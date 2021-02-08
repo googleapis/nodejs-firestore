@@ -2643,40 +2643,55 @@ describe('BulkWriter class', () => {
     //                 └── childCol
     //                     ├── ernie
     //                     └── francis
-    await firestore.runTransaction(tx => {
-      tx.set(randomCol.doc('anna'), {name: 'anna'});
-      tx.set(randomCol.doc('bob'), {name: 'bob'});
-      tx.set(randomCol.doc('bob/parentsCol/charlie'), {name: 'charlie'});
-      tx.set(randomCol.doc('bob/parentsCol/daniel'), {name: 'daniel'});
-      tx.set(randomCol.doc('bob/parentsCol/daniel/childCol/ernie'), {
-        name: 'ernie',
-      });
-      tx.set(randomCol.doc('bob/parentsCol/daniel/childCol/francis'), {
-        name: 'francis',
-      });
-      return Promise.resolve();
+    const batch = firestore.batch();
+    batch.set(randomCol.doc('anna'), {name: 'anna'});
+    batch.set(randomCol.doc('bob'), {name: 'bob'});
+    batch.set(randomCol.doc('bob/parentsCol/charlie'), {name: 'charlie'});
+    batch.set(randomCol.doc('bob/parentsCol/daniel'), {name: 'daniel'});
+    batch.set(randomCol.doc('bob/parentsCol/daniel/childCol/ernie'), {
+      name: 'ernie',
     });
+    batch.set(randomCol.doc('bob/parentsCol/daniel/childCol/francis'), {
+      name: 'francis',
+    });
+    await batch.commit();
+
+    const numStreamItems = async (
+      stream: NodeJS.ReadableStream
+    ): Promise<number> => {
+      let count = 0;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _ of stream) {
+        ++count;
+      }
+      return count;
+    };
+
     // Query all descendants of collections.
-    let descendants = await firestore._getAllDescendants(randomCol);
-    expect(descendants.length).to.equal(6);
-    descendants = await firestore._getAllDescendants(
+    let descendantsStream = await firestore._getAllDescendants(randomCol);
+    expect(await numStreamItems(descendantsStream)).to.equal(6);
+    descendantsStream = await firestore._getAllDescendants(
       randomCol.doc('bob').collection('parentsCol')
     );
-    expect(descendants.length).to.equal(4);
-    descendants = await firestore._getAllDescendants(
+    expect(await numStreamItems(descendantsStream)).to.equal(4);
+    descendantsStream = await firestore._getAllDescendants(
       randomCol.doc('bob').collection('parentsCol/daniel/childCol')
     );
-    expect(descendants.length).to.equal(2);
+    expect(await numStreamItems(descendantsStream)).to.equal(2);
 
     // Query all descendants of documents.
-    descendants = await firestore._getAllDescendants(randomCol.doc('bob'));
-    expect(descendants.length).to.equal(4);
-    descendants = await firestore._getAllDescendants(
+    descendantsStream = await firestore._getAllDescendants(
+      randomCol.doc('bob')
+    );
+    expect(await numStreamItems(descendantsStream)).to.equal(4);
+    descendantsStream = await firestore._getAllDescendants(
       randomCol.doc('bob/parentsCol/daniel')
     );
-    expect(descendants.length).to.equal(2);
-    descendants = await firestore._getAllDescendants(randomCol.doc('anna'));
-    expect(descendants.length).to.equal(0);
+    expect(await numStreamItems(descendantsStream)).to.equal(2);
+    descendantsStream = await firestore._getAllDescendants(
+      randomCol.doc('anna')
+    );
+    expect(await numStreamItems(descendantsStream)).to.equal(0);
   });
 
   it('can retry failed writes with a provided callback', async () => {

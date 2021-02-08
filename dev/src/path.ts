@@ -178,6 +178,18 @@ abstract class Path<T> {
   }
 
   /**
+   * Pops the last segment from this `Path` and returns a newly constructed
+   * `Path`.
+   *
+   * @private
+   * @returns The newly created Path.
+   */
+  popLast(): T {
+    this.segments.pop();
+    return this.construct(this.segments);
+  }
+
+  /**
    * Returns true if this `Path` is equal to the provided value.
    *
    * @private

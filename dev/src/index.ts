@@ -1202,28 +1202,27 @@ export class Firestore implements firestore.Firestore {
    * Retrieves all descendant documents nested under the provided reference.
    *
    * @private
+   * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
    */
   // TODO(chenbrian): Make this a private method after adding recursive delete.
   _getAllDescendants(
     ref: CollectionReference | DocumentReference
-  ): Promise<DocumentReference[]> {
-    const segments = ref.path.split('/');
-
+  ): NodeJS.ReadableStream {
     // The parent is the closest ancestor document to the location we're
     // deleting. If we are deleting a document, the parent is the path of that
     // document. If we are deleting a collection, the parent is the path of the
     // document containing that collection (or the database root, if it is a
-    // root collection.
+    // root collection).
+    let parentPath = ref._resourcePath;
     if (ref instanceof CollectionReference) {
-      segments.pop();
+      parentPath = parentPath.popLast();
     }
-    const parentPath = ResourcePath.EMPTY.construct(segments);
     const collectionId =
       ref instanceof CollectionReference ? ref.id : ref.parent.id;
 
     let query: Query<firestore.DocumentData> = new Query(
       this,
-      QueryOptions.forDocumentNamesOnly(parentPath, collectionId)
+      QueryOptions.forKindlessAllDescendants(parentPath, collectionId)
     );
 
     // Query for names only to fetch empty snapshots.
@@ -1243,22 +1242,7 @@ export class Firestore implements firestore.Firestore {
         .where(FieldPath.documentId(), '<', endAt);
     }
 
-    const docs: DocumentReference[] = [];
-    return new Promise((resolve, reject) => {
-      query
-        .stream()
-        .on('error', err => {
-          reject(err);
-        })
-        .on('data', result => {
-          if (result) {
-            docs.push(result);
-          }
-        })
-        .on('end', () => {
-          resolve(docs);
-        });
-    });
+    return query.stream();
   }
 
   /**
