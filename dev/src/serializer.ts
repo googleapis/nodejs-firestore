@@ -169,7 +169,7 @@ export class Serializer {
       }
     }
 
-    if (val instanceof Array) {
+    if (Array.isArray(val)) {
       const array: api.IValue = {
         arrayValue: {},
       };
