@@ -15,7 +15,6 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
-
 import {Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 
@@ -206,8 +205,16 @@ export class DocumentReference<T = firestore.DocumentData>
   }
 
   /**
-   * A reference to the collection to which this DocumentReference belongs.
-   *
+   * Returns a resource path for this document.
+   * @private
+   */
+  get _resourcePath(): ResourcePath {
+    return this._path;
+  }
+
+  /**
+   * A reference to the collection to which this DocumentRference belongs.
+   *e
    * @name DocumentReference#parent
    * @type {CollectionReference}
    * @readonly
@@ -996,14 +1003,17 @@ export class QueryOptions<T> {
     readonly limit?: number,
     readonly limitType?: LimitType,
     readonly offset?: number,
-    readonly projection?: api.StructuredQuery.IProjection
+    readonly projection?: api.StructuredQuery.IProjection,
+    // Whether to select all documents under `parentPath`. By default, only
+    // collections that match `collectionId` are selected.
+    readonly kindless = false
   ) {}
 
   /**
    * Returns query options for a collection group query.
    * @private
    */
-  static forCollectionGroupQuery<T>(
+  static forCollectionGroupQuery<T = firestore.DocumentData>(
     collectionId: string,
     converter = defaultConverter<T>()
   ): QueryOptions<T> {
@@ -1021,7 +1031,7 @@ export class QueryOptions<T> {
    * Returns query options for a single-collection query.
    * @private
    */
-  static forCollectionQuery<T>(
+  static forCollectionQuery<T = firestore.DocumentData>(
     collectionRef: ResourcePath,
     converter = defaultConverter<T>()
   ): QueryOptions<T> {
@@ -1033,6 +1043,31 @@ export class QueryOptions<T> {
       /*fieldFilters=*/ [],
       /*fieldOrders=*/ []
     );
+  }
+
+  /**
+   * Returns query options for a query that fetches all descendants under the
+   * specified reference.
+   *
+   * @private
+   */
+  static forKindlessAllDescendants<T = firestore.DocumentData>(
+    parent: ResourcePath,
+    id: string
+  ): QueryOptions<T> {
+    let options = new QueryOptions<T>(
+      parent,
+      id,
+      defaultConverter(),
+      /*allDescendants=*/ true,
+      /*fieldFilters=*/ [],
+      /*fieldOrders=*/ []
+    );
+
+    options = options.with({
+      kindless: true,
+    });
+    return options;
   }
 
   /**
@@ -1052,7 +1087,8 @@ export class QueryOptions<T> {
       coalesce(settings.limit, this.limit),
       coalesce(settings.limitType, this.limitType),
       coalesce(settings.offset, this.offset),
-      coalesce(settings.projection, this.projection)
+      coalesce(settings.projection, this.projection),
+      coalesce(settings.kindless, this.kindless)
     );
   }
 
@@ -1096,7 +1132,8 @@ export class QueryOptions<T> {
       deepEqual(this.fieldOrders, other.fieldOrders) &&
       deepEqual(this.startAt, other.startAt) &&
       deepEqual(this.endAt, other.endAt) &&
-      deepEqual(this.projection, other.projection)
+      deepEqual(this.projection, other.projection) &&
+      this.kindless === other.kindless
     );
   }
 }
@@ -2026,15 +2063,17 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
   private toStructuredQuery(): api.IStructuredQuery {
     const structuredQuery: api.IStructuredQuery = {
-      from: [
-        {
-          collectionId: this._queryOptions.collectionId,
-        },
-      ],
+      from: [{}],
     };
 
     if (this._queryOptions.allDescendants) {
       structuredQuery.from![0].allDescendants = true;
+    }
+
+    // Kindless queries select all descendant documents, so we remove the
+    // collectionId field.
+    if (!this._queryOptions.kindless) {
+      structuredQuery.from![0].collectionId = this._queryOptions.collectionId;
     }
 
     if (this._queryOptions.fieldFilters.length === 1) {
@@ -2348,7 +2387,7 @@ export class CollectionReference<T = firestore.DocumentData>
    * Returns a resource path for this collection.
    * @private
    */
-  private get resourcePath(): ResourcePath {
+  get _resourcePath(): ResourcePath {
     return this._queryOptions.parentPath.append(
       this._queryOptions.collectionId
     );
@@ -2406,7 +2445,7 @@ export class CollectionReference<T = firestore.DocumentData>
    * console.log(`Path of the subcollection: ${collectionRef.path}`);
    */
   get path(): string {
-    return this.resourcePath.relativeName;
+    return this._resourcePath.relativeName;
   }
 
   /**
@@ -2499,7 +2538,7 @@ export class CollectionReference<T = firestore.DocumentData>
       validateResourcePath('documentPath', documentPath!);
     }
 
-    const path = this.resourcePath.append(documentPath!);
+    const path = this._resourcePath.append(documentPath!);
     if (!path.isDocument) {
       throw new Error(
         `Value for argument "documentPath" must point to a document, but was "${documentPath}". Your path does not contain an even number of components.`
@@ -2613,7 +2652,7 @@ export class CollectionReference<T = firestore.DocumentData>
   ): CollectionReference<U> {
     return new CollectionReference<U>(
       this.firestore,
-      this.resourcePath,
+      this._resourcePath,
       converter ?? defaultConverter()
     );
   }

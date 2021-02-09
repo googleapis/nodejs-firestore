@@ -40,7 +40,7 @@ import {
   validateResourcePath,
 } from './path';
 import {ClientPool} from './pool';
-import {CollectionReference} from './reference';
+import {CollectionReference, Query, QueryOptions} from './reference';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
@@ -155,6 +155,18 @@ const DEFAULT_MAX_IDLE_CHANNELS = 1;
  * multiplex all requests over a single channel.
  */
 const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
+
+/**
+ * Datastore allowed numeric IDs where Firestore only allows strings. Numeric
+ * IDs are exposed to Firestore as __idNUM__, so this is the lowest possible
+ * negative numeric value expressed in that format.
+ *
+ * This constant is used to specify startAt/endAt values when querying for all
+ * descendants in a single collection.
+ *
+ * @private
+ */
+const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
 
 /**
  * Document data (e.g. for use with
@@ -1184,6 +1196,53 @@ export class Firestore implements firestore.Firestore {
    */
   _decrementBulkWritersCount(): void {
     this.bulkWritersCount -= 1;
+  }
+
+  /**
+   * Retrieves all descendant documents nested under the provided reference.
+   *
+   * @private
+   * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
+   */
+  // TODO(chenbrian): Make this a private method after adding recursive delete.
+  _getAllDescendants(
+    ref: CollectionReference | DocumentReference
+  ): NodeJS.ReadableStream {
+    // The parent is the closest ancestor document to the location we're
+    // deleting. If we are deleting a document, the parent is the path of that
+    // document. If we are deleting a collection, the parent is the path of the
+    // document containing that collection (or the database root, if it is a
+    // root collection).
+    let parentPath = ref._resourcePath;
+    if (ref instanceof CollectionReference) {
+      parentPath = parentPath.popLast();
+    }
+    const collectionId =
+      ref instanceof CollectionReference ? ref.id : ref.parent.id;
+
+    let query: Query = new Query(
+      this,
+      QueryOptions.forKindlessAllDescendants(parentPath, collectionId)
+    );
+
+    // Query for names only to fetch empty snapshots.
+    query = query.select(FieldPath.documentId());
+
+    if (ref instanceof CollectionReference) {
+      // To find all descendants of a collection reference, we need to use a
+      // composite filter that captures all documents that start with the
+      // collection prefix. The MIN_KEY constant represents the minimum key in
+      // this collection, and a null byte + the MIN_KEY represents the minimum
+      // key is the next possible collection.
+      const nullChar = String.fromCharCode(0);
+      const startAt = collectionId + '/' + REFERENCE_NAME_MIN_ID;
+      const endAt = collectionId + nullChar + '/' + REFERENCE_NAME_MIN_ID;
+      query = query
+        .where(FieldPath.documentId(), '>=', startAt)
+        .where(FieldPath.documentId(), '<', endAt);
+    }
+
+    return query.stream();
   }
 
   /**

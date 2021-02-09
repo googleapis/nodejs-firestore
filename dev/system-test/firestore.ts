@@ -2629,6 +2629,71 @@ describe('BulkWriter class', () => {
     return firestore.terminate();
   });
 
+  // TODO(chenbrian): This is a temporary test used to validate that the
+  //  StructuredQuery calls work properly. Remove these tests after adding
+  //  recursive delete tests.
+  it('finds nested documents and collection', async () => {
+    // ROOT-DB
+    // └── randomCol
+    //     ├── anna
+    //     └── bob
+    //         └── parentsCol
+    //             ├── charlie
+    //             └── daniel
+    //                 └── childCol
+    //                     ├── ernie
+    //                     └── francis
+    const batch = firestore.batch();
+    batch.set(randomCol.doc('anna'), {name: 'anna'});
+    batch.set(randomCol.doc('bob'), {name: 'bob'});
+    batch.set(randomCol.doc('bob/parentsCol/charlie'), {name: 'charlie'});
+    batch.set(randomCol.doc('bob/parentsCol/daniel'), {name: 'daniel'});
+    batch.set(randomCol.doc('bob/parentsCol/daniel/childCol/ernie'), {
+      name: 'ernie',
+    });
+    batch.set(randomCol.doc('bob/parentsCol/daniel/childCol/francis'), {
+      name: 'francis',
+    });
+    await batch.commit();
+
+    const numStreamItems = async (
+      stream: NodeJS.ReadableStream
+    ): Promise<number> => {
+      let count = 0;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _ of stream) {
+        ++count;
+      }
+      return count;
+    };
+
+    // Query all descendants of collections.
+    let descendantsStream = await firestore._getAllDescendants(randomCol);
+    expect(await numStreamItems(descendantsStream)).to.equal(6);
+    descendantsStream = await firestore._getAllDescendants(
+      randomCol.doc('bob').collection('parentsCol')
+    );
+    expect(await numStreamItems(descendantsStream)).to.equal(4);
+    descendantsStream = await firestore._getAllDescendants(
+      randomCol.doc('bob').collection('parentsCol/daniel/childCol')
+    );
+    expect(await numStreamItems(descendantsStream)).to.equal(2);
+
+    // Query all descendants of documents.
+    descendantsStream = await firestore._getAllDescendants(
+      randomCol.doc('bob')
+    );
+    expect(await numStreamItems(descendantsStream)).to.equal(4);
+    descendantsStream = await firestore._getAllDescendants(
+      randomCol.doc('bob/parentsCol/daniel')
+    );
+    expect(await numStreamItems(descendantsStream)).to.equal(2);
+    descendantsStream = await firestore._getAllDescendants(
+      randomCol.doc('anna')
+    );
+    expect(await numStreamItems(descendantsStream)).to.equal(0);
+  });
+
   it('can retry failed writes with a provided callback', async () => {
     let retryCount = 0;
     let code: Status = -1;
