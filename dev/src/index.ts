@@ -1220,7 +1220,7 @@ export class Firestore implements firestore.Firestore {
     const collectionId =
       ref instanceof CollectionReference ? ref.id : ref.parent.id;
 
-    let query: Query<firestore.DocumentData> = new Query(
+    let query: Query = new Query(
       this,
       QueryOptions.forKindlessAllDescendants(parentPath, collectionId)
     );

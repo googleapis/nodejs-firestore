@@ -1013,7 +1013,7 @@ export class QueryOptions<T> {
    * Returns query options for a collection group query.
    * @private
    */
-  static forCollectionGroupQuery<T>(
+  static forCollectionGroupQuery<T = firestore.DocumentData>(
     collectionId: string,
     converter = defaultConverter<T>()
   ): QueryOptions<T> {
@@ -1031,7 +1031,7 @@ export class QueryOptions<T> {
    * Returns query options for a single-collection query.
    * @private
    */
-  static forCollectionQuery<T>(
+  static forCollectionQuery<T = firestore.DocumentData>(
     collectionRef: ResourcePath,
     converter = defaultConverter<T>()
   ): QueryOptions<T> {
@@ -1051,7 +1051,7 @@ export class QueryOptions<T> {
    *
    * @private
    */
-  static forKindlessAllDescendants<T>(
+  static forKindlessAllDescendants<T = firestore.DocumentData>(
     parent: ResourcePath,
     id: string
   ): QueryOptions<T> {
