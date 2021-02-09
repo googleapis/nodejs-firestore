@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.9.3](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.2...v4.9.3) (2021-02-09)
+
+
+### Bug Fixes
+
+* use `Array.isArray` instead of an `instanceof` check ([#1417](https://www.github.com/googleapis/nodejs-firestore/issues/1417)) ([4a8c3cf](https://www.github.com/googleapis/nodejs-firestore/commit/4a8c3cfcaf57ed600da094ab0275a5f32fb1ea30))
+
 ### [4.9.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.1...v4.9.2) (2021-02-05)
 
 
