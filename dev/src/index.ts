@@ -125,12 +125,12 @@ setLibVersion(libVersion);
 /*!
  * @see v1
  */
-let v1: unknown; // Lazy-loaded in `_runRequest()`
+let v1: typeof import('./v1'); // Lazy-loaded in `_runRequest()`
 
 /*!
  * @see v1beta1
  */
-let v1beta1: unknown; // Lazy-loaded upon access.
+let v1beta1: typeof import('./v1beta1'); // Lazy-loaded upon access.
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -1553,7 +1553,7 @@ export class Firestore implements firestore.Firestore {
 
   /**
    * A funnel for streaming API requests, assigning a project ID where necessary
-   * within the request options.
+   * within the request options.require
    *
    * The stream is returned in paused state and needs to be resumed once all
    * listeners are attached.
