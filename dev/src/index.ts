@@ -1553,7 +1553,7 @@ export class Firestore implements firestore.Firestore {
 
   /**
    * A funnel for streaming API requests, assigning a project ID where necessary
-   * within the request options.require
+   * within the request options.
    *
    * The stream is returned in paused state and needs to be resumed once all
    * listeners are attached.
