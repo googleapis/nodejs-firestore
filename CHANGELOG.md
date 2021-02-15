@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.9.4](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.3...v4.9.4) (2021-02-15)
+
+
+### Bug Fixes
+
+* update "protobufjs" to be a dependency ([#1425](https://www.github.com/googleapis/nodejs-firestore/issues/1425)) ([d960fbb](https://www.github.com/googleapis/nodejs-firestore/commit/d960fbb5ca20a7eb9594e8c0b2dfabdb0cb473e3))
+
 ### [4.9.3](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.2...v4.9.3) (2021-02-09)
 
 
