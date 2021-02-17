@@ -216,11 +216,14 @@ function offset(n: number): api.IStructuredQuery {
   };
 }
 
-function allDescendants(): api.IStructuredQuery {
+export function allDescendants(kindless = false): api.IStructuredQuery {
+  if (kindless) {
+    return {from: [{collectionId: undefined, allDescendants: true}]};
+  }
   return {from: [{collectionId: 'collectionId', allDescendants: true}]};
 }
 
-function select(...fields: string[]): api.IStructuredQuery {
+export function select(...fields: string[]): api.IStructuredQuery {
   const select: api.StructuredQuery.IProjection = {
     fields: [],
   };
@@ -282,25 +285,45 @@ function endAt(
   return {endAt: cursor};
 }
 
+export function queryEqualsWithParent(
+  actual: api.IRunQueryRequest | undefined,
+  parent: string,
+  ...protoComponents: api.IStructuredQuery[]
+): void {
+  queryEqualsHelper(actual, '/' + parent, ...protoComponents);
+}
+
 export function queryEquals(
   actual: api.IRunQueryRequest | undefined,
   ...protoComponents: api.IStructuredQuery[]
-) {
+): void {
+  queryEqualsHelper(actual, '', ...protoComponents);
+}
+
+function queryEqualsHelper(
+  actual: api.IRunQueryRequest | undefined,
+  parent: string,
+  ...protoComponents: api.IStructuredQuery[]
+): void {
   expect(actual).to.not.be.undefined;
 
   const query: api.IRunQueryRequest = {
-    parent: DATABASE_ROOT + '/documents',
-    structuredQuery: {
-      from: [
-        {
-          collectionId: 'collectionId',
-        },
-      ],
-    },
+    parent: DATABASE_ROOT + '/documents' + parent,
+    structuredQuery: {},
   };
 
   for (const protoComponent of protoComponents) {
     extend(true, query.structuredQuery, protoComponent);
+  }
+
+  // We add the `from` selector here in order to avoid setting collectionId on
+  // kindless queries.
+  if (query.structuredQuery!.from === undefined) {
+    query.structuredQuery!.from = [
+      {
+        collectionId: 'collectionId',
+      },
+    ];
   }
 
   // 'extend' removes undefined fields in the request object. The backend

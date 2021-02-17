@@ -16,14 +16,14 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions, grpc, RetryOptions} from 'google-gax';
+import {CallOptions, GoogleError, grpc, RetryOptions, Status} from 'google-gax';
 import {Duplex, PassThrough, Transform} from 'stream';
 
 import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
-import {BulkWriter} from './bulk-writer';
+import {BulkWriter, BulkWriterError} from './bulk-writer';
 import {BundleBuilder} from './bundle';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
@@ -76,6 +76,7 @@ const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
 import {CollectionGroup} from './collection-group';
+import {DocumentData} from '@google-cloud/firestore';
 
 export {
   CollectionReference,
@@ -141,7 +142,7 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 /*!
  * The maximum number of times to retry idempotent requests.
  */
-const MAX_REQUEST_RETRIES = 5;
+export const MAX_REQUEST_RETRIES = 5;
 
 /*!
  * The default number of idle GRPC channel to keep.
@@ -166,7 +167,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *
  * @private
  */
-const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
+export const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
 
 /**
  * Document data (e.g. for use with
@@ -398,6 +399,26 @@ export class Firestore implements firestore.Firestore {
    * @private
    */
   private registeredListenersCount = 0;
+
+  /**
+   * A lazy-loaded BulkWriter instance to be used with recursiveDelete() if no
+   * BulkWriter instance is provided.
+   *
+   * @private
+   */
+  private _bulkWriter: BulkWriter | undefined;
+
+  /**
+   * Lazy-load the Firestore's default BulkWriter.
+   *
+   * @private
+   */
+  private getBulkWriter(): BulkWriter {
+    if (!this._bulkWriter) {
+      this._bulkWriter = this.bulkWriter();
+    }
+    return this._bulkWriter;
+  }
 
   /**
    * Number of pending operations on the client.
@@ -1199,14 +1220,99 @@ export class Firestore implements firestore.Firestore {
   }
 
   /**
+   * Recursively deletes all documents and subcollections at and under the
+   * specified level.
+   *
+   * If any deletes fail, the promise is rejected with an error message
+   * containing the number of failed writes and the stack trace of the last
+   * failed write. The provided reference is deleted regardless of whether
+   * all deletes succeeded, except when Firestore fails to fetch the provided
+   * reference's descendants.
+   *
+   * Firestore uses a BulkWriter instance with default settings to perform the
+   * deletes. To customize throttling rates or add success/error callbacks,
+   * pass in a custom BulkWriter instance.
+   *
+   * @param ref The reference of a document or collection to delete.
+   * @param bulkWriter Custom BulkWriter instance with which to perform the
+   * deletes with.
+   * @return A promise that resolves when all deletes have been performed.
+   * The promise is rejected if any of the deletes fail.
+   */
+  recursiveDelete<T = DocumentData>(
+    ref: CollectionReference<T> | DocumentReference<T>,
+    bulkWriter?: BulkWriter
+  ): Promise<void> {
+    const docStream = this.getAllDescendants(ref);
+    const writer = bulkWriter ?? this.getBulkWriter();
+    const deleteCompleted = new Deferred<void>();
+    let errorCount = 0;
+    let lastError: Error | undefined;
+
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    docStream
+      .on('error', err => {
+        err.code = Status.FAILED_PRECONDITION;
+        err.message =
+          'Failed to fetch children documents. ' +
+          'The provided reference was not deleted.';
+        deleteCompleted.reject(wrapError(err, stack));
+      })
+      .on('data', (snap: QueryDocumentSnapshot) => {
+        const docRef = new DocumentReference(this, snap.ref._path);
+        writer.delete(docRef).catch(err => {
+          errorCount++;
+          lastError = err;
+        });
+      })
+      .on('end', () => {
+        writer.flush().then(async () => {
+          if (ref instanceof DocumentReference) {
+            try {
+              await ref.delete();
+            } catch (err) {
+              logger(
+                'Firestore.recursiveDelete',
+                null,
+                'failed to delete the provided reference',
+                ref.path
+              );
+              lastError = err;
+            }
+          }
+
+          if (lastError === undefined) {
+            deleteCompleted.resolve();
+          } else {
+            let error = new GoogleError(
+              `${errorCount} ` +
+                `${errorCount > 1 ? 'deletes' : 'delete'} ` +
+                'failed. The last delete failed with: '
+            );
+            if (lastError instanceof BulkWriterError) {
+              error.code = (lastError.code as number) as Status;
+            }
+            error = wrapError(error, stack);
+
+            // Wrap the BulkWriter error last to provide the full stack trace.
+            deleteCompleted.reject(wrapError(error, lastError.stack ?? ''));
+          }
+        });
+      });
+
+    return deleteCompleted.promise;
+  }
+
+  /**
    * Retrieves all descendant documents nested under the provided reference.
    *
    * @private
    * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
    */
-  // TODO(chenbrian): Make this a private method after adding recursive delete.
-  _getAllDescendants(
-    ref: CollectionReference | DocumentReference
+  private getAllDescendants<T = DocumentData>(
+    ref: CollectionReference<T> | DocumentReference<T>
   ): NodeJS.ReadableStream {
     // The parent is the closest ancestor document to the location we're
     // deleting. If we are deleting a document, the parent is the path of that

@@ -243,6 +243,31 @@ declare namespace FirebaseFirestore {
     ): Promise<Array<DocumentSnapshot<DocumentData>>>;
 
     /**
+     * Recursively deletes all documents and subcollections at and under the
+     * specified level.
+     *
+     * If any deletes fail, the promise is rejected with an error message
+     * containing the number of failed writes and the stack trace of the last
+     * failed write. The provided reference is deleted regardless of whether
+     * all deletes succeeded, except when Firestore fails to fetch the provided
+     * reference's descendants.
+     *
+     * Firestore uses a BulkWriter instance with default settings to perform the
+     * deletes. To customize throttling rates or add success/error callbacks,
+     * pass in a custom BulkWriter instance.
+     *
+     * @param ref The reference of a document or collection to delete.
+     * @param bulkWriter Custom BulkWriter instance with which to perform the
+     * deletes with.
+     * @return A promise that resolves when all deletes have been performed.
+     * The promise is rejected if any of the deletes fail.
+     */
+    recursiveDelete(
+      ref: CollectionReference | DocumentReference,
+      bulkWriter?: BulkWriter
+    ): Promise<void>;
+
+    /**
      * Terminates the Firestore client and closes all open streams.
      *
      * @return A Promise that resolves when the client is terminated.

@@ -21,7 +21,12 @@ import {GoogleError, GrpcClient, Status} from 'google-gax';
 import {google} from '../protos/firestore_v1_proto_api';
 
 import * as Firestore from '../src';
-import {DocumentSnapshot, FieldPath} from '../src';
+import {
+  DocumentSnapshot,
+  FieldPath,
+  MAX_REQUEST_RETRIES,
+  REFERENCE_NAME_MIN_ID,
+} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {QualifiedResourcePath} from '../src/path';
 import {
@@ -32,12 +37,30 @@ import {
   found,
   InvalidApiUsage,
   missing,
+  postConverter,
   response,
   stream,
   verifyInstance,
 } from './util/helpers';
 
 import api = google.firestore.v1;
+import {
+  successResponse,
+  createRequest,
+  deleteOp,
+  mergeResponses,
+  failedResponse,
+} from './bulk-writer';
+import {
+  allDescendants,
+  fieldFilters,
+  queryEquals,
+  queryEqualsWithParent,
+  result,
+  select,
+} from './query';
+import * as sinon from 'sinon';
+import {fail} from 'assert';
 
 use(chaiAsPromised);
 
@@ -1270,6 +1293,428 @@ describe('getAll() method', () => {
       ).to.throw(
         'Value for argument "options" is not a valid read option. "fieldMask" is not valid: Element at index 2 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.'
       );
+    });
+  });
+});
+
+describe('recursiveDelete() method:', () => {
+  // We store errors from batchWrite inside an error object since errors thrown
+  // in batchWrite do not affect the recursiveDelete promise.
+  let batchWriteError: Error | undefined;
+  let firestore: Firestore.Firestore;
+
+  beforeEach(() => {
+    setTimeoutHandler(setImmediate);
+  });
+
+  afterEach(() => {
+    verifyInstance(firestore);
+    setTimeoutHandler(setTimeout);
+  });
+
+  function instantiateInstance(
+    childrenDocs: string[],
+    deleteDocumentRef = '',
+    responses?: api.IBatchWriteResponse
+  ): Promise<Firestore.Firestore> {
+    const overrides: ApiOverride = {
+      runQuery: () => {
+        return stream(...childrenDocs.map(docId => result(docId)));
+      },
+      batchWrite: request => {
+        const expected = createRequest(
+          childrenDocs.map(docId => deleteOp(docId))
+        );
+        try {
+          expect(request.writes).to.deep.equal(expected.writes);
+        } catch (e) {
+          batchWriteError = e;
+        }
+        responses =
+          responses ??
+          mergeResponses(childrenDocs.map(() => successResponse(1)));
+
+        return response({
+          writeResults: responses.writeResults,
+          status: responses.status,
+        });
+      },
+    };
+
+    if (deleteDocumentRef.length > 0) {
+      overrides.commit = req => {
+        const expected = [
+          {
+            delete:
+              DATABASE_ROOT + '/documents/collectionId/' + deleteDocumentRef,
+          },
+        ];
+        expect(req.writes).to.deep.equal(expected);
+        return response({
+          commitTime: {},
+          writeResults: [
+            {
+              updateTime: {},
+            },
+          ],
+        });
+      };
+    }
+    return createInstance(overrides);
+  }
+
+  describe('calls getAllDescendants() with correct StructuredQuery', () => {
+    function startAt(name: string): api.IValue {
+      return {
+        referenceValue:
+          DATABASE_ROOT + '/documents/' + name + '/' + REFERENCE_NAME_MIN_ID,
+      };
+    }
+
+    function endAt(name: string): api.IValue {
+      return {
+        referenceValue:
+          DATABASE_ROOT +
+          '/documents/' +
+          name +
+          String.fromCharCode(0) +
+          '/' +
+          REFERENCE_NAME_MIN_ID,
+      };
+    }
+
+    it('for root-level collections', async () => {
+      const overrides: ApiOverride = {
+        runQuery: req => {
+          queryEquals(
+            req,
+            select('__name__'),
+            allDescendants(/* kindless= */ true),
+            fieldFilters(
+              '__name__',
+              'GREATER_THAN_OR_EQUAL',
+              startAt('root'),
+              '__name__',
+              'LESS_THAN',
+              endAt('root')
+            )
+          );
+          return stream();
+        },
+      };
+      firestore = await createInstance(overrides);
+      return firestore.recursiveDelete(firestore.collection('root'));
+    });
+
+    it('for nested collections', async () => {
+      const overrides: ApiOverride = {
+        runQuery: req => {
+          queryEqualsWithParent(
+            req,
+            'root/doc',
+            select('__name__'),
+            allDescendants(/* kindless= */ true),
+            fieldFilters(
+              '__name__',
+              'GREATER_THAN_OR_EQUAL',
+              startAt('root/doc/nestedCol'),
+              '__name__',
+              'LESS_THAN',
+              endAt('root/doc/nestedCol')
+            )
+          );
+          return stream();
+        },
+      };
+      firestore = await createInstance(overrides);
+      return firestore.recursiveDelete(
+        firestore.collection('root/doc/nestedCol')
+      );
+    });
+
+    it('documents', async () => {
+      const overrides: ApiOverride = {
+        runQuery: req => {
+          queryEqualsWithParent(
+            req,
+            'root/doc',
+            select('__name__'),
+            allDescendants(/* kindless= */ true)
+          );
+          return stream();
+        },
+        // Include dummy response for the deleted docRef.
+        commit: () => {
+          return response({
+            commitTime: {},
+            writeResults: [
+              {
+                updateTime: {},
+              },
+            ],
+          });
+        },
+      };
+      firestore = await createInstance(overrides);
+      return firestore.recursiveDelete(firestore.doc('root/doc'));
+    });
+  });
+
+  describe('deletes', () => {
+    it('collection', async () => {
+      firestore = await instantiateInstance([
+        'anna',
+        'bob',
+        'bob/children/charlie',
+        'bob/children/daniel',
+      ]);
+      await firestore.recursiveDelete(firestore.collection('collectionId'));
+      expect(batchWriteError, 'batchWrite should not have errored').to.be
+        .undefined;
+    });
+
+    it('document along with reference', async () => {
+      firestore = await instantiateInstance(
+        ['bob/children/brian', 'bob/children/charlie', 'bob/children/daniel'],
+        'bob'
+      );
+      await firestore.recursiveDelete(
+        firestore.collection('collectionId').doc('bob')
+      );
+      expect(batchWriteError, 'batchWrite should not have errored').to.be
+        .undefined;
+    });
+
+    it('promise is rejected with the last error code if writes fail', async () => {
+      firestore = await instantiateInstance(
+        ['bob/children/brian', 'bob/children/charlie', 'bob/children/daniel'],
+        'bob',
+        mergeResponses([
+          successResponse(1),
+          failedResponse(Status.CANCELLED),
+          failedResponse(Status.PERMISSION_DENIED),
+        ])
+      );
+      try {
+        await firestore.recursiveDelete(
+          firestore.collection('collectionId').doc('bob')
+        );
+        fail('recursiveDelete should have failed');
+      } catch (err) {
+        expect(err.code).to.equal(Status.PERMISSION_DENIED);
+        expect(err.message).to.contain('2 deletes failed');
+      }
+
+      expect(batchWriteError, 'batchWrite should not have errored').to.be
+        .undefined;
+    });
+
+    it('promise is rejected if BulkWriter success handler fails', async () => {
+      firestore = await instantiateInstance(['bob/children/brian'], 'bob');
+
+      const bulkWriter = firestore.bulkWriter();
+      bulkWriter.onWriteResult(() => {
+        throw new Error('User provided result callback failed');
+      });
+
+      try {
+        await firestore.recursiveDelete(
+          firestore.collection('collectionId').doc('bob'),
+          bulkWriter
+        );
+        fail('recursiveDelete() should have failed');
+      } catch (err) {
+        expect(err.message).to.contain('1 delete failed');
+        expect(err.stack).to.contain('User provided result callback failed');
+      }
+      expect(batchWriteError, 'batchWrite should not have errored').to.be
+        .undefined;
+    });
+
+    it('promise is rejected if provided reference was not deleted', async () => {
+      const overrides: ApiOverride = {
+        runQuery: () => {
+          return stream();
+        },
+        commit: () => {
+          throw new GoogleError('commit() failed in test');
+        },
+      };
+      firestore = await createInstance(overrides);
+      await expect(firestore.recursiveDelete(firestore.doc('root/doc'))).to
+        .eventually.be.rejected;
+    });
+
+    it('does not delete reference if StructuredQuery fails', async () => {
+      // The test will error with 'gapicClient[methodName] is not a function'
+      // if the reference is deleted, since `commit()` isn't overridden.
+      const overrides: ApiOverride = {
+        runQuery: () => {
+          const permanentError = new GoogleError(
+            'Mock runQuery failed in test'
+          );
+          permanentError.code = Status.INVALID_ARGUMENT;
+          throw permanentError;
+        },
+      };
+      firestore = await createInstance(overrides);
+      await expect(
+        firestore.recursiveDelete(firestore.doc('coll/foo'))
+      ).to.eventually.be.rejectedWith('Failed to fetch children documents');
+    });
+
+    it('retries stream errors', async () => {
+      let attempts = 0;
+      const overrides: ApiOverride = {
+        runQuery: () => {
+          attempts++;
+          throw new Error('Expected runQuery error in test');
+        },
+      };
+      firestore = await createInstance(overrides);
+      await expect(
+        firestore.recursiveDelete(firestore.doc('coll/foo'))
+      ).to.eventually.be.rejectedWith('Failed to fetch children documents');
+      expect(attempts).to.equal(MAX_REQUEST_RETRIES);
+    });
+
+    it('handles successful stream error retries', async () => {
+      let requestCounter = 0;
+      const streamItems = [
+        [
+          result('a'),
+          result('b'),
+          new Error('Expected runQuery error in test'),
+        ],
+        [new Error('Expected runQuery error in test')],
+        [result('c'), new Error('Expected runQuery error in test')],
+        [result('d')],
+      ];
+
+      const overrides: ApiOverride = {
+        runQuery: () => {
+          const streamPromise = stream(...streamItems[requestCounter]);
+          requestCounter++;
+          return streamPromise;
+        },
+        batchWrite: request => {
+          const expected = createRequest([
+            deleteOp('a'),
+            deleteOp('b'),
+            deleteOp('c'),
+            deleteOp('d'),
+          ]);
+          try {
+            expect(request.writes).to.deep.equal(expected.writes);
+          } catch (e) {
+            batchWriteError = e;
+          }
+          return response(
+            mergeResponses(expected.writes!.map(() => successResponse(1)))
+          );
+        },
+      };
+      firestore = await createInstance(overrides);
+      await firestore.recursiveDelete(firestore.collection('letters'));
+      expect(batchWriteError, 'batchWrite should not have errored').to.be
+        .undefined;
+    });
+
+    it('handles multiple calls to recursiveDelete()', async () => {
+      let requestCounter = 0;
+      const docIds = ['a', 'b', 'c'];
+      const streamItems = docIds.map(docId => [result(docId)]);
+      const expected = docIds.map(docId => createRequest([deleteOp(docId)]));
+      const responses = docIds.map(() => successResponse(1));
+
+      const overrides: ApiOverride = {
+        runQuery: () => {
+          return stream(...streamItems[requestCounter]);
+        },
+        batchWrite: request => {
+          try {
+            expect(request.writes).to.deep.equal(
+              expected[requestCounter]!.writes
+            );
+          } catch (e) {
+            batchWriteError = e;
+          }
+          const responsePromise = response(responses[requestCounter]);
+          requestCounter++;
+          return responsePromise;
+        },
+      };
+      firestore = await createInstance(overrides);
+      await firestore.recursiveDelete(firestore.collection('a'));
+      await firestore.recursiveDelete(firestore.collection('b'));
+      await firestore.recursiveDelete(firestore.collection('c'));
+      expect(batchWriteError, 'batchWrite should not have errored').to.be
+        .undefined;
+    });
+
+    it('accepts references with converters', async () => {
+      const overrides: ApiOverride = {
+        runQuery: () => {
+          return stream();
+        },
+        commit: () => {
+          return response({
+            commitTime: {},
+            writeResults: [
+              {
+                updateTime: {},
+              },
+            ],
+          });
+        },
+      };
+      firestore = await createInstance(overrides);
+      await firestore.recursiveDelete(
+        firestore.doc('root/doc').withConverter(postConverter)
+      );
+      await firestore.recursiveDelete(
+        firestore.collection('root').withConverter(postConverter)
+      );
+    });
+  });
+
+  describe('BulkWriter instance', () => {
+    it('uses custom BulkWriter instance if provided', async () => {
+      firestore = await instantiateInstance(['a', 'b', 'c']);
+      let callbackCount = 0;
+      const bulkWriter = firestore.bulkWriter();
+      bulkWriter.onWriteResult(() => {
+        callbackCount++;
+      });
+      await firestore.recursiveDelete(firestore.collection('foo'), bulkWriter);
+      expect(callbackCount).to.equal(3);
+    });
+
+    it('default: uses the same BulkWriter instance across calls', async () => {
+      const overrides: ApiOverride = {
+        runQuery: () => {
+          return stream();
+        },
+      };
+      firestore = await createInstance(overrides);
+      const spy = sinon.spy(firestore, 'bulkWriter');
+
+      await firestore.recursiveDelete(firestore.collection('foo'));
+      await firestore.recursiveDelete(firestore.collection('boo'));
+      await firestore.recursiveDelete(firestore.collection('moo'));
+
+      // Only the first recursiveDelete() call should have called the
+      // constructor. Subsequent calls should have used the same bulkWriter.
+      expect(spy.callCount).to.equal(1);
+    });
+
+    it('throws error if BulkWriter instance is closed', async () => {
+      firestore = await createInstance();
+      const bulkWriter = firestore.bulkWriter();
+      await bulkWriter.close();
+      await expect(
+        firestore.recursiveDelete(firestore.collection('foo'), bulkWriter)
+      ).to.be.eventually.rejected;
     });
   });
 });
