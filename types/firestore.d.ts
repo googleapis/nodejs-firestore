@@ -247,8 +247,8 @@ declare namespace FirebaseFirestore {
      * specified level.
      *
      * If any deletes fail, the promise is rejected with an error message
-     * containing the number of failed writes and the stack trace of the last
-     * failed write. The provided reference is deleted regardless of whether
+     * containing the number of failed deletes and the stack trace of the last
+     * failed delete. The provided reference is deleted regardless of whether
      * all deletes succeeded, except when Firestore fails to fetch the provided
      * reference's descendants.
      *
@@ -257,8 +257,7 @@ declare namespace FirebaseFirestore {
      * pass in a custom BulkWriter instance.
      *
      * @param ref The reference of a document or collection to delete.
-     * @param bulkWriter Custom BulkWriter instance with which to perform the
-     * deletes with.
+     * @param bulkWriter Custom BulkWriter instance used to perform the deletes.
      * @return A promise that resolves when all deletes have been performed.
      * The promise is rejected if any of the deletes fail.
      */

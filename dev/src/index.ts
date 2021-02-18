@@ -1224,8 +1224,8 @@ export class Firestore implements firestore.Firestore {
    * specified level.
    *
    * If any deletes fail, the promise is rejected with an error message
-   * containing the number of failed writes and the stack trace of the last
-   * failed write. The provided reference is deleted regardless of whether
+   * containing the number of failed deletes and the stack trace of the last
+   * failed delete. The provided reference is deleted regardless of whether
    * all deletes succeeded, except when Firestore fails to fetch the provided
    * reference's descendants.
    *
@@ -1234,8 +1234,7 @@ export class Firestore implements firestore.Firestore {
    * pass in a custom BulkWriter instance.
    *
    * @param ref The reference of a document or collection to delete.
-   * @param bulkWriter Custom BulkWriter instance with which to perform the
-   * deletes with.
+   * @param bulkWriter Custom BulkWriter instance used to perform the deletes.
    * @return A promise that resolves when all deletes have been performed.
    * The promise is rejected if any of the deletes fail.
    */
@@ -1245,7 +1244,7 @@ export class Firestore implements firestore.Firestore {
   ): Promise<void> {
     const docStream = this.getAllDescendants(ref);
     const writer = bulkWriter ?? this.getBulkWriter();
-    const deleteCompleted = new Deferred<void>();
+    const deleteCompletedDeferred = new Deferred<void>();
     let errorCount = 0;
     let lastError: Error | undefined;
 
@@ -1258,7 +1257,7 @@ export class Firestore implements firestore.Firestore {
         err.message =
           'Failed to fetch children documents. ' +
           'The provided reference was not deleted.';
-        deleteCompleted.reject(wrapError(err, stack));
+        deleteCompletedDeferred.reject(wrapError(err, stack));
       })
       .on('data', (snap: QueryDocumentSnapshot) => {
         const docRef = new DocumentReference(this, snap.ref._path);
@@ -1270,21 +1269,15 @@ export class Firestore implements firestore.Firestore {
       .on('end', () => {
         writer.flush().then(async () => {
           if (ref instanceof DocumentReference) {
-            try {
-              await ref.delete();
-            } catch (err) {
-              logger(
-                'Firestore.recursiveDelete',
-                null,
-                'failed to delete the provided reference',
-                ref.path
-              );
+            writer.delete(ref).catch(err => {
+              errorCount++;
               lastError = err;
-            }
+            });
+            await writer.flush();
           }
 
           if (lastError === undefined) {
-            deleteCompleted.resolve();
+            deleteCompletedDeferred.resolve();
           } else {
             let error = new GoogleError(
               `${errorCount} ` +
@@ -1297,12 +1290,14 @@ export class Firestore implements firestore.Firestore {
             error = wrapError(error, stack);
 
             // Wrap the BulkWriter error last to provide the full stack trace.
-            deleteCompleted.reject(wrapError(error, lastError.stack ?? ''));
+            deleteCompletedDeferred.reject(
+              lastError.stack ? wrapError(error, lastError.stack ?? '') : error
+            );
           }
         });
       });
 
-    return deleteCompleted.promise;
+    return deleteCompletedDeferred.promise;
   }
 
   /**

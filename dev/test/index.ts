@@ -1313,53 +1313,40 @@ describe('recursiveDelete() method:', () => {
   });
 
   function instantiateInstance(
-    childrenDocs: string[],
-    deleteDocumentRef = '',
-    responses?: api.IBatchWriteResponse
+    childrenDocs: Array<Array<string>>,
+    responses?: api.IBatchWriteResponse[]
   ): Promise<Firestore.Firestore> {
+    let requestCount = 0;
     const overrides: ApiOverride = {
       runQuery: () => {
-        return stream(...childrenDocs.map(docId => result(docId)));
+        return stream(
+          ...childrenDocs[requestCount].map(docId => result(docId))
+        );
       },
       batchWrite: request => {
         const expected = createRequest(
-          childrenDocs.map(docId => deleteOp(docId))
+          childrenDocs[requestCount].map(docId => deleteOp(docId))
         );
         try {
           expect(request.writes).to.deep.equal(expected.writes);
         } catch (e) {
           batchWriteError = e;
         }
-        responses =
-          responses ??
-          mergeResponses(childrenDocs.map(() => successResponse(1)));
+        const returnedResponse = responses
+          ? responses[requestCount]
+          : mergeResponses(
+              childrenDocs[requestCount].map(() => successResponse(1))
+            );
 
-        return response({
-          writeResults: responses.writeResults,
-          status: responses.status,
+        const responsePromise = response({
+          writeResults: returnedResponse.writeResults,
+          status: returnedResponse.status,
         });
+        requestCount++;
+        return responsePromise;
       },
     };
 
-    if (deleteDocumentRef.length > 0) {
-      overrides.commit = req => {
-        const expected = [
-          {
-            delete:
-              DATABASE_ROOT + '/documents/collectionId/' + deleteDocumentRef,
-          },
-        ];
-        expect(req.writes).to.deep.equal(expected);
-        return response({
-          commitTime: {},
-          writeResults: [
-            {
-              updateTime: {},
-            },
-          ],
-        });
-      };
-    }
     return createInstance(overrides);
   }
 
@@ -1444,15 +1431,8 @@ describe('recursiveDelete() method:', () => {
           return stream();
         },
         // Include dummy response for the deleted docRef.
-        commit: () => {
-          return response({
-            commitTime: {},
-            writeResults: [
-              {
-                updateTime: {},
-              },
-            ],
-          });
+        batchWrite: () => {
+          return response(successResponse(1));
         },
       };
       firestore = await createInstance(overrides);
@@ -1463,10 +1443,7 @@ describe('recursiveDelete() method:', () => {
   describe('deletes', () => {
     it('collection', async () => {
       firestore = await instantiateInstance([
-        'anna',
-        'bob',
-        'bob/children/charlie',
-        'bob/children/daniel',
+        ['anna', 'bob', 'bob/children/charlie', 'bob/children/daniel'],
       ]);
       await firestore.recursiveDelete(firestore.collection('collectionId'));
       expect(batchWriteError, 'batchWrite should not have errored').to.be
@@ -1474,10 +1451,10 @@ describe('recursiveDelete() method:', () => {
     });
 
     it('document along with reference', async () => {
-      firestore = await instantiateInstance(
+      firestore = await instantiateInstance([
         ['bob/children/brian', 'bob/children/charlie', 'bob/children/daniel'],
-        'bob'
-      );
+        ['bob'],
+      ]);
       await firestore.recursiveDelete(
         firestore.collection('collectionId').doc('bob')
       );
@@ -1487,13 +1464,18 @@ describe('recursiveDelete() method:', () => {
 
     it('promise is rejected with the last error code if writes fail', async () => {
       firestore = await instantiateInstance(
-        ['bob/children/brian', 'bob/children/charlie', 'bob/children/daniel'],
-        'bob',
-        mergeResponses([
+        [
+          ['bob/children/brian', 'bob/children/charlie', 'bob/children/daniel'],
+          ['bob'],
+        ],
+        [
+          mergeResponses([
+            successResponse(1),
+            failedResponse(Status.CANCELLED),
+            failedResponse(Status.PERMISSION_DENIED),
+          ]),
           successResponse(1),
-          failedResponse(Status.CANCELLED),
-          failedResponse(Status.PERMISSION_DENIED),
-        ])
+        ]
       );
       try {
         await firestore.recursiveDelete(
@@ -1510,7 +1492,7 @@ describe('recursiveDelete() method:', () => {
     });
 
     it('promise is rejected if BulkWriter success handler fails', async () => {
-      firestore = await instantiateInstance(['bob/children/brian'], 'bob');
+      firestore = await instantiateInstance([['bob/children/brian'], ['bob']]);
 
       const bulkWriter = firestore.bulkWriter();
       bulkWriter.onWriteResult(() => {
@@ -1524,7 +1506,7 @@ describe('recursiveDelete() method:', () => {
         );
         fail('recursiveDelete() should have failed');
       } catch (err) {
-        expect(err.message).to.contain('1 delete failed');
+        expect(err.message).to.contain('2 deletes failed');
         expect(err.stack).to.contain('User provided result callback failed');
       }
       expect(batchWriteError, 'batchWrite should not have errored').to.be
@@ -1657,15 +1639,9 @@ describe('recursiveDelete() method:', () => {
         runQuery: () => {
           return stream();
         },
-        commit: () => {
-          return response({
-            commitTime: {},
-            writeResults: [
-              {
-                updateTime: {},
-              },
-            ],
-          });
+        // Include response for deleting the provided document reference.
+        batchWrite: () => {
+          return response(successResponse(1));
         },
       };
       firestore = await createInstance(overrides);
@@ -1680,7 +1656,7 @@ describe('recursiveDelete() method:', () => {
 
   describe('BulkWriter instance', () => {
     it('uses custom BulkWriter instance if provided', async () => {
-      firestore = await instantiateInstance(['a', 'b', 'c']);
+      firestore = await instantiateInstance([['a', 'b', 'c']]);
       let callbackCount = 0;
       const bulkWriter = firestore.bulkWriter();
       bulkWriter.onWriteResult(() => {
