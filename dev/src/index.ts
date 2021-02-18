@@ -1242,11 +1242,43 @@ export class Firestore implements firestore.Firestore {
     ref: CollectionReference<T> | DocumentReference<T>,
     bulkWriter?: BulkWriter
   ): Promise<void> {
-    const docStream = this.getAllDescendants(ref);
     const writer = bulkWriter ?? this.getBulkWriter();
+    writer._verifyNotClosed();
+    const docStream = this.getAllDescendants(ref);
     const deleteCompletedDeferred = new Deferred<void>();
     let errorCount = 0;
     let lastError: Error | undefined;
+    const incrementErrorCount = (err: Error): void => {
+      errorCount++;
+      lastError = err;
+    };
+    const onStreamEnd = (): void => {
+      writer.flush().then(async () => {
+        if (ref instanceof DocumentReference) {
+          writer.delete(ref).catch(err => incrementErrorCount(err));
+          await writer.flush();
+        }
+
+        if (lastError === undefined) {
+          deleteCompletedDeferred.resolve();
+        } else {
+          let error = new GoogleError(
+            `${errorCount} ` +
+              `${errorCount > 1 ? 'deletes' : 'delete'} ` +
+              'failed. The last delete failed with: '
+          );
+          if (lastError instanceof BulkWriterError) {
+            error.code = (lastError.code as number) as Status;
+          }
+          error = wrapError(error, stack);
+
+          // Wrap the BulkWriter error last to provide the full stack trace.
+          deleteCompletedDeferred.reject(
+            lastError.stack ? wrapError(error, lastError.stack ?? '') : error
+          );
+        }
+      });
+    };
 
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -1257,45 +1289,14 @@ export class Firestore implements firestore.Firestore {
         err.message =
           'Failed to fetch children documents. ' +
           'The provided reference was not deleted.';
-        deleteCompletedDeferred.reject(wrapError(err, stack));
+        incrementErrorCount(err);
+        onStreamEnd();
       })
       .on('data', (snap: QueryDocumentSnapshot) => {
         const docRef = new DocumentReference(this, snap.ref._path);
-        writer.delete(docRef).catch(err => {
-          errorCount++;
-          lastError = err;
-        });
+        writer.delete(docRef).catch(err => incrementErrorCount(err));
       })
-      .on('end', () => {
-        writer.flush().then(async () => {
-          if (ref instanceof DocumentReference) {
-            writer.delete(ref).catch(err => {
-              errorCount++;
-              lastError = err;
-            });
-            await writer.flush();
-          }
-
-          if (lastError === undefined) {
-            deleteCompletedDeferred.resolve();
-          } else {
-            let error = new GoogleError(
-              `${errorCount} ` +
-                `${errorCount > 1 ? 'deletes' : 'delete'} ` +
-                'failed. The last delete failed with: '
-            );
-            if (lastError instanceof BulkWriterError) {
-              error.code = (lastError.code as number) as Status;
-            }
-            error = wrapError(error, stack);
-
-            // Wrap the BulkWriter error last to provide the full stack trace.
-            deleteCompletedDeferred.reject(
-              lastError.stack ? wrapError(error, lastError.stack ?? '') : error
-            );
-          }
-        });
-      });
+      .on('end', () => onStreamEnd());
 
     return deleteCompletedDeferred.promise;
   }

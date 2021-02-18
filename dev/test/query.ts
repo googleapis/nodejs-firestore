@@ -218,7 +218,7 @@ function offset(n: number): api.IStructuredQuery {
 
 export function allDescendants(kindless = false): api.IStructuredQuery {
   if (kindless) {
-    return {from: [{collectionId: undefined, allDescendants: true}]};
+    return {from: [{allDescendants: true}]};
   }
   return {from: [{collectionId: 'collectionId', allDescendants: true}]};
 }

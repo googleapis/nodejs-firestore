@@ -1527,24 +1527,6 @@ describe('recursiveDelete() method:', () => {
         .eventually.be.rejected;
     });
 
-    it('does not delete reference if StructuredQuery fails', async () => {
-      // The test will error with 'gapicClient[methodName] is not a function'
-      // if the reference is deleted, since `commit()` isn't overridden.
-      const overrides: ApiOverride = {
-        runQuery: () => {
-          const permanentError = new GoogleError(
-            'Mock runQuery failed in test'
-          );
-          permanentError.code = Status.INVALID_ARGUMENT;
-          throw permanentError;
-        },
-      };
-      firestore = await createInstance(overrides);
-      await expect(
-        firestore.recursiveDelete(firestore.doc('coll/foo'))
-      ).to.eventually.be.rejectedWith('Failed to fetch children documents');
-    });
-
     it('retries stream errors', async () => {
       let attempts = 0;
       const overrides: ApiOverride = {
@@ -1552,12 +1534,19 @@ describe('recursiveDelete() method:', () => {
           attempts++;
           throw new Error('Expected runQuery error in test');
         },
+        batchWrite: () => {
+          return response(successResponse(1));
+        },
       };
       firestore = await createInstance(overrides);
-      await expect(
-        firestore.recursiveDelete(firestore.doc('coll/foo'))
-      ).to.eventually.be.rejectedWith('Failed to fetch children documents');
-      expect(attempts).to.equal(MAX_REQUEST_RETRIES);
+      try {
+        await firestore.recursiveDelete(firestore.doc('coll/foo'));
+        fail('recursiveDelete() should have failed');
+      } catch (err) {
+        expect(attempts).to.equal(MAX_REQUEST_RETRIES);
+        expect(err.stack).to.contain('1 delete failed');
+        expect(err.stack).to.contain('Failed to fetch children documents');
+      }
     });
 
     it('handles successful stream error retries', async () => {
@@ -1688,9 +1677,9 @@ describe('recursiveDelete() method:', () => {
       firestore = await createInstance();
       const bulkWriter = firestore.bulkWriter();
       await bulkWriter.close();
-      await expect(
+      await expect(() => () =>
         firestore.recursiveDelete(firestore.collection('foo'), bulkWriter)
-      ).to.be.eventually.rejected;
+      ).to.throw;
     });
   });
 });
