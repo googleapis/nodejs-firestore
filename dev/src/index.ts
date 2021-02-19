@@ -1229,7 +1229,7 @@ export class Firestore implements firestore.Firestore {
    * all deletes succeeded, except when Firestore fails to fetch the provided
    * reference's descendants.
    *
-   * Firestore uses a BulkWriter instance with default settings to perform the
+   * `recursiveDelete()` uses a BulkWriter instance with default settings to perform the
    * deletes. To customize throttling rates or add success/error callbacks,
    * pass in a custom BulkWriter instance.
    *
@@ -1253,11 +1253,10 @@ export class Firestore implements firestore.Firestore {
       lastError = err;
     };
     const onStreamEnd = (): void => {
-      writer.flush().then(async () => {
-        if (ref instanceof DocumentReference) {
+      if (ref instanceof DocumentReference) {
           writer.delete(ref).catch(err => incrementErrorCount(err));
-          await writer.flush();
         }
+      writer.flush().then(async () => {
 
         if (lastError === undefined) {
           deleteCompletedDeferred.resolve();
@@ -1293,8 +1292,7 @@ export class Firestore implements firestore.Firestore {
         onStreamEnd();
       })
       .on('data', (snap: QueryDocumentSnapshot) => {
-        const docRef = new DocumentReference(this, snap.ref._path);
-        writer.delete(docRef).catch(err => incrementErrorCount(err));
+        writer.delete(snap.ref).catch(err => incrementErrorCount(err));
       })
       .on('end', () => onStreamEnd());
 
