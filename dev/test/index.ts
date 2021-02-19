@@ -1310,40 +1310,37 @@ describe('recursiveDelete() method:', () => {
   afterEach(() => {
     verifyInstance(firestore);
     setTimeoutHandler(setTimeout);
+    expect(batchWriteError, 'batchWrite should not have errored').to.be
+      .undefined;
   });
 
   function instantiateInstance(
-    childrenDocs: Array<Array<string>>,
-    responses?: api.IBatchWriteResponse[]
+    childrenDocs: Array<string>,
+    deleteDocRef = '',
+    responses?: api.IBatchWriteResponse
   ): Promise<Firestore.Firestore> {
-    let requestCount = 0;
     const overrides: ApiOverride = {
       runQuery: () => {
-        return stream(
-          ...childrenDocs[requestCount].map(docId => result(docId))
-        );
+        return stream(...childrenDocs.map(docId => result(docId)));
       },
       batchWrite: request => {
-        const expected = createRequest(
-          childrenDocs[requestCount].map(docId => deleteOp(docId))
-        );
+        const documents = childrenDocs;
+        if (deleteDocRef.length > 0) {
+          documents.push(deleteDocRef);
+        }
+        const expected = createRequest(documents.map(docId => deleteOp(docId)));
         try {
           expect(request.writes).to.deep.equal(expected.writes);
         } catch (e) {
           batchWriteError = e;
         }
-        const returnedResponse = responses
-          ? responses[requestCount]
-          : mergeResponses(
-              childrenDocs[requestCount].map(() => successResponse(1))
-            );
+        const returnedResponse =
+          responses ?? mergeResponses(documents.map(() => successResponse(1)));
 
-        const responsePromise = response({
+        return response({
           writeResults: returnedResponse.writeResults,
           status: returnedResponse.status,
         });
-        requestCount++;
-        return responsePromise;
       },
     };
 
@@ -1443,39 +1440,34 @@ describe('recursiveDelete() method:', () => {
   describe('deletes', () => {
     it('collection', async () => {
       firestore = await instantiateInstance([
-        ['anna', 'bob', 'bob/children/charlie', 'bob/children/daniel'],
+        'anna',
+        'bob',
+        'bob/children/charlie',
+        'bob/children/daniel',
       ]);
       await firestore.recursiveDelete(firestore.collection('collectionId'));
-      expect(batchWriteError, 'batchWrite should not have errored').to.be
-        .undefined;
     });
 
     it('document along with reference', async () => {
-      firestore = await instantiateInstance([
+      firestore = await instantiateInstance(
         ['bob/children/brian', 'bob/children/charlie', 'bob/children/daniel'],
-        ['bob'],
-      ]);
+        'bob'
+      );
       await firestore.recursiveDelete(
         firestore.collection('collectionId').doc('bob')
       );
-      expect(batchWriteError, 'batchWrite should not have errored').to.be
-        .undefined;
     });
 
     it('promise is rejected with the last error code if writes fail', async () => {
       firestore = await instantiateInstance(
-        [
-          ['bob/children/brian', 'bob/children/charlie', 'bob/children/daniel'],
-          ['bob'],
-        ],
-        [
-          mergeResponses([
-            successResponse(1),
-            failedResponse(Status.CANCELLED),
-            failedResponse(Status.PERMISSION_DENIED),
-          ]),
+        ['bob/children/brian', 'bob/children/charlie', 'bob/children/daniel'],
+        'bob',
+        mergeResponses([
           successResponse(1),
-        ]
+          failedResponse(Status.CANCELLED),
+          failedResponse(Status.PERMISSION_DENIED),
+          successResponse(1),
+        ])
       );
       try {
         await firestore.recursiveDelete(
@@ -1486,13 +1478,10 @@ describe('recursiveDelete() method:', () => {
         expect(err.code).to.equal(Status.PERMISSION_DENIED);
         expect(err.message).to.contain('2 deletes failed');
       }
-
-      expect(batchWriteError, 'batchWrite should not have errored').to.be
-        .undefined;
     });
 
     it('promise is rejected if BulkWriter success handler fails', async () => {
-      firestore = await instantiateInstance([['bob/children/brian'], ['bob']]);
+      firestore = await instantiateInstance(['bob/children/brian'], 'bob');
 
       const bulkWriter = firestore.bulkWriter();
       bulkWriter.onWriteResult(() => {
@@ -1509,8 +1498,6 @@ describe('recursiveDelete() method:', () => {
         expect(err.message).to.contain('2 deletes failed');
         expect(err.stack).to.contain('User provided result callback failed');
       }
-      expect(batchWriteError, 'batchWrite should not have errored').to.be
-        .undefined;
     });
 
     it('promise is rejected if provided reference was not deleted', async () => {
@@ -1527,7 +1514,7 @@ describe('recursiveDelete() method:', () => {
         .eventually.be.rejected;
     });
 
-    it.only('retries stream errors', async () => {
+    it('retries stream errors', async () => {
       let attempts = 0;
       const overrides: ApiOverride = {
         runQuery: () => {
@@ -1544,7 +1531,7 @@ describe('recursiveDelete() method:', () => {
         fail('recursiveDelete() should have failed');
       } catch (err) {
         expect(attempts).to.equal(MAX_REQUEST_RETRIES);
-        expect(err.stack).to.contain('1 delete failed');
+        expect(err.stack).to.contain('Failed to fetch children documents');
       }
     });
 
@@ -1586,8 +1573,6 @@ describe('recursiveDelete() method:', () => {
       };
       firestore = await createInstance(overrides);
       await firestore.recursiveDelete(firestore.collection('letters'));
-      expect(batchWriteError, 'batchWrite should not have errored').to.be
-        .undefined;
     });
 
     it('handles multiple calls to recursiveDelete()', async () => {
@@ -1618,8 +1603,6 @@ describe('recursiveDelete() method:', () => {
       await firestore.recursiveDelete(firestore.collection('a'));
       await firestore.recursiveDelete(firestore.collection('b'));
       await firestore.recursiveDelete(firestore.collection('c'));
-      expect(batchWriteError, 'batchWrite should not have errored').to.be
-        .undefined;
     });
 
     it('accepts references with converters', async () => {
@@ -1644,7 +1627,7 @@ describe('recursiveDelete() method:', () => {
 
   describe('BulkWriter instance', () => {
     it('uses custom BulkWriter instance if provided', async () => {
-      firestore = await instantiateInstance([['a', 'b', 'c']]);
+      firestore = await instantiateInstance(['a', 'b', 'c']);
       let callbackCount = 0;
       const bulkWriter = firestore.bulkWriter();
       bulkWriter.onWriteResult(() => {

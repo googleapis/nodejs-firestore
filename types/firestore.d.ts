@@ -246,23 +246,39 @@ declare namespace FirebaseFirestore {
      * Recursively deletes all documents and subcollections at and under the
      * specified level.
      *
-     * If any deletes fail, the promise is rejected with an error message
+     * If any delete fails, the promise is rejected with an error message
      * containing the number of failed deletes and the stack trace of the last
      * failed delete. The provided reference is deleted regardless of whether
-     * all deletes succeeded, except when Firestore fails to fetch the provided
-     * reference's descendants.
+     * all deletes succeeded.
      *
-     * Firestore uses a BulkWriter instance with default settings to perform the
-     * deletes. To customize throttling rates or add success/error callbacks,
-     * pass in a custom BulkWriter instance.
+     * `recursiveDelete()` uses a BulkWriter instance with default settings to
+     * perform the deletes. To customize throttling rates or add success/error
+     * callbacks, pass in a custom BulkWriter instance.
      *
      * @param ref The reference of a document or collection to delete.
      * @param bulkWriter Custom BulkWriter instance used to perform the deletes.
      * @return A promise that resolves when all deletes have been performed.
      * The promise is rejected if any of the deletes fail.
+     *
+     * @example
+     * // Recursively delete a reference and log the references of failures.
+     * const bulkWriter = firestore.bulkWriter();
+     * bulkWriter
+     *   .onWriteError((error) => {
+     *     if (
+     *       error.code === GrpcStatus.UNAVAILABLE &&
+     *       error.failedAttempts < MAX_RETRY_ATTEMPTS
+     *     ) {
+     *       return true;
+     *     } else {
+     *       console.log('Failed write at document: ', error.documentRef);
+     *       return false;
+     *     }
+     *   });
+     * await firestore.recursiveDelete(docRef, bulkWriter);
      */
     recursiveDelete(
-      ref: CollectionReference | DocumentReference,
+      ref: CollectionReference<unknown> | DocumentReference<unknown>,
       bulkWriter?: BulkWriter
     ): Promise<void>;
 
