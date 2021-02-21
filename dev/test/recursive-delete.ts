@@ -353,7 +353,6 @@ describe('recursiveDelete() method:', () => {
         fail('recursiveDelete() should have failed');
       } catch (err) {
         expect(attempts).to.equal(MAX_REQUEST_RETRIES);
-        expect(err.stack).to.contain('Failed to fetch children documents');
       }
     });
 
