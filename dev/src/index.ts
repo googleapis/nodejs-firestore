@@ -400,26 +400,6 @@ export class Firestore implements firestore.Firestore {
   private registeredListenersCount = 0;
 
   /**
-   * A lazy-loaded BulkWriter instance to be used with recursiveDelete() if no
-   * BulkWriter instance is provided.
-   *
-   * @private
-   */
-  private _bulkWriter: BulkWriter | undefined;
-
-  /**
-   * Lazy-load the Firestore's default BulkWriter.
-   *
-   * @private
-   */
-  private getBulkWriter(): BulkWriter {
-    if (!this._bulkWriter) {
-      this._bulkWriter = this.bulkWriter();
-    }
-    return this._bulkWriter;
-  }
-
-  /**
    * Number of pending operations on the client.
    *
    * The client can only be terminated when there are no pending writes or
@@ -1242,12 +1222,11 @@ export class Firestore implements firestore.Firestore {
    * bulkWriter
    *   .onWriteError((error) => {
    *     if (
-   *       error.code === GrpcStatus.UNAVAILABLE &&
    *       error.failedAttempts < MAX_RETRY_ATTEMPTS
    *     ) {
    *       return true;
    *     } else {
-   *       console.log('Failed write at document: ', error.documentRef);
+   *       console.log('Failed write at document: ', error.documentRef.path);
    *       return false;
    *     }
    *   });
@@ -1262,7 +1241,7 @@ export class Firestore implements firestore.Firestore {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    const writer = bulkWriter ?? this.getBulkWriter();
+    const writer = bulkWriter ?? BulkWriter._getInstance(this);
     writer._verifyNotClosed();
     const docStream = this._getAllDescendants(
       ref instanceof CollectionReference
@@ -1304,7 +1283,7 @@ export class Firestore implements firestore.Firestore {
 
     docStream
       .on('error', err => {
-        err.code = Status.FAILED_PRECONDITION;
+        err.code = Status.UNAVAILABLE;
         err.message = 'Failed to fetch children documents.';
         lastError = err;
         onStreamEnd();

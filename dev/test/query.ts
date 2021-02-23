@@ -290,22 +290,11 @@ export function queryEqualsWithParent(
   parent: string,
   ...protoComponents: api.IStructuredQuery[]
 ): void {
-  queryEqualsHelper(actual, '/' + parent, ...protoComponents);
-}
-
-export function queryEquals(
-  actual: api.IRunQueryRequest | undefined,
-  ...protoComponents: api.IStructuredQuery[]
-): void {
-  queryEqualsHelper(actual, '', ...protoComponents);
-}
-
-function queryEqualsHelper(
-  actual: api.IRunQueryRequest | undefined,
-  parent: string,
-  ...protoComponents: api.IStructuredQuery[]
-): void {
   expect(actual).to.not.be.undefined;
+
+  if (parent !== '') {
+    parent = '/' + parent;
+  }
 
   const query: api.IRunQueryRequest = {
     parent: DATABASE_ROOT + '/documents' + parent,
@@ -331,6 +320,13 @@ function queryEqualsHelper(
   // the expected and the actual request.
   actual = extend(true, {}, actual);
   expect(actual).to.deep.eq(query);
+}
+
+export function queryEquals(
+  actual: api.IRunQueryRequest | undefined,
+  ...protoComponents: api.IStructuredQuery[]
+): void {
+  queryEqualsWithParent(actual, '', ...protoComponents);
 }
 
 function bundledQueryEquals(

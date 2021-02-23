@@ -2677,12 +2677,12 @@ describe('BulkWriter class', () => {
       await batch.commit();
     });
 
-    it('recursiveDelete on top-level collection', async () => {
+    it('on top-level collection', async () => {
       await firestore.recursiveDelete(randomCol);
       expect(await countCollectionChildren(randomCol)).to.equal(0);
     });
 
-    it('recursiveDelete on nested collection', async () => {
+    it('on nested collection', async () => {
       const coll = randomCol.doc('bob').collection('parentsCol');
       await firestore.recursiveDelete(coll);
 
@@ -2690,7 +2690,7 @@ describe('BulkWriter class', () => {
       expect(await countCollectionChildren(randomCol)).to.equal(2);
     });
 
-    it('recursiveDelete on nested document', async () => {
+    it('on nested document', async () => {
       const doc = randomCol.doc('bob/parentsCol/daniel');
       await firestore.recursiveDelete(doc);
 
@@ -2700,7 +2700,7 @@ describe('BulkWriter class', () => {
       expect(await countCollectionChildren(randomCol)).to.equal(3);
     });
 
-    it('recursiveDelete on leaf document', async () => {
+    it('on leaf document', async () => {
       const doc = randomCol.doc('bob/parentsCol/daniel/childCol/ernie');
       await firestore.recursiveDelete(doc);
 
@@ -2709,7 +2709,21 @@ describe('BulkWriter class', () => {
       expect(await countCollectionChildren(randomCol)).to.equal(5);
     });
 
-    it('recursiveDelete with custom BulkWriter instance', async () => {
+    it('does not affect other collections', async () => {
+      const collA = randomCol.doc('bob').collection('parentsCol');
+
+      // Add other nested collection under 'bob' that shouldn't be deleted.
+      const collB = randomCol.doc('bob').collection('pets');
+      await collB.doc('doggo').set({name: 'goodboi'});
+
+      await firestore.recursiveDelete(collA);
+
+      expect(await countCollectionChildren(collA)).to.equal(0);
+      expect(await countCollectionChildren(randomCol)).to.equal(3);
+      expect(await countCollectionChildren(collB)).to.equal(1);
+    });
+
+    it('with custom BulkWriter instance', async () => {
       const bulkWriter = firestore.bulkWriter();
       let callbackCount = 0;
       bulkWriter.onWriteResult(() => {
