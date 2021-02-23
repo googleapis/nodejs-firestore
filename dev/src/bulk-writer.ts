@@ -688,7 +688,7 @@ export class BulkWriter {
    * Throws an error if the BulkWriter instance has been closed.
    * @private
    */
-  private _verifyNotClosed(): void {
+  _verifyNotClosed(): void {
     if (this._closing) {
       throw new Error('BulkWriter has already been closed.');
     }

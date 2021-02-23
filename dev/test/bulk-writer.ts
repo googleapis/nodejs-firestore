@@ -57,6 +57,73 @@ interface RequestResponse {
   response: api.IBatchWriteResponse;
 }
 
+export function createRequest(requests: api.IWrite[]): api.IBatchWriteRequest {
+  return {
+    writes: requests,
+  };
+}
+
+export function successResponse(
+  updateTimeSeconds: number
+): api.IBatchWriteResponse {
+  return {
+    writeResults: [
+      {
+        updateTime: {
+          nanos: 0,
+          seconds: updateTimeSeconds,
+        },
+      },
+    ],
+    status: [{code: Status.OK}],
+  };
+}
+
+export function failedResponse(
+  code = Status.DEADLINE_EXCEEDED
+): api.IBatchWriteResponse {
+  return {
+    writeResults: [
+      {
+        updateTime: null,
+      },
+    ],
+    status: [{code}],
+  };
+}
+
+export function mergeResponses(
+  responses: api.IBatchWriteResponse[]
+): api.IBatchWriteResponse {
+  return {
+    writeResults: responses.map(v => v.writeResults![0]),
+    status: responses.map(v => v.status![0]),
+  };
+}
+
+export function setOp(doc: string, value: string): api.IWrite {
+  return set({
+    document: document(doc, 'foo', value),
+  }).writes![0];
+}
+
+export function updateOp(doc: string, value: string): api.IWrite {
+  return update({
+    document: document(doc, 'foo', value),
+    mask: updateMask('foo'),
+  }).writes![0];
+}
+
+export function createOp(doc: string, value: string): api.IWrite {
+  return create({
+    document: document(doc, 'foo', value),
+  }).writes![0];
+}
+
+export function deleteOp(doc: string): api.IWrite {
+  return remove(doc).writes![0];
+}
+
 describe('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
@@ -84,71 +151,6 @@ describe('BulkWriter', () => {
 
   function verifyOpCount(expected: number): void {
     expect(opCount).to.equal(expected);
-  }
-
-  function setOp(doc: string, value: string): api.IWrite {
-    return set({
-      document: document(doc, 'foo', value),
-    }).writes![0];
-  }
-
-  function updateOp(doc: string, value: string): api.IWrite {
-    return update({
-      document: document(doc, 'foo', value),
-      mask: updateMask('foo'),
-    }).writes![0];
-  }
-
-  function createOp(doc: string, value: string): api.IWrite {
-    return create({
-      document: document(doc, 'foo', value),
-    }).writes![0];
-  }
-
-  function deleteOp(doc: string): api.IWrite {
-    return remove(doc).writes![0];
-  }
-
-  function createRequest(requests: api.IWrite[]): api.IBatchWriteRequest {
-    return {
-      writes: requests,
-    };
-  }
-
-  function successResponse(updateTimeSeconds: number): api.IBatchWriteResponse {
-    return {
-      writeResults: [
-        {
-          updateTime: {
-            nanos: 0,
-            seconds: updateTimeSeconds,
-          },
-        },
-      ],
-      status: [{code: Status.OK}],
-    };
-  }
-
-  function failedResponse(
-    code = Status.DEADLINE_EXCEEDED
-  ): api.IBatchWriteResponse {
-    return {
-      writeResults: [
-        {
-          updateTime: null,
-        },
-      ],
-      status: [{code}],
-    };
-  }
-
-  function mergeResponses(
-    responses: api.IBatchWriteResponse[]
-  ): api.IBatchWriteResponse {
-    return {
-      writeResults: responses.map(v => v.writeResults![0]),
-      status: responses.map(v => v.status![0]),
-    };
   }
 
   /**
