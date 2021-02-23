@@ -256,7 +256,8 @@ declare namespace FirebaseFirestore {
      * callbacks, pass in a custom BulkWriter instance.
      *
      * @param ref The reference of a document or collection to delete.
-     * @param bulkWriter Custom BulkWriter instance used to perform the deletes.
+     * @param bulkWriter A custom BulkWriter instance used to perform the
+     * deletes.
      * @return A promise that resolves when all deletes have been performed.
      * The promise is rejected if any of the deletes fail.
      *
@@ -266,12 +267,11 @@ declare namespace FirebaseFirestore {
      * bulkWriter
      *   .onWriteError((error) => {
      *     if (
-     *       error.code === GrpcStatus.UNAVAILABLE &&
      *       error.failedAttempts < MAX_RETRY_ATTEMPTS
      *     ) {
      *       return true;
      *     } else {
-     *       console.log('Failed write at document: ', error.documentRef);
+     *       console.log('Failed write at document: ', error.documentRef.path);
      *       return false;
      *     }
      *   });

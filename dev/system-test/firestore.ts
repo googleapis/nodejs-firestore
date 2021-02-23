@@ -2710,17 +2710,13 @@ describe('BulkWriter class', () => {
     });
 
     it('does not affect other collections', async () => {
-      const collA = randomCol.doc('bob').collection('parentsCol');
-
-      // Add other nested collection under 'bob' that shouldn't be deleted.
-      const collB = randomCol.doc('bob').collection('pets');
+      // Add other nested collection that shouldn't be deleted.
+      const collB = firestore.collection('doggos');
       await collB.doc('doggo').set({name: 'goodboi'});
 
-      await firestore.recursiveDelete(collA);
-
-      expect(await countCollectionChildren(collA)).to.equal(0);
-      expect(await countCollectionChildren(randomCol)).to.equal(3);
-      expect(await countCollectionChildren(collB)).to.equal(1);
+      await firestore.recursiveDelete(collB);
+      expect(await countCollectionChildren(randomCol)).to.equal(6);
+      expect(await countCollectionChildren(collB)).to.equal(0);
     });
 
     it('with custom BulkWriter instance', async () => {

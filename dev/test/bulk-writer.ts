@@ -1028,17 +1028,6 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('uses the same BulkWriter instance on getInstance()', async () => {
-    const firestore = await createInstance();
-    const bulkWriter1 = BulkWriter._getInstance(firestore);
-    const bulkWriter2 = BulkWriter._getInstance(firestore);
-    expect(bulkWriter1).to.equal(bulkWriter2);
-
-    const firestore2 = await createInstance();
-    const bulkWriter3 = BulkWriter._getInstance(firestore2);
-    expect(bulkWriter1).to.not.equal(bulkWriter3);
-  });
-
   describe('if bulkCommit() fails', async () => {
     function instantiateInstance(): Promise<BulkWriter> {
       const overrides: ApiOverride = {

@@ -296,8 +296,6 @@ export class BulkWriter {
    */
   readonly _rateLimiter: RateLimiter;
 
-  private static instance: BulkWriter;
-
   /**
    * The user-provided callback to be run every time a BulkWriter operation
    * successfully completes.
@@ -372,20 +370,6 @@ export class BulkWriter {
         maxRate
       );
     }
-  }
-
-  /**
-   * Returns a lazy-loaded BulkWriter instance.
-   *
-   * @param firestore Used to instantiate the BulkWriter instance the first
-   * time.
-   * @private
-   */
-  static _getInstance(firestore: Firestore): BulkWriter {
-    if (!this.instance || this.instance.firestore !== firestore) {
-      this.instance = new BulkWriter(firestore);
-    }
-    return this.instance;
   }
 
   /**

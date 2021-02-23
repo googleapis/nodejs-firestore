@@ -15,6 +15,7 @@ import {afterEach, beforeEach, describe, it} from 'mocha';
 import {fail} from 'assert';
 import {expect} from 'chai';
 import {GoogleError, Status} from 'google-gax';
+import sinon = require('sinon');
 
 import {google} from '../protos/firestore_v1_proto_api';
 
@@ -447,6 +448,22 @@ describe('recursiveDelete() method:', () => {
       });
       await firestore.recursiveDelete(firestore.collection('foo'), bulkWriter);
       expect(callbackCount).to.equal(3);
+    });
+
+    it('default: uses the same BulkWriter instance across calls', async () => {
+      const overrides: ApiOverride = {
+        runQuery: () => stream(),
+      };
+      firestore = await createInstance(overrides);
+      const spy = sinon.spy(firestore, 'bulkWriter');
+
+      await firestore.recursiveDelete(firestore.collection('foo'));
+      await firestore.recursiveDelete(firestore.collection('boo'));
+      await firestore.recursiveDelete(firestore.collection('moo'));
+
+      // Only the first recursiveDelete() call should have called the
+      // constructor. Subsequent calls should have used the same bulkWriter.
+      expect(spy.callCount).to.equal(1);
     });
 
     it('throws error if BulkWriter instance is closed', async () => {
