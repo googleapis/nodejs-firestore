@@ -6,6 +6,7 @@ coverage
 docs/
 out/
 build/
+venv/
 system-test/secrets.js
 system-test/*key.json
 *.lock
