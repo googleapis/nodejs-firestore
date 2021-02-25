@@ -15,7 +15,7 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
-import * as protos from '../protos/firestore_v1_proto_api';
+import * as protos from './protos/firestore_v1_proto_api';
 
 import {QueryPartition} from './query-partition';
 import {requestTag} from './util';

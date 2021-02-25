@@ -22,7 +22,7 @@ import {GoogleError, Status} from 'google-gax';
 import {Duplex, Transform} from 'stream';
 import * as through2 from 'through2';
 
-import {google} from '../protos/firestore_v1_proto_api';
+import {google} from '../src/protos/firestore_v1_proto_api';
 
 import {
   CollectionReference,

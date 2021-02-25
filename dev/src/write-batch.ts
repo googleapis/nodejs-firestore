@@ -16,7 +16,7 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {google} from '../protos/firestore_v1_proto_api';
+import {google} from './protos/firestore_v1_proto_api';
 import {
   DocumentMask,
   DocumentSnapshot,

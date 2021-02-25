@@ -19,7 +19,7 @@ import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 
-import {firestore, google} from '../protos/firestore_v1_proto_api';
+import {firestore, google} from '../src/protos/firestore_v1_proto_api';
 import {
   DocumentReference,
   FieldPath,

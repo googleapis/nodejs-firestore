@@ -18,7 +18,7 @@ import * as firestore from '@google-cloud/firestore';
 
 import {GoogleError, Status} from 'google-gax';
 
-import * as proto from '../protos/firestore_v1_proto_api';
+import * as proto from './protos/firestore_v1_proto_api';
 
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshot} from './document';

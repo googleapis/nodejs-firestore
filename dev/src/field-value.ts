@@ -18,7 +18,7 @@ import * as firestore from '@google-cloud/firestore';
 
 import * as deepEqual from 'fast-deep-equal';
 
-import * as proto from '../protos/firestore_v1_proto_api';
+import * as proto from './protos/firestore_v1_proto_api';
 
 import {FieldPath} from './path';
 import {Serializer, validateUserInput} from './serializer';

@@ -16,7 +16,7 @@
 
 import {DocumentData} from '@google-cloud/firestore';
 
-import * as proto from '../protos/firestore_v1_proto_api';
+import * as proto from './protos/firestore_v1_proto_api';
 
 import {detectValueType} from './convert';
 import {DeleteTransform, FieldTransform} from './field-value';

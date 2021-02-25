@@ -22,7 +22,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
-import * as proto from '../protos/firestore_v1_proto_api';
+import * as proto from '../src/protos/firestore_v1_proto_api';
 
 import {
   DocumentChange,

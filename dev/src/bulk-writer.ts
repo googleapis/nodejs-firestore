@@ -17,7 +17,7 @@ import * as firestore from '@google-cloud/firestore';
 
 import * as assert from 'assert';
 
-import {google} from '../protos/firestore_v1_proto_api';
+import {google} from './protos/firestore_v1_proto_api';
 import {FieldPath, Firestore} from '.';
 import {delayExecution, MAX_RETRY_ATTEMPTS} from './backoff';
 import {RateLimiter} from './rate-limiter';

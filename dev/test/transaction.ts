@@ -20,7 +20,7 @@ import {GoogleError, Status} from 'google-gax';
 import {Duplex} from 'stream';
 import * as through2 from 'through2';
 
-import * as proto from '../protos/firestore_v1_proto_api';
+import * as proto from '../src/protos/firestore_v1_proto_api';
 import * as Firestore from '../src';
 import {DocumentReference, FieldPath, Transaction} from '../src';
 import {setTimeoutHandler} from '../src/backoff';

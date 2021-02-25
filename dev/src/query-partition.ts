@@ -15,7 +15,7 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
-import * as protos from '../protos/firestore_v1_proto_api';
+import * as protos from './protos/firestore_v1_proto_api';
 
 import {FieldOrder, Query, QueryOptions} from './reference';
 import {FieldPath} from './path';

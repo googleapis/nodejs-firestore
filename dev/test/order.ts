@@ -15,7 +15,7 @@
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 
-import {google} from '../protos/firestore_v1_proto_api';
+import {google} from '../src/protos/firestore_v1_proto_api';
 
 import {
   Firestore,

@@ -18,7 +18,7 @@ import {describe, it, before, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
-import {firestore} from '../protos/firestore_v1_proto_api';
+import {firestore} from '../src/protos/firestore_v1_proto_api';
 
 import {
   CollectionReference,

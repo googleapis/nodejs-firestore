@@ -19,7 +19,7 @@ import {FirestoreDataConverter, DocumentData} from '@google-cloud/firestore';
 import {CallOptions} from 'google-gax';
 import {Duplex} from 'stream';
 
-import {google} from '../protos/firestore_v1_proto_api';
+import {google} from './protos/firestore_v1_proto_api';
 import {FieldPath} from './path';
 
 import api = google.firestore.v1;

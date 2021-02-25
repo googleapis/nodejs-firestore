@@ -18,7 +18,7 @@ import * as firestore from '@google-cloud/firestore';
 import {Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 
-import * as protos from '../protos/firestore_v1_proto_api';
+import * as protos from './protos/firestore_v1_proto_api';
 
 import {
   DocumentSnapshot,

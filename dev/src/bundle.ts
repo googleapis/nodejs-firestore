@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {firestore, google} from '../protos/firestore_v1_proto_api';
+import {firestore, google} from './protos/firestore_v1_proto_api';
 
 import {DocumentSnapshot} from './document';
 import {QuerySnapshot} from './reference';
