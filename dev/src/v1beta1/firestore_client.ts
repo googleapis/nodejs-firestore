@@ -30,7 +30,7 @@ import * as path from 'path';
 
 import {Transform} from 'stream';
 import {RequestType} from 'google-gax/build/src/apitypes';
-import * as protos from '../../protos/firestore_v1beta1_proto_api';
+import * as protos from '../protos/firestore_v1beta1_proto_api';
 /**
  * Client JSON configuration object, loaded from
  * `src/v1beta1/firestore_client_config.json`.
@@ -165,17 +165,11 @@ export class FirestoreClient {
     // For Node.js, pass the path to JSON proto file.
     // For browsers, pass the JSON content.
 
-    const nodejsProtoPath = path.join(
-      __dirname,
-      '..',
-      '..',
-      'protos',
-      'protos.json'
-    );
+    const nodejsProtoPath = path.join(__dirname, '..', 'protos', 'protos.json');
     this._protos = this._gaxGrpc.loadProto(
       opts.fallback
         ? // eslint-disable-next-line @typescript-eslint/no-var-requires
-          require('../../protos/protos.json')
+          require('../protos/protos.json')
         : nodejsProtoPath
     );
 
