@@ -115,4 +115,4 @@ perl -pi -e 's/number\|Long/number\|string/g' firestore_admin_v1_proto_api.js
 perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
 "${PBTS}" -o firestore_v1beta1_proto_api.d.ts firestore_v1beta1_proto_api.js
 
-node  ../../../scripts/license.js *.d.ts *.js
+node  ./scripts/license.js *.d.ts *.js

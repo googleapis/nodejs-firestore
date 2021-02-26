@@ -70,17 +70,6 @@ s.replace(
    "/protos/firestore_v1_proto_api'"
  )
 s.replace(
-    "dev/src/v1/firestore_client.ts",
-    "../../protos",
-    "../protos"
-)
-s.replace(
-    "dev/src/v1/firestore_client.ts",
-    r"__dirname,.'..'",
-    "__dirname",
-    1
-)
-s.replace(
   "dev/test/gapic_firestore_v1.ts",
   "../protos/protos'",
   "../src/protos/firestore_v1_proto_api'"
@@ -101,17 +90,6 @@ s.replace(
    "/protos/firestore_admin_v1_proto_api'"
  )
 s.replace(
-    "dev/src/v1/firestore_admin_client.ts",
-    "../../protos",
-    "../protos"
-)
-s.replace(
-    "dev/src/v1/firestore_admin_client.ts",
-    r"__dirname,.'..'",
-    "__dirname",
-    1
-)
-s.replace(
   "dev/test/gapic_firestore_admin_v1.ts",
   "../protos/protos'",
   "../src/protos/firestore_admin_v1_proto_api'"
@@ -130,17 +108,6 @@ s.replace(
    "dev/src/v1beta1/firestore_client.ts",
    "/protos/protos'",
    "/protos/firestore_v1beta1_proto_api'"
-)
-s.replace(
-    "dev/src/v1beta1/firestore_client.ts",
-    r"__dirname,.'..'",
-    "__dirname",
-    1
-)
-s.replace(
-    "dev/src/v1beta1/firestore_client.ts",
-    "../../protos",
-    "../protos"
 )
 s.replace(
   "dev/test/gapic_firestore_v1beta1.ts",
@@ -197,13 +164,48 @@ node.compile_protos()
 os.chdir("protos")
 os.unlink('protos.js')
 os.unlink('protos.d.ts')
-subprocess.run('./update.sh', shell=True)
 
 # Copy the protos directory into dev/src after compiling.
 os.chdir("../../")
 s.move("dev/protos", "dev/src/protos")
 os.system("rm -rf dev/protos")
+s.replace(
+    "dev/src/v1/firestore_client.ts",
+    "../../protos",
+    "../protos"
+)
+s.replace(
+    "dev/src/v1/firestore_client.ts",
+    r"__dirname,.'..'",
+    "__dirname",
+    1
+)
+s.replace(
+    "dev/src/v1/firestore_admin_client.ts",
+    "../../protos",
+    "../protos"
+)
+s.replace(
+    "dev/src/v1/firestore_admin_client.ts",
+    r"__dirname,.'..'",
+    "__dirname",
+    1
+)
+s.replace(
+    "dev/src/v1beta1/firestore_client.ts",
+    r"__dirname,.'..'",
+    "__dirname",
+    1
+)
+s.replace(
+    "dev/src/v1beta1/firestore_client.ts",
+    "../../protos",
+    "../protos"
+)
+
 
 # Run node install
 node.install()
 node.fix()
+
+subprocess.run('dev/src/protos/update.sh', shell=True)
