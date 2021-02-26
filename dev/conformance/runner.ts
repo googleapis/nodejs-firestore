@@ -65,7 +65,7 @@ const CONFORMANCE_TEST_PROJECT_ID = 'projectID';
 const protobufRoot = new protobufjs.Root();
 protobufRoot.resolvePath = (origin, target) => {
   if (/^google\/.*/.test(target)) {
-    target = path.join(__dirname, '../protos', target);
+    target = path.join(__dirname, '../src/protos', target);
   }
   return target;
 };
