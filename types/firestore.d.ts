@@ -658,7 +658,7 @@ declare namespace FirebaseFirestore {
     /**
      * Commits all enqueued writes and marks the BulkWriter instance as closed.
      *
-     * After calling `close()`, calling any method wil throw an error. Any
+     * After calling `close()`, calling any method will throw an error. Any
      * retries scheduled as part of an `onWriteError()` handler will be run
      * before the `close()` promise resolves.
      *
