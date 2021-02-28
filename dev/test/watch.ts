@@ -2281,7 +2281,7 @@ describe('DocumentReference watch', () => {
 
   beforeEach(() => {
     // We are intentionally skipping the delays to ensure fast test execution.
-    // The retry semantics are uneffected by this, as we maintain their
+    // The retry semantics are unaffected by this, as we maintain their
     // asynchronous behavior.
     setTimeoutHandler((op, timeout) => {
       if (timeout !== WATCH_IDLE_TIMEOUT_MS) {

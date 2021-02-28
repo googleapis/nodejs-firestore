@@ -133,7 +133,7 @@ export class QueryPartition<T = firestore.DocumentData>
    */
   toQuery(): Query<T> {
     // Since the api.Value to JavaScript type conversion can be lossy (unless
-    // `useBigInt` is used), we pass the original protobuf representaion to the
+    // `useBigInt` is used), we pass the original protobuf representation to the
     // created query.
     let queryOptions = QueryOptions.forCollectionGroupQuery(
       this._collectionId,

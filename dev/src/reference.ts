@@ -213,8 +213,8 @@ export class DocumentReference<T = firestore.DocumentData>
   }
 
   /**
-   * A reference to the collection to which this DocumentRference belongs.
-   *e
+   * A reference to the collection to which this DocumentReference belongs.
+   *
    * @name DocumentReference#parent
    * @type {CollectionReference}
    * @readonly
