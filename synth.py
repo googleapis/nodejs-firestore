@@ -170,6 +170,7 @@ os.chdir("../../")
 # Copy types into types/
 os.system("cp build/src/v1/firestore*.d.ts types/v1")
 os.system("cp build/src/v1beta1/firestore_client.d.ts types/v1beta1")
+os.system("cp build/protos/firestore*.d.ts types/protos")
 s.replace(
     "types/v1/firestore_client.d.ts",
     "../../protos",
@@ -186,3 +187,7 @@ s.replace(
     "../protos"
 )
 node.fix()
+
+# Add license headers
+os.system("node scripts/license.js types/v1/*.d.ts types/v1beta1/*.d.ts")
+
