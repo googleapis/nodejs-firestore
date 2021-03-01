@@ -159,7 +159,6 @@ s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*", ".github/CODEOWNER
 os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
 
 node.install()
-node.fix()
 os.chdir("dev")
 node.compile_protos()
 os.chdir("protos")
@@ -167,3 +166,23 @@ os.unlink('protos.js')
 os.unlink('protos.d.ts')
 subprocess.run('./update.sh', shell=True)
 os.chdir("../../")
+
+# Copy types into types/
+os.system("cp build/src/v1/firestore*.d.ts types/v1")
+os.system("cp build/src/v1beta1/firestore_client.d.ts types/v1beta1")
+s.replace(
+    "types/v1/firestore_client.d.ts",
+    "../../protos",
+    "../protos"
+)
+s.replace(
+    "types/v1/firestore_admin_client.d.ts",
+    "../../protos",
+    "../protos"
+)
+s.replace(
+    "types/v1beta1/firestore_client.d.ts",
+    "../../protos",
+    "../protos"
+)
+node.fix()
