@@ -34,7 +34,6 @@ const LICENSE_HEADER = `/*!
 `;
 
 for (const file of process.argv.slice(2)) {
-  console.log(file);
   const content = fs.readFileSync(file, 'utf-8');
   fs.writeFileSync(file, `${LICENSE_HEADER}\n${content.trim()}\n`);
 }

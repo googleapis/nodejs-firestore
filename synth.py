@@ -189,5 +189,5 @@ s.replace(
 node.fix()
 
 # Add license headers
-os.system("node scripts/license.js types/v1/*.d.ts types/v1beta1/*.d.ts")
+os.system("node scripts/license.js types/**/*.d.ts")
 
