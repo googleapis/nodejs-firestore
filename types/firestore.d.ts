@@ -1962,7 +1962,9 @@ declare namespace FirebaseFirestore {
    * Firestore v1beta1 RPCs.
    * @deprecated Use v1 instead.
    */
-  export const v1beta1: import('./v1beta1/firestore_client').FirestoreClient;
+  export const v1beta1: {
+    FirestoreClient: import('./v1beta1/firestore_client').FirestoreClient;
+  };
 
   /**
    * The v1 Veneer clients. These clients provide access to the Firestore Admin
