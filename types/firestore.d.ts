@@ -1,13 +1,11 @@
-/**
- * @fileoverview Firestore Server API.
- *
- * Copyright 2017 Google Inc. All Rights Reserved.
+/*!
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -698,7 +696,7 @@ declare namespace FirebaseFirestore {
     /**
      * Commits all enqueued writes and marks the BulkWriter instance as closed.
      *
-     * After calling `close()`, calling any method wil throw an error. Any
+     * After calling `close()`, calling any method will throw an error. Any
      * retries scheduled as part of an `onWriteError()` handler will be run
      * before the `close()` promise resolves.
      *
@@ -2004,13 +2002,18 @@ declare namespace FirebaseFirestore {
    * Firestore v1beta1 RPCs.
    * @deprecated Use v1 instead.
    */
-  export const v1beta1: any;
+  export const v1beta1: {
+    FirestoreClient: import('./v1beta1/firestore_client').FirestoreClient;
+  };
 
   /**
    * The v1 Veneer clients. These clients provide access to the Firestore Admin
    * API and the underlying Firestore v1 RPCs.
    */
-  export const v1: {FirestoreClient: any; FirestoreAdminClient: any};
+  export const v1: {
+    FirestoreClient: import('./v1/firestore_client').FirestoreClient;
+    FirestoreAdminClient: import('./v1/firestore_admin_client').FirestoreAdminClient;
+  };
 
   /**
    * Status codes returned by Firestore's gRPC calls.

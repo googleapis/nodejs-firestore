@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.9.5](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.4...v4.9.5) (2021-03-02)
+
+
+### Bug Fixes
+
+* add typings to v1 and v1beta in firestore.d.ts ([#1433](https://www.github.com/googleapis/nodejs-firestore/issues/1433)) ([47238a9](https://www.github.com/googleapis/nodejs-firestore/commit/47238a926471dee8bdeaa38bcb5f772c7f20349f))
+
 ### [4.9.4](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.3...v4.9.4) (2021-02-15)
 
 

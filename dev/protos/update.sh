@@ -86,7 +86,7 @@ PBJS_ARGS=( --proto_path=. \
   --no-verify \
   --no-delimited \
   --force-enum-string)
-      
+
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_v1_proto_api.js \
   -r firestore_v1 \
   "${PROTOS_DIR}/google/firestore/v1/*.proto" \
