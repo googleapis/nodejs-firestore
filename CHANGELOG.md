@@ -9,7 +9,7 @@
 
 ### Bug Fixes
 
-* set default max ratelimiter throughput to 10k and update docs ([#1439](https://www.github.com/googleapis/nodejs-firestore/issues/1439)) ([c06fb3c](https://www.github.com/googleapis/nodejs-firestore/commit/c06fb3cc32f94c9058ad8e484333e688967d5a8f))
+* set default max ratelimiter throughput to 10k for BulkWriter ([#1439](https://www.github.com/googleapis/nodejs-firestore/issues/1439)) ([c06fb3c](https://www.github.com/googleapis/nodejs-firestore/commit/c06fb3cc32f94c9058ad8e484333e688967d5a8f))
 
 ### [4.9.5](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.4...v4.9.5) (2021-03-02)
 
