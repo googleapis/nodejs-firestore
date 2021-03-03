@@ -290,6 +290,8 @@ declare namespace FirebaseFirestore {
      * multiple writes in parallel. Gradually ramps up writes as specified
      * by the 500/50/5 rule.
      *
+     * @see https://firebase.google.com/docs/firestore/best-practices#ramping_up_traffic
+     *
      * @param options An options object used to configure the throttling
      * behavior for the underlying BulkWriter.
      */
@@ -681,6 +683,8 @@ declare namespace FirebaseFirestore {
      * object. Setting it to `true` will use default values. You can override
      * the defaults by setting it to `false` to disable throttling, or by
      * setting the config values to enable throttling with the provided values.
+     *
+     * @see https://firebase.google.com/docs/firestore/best-practices#ramping_up_traffic
      *
      * @param initialOpsPerSecond The initial maximum number of operations per
      * second allowed by the throttler. If this field is not set, the default

@@ -26,7 +26,7 @@ import {logger} from './logger';
  *
  * RateLimiter can also implement a gradually increasing rate limit. This is
  * used to enforce the 500/50/5 rule
- * (https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic).
+ * (https://firebase.google.com/docs/firestore/best-practices#ramping_up_traffic).
  *
  * @private
  */
