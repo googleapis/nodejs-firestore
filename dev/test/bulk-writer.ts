@@ -29,7 +29,8 @@ import {
 import {setTimeoutHandler} from '../src/backoff';
 import {
   BulkWriterError,
-  DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND,
+  DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT,
+  DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT,
 } from '../src/bulk-writer';
 import {
   ApiOverride,
@@ -253,7 +254,7 @@ describe('BulkWriter', () => {
       });
       expect(bulkWriter._rateLimiter.availableTokens).to.equal(100);
       expect(bulkWriter._rateLimiter.maximumCapacity).to.equal(
-        Number.POSITIVE_INFINITY
+        DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT
       );
 
       bulkWriter = firestore.bulkWriter({
@@ -264,18 +265,18 @@ describe('BulkWriter', () => {
 
       bulkWriter = firestore.bulkWriter();
       expect(bulkWriter._rateLimiter.availableTokens).to.equal(
-        DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND
+        DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT
       );
       expect(bulkWriter._rateLimiter.maximumCapacity).to.equal(
-        Number.POSITIVE_INFINITY
+        DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT
       );
 
       bulkWriter = firestore.bulkWriter({throttling: true});
       expect(bulkWriter._rateLimiter.availableTokens).to.equal(
-        DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND
+        DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT
       );
       expect(bulkWriter._rateLimiter.maximumCapacity).to.equal(
-        Number.POSITIVE_INFINITY
+        DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT
       );
 
       bulkWriter = firestore.bulkWriter({throttling: false});

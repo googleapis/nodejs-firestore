@@ -728,12 +728,13 @@ export class Firestore implements firestore.Firestore {
    * multiple writes in parallel. Gradually ramps up writes as specified
    * by the 500/50/5 rule.
    *
-   * @see [500/50/5 Documentation]{@link https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic}
+   * If you pass [BulkWriterOptions]{@link BulkWriterOptions}, you can
+   * configure the throttling rates for the created BulkWriter.
    *
-   * @param {object=} options BulkWriter options.
-   * @param {boolean=} options.disableThrottling Whether to disable throttling
-   * as specified by the 500/50/5 rule.
-   * @returns {WriteBatch} A BulkWriter that operates on this Firestore
+   * @see [500/50/5 Documentation]{@link https://firebase.google.com/docs/firestore/best-practices#ramping_up_traffic}
+   *
+   * @param {BulkWriterOptions=} options BulkWriter options.
+   * @returns {BulkWriter} A BulkWriter that operates on this Firestore
    * client.
    *
    * @example

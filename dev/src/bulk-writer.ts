@@ -53,22 +53,26 @@ const MAX_BATCH_SIZE = 20;
  * The starting maximum number of operations per second as allowed by the
  * 500/50/5 rule.
  *
- * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
+ * https://firebase.google.com/docs/firestore/best-practices#ramping_up_traffic.
  */
-export const DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND = 500;
+export const DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT = 500;
+
+/*!
+ * The maximum number of operations per second as allowed by the 500/50/5 rule.
+ * By default the rate limiter will not exceed this value.
+ *
+ * https://firebase.google.com/docs/firestore/best-practices#ramping_up_traffic.
+ */
+export const DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT = 10000;
 
 /*!
  * The rate by which to increase the capacity as specified by the 500/50/5 rule.
- *
- * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
  */
 const RATE_LIMITER_MULTIPLIER = 1.5;
 
 /*!
  * How often the operations per second capacity should increase in milliseconds
  * as specified by the 500/50/5 rule.
- *
- * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
  */
 const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 
@@ -336,8 +340,8 @@ export class BulkWriter {
         Number.POSITIVE_INFINITY
       );
     } else {
-      let startingRate = DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND;
-      let maxRate = Number.POSITIVE_INFINITY;
+      let startingRate = DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT;
+      let maxRate = DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT;
 
       if (typeof options?.throttling !== 'boolean') {
         if (options?.throttling?.maxOpsPerSecond !== undefined) {
