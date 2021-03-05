@@ -131,7 +131,8 @@ describe('BulkWriter', () => {
   }
 
   function failedResponse(
-    code = Status.DEADLINE_EXCEEDED
+    code = Status.DEADLINE_EXCEEDED,
+    message = ''
   ): api.IBatchWriteResponse {
     return {
       writeResults: [
@@ -139,7 +140,7 @@ describe('BulkWriter', () => {
           updateTime: null,
         },
       ],
-      status: [{code}],
+      status: [{code, message}],
     };
   }
 
@@ -536,9 +537,9 @@ describe('BulkWriter', () => {
         ]),
         response: mergeResponses([
           successResponse(1),
-          failedResponse(Status.INTERNAL),
-          failedResponse(Status.INTERNAL),
-          failedResponse(Status.INTERNAL),
+          failedResponse(Status.CANCELLED),
+          failedResponse(Status.CANCELLED),
+          failedResponse(Status.CANCELLED),
         ]),
       },
       {
@@ -604,6 +605,28 @@ describe('BulkWriter', () => {
     await bulkWriter.flush();
     expect(catchCalled).to.be.true;
     expect(onWriteErrorCalled).to.be.true;
+  });
+
+  it('automatically retries RST_STREAM errors', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc1', 'bar')]),
+        response: failedResponse(
+          Status.INTERNAL,
+          'Received RST_STREAM with code 2'
+        ),
+      },
+      {
+        request: createRequest([setOp('doc1', 'bar')]),
+        response: successResponse(2),
+      },
+    ]);
+
+    const set = bulkWriter.set(firestore.doc('collectionId/doc1'), {
+      foo: 'bar',
+    });
+    await bulkWriter.close();
+    expect((await set).writeTime).to.deep.equal(new Timestamp(2, 0));
   });
 
   it('surfaces errors thrown by user-provided error callback', async () => {
@@ -860,7 +883,7 @@ describe('BulkWriter', () => {
     return bulkWriter.close().then(() => verifyOpCount(2));
   });
 
-  it('retries individual writes that fail with ABORTED errors', async () => {
+  it('retries individual writes that fail with ABORTED and UNAVAILABLE errors', async () => {
     setTimeoutHandler(setImmediate);
     // Create mock responses that simulate one successful write followed by
     // failed responses.

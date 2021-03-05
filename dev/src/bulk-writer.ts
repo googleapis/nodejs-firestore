@@ -316,10 +316,14 @@ export class BulkWriter {
    * @private
    */
   private _errorFn: (error: BulkWriterError) => boolean = error => {
+    const isRstStreamError =
+      (error.code as number) === Status.INTERNAL &&
+      error.message !== undefined &&
+      error.message.indexOf('RST_STREAM') !== -1;
     const retryCodes = getRetryCodes('batchWrite');
     return (
       error.code !== undefined &&
-      retryCodes.includes(error.code) &&
+      (retryCodes.includes(error.code) || isRstStreamError) &&
       error.failedAttempts < MAX_RETRY_ATTEMPTS
     );
   };
