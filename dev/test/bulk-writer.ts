@@ -58,7 +58,7 @@ interface RequestResponse {
   response: api.IBatchWriteResponse;
 }
 
-describe('BulkWriter', () => {
+describe.only('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
@@ -131,8 +131,7 @@ describe('BulkWriter', () => {
   }
 
   function failedResponse(
-    code = Status.DEADLINE_EXCEEDED,
-    message = ''
+    code = Status.DEADLINE_EXCEEDED
   ): api.IBatchWriteResponse {
     return {
       writeResults: [
@@ -140,7 +139,7 @@ describe('BulkWriter', () => {
           updateTime: null,
         },
       ],
-      status: [{code, message}],
+      status: [{code}],
     };
   }
 
@@ -607,26 +606,33 @@ describe('BulkWriter', () => {
     expect(onWriteErrorCalled).to.be.true;
   });
 
-  it('automatically retries RST_STREAM errors', async () => {
+  it('retries INTERNAL errors for deletes', async () => {
     const bulkWriter = await instantiateInstance([
       {
-        request: createRequest([setOp('doc1', 'bar')]),
-        response: failedResponse(
-          Status.INTERNAL,
-          'Received RST_STREAM with code 2'
-        ),
+        request: createRequest([setOp('doc1', 'bar'), deleteOp('doc2')]),
+        response: mergeResponses([
+          failedResponse(Status.INTERNAL),
+          failedResponse(Status.INTERNAL),
+        ]),
       },
       {
-        request: createRequest([setOp('doc1', 'bar')]),
+        request: createRequest([deleteOp('doc2')]),
         response: successResponse(2),
       },
     ]);
 
-    const set = bulkWriter.set(firestore.doc('collectionId/doc1'), {
-      foo: 'bar',
-    });
+    let errorCaught = false;
+    bulkWriter
+      .set(firestore.doc('collectionId/doc1'), {
+        foo: 'bar',
+      })
+      .catch(() => {
+        errorCaught = true;
+      });
+    const del = bulkWriter.delete(firestore.doc('collectionId/doc2'));
     await bulkWriter.close();
-    expect((await set).writeTime).to.deep.equal(new Timestamp(2, 0));
+    expect((await del).writeTime).to.deep.equal(new Timestamp(2, 0));
+    expect(errorCaught).to.be.true;
   });
 
   it('surfaces errors thrown by user-provided error callback', async () => {
