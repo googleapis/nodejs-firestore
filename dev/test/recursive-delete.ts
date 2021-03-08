@@ -352,6 +352,9 @@ describe('recursiveDelete() method:', () => {
         await firestore.recursiveDelete(firestore.doc('coll/foo'));
         fail('recursiveDelete() should have failed');
       } catch (err) {
+        expect(err.code).to.equal(Status.UNAVAILABLE);
+        expect(err.stack).to.contain('Failed to fetch children documents');
+        expect(err.stack).to.contain('runQuery() error in test');
         expect(attempts).to.equal(MAX_REQUEST_RETRIES);
       }
     });

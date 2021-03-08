@@ -1271,7 +1271,7 @@ export class Firestore implements firestore.Firestore {
     );
     const resultDeferred = new Deferred<void>();
     let errorCount = 0;
-    let lastError: Error | undefined;
+    let lastError: GoogleError | BulkWriterError | undefined;
     const incrementErrorCount = (err: Error): void => {
       errorCount++;
       lastError = err;
@@ -1289,7 +1289,7 @@ export class Firestore implements firestore.Firestore {
               `${errorCount !== 1 ? 'deletes' : 'delete'} ` +
               'failed. The last delete failed with: '
           );
-          if (lastError instanceof BulkWriterError) {
+          if (lastError.code !== undefined) {
             error.code = (lastError.code as number) as Status;
           }
           error = wrapError(error, stack);
@@ -1305,7 +1305,7 @@ export class Firestore implements firestore.Firestore {
     docStream
       .on('error', err => {
         err.code = Status.UNAVAILABLE;
-        err.message = 'Failed to fetch children documents.';
+        err.stack = 'Failed to fetch children documents: ' + err.stack;
         lastError = err;
         onStreamEnd();
       })
