@@ -536,9 +536,9 @@ describe('BulkWriter', () => {
         ]),
         response: mergeResponses([
           successResponse(1),
-          failedResponse(Status.INTERNAL),
-          failedResponse(Status.INTERNAL),
-          failedResponse(Status.INTERNAL),
+          failedResponse(Status.CANCELLED),
+          failedResponse(Status.CANCELLED),
+          failedResponse(Status.CANCELLED),
         ]),
       },
       {
@@ -604,6 +604,35 @@ describe('BulkWriter', () => {
     await bulkWriter.flush();
     expect(catchCalled).to.be.true;
     expect(onWriteErrorCalled).to.be.true;
+  });
+
+  it('retries INTERNAL errors for deletes', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc1', 'bar'), deleteOp('doc2')]),
+        response: mergeResponses([
+          failedResponse(Status.INTERNAL),
+          failedResponse(Status.INTERNAL),
+        ]),
+      },
+      {
+        request: createRequest([deleteOp('doc2')]),
+        response: successResponse(2),
+      },
+    ]);
+
+    let errorCaught = false;
+    bulkWriter
+      .set(firestore.doc('collectionId/doc1'), {
+        foo: 'bar',
+      })
+      .catch(() => {
+        errorCaught = true;
+      });
+    const del = bulkWriter.delete(firestore.doc('collectionId/doc2'));
+    await bulkWriter.close();
+    expect((await del).writeTime).to.deep.equal(new Timestamp(2, 0));
+    expect(errorCaught).to.be.true;
   });
 
   it('surfaces errors thrown by user-provided error callback', async () => {
@@ -860,7 +889,7 @@ describe('BulkWriter', () => {
     return bulkWriter.close().then(() => verifyOpCount(2));
   });
 
-  it('retries individual writes that fail with ABORTED errors', async () => {
+  it('retries individual writes that fail with ABORTED and UNAVAILABLE errors', async () => {
     setTimeoutHandler(setImmediate);
     // Create mock responses that simulate one successful write followed by
     // failed responses.

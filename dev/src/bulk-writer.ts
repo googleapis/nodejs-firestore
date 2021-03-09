@@ -316,10 +316,12 @@ export class BulkWriter {
    * @private
    */
   private _errorFn: (error: BulkWriterError) => boolean = error => {
+    const isRetryableDeleteError =
+      error.operationType === 'delete' &&
+      (error.code as number) === Status.INTERNAL;
     const retryCodes = getRetryCodes('batchWrite');
     return (
-      error.code !== undefined &&
-      retryCodes.includes(error.code) &&
+      (retryCodes.includes(error.code) || isRetryableDeleteError) &&
       error.failedAttempts < MAX_RETRY_ATTEMPTS
     );
   };
