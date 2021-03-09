@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {describe, it} from 'mocha';
+import {beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
@@ -405,6 +405,19 @@ describe('failed transactions', () => {
     [Status.DATA_LOSS]: false,
     [Status.UNAUTHENTICATED]: true,
   };
+
+  beforeEach(() => {
+
+    setTimeoutHandler((fn, timeout) => {
+      // Since a call to the backoff is made before each batchWrite, only
+      // increment the counter if the timeout is non-zero, which indicates a
+      // retry from an error.
+      if (timeout > 0) {
+        timeoutHandlerCounter++;
+      }
+      fn();
+    });
+  });
 
   it('retries commit based on error code', async () => {
     const transactionFunction = () => Promise.resolve();

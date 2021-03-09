@@ -321,7 +321,6 @@ export class BulkWriter {
       (error.code as number) === Status.INTERNAL;
     const retryCodes = getRetryCodes('batchWrite');
     return (
-      error.code !== undefined &&
       (retryCodes.includes(error.code) || isRetryableDeleteError) &&
       error.failedAttempts < MAX_RETRY_ATTEMPTS
     );
