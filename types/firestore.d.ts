@@ -1967,7 +1967,7 @@ declare namespace FirebaseFirestore {
    * @deprecated Use v1 instead.
    */
   export const v1beta1: {
-    FirestoreClient: import('./v1beta1/firestore_client').FirestoreClient;
+    FirestoreClient: typeof import('./v1beta1/firestore_client').FirestoreClient;
   };
 
   /**
@@ -1975,8 +1975,8 @@ declare namespace FirebaseFirestore {
    * API and the underlying Firestore v1 RPCs.
    */
   export const v1: {
-    FirestoreClient: import('./v1/firestore_client').FirestoreClient;
-    FirestoreAdminClient: import('./v1/firestore_admin_client').FirestoreAdminClient;
+    FirestoreClient: typeof import('./v1/firestore_client').FirestoreClient;
+    FirestoreAdminClient: typeof import('./v1/firestore_admin_client').FirestoreAdminClient;
   };
 
   /**
