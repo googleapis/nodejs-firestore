@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.9.7](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.6...v4.9.7) (2021-03-09)
+
+
+### Bug Fixes
+
+* export v1 and v1beta1 client class types correctly ([#1445](https://www.github.com/googleapis/nodejs-firestore/issues/1445)) ([6c9319e](https://www.github.com/googleapis/nodejs-firestore/commit/6c9319ed6e2ac0dfe0fcf45853f0b38dc0784686))
+* retry BulkWriter deletes that fail with RST_STREAM error ([#1442](https://www.github.com/googleapis/nodejs-firestore/issues/1442)) ([cccf48d](https://www.github.com/googleapis/nodejs-firestore/commit/cccf48de4963403a2e77ba241641a2b77fb993da))
+
 ### [4.9.6](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.5...v4.9.6) (2021-03-03)
 
 
