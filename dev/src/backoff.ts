@@ -30,17 +30,17 @@ import {logger} from './logger';
  * The default initial backoff time in milliseconds after an error.
  * Set to 1s according to https://cloud.google.com/apis/design/errors.
  */
-const DEFAULT_BACKOFF_INITIAL_DELAY_MS = 1000;
+export const DEFAULT_BACKOFF_INITIAL_DELAY_MS = 1000;
 
 /*!
  * The default maximum backoff time in milliseconds.
  */
-const DEFAULT_BACKOFF_MAX_DELAY_MS = 60 * 1000;
+export const DEFAULT_BACKOFF_MAX_DELAY_MS = 60 * 1000;
 
 /*!
  * The default factor to increase the backup by after each failed attempt.
  */
-const DEFAULT_BACKOFF_FACTOR = 1.5;
+export const DEFAULT_BACKOFF_FACTOR = 1.5;
 
 /*!
  * The default jitter to distribute the backoff attempts by (0 means no

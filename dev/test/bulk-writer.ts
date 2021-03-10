@@ -26,7 +26,11 @@ import {
   Timestamp,
   WriteResult,
 } from '../src';
-import {setTimeoutHandler} from '../src/backoff';
+import {
+  DEFAULT_BACKOFF_MAX_DELAY_MS,
+  MAX_RETRY_ATTEMPTS,
+  setTimeoutHandler,
+} from '../src/backoff';
 import {
   BulkWriterError,
   DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT,
@@ -180,7 +184,6 @@ describe('BulkWriter', () => {
 
   afterEach(() => {
     verifyInstance(firestore);
-    expect(timeoutHandlerCounter).to.equal(0);
     setTimeoutHandler(setTimeout);
   });
 
@@ -579,6 +582,7 @@ describe('BulkWriter', () => {
         'success',
       ]);
       expect(writeResults).to.deep.equal([1, 2, 3, 4]);
+      expect(timeoutHandlerCounter).to.equal(1);
     });
   });
 
@@ -707,6 +711,7 @@ describe('BulkWriter', () => {
       });
     await bulkWriter.close();
     expect(writeResult).to.equal(1);
+    expect(timeoutHandlerCounter).to.equal(3);
   });
 
   it('retries maintain correct write resolution ordering', async () => {
@@ -1027,7 +1032,14 @@ describe('BulkWriter', () => {
   });
 
   it('fails writes after all retry attempts failed', async () => {
-    setTimeoutHandler(setImmediate);
+    let previousTimeout = 0;
+    setTimeoutHandler((fn, timeout) => {
+      timeoutHandlerCounter++;
+      // Backoff amount should be increasing with each retry.
+      expect(timeout).to.be.greaterThan(previousTimeout);
+      previousTimeout = timeout;
+      fn();
+    });
     function instantiateInstance(): Promise<BulkWriter> {
       const overrides: ApiOverride = {
         batchWrite: () => {
@@ -1053,6 +1065,43 @@ describe('BulkWriter', () => {
       });
     return bulkWriter.close().then(() => {
       verifyOpCount(1);
+      expect(timeoutHandlerCounter).to.equal(MAX_RETRY_ATTEMPTS - 1);
+    });
+  });
+
+  it('applies maximum backoff on retries for RESOURCE_EXHAUSTED', async () => {
+    setTimeoutHandler((fn, timeout) => {
+      timeoutHandlerCounter++;
+      expect(timeout).to.equal(DEFAULT_BACKOFF_MAX_DELAY_MS);
+      fn();
+    });
+    function instantiateInstance(): Promise<BulkWriter> {
+      const overrides: ApiOverride = {
+        batchWrite: () => {
+          const error = new GoogleError('Mock batchWrite failed in test');
+          error.code = Status.RESOURCE_EXHAUSTED;
+          throw error;
+        },
+      };
+      return createInstance(overrides).then(firestoreClient => {
+        firestore = firestoreClient;
+        return firestore.bulkWriter();
+      });
+    }
+    const bulkWriter = await instantiateInstance();
+    bulkWriter.onWriteError(err => err.failedAttempts < 5);
+    bulkWriter
+      .create(firestore.doc('collectionId/doc'), {
+        foo: 'bar',
+      })
+      .catch(err => {
+        expect(err instanceof BulkWriterError).to.be.true;
+        expect(err.code).to.equal(Status.RESOURCE_EXHAUSTED);
+        incrementOpCount();
+      });
+    return bulkWriter.close().then(() => {
+      verifyOpCount(1);
+      expect(timeoutHandlerCounter).to.equal(4);
     });
   });
 
