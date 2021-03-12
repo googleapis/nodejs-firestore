@@ -72,6 +72,12 @@ export const DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT = 500;
 export const DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT = 10000;
 
 /*!
+ * The default jitter to apply. For example, a factor of 0.3 means a 30% jitter
+ * is applied.
+ */
+export const DEFAULT_JITTER_FACTOR = 0.3;
+
+/*!
  * The rate by which to increase the capacity as specified by the 500/50/5 rule.
  */
 const RATE_LIMITER_MULTIPLIER = 1.5;
@@ -90,12 +96,8 @@ const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 class BulkWriterOperation {
   private deferred = new Deferred<WriteResult>();
   private _failedAttempts = 0;
-
-  /**
-   * Whether the last error failed with Status.RESOURCE_EXHAUSTED.
-   * @private
-   */
-  private _resourceExhausted = false;
+  private _lastError?: Status;
+  private _backoffDuration = 0;
 
   /**
    * @param ref The document reference being written to.
@@ -119,12 +121,12 @@ class BulkWriterOperation {
     return this.deferred.promise;
   }
 
-  get resourceExhausted(): boolean {
-    return this._resourceExhausted;
+  get lastError(): Status | undefined {
+    return this._lastError;
   }
 
-  get failedAttempts(): number {
-    return this._failedAttempts;
+  get backoffDuration(): number {
+    return this._backoffDuration;
   }
 
   onError(error: GoogleError): void {
@@ -151,13 +153,24 @@ class BulkWriterOperation {
       );
 
       if (shouldRetry) {
-        this._resourceExhausted = error.code === Status.RESOURCE_EXHAUSTED;
+        this._lastError = error.code;
+        this.updateBackoffDuration();
         this.sendFn(this);
       } else {
         this.deferred.reject(bulkWriterError);
       }
     } catch (userCallbackError) {
       this.deferred.reject(userCallbackError);
+    }
+  }
+
+  private updateBackoffDuration(): void {
+    if (this._lastError === Status.RESOURCE_EXHAUSTED) {
+      this._backoffDuration = DEFAULT_BACKOFF_MAX_DELAY_MS;
+    } else if (this._backoffDuration === 0) {
+      this._backoffDuration = DEFAULT_BACKOFF_INITIAL_DELAY_MS;
+    } else {
+      this._backoffDuration *= DEFAULT_BACKOFF_FACTOR;
     }
   }
 
@@ -182,11 +195,7 @@ class BulkCommitBatch extends WriteBatch {
 
   // An array of pending write operations. Only contains writes that have not
   // been resolved.
-  private _pendingOps: Array<BulkWriterOperation> = [];
-
-  get pendingOps(): Array<BulkWriterOperation> {
-    return this._pendingOps;
-  }
+  readonly pendingOps: Array<BulkWriterOperation> = [];
 
   has(documentRef: firestore.DocumentReference<unknown>): boolean {
     return this.docPaths.has(documentRef.path);
@@ -212,7 +221,7 @@ class BulkCommitBatch extends WriteBatch {
       >({retryCodes, methodName: 'batchWrite', requestTag: tag});
     } catch (err) {
       // Map the failure to each individual write's result.
-      const ops = Array.from({length: this._pendingOps.length});
+      const ops = Array.from({length: this.pendingOps.length});
       response = {
         writeResults: ops.map(() => {
           return {};
@@ -232,11 +241,11 @@ class BulkCommitBatch extends WriteBatch {
         const updateTime = Timestamp.fromProto(
           response.writeResults![i].updateTime || DELETE_TIMESTAMP_SENTINEL
         );
-        this._pendingOps[i].onSuccess(new WriteResult(updateTime));
+        this.pendingOps[i].onSuccess(new WriteResult(updateTime));
       } else {
         const error = new GoogleError(status.message || undefined);
         error.code = status.code as Status;
-        this._pendingOps[i].onError(wrapError(error, stack));
+        this.pendingOps[i].onError(wrapError(error, stack));
       }
     }
   }
@@ -251,7 +260,7 @@ class BulkCommitBatch extends WriteBatch {
       'Batch should not contain writes to the same document'
     );
     this.docPaths.add(op.ref.path);
-    this._pendingOps.push(op);
+    this.pendingOps.push(op);
   }
 }
 
@@ -740,15 +749,10 @@ export class BulkWriter {
     const pendingBatch = this._bulkCommitBatch;
 
     // Use the write with the highest failure count when determining backoff.
-    const highestFailureCount = pendingBatch.pendingOps.reduce((prev, cur) =>
-      prev.failedAttempts > cur.failedAttempts ? prev : cur
-    ).failedAttempts;
-    const resourceExhausted =
-      pendingBatch.pendingOps.filter(op => op.resourceExhausted).length > 0;
-    const backoffMs = BulkWriter.calculateBackoffMs(
-      highestFailureCount,
-      resourceExhausted
-    );
+    const highestBackoffDuration = pendingBatch.pendingOps.reduce((prev, cur) =>
+      prev.backoffDuration > cur.backoffDuration ? prev : cur
+    ).backoffDuration;
+    const backoffMsWithJitter = BulkWriter.applyJitter(highestBackoffDuration);
     const delayMs = this._rateLimiter.getNextRequestDelayMs(
       pendingBatch._opCount
     );
@@ -758,14 +762,14 @@ export class BulkWriter {
     const delayedExecution = new Deferred<void>();
     // Send the batch if it is does not require any delay, or schedule another
     // attempt after the appropriate timeout.
-    if (backoffMs === 0 && delayMs === 0) {
+    if (backoffMsWithJitter === 0 && delayMs === 0) {
       assert(
         this._rateLimiter.tryMakeRequest(pendingBatch._opCount),
         'RateLimiter should allow request if delayMs === 0'
       );
       delayedExecution.resolve();
     } else {
-      const finalDelayMs = Math.max(backoffMs, delayMs);
+      const finalDelayMs = Math.max(backoffMsWithJitter, delayMs);
       logger(
         'BulkWriter._sendCurrentBatch',
         tag,
@@ -781,23 +785,20 @@ export class BulkWriter {
   }
 
   /**
-   * Calculates the exponential backoff based on the number of failures and
-   * adds a 30% jitter.
+   * Adds a 30% jitter to the provided backoff.
    *
    * @private
    */
-  private static calculateBackoffMs(
-    failureCount: number,
-    useMaxDelay: boolean
-  ): number {
-    if (failureCount === 0) return 0;
-    if (useMaxDelay) return DEFAULT_BACKOFF_MAX_DELAY_MS;
-    const backoffMs =
-      DEFAULT_BACKOFF_INITIAL_DELAY_MS *
-      Math.pow(DEFAULT_BACKOFF_FACTOR, failureCount);
+  private static applyJitter(backoffMs: number): number {
+    if (backoffMs === 0) return 0;
+    // Random value in [-0.3, 0.3].
+    const jitter =
+      Math.random() *
+      DEFAULT_JITTER_FACTOR *
+      (Math.round(Math.random()) ? 1 : -1);
     return Math.min(
       DEFAULT_BACKOFF_MAX_DELAY_MS,
-      backoffMs + Math.random() * 0.3 * backoffMs
+      backoffMs + jitter * backoffMs
     );
   }
 
