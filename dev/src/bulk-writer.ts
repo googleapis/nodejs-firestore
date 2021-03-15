@@ -19,7 +19,13 @@ import * as assert from 'assert';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath, Firestore} from '.';
-import {delayExecution, MAX_RETRY_ATTEMPTS} from './backoff';
+import {
+  DEFAULT_BACKOFF_FACTOR,
+  DEFAULT_BACKOFF_INITIAL_DELAY_MS,
+  DEFAULT_BACKOFF_MAX_DELAY_MS,
+  delayExecution,
+  MAX_RETRY_ATTEMPTS,
+} from './backoff';
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
@@ -66,6 +72,12 @@ export const DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT = 500;
 export const DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT = 10000;
 
 /*!
+ * The default jitter to apply to the exponential backoff used in retries. For
+ * example, a factor of 0.3 means a 30% jitter is applied.
+ */
+export const DEFAULT_JITTER_FACTOR = 0.3;
+
+/*!
  * The rate by which to increase the capacity as specified by the 500/50/5 rule.
  */
 const RATE_LIMITER_MULTIPLIER = 1.5;
@@ -84,6 +96,8 @@ const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 class BulkWriterOperation {
   private deferred = new Deferred<WriteResult>();
   private failedAttempts = 0;
+  private lastStatus?: Status;
+  private _backoffDuration = 0;
 
   /**
    * @param ref The document reference being written to.
@@ -105,6 +119,10 @@ class BulkWriterOperation {
 
   get promise(): Promise<WriteResult> {
     return this.deferred.promise;
+  }
+
+  get backoffDuration(): number {
+    return this._backoffDuration;
   }
 
   onError(error: GoogleError): void {
@@ -131,12 +149,24 @@ class BulkWriterOperation {
       );
 
       if (shouldRetry) {
+        this.lastStatus = error.code;
+        this.updateBackoffDuration();
         this.sendFn(this);
       } else {
         this.deferred.reject(bulkWriterError);
       }
     } catch (userCallbackError) {
       this.deferred.reject(userCallbackError);
+    }
+  }
+
+  private updateBackoffDuration(): void {
+    if (this.lastStatus === Status.RESOURCE_EXHAUSTED) {
+      this._backoffDuration = DEFAULT_BACKOFF_MAX_DELAY_MS;
+    } else if (this._backoffDuration === 0) {
+      this._backoffDuration = DEFAULT_BACKOFF_INITIAL_DELAY_MS;
+    } else {
+      this._backoffDuration *= DEFAULT_BACKOFF_FACTOR;
     }
   }
 
@@ -161,7 +191,7 @@ class BulkCommitBatch extends WriteBatch {
 
   // An array of pending write operations. Only contains writes that have not
   // been resolved.
-  private pendingOps: Array<BulkWriterOperation> = [];
+  readonly pendingOps: Array<BulkWriterOperation> = [];
 
   has(documentRef: firestore.DocumentReference<unknown>): boolean {
     return this.docPaths.has(documentRef.path);
@@ -279,7 +309,7 @@ export class BulkWriter {
   private _bulkCommitBatch = new BulkCommitBatch(this.firestore);
 
   /**
-   * A pointer to the tail of all active BulkWriter applications. This pointer
+   * A pointer to the tail of all active BulkWriter operations. This pointer
    * is advanced every time a new write is enqueued.
    * @private
    */
@@ -714,33 +744,59 @@ export class BulkWriter {
     const tag = requestTag();
     const pendingBatch = this._bulkCommitBatch;
 
-    this._bulkCommitBatch = new BulkCommitBatch(this.firestore);
-
-    // Send the batch if it is under the rate limit, or schedule another
-    // attempt after the appropriate timeout.
-    const underRateLimit = this._rateLimiter.tryMakeRequest(
+    // Use the write with the longest backoff duration when determining backoff.
+    const highestBackoffDuration = pendingBatch.pendingOps.reduce((prev, cur) =>
+      prev.backoffDuration > cur.backoffDuration ? prev : cur
+    ).backoffDuration;
+    const backoffMsWithJitter = BulkWriter.applyJitter(highestBackoffDuration);
+    const delayMs = this._rateLimiter.getNextRequestDelayMs(
       pendingBatch._opCount
     );
+    const finalDelayMs = Math.max(backoffMsWithJitter, delayMs);
 
     const delayedExecution = new Deferred<void>();
-    if (underRateLimit) {
-      delayedExecution.resolve();
-    } else {
-      const delayMs = this._rateLimiter.getNextRequestDelayMs(
+    this._bulkCommitBatch = new BulkCommitBatch(this.firestore);
+
+    // Send the batch if it is does not require any delay, or schedule another
+    // attempt after the appropriate timeout.
+    if (finalDelayMs === 0) {
+      const underRateLimit = this._rateLimiter.tryMakeRequest(
         pendingBatch._opCount
       );
+      assert(
+        underRateLimit,
+        'RateLimiter should allow request if delayMs === 0'
+      );
+      delayedExecution.resolve();
+    } else {
       logger(
         'BulkWriter._sendCurrentBatch',
         tag,
-        `Backing off for ${delayMs} seconds`
+        `Backing off for ${finalDelayMs} seconds`
       );
-      delayExecution(() => delayedExecution.resolve(), delayMs);
+      delayExecution(() => delayedExecution.resolve(), finalDelayMs);
     }
 
     delayedExecution.promise.then(async () => {
+      // This should subtract rate limit, but it's not.
       await pendingBatch.bulkCommit({requestTag: tag});
       if (flush) this._sendCurrentBatch(flush);
     });
+  }
+
+  /**
+   * Adds a 30% jitter to the provided backoff.
+   *
+   * @private
+   */
+  private static applyJitter(backoffMs: number): number {
+    if (backoffMs === 0) return 0;
+    // Random value in [-0.3, 0.3].
+    const jitter = DEFAULT_JITTER_FACTOR * (Math.random() * 2 - 1);
+    return Math.min(
+      DEFAULT_BACKOFF_MAX_DELAY_MS,
+      backoffMs + jitter * backoffMs
+    );
   }
 
   /**
