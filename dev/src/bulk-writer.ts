@@ -72,8 +72,8 @@ export const DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT = 500;
 export const DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT = 10000;
 
 /*!
- * The default jitter to apply. For example, a factor of 0.3 means a 30% jitter
- * is applied.
+ * The default jitter to apply to the exponential backoff used in retries. For
+ * example, a factor of 0.3 means a 30% jitter is applied.
  */
 export const DEFAULT_JITTER_FACTOR = 0.3;
 
@@ -96,7 +96,7 @@ const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 class BulkWriterOperation {
   private deferred = new Deferred<WriteResult>();
   private _failedAttempts = 0;
-  private _lastError?: Status;
+  private lastStatus?: Status;
   private _backoffDuration = 0;
 
   /**
@@ -119,10 +119,6 @@ class BulkWriterOperation {
 
   get promise(): Promise<WriteResult> {
     return this.deferred.promise;
-  }
-
-  get lastError(): Status | undefined {
-    return this._lastError;
   }
 
   get backoffDuration(): number {
@@ -153,7 +149,7 @@ class BulkWriterOperation {
       );
 
       if (shouldRetry) {
-        this._lastError = error.code;
+        this.lastStatus = error.code;
         this.updateBackoffDuration();
         this.sendFn(this);
       } else {
@@ -165,7 +161,7 @@ class BulkWriterOperation {
   }
 
   private updateBackoffDuration(): void {
-    if (this._lastError === Status.RESOURCE_EXHAUSTED) {
+    if (this.lastStatus === Status.RESOURCE_EXHAUSTED) {
       this._backoffDuration = DEFAULT_BACKOFF_MAX_DELAY_MS;
     } else if (this._backoffDuration === 0) {
       this._backoffDuration = DEFAULT_BACKOFF_INITIAL_DELAY_MS;
@@ -748,7 +744,7 @@ export class BulkWriter {
     const tag = requestTag();
     const pendingBatch = this._bulkCommitBatch;
 
-    // Use the write with the highest failure count when determining backoff.
+    // Use the write with the longest backoff duration when determining backoff.
     const highestBackoffDuration = pendingBatch.pendingOps.reduce((prev, cur) =>
       prev.backoffDuration > cur.backoffDuration ? prev : cur
     ).backoffDuration;
@@ -756,20 +752,20 @@ export class BulkWriter {
     const delayMs = this._rateLimiter.getNextRequestDelayMs(
       pendingBatch._opCount
     );
-
-    this._bulkCommitBatch = new BulkCommitBatch(this.firestore);
+    const finalDelayMs = Math.max(backoffMsWithJitter, delayMs);
 
     const delayedExecution = new Deferred<void>();
+    this._bulkCommitBatch = new BulkCommitBatch(this.firestore);
+
     // Send the batch if it is does not require any delay, or schedule another
     // attempt after the appropriate timeout.
-    if (backoffMsWithJitter === 0 && delayMs === 0) {
+    if (finalDelayMs === 0) {
       assert(
         this._rateLimiter.tryMakeRequest(pendingBatch._opCount),
         'RateLimiter should allow request if delayMs === 0'
       );
       delayedExecution.resolve();
     } else {
-      const finalDelayMs = Math.max(backoffMsWithJitter, delayMs);
       logger(
         'BulkWriter._sendCurrentBatch',
         tag,
@@ -792,10 +788,7 @@ export class BulkWriter {
   private static applyJitter(backoffMs: number): number {
     if (backoffMs === 0) return 0;
     // Random value in [-0.3, 0.3].
-    const jitter =
-      Math.random() *
-      DEFAULT_JITTER_FACTOR *
-      (Math.round(Math.random()) ? 1 : -1);
+    const jitter = DEFAULT_JITTER_FACTOR * (Math.random() * 2 - 1);
     return Math.min(
       DEFAULT_BACKOFF_MAX_DELAY_MS,
       backoffMs + jitter * backoffMs
