@@ -760,8 +760,11 @@ export class BulkWriter {
     // Send the batch if it is does not require any delay, or schedule another
     // attempt after the appropriate timeout.
     if (finalDelayMs === 0) {
+      const underRateLimit = this._rateLimiter.tryMakeRequest(
+        pendingBatch._opCount
+      );
       assert(
-        this._rateLimiter.tryMakeRequest(pendingBatch._opCount),
+        underRateLimit,
         'RateLimiter should allow request if delayMs === 0'
       );
       delayedExecution.resolve();
@@ -775,6 +778,7 @@ export class BulkWriter {
     }
 
     delayedExecution.promise.then(async () => {
+      // This should subtract rate limit, but it's not.
       await pendingBatch.bulkCommit({requestTag: tag});
       if (flush) this._sendCurrentBatch(flush);
     });
