@@ -95,7 +95,7 @@ const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
  */
 class BulkWriterOperation {
   private deferred = new Deferred<WriteResult>();
-  private _failedAttempts = 0;
+  private failedAttempts = 0;
   private lastStatus?: Status;
   private _backoffDuration = 0;
 
@@ -126,7 +126,7 @@ class BulkWriterOperation {
   }
 
   onError(error: GoogleError): void {
-    ++this._failedAttempts;
+    ++this.failedAttempts;
 
     try {
       const bulkWriterError = new BulkWriterError(
@@ -134,7 +134,7 @@ class BulkWriterOperation {
         error.message,
         this.ref,
         this.type,
-        this._failedAttempts
+        this.failedAttempts
       );
       const shouldRetry = this.errorFn(bulkWriterError);
       logger(
