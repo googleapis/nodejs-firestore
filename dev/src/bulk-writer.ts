@@ -757,9 +757,7 @@ export class BulkWriter {
       delayedExecution.resolve();
     }
 
-    delayedExecution.promise.then(() =>
-      this._sendBatch(pendingBatch, flush)
-    );
+    delayedExecution.promise.then(() => this._sendBatch(pendingBatch, flush));
   }
 
   /**
