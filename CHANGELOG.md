@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.9.8](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.7...v4.9.8) (2021-03-15)
+
+
+### Bug Fixes
+
+* BulkWriter: add backoff on retries ([#1447](https://www.github.com/googleapis/nodejs-firestore/issues/1447)) ([f483083](https://www.github.com/googleapis/nodejs-firestore/commit/f48308344a90d2da48af99a878f0384b7b93f704))
+
 ### [4.9.7](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.6...v4.9.7) (2021-03-09)
 
 
