@@ -758,14 +758,14 @@ export class BulkWriter {
     }
 
     delayedExecution.promise.then(() =>
-      this._sendCurrentBatch(pendingBatch, flush)
+      this._sendBatch(pendingBatch, flush)
     );
   }
 
   /**
    * Sends the provided batch once the rate limiter does not require any delay.
    */
-  private async _sendCurrentBatch(
+  private async _sendBatch(
     batch: BulkCommitBatch,
     flush = false
   ): Promise<void> {
@@ -780,11 +780,11 @@ export class BulkWriter {
     } else {
       const delayMs = this._rateLimiter.getNextRequestDelayMs(batch._opCount);
       logger(
-        'BulkWriter._sendCurrentBatch',
+        'BulkWriter._sendBatch',
         tag,
         `Backing off for ${delayMs} seconds`
       );
-      delayExecution(() => this._sendCurrentBatch(batch, flush), delayMs);
+      delayExecution(() => this._sendBatch(batch, flush), delayMs);
     }
   }
 
