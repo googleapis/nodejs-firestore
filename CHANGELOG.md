@@ -4,6 +4,28 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.9.8](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.7...v4.9.8) (2021-03-15)
+
+
+### Bug Fixes
+
+* BulkWriter: add backoff on retries ([#1447](https://www.github.com/googleapis/nodejs-firestore/issues/1447)) ([f483083](https://www.github.com/googleapis/nodejs-firestore/commit/f48308344a90d2da48af99a878f0384b7b93f704))
+
+### [4.9.7](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.6...v4.9.7) (2021-03-09)
+
+
+### Bug Fixes
+
+* export v1 and v1beta1 client class types correctly ([#1445](https://www.github.com/googleapis/nodejs-firestore/issues/1445)) ([6c9319e](https://www.github.com/googleapis/nodejs-firestore/commit/6c9319ed6e2ac0dfe0fcf45853f0b38dc0784686))
+* retry BulkWriter deletes that fail with RST_STREAM error ([#1442](https://www.github.com/googleapis/nodejs-firestore/issues/1442)) ([cccf48d](https://www.github.com/googleapis/nodejs-firestore/commit/cccf48de4963403a2e77ba241641a2b77fb993da))
+
+### [4.9.6](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.5...v4.9.6) (2021-03-03)
+
+
+### Bug Fixes
+
+* set default max ratelimiter throughput to 10k for BulkWriter ([#1439](https://www.github.com/googleapis/nodejs-firestore/issues/1439)) ([c06fb3c](https://www.github.com/googleapis/nodejs-firestore/commit/c06fb3cc32f94c9058ad8e484333e688967d5a8f))
+
 ### [4.9.5](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.4...v4.9.5) (2021-03-02)
 
 

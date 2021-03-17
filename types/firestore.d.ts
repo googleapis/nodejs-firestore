@@ -330,6 +330,8 @@ declare namespace FirebaseFirestore {
      * multiple writes in parallel. Gradually ramps up writes as specified
      * by the 500/50/5 rule.
      *
+     * @see https://firebase.google.com/docs/firestore/best-practices#ramping_up_traffic
+     *
      * @param options An options object used to configure the throttling
      * behavior for the underlying BulkWriter.
      */
@@ -721,6 +723,8 @@ declare namespace FirebaseFirestore {
      * object. Setting it to `true` will use default values. You can override
      * the defaults by setting it to `false` to disable throttling, or by
      * setting the config values to enable throttling with the provided values.
+     *
+     * @see https://firebase.google.com/docs/firestore/best-practices#ramping_up_traffic
      *
      * @param initialOpsPerSecond The initial maximum number of operations per
      * second allowed by the throttler. If this field is not set, the default
@@ -2003,7 +2007,7 @@ declare namespace FirebaseFirestore {
    * @deprecated Use v1 instead.
    */
   export const v1beta1: {
-    FirestoreClient: import('./v1beta1/firestore_client').FirestoreClient;
+    FirestoreClient: typeof import('./v1beta1/firestore_client').FirestoreClient;
   };
 
   /**
@@ -2011,8 +2015,8 @@ declare namespace FirebaseFirestore {
    * API and the underlying Firestore v1 RPCs.
    */
   export const v1: {
-    FirestoreClient: import('./v1/firestore_client').FirestoreClient;
-    FirestoreAdminClient: import('./v1/firestore_admin_client').FirestoreAdminClient;
+    FirestoreClient: typeof import('./v1/firestore_client').FirestoreClient;
+    FirestoreAdminClient: typeof import('./v1/firestore_admin_client').FirestoreAdminClient;
   };
 
   /**
