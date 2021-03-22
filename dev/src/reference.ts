@@ -1521,6 +1521,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       // If no explicit ordering is specified, use the first inequality to
       // define an implicit order.
       for (const fieldFilter of this._queryOptions.fieldFilters) {
+        if (FieldPath.documentId().isEqual(fieldFilter.field)) {
+          hasDocumentId = true;
+        }
         if (fieldFilter.isInequalityFilter()) {
           fieldOrders.push(new FieldOrder(fieldFilter.field));
           break;

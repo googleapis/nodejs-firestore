@@ -49,6 +49,7 @@ import {
 } from './util/helpers';
 
 import api = google.firestore.v1;
+import protobuf = google.protobuf;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -285,9 +286,24 @@ function endAt(
   return {endAt: cursor};
 }
 
-export function queryEqualsWithParent(
+/**
+ * Returns the timestamp value for the provided readTimes, or the default
+ * readTime value used in tests if no values are provided.
+ */
+export function readTime(
+  seconds?: number,
+  nanos?: number
+): protobuf.ITimestamp {
+  if (seconds === undefined && nanos === undefined) {
+    return {seconds: '5', nanos: 6};
+  }
+  return {seconds: String(seconds), nanos: nanos};
+}
+
+export function queryEqualsWithParentAndReadTime(
   actual: api.IRunQueryRequest | undefined,
   parent: string,
+  readTime?: protobuf.ITimestamp,
   ...protoComponents: api.IStructuredQuery[]
 ): void {
   expect(actual).to.not.be.undefined;
@@ -315,6 +331,10 @@ export function queryEqualsWithParent(
     ];
   }
 
+  if (readTime) {
+    query.readTime = readTime;
+  }
+
   // 'extend' removes undefined fields in the request object. The backend
   // ignores these fields, but we need to manually strip them before we compare
   // the expected and the actual request.
@@ -326,7 +346,12 @@ export function queryEquals(
   actual: api.IRunQueryRequest | undefined,
   ...protoComponents: api.IStructuredQuery[]
 ): void {
-  queryEqualsWithParent(actual, '', ...protoComponents);
+  queryEqualsWithParentAndReadTime(
+    actual,
+    '',
+    /* readTime= */ undefined,
+    ...protoComponents
+  );
 }
 
 function bundledQueryEquals(
