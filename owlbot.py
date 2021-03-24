@@ -3,31 +3,23 @@ import synthtool.gcp as gcp
 import synthtool.languages.node as node
 import logging
 import os
+import pathlib
+import shutil
 import subprocess
 
 logging.basicConfig(level=logging.DEBUG)
 
-AUTOSYNTH_MULTIPLE_COMMITS = True
+staging = pathlib.Path(".owl-bot-staging")
 
-
-gapic_bazel = gcp.GAPICBazel()
-
-v1_admin_library = gapic_bazel.node_library(
-    "firestore-admin", "v1", proto_path="/google/firestore/admin/v1"
-)
-v1beta1_library = gapic_bazel.node_library(
-    "firestore", "v1beta1", proto_path="/google/firestore/v1beta1"
-)
-v1_library = gapic_bazel.node_library(
-    "firestore", "v1", proto_path="/google/firestore/v1"
-)
-
-# skip index, protos, package.json, and README.md
-s.copy(v1_admin_library, "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1/index.ts",
+# copy but skip index, protos, package.json, and README.md
+s._tracked_paths.add(staging / "admin" / "v1")
+s.copy(staging / "admin" / "v1", "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1/index.ts",
     "tsconfig.json", "linkinator.config.json", "webpack.config.js"])
-s.copy(v1beta1_library, "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1beta1/index.ts",
+s._tracked_paths.add(staging / "v1beta1")
+s.copy(staging / "v1beta1", "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1beta1/index.ts",
     "tsconfig.json", "linkinator.config.json", "webpack.config.js"])
-s.copy(v1_library, "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1/index.ts",
+s._tracked_paths.add(staging / "v1")
+s.copy(staging / "v1", "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1/index.ts",
     "tsconfig.json", "linkinator.config.json", "webpack.config.js"])
 
 # Fix dropping of google-cloud-resource-header
