@@ -1,0 +1,141 @@
+{
+  "schema": "1.0",
+  "comment": "This file maps proto services/RPCs to the corresponding library clients/methods",
+  "language": "typescript",
+  "protoPackage": "google.firestore.v1beta1",
+  "libraryPackage": "firestore",
+  "services": {
+    "Firestore": {
+      "clients": {
+        "grpc": {
+          "libraryClient": "FirestoreClient",
+          "rpcs": {
+            "GetDocument": {
+              "methods": [
+                "getDocument"
+              ]
+            },
+            "CreateDocument": {
+              "methods": [
+                "createDocument"
+              ]
+            },
+            "UpdateDocument": {
+              "methods": [
+                "updateDocument"
+              ]
+            },
+            "DeleteDocument": {
+              "methods": [
+                "deleteDocument"
+              ]
+            },
+            "BeginTransaction": {
+              "methods": [
+                "beginTransaction"
+              ]
+            },
+            "Commit": {
+              "methods": [
+                "commit"
+              ]
+            },
+            "Rollback": {
+              "methods": [
+                "rollback"
+              ]
+            },
+            "BatchGetDocuments": {
+              "methods": [
+                "batchGetDocuments"
+              ]
+            },
+            "RunQuery": {
+              "methods": [
+                "runQuery"
+              ]
+            },
+            "Write": {
+              "methods": [
+                "write"
+              ]
+            },
+            "Listen": {
+              "methods": [
+                "listen"
+              ]
+            },
+            "ListDocuments": {
+              "methods": [
+                "listDocuments",
+                "listDocumentsStream",
+                "listDocumentsAsync"
+              ]
+            },
+            "ListCollectionIds": {
+              "methods": [
+                "listCollectionIds",
+                "listCollectionIdsStream",
+                "listCollectionIdsAsync"
+              ]
+            }
+          }
+        },
+        "grpc-fallback": {
+          "libraryClient": "FirestoreClient",
+          "rpcs": {
+            "GetDocument": {
+              "methods": [
+                "getDocument"
+              ]
+            },
+            "CreateDocument": {
+              "methods": [
+                "createDocument"
+              ]
+            },
+            "UpdateDocument": {
+              "methods": [
+                "updateDocument"
+              ]
+            },
+            "DeleteDocument": {
+              "methods": [
+                "deleteDocument"
+              ]
+            },
+            "BeginTransaction": {
+              "methods": [
+                "beginTransaction"
+              ]
+            },
+            "Commit": {
+              "methods": [
+                "commit"
+              ]
+            },
+            "Rollback": {
+              "methods": [
+                "rollback"
+              ]
+            },
+            "ListDocuments": {
+              "methods": [
+                "listDocuments",
+                "listDocumentsStream",
+                "listDocumentsAsync"
+              ]
+            },
+            "ListCollectionIds": {
+              "methods": [
+                "listCollectionIds",
+                "listCollectionIdsStream",
+                "listCollectionIdsAsync"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
