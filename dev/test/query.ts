@@ -348,7 +348,7 @@ export function queryEquals(
 ): void {
   queryEqualsWithParentAndReadTime(
     actual,
-    '',
+    /* parent= */ '',
     /* readTime= */ undefined,
     ...protoComponents
   );

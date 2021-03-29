@@ -1515,28 +1515,21 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     }
 
     const fieldOrders = this._queryOptions.fieldOrders.slice();
-    let hasDocumentId = false;
 
+    // If no explicit ordering is specified, use the first inequality to
+    // define an implicit order.
     if (fieldOrders.length === 0) {
-      // If no explicit ordering is specified, use the first inequality to
-      // define an implicit order.
       for (const fieldFilter of this._queryOptions.fieldFilters) {
-        if (FieldPath.documentId().isEqual(fieldFilter.field)) {
-          hasDocumentId = true;
-        }
         if (fieldFilter.isInequalityFilter()) {
           fieldOrders.push(new FieldOrder(fieldFilter.field));
           break;
         }
       }
-    } else {
-      for (const fieldOrder of fieldOrders) {
-        if (FieldPath.documentId().isEqual(fieldOrder.field)) {
-          hasDocumentId = true;
-        }
-      }
     }
 
+    const hasDocumentId = !!fieldOrders.find(fieldOrder =>
+      FieldPath.documentId().isEqual(fieldOrder.field)
+    );
     if (!hasDocumentId) {
       // Add implicit sorting by name, using the last specified direction.
       const lastDirection =
