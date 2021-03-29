@@ -32,10 +32,13 @@ import {
 import {
   allDescendants,
   fieldFilters,
+  orderBy,
   queryEquals,
-  queryEqualsWithParent,
+  queryEqualsWithParentAndReadTime,
+  readTime,
   result,
   select,
+  startAt as queryStartAt,
 } from './query';
 import {
   createRequest,
@@ -147,9 +150,10 @@ describe('recursiveDelete() method:', () => {
     it('for nested collections', async () => {
       const overrides: ApiOverride = {
         runQuery: req => {
-          queryEqualsWithParent(
+          queryEqualsWithParentAndReadTime(
             req,
             'root/doc',
+            /* readTime= */ undefined,
             select('__name__'),
             allDescendants(/* kindless= */ true),
             fieldFilters(
@@ -173,9 +177,10 @@ describe('recursiveDelete() method:', () => {
     it('documents', async () => {
       const overrides: ApiOverride = {
         runQuery: req => {
-          queryEqualsWithParent(
+          queryEqualsWithParentAndReadTime(
             req,
             'root/doc',
+            /* readTime= */ undefined,
             select('__name__'),
             allDescendants(/* kindless= */ true)
           );
@@ -186,6 +191,45 @@ describe('recursiveDelete() method:', () => {
       };
       firestore = await createInstance(overrides);
       return firestore.recursiveDelete(firestore.doc('root/doc'));
+    });
+
+    it('creates retry query after stream exception with last received doc', async () => {
+      let callCount = 0;
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          callCount++;
+          if (callCount === 1) {
+            return stream(result('doc1'), new Error('failed in test'));
+          } else {
+            queryEqualsWithParentAndReadTime(
+              request,
+              /* parent= */ '',
+              readTime(),
+              select('__name__'),
+              allDescendants(/* kindless= */ true),
+              orderBy('__name__', 'ASCENDING'),
+              queryStartAt(false, {
+                referenceValue:
+                  `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc1',
+              }),
+              fieldFilters(
+                '__name__',
+                'GREATER_THAN_OR_EQUAL',
+                startAt('root'),
+                '__name__',
+                'LESS_THAN',
+                endAt('root')
+              )
+            );
+            return stream();
+          }
+        },
+        batchWrite: () => response(successResponse(1)),
+      };
+
+      const firestore = await createInstance(overrides);
+      await firestore.recursiveDelete(firestore.collection('root'));
     });
   });
 
