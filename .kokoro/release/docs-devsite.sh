@@ -38,7 +38,10 @@ fi
 
 # Generate the data for the devsite tarball
 dir="$(cd "$(dirname "$0")"; pwd)"
-. "$dir/generate-devsite.sh"
+echo "in the script"
+echo $dir
+
+. "$dir/.kokoro/release/generate-devsite.sh"
 
 npm i json@9.0.6 -g
 
