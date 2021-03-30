@@ -19,7 +19,12 @@ echo "*** pwd:"
 pwd
 echo "*** dirname"
 dirname $0
-exit 0;
+
+dir="$(cd "$(dirname "$0")"; pwd)"
+echo $dir
+
+
+
 set -eo pipefail
 
 # build jsdocs (Python is installed on the Node 10 docker image).
@@ -33,7 +38,7 @@ fi
 
 # Generate the data for the devsite tarball
 dir="$(cd "$(dirname "$0")"; pwd)"
-. "$dir/.kokoro/release/generate-devsite.sh"
+. "$dir/generate-devsite.sh"
 
 npm i json@9.0.6 -g
 
