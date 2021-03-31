@@ -2177,9 +2177,18 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
                 // query cursor. Note that we do not use backoff here. The call to
                 // `requestStream()` will backoff should the restart fail before
                 // delivering any results.
-                request = this.startAfter(lastReceivedDocument).toProto(
-                  lastReceivedDocument.readTime
-                );
+                if (this._queryOptions.kindless) {
+                  // Kindless queries are currently used exclusively for recursive
+                  // deletes. We don't need the readTime in for documents that are
+                  // going to be deleted. The backend also requires the readTime
+                  // to not be older than 270 seconds, so omitting the readTime
+                  // is easier than trying to keep it updated.
+                  request = this.startAfter(lastReceivedDocument).toProto();
+                } else {
+                  request = this.startAfter(lastReceivedDocument).toProto(
+                    lastReceivedDocument.readTime
+                  );
+                }
               }
               streamActive.resolve(/* active= */ true);
             } else {

@@ -300,10 +300,9 @@ export function readTime(
   return {seconds: String(seconds), nanos: nanos};
 }
 
-export function queryEqualsWithParentAndReadTime(
+export function queryEqualsWithParent(
   actual: api.IRunQueryRequest | undefined,
   parent: string,
-  readTime?: protobuf.ITimestamp,
   ...protoComponents: api.IStructuredQuery[]
 ): void {
   expect(actual).to.not.be.undefined;
@@ -331,10 +330,6 @@ export function queryEqualsWithParentAndReadTime(
     ];
   }
 
-  if (readTime) {
-    query.readTime = readTime;
-  }
-
   // 'extend' removes undefined fields in the request object. The backend
   // ignores these fields, but we need to manually strip them before we compare
   // the expected and the actual request.
@@ -346,12 +341,7 @@ export function queryEquals(
   actual: api.IRunQueryRequest | undefined,
   ...protoComponents: api.IStructuredQuery[]
 ): void {
-  queryEqualsWithParentAndReadTime(
-    actual,
-    /* parent= */ '',
-    /* readTime= */ undefined,
-    ...protoComponents
-  );
+  queryEqualsWithParent(actual, /* parent= */ '', ...protoComponents);
 }
 
 function bundledQueryEquals(

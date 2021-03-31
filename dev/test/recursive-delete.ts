@@ -34,8 +34,7 @@ import {
   fieldFilters,
   orderBy,
   queryEquals,
-  queryEqualsWithParentAndReadTime,
-  readTime,
+  queryEqualsWithParent,
   result,
   select,
   startAt as queryStartAt,
@@ -150,10 +149,9 @@ describe('recursiveDelete() method:', () => {
     it('for nested collections', async () => {
       const overrides: ApiOverride = {
         runQuery: req => {
-          queryEqualsWithParentAndReadTime(
+          queryEqualsWithParent(
             req,
             'root/doc',
-            /* readTime= */ undefined,
             select('__name__'),
             allDescendants(/* kindless= */ true),
             fieldFilters(
@@ -177,10 +175,9 @@ describe('recursiveDelete() method:', () => {
     it('documents', async () => {
       const overrides: ApiOverride = {
         runQuery: req => {
-          queryEqualsWithParentAndReadTime(
+          queryEqualsWithParent(
             req,
             'root/doc',
-            /* readTime= */ undefined,
             select('__name__'),
             allDescendants(/* kindless= */ true)
           );
@@ -201,10 +198,9 @@ describe('recursiveDelete() method:', () => {
           if (callCount === 1) {
             return stream(result('doc1'), new Error('failed in test'));
           } else {
-            queryEqualsWithParentAndReadTime(
+            queryEqualsWithParent(
               request,
               /* parent= */ '',
-              readTime(),
               select('__name__'),
               allDescendants(/* kindless= */ true),
               orderBy('__name__', 'ASCENDING'),
