@@ -1006,7 +1006,11 @@ export class QueryOptions<T> {
     readonly projection?: api.StructuredQuery.IProjection,
     // Whether to select all documents under `parentPath`. By default, only
     // collections that match `collectionId` are selected.
-    readonly kindless = false
+    readonly kindless = false,
+    // Whether to require consistent documents when restarting the query. By
+    // default, restarting the query uses the readTime offset of the original
+    // query.
+    readonly requireConsistency = false
   ) {}
 
   /**
@@ -1066,6 +1070,7 @@ export class QueryOptions<T> {
 
     options = options.with({
       kindless: true,
+      requireConsistency: true,
     });
     return options;
   }
@@ -1088,7 +1093,8 @@ export class QueryOptions<T> {
       coalesce(settings.limitType, this.limitType),
       coalesce(settings.offset, this.offset),
       coalesce(settings.projection, this.projection),
-      coalesce(settings.kindless, this.kindless)
+      coalesce(settings.kindless, this.kindless),
+      coalesce(settings.requireConsistency, this.requireConsistency)
     );
   }
 
@@ -1133,7 +1139,8 @@ export class QueryOptions<T> {
       deepEqual(this.startAt, other.startAt) &&
       deepEqual(this.endAt, other.endAt) &&
       deepEqual(this.projection, other.projection) &&
-      this.kindless === other.kindless
+      this.kindless === other.kindless &&
+      this.requireConsistency === other.requireConsistency
     );
   }
 }
@@ -2177,12 +2184,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
                 // query cursor. Note that we do not use backoff here. The call to
                 // `requestStream()` will backoff should the restart fail before
                 // delivering any results.
-                if (this._queryOptions.kindless) {
-                  // Kindless queries are currently used exclusively for recursive
-                  // deletes. We don't need the readTime in for documents that are
-                  // going to be deleted. The backend also requires the readTime
-                  // to not be older than 270 seconds, so omitting the readTime
-                  // is easier than trying to keep it updated.
+                if (this._queryOptions.requireConsistency) {
                   request = this.startAfter(lastReceivedDocument).toProto();
                 } else {
                   request = this.startAfter(lastReceivedDocument).toProto(
