@@ -1344,7 +1344,11 @@ export class Firestore implements firestore.Firestore {
 
     let query: Query = new Query(
       this,
-      QueryOptions.forKindlessAllDescendants(parentPath, collectionId)
+      QueryOptions.forKindlessAllDescendants(
+        parentPath,
+        collectionId,
+        /* requireConsistency= */ false
+      )
     );
 
     // Query for names only to fetch empty snapshots.
