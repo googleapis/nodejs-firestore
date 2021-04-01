@@ -1009,8 +1009,8 @@ export class QueryOptions<T> {
     readonly kindless = false,
     // Whether to require consistent documents when restarting the query. By
     // default, restarting the query uses the readTime offset of the original
-    // query.
-    readonly requireConsistency = false
+    // query to provide consistent results.
+    readonly requireConsistency = true
   ) {}
 
   /**
@@ -1057,7 +1057,8 @@ export class QueryOptions<T> {
    */
   static forKindlessAllDescendants<T = firestore.DocumentData>(
     parent: ResourcePath,
-    id: string
+    id: string,
+    requireConsistency = true
   ): QueryOptions<T> {
     let options = new QueryOptions<T>(
       parent,
@@ -1070,7 +1071,7 @@ export class QueryOptions<T> {
 
     options = options.with({
       kindless: true,
-      requireConsistency: true,
+      requireConsistency,
     });
     return options;
   }
@@ -2185,11 +2186,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
                 // `requestStream()` will backoff should the restart fail before
                 // delivering any results.
                 if (this._queryOptions.requireConsistency) {
-                  request = this.startAfter(lastReceivedDocument).toProto();
-                } else {
                   request = this.startAfter(lastReceivedDocument).toProto(
                     lastReceivedDocument.readTime
                   );
+                } else {
+                  request = this.startAfter(lastReceivedDocument).toProto();
                 }
               }
               streamActive.resolve(/* active= */ true);
