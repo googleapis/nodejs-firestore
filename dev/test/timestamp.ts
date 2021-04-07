@@ -132,6 +132,12 @@ describe('timestamps', () => {
     expect(actual.isEqual(expected)).to.be.true;
   });
 
+  it('handles decimal inputs in fromMillis()', () => {
+    const actual = Firestore.Timestamp.fromMillis(1000.1);
+    const expected = new Firestore.Timestamp(1, 100000);
+    expect(actual.isEqual(expected)).to.be.true;
+  });
+
   it('validates seconds', () => {
     expect(() => new Firestore.Timestamp(0.1, 0)).to.throw(
       'Value for argument "seconds" is not a valid integer.'
