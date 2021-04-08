@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.9.9](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.8...v4.9.9) (2021-04-07)
+
+
+### Bug Fixes
+
+* BulkWriter: apply rate limiter before sending batch ([#1451](https://www.github.com/googleapis/nodejs-firestore/issues/1451)) ([3a50f8b](https://www.github.com/googleapis/nodejs-firestore/commit/3a50f8b524a73d60c6034d4828682b9dc1b49d6e))
+* remove floating point rounding error in Timestamp.fromMillis() ([#1464](https://www.github.com/googleapis/nodejs-firestore/issues/1464)) ([97e7281](https://www.github.com/googleapis/nodejs-firestore/commit/97e728188a097760bd52099ec852a716a25b4745))
+
 ### [4.9.8](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.7...v4.9.8) (2021-03-15)
 
 
