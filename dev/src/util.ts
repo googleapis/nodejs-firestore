@@ -150,8 +150,10 @@ export function isPermanentRpcError(
   err: GoogleError,
   methodName: string
 ): boolean {
+  console.log('BCHEN retry code: ', err.code);
   if (err.code !== undefined) {
     const retryCodes = getRetryCodes(methodName);
+    console.log('retry codes:', getRetryCodes(methodName));
     return retryCodes.indexOf(err.code) === -1;
   } else {
     return false;

@@ -2169,6 +2169,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
           );
           backendStream.on('error', err => {
             backendStream.unpipe(stream);
+            console.log(
+              'BCHEN is permanent?',
+              isPermanentRpcError(err, 'runQuery')
+            );
 
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
@@ -2194,6 +2198,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
               }
               streamActive.resolve(/* active= */ true);
             } else {
+              console.error('BCHEN TEAR DOWN');
               logger(
                 'Query._stream',
                 tag,

@@ -532,7 +532,7 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('can retry failed operations with global error callback', async () => {
+  it.only('can retry failed operations with global error callback', async () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([

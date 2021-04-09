@@ -88,6 +88,8 @@ const RATE_LIMITER_MULTIPLIER = 1.5;
  */
 const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 
+const MAXIMUM_PENDING_OPERATIONS_COUNT = 100000;
+
 /**
  * Represents a single write for BulkWriter, encapsulating operation dispatch
  * and error handling.
@@ -330,6 +332,13 @@ export class BulkWriter {
    */
   readonly _rateLimiter: RateLimiter;
 
+  totalOps = 0;
+  totalEnqueuedOps = 0;
+  totalDequeuedOps = 0;
+  private _pendingOpsCount = 0;
+
+  private bufferedOperations: Array<() => void> = [];
+
   /**
    * The user-provided callback to be run every time a BulkWriter operation
    * successfully completes.
@@ -361,6 +370,7 @@ export class BulkWriter {
     private readonly firestore: Firestore,
     options?: firestore.BulkWriterOptions
   ) {
+    console.error('BCHEN BulkWriter started lets go');
     this.firestore._incrementBulkWritersCount();
     validateBulkWriterOptions(options);
 
@@ -441,7 +451,7 @@ export class BulkWriter {
     const op = this._enqueue(documentRef, 'create', bulkCommitBatch =>
       bulkCommitBatch.create(documentRef, data)
     );
-    silencePromise(op);
+    this.processOp(op);
     return op;
   }
 
@@ -481,7 +491,7 @@ export class BulkWriter {
     const op = this._enqueue(documentRef, 'delete', bulkCommitBatch =>
       bulkCommitBatch.delete(documentRef, precondition)
     );
-    silencePromise(op);
+    this.processOp(op);
     return op;
   }
 
@@ -538,7 +548,7 @@ export class BulkWriter {
     const op = this._enqueue(documentRef, 'set', bulkCommitBatch =>
       bulkCommitBatch.set(documentRef, data, options)
     );
-    silencePromise(op);
+    this.processOp(op);
     return op;
   }
 
@@ -594,7 +604,7 @@ export class BulkWriter {
     const op = this._enqueue(documentRef, 'update', bulkCommitBatch =>
       bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues)
     );
-    silencePromise(op);
+    this.processOp(op);
     return op;
   }
 
@@ -730,6 +740,23 @@ export class BulkWriter {
     }
   }
 
+  private processOp(op: Promise<WriteResult>): Promise<void> {
+    return silencePromise(op).then(() => {
+      this._pendingOpsCount--;
+      if (
+        this._pendingOpsCount < MAXIMUM_PENDING_OPERATIONS_COUNT &&
+        this.bufferedOperations.length > 0
+      ) {
+        this.totalDequeuedOps++;
+        if (this.totalDequeuedOps % 10000 === 0) {
+          console.error('total dequeued ops', this.totalDequeuedOps);
+        }
+        const nextOp = this.bufferedOperations.shift()!;
+        nextOp();
+      }
+    });
+  }
+
   /**
    * Sends the current batch and resets `this._bulkCommitBatch`.
    *
@@ -810,6 +837,10 @@ export class BulkWriter {
     type: 'create' | 'set' | 'update' | 'delete',
     enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void
   ): Promise<WriteResult> {
+    this.totalOps++;
+    if (this.totalOps % 10000 === 0) {
+      console.error('bulkWriter totalOps: ', this.totalOps);
+    }
     const bulkWriterOp = new BulkWriterOperation(
       ref,
       type,
@@ -817,7 +848,18 @@ export class BulkWriter {
       this._errorFn.bind(this),
       this._successFn.bind(this)
     );
-    this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
+    if (this._pendingOpsCount < MAXIMUM_PENDING_OPERATIONS_COUNT) {
+      this._pendingOpsCount++;
+      this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
+    } else {
+      this.totalEnqueuedOps++;
+      if (this.totalEnqueuedOps % 10000 === 0) {
+        console.log('total enqueued ops', this.totalEnqueuedOps);
+      }
+      this.bufferedOperations.push(() =>
+        this._sendFn(enqueueOnBatchCallback, bulkWriterOp)
+      );
+    }
     return bulkWriterOp.promise;
   }
 

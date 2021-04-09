@@ -10,7 +10,8 @@
         "deadline_exceeded_internal_unavailable": [
           "DEADLINE_EXCEEDED",
           "INTERNAL",
-          "UNAVAILABLE"
+          "UNAVAILABLE",
+          "RESOURCE_EXHAUSTED"
         ],
         "unavailable": [
           "UNAVAILABLE"
@@ -73,7 +74,7 @@
           "retry_params_name": "default"
         },
         "RunQuery": {
-          "timeout_millis": 300000,
+          "timeout_millis": 200000,
           "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },

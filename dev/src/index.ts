@@ -1308,12 +1308,16 @@ export class Firestore implements firestore.Firestore {
         err.code = Status.UNAVAILABLE;
         err.stack = 'Failed to fetch children documents: ' + err.stack;
         lastError = err;
+        console.error('BCHEN stream error', err);
         onStreamEnd();
       })
       .on('data', (snap: QueryDocumentSnapshot) => {
         writer.delete(snap.ref).catch(err => incrementErrorCount(err));
       })
-      .on('end', () => onStreamEnd());
+      .on('end', () => {
+        console.error('BCHEN stream end');
+        onStreamEnd();
+      });
 
     return resultDeferred.promise;
   }
