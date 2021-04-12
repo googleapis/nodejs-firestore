@@ -107,9 +107,7 @@ export class Timestamp implements firestore.Timestamp {
    */
   static fromMillis(milliseconds: number): Timestamp {
     const seconds = Math.floor(milliseconds / 1000);
-    const nanos = Math.floor(
-      milliseconds * MS_TO_NANOS - seconds * 1000 * MS_TO_NANOS
-    );
+    const nanos = Math.floor((milliseconds - seconds * 1000) * MS_TO_NANOS);
     return new Timestamp(seconds, nanos);
   }
 
