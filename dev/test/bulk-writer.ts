@@ -502,6 +502,48 @@ describe('BulkWriter', () => {
     });
   });
 
+  it('buffers subsequent operations after reaching maximum pending op count', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([
+          setOp('doc1', 'bar'),
+          setOp('doc2', 'bar'),
+          setOp('doc3', 'bar'),
+        ]),
+        response: mergeResponses([
+          successResponse(1),
+          successResponse(2),
+          successResponse(3),
+        ]),
+      },
+      {
+        request: createRequest([setOp('doc4', 'bar'), setOp('doc5', 'bar')]),
+        response: mergeResponses([successResponse(4), successResponse(5)]),
+      },
+    ]);
+    bulkWriter._setMaxPendingOpCount(3);
+    bulkWriter
+      .set(firestore.doc('collectionId/doc1'), {foo: 'bar'})
+      .then(incrementOpCount);
+    bulkWriter
+      .set(firestore.doc('collectionId/doc2'), {foo: 'bar'})
+      .then(incrementOpCount);
+    bulkWriter
+      .set(firestore.doc('collectionId/doc3'), {foo: 'bar'})
+      .then(incrementOpCount);
+    bulkWriter
+      .set(firestore.doc('collectionId/doc4'), {foo: 'bar'})
+      .then(incrementOpCount);
+    expect(bulkWriter._getBufferedOperationsCount()).to.equal(1);
+    bulkWriter
+      .set(firestore.doc('collectionId/doc5'), {foo: 'bar'})
+      .then(incrementOpCount);
+    expect(bulkWriter._getBufferedOperationsCount()).to.equal(2);
+    return bulkWriter.close().then(async () => {
+      verifyOpCount(5);
+    });
+  });
+
   it('runs the success handler', async () => {
     const bulkWriter = await instantiateInstance([
       {
