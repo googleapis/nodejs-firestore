@@ -861,9 +861,7 @@ export class BulkWriter {
 
     // Advance the `_lastOp` pointer. This ensures that `_lastOp` only resolves
     // when both the previous and the current write resolves.
-    this._lastOp = this._lastOp.then(() => {
-      return silencePromise(bulkWriterOp.promise);
-    });
+    this._lastOp = this._lastOp.then(() => silencePromise(bulkWriterOp.promise));
 
     // Schedule the operation if the BulkWriter has fewer than the maximum
     // number of allowed pending operations, or add the operation to the
