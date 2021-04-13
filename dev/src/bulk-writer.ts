@@ -869,9 +869,11 @@ export class BulkWriter {
     // number of allowed pending operations, or add the operation to the
     // buffer.
     if (this._pendingOpsCount < this._maxPendingOpCount) {
+      this._pendingOpsCount++;
       this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
     } else {
       this._bufferedOperations.push(() => {
+        this._pendingOpsCount++;
         this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
       });
     }
@@ -881,10 +883,12 @@ export class BulkWriter {
     // enqueued before the next batch is scheduled in `_sendBatch()`.
     return bulkWriterOp.promise
       .then(res => {
+        this._pendingOpsCount--;
         this._processBufferedOps();
         return res;
       })
       .catch(err => {
+        this._pendingOpsCount--;
         this._processBufferedOps();
         throw err;
       });
@@ -896,7 +900,6 @@ export class BulkWriter {
    * @private
    */
   private _processBufferedOps(): void {
-    this._pendingOpsCount--;
     if (
       this._pendingOpsCount < this._maxPendingOpCount &&
       this._bufferedOperations.length > 0
@@ -916,7 +919,6 @@ export class BulkWriter {
     enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
     op: BulkWriterOperation
   ): void {
-    this._pendingOpsCount++;
     if (this._bulkCommitBatch.has(op.ref)) {
       // Create a new batch since the backend doesn't support batches with two
       // writes to the same document.
