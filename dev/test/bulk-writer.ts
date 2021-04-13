@@ -519,8 +519,6 @@ describe('BulkWriter', () => {
         response: mergeResponses([successResponse(4), successResponse(5)]),
       },
     ]);
-    // eslint-disable-next-line no-console
-    console.log('BCHEN start buffer test');
     bulkWriter._setMaxPendingOpCount(3);
     bulkWriter
       .set(firestore.doc('collectionId/doc1'), {foo: 'bar'})
@@ -540,8 +538,6 @@ describe('BulkWriter', () => {
       .then(incrementOpCount);
     expect(bulkWriter._getBufferedOperationsCount()).to.equal(2);
     return bulkWriter.close().then(async () => {
-      // eslint-disable-next-line no-console
-      console.log('close complete');
       verifyOpCount(5);
     });
   });

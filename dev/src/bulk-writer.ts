@@ -90,10 +90,11 @@ const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 
 /*!
  * The default maximum number of pending operations that can be enqueued onto a
- * BulkWriter instance. BulkWriter buffers additional writes after this many
- * pending operations in order to avoiding going OOM.
+ * BulkWriter instance. An operation is considered pending if BulkWriter has
+ * sent it via RPC and is awaiting the result. BulkWriter buffers additional
+ * writes after this many pending operations in order to avoiding going OOM.
  */
-const DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT = 10000;
+const DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT = 500;
 
 /**
  * Represents a single write for BulkWriter, encapsulating operation dispatch
@@ -339,6 +340,8 @@ export class BulkWriter {
 
   /**
    * The number of pending operations enqueued on this BulkWriter instance.
+   * An operation is considered pending if BulkWriter has sent it via RPC and
+   * is awaiting the result.
    * @private
    */
   private _pendingOpsCount = 0;
@@ -866,11 +869,9 @@ export class BulkWriter {
     // number of allowed pending operations, or add the operation to the
     // buffer.
     if (this._pendingOpsCount < this._maxPendingOpCount) {
-      this._pendingOpsCount++;
       this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
     } else {
       this._bufferedOperations.push(() => {
-        this._pendingOpsCount++;
         this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
       });
     }
@@ -915,6 +916,7 @@ export class BulkWriter {
     enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
     op: BulkWriterOperation
   ): void {
+    this._pendingOpsCount++;
     if (this._bulkCommitBatch.has(op.ref)) {
       // Create a new batch since the backend doesn't support batches with two
       // writes to the same document.
