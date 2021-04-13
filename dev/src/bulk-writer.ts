@@ -88,6 +88,14 @@ const RATE_LIMITER_MULTIPLIER = 1.5;
  */
 const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 
+/*!
+ * The default maximum number of pending operations that can be enqueued onto a
+ * BulkWriter instance. An operation is considered pending if BulkWriter has
+ * sent it via RPC and is awaiting the result. BulkWriter buffers additional
+ * writes after this many pending operations in order to avoiding going OOM.
+ */
+const DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT = 500;
+
 /**
  * Represents a single write for BulkWriter, encapsulating operation dispatch
  * and error handling.
@@ -329,6 +337,39 @@ export class BulkWriter {
    * @private
    */
   readonly _rateLimiter: RateLimiter;
+
+  /**
+   * The number of pending operations enqueued on this BulkWriter instance.
+   * An operation is considered pending if BulkWriter has sent it via RPC and
+   * is awaiting the result.
+   * @private
+   */
+  private _pendingOpsCount = 0;
+
+  /**
+   * An array containing buffered BulkWriter operations after the maximum number
+   * of pending operations has been enqueued.
+   * @private
+   */
+  private _bufferedOperations: Array<() => void> = [];
+
+  // Visible for testing.
+  _getBufferedOperationsCount(): number {
+    return this._bufferedOperations.length;
+  }
+
+  /**
+   * The maximum number of pending operations that can be enqueued onto this
+   * BulkWriter instance. Once the this number of writes have been enqueued,
+   * subsequent writes are buffered.
+   * @private
+   */
+  private _maxPendingOpCount = DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT;
+
+  // Visible for testing.
+  _setMaxPendingOpCount(newMax: number): void {
+    this._maxPendingOpCount = newMax;
+  }
 
   /**
    * The user-provided callback to be run every time a BulkWriter operation
@@ -817,8 +858,55 @@ export class BulkWriter {
       this._errorFn.bind(this),
       this._successFn.bind(this)
     );
-    this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
-    return bulkWriterOp.promise;
+
+    // Advance the `_lastOp` pointer. This ensures that `_lastOp` only resolves
+    // when both the previous and the current write resolves.
+    this._lastOp = this._lastOp.then(() =>
+      silencePromise(bulkWriterOp.promise)
+    );
+
+    // Schedule the operation if the BulkWriter has fewer than the maximum
+    // number of allowed pending operations, or add the operation to the
+    // buffer.
+    if (this._pendingOpsCount < this._maxPendingOpCount) {
+      this._pendingOpsCount++;
+      this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
+    } else {
+      this._bufferedOperations.push(() => {
+        this._pendingOpsCount++;
+        this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
+      });
+    }
+
+    // Chain the BulkWriter operation promise with the buffer processing logic
+    // in order to ensure that it runs and that subsequent operations are
+    // enqueued before the next batch is scheduled in `_sendBatch()`.
+    return bulkWriterOp.promise
+      .then(res => {
+        this._pendingOpsCount--;
+        this._processBufferedOps();
+        return res;
+      })
+      .catch(err => {
+        this._pendingOpsCount--;
+        this._processBufferedOps();
+        throw err;
+      });
+  }
+
+  /**
+   * Manages the pending operation counter and schedules the next BulkWriter
+   * operation if we're under the maximum limit.
+   * @private
+   */
+  private _processBufferedOps(): void {
+    if (
+      this._pendingOpsCount < this._maxPendingOpCount &&
+      this._bufferedOperations.length > 0
+    ) {
+      const nextOp = this._bufferedOperations.shift()!;
+      nextOp();
+    }
   }
 
   /**
@@ -837,12 +925,8 @@ export class BulkWriter {
       this._scheduleCurrentBatch();
     }
 
-    // Run the operation on the current batch and advance the `_lastOp` pointer.
-    // This ensures that `_lastOp` only resolves when both the previous and the
-    // current write resolves.
     enqueueOnBatchCallback(this._bulkCommitBatch);
     this._bulkCommitBatch.processLastOperation(op);
-    this._lastOp = this._lastOp.then(() => silencePromise(op.promise));
 
     if (this._bulkCommitBatch._opCount === this._maxBatchSize) {
       this._scheduleCurrentBatch();
