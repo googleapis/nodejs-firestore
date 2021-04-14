@@ -7,15 +7,18 @@
           "DEADLINE_EXCEEDED",
           "UNAVAILABLE"
         ],
-        "deadline_exceeded_internal_unavailable": [
+        "deadline_exceeded_resource_exhausted_internal_unavailable": [
           "DEADLINE_EXCEEDED",
+          "RESOURCE_EXHAUSTED",
           "INTERNAL",
           "UNAVAILABLE"
         ],
-        "unavailable": [
+        "resource_exhausted_unavailable": [
+          "RESOURCE_EXHAUSTED",
           "UNAVAILABLE"
         ],
-        "aborted_unavailable": [
+        "resource_exhausted_aborted_unavailable": [
+          "RESOURCE_EXHAUSTED",
           "ABORTED",
           "UNAVAILABLE"
         ]
@@ -34,52 +37,52 @@
       "methods": {
         "GetDocument": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
         "ListDocuments": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
         "UpdateDocument": {
           "timeout_millis": 60000,
-          "retry_codes_name": "unavailable",
+          "retry_codes_name": "resource_exhausted_unavailable",
           "retry_params_name": "default"
         },
         "DeleteDocument": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
         "BatchGetDocuments": {
           "timeout_millis": 300000,
-          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
         "BeginTransaction": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
         "Commit": {
           "timeout_millis": 60000,
-          "retry_codes_name": "unavailable",
+          "retry_codes_name": "resource_exhausted_unavailable",
           "retry_params_name": "default"
         },
         "Rollback": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
         "RunQuery": {
           "timeout_millis": 300000,
-          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
         "PartitionQuery": {
           "timeout_millis": 300000,
-          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
         "Write": {
@@ -89,22 +92,22 @@
         },
         "Listen": {
           "timeout_millis": 86400000,
-          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
         "ListCollectionIds": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
         "BatchWrite": {
           "timeout_millis": 60000,
-          "retry_codes_name": "aborted_unavailable",
+          "retry_codes_name": "resource_exhausted_aborted_unavailable",
           "retry_params_name": "default"
         },
         "CreateDocument": {
           "timeout_millis": 60000,
-          "retry_codes_name": "unavailable",
+          "retry_codes_name": "resource_exhausted_unavailable",
           "retry_params_name": "default"
         }
       }

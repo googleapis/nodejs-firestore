@@ -2535,22 +2535,6 @@
                         }
                       ]
                     },
-                    "CreateDocument": {
-                      "requestType": "CreateDocumentRequest",
-                      "responseType": "Document",
-                      "options": {
-                        "(google.api.http).post": "/v1beta1/{parent=projects/*/databases/*/documents/**}/{collection_id}",
-                        "(google.api.http).body": "document"
-                      },
-                      "parsedOptions": [
-                        {
-                          "(google.api.http)": {
-                            "post": "/v1beta1/{parent=projects/*/databases/*/documents/**}/{collection_id}",
-                            "body": "document"
-                          }
-                        }
-                      ]
-                    },
                     "UpdateDocument": {
                       "requestType": "UpdateDocumentRequest",
                       "responseType": "Document",
@@ -2689,6 +2673,28 @@
                         }
                       ]
                     },
+                    "PartitionQuery": {
+                      "requestType": "PartitionQueryRequest",
+                      "responseType": "PartitionQueryResponse",
+                      "options": {
+                        "(google.api.http).post": "/v1beta1/{parent=projects/*/databases/*/documents}:partitionQuery",
+                        "(google.api.http).body": "*",
+                        "(google.api.http).additional_bindings.post": "/v1beta1/{parent=projects/*/databases/*/documents/*/**}:partitionQuery",
+                        "(google.api.http).additional_bindings.body": "*"
+                      },
+                      "parsedOptions": [
+                        {
+                          "(google.api.http)": {
+                            "post": "/v1beta1/{parent=projects/*/databases/*/documents}:partitionQuery",
+                            "body": "*",
+                            "additional_bindings": {
+                              "post": "/v1beta1/{parent=projects/*/databases/*/documents/*/**}:partitionQuery",
+                              "body": "*"
+                            }
+                          }
+                        }
+                      ]
+                    },
                     "Write": {
                       "requestType": "WriteRequest",
                       "requestStream": true,
@@ -2748,6 +2754,38 @@
                         },
                         {
                           "(google.api.method_signature)": "parent"
+                        }
+                      ]
+                    },
+                    "BatchWrite": {
+                      "requestType": "BatchWriteRequest",
+                      "responseType": "BatchWriteResponse",
+                      "options": {
+                        "(google.api.http).post": "/v1beta1/{database=projects/*/databases/*}/documents:batchWrite",
+                        "(google.api.http).body": "*"
+                      },
+                      "parsedOptions": [
+                        {
+                          "(google.api.http)": {
+                            "post": "/v1beta1/{database=projects/*/databases/*}/documents:batchWrite",
+                            "body": "*"
+                          }
+                        }
+                      ]
+                    },
+                    "CreateDocument": {
+                      "requestType": "CreateDocumentRequest",
+                      "responseType": "Document",
+                      "options": {
+                        "(google.api.http).post": "/v1beta1/{parent=projects/*/databases/*/documents/**}/{collection_id}",
+                        "(google.api.http).body": "document"
+                      },
+                      "parsedOptions": [
+                        {
+                          "(google.api.http)": {
+                            "post": "/v1beta1/{parent=projects/*/databases/*/documents/**}/{collection_id}",
+                            "body": "document"
+                          }
                         }
                       ]
                     }
@@ -3126,6 +3164,53 @@
                     }
                   }
                 },
+                "PartitionQueryRequest": {
+                  "oneofs": {
+                    "queryType": {
+                      "oneof": [
+                        "structuredQuery"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "parent": {
+                      "type": "string",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
+                    },
+                    "structuredQuery": {
+                      "type": "StructuredQuery",
+                      "id": 2
+                    },
+                    "partitionCount": {
+                      "type": "int64",
+                      "id": 3
+                    },
+                    "pageToken": {
+                      "type": "string",
+                      "id": 4
+                    },
+                    "pageSize": {
+                      "type": "int32",
+                      "id": 5
+                    }
+                  }
+                },
+                "PartitionQueryResponse": {
+                  "fields": {
+                    "partitions": {
+                      "rule": "repeated",
+                      "type": "Cursor",
+                      "id": 1
+                    },
+                    "nextPageToken": {
+                      "type": "string",
+                      "id": 2
+                    }
+                  }
+                },
                 "WriteRequest": {
                   "fields": {
                     "database": {
@@ -3383,6 +3468,41 @@
                     }
                   }
                 },
+                "BatchWriteRequest": {
+                  "fields": {
+                    "database": {
+                      "type": "string",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
+                    },
+                    "writes": {
+                      "rule": "repeated",
+                      "type": "Write",
+                      "id": 2
+                    },
+                    "labels": {
+                      "keyType": "string",
+                      "type": "string",
+                      "id": 3
+                    }
+                  }
+                },
+                "BatchWriteResponse": {
+                  "fields": {
+                    "writeResults": {
+                      "rule": "repeated",
+                      "type": "WriteResult",
+                      "id": 1
+                    },
+                    "status": {
+                      "rule": "repeated",
+                      "type": "google.rpc.Status",
+                      "id": 2
+                    }
+                  }
+                },
                 "StructuredQuery": {
                   "fields": {
                     "select": {
@@ -3503,9 +3623,11 @@
                             "GREATER_THAN": 3,
                             "GREATER_THAN_OR_EQUAL": 4,
                             "EQUAL": 5,
+                            "NOT_EQUAL": 6,
                             "ARRAY_CONTAINS": 7,
                             "IN": 8,
-                            "ARRAY_CONTAINS_ANY": 9
+                            "ARRAY_CONTAINS_ANY": 9,
+                            "NOT_IN": 10
                           }
                         }
                       }
@@ -3533,8 +3655,18 @@
                           "values": {
                             "OPERATOR_UNSPECIFIED": 0,
                             "IS_NAN": 2,
-                            "IS_NULL": 3
+                            "IS_NULL": 3,
+                            "IS_NOT_NAN": 4,
+                            "IS_NOT_NULL": 5
                           }
+                        }
+                      }
+                    },
+                    "FieldReference": {
+                      "fields": {
+                        "fieldPath": {
+                          "type": "string",
+                          "id": 2
                         }
                       }
                     },
@@ -3546,14 +3678,6 @@
                         },
                         "direction": {
                           "type": "Direction",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "FieldReference": {
-                      "fields": {
-                        "fieldPath": {
-                          "type": "string",
                           "id": 2
                         }
                       }
@@ -3615,6 +3739,11 @@
                     "updateMask": {
                       "type": "DocumentMask",
                       "id": 3
+                    },
+                    "updateTransforms": {
+                      "rule": "repeated",
+                      "type": "DocumentTransform.FieldTransform",
+                      "id": 7
                     },
                     "currentDocument": {
                       "type": "Precondition",
