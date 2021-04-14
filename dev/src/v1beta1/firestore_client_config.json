@@ -6,11 +6,6 @@
         "idempotent": [
           "DEADLINE_EXCEEDED",
           "UNAVAILABLE"
-        ],
-        "deadline_exceeded_resource_exhausted_unavailable": [
-          "DEADLINE_EXCEEDED",
-          "RESOURCE_EXHAUSTED",
-          "UNAVAILABLE"
         ]
       },
       "retry_params": {
@@ -27,17 +22,12 @@
       "methods": {
         "GetDocument": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_resource_exhausted_unavailable",
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "ListDocuments": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_resource_exhausted_unavailable",
-          "retry_params_name": "default"
-        },
-        "CreateDocument": {
-          "timeout_millis": 60000,
-          "retry_codes_name": "non_idempotent",
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "UpdateDocument": {
@@ -47,17 +37,17 @@
         },
         "DeleteDocument": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_resource_exhausted_unavailable",
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "BatchGetDocuments": {
           "timeout_millis": 300000,
-          "retry_codes_name": "deadline_exceeded_resource_exhausted_unavailable",
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "BeginTransaction": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_resource_exhausted_unavailable",
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "Commit": {
@@ -67,12 +57,16 @@
         },
         "Rollback": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_resource_exhausted_unavailable",
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "RunQuery": {
           "timeout_millis": 300000,
-          "retry_codes_name": "deadline_exceeded_resource_exhausted_unavailable",
+          "retry_codes_name": "idempotent",
+          "retry_params_name": "default"
+        },
+        "PartitionQuery": {
+          "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
         "Write": {
@@ -82,12 +76,21 @@
         },
         "Listen": {
           "timeout_millis": 86400000,
-          "retry_codes_name": "deadline_exceeded_resource_exhausted_unavailable",
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "ListCollectionIds": {
           "timeout_millis": 60000,
-          "retry_codes_name": "deadline_exceeded_resource_exhausted_unavailable",
+          "retry_codes_name": "idempotent",
+          "retry_params_name": "default"
+        },
+        "BatchWrite": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "CreateDocument": {
+          "timeout_millis": 60000,
+          "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         }
       }
