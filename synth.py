@@ -158,6 +158,7 @@ s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*", ".github/CODEOWNER
 # Remove auto-generated packaging tests
 os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
 
+node.install()
 os.chdir("dev")
 node.compile_protos()
 os.chdir("protos")
@@ -165,7 +166,6 @@ os.unlink('protos.js')
 os.unlink('protos.d.ts')
 subprocess.run('./update.sh', shell=True)
 os.chdir("../../")
-node.install()
 
 # Copy types into types/
 os.system("cp build/src/v1/firestore*.d.ts types/v1")
