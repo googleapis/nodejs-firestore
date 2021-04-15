@@ -4,6 +4,18 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.10.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.9...v4.10.0) (2021-04-15)
+
+
+### Features
+
+* add buffering layer to BulkWriter ([#1470](https://www.github.com/googleapis/nodejs-firestore/issues/1470)) ([9cc9548](https://www.github.com/googleapis/nodejs-firestore/commit/9cc954849c74199f01e52b24fc7ba045d5b56be4))
+
+
+### Bug Fixes
+
+* use BigInt when calculating nanos in Timestamp.fromMillis() ([#1468](https://www.github.com/googleapis/nodejs-firestore/issues/1468)) ([cf1949f](https://www.github.com/googleapis/nodejs-firestore/commit/cf1949f99f840d1e34edfa31a223418abdf48372))
+
 ### [4.9.9](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.8...v4.9.9) (2021-04-07)
 
 
