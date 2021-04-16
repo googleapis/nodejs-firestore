@@ -203,7 +203,7 @@ export function orderBy(
   return {orderBy};
 }
 
-function limit(n: number): api.IStructuredQuery {
+export function limit(n: number): api.IStructuredQuery {
   return {
     limit: {
       value: n,

@@ -156,6 +156,22 @@ const DEFAULT_MAX_IDLE_CHANNELS = 1;
  */
 const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
 
+/*!
+ * The query limit used for recursiveDelete() when fetching all descendants of
+ * the specified reference to delete. This is done to prevent the query stream
+ * from streaming documents faster than Firestore can delete.
+ */
+export const RECURSIVE_DELETE_QUERY_LIMIT = 5000;
+
+/**
+ * The number of pending BulkWriter operations at which recursiveDelete()
+ * starts the next limit query to fetch descendants. By starting the query
+ * while there are pending operations, Firestore can improve BulkWriter
+ * throughput. This helps prevent BulkWriter from idling while Firestore
+ * fetches the next query.
+ */
+const RECURSIVE_DELETE_PENDING_OP_LIMIT = 1000;
+
 /**
  * Datastore allowed numeric IDs where Firestore only allows strings. Numeric
  * IDs are exposed to Firestore as __idNUM__, so this is the lowest possible
@@ -1265,19 +1281,95 @@ export class Firestore implements firestore.Firestore {
 
     const writer = bulkWriter ?? this.getBulkWriter();
     writer._verifyNotClosed();
-    const docStream = this._getAllDescendants(
-      ref instanceof CollectionReference
-        ? (ref as CollectionReference<unknown>)
-        : (ref as DocumentReference<unknown>)
-    );
+
+    // A deferred promise that resolves when the recursive delete operation
+    // is completed.
     const resultDeferred = new Deferred<void>();
+
     let errorCount = 0;
     let lastError: GoogleError | BulkWriterError | undefined;
     const incrementErrorCount = (err: Error): void => {
       errorCount++;
       lastError = err;
     };
-    const onStreamEnd = (): void => {
+
+    // Whether all descendants for this query have been fetched.
+    let allDescendantsFetched = false;
+
+    // Whether a query stream is currently in progress. Only one stream can be
+    // run at a time.
+    let streamInProgress = false;
+
+    // The last document snapshot returned by the stream. Used to set the
+    // startAfter() field in the subsequent stream.
+    let lastDocumentSnap: QueryDocumentSnapshot;
+
+    // The number of pending BulkWriter operations. Used to determine when the
+    // next query can be run.
+    let pendingPromiseCount = 0;
+
+    // Deletes the provided reference, and starts the next stream if conditions
+    // are met.
+    const deleteRef = (docRef: DocumentReference): void => {
+      pendingPromiseCount++;
+      writer
+        .delete(docRef)
+        .then(() => pendingPromiseCount--)
+        .catch(err => {
+          pendingPromiseCount--;
+          incrementErrorCount(err);
+        })
+        .then(() => {
+          // We wait until the previous stream has ended in order to sure the
+          // startAfter document is correct. Starting the next stream while
+          // there are pending operations allows Firestore to maximize
+          // BulkWriter throughput.
+          if (
+            !allDescendantsFetched &&
+            !streamInProgress &&
+            pendingPromiseCount < RECURSIVE_DELETE_PENDING_OP_LIMIT
+          ) {
+            const nextDocStream = this._getAllDescendants(
+              ref instanceof CollectionReference
+                ? (ref as CollectionReference<unknown>)
+                : (ref as DocumentReference<unknown>),
+              /* startAfter= */ lastDocumentSnap
+            );
+            setupStream(nextDocStream);
+          }
+        });
+    };
+
+    // Attaches event handlers to the query stream.
+    const setupStream = (stream: NodeJS.ReadableStream): void => {
+      streamInProgress = true;
+      let streamedDocsCount = 0;
+      stream
+        .on('error', err => {
+          err.code = Status.UNAVAILABLE;
+          err.stack = 'Failed to fetch children documents: ' + err.stack;
+          lastError = err;
+          onQueryEnd();
+        })
+        .on('data', (snap: QueryDocumentSnapshot) => {
+          streamedDocsCount++;
+          lastDocumentSnap = snap;
+          deleteRef(snap.ref);
+        })
+        .on('end', () => {
+          streamInProgress = false;
+          // If there are fewer than the number of documents specified in the
+          // limit() field, we know that the query is complete.
+          if (streamedDocsCount < RECURSIVE_DELETE_QUERY_LIMIT) {
+            onQueryEnd();
+          }
+        });
+    };
+
+    // Called when all descendants of the provided reference have been streamed
+    // or if a permanent error occurs during the stream.
+    const onQueryEnd = (): void => {
+      allDescendantsFetched = true;
       if (ref instanceof DocumentReference) {
         writer.delete(ref).catch(err => incrementErrorCount(err));
       }
@@ -1303,17 +1395,12 @@ export class Firestore implements firestore.Firestore {
       });
     };
 
-    docStream
-      .on('error', err => {
-        err.code = Status.UNAVAILABLE;
-        err.stack = 'Failed to fetch children documents: ' + err.stack;
-        lastError = err;
-        onStreamEnd();
-      })
-      .on('data', (snap: QueryDocumentSnapshot) => {
-        writer.delete(snap.ref).catch(err => incrementErrorCount(err));
-      })
-      .on('end', () => onStreamEnd());
+    const docStream = this._getAllDescendants(
+      ref instanceof CollectionReference
+        ? (ref as CollectionReference<unknown>)
+        : (ref as DocumentReference<unknown>)
+    );
+    setupStream(docStream);
 
     return resultDeferred.promise;
   }
@@ -1325,7 +1412,8 @@ export class Firestore implements firestore.Firestore {
    * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
    */
   private _getAllDescendants(
-    ref: CollectionReference<unknown> | DocumentReference<unknown>
+    ref: CollectionReference<unknown> | DocumentReference<unknown>,
+    startAfter?: QueryDocumentSnapshot
   ): NodeJS.ReadableStream {
     // The parent is the closest ancestor document to the location we're
     // deleting. If we are deleting a document, the parent is the path of that
@@ -1352,7 +1440,9 @@ export class Firestore implements firestore.Firestore {
     );
 
     // Query for names only to fetch empty snapshots.
-    query = query.select(FieldPath.documentId());
+    query = query
+      .select(FieldPath.documentId())
+      .limit(RECURSIVE_DELETE_QUERY_LIMIT);
 
     if (ref instanceof CollectionReference) {
       // To find all descendants of a collection reference, we need to use a
@@ -1366,6 +1456,10 @@ export class Firestore implements firestore.Firestore {
       query = query
         .where(FieldPath.documentId(), '>=', startAt)
         .where(FieldPath.documentId(), '<', endAt);
+    }
+
+    if (startAfter) {
+      query = query.startAfter(startAfter);
     }
 
     return query.stream();

@@ -32,6 +32,7 @@ import {
 import {
   allDescendants,
   fieldFilters,
+  limit,
   orderBy,
   queryEquals,
   queryEqualsWithParent,
@@ -46,7 +47,11 @@ import {
   mergeResponses,
   successResponse,
 } from './bulk-writer';
-import {MAX_REQUEST_RETRIES, REFERENCE_NAME_MIN_ID} from '../src';
+import {
+  MAX_REQUEST_RETRIES,
+  RECURSIVE_DELETE_QUERY_LIMIT,
+  REFERENCE_NAME_MIN_ID,
+} from '../src';
 
 import api = google.firestore.v1;
 
@@ -137,7 +142,8 @@ describe('recursiveDelete() method:', () => {
               '__name__',
               'LESS_THAN',
               endAt('root')
-            )
+            ),
+            limit(RECURSIVE_DELETE_QUERY_LIMIT)
           );
           return stream();
         },
@@ -161,7 +167,8 @@ describe('recursiveDelete() method:', () => {
               '__name__',
               'LESS_THAN',
               endAt('root/doc/nestedCol')
-            )
+            ),
+            limit(RECURSIVE_DELETE_QUERY_LIMIT)
           );
           return stream();
         },
@@ -179,7 +186,8 @@ describe('recursiveDelete() method:', () => {
             req,
             'root/doc',
             select('__name__'),
-            allDescendants(/* kindless= */ true)
+            allDescendants(/* kindless= */ true),
+            limit(RECURSIVE_DELETE_QUERY_LIMIT)
           );
           return stream();
         },
@@ -216,7 +224,8 @@ describe('recursiveDelete() method:', () => {
                 '__name__',
                 'LESS_THAN',
                 endAt('root')
-              )
+              ),
+              limit(RECURSIVE_DELETE_QUERY_LIMIT)
             );
             return stream();
           }
@@ -226,6 +235,82 @@ describe('recursiveDelete() method:', () => {
 
       const firestore = await createInstance(overrides);
       await firestore.recursiveDelete(firestore.collection('root'));
+    });
+
+    it('creates a second query with the correct startAfter', async () => {
+      const firstStream = Array.from(
+        Array(RECURSIVE_DELETE_QUERY_LIMIT).keys()
+      ).map((_, i) => result('doc' + i));
+
+      // Use an array to store that the queryEquals() method succeeded, since
+      // thrown errors do not result in the recursiveDelete() method failing.
+      const called: number[] = [];
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          if (called.length === 0) {
+            queryEquals(
+              request,
+              select('__name__'),
+              allDescendants(/* kindless= */ true),
+              fieldFilters(
+                '__name__',
+                'GREATER_THAN_OR_EQUAL',
+                startAt('root'),
+                '__name__',
+                'LESS_THAN',
+                endAt('root')
+              ),
+              limit(RECURSIVE_DELETE_QUERY_LIMIT)
+            );
+            called.push(1);
+            return stream(...firstStream);
+          } else if (called.length === 1) {
+            queryEquals(
+              request,
+              select('__name__'),
+              allDescendants(/* kindless= */ true),
+              orderBy('__name__', 'ASCENDING'),
+              fieldFilters(
+                '__name__',
+                'GREATER_THAN_OR_EQUAL',
+                startAt('root'),
+                '__name__',
+                'LESS_THAN',
+                endAt('root')
+              ),
+              queryStartAt(false, {
+                referenceValue:
+                  `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc' +
+                  (RECURSIVE_DELETE_QUERY_LIMIT - 1),
+              }),
+              limit(RECURSIVE_DELETE_QUERY_LIMIT)
+            );
+            called.push(2);
+            return stream();
+          } else {
+            called.push(3);
+            return stream();
+          }
+        },
+        batchWrite: () => {
+          const responses = mergeResponses(
+            Array.from(Array(500).keys()).map(() => successResponse(1))
+          );
+          return response({
+            writeResults: responses.writeResults,
+            status: responses.status,
+          });
+        },
+      };
+      const firestore = await createInstance(overrides);
+
+      // Use a custom batch size with BulkWriter to simplify the dummy
+      // batchWrite() response logic.
+      const bulkWriter = firestore.bulkWriter();
+      bulkWriter._maxBatchSize = 500;
+      await firestore.recursiveDelete(firestore.collection('root'), bulkWriter);
+      expect(called).to.deep.equal([1, 2]);
     });
   });
 
