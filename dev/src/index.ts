@@ -16,7 +16,7 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions, grpc, RetryOptions, Status} from 'google-gax';
+import {CallOptions, grpc, RetryOptions} from 'google-gax';
 import {Duplex, PassThrough, Transform} from 'stream';
 
 import {URL} from 'url';
@@ -40,7 +40,7 @@ import {
   validateResourcePath,
 } from './path';
 import {ClientPool} from './pool';
-import {CollectionReference, Query} from './reference';
+import {CollectionReference} from './reference';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
