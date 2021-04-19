@@ -58,6 +58,12 @@ export const MAX_PENDING_OPS = 5000;
  */
 const MIN_PENDING_OPS = 1000;
 
+/**
+ * Class used to store state required for running a recursive delete operation.
+ * Each recursive delete call should use a new instance of the class, like the
+ * Transaction class.
+ * @private
+ */
 export class RecursiveDelete {
   /**
    * The number of deletes that failed with a permanent error.
@@ -73,7 +79,8 @@ export class RecursiveDelete {
   private lastError: GoogleError | BulkWriterError | undefined;
 
   /**
-   * Whether all descendants for this query have been fetched.
+   * Whether all descendants for this query have been fetched, or if the stream
+   * has errored.
    * @private
    */
   private allDescendantsFetched = false;
