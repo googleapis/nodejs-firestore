@@ -47,13 +47,10 @@ import {
   mergeResponses,
   successResponse,
 } from './bulk-writer';
-import {
-  MAX_REQUEST_RETRIES,
-  RECURSIVE_DELETE_QUERY_LIMIT,
-  REFERENCE_NAME_MIN_ID,
-} from '../src';
+import {MAX_REQUEST_RETRIES} from '../src';
 
 import api = google.firestore.v1;
+import {MAX_PENDING_OPS, REFERENCE_NAME_MIN_ID} from '../src/recursive-delete';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -143,7 +140,7 @@ describe('recursiveDelete() method:', () => {
               'LESS_THAN',
               endAt('root')
             ),
-            limit(RECURSIVE_DELETE_QUERY_LIMIT)
+            limit(MAX_PENDING_OPS)
           );
           return stream();
         },
@@ -168,7 +165,7 @@ describe('recursiveDelete() method:', () => {
               'LESS_THAN',
               endAt('root/doc/nestedCol')
             ),
-            limit(RECURSIVE_DELETE_QUERY_LIMIT)
+            limit(MAX_PENDING_OPS)
           );
           return stream();
         },
@@ -187,7 +184,7 @@ describe('recursiveDelete() method:', () => {
             'root/doc',
             select('__name__'),
             allDescendants(/* kindless= */ true),
-            limit(RECURSIVE_DELETE_QUERY_LIMIT)
+            limit(MAX_PENDING_OPS)
           );
           return stream();
         },
@@ -225,7 +222,7 @@ describe('recursiveDelete() method:', () => {
                 'LESS_THAN',
                 endAt('root')
               ),
-              limit(RECURSIVE_DELETE_QUERY_LIMIT)
+              limit(MAX_PENDING_OPS)
             );
             return stream();
           }
@@ -239,7 +236,7 @@ describe('recursiveDelete() method:', () => {
 
     it('creates a second query with the correct startAfter', async () => {
       const firstStream = Array.from(
-        Array(RECURSIVE_DELETE_QUERY_LIMIT).keys()
+        Array(MAX_PENDING_OPS).keys()
       ).map((_, i) => result('doc' + i));
 
       // Use an array to store that the queryEquals() method succeeded, since
@@ -260,7 +257,7 @@ describe('recursiveDelete() method:', () => {
                 'LESS_THAN',
                 endAt('root')
               ),
-              limit(RECURSIVE_DELETE_QUERY_LIMIT)
+              limit(MAX_PENDING_OPS)
             );
             called.push(1);
             return stream(...firstStream);
@@ -282,9 +279,9 @@ describe('recursiveDelete() method:', () => {
                 referenceValue:
                   `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc' +
-                  (RECURSIVE_DELETE_QUERY_LIMIT - 1),
+                  (MAX_PENDING_OPS - 1),
               }),
-              limit(RECURSIVE_DELETE_QUERY_LIMIT)
+              limit(MAX_PENDING_OPS)
             );
             called.push(2);
             return stream();
