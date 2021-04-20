@@ -43,14 +43,14 @@ import {QueryOptions} from './reference';
 export const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
 
 /*!
- * The query limit used for recursiveDelete() when fetching all descendants of
+ * The query limit used for recursive deletes when fetching all descendants of
  * the specified reference to delete. This is done to prevent the query stream
  * from streaming documents faster than Firestore can delete.
  */
 export const MAX_PENDING_OPS = 5000;
 
 /**
- * The number of pending BulkWriter operations at which recursiveDelete()
+ * The number of pending BulkWriter operations at which RecursiveDelete
  * starts the next limit query to fetch descendants. By starting the query
  * while there are pending operations, Firestore can improve BulkWriter
  * throughput. This helps prevent BulkWriter from idling while Firestore
@@ -60,8 +60,7 @@ const MIN_PENDING_OPS = 1000;
 
 /**
  * Class used to store state required for running a recursive delete operation.
- * Each recursive delete call should use a new instance of the class, like the
- * Transaction class.
+ * Each recursive delete call should use a new instance of the class.
  * @private
  */
 export class RecursiveDelete {
@@ -155,11 +154,12 @@ export class RecursiveDelete {
    * @private
    */
   private setupStream(startAfterLastSnapshot = false): void {
+    const limit = MAX_PENDING_OPS;
     const stream = this.getAllDescendants(
       this.ref instanceof CollectionReference
         ? (this.ref as CollectionReference<unknown>)
         : (this.ref as DocumentReference<unknown>),
-      MAX_PENDING_OPS,
+      limit,
       startAfterLastSnapshot
     );
     this.streamInProgress = true;
@@ -180,7 +180,7 @@ export class RecursiveDelete {
         this.streamInProgress = false;
         // If there are fewer than the number of documents specified in the
         // limit() field, we know that the query is complete.
-        if (streamedDocsCount < MAX_PENDING_OPS) {
+        if (streamedDocsCount < limit) {
           this.onQueryEnd();
         }
       });
