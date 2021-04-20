@@ -47,6 +47,7 @@ export const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
  * the specified reference to delete. This is done to prevent the query stream
  * from streaming documents faster than Firestore can delete.
  */
+// Visible for testing.
 export const MAX_PENDING_OPS = 5000;
 
 /**
@@ -78,11 +79,10 @@ export class RecursiveDelete {
   private lastError: GoogleError | BulkWriterError | undefined;
 
   /**
-   * Whether all descendants for this query have been fetched, or if the stream
-   * has errored.
+   * Whether there are still documents to delete that still need to be fetched.
    * @private
    */
-  private allDescendantsFetched = false;
+  private documentsPending = true;
 
   /**
    * A deferred promise that resolves when the recursive delete operation
@@ -133,9 +133,9 @@ export class RecursiveDelete {
    * Returns a promise that resolves when all descendants have been deleted, or
    * if an error occurs.
    */
-  delete(): Promise<void> {
+  run(): Promise<void> {
     assert(
-      !this.allDescendantsFetched,
+      this.documentsPending,
       'The recursive delete operation has already been completed.'
     );
 
@@ -149,18 +149,15 @@ export class RecursiveDelete {
 
   /**
    * Creates a query stream and attaches event handlers to it.
-   * @param startAfterLastSnapshot Whether to start after the last streamed
-   * snapshot.
    * @private
    */
-  private setupStream(startAfterLastSnapshot = false): void {
+  private setupStream(): void {
     const limit = MAX_PENDING_OPS;
     const stream = this.getAllDescendants(
       this.ref instanceof CollectionReference
         ? (this.ref as CollectionReference<unknown>)
         : (this.ref as DocumentReference<unknown>),
-      limit,
-      startAfterLastSnapshot
+      limit
     );
     this.streamInProgress = true;
     let streamedDocsCount = 0;
@@ -182,6 +179,8 @@ export class RecursiveDelete {
         // limit() field, we know that the query is complete.
         if (streamedDocsCount < limit) {
           this.onQueryEnd();
+        } else if (this.pendingOpsCount === 0) {
+          this.setupStream();
         }
       });
   }
@@ -190,15 +189,12 @@ export class RecursiveDelete {
    * Retrieves all descendant documents nested under the provided reference.
    * @param ref The reference to fetch all descendants for.
    * @param limit The number of descendants to fetch in the query.
-   * @param startAfterLastSnapshot Whether to start from the last streamed
-   * document snapshot.
    * @private
    * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
    */
   private getAllDescendants(
     ref: CollectionReference<unknown> | DocumentReference<unknown>,
-    limit: number,
-    startAfterLastSnapshot: boolean
+    limit: number
   ): NodeJS.ReadableStream {
     // The parent is the closest ancestor document to the location we're
     // deleting. If we are deleting a document, the parent is the path of that
@@ -240,7 +236,7 @@ export class RecursiveDelete {
         .where(FieldPath.documentId(), '<', endAt);
     }
 
-    if (startAfterLastSnapshot) {
+    if (this.lastDocumentSnap) {
       query = query.startAfter(this.lastDocumentSnap);
     }
 
@@ -254,7 +250,7 @@ export class RecursiveDelete {
    * @private
    */
   private onQueryEnd(): void {
-    this.allDescendantsFetched = true;
+    this.documentsPending = false;
     if (this.ref instanceof DocumentReference) {
       this.writer.delete(this.ref).catch(err => this.incrementErrorCount(err));
     }
@@ -296,16 +292,17 @@ export class RecursiveDelete {
       })
       .then(() => {
         this.pendingOpsCount--;
+
         // We wait until the previous stream has ended in order to sure the
         // startAfter document is correct. Starting the next stream while
         // there are pending operations allows Firestore to maximize
         // BulkWriter throughput.
         if (
-          !this.allDescendantsFetched &&
+          this.documentsPending &&
           !this.streamInProgress &&
           this.pendingOpsCount < MIN_PENDING_OPS
         ) {
-          this.setupStream(/* startAfterLastSnapshot= */ true);
+          this.setupStream();
         }
       });
   }

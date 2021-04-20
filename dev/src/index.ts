@@ -1251,7 +1251,7 @@ export class Firestore implements firestore.Firestore {
   ): Promise<void> {
     const writer = bulkWriter ?? this.getBulkWriter();
     const deleter = new RecursiveDelete(this, writer, ref);
-    return deleter.delete();
+    return deleter.run();
   }
 
   /**
