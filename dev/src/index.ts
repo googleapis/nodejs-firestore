@@ -16,14 +16,14 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions, GoogleError, grpc, RetryOptions, Status} from 'google-gax';
+import {CallOptions, grpc, RetryOptions} from 'google-gax';
 import {Duplex, PassThrough, Transform} from 'stream';
 
 import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
-import {BulkWriter, BulkWriterError} from './bulk-writer';
+import {BulkWriter} from './bulk-writer';
 import {BundleBuilder} from './bundle';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
@@ -40,7 +40,7 @@ import {
   validateResourcePath,
 } from './path';
 import {ClientPool} from './pool';
-import {CollectionReference, Query, QueryOptions} from './reference';
+import {CollectionReference} from './reference';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
@@ -76,6 +76,7 @@ const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
 import {CollectionGroup} from './collection-group';
+import {RecursiveDelete} from './recursive-delete';
 
 export {
   CollectionReference,
@@ -155,18 +156,6 @@ const DEFAULT_MAX_IDLE_CHANNELS = 1;
  * multiplex all requests over a single channel.
  */
 const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
-
-/**
- * Datastore allowed numeric IDs where Firestore only allows strings. Numeric
- * IDs are exposed to Firestore as __idNUM__, so this is the lowest possible
- * negative numeric value expressed in that format.
- *
- * This constant is used to specify startAt/endAt values when querying for all
- * descendants in a single collection.
- *
- * @private
- */
-export const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
 
 /**
  * Document data (e.g. for use with
@@ -1260,115 +1249,9 @@ export class Firestore implements firestore.Firestore {
       | firestore.DocumentReference<unknown>,
     bulkWriter?: BulkWriter
   ): Promise<void> {
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
     const writer = bulkWriter ?? this.getBulkWriter();
-    writer._verifyNotClosed();
-    const docStream = this._getAllDescendants(
-      ref instanceof CollectionReference
-        ? (ref as CollectionReference<unknown>)
-        : (ref as DocumentReference<unknown>)
-    );
-    const resultDeferred = new Deferred<void>();
-    let errorCount = 0;
-    let lastError: GoogleError | BulkWriterError | undefined;
-    const incrementErrorCount = (err: Error): void => {
-      errorCount++;
-      lastError = err;
-    };
-    const onStreamEnd = (): void => {
-      if (ref instanceof DocumentReference) {
-        writer.delete(ref).catch(err => incrementErrorCount(err));
-      }
-      writer.flush().then(async () => {
-        if (lastError === undefined) {
-          resultDeferred.resolve();
-        } else {
-          let error = new GoogleError(
-            `${errorCount} ` +
-              `${errorCount !== 1 ? 'deletes' : 'delete'} ` +
-              'failed. The last delete failed with: '
-          );
-          if (lastError.code !== undefined) {
-            error.code = (lastError.code as number) as Status;
-          }
-          error = wrapError(error, stack);
-
-          // Wrap the BulkWriter error last to provide the full stack trace.
-          resultDeferred.reject(
-            lastError.stack ? wrapError(error, lastError.stack ?? '') : error
-          );
-        }
-      });
-    };
-
-    docStream
-      .on('error', err => {
-        err.code = Status.UNAVAILABLE;
-        err.stack = 'Failed to fetch children documents: ' + err.stack;
-        lastError = err;
-        onStreamEnd();
-      })
-      .on('data', (snap: QueryDocumentSnapshot) => {
-        writer.delete(snap.ref).catch(err => incrementErrorCount(err));
-      })
-      .on('end', () => onStreamEnd());
-
-    return resultDeferred.promise;
-  }
-
-  /**
-   * Retrieves all descendant documents nested under the provided reference.
-   *
-   * @private
-   * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
-   */
-  private _getAllDescendants(
-    ref: CollectionReference<unknown> | DocumentReference<unknown>
-  ): NodeJS.ReadableStream {
-    // The parent is the closest ancestor document to the location we're
-    // deleting. If we are deleting a document, the parent is the path of that
-    // document. If we are deleting a collection, the parent is the path of the
-    // document containing that collection (or the database root, if it is a
-    // root collection).
-
-    let parentPath = ref._resourcePath;
-    if (ref instanceof CollectionReference) {
-      parentPath = parentPath.popLast();
-    }
-    const collectionId =
-      ref instanceof CollectionReference
-        ? ref.id
-        : (ref as DocumentReference<unknown>).parent.id;
-
-    let query: Query = new Query(
-      this,
-      QueryOptions.forKindlessAllDescendants(
-        parentPath,
-        collectionId,
-        /* requireConsistency= */ false
-      )
-    );
-
-    // Query for names only to fetch empty snapshots.
-    query = query.select(FieldPath.documentId());
-
-    if (ref instanceof CollectionReference) {
-      // To find all descendants of a collection reference, we need to use a
-      // composite filter that captures all documents that start with the
-      // collection prefix. The MIN_KEY constant represents the minimum key in
-      // this collection, and a null byte + the MIN_KEY represents the minimum
-      // key is the next possible collection.
-      const nullChar = String.fromCharCode(0);
-      const startAt = collectionId + '/' + REFERENCE_NAME_MIN_ID;
-      const endAt = collectionId + nullChar + '/' + REFERENCE_NAME_MIN_ID;
-      query = query
-        .where(FieldPath.documentId(), '>=', startAt)
-        .where(FieldPath.documentId(), '<', endAt);
-    }
-
-    return query.stream();
+    const deleter = new RecursiveDelete(this, writer, ref);
+    return deleter.run();
   }
 
   /**
