@@ -15,11 +15,6 @@
                 "getDocument"
               ]
             },
-            "CreateDocument": {
-              "methods": [
-                "createDocument"
-              ]
-            },
             "UpdateDocument": {
               "methods": [
                 "updateDocument"
@@ -43,6 +38,16 @@
             "Rollback": {
               "methods": [
                 "rollback"
+              ]
+            },
+            "BatchWrite": {
+              "methods": [
+                "batchWrite"
+              ]
+            },
+            "CreateDocument": {
+              "methods": [
+                "createDocument"
               ]
             },
             "BatchGetDocuments": {
@@ -72,6 +77,13 @@
                 "listDocumentsAsync"
               ]
             },
+            "PartitionQuery": {
+              "methods": [
+                "partitionQuery",
+                "partitionQueryStream",
+                "partitionQueryAsync"
+              ]
+            },
             "ListCollectionIds": {
               "methods": [
                 "listCollectionIds",
@@ -87,11 +99,6 @@
             "GetDocument": {
               "methods": [
                 "getDocument"
-              ]
-            },
-            "CreateDocument": {
-              "methods": [
-                "createDocument"
               ]
             },
             "UpdateDocument": {
@@ -119,11 +126,28 @@
                 "rollback"
               ]
             },
+            "BatchWrite": {
+              "methods": [
+                "batchWrite"
+              ]
+            },
+            "CreateDocument": {
+              "methods": [
+                "createDocument"
+              ]
+            },
             "ListDocuments": {
               "methods": [
                 "listDocuments",
                 "listDocumentsStream",
                 "listDocumentsAsync"
+              ]
+            },
+            "PartitionQuery": {
+              "methods": [
+                "partitionQuery",
+                "partitionQueryStream",
+                "partitionQueryAsync"
               ]
             },
             "ListCollectionIds": {
