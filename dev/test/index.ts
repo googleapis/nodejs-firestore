@@ -284,7 +284,7 @@ const allSupportedTypesOutput = {
       _getProjectId: () => ({projectId: PROJECT_ID, databaseId: '(default)'}),
     } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     new QualifiedResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
-  ),
+  ) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
   nilValue: null,

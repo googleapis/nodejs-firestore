@@ -458,7 +458,8 @@ describe('DocumentReference class', () => {
       emptyObject: {},
       dateValue: new Timestamp(479978400, 123000000),
       zeroDateValue: new Timestamp(0, 0),
-      pathValue: firestore.doc('col1/ref1'),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      pathValue: firestore.doc('col1/ref1') as any,
       arrayValue: ['foo', 42, 'bar'],
       emptyArray: [],
       nilValue: null,
@@ -1200,7 +1201,7 @@ describe('DocumentReference class', () => {
       await setupDeferred.promise;
       await ref.set(new Post('post', 'author'));
       const snapshot = await resultsDeferred.promise;
-      expect(snapshot.docs[0].data().toString()).to.equal('post, by author');
+      expect(snapshot?.docs[0].data().toString()).to.equal('post, by author');
       unsubscribe();
     });
   });

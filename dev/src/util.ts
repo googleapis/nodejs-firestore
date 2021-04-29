@@ -41,13 +41,13 @@ const serviceConfig = constructSettings(
  */
 export class Deferred<R> {
   promise: Promise<R>;
-  resolve: (value?: R | Promise<R>) => void = () => {};
+  resolve: (value: R | Promise<R>) => void = () => {};
   reject: (reason?: Error) => void = () => {};
 
   constructor() {
     this.promise = new Promise(
       (
-        resolve: (value?: R | Promise<R>) => void,
+        resolve: (value: R | Promise<R>) => void,
         reject: (reason?: Error) => void
       ) => {
         this.resolve = resolve;
