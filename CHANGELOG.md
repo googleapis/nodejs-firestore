@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.10.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.10.0...v4.10.1) (2021-04-28)
+
+
+### Bug Fixes
+
+* type of QuerySnapshot.docChanges() should be generic ([#1484](https://www.github.com/googleapis/nodejs-firestore/issues/1484)) ([3ed1929](https://www.github.com/googleapis/nodejs-firestore/commit/3ed1929a06b4c019bbb0b1db3e1abcd62ee668d2))
+
 ## [4.10.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.9...v4.10.0) (2021-04-15)
 
 
