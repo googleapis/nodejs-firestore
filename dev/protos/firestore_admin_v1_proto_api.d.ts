@@ -962,10 +962,10 @@ export namespace google {
                         public fieldPath: string;
 
                         /** IndexField order. */
-                        public order: google.firestore.admin.v1.Index.IndexField.Order;
+                        public order?: (google.firestore.admin.v1.Index.IndexField.Order|null);
 
                         /** IndexField arrayConfig. */
-                        public arrayConfig: google.firestore.admin.v1.Index.IndexField.ArrayConfig;
+                        public arrayConfig?: (google.firestore.admin.v1.Index.IndexField.ArrayConfig|null);
 
                         /** IndexField valueMode. */
                         public valueMode?: ("order"|"arrayConfig");
@@ -1586,19 +1586,19 @@ export namespace google {
             constructor(properties?: google.api.IHttpRule);
 
             /** HttpRule get. */
-            public get: string;
+            public get?: (string|null);
 
             /** HttpRule put. */
-            public put: string;
+            public put?: (string|null);
 
             /** HttpRule post. */
-            public post: string;
+            public post?: (string|null);
 
             /** HttpRule delete. */
-            public delete: string;
+            public delete?: (string|null);
 
             /** HttpRule patch. */
-            public patch: string;
+            public patch?: (string|null);
 
             /** HttpRule custom. */
             public custom?: (google.api.ICustomHttpPattern|null);
@@ -3679,16 +3679,16 @@ export namespace google {
             constructor(properties?: google.protobuf.IValue);
 
             /** Value nullValue. */
-            public nullValue: google.protobuf.NullValue;
+            public nullValue?: (google.protobuf.NullValue|null);
 
             /** Value numberValue. */
-            public numberValue: number;
+            public numberValue?: (number|null);
 
             /** Value stringValue. */
-            public stringValue: string;
+            public stringValue?: (string|null);
 
             /** Value boolValue. */
-            public boolValue: boolean;
+            public boolValue?: (boolean|null);
 
             /** Value structValue. */
             public structValue?: (google.protobuf.IStruct|null);
