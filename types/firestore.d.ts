@@ -1504,7 +1504,7 @@ declare namespace FirebaseFirestore {
      * this is the first snapshot, all documents will be in the list as added
      * changes.
      */
-    docChanges(): DocumentChange[];
+    docChanges(): DocumentChange<T>[];
 
     /**
      * Enumerates all of the documents in the QuerySnapshot.
