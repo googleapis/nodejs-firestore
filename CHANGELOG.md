@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.11.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.10.1...v4.11.0) (2021-05-05)
+
+
+### Features
+
+* add recursive delete to Firestore class ([#1494](https://www.github.com/googleapis/nodejs-firestore/issues/1494)) ([6f1e304](https://www.github.com/googleapis/nodejs-firestore/commit/6f1e3040800d0dcc5ed3f9f7cef16fe41804266a))
+
 ### [4.10.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.10.0...v4.10.1) (2021-04-28)
 
 
