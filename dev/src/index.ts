@@ -40,7 +40,7 @@ import {
   validateResourcePath,
 } from './path';
 import {ClientPool} from './pool';
-import {CollectionReference, Query, QueryOptions} from './reference';
+import {CollectionReference} from './reference';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
@@ -76,6 +76,7 @@ const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
 import {CollectionGroup} from './collection-group';
+import {RecursiveDelete} from './recursive-delete';
 
 export {
   CollectionReference,
@@ -141,7 +142,7 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 /*!
  * The maximum number of times to retry idempotent requests.
  */
-const MAX_REQUEST_RETRIES = 5;
+export const MAX_REQUEST_RETRIES = 5;
 
 /*!
  * The default number of idle GRPC channel to keep.
@@ -155,18 +156,6 @@ const DEFAULT_MAX_IDLE_CHANNELS = 1;
  * multiplex all requests over a single channel.
  */
 const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
-
-/**
- * Datastore allowed numeric IDs where Firestore only allows strings. Numeric
- * IDs are exposed to Firestore as __idNUM__, so this is the lowest possible
- * negative numeric value expressed in that format.
- *
- * This constant is used to specify startAt/endAt values when querying for all
- * descendants in a single collection.
- *
- * @private
- */
-const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
 
 /**
  * Document data (e.g. for use with
@@ -398,6 +387,26 @@ export class Firestore implements firestore.Firestore {
    * @private
    */
   private registeredListenersCount = 0;
+
+  /**
+   * A lazy-loaded BulkWriter instance to be used with recursiveDelete() if no
+   * BulkWriter instance is provided.
+   *
+   * @private
+   */
+  private _bulkWriter: BulkWriter | undefined;
+
+  /**
+   * Lazy-load the Firestore's default BulkWriter.
+   *
+   * @private
+   */
+  private getBulkWriter(): BulkWriter {
+    if (!this._bulkWriter) {
+      this._bulkWriter = this.bulkWriter();
+    }
+    return this._bulkWriter;
+  }
 
   /**
    * Number of pending operations on the client.
@@ -1200,50 +1209,49 @@ export class Firestore implements firestore.Firestore {
   }
 
   /**
-   * Retrieves all descendant documents nested under the provided reference.
+   * Recursively deletes all documents and subcollections at and under the
+   * specified level.
    *
-   * @private
-   * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
+   * If any delete fails, the promise is rejected with an error message
+   * containing the number of failed deletes and the stack trace of the last
+   * failed delete. The provided reference is deleted regardless of whether
+   * all deletes succeeded.
+   *
+   * `recursiveDelete()` uses a BulkWriter instance with default settings to
+   * perform the deletes. To customize throttling rates or add success/error
+   * callbacks, pass in a custom BulkWriter instance.
+   *
+   * @param ref The reference of a document or collection to delete.
+   * @param bulkWriter A custom BulkWriter instance used to perform the
+   * deletes.
+   * @return A promise that resolves when all deletes have been performed.
+   * The promise is rejected if any of the deletes fail.
+   *
+   * @example
+   * // Recursively delete a reference and log the references of failures.
+   * const bulkWriter = firestore.bulkWriter();
+   * bulkWriter
+   *   .onWriteError((error) => {
+   *     if (
+   *       error.failedAttempts < MAX_RETRY_ATTEMPTS
+   *     ) {
+   *       return true;
+   *     } else {
+   *       console.log('Failed write at document: ', error.documentRef.path);
+   *       return false;
+   *     }
+   *   });
+   * await firestore.recursiveDelete(docRef, bulkWriter);
    */
-  // TODO(chenbrian): Make this a private method after adding recursive delete.
-  _getAllDescendants(
-    ref: CollectionReference | DocumentReference
-  ): NodeJS.ReadableStream {
-    // The parent is the closest ancestor document to the location we're
-    // deleting. If we are deleting a document, the parent is the path of that
-    // document. If we are deleting a collection, the parent is the path of the
-    // document containing that collection (or the database root, if it is a
-    // root collection).
-    let parentPath = ref._resourcePath;
-    if (ref instanceof CollectionReference) {
-      parentPath = parentPath.popLast();
-    }
-    const collectionId =
-      ref instanceof CollectionReference ? ref.id : ref.parent.id;
-
-    let query: Query = new Query(
-      this,
-      QueryOptions.forKindlessAllDescendants(parentPath, collectionId)
-    );
-
-    // Query for names only to fetch empty snapshots.
-    query = query.select(FieldPath.documentId());
-
-    if (ref instanceof CollectionReference) {
-      // To find all descendants of a collection reference, we need to use a
-      // composite filter that captures all documents that start with the
-      // collection prefix. The MIN_KEY constant represents the minimum key in
-      // this collection, and a null byte + the MIN_KEY represents the minimum
-      // key is the next possible collection.
-      const nullChar = String.fromCharCode(0);
-      const startAt = collectionId + '/' + REFERENCE_NAME_MIN_ID;
-      const endAt = collectionId + nullChar + '/' + REFERENCE_NAME_MIN_ID;
-      query = query
-        .where(FieldPath.documentId(), '>=', startAt)
-        .where(FieldPath.documentId(), '<', endAt);
-    }
-
-    return query.stream();
+  recursiveDelete(
+    ref:
+      | firestore.CollectionReference<unknown>
+      | firestore.DocumentReference<unknown>,
+    bulkWriter?: BulkWriter
+  ): Promise<void> {
+    const writer = bulkWriter ?? this.getBulkWriter();
+    const deleter = new RecursiveDelete(this, writer, ref);
+    return deleter.run();
   }
 
   /**
