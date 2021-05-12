@@ -235,9 +235,9 @@ describe('recursiveDelete() method:', () => {
     });
 
     it('creates a second query with the correct startAfter', async () => {
-      const firstStream = Array.from(
-        Array(MAX_PENDING_OPS).keys()
-      ).map((_, i) => result('doc' + i));
+      const firstStream = Array.from(Array(MAX_PENDING_OPS).keys()).map(
+        (_, i) => result('doc' + i)
+      );
 
       // Use an array to store that the queryEquals() method succeeded, since
       // thrown errors do not result in the recursiveDelete() method failing.
@@ -420,7 +420,7 @@ describe('recursiveDelete() method:', () => {
       const refs: string[] = [];
       const bulkWriter = firestore.bulkWriter();
       bulkWriter.onWriteError(err => {
-        codes.push((err.code as unknown) as Status);
+        codes.push(err.code as unknown as Status);
         refs.push(err.documentRef.path);
         return false;
       });
@@ -595,8 +595,9 @@ describe('recursiveDelete() method:', () => {
       firestore = await createInstance();
       const bulkWriter = firestore.bulkWriter();
       await bulkWriter.close();
-      await expect(() => () =>
-        firestore.recursiveDelete(firestore.collection('foo'), bulkWriter)
+      await expect(
+        () => () =>
+          firestore.recursiveDelete(firestore.collection('foo'), bulkWriter)
       ).to.throw;
     });
   });

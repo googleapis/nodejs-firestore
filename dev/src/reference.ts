@@ -123,7 +123,8 @@ const comparisonOperators: {
  * @class DocumentReference
  */
 export class DocumentReference<T = firestore.DocumentData>
-  implements Serializable, firestore.DocumentReference<T> {
+  implements Serializable, firestore.DocumentReference<T>
+{
   /**
    * @hideconstructor
    *
@@ -736,7 +737,8 @@ class FieldFilter {
  * @class QuerySnapshot
  */
 export class QuerySnapshot<T = firestore.DocumentData>
-  implements firestore.QuerySnapshot<T> {
+  implements firestore.QuerySnapshot<T>
+{
   private _materializedDocs: Array<QueryDocumentSnapshot<T>> | null = null;
   private _materializedChanges: Array<DocumentChange<T>> | null = null;
   private _docs: (() => Array<QueryDocumentSnapshot<T>>) | null = null;
@@ -1167,8 +1169,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     protected readonly _queryOptions: QueryOptions<T>
   ) {
     this._serializer = new Serializer(_firestore);
-    this._allowUndefined = !!this._firestore._settings
-      .ignoreUndefinedProperties;
+    this._allowUndefined =
+      !!this._firestore._settings.ignoreUndefinedProperties;
   }
 
   /**
@@ -1989,9 +1991,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     transactionIdOrReadTime?: Uint8Array | Timestamp
   ): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
-    const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
-      projectId
-    );
+    const parentPath =
+      this._queryOptions.parentPath.toQualifiedResourcePath(projectId);
 
     const structuredQuery = this.toStructuredQuery();
 
@@ -2034,7 +2035,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     if (transactionIdOrReadTime instanceof Uint8Array) {
       runQueryRequest.transaction = transactionIdOrReadTime;
     } else if (transactionIdOrReadTime instanceof Timestamp) {
-      runQueryRequest.readTime = transactionIdOrReadTime.toProto().timestampValue;
+      runQueryRequest.readTime =
+        transactionIdOrReadTime.toProto().timestampValue;
     }
 
     return runQueryRequest;
@@ -2047,9 +2049,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    */
   _toBundledQuery(): protos.firestore.IBundledQuery {
     const projectId = this.firestore.projectId;
-    const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
-      projectId
-    );
+    const parentPath =
+      this._queryOptions.parentPath.toQualifiedResourcePath(projectId);
     const structuredQuery = this.toStructuredQuery();
 
     const bundledQuery: protos.firestore.IBundledQuery = {
@@ -2376,7 +2377,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
  */
 export class CollectionReference<T = firestore.DocumentData>
   extends Query<T>
-  implements firestore.CollectionReference<T> {
+  implements firestore.CollectionReference<T>
+{
   /**
    * @hideconstructor
    *
