@@ -138,7 +138,7 @@ class BulkWriterOperation {
 
     try {
       const bulkWriterError = new BulkWriterError(
-        (error.code as number) as GrpcStatus,
+        error.code as number as GrpcStatus,
         error.message,
         this.ref,
         this.type,

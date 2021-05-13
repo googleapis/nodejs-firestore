@@ -264,7 +264,7 @@ export class RecursiveDelete {
             'failed. The last delete failed with: '
         );
         if (this.lastError.code !== undefined) {
-          error.code = (this.lastError.code as number) as Status;
+          error.code = this.lastError.code as number as Status;
         }
         error = wrapError(error, this.errorStack);
 
