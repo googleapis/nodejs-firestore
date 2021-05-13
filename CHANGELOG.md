@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.11.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.11.0...v4.11.1) (2021-05-13)
+
+
+### Bug Fixes
+
+* **deps:** require google-gax v2.12.0 ([#1497](https://www.github.com/googleapis/nodejs-firestore/issues/1497)) ([a8d5f0b](https://www.github.com/googleapis/nodejs-firestore/commit/a8d5f0b1e4503ef9f0d289dbf8ed67a30eb9ed4b))
+
 ## [4.11.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.10.1...v4.11.0) (2021-05-05)
 
 
