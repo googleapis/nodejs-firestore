@@ -371,6 +371,8 @@ export class DocumentReference<T = firestore.DocumentData>
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime. Fails the delete if the
    * document was last updated at a different time.
+   * @param {boolean=} precondition.exists If set, enforces that the target document
+   * must exist.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * delete time.
    *
