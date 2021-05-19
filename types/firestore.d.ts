@@ -551,6 +551,8 @@ declare namespace FirebaseFirestore {
      * @param precondition.lastUpdateTime If set, enforces that the
      * document was last updated at lastUpdateTime. Fails the batch if the
      * document doesn't exist or was last updated at a different time.
+     * @param precondition.exists If set, enforces that the target document
+     * must or must not exist.
      * @returns A promise that resolves with the result of the delete. If the
      * delete fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
@@ -878,6 +880,11 @@ declare namespace FirebaseFirestore {
      * If set, the last update time to enforce.
      */
     readonly lastUpdateTime?: Timestamp;
+
+    /**
+     * If set, enforces that the target document must or must not exist.
+     */
+    readonly exists?: boolean;
   }
 
   /**
