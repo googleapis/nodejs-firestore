@@ -244,7 +244,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *  enforces that the document was last updated at lastUpdateTime. Fails the
  *  operation if the document was last updated at a different time.
  * @property {boolean} exists If set, enforces that the target document must
- * or must not exist. This property is only valid with delete operations.
+ * or must not exist.
  * @typedef {Object} Precondition
  */
 
