@@ -222,6 +222,8 @@ export class WriteBatch implements firestore.WriteBatch {
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime. Fails the batch if the
    * document doesn't exist or was last updated at a different time.
+   * @param {boolean= } precondition.exists If set to true, enforces that the target
+   * document must or must not exist.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *

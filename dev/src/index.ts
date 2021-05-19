@@ -225,7 +225,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * [update()]{@link DocumentReference#update} and
  * [delete()]{@link DocumentReference#delete} calls in
  * [DocumentReference]{@link DocumentReference},
- * [WriteBatch]{@link WriteBatch}, and
+ * [WriteBatch]{@link WriteBatch}, [BulkWriter]({@link BulkWriter}, and
  * [Transaction]{@link Transaction}. Using Preconditions, these calls
  * can be restricted to only apply to documents that match the specified
  * conditions.
@@ -243,6 +243,8 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * @property {Timestamp} lastUpdateTime The update time to enforce. If set,
  *  enforces that the document was last updated at lastUpdateTime. Fails the
  *  operation if the document was last updated at a different time.
+ * @property {boolean} exists If set, enforces that the target document must
+ * or must not exist.
  * @typedef {Object} Precondition
  */
 
