@@ -330,8 +330,8 @@ export class Transaction implements firestore.Transaction {
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime. Fails the transaction if the
    * document doesn't exist or was last updated at a different time.
-   * @param {boolean=} precondition.exists If set, enforces that the target document must
-   * exist.
+   * @param {boolean=} precondition.exists If set, enforces that the target
+   * document must or must not exist.
    * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *

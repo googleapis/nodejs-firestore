@@ -735,6 +735,15 @@ describe('DocumentReference class', () => {
     return ref.delete();
   });
 
+  it('will fail to delete document with exists: true if doc does not exist', () => {
+    const ref = randomCol.doc();
+    return ref.delete({exists: true})
+        .then(() => Promise.reject('Delete should have failed'))
+        .catch((err: Error) => {
+          expect(err.message).to.contain('NOT_FOUND: No document to update');
+        });
+  });
+
   it('supports non-alphanumeric field names', () => {
     const ref = randomCol.doc('doc');
     return ref
