@@ -64,16 +64,6 @@ export function createInstance(
   const firestore = new Firestore();
   firestore.settings(initializationOptions);
 
-  firestore['_clientPool'] = new ClientPool<GapicClient>(
-    /* concurrentRequestLimit= */ 1,
-    /* maxIdleClients= */ 0,
-    () =>
-      ({
-        ...new v1.FirestoreClient(initializationOptions),
-        ...apiOverrides,
-      } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
-  );
-
   return Promise.resolve(firestore);
 }
 
@@ -86,7 +76,7 @@ export function verifyInstance(firestore: Firestore): Promise<void> {
   // verifying that all operations have finished executing.
   return new Promise<void>(resolve => {
     setTimeout(() => {
-      expect(firestore['_clientPool'].opCount).to.equal(0);
+      expect((firestore['_rpcClient'] as any).clientPool.opCount).to.equal(0);
       resolve();
     }, 10);
   });

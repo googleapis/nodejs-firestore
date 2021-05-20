@@ -31,7 +31,6 @@ import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
 import {
   Deferred,
-  getRetryCodes,
   isObject,
   requestTag,
   silencePromise,
@@ -49,6 +48,7 @@ import {GoogleError, Status} from 'google-gax';
 // eslint-disable-next-line no-undef
 import GrpcStatus = FirebaseFirestore.GrpcStatus;
 import api = google.firestore.v1;
+import {getRetryCodes} from "./gax-util";
 
 /*!
  * The maximum number of writes that can be in a single batch.

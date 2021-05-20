@@ -31,7 +31,6 @@ import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {FirestoreUnaryMethod, UpdateMap} from './types';
 import {
-  getRetryCodes,
   isObject,
   isPlainObject,
   requestTag,
@@ -47,6 +46,7 @@ import {
 } from './validate';
 import {Status} from 'google-gax';
 import api = google.firestore.v1;
+import {getRetryCodes} from "./gax-util";
 
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),

@@ -16,14 +16,12 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions, grpc, RetryOptions} from 'google-gax';
-import {Duplex, PassThrough, Transform} from 'stream';
+import {Duplex} from 'stream';
 
 import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
-import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
-import {BulkWriter} from './bulk-writer';
+import {ExponentialBackoffSetting} from './backoff';
 import {BundleBuilder} from './bundle';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
@@ -39,27 +37,15 @@ import {
   ResourcePath,
   validateResourcePath,
 } from './path';
-import {ClientPool} from './pool';
-import {CollectionReference} from './reference';
-import {DocumentReference} from './reference';
+import {CollectionReference, DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {parseGetAllArguments, Transaction} from './transaction';
 import {
   ApiMapValue,
   FirestoreStreamingMethod,
   FirestoreUnaryMethod,
-  GapicClient,
-  UnaryMethod,
 } from './types';
-import {
-  autoId,
-  Deferred,
-  getRetryParams,
-  isPermanentRpcError,
-  requestTag,
-  wrapError,
-} from './util';
+import {autoId, requestTag, wrapError} from './util';
 import {
   validateBoolean,
   validateFunction,
@@ -69,14 +55,14 @@ import {
   validateObject,
   validateString,
 } from './validate';
-import {WriteBatch} from './write-batch';
 
 import {interfaces} from './v1/firestore_client_config.json';
+import {CollectionGroup} from './collection-group';
+
 const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
-import {CollectionGroup} from './collection-group';
-import {RecursiveDelete} from './recursive-delete';
+import {RpcClient} from './rpc-client';
 
 export {
   CollectionReference,
@@ -84,11 +70,11 @@ export {
   QuerySnapshot,
   Query,
 } from './reference';
-export {BulkWriter} from './bulk-writer';
+//export {BulkWriter} from './bulk-writer';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
-export {WriteBatch, WriteResult} from './write-batch';
-export {Transaction} from './transaction';
+//export {WriteBatch, WriteResult} from './write-batch';
+//export {Transaction} from './transaction';
 export {Timestamp} from './timestamp';
 export {DocumentChange} from './document-change';
 export {FieldPath} from './path';
@@ -96,10 +82,11 @@ export {GeoPoint} from './geo-point';
 export {CollectionGroup};
 export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
-export {Status as GrpcStatus} from 'google-gax';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
+
+// eslint-disable @typescript-eslint/no-explicit-any
 
 /*!
  * DO NOT REMOVE THE FOLLOWING NAMESPACE DEFINITIONS
@@ -134,28 +121,9 @@ let v1: unknown; // Lazy-loaded in `_runRequest()`
 let v1beta1: unknown; // Lazy-loaded upon access.
 
 /*!
- * HTTP header for the resource prefix to improve routing and project isolation
- * by the backend.
+ * @see GrpcStatus
  */
-const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
-
-/*!
- * The maximum number of times to retry idempotent requests.
- */
-export const MAX_REQUEST_RETRIES = 5;
-
-/*!
- * The default number of idle GRPC channel to keep.
- */
-const DEFAULT_MAX_IDLE_CHANNELS = 1;
-
-/*!
- * The maximum number of concurrent requests supported by a single GRPC channel,
- * as enforced by Google's Frontend. If the SDK issues more than 100 concurrent
- * operations, we need to use more than one GAPIC client since these clients
- * multiplex all requests over a single channel.
- */
-const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
+let grpcStatus: unknown; // Lazy-loaded upon access.
 
 /**
  * Document data (e.g. for use with
@@ -339,13 +307,6 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  */
 export class Firestore implements firestore.Firestore {
   /**
-   * A client pool to distribute requests over multiple GAPIC clients in order
-   * to work around a connection limit of 100 concurrent requests per client.
-   * @private
-   */
-  private _clientPool: ClientPool<GapicClient>;
-
-  /**
    * The configuration options for the GAPIC client.
    * @private
    */
@@ -391,17 +352,22 @@ export class Firestore implements firestore.Firestore {
   /**
    * A lazy-loaded BulkWriter instance to be used with recursiveDelete() if no
    * BulkWriter instance is provided.
-   *
    * @private
    */
-  private _bulkWriter: BulkWriter | undefined;
+  private _bulkWriter: any | undefined;
+
+  /**
+   * A lazy-loaded wrapper around Firestore's networking layer.
+   * @private
+   */
+  private _rpcClient: RpcClient | undefined;
 
   /**
    * Lazy-load the Firestore's default BulkWriter.
    *
    * @private
    */
-  private getBulkWriter(): BulkWriter {
+  private getBulkWriter(): any {
     if (!this._bulkWriter) {
       this._bulkWriter = this.bulkWriter();
     }
@@ -469,34 +435,6 @@ export class Firestore implements firestore.Firestore {
       maxDelayMs: retryConfig.max_retry_delay_millis,
       backoffFactor: retryConfig.retry_delay_multiplier,
     };
-
-    const maxIdleChannels =
-      this._settings.maxIdleChannels === undefined
-        ? DEFAULT_MAX_IDLE_CHANNELS
-        : this._settings.maxIdleChannels;
-    this._clientPool = new ClientPool<GapicClient>(
-      MAX_CONCURRENT_REQUESTS_PER_CLIENT,
-      maxIdleChannels,
-      /* clientFactory= */ () => {
-        let client: GapicClient;
-
-        if (this._settings.ssl === false) {
-          const grpcModule = this._settings.grpc ?? grpc;
-          const sslCreds = grpcModule.credentials.createInsecure();
-
-          client = new module.exports.v1({
-            sslCreds,
-            ...this._settings,
-          });
-        } else {
-          client = new module.exports.v1(this._settings);
-        }
-
-        logger('Firestore', null, 'Initialized Firestore GAPIC Client');
-        return client;
-      },
-      /* clientDestructor= */ client => client.close()
-    );
 
     logger('Firestore', null, 'Initialized Firestore');
   }
@@ -728,8 +666,8 @@ export class Firestore implements firestore.Firestore {
    *   console.log('Successfully executed batch.');
    * });
    */
-  batch(): WriteBatch {
-    return new WriteBatch(this);
+  batch(): any {
+    return new (require('write-batch').WriteBatch)(this);
   }
 
   /**
@@ -765,8 +703,8 @@ export class Firestore implements firestore.Firestore {
    *   console.log('Executed all writes');
    * });
    */
-  bulkWriter(options?: firestore.BulkWriterOptions): BulkWriter {
-    return new BulkWriter(this, options);
+  bulkWriter(options?: firestore.BulkWriterOptions): any {
+    return new (require('BulkWriter').BulkWriter)(this, options);
   }
 
   /**
@@ -946,32 +884,10 @@ export class Firestore implements firestore.Firestore {
    * });
    */
   runTransaction<T>(
-    updateFunction: (transaction: Transaction) => Promise<T>,
+    updateFunction: (transaction: any) => Promise<T>,
     transactionOptions?: {maxAttempts?: number}
   ): Promise<T> {
-    validateFunction('updateFunction', updateFunction);
-
-    const defaultAttempts = 5;
-    const tag = requestTag();
-
-    let maxAttempts: number;
-
-    if (transactionOptions) {
-      validateObject('transactionOptions', transactionOptions);
-      validateInteger(
-        'transactionOptions.maxAttempts',
-        transactionOptions.maxAttempts,
-        {optional: true, minValue: 1}
-      );
-      maxAttempts = transactionOptions.maxAttempts || defaultAttempts;
-    } else {
-      maxAttempts = defaultAttempts;
-    }
-
-    const transaction = new Transaction(this, tag);
-    return this.initializeIfNeeded(tag).then(() =>
-      transaction.runTransaction(updateFunction, maxAttempts)
-    );
+    return Promise.resolve({} as any);
   }
 
   /**
@@ -1025,19 +941,7 @@ export class Firestore implements firestore.Firestore {
       1
     );
 
-    const {documents, fieldMask} = parseGetAllArguments(
-      documentRefsOrReadOptions
-    );
-    const tag = requestTag();
-
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    return this.initializeIfNeeded(tag)
-      .then(() => this.getAll_(documents, fieldMask, tag))
-      .catch(err => {
-        throw wrapError(err, stack);
-      });
+    return Promise.resolve([]);
   }
 
   /**
@@ -1247,10 +1151,14 @@ export class Firestore implements firestore.Firestore {
     ref:
       | firestore.CollectionReference<unknown>
       | firestore.DocumentReference<unknown>,
-    bulkWriter?: BulkWriter
+    bulkWriter?: any
   ): Promise<void> {
     const writer = bulkWriter ?? this.getBulkWriter();
-    const deleter = new RecursiveDelete(this, writer, ref);
+    const deleter = new (require('recursive-delete').RecursiveDelete)(
+      this,
+      writer,
+      ref
+    );
     return deleter.run();
   }
 
@@ -1268,7 +1176,7 @@ export class Firestore implements firestore.Firestore {
           `${this.bulkWritersCount} open BulkWriter instances.`
       );
     }
-    return this._clientPool.terminate();
+    return this._rpcClient ? this._rpcClient.terminate() : Promise.resolve();
   }
 
   /**
@@ -1297,225 +1205,13 @@ export class Firestore implements firestore.Firestore {
       };
     }
 
-    if (this._projectId === undefined) {
-      try {
-        this._projectId = await this._clientPool.run(requestTag, gapicClient =>
-          gapicClient.getProjectId()
-        );
-        logger(
-          'Firestore.initializeIfNeeded',
-          null,
-          'Detected project ID: %s',
-          this._projectId
-        );
-      } catch (err) {
-        logger(
-          'Firestore.initializeIfNeeded',
-          null,
-          'Failed to detect project ID: %s',
-          err
-        );
-        return Promise.reject(err);
-      }
+    if (this._rpcClient === undefined) {
+      this._rpcClient = new (require('dev/src/rpc-client-impl').RpcClientImpl)(
+        this._settings
+      );
+      await this._rpcClient!.initialize(requestTag);
+      this._projectId = this._rpcClient!.projectId;
     }
-  }
-
-  /**
-   * Returns GAX call options that set the cloud resource header.
-   * @private
-   */
-  private createCallOptions(
-    methodName: string,
-    retryCodes?: number[]
-  ): CallOptions {
-    const callOptions: CallOptions = {
-      otherArgs: {
-        headers: {
-          [CLOUD_RESOURCE_HEADER]: this.formattedName,
-          ...this._settings.customHeaders,
-          ...this._settings[methodName]?.customHeaders,
-        },
-      },
-    };
-
-    if (retryCodes) {
-      const retryParams = getRetryParams(methodName);
-      callOptions.retry = new RetryOptions(retryCodes, retryParams);
-    }
-
-    return callOptions;
-  }
-
-  /**
-   * A function returning a Promise that can be retried.
-   *
-   * @private
-   * @callback retryFunction
-   * @returns {Promise} A Promise indicating the function's success.
-   */
-
-  /**
-   * Helper method that retries failed Promises.
-   *
-   * If 'delayMs' is specified, waits 'delayMs' between invocations. Otherwise,
-   * schedules the first attempt immediately, and then waits 100 milliseconds
-   * for further attempts.
-   *
-   * @private
-   * @param methodName Name of the Veneer API endpoint that takes a request
-   * and GAX options.
-   * @param requestTag A unique client-assigned identifier for this request.
-   * @param func Method returning a Promise than can be retried.
-   * @returns A Promise with the function's result if successful within
-   * `attemptsRemaining`. Otherwise, returns the last rejected Promise.
-   */
-  private async _retry<T>(
-    methodName: string,
-    requestTag: string,
-    func: () => Promise<T>
-  ): Promise<T> {
-    const backoff = new ExponentialBackoff();
-
-    let lastError: Error | undefined = undefined;
-
-    for (let attempt = 0; attempt < MAX_REQUEST_RETRIES; ++attempt) {
-      if (lastError) {
-        logger(
-          'Firestore._retry',
-          requestTag,
-          'Retrying request that failed with error:',
-          lastError
-        );
-      }
-
-      try {
-        await backoff.backoffAndWait();
-        return await func();
-      } catch (err) {
-        lastError = err;
-
-        if (isPermanentRpcError(err, methodName)) {
-          break;
-        }
-      }
-    }
-
-    logger(
-      'Firestore._retry',
-      requestTag,
-      'Request failed with error:',
-      lastError
-    );
-    return Promise.reject(lastError);
-  }
-
-  /**
-   * Waits for the provided stream to become active and returns a paused but
-   * healthy stream. If an error occurs before the first byte is read, the
-   * method rejects the returned Promise.
-   *
-   * @private
-   * @param backendStream The Node stream to monitor.
-   * @param lifetime A Promise that resolves when the stream receives an 'end',
-   * 'close' or 'finish' message.
-   * @param requestTag A unique client-assigned identifier for this request.
-   * @param request If specified, the request that should be written to the
-   * stream after opening.
-   * @returns A guaranteed healthy stream that should be used instead of
-   * `backendStream`.
-   */
-  private _initializeStream(
-    backendStream: Duplex,
-    lifetime: Deferred<void>,
-    requestTag: string,
-    request?: {}
-  ): Promise<Duplex> {
-    const resultStream = new PassThrough({objectMode: true});
-    resultStream.pause();
-
-    /**
-     * Whether we have resolved the Promise and returned the stream to the
-     * caller.
-     */
-    let streamInitialized = false;
-
-    return new Promise<Duplex>((resolve, reject) => {
-      function streamReady(): void {
-        if (!streamInitialized) {
-          streamInitialized = true;
-          logger('Firestore._initializeStream', requestTag, 'Releasing stream');
-          resolve(resultStream);
-        }
-      }
-
-      function streamEnded(): void {
-        logger(
-          'Firestore._initializeStream',
-          requestTag,
-          'Received stream end'
-        );
-        resultStream.unpipe(backendStream);
-        resolve(resultStream);
-        lifetime.resolve();
-      }
-
-      function streamFailed(err: Error): void {
-        if (!streamInitialized) {
-          // If we receive an error before we were able to receive any data,
-          // reject this stream.
-          logger(
-            'Firestore._initializeStream',
-            requestTag,
-            'Received initial error:',
-            err
-          );
-          reject(err);
-        } else {
-          logger(
-            'Firestore._initializeStream',
-            requestTag,
-            'Received stream error:',
-            err
-          );
-          // We execute the forwarding of the 'error' event via setImmediate() as
-          // V8 guarantees that the Promise chain returned from this method
-          // is resolved before any code executed via setImmediate(). This
-          // allows the caller to attach an error handler.
-          setImmediate(() => {
-            resultStream.emit('error', err);
-          });
-        }
-      }
-
-      backendStream.on('data', () => streamReady());
-      backendStream.on('error', err => streamFailed(err));
-      backendStream.on('end', () => streamEnded());
-      backendStream.on('close', () => streamEnded());
-      backendStream.on('finish', () => streamEnded());
-
-      backendStream.pipe(resultStream);
-
-      if (request) {
-        logger(
-          'Firestore._initializeStream',
-          requestTag,
-          'Sending request: %j',
-          request
-        );
-        backendStream.write(request, 'utf-8', err => {
-          if (err) {
-            streamFailed(err);
-          } else {
-            logger(
-              'Firestore._initializeStream',
-              requestTag,
-              'Marking stream as healthy'
-            );
-            streamReady();
-          }
-        });
-      }
-    });
   }
 
   /**
@@ -1537,27 +1233,12 @@ export class Firestore implements firestore.Firestore {
     requestTag: string,
     retryCodes?: number[]
   ): Promise<Resp> {
-    const callOptions = this.createCallOptions(methodName, retryCodes);
-
-    return this._clientPool.run(requestTag, async gapicClient => {
-      try {
-        logger('Firestore.request', requestTag, 'Sending request: %j', request);
-        const [result] = await (gapicClient[methodName] as UnaryMethod<
-          Req,
-          Resp
-        >)(request, callOptions);
-        logger(
-          'Firestore.request',
-          requestTag,
-          'Received response: %j',
-          result
-        );
-        return result;
-      } catch (err) {
-        logger('Firestore.request', requestTag, 'Received error:', err);
-        return Promise.reject(err);
-      }
-    });
+    return this._rpcClient!.request(
+      methodName,
+      request,
+      requestTag,
+      retryCodes
+    );
   }
 
   /**
@@ -1579,59 +1260,7 @@ export class Firestore implements firestore.Firestore {
     request: {},
     requestTag: string
   ): Promise<Duplex> {
-    const callOptions = this.createCallOptions(methodName);
-
-    const bidirectional = methodName === 'listen';
-
-    return this._retry(methodName, requestTag, () => {
-      const result = new Deferred<Duplex>();
-
-      this._clientPool.run(requestTag, async gapicClient => {
-        logger(
-          'Firestore.requestStream',
-          requestTag,
-          'Sending request: %j',
-          request
-        );
-        try {
-          const stream = bidirectional
-            ? gapicClient[methodName](callOptions)
-            : gapicClient[methodName](request, callOptions);
-          const logStream = new Transform({
-            objectMode: true,
-            transform: (chunk, encoding, callback) => {
-              logger(
-                'Firestore.requestStream',
-                requestTag,
-                'Received response: %j',
-                chunk
-              );
-              callback();
-            },
-          });
-          stream.pipe(logStream);
-
-          const lifetime = new Deferred<void>();
-          const resultStream = await this._initializeStream(
-            stream,
-            lifetime,
-            requestTag,
-            bidirectional ? request : undefined
-          );
-          resultStream.on('end', () => stream.end());
-          result.resolve(resultStream);
-
-          // While we return the stream to the callee early, we don't want to
-          // release the GAPIC client until the callee has finished processing the
-          // stream.
-          return lifetime.promise;
-        } catch (e) {
-          result.reject(e);
-        }
-      });
-
-      return result.promise;
-    });
+    return this._rpcClient!.requestStream(methodName, request, requestTag);
   }
 }
 
@@ -1719,5 +1348,16 @@ Object.defineProperty(module.exports, 'v1', {
       v1 = require('./v1');
     }
     return v1;
+  },
+});
+
+Object.defineProperty(module.exports, 'GrpcStatus', {
+  // The gax module is very large. To avoid pulling it in from static
+  // scope, we lazy-load and cache the module.
+  get: () => {
+    if (!grpcStatus) {
+      grpcStatus = require('google-gax').Status;
+    }
+    return grpcStatus;
   },
 });

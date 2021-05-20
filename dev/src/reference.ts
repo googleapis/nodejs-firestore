@@ -39,13 +39,7 @@ import {
 import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {defaultConverter} from './types';
-import {
-  autoId,
-  Deferred,
-  isPermanentRpcError,
-  requestTag,
-  wrapError,
-} from './util';
+import {autoId, Deferred, requestTag, wrapError} from './util';
 import {
   invalidArgumentMessage,
   validateEnumValue,
@@ -53,8 +47,6 @@ import {
   validateInteger,
   validateMinNumberOfArguments,
 } from './validate';
-import {DocumentWatch, QueryWatch} from './watch';
-import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = protos.google.firestore.v1;
 
@@ -351,12 +343,12 @@ export class DocumentReference<T = firestore.DocumentData>
    *   console.log(`Failed to create document: ${err}`);
    * });
    */
-  create(data: T): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
+  create(data: T): Promise<any> {
+    const writeBatch = new (require('write-batch').WriteBatch)(this._firestore);
     return writeBatch
       .create(this, data)
       .commit()
-      .then(([writeResult]) => writeResult);
+      .then(([writeResult]: any[]) => writeResult);
   }
 
   /**
@@ -380,16 +372,16 @@ export class DocumentReference<T = firestore.DocumentData>
    *   console.log('Document successfully deleted.');
    * });
    */
-  delete(precondition?: firestore.Precondition): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
+  delete(precondition?: firestore.Precondition): Promise<any> {
+    const writeBatch = new (require('write-batch').WriteBatch)(this._firestore);
     return writeBatch
       .delete(this, precondition)
       .commit()
-      .then(([writeResult]) => writeResult);
+      .then(([writeResult]: any[]) => writeResult);
   }
 
-  set(data: Partial<T>, options: firestore.SetOptions): Promise<WriteResult>;
-  set(data: T): Promise<WriteResult>;
+  set(data: Partial<T>, options: firestore.SetOptions): Promise<any>;
+  set(data: T): Promise<any>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
    * document does not yet exist, it will be created. If you pass
@@ -413,15 +405,12 @@ export class DocumentReference<T = firestore.DocumentData>
    *   console.log(`Document written at ${res.updateTime}`);
    * });
    */
-  set(
-    data: T | Partial<T>,
-    options?: firestore.SetOptions
-  ): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
+  set(data: T | Partial<T>, options?: firestore.SetOptions): Promise<any> {
+    const writeBatch = new (require('write-batch').WriteBatch)(this._firestore);
     return writeBatch
       .set(this, data, options)
       .commit()
-      .then(([writeResult]) => writeResult);
+      .then(([writeResult]: any[]) => writeResult);
   }
 
   /**
@@ -458,15 +447,15 @@ export class DocumentReference<T = firestore.DocumentData>
     ...preconditionOrValues: Array<
       unknown | string | firestore.FieldPath | firestore.Precondition
     >
-  ): Promise<WriteResult> {
+  ): Promise<any> {
     // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
-    const writeBatch = new WriteBatch(this._firestore);
+    const writeBatch = new (require('write-batch').WriteBatch)(this._firestore);
     return writeBatch
       .update(this, dataOrField, ...preconditionOrValues)
       .commit()
-      .then(([writeResult]) => writeResult);
+      .then(([writeResult]: any[]) => writeResult);
   }
 
   /**
@@ -502,9 +491,10 @@ export class DocumentReference<T = firestore.DocumentData>
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = new DocumentWatch(this.firestore, this);
+    const watch = new (require('watch').DocumentWatch)(this.firestore, this);
 
-    return watch.onSnapshot((readTime, size, docs) => {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    return watch.onSnapshot((readTime: any, size: any, docs: any) => {
       for (const document of docs()) {
         if (document.ref.path === this.path) {
           onNext(document);
@@ -2173,7 +2163,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
-            if (!transactionId && !isPermanentRpcError(err, 'runQuery')) {
+            if (!transactionId) {
               logger(
                 'Query._stream',
                 tag,
@@ -2247,15 +2237,19 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = new QueryWatch(
+    const watch = new (require('watch').QueryWatch)(
       this.firestore,
       this,
       this._queryOptions.converter
     );
 
-    return watch.onSnapshot((readTime, size, docs, changes) => {
-      onNext(new QuerySnapshot(this, readTime, size, docs, changes));
-    }, onError || console.error);
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    return watch.onSnapshot(
+      (readTime: any, size: any, docs: any, changes: any) => {
+        onNext(new QuerySnapshot(this, readTime, size, docs, changes));
+      },
+      onError || console.error
+    );
   }
 
   /**
@@ -2578,13 +2572,6 @@ export class CollectionReference<T = firestore.DocumentData>
    */
   add(data: T): Promise<DocumentReference<T>> {
     const firestoreData = this._queryOptions.converter.toFirestore(data);
-    validateDocumentData(
-      'data',
-      firestoreData,
-      /*allowDeletes=*/ false,
-      this._allowUndefined
-    );
-
     const documentRef = this.doc();
     return documentRef.create(data).then(() => documentRef);
   }
