@@ -22,7 +22,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshot} from './document';
-import {Firestore, WriteBatch} from './index';
+import {Firestore} from './index';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {
@@ -40,6 +40,7 @@ import {
 } from './validate';
 
 import api = proto.google.firestore.v1;
+import {WriteBatch} from "./write-batch";
 
 /*!
  * Error message for transactional reads that were executed after performing

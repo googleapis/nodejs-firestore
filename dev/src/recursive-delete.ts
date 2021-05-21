@@ -18,7 +18,6 @@ import * as firestore from '@google-cloud/firestore';
 import * as assert from 'assert';
 
 import Firestore, {
-  BulkWriter,
   CollectionReference,
   DocumentReference,
   FieldPath,
@@ -27,7 +26,7 @@ import Firestore, {
 } from '.';
 import {Deferred, wrapError} from './util';
 import {GoogleError, Status} from 'google-gax';
-import {BulkWriterError} from './bulk-writer';
+import {BulkWriter, BulkWriterError} from './bulk-writer';
 import {QueryOptions} from './reference';
 
 /**
