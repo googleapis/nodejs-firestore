@@ -22,7 +22,6 @@ import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoffSetting} from './backoff';
-import {BundleBuilder} from './bundle';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
   DocumentSnapshot,
@@ -824,8 +823,8 @@ export class Firestore implements firestore.Firestore {
    * and the timestamp associated with the built bundle to tell if it has been loaded already.
    * If not specified, a random identifier will be used.
    */
-  bundle(name?: string): BundleBuilder {
-    return new BundleBuilder(name || autoId());
+  bundle(name?: string): any {
+    return new (require('bundle').BundleBuilder)(name || autoId());
   }
 
   /**
