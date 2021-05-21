@@ -222,7 +222,7 @@ describe('Client pool', () => {
   });
 
   it('garbage collection calls destructor', () => {
-    const garbageCollect = new Deferred();
+    const garbageCollect = new Deferred<void>();
 
     const clientPool = new ClientPool<{}>(
       1,
