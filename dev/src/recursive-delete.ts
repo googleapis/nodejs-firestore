@@ -48,7 +48,7 @@ export const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
  * from streaming documents faster than Firestore can delete.
  */
 // Visible for testing.
-export const MAX_PENDING_OPS = 5000;
+export const RECURSIVE_DELETE_MAX_PENDING_OPS = 5000;
 
 /**
  * The number of pending BulkWriter operations at which RecursiveDelete
@@ -57,7 +57,7 @@ export const MAX_PENDING_OPS = 5000;
  * throughput. This helps prevent BulkWriter from idling while Firestore
  * fetches the next query.
  */
-const MIN_PENDING_OPS = 1000;
+export const RECURSIVE_DELETE_MIN_PENDING_OPS = 1000;
 
 /**
  * Class used to store state required for running a recursive delete operation.
@@ -83,6 +83,21 @@ export class RecursiveDelete {
    * @private
    */
   private documentsPending = true;
+
+  /**
+   * Whether run() has been called.
+   * @private
+   */
+  private started = false;
+
+  /** Query limit to use when fetching all descendants. */
+  private maxPendingOps: number;
+
+  /**
+   * The number of pending BulkWriter operations at which RecursiveDelete starts the next limit
+   * query to fetch descendants.
+   */
+  private minPendingOps: number;
 
   /**
    * A deferred promise that resolves when the recursive delete operation
@@ -125,8 +140,13 @@ export class RecursiveDelete {
     private readonly writer: BulkWriter,
     private readonly ref:
       | firestore.CollectionReference<unknown>
-      | firestore.DocumentReference<unknown>
-  ) {}
+      | firestore.DocumentReference<unknown>,
+    private readonly maxLimit: number,
+    private readonly minLimit: number,
+  ) {
+    this.maxPendingOps = maxLimit;
+    this.minPendingOps = minLimit;
+  }
 
   /**
    * Recursively deletes the reference provided in the class constructor.
@@ -135,8 +155,8 @@ export class RecursiveDelete {
    */
   run(): Promise<void> {
     assert(
-      this.documentsPending,
-      'The recursive delete operation has already been completed.'
+      !this.started,
+      'RecursiveDelete.run() should only be called once.'
     );
 
     // Capture the error stack to preserve stack tracing across async calls.
@@ -152,12 +172,10 @@ export class RecursiveDelete {
    * @private
    */
   private setupStream(): void {
-    const limit = MAX_PENDING_OPS;
     const stream = this.getAllDescendants(
       this.ref instanceof CollectionReference
         ? (this.ref as CollectionReference<unknown>)
         : (this.ref as DocumentReference<unknown>),
-      limit
     );
     this.streamInProgress = true;
     let streamedDocsCount = 0;
@@ -177,7 +195,7 @@ export class RecursiveDelete {
         this.streamInProgress = false;
         // If there are fewer than the number of documents specified in the
         // limit() field, we know that the query is complete.
-        if (streamedDocsCount < limit) {
+        if (streamedDocsCount < this.minPendingOps) {
           this.onQueryEnd();
         } else if (this.pendingOpsCount === 0) {
           this.setupStream();
@@ -193,8 +211,7 @@ export class RecursiveDelete {
    * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
    */
   private getAllDescendants(
-    ref: CollectionReference<unknown> | DocumentReference<unknown>,
-    limit: number
+    ref: CollectionReference<unknown> | DocumentReference<unknown>
   ): NodeJS.ReadableStream {
     // The parent is the closest ancestor document to the location we're
     // deleting. If we are deleting a document, the parent is the path of that
@@ -220,7 +237,7 @@ export class RecursiveDelete {
     );
 
     // Query for names only to fetch empty snapshots.
-    query = query.select(FieldPath.documentId()).limit(limit);
+    query = query.select(FieldPath.documentId()).limit(this.maxPendingOps);
 
     if (ref instanceof CollectionReference) {
       // To find all descendants of a collection reference, we need to use a
@@ -300,7 +317,7 @@ export class RecursiveDelete {
         if (
           this.documentsPending &&
           !this.streamInProgress &&
-          this.pendingOpsCount < MIN_PENDING_OPS
+          this.pendingOpsCount < this.minPendingOps
         ) {
           this.setupStream();
         }
