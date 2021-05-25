@@ -79,7 +79,7 @@ import {CollectionGroup} from './collection-group';
 import {
   RECURSIVE_DELETE_MAX_PENDING_OPS,
   RECURSIVE_DELETE_MIN_PENDING_OPS,
-  RecursiveDelete
+  RecursiveDelete,
 } from './recursive-delete';
 
 export {
@@ -1255,7 +1255,12 @@ export class Firestore implements firestore.Firestore {
       | firestore.DocumentReference<unknown>,
     bulkWriter?: BulkWriter
   ): Promise<void> {
-    return this._recursiveDelete(ref, RECURSIVE_DELETE_MAX_PENDING_OPS, RECURSIVE_DELETE_MIN_PENDING_OPS, bulkWriter);
+    return this._recursiveDelete(
+      ref,
+      RECURSIVE_DELETE_MAX_PENDING_OPS,
+      RECURSIVE_DELETE_MIN_PENDING_OPS,
+      bulkWriter
+    );
   }
 
   /**
@@ -1266,15 +1271,21 @@ export class Firestore implements firestore.Firestore {
    */
   // Visible for testing
   _recursiveDelete(
-      ref:
-          | firestore.CollectionReference<unknown>
-          | firestore.DocumentReference<unknown>,
-      maxPendingOps: number,
-      minPendingOps: number,
-      bulkWriter?: BulkWriter
-): Promise<void> {
+    ref:
+      | firestore.CollectionReference<unknown>
+      | firestore.DocumentReference<unknown>,
+    maxPendingOps: number,
+    minPendingOps: number,
+    bulkWriter?: BulkWriter
+  ): Promise<void> {
     const writer = bulkWriter ?? this.getBulkWriter();
-    const deleter = new RecursiveDelete(this, writer, ref, maxPendingOps, minPendingOps);
+    const deleter = new RecursiveDelete(
+      this,
+      writer,
+      ref,
+      maxPendingOps,
+      minPendingOps
+    );
     return deleter.run();
   }
 

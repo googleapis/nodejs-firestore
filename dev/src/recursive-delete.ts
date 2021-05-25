@@ -134,6 +134,9 @@ export class RecursiveDelete {
    * @param firestore The Firestore instance to use.
    * @param writer The BulkWriter instance to use for delete operations.
    * @param ref The document or collection reference to recursively delete.
+   * @param maxLimit The query limit to use when fetching descendants
+   * @param minLimit The number of pending BulkWriter operations at which
+   * RecursiveDelete starts the next limit query to fetch descendants.
    */
   constructor(
     private readonly firestore: Firestore,
@@ -142,7 +145,7 @@ export class RecursiveDelete {
       | firestore.CollectionReference<unknown>
       | firestore.DocumentReference<unknown>,
     private readonly maxLimit: number,
-    private readonly minLimit: number,
+    private readonly minLimit: number
   ) {
     this.maxPendingOps = maxLimit;
     this.minPendingOps = minLimit;
@@ -154,10 +157,7 @@ export class RecursiveDelete {
    * if an error occurs.
    */
   run(): Promise<void> {
-    assert(
-      !this.started,
-      'RecursiveDelete.run() should only be called once.'
-    );
+    assert(!this.started, 'RecursiveDelete.run() should only be called once.');
 
     // Capture the error stack to preserve stack tracing across async calls.
     this.errorStack = Error().stack!;
@@ -175,7 +175,7 @@ export class RecursiveDelete {
     const stream = this.getAllDescendants(
       this.ref instanceof CollectionReference
         ? (this.ref as CollectionReference<unknown>)
-        : (this.ref as DocumentReference<unknown>),
+        : (this.ref as DocumentReference<unknown>)
     );
     this.streamInProgress = true;
     let streamedDocsCount = 0;
@@ -206,7 +206,6 @@ export class RecursiveDelete {
   /**
    * Retrieves all descendant documents nested under the provided reference.
    * @param ref The reference to fetch all descendants for.
-   * @param limit The number of descendants to fetch in the query.
    * @private
    * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
    */

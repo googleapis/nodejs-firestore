@@ -50,8 +50,11 @@ import {
 import {MAX_REQUEST_RETRIES} from '../src';
 
 import api = google.firestore.v1;
-import {RECURSIVE_DELETE_MAX_PENDING_OPS, REFERENCE_NAME_MIN_ID} from '../src/recursive-delete';
-import {Deferred} from "../src/util";
+import {
+  RECURSIVE_DELETE_MAX_PENDING_OPS,
+  REFERENCE_NAME_MIN_ID,
+} from '../src/recursive-delete';
+import {Deferred} from '../src/util';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -254,12 +257,12 @@ describe('recursiveDelete() method:', () => {
       // This deferred completes when the second query is run.
       const secondQueryDeferred = new Deferred<void>();
 
-      const firstStream = Array.from(Array(maxPendingOps).keys()).map(
-        (_, i) => result('doc' + i)
+      const firstStream = Array.from(Array(maxPendingOps).keys()).map((_, i) =>
+        result('doc' + i)
       );
 
       const batchWriteResponse = mergeResponses(
-          Array.from(Array(maxBatchSize).keys()).map(() => successResponse(1))
+        Array.from(Array(maxBatchSize).keys()).map(() => successResponse(1))
       );
 
       // Use an array to store that the queryEquals() method succeeded, since
@@ -342,7 +345,12 @@ describe('recursiveDelete() method:', () => {
 
       const bulkWriter = firestore.bulkWriter();
       bulkWriter._maxBatchSize = maxBatchSize;
-      await firestore._recursiveDelete(firestore.collection('root'), maxPendingOps, minPendingOps, bulkWriter);
+      await firestore._recursiveDelete(
+        firestore.collection('root'),
+        maxPendingOps,
+        minPendingOps,
+        bulkWriter
+      );
       expect(called).to.deep.equal([1, 2]);
     });
   });
