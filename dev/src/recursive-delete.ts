@@ -26,9 +26,10 @@ import Firestore, {
   QueryDocumentSnapshot,
 } from '.';
 import {Deferred, wrapError} from './util';
-import {GoogleError, Status} from 'google-gax';
+import {GoogleError} from 'google-gax';
 import {BulkWriterError} from './bulk-writer';
 import {QueryOptions} from './reference';
+import {StatusCode} from './status-code';
 
 /**
  * Datastore allowed numeric IDs where Firestore only allows strings. Numeric
@@ -163,7 +164,7 @@ export class RecursiveDelete {
     let streamedDocsCount = 0;
     stream
       .on('error', err => {
-        err.code = Status.UNAVAILABLE;
+        err.code = StatusCode.UNAVAILABLE;
         err.stack = 'Failed to fetch children documents: ' + err.stack;
         this.lastError = err;
         this.onQueryEnd();
@@ -258,13 +259,13 @@ export class RecursiveDelete {
       if (this.lastError === undefined) {
         this.completionDeferred.resolve();
       } else {
-        let error = new GoogleError(
+        let error = new (require('google-gax').GoogleError)(
           `${this.errorCount} ` +
             `${this.errorCount !== 1 ? 'deletes' : 'delete'} ` +
             'failed. The last delete failed with: '
         );
         if (this.lastError.code !== undefined) {
-          error.code = (this.lastError.code as number) as Status;
+          error.code = this.lastError.code as number;
         }
         error = wrapError(error, this.errorStack);
 

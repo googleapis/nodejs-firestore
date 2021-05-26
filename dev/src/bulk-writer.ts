@@ -16,6 +16,7 @@
 import * as firestore from '@google-cloud/firestore';
 
 import * as assert from 'assert';
+import {GoogleError} from 'google-gax';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath, Firestore} from '.';
@@ -44,7 +45,7 @@ import {
   validateOptional,
 } from './validate';
 import {logger} from './logger';
-import {GoogleError, Status} from 'google-gax';
+import {StatusCode} from './status-code';
 
 // eslint-disable-next-line no-undef
 import GrpcStatus = FirebaseFirestore.GrpcStatus;
@@ -104,7 +105,7 @@ const DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT = 500;
 class BulkWriterOperation {
   private deferred = new Deferred<WriteResult>();
   private failedAttempts = 0;
-  private lastStatus?: Status;
+  private lastStatus?: StatusCode;
   private _backoffDuration = 0;
 
   /**
@@ -157,7 +158,7 @@ class BulkWriterOperation {
       );
 
       if (shouldRetry) {
-        this.lastStatus = error.code;
+        this.lastStatus = error.code as number;
         this.updateBackoffDuration();
         this.sendFn(this);
       } else {
@@ -169,7 +170,7 @@ class BulkWriterOperation {
   }
 
   private updateBackoffDuration(): void {
-    if (this.lastStatus === Status.RESOURCE_EXHAUSTED) {
+    if (this.lastStatus === StatusCode.RESOURCE_EXHAUSTED) {
       this._backoffDuration = DEFAULT_BACKOFF_MAX_DELAY_MS;
     } else if (this._backoffDuration === 0) {
       this._backoffDuration = DEFAULT_BACKOFF_INITIAL_DELAY_MS;
@@ -241,14 +242,16 @@ class BulkCommitBatch extends WriteBatch {
       const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
 
       const status = (response.status || [])[i];
-      if (status.code === Status.OK) {
+      if (status.code === StatusCode.OK) {
         const updateTime = Timestamp.fromProto(
           response.writeResults![i].updateTime || DELETE_TIMESTAMP_SENTINEL
         );
         this.pendingOps[i].onSuccess(new WriteResult(updateTime));
       } else {
-        const error = new GoogleError(status.message || undefined);
-        error.code = status.code as Status;
+        const error = new (require('google-gax').GoogleError)(
+          status.message || undefined
+        );
+        error.code = status.code as number;
         this.pendingOps[i].onError(wrapError(error, stack));
       }
     }
@@ -389,7 +392,7 @@ export class BulkWriter {
   private _errorFn: (error: BulkWriterError) => boolean = error => {
     const isRetryableDeleteError =
       error.operationType === 'delete' &&
-      (error.code as number) === Status.INTERNAL;
+      (error.code as number) === StatusCode.INTERNAL;
     const retryCodes = getRetryCodes('batchWrite');
     return (
       (retryCodes.includes(error.code) || isRetryableDeleteError) &&

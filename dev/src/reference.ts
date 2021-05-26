@@ -502,8 +502,10 @@ export class DocumentReference<T = firestore.DocumentData>
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = new DocumentWatch(this.firestore, this);
-
+    const watch: DocumentWatch<T> = new (require('./watch').DocumentWatch)(
+      this.firestore,
+      this
+    );
     return watch.onSnapshot((readTime, size, docs) => {
       for (const document of docs()) {
         if (document.ref.path === this.path) {
@@ -2247,7 +2249,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = new QueryWatch(
+    const watch: QueryWatch<T> = new (require('./watch').QueryWatch)(
       this.firestore,
       this,
       this._queryOptions.converter

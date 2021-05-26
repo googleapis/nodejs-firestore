@@ -45,7 +45,8 @@ import {
   validateMinNumberOfArguments,
   validateOptional,
 } from './validate';
-import {Status} from 'google-gax';
+import {StatusCode} from './status-code';
+
 import api = google.firestore.v1;
 
 /**
@@ -542,7 +543,7 @@ export class WriteBatch implements firestore.WriteBatch {
     const stack = Error().stack!;
 
     // Commits should also be retried when they fail with status code ABORTED.
-    const retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
+    const retryCodes = [StatusCode.ABORTED, ...getRetryCodes('commit')];
 
     return this._commit<api.CommitRequest, api.CommitResponse>({retryCodes})
       .then(response => {
