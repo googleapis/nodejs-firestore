@@ -99,7 +99,8 @@ describe('Collection interface', () => {
     const overrides: ApiOverride = {
       commit: request => {
         // Verify that the document name uses an auto-generated id.
-        const docIdRe = /^projects\/test-project\/databases\/\(default\)\/documents\/collectionId\/[a-zA-Z0-9]{20}$/;
+        const docIdRe =
+          /^projects\/test-project\/databases\/\(default\)\/documents\/collectionId\/[a-zA-Z0-9]{20}$/;
         expect(request.writes![0].update!.name).to.match(docIdRe);
         delete request.writes![0].update!.name;
 

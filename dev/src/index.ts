@@ -76,7 +76,11 @@ const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
 import {CollectionGroup} from './collection-group';
-import {RecursiveDelete} from './recursive-delete';
+import {
+  RECURSIVE_DELETE_MAX_PENDING_OPS,
+  RECURSIVE_DELETE_MIN_PENDING_OPS,
+  RecursiveDelete,
+} from './recursive-delete';
 
 export {
   CollectionReference,
@@ -214,7 +218,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * [update()]{@link DocumentReference#update} and
  * [delete()]{@link DocumentReference#delete} calls in
  * [DocumentReference]{@link DocumentReference},
- * [WriteBatch]{@link WriteBatch}, and
+ * [WriteBatch]{@link WriteBatch}, [BulkWriter]({@link BulkWriter}, and
  * [Transaction]{@link Transaction}. Using Preconditions, these calls
  * can be restricted to only apply to documents that match the specified
  * conditions.
@@ -232,6 +236,8 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * @property {Timestamp} lastUpdateTime The update time to enforce. If set,
  *  enforces that the document was last updated at lastUpdateTime. Fails the
  *  operation if the document was last updated at a different time.
+ * @property {boolean} exists If set, enforces that the target document must
+ * or must not exist.
  * @typedef {Object} Precondition
  */
 
@@ -1238,8 +1244,37 @@ export class Firestore implements firestore.Firestore {
       | firestore.DocumentReference<unknown>,
     bulkWriter?: BulkWriter
   ): Promise<void> {
+    return this._recursiveDelete(
+      ref,
+      RECURSIVE_DELETE_MAX_PENDING_OPS,
+      RECURSIVE_DELETE_MIN_PENDING_OPS,
+      bulkWriter
+    );
+  }
+
+  /**
+   * This overload is not private in order to test the query resumption with
+   * startAfter() once the RecursiveDelete instance has MAX_PENDING_OPS pending.
+   *
+   * @private
+   */
+  // Visible for testing
+  _recursiveDelete(
+    ref:
+      | firestore.CollectionReference<unknown>
+      | firestore.DocumentReference<unknown>,
+    maxPendingOps: number,
+    minPendingOps: number,
+    bulkWriter?: BulkWriter
+  ): Promise<void> {
     const writer = bulkWriter ?? this.getBulkWriter();
-    const deleter = new RecursiveDelete(this, writer, ref);
+    const deleter = new RecursiveDelete(
+      this,
+      writer,
+      ref,
+      maxPendingOps,
+      minPendingOps
+    );
     return deleter.run();
   }
 
@@ -1534,10 +1569,9 @@ export class Firestore implements firestore.Firestore {
     return this._clientPool.run(requestTag, async gapicClient => {
       try {
         logger('Firestore.request', requestTag, 'Sending request: %j', request);
-        const [result] = await (gapicClient[methodName] as UnaryMethod<
-          Req,
-          Resp
-        >)(request, callOptions);
+        const [result] = await (
+          gapicClient[methodName] as UnaryMethod<Req, Resp>
+        )(request, callOptions);
         logger(
           'Firestore.request',
           requestTag,

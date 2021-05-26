@@ -139,7 +139,7 @@ class BulkWriterOperation {
 
     try {
       const bulkWriterError = new BulkWriterError(
-        (error.code as number) as GrpcStatus,
+        error.code as number as GrpcStatus,
         error.message,
         this.ref,
         this.type,
@@ -643,11 +643,21 @@ export class BulkWriter {
   }
 
   /**
+   * Callback function set by {@link BulkWriter#onWriteResult} that is run
+   * every time a {@link BulkWriter} operation successfully completes.
+   *
+   * @callback BulkWriter~successCallback
+   * @param {DocumentReference} documentRef The document reference the
+   * operation was performed on
+   * @param {WriteResult} result The server write time of the operation.
+   */
+
+  /**
    * Attaches a listener that is run every time a BulkWriter operation
    * successfully completes.
    *
-   * @param callback A callback to be called every time a BulkWriter operation
-   * successfully completes.
+   * @param {BulkWriter~successCallback} successCallback A callback to be
+   * called every time a BulkWriter operation successfully completes.
    * @example
    * let bulkWriter = firestore.bulkWriter();
    *
@@ -662,13 +672,25 @@ export class BulkWriter {
    *   });
    */
   onWriteResult(
-    callback: (
+    successCallback: (
       documentRef: firestore.DocumentReference<unknown>,
       result: WriteResult
     ) => void
   ): void {
-    this._successFn = callback;
+    this._successFn = successCallback;
   }
+
+  /**
+   * Callback function set by {@link BulkWriter#onWriteError} that is run when
+   * a write fails in order to determine whether {@link BulkWriter} should
+   * retry the operation.
+   *
+   * @callback BulkWriter~shouldRetryCallback
+   * @param {BulkWriterError} error The error object with information about the
+   * operation and error.
+   * @returns {boolean} Whether or not to retry the failed operation. Returning
+   * `true` retries the operation. Returning `false` will stop the retry loop.
+   */
 
   /**
    * Attaches an error handler listener that is run every time a BulkWriter
@@ -678,9 +700,9 @@ export class BulkWriter {
    * ABORTED errors up to a maximum of 10 failed attempts. When an error
    * handler is specified, the default error handler will be overwritten.
    *
-   * @param shouldRetryCallback A callback to be called every time a BulkWriter
-   * operation fails. Returning `true` will retry the operation. Returning
-   * `false` will stop the retry loop.
+   * @param shouldRetryCallback {BulkWriter~shouldRetryCallback} A callback to
+   * be called every time a BulkWriter operation fails. Returning `true` will
+   * retry the operation. Returning `false` will stop the retry loop.
    * @example
    * let bulkWriter = firestore.bulkWriter();
    *
@@ -806,6 +828,7 @@ export class BulkWriter {
 
   /**
    * Sends the provided batch once the rate limiter does not require any delay.
+   * @private
    */
   private async _sendBatch(
     batch: BulkCommitBatch,

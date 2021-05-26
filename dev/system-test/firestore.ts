@@ -287,9 +287,8 @@ describe('CollectionGroup class', () => {
   });
 
   it('partition query with converter', async () => {
-    const collectionGroupWithConverter = collectionGroup.withConverter(
-      postConverter
-    );
+    const collectionGroupWithConverter =
+      collectionGroup.withConverter(postConverter);
     const partitions = await getPartitions(
       collectionGroupWithConverter,
       desiredPartitionCount
@@ -734,6 +733,16 @@ describe('DocumentReference class', () => {
   it('can delete() a non-existing document', () => {
     const ref = firestore.collection('col').doc();
     return ref.delete();
+  });
+
+  it('will fail to delete document with exists: true if doc does not exist', () => {
+    const ref = randomCol.doc();
+    return ref
+      .delete({exists: true})
+      .then(() => Promise.reject('Delete should have failed'))
+      .catch((err: Error) => {
+        expect(err.message).to.contain('NOT_FOUND: No document to update');
+      });
   });
 
   it('supports non-alphanumeric field names', () => {
@@ -2750,85 +2759,88 @@ describe('BulkWriter class', () => {
 });
 
 describe('Client initialization', () => {
-  const ops: Array<
-    [string, (coll: CollectionReference) => Promise<unknown>]
-  > = [
-    ['CollectionReference.get()', randomColl => randomColl.get()],
-    ['CollectionReference.add()', randomColl => randomColl.add({})],
+  const ops: Array<[string, (coll: CollectionReference) => Promise<unknown>]> =
     [
-      'CollectionReference.stream()',
-      randomColl => {
-        const deferred = new Deferred<void>();
-        randomColl.stream().on('finish', () => {
-          deferred.resolve();
-        });
-        return deferred.promise;
-      },
-    ],
-    [
-      'CollectionReference.listDocuments()',
-      randomColl => randomColl.listDocuments(),
-    ],
-    [
-      'CollectionReference.onSnapshot()',
-      randomColl => {
-        const deferred = new Deferred<void>();
-        const unsubscribe = randomColl.onSnapshot(() => {
-          unsubscribe();
-          deferred.resolve();
-        });
-        return deferred.promise;
-      },
-    ],
-    ['DocumentReference.get()', randomColl => randomColl.doc().get()],
-    ['DocumentReference.create()', randomColl => randomColl.doc().create({})],
-    ['DocumentReference.set()', randomColl => randomColl.doc().set({})],
-    [
-      'DocumentReference.update()',
-      async randomColl => {
-        const update = randomColl.doc().update('foo', 'bar');
-        await expect(update).to.eventually.be.rejectedWith(
-          'No document to update'
-        );
-      },
-    ],
-    ['DocumentReference.delete()', randomColl => randomColl.doc().delete()],
-    [
-      'DocumentReference.listCollections()',
-      randomColl => randomColl.doc().listCollections(),
-    ],
-    [
-      'DocumentReference.onSnapshot()',
-      randomColl => {
-        const deferred = new Deferred<void>();
-        const unsubscribe = randomColl.doc().onSnapshot(() => {
-          unsubscribe();
-          deferred.resolve();
-        });
-        return deferred.promise;
-      },
-    ],
-    [
-      'CollectionGroup.getPartitions()',
-      async randomColl => {
-        const partitions = randomColl.firestore
-          .collectionGroup('id')
-          .getPartitions(2);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for await (const _ of partitions);
-      },
-    ],
-    [
-      'Firestore.runTransaction()',
-      randomColl => randomColl.firestore.runTransaction(t => t.get(randomColl)),
-    ],
-    [
-      'Firestore.getAll()',
-      randomColl => randomColl.firestore.getAll(randomColl.doc()),
-    ],
-    ['Firestore.batch()', randomColl => randomColl.firestore.batch().commit()],
-    ['Firestore.terminate()', randomColl => randomColl.firestore.terminate()],
-  ];
+      ['CollectionReference.get()', randomColl => randomColl.get()],
+      ['CollectionReference.add()', randomColl => randomColl.add({})],
+      [
+        'CollectionReference.stream()',
+        randomColl => {
+          const deferred = new Deferred<void>();
+          randomColl.stream().on('finish', () => {
+            deferred.resolve();
+          });
+          return deferred.promise;
+        },
+      ],
+      [
+        'CollectionReference.listDocuments()',
+        randomColl => randomColl.listDocuments(),
+      ],
+      [
+        'CollectionReference.onSnapshot()',
+        randomColl => {
+          const deferred = new Deferred<void>();
+          const unsubscribe = randomColl.onSnapshot(() => {
+            unsubscribe();
+            deferred.resolve();
+          });
+          return deferred.promise;
+        },
+      ],
+      ['DocumentReference.get()', randomColl => randomColl.doc().get()],
+      ['DocumentReference.create()', randomColl => randomColl.doc().create({})],
+      ['DocumentReference.set()', randomColl => randomColl.doc().set({})],
+      [
+        'DocumentReference.update()',
+        async randomColl => {
+          const update = randomColl.doc().update('foo', 'bar');
+          await expect(update).to.eventually.be.rejectedWith(
+            'No document to update'
+          );
+        },
+      ],
+      ['DocumentReference.delete()', randomColl => randomColl.doc().delete()],
+      [
+        'DocumentReference.listCollections()',
+        randomColl => randomColl.doc().listCollections(),
+      ],
+      [
+        'DocumentReference.onSnapshot()',
+        randomColl => {
+          const deferred = new Deferred<void>();
+          const unsubscribe = randomColl.doc().onSnapshot(() => {
+            unsubscribe();
+            deferred.resolve();
+          });
+          return deferred.promise;
+        },
+      ],
+      [
+        'CollectionGroup.getPartitions()',
+        async randomColl => {
+          const partitions = randomColl.firestore
+            .collectionGroup('id')
+            .getPartitions(2);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          for await (const _ of partitions);
+        },
+      ],
+      [
+        'Firestore.runTransaction()',
+        randomColl =>
+          randomColl.firestore.runTransaction(t => t.get(randomColl)),
+      ],
+      [
+        'Firestore.getAll()',
+        randomColl => randomColl.firestore.getAll(randomColl.doc()),
+      ],
+      [
+        'Firestore.batch()',
+        randomColl => randomColl.firestore.batch().commit(),
+      ],
+      ['Firestore.terminate()', randomColl => randomColl.firestore.terminate()],
+    ];
 
   for (const [description, op] of ops) {
     it(`succeeds for ${description}`, () => {
