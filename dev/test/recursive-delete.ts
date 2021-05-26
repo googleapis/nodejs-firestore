@@ -257,12 +257,14 @@ describe('recursiveDelete() method:', () => {
       // This deferred completes when the second query is run.
       const secondQueryDeferred = new Deferred<void>();
 
-      const firstStream = Array.from(Array(maxPendingOps).keys()).map((_, i) =>
+      const nLengthArray = (n: number): number[] => Array.from(Array(n).keys());
+
+      const firstStream = nLengthArray(maxPendingOps).map((_, i) =>
         result('doc' + i)
       );
 
       const batchWriteResponse = mergeResponses(
-        Array.from(Array(maxBatchSize).keys()).map(() => successResponse(1))
+        nLengthArray(maxBatchSize).map(() => successResponse(1))
       );
 
       // Use an array to store that the queryEquals() method succeeded, since

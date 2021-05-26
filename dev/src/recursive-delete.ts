@@ -90,14 +90,18 @@ export class RecursiveDelete {
    */
   private started = false;
 
-  /** Query limit to use when fetching all descendants. */
-  private maxPendingOps: number;
+  /**
+   * Query limit to use when fetching all descendants.
+   * @private
+   */
+  private readonly maxPendingOps: number;
 
   /**
-   * The number of pending BulkWriter operations at which RecursiveDelete starts the next limit
-   * query to fetch descendants.
+   * The number of pending BulkWriter operations at which RecursiveDelete
+   * starts the next limit query to fetch descendants.
+   * @private
    */
-  private minPendingOps: number;
+  private readonly minPendingOps: number;
 
   /**
    * A deferred promise that resolves when the recursive delete operation
