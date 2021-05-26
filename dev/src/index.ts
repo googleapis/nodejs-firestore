@@ -1733,7 +1733,7 @@ Object.defineProperty(module.exports, 'v1beta1', {
 Object.defineProperty(module.exports, 'v1', {
   // The v1 module is very large. To avoid pulling it in from static
   // scope, we lazy-load  the module.
-  get: () => require('./v1beta1'),
+  get: () => require('./v1'),
 });
 
 /**
