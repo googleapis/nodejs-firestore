@@ -76,7 +76,11 @@ const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
 import {CollectionGroup} from './collection-group';
-import {RecursiveDelete} from './recursive-delete';
+import {
+  RECURSIVE_DELETE_MAX_PENDING_OPS,
+  RECURSIVE_DELETE_MIN_PENDING_OPS,
+  RecursiveDelete,
+} from './recursive-delete';
 
 export {
   CollectionReference,
@@ -1251,8 +1255,37 @@ export class Firestore implements firestore.Firestore {
       | firestore.DocumentReference<unknown>,
     bulkWriter?: BulkWriter
   ): Promise<void> {
+    return this._recursiveDelete(
+      ref,
+      RECURSIVE_DELETE_MAX_PENDING_OPS,
+      RECURSIVE_DELETE_MIN_PENDING_OPS,
+      bulkWriter
+    );
+  }
+
+  /**
+   * This overload is not private in order to test the query resumption with
+   * startAfter() once the RecursiveDelete instance has MAX_PENDING_OPS pending.
+   *
+   * @private
+   */
+  // Visible for testing
+  _recursiveDelete(
+    ref:
+      | firestore.CollectionReference<unknown>
+      | firestore.DocumentReference<unknown>,
+    maxPendingOps: number,
+    minPendingOps: number,
+    bulkWriter?: BulkWriter
+  ): Promise<void> {
     const writer = bulkWriter ?? this.getBulkWriter();
-    const deleter = new RecursiveDelete(this, writer, ref);
+    const deleter = new RecursiveDelete(
+      this,
+      writer,
+      ref,
+      maxPendingOps,
+      minPendingOps
+    );
     return deleter.run();
   }
 

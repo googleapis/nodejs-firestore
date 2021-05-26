@@ -50,7 +50,11 @@ import {
 import {MAX_REQUEST_RETRIES} from '../src';
 
 import api = google.firestore.v1;
-import {MAX_PENDING_OPS, REFERENCE_NAME_MIN_ID} from '../src/recursive-delete';
+import {
+  RECURSIVE_DELETE_MAX_PENDING_OPS,
+  REFERENCE_NAME_MIN_ID,
+} from '../src/recursive-delete';
+import {Deferred} from '../src/util';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -140,7 +144,7 @@ describe('recursiveDelete() method:', () => {
               'LESS_THAN',
               endAt('root')
             ),
-            limit(MAX_PENDING_OPS)
+            limit(RECURSIVE_DELETE_MAX_PENDING_OPS)
           );
           return stream();
         },
@@ -165,7 +169,7 @@ describe('recursiveDelete() method:', () => {
               'LESS_THAN',
               endAt('root/doc/nestedCol')
             ),
-            limit(MAX_PENDING_OPS)
+            limit(RECURSIVE_DELETE_MAX_PENDING_OPS)
           );
           return stream();
         },
@@ -184,7 +188,7 @@ describe('recursiveDelete() method:', () => {
             'root/doc',
             select('__name__'),
             allDescendants(/* kindless= */ true),
-            limit(MAX_PENDING_OPS)
+            limit(RECURSIVE_DELETE_MAX_PENDING_OPS)
           );
           return stream();
         },
@@ -222,7 +226,7 @@ describe('recursiveDelete() method:', () => {
                 'LESS_THAN',
                 endAt('root')
               ),
-              limit(MAX_PENDING_OPS)
+              limit(RECURSIVE_DELETE_MAX_PENDING_OPS)
             );
             return stream();
           }
@@ -235,8 +239,32 @@ describe('recursiveDelete() method:', () => {
     });
 
     it('creates a second query with the correct startAfter', async () => {
-      const firstStream = Array.from(Array(MAX_PENDING_OPS).keys()).map(
-        (_, i) => result('doc' + i)
+      // This test checks that the second query is created with the correct
+      // startAfter() once the RecursiveDelete instance is below the
+      // MIN_PENDING_OPS threshold to send the next batch. Use lower limits
+      // than the actual RecursiveDelete class in order to make this test run fast.
+      const maxPendingOps = 100;
+      const minPendingOps = 11;
+      const maxBatchSize = 10;
+      const cutoff = maxPendingOps - minPendingOps;
+      let numDeletesBuffered = 0;
+
+      // This deferred promise is used to delay the BatchWriteResponses from
+      // returning in order to create the situation where the number of pending
+      // operations is less than `minPendingOps`.
+      const bufferDeferred = new Deferred<void>();
+
+      // This deferred completes when the second query is run.
+      const secondQueryDeferred = new Deferred<void>();
+
+      const nLengthArray = (n: number): number[] => Array.from(Array(n).keys());
+
+      const firstStream = nLengthArray(maxPendingOps).map((_, i) =>
+        result('doc' + i)
+      );
+
+      const batchWriteResponse = mergeResponses(
+        nLengthArray(maxBatchSize).map(() => successResponse(1))
       );
 
       // Use an array to store that the queryEquals() method succeeded, since
@@ -257,7 +285,7 @@ describe('recursiveDelete() method:', () => {
                 'LESS_THAN',
                 endAt('root')
               ),
-              limit(MAX_PENDING_OPS)
+              limit(maxPendingOps)
             );
             called.push(1);
             return stream(...firstStream);
@@ -279,11 +307,12 @@ describe('recursiveDelete() method:', () => {
                 referenceValue:
                   `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc' +
-                  (MAX_PENDING_OPS - 1),
+                  (maxPendingOps - 1),
               }),
-              limit(MAX_PENDING_OPS)
+              limit(maxPendingOps)
             );
             called.push(2);
+            secondQueryDeferred.resolve();
             return stream();
           } else {
             called.push(3);
@@ -291,22 +320,39 @@ describe('recursiveDelete() method:', () => {
           }
         },
         batchWrite: () => {
-          const responses = mergeResponses(
-            Array.from(Array(500).keys()).map(() => successResponse(1))
-          );
-          return response({
-            writeResults: responses.writeResults,
-            status: responses.status,
+          const returnedResponse = response({
+            writeResults: batchWriteResponse.writeResults,
+            status: batchWriteResponse.status,
           });
+          if (numDeletesBuffered < cutoff) {
+            numDeletesBuffered += batchWriteResponse.writeResults!.length;
+
+            // By waiting for `bufferFuture` to complete, we can guarantee that
+            // the writes complete after all documents are streamed. Without
+            // this future, the test can race and complete the writes before
+            // the stream is finished, which is a different scenario this test
+            // is not for.
+            return bufferDeferred.promise.then(() => returnedResponse);
+          } else {
+            // Once there are `cutoff` pending deletes, completing the future
+            // allows enough responses to be returned such that the number of
+            // pending deletes should be less than `minPendingOps`. This allows
+            // us to test that the second query is made.
+            bufferDeferred.resolve();
+            return secondQueryDeferred.promise.then(() => returnedResponse);
+          }
         },
       };
       const firestore = await createInstance(overrides);
 
-      // Use a custom batch size with BulkWriter to simplify the dummy
-      // batchWrite() response logic.
       const bulkWriter = firestore.bulkWriter();
-      bulkWriter._maxBatchSize = 500;
-      await firestore.recursiveDelete(firestore.collection('root'), bulkWriter);
+      bulkWriter._maxBatchSize = maxBatchSize;
+      await firestore._recursiveDelete(
+        firestore.collection('root'),
+        maxPendingOps,
+        minPendingOps,
+        bulkWriter
+      );
       expect(called).to.deep.equal([1, 2]);
     });
   });
