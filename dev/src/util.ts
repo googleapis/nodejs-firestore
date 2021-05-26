@@ -144,7 +144,7 @@ export function isPermanentRpcError(
   }
 }
 
-let serviceConfig: undefined | {[k: string]: CallSettings};
+let serviceConfig: Record<string, CallSettings> | undefined;
 
 /** Lazy-loads the service config when first accessed. */
 function getServiceConfig(methodName: string): CallSettings | undefined {
