@@ -229,7 +229,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * [update()]{@link DocumentReference#update} and
  * [delete()]{@link DocumentReference#delete} calls in
  * [DocumentReference]{@link DocumentReference},
- * [WriteBatch]{@link WriteBatch}, [BulkWriter]({@link BulkWriter}, and
+ * [WriteBatch]{@link WriteBatch}, [BulkWriter]{@link BulkWriter}, and
  * [Transaction]{@link Transaction}. Using Preconditions, these calls
  * can be restricted to only apply to documents that match the specified
  * conditions.
@@ -303,6 +303,23 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * of operations per second allowed by the throttler. If `maxOpsPerSecond` is
  * not set, no maximum is enforced.
  * @typedef {Object} BulkWriterOptions
+ */
+
+/**
+ * An error thrown when a BulkWriter operation fails.
+ *
+ * The error used by {@link BulkWriter~shouldRetryCallback} set in
+ * {@link BulkWriter#onWriteError}.
+ *
+ * @property {GrpcStatus} code The status code of the error.
+ * @property {string} message The error message of the error.
+ * @property {DocumentReference} documentRef The document reference the operation was
+ * performed on.
+ * @property {'create' | 'set' | 'update' | 'delete'} operationType The type
+ * of operation performed.
+ * @property {number} failedAttempts How many times this operation has been
+ * attempted unsuccessfully.
+ * @typedef {Error} BulkWriterError
  */
 
 /**
