@@ -1313,6 +1313,16 @@ export class Firestore implements firestore.Firestore {
   }
 
   /**
+   * Returns the Project ID to serve as the JSON representation of this
+   * Firestore instance.
+   *
+   * @return An object that contains the project ID (or `undefined` if not yet
+   * available).
+   */
+  toJSON(): object {
+    return {projectId: this._projectId};
+  }
+  /**
    * Initializes the client if it is not already initialized. All methods in the
    * SDK can be used after this method completes.
    *
