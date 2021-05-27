@@ -17,23 +17,9 @@
 import {DocumentData} from '@google-cloud/firestore';
 
 import {randomBytes} from 'crypto';
-import {
-  CallSettings,
-  ClientConfig,
-  constructSettings,
-  createDefaultBackoffSettings,
-  GoogleError,
-  Status,
-} from 'google-gax';
+import {CallSettings, ClientConfig, GoogleError} from 'google-gax';
 import {BackoffSettings} from 'google-gax/build/src/gax';
 import * as gapicConfig from './v1/firestore_client_config.json';
-
-const serviceConfig = constructSettings(
-  'google.firestore.v1.Firestore',
-  gapicConfig as ClientConfig,
-  {},
-  Status
-) as {[k: string]: CallSettings};
 
 /**
  * A Promise implementation that supports deferred resolution.
@@ -158,13 +144,28 @@ export function isPermanentRpcError(
   }
 }
 
+let serviceConfig: Record<string, CallSettings> | undefined;
+
+/** Lazy-loads the service config when first accessed. */
+function getServiceConfig(methodName: string): CallSettings | undefined {
+  if (!serviceConfig) {
+    serviceConfig = require('google-gax').constructSettings(
+      'google.firestore.v1.Firestore',
+      gapicConfig as ClientConfig,
+      {},
+      require('google-gax').Status
+    ) as {[k: string]: CallSettings};
+  }
+  return serviceConfig[methodName];
+}
+
 /**
  * Returns the list of retryable error codes specified in the service
  * configuration.
  * @private
  */
 export function getRetryCodes(methodName: string): number[] {
-  return serviceConfig[methodName]?.retry?.retryCodes ?? [];
+  return getServiceConfig(methodName)?.retry?.retryCodes ?? [];
 }
 
 /**
@@ -173,8 +174,8 @@ export function getRetryCodes(methodName: string): number[] {
  */
 export function getRetryParams(methodName: string): BackoffSettings {
   return (
-    serviceConfig[methodName]?.retry?.backoffSettings ??
-    createDefaultBackoffSettings()
+    getServiceConfig(methodName)?.retry?.backoffSettings ??
+    require('google-gax').createDefaultBackoffSettings()
   );
 }
 
