@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.12.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.1...v4.12.2) (2021-05-27)
+
+
+### Bug Fixes
+
+* do not leak credentials in Firestore.toJSON() ([#1522](https://www.github.com/googleapis/nodejs-firestore/issues/1522)) ([791310f](https://www.github.com/googleapis/nodejs-firestore/commit/791310ff4b0a828ca6d1f5c0fa03a110972afb1f))
+
 ### [4.12.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.0...v4.12.1) (2021-05-27)
 
 
