@@ -16,7 +16,7 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions, grpc, RetryOptions} from 'google-gax';
+import {CallOptions} from 'google-gax';
 import {Duplex, PassThrough, Transform} from 'stream';
 
 import {URL} from 'url';
@@ -100,7 +100,6 @@ export {GeoPoint} from './geo-point';
 export {CollectionGroup};
 export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
-export {Status as GrpcStatus} from 'google-gax';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
@@ -126,16 +125,6 @@ setLibVersion(libVersion);
 /**
  * @namespace google.firestore.admin.v1
  */
-
-/*!
- * @see v1
- */
-let v1: unknown; // Lazy-loaded in `_runRequest()`
-
-/*!
- * @see v1beta1
- */
-let v1beta1: unknown; // Lazy-loaded upon access.
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -504,7 +493,7 @@ export class Firestore implements firestore.Firestore {
         let client: GapicClient;
 
         if (this._settings.ssl === false) {
-          const grpcModule = this._settings.grpc ?? grpc;
+          const grpcModule = this._settings.grpc ?? require('google-gax').grpc;
           const sslCreds = grpcModule.credentials.createInsecure();
 
           client = new module.exports.v1({
@@ -1392,7 +1381,10 @@ export class Firestore implements firestore.Firestore {
 
     if (retryCodes) {
       const retryParams = getRetryParams(methodName);
-      callOptions.retry = new RetryOptions(retryCodes, retryParams);
+      callOptions.retry = new (require('google-gax').RetryOptions)(
+        retryCodes,
+        retryParams
+      );
     }
 
     return callOptions;
@@ -1740,18 +1732,12 @@ module.exports = Object.assign(module.exports, existingExports);
  *
  * @private
  * @name Firestore.v1beta1
- * @see v1beta1
  * @type {function}
  */
 Object.defineProperty(module.exports, 'v1beta1', {
   // The v1beta1 module is very large. To avoid pulling it in from static
-  // scope, we lazy-load and cache the module.
-  get: () => {
-    if (!v1beta1) {
-      v1beta1 = require('./v1beta1');
-    }
-    return v1beta1;
-  },
+  // scope, we lazy-load the module.
+  get: () => require('./v1beta1'),
 });
 
 /**
@@ -1759,16 +1745,23 @@ Object.defineProperty(module.exports, 'v1beta1', {
  *
  * @private
  * @name Firestore.v1
- * @see v1
  * @type {function}
  */
 Object.defineProperty(module.exports, 'v1', {
   // The v1 module is very large. To avoid pulling it in from static
-  // scope, we lazy-load and cache the module.
-  get: () => {
-    if (!v1) {
-      v1 = require('./v1');
-    }
-    return v1;
-  },
+  // scope, we lazy-load  the module.
+  get: () => require('./v1'),
+});
+
+/**
+ * {@link Status} factory function.
+ *
+ * @private
+ * @name Firestore.GrpcStatus
+ * @type {function}
+ */
+Object.defineProperty(module.exports, 'GrpcStatus', {
+  // The gax module is very large. To avoid pulling it in from static
+  // scope, we lazy-load the module.
+  get: () => require('google-gax').Status,
 });

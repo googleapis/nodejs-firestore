@@ -16,8 +16,7 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {GoogleError, Status} from 'google-gax';
-
+import {GoogleError} from 'google-gax';
 import * as proto from '../protos/firestore_v1_proto_api';
 
 import {ExponentialBackoff} from './backoff';
@@ -25,6 +24,7 @@ import {DocumentSnapshot} from './document';
 import {Firestore, WriteBatch} from './index';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
+import {StatusCode} from './status-code';
 import {
   DocumentReference,
   Query,
@@ -484,7 +484,7 @@ export class Transaction implements firestore.Transaction {
    * @return A Promise that resolves after the delay expired.
    */
   private async maybeBackoff(error?: GoogleError): Promise<void> {
-    if (error && error.code === Status.RESOURCE_EXHAUSTED) {
+    if ((error?.code as number | undefined) === StatusCode.RESOURCE_EXHAUSTED) {
       this._backoff.resetToMax();
     }
     await this._backoff.backoffAndWait();
@@ -592,17 +592,17 @@ function validateReadOptions(
 function isRetryableTransactionError(error: GoogleError): boolean {
   if (error.code !== undefined) {
     // This list is based on https://github.com/firebase/firebase-js-sdk/blob/master/packages/firestore/src/core/transaction_runner.ts#L112
-    switch (error.code) {
-      case Status.ABORTED:
-      case Status.CANCELLED:
-      case Status.UNKNOWN:
-      case Status.DEADLINE_EXCEEDED:
-      case Status.INTERNAL:
-      case Status.UNAVAILABLE:
-      case Status.UNAUTHENTICATED:
-      case Status.RESOURCE_EXHAUSTED:
+    switch (error.code as number) {
+      case StatusCode.ABORTED:
+      case StatusCode.CANCELLED:
+      case StatusCode.UNKNOWN:
+      case StatusCode.DEADLINE_EXCEEDED:
+      case StatusCode.INTERNAL:
+      case StatusCode.UNAVAILABLE:
+      case StatusCode.UNAUTHENTICATED:
+      case StatusCode.RESOURCE_EXHAUSTED:
         return true;
-      case Status.INVALID_ARGUMENT:
+      case StatusCode.INVALID_ARGUMENT:
         // The Firestore backend uses "INVALID_ARGUMENT" for transactions
         // IDs that have expired. While INVALID_ARGUMENT is generally not
         // retryable, we retry this specific case.
