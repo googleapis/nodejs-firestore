@@ -39,6 +39,8 @@ import api = google.firestore.v1;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
+const DOC1 = `${DATABASE_ROOT}/documents/coll/doc1`;
+const DOC2 = `${DATABASE_ROOT}/documents/coll/doc2`;
 
 export function partitionQueryEquals(
   actual: api.IPartitionQueryRequest | undefined,
@@ -127,7 +129,7 @@ describe('Partition Query', () => {
   it('requests one less than desired partitions', () => {
     const desiredPartitionsCount = 2;
     const cursorValue = {
-      values: [{referenceValue: 'projects/p1/databases/d1/documents/coll/doc'}],
+      values: [{referenceValue: DOC1}],
     };
 
     const overrides: ApiOverride = {
@@ -178,12 +180,12 @@ describe('Partition Query', () => {
 
     const expectedStartAt: Array<undefined | api.IValue> = [
       undefined,
-      {referenceValue: 'coll/doc1'},
-      {referenceValue: 'coll/doc2'},
+      {referenceValue: DOC1},
+      {referenceValue: DOC2},
     ];
     const expectedEndBefore: Array<undefined | api.IValue> = [
-      {referenceValue: 'coll/doc1'},
-      {referenceValue: 'coll/doc2'},
+      {referenceValue: DOC1},
+      {referenceValue: DOC2},
       undefined,
     ];
 
@@ -196,10 +198,10 @@ describe('Partition Query', () => {
 
         return stream<api.ICursor>(
           {
-            values: [{referenceValue: 'coll/doc1'}],
+            values: [{referenceValue: DOC1}],
           },
           {
-            values: [{referenceValue: 'coll/doc2'}],
+            values: [{referenceValue: DOC2}],
           }
         );
       },
@@ -285,14 +287,10 @@ describe('Partition Query', () => {
       partitionQueryStream: () => {
         return stream<api.ICursor>(
           {
-            values: [
-              {referenceValue: 'projects/p1/databases/d1/documents/coll/doc2'},
-            ],
+            values: [{referenceValue: DOC2}],
           },
           {
-            values: [
-              {referenceValue: 'projects/p1/databases/d1/documents/coll/doc1'},
-            ],
+            values: [{referenceValue: DOC1}],
           }
         );
       },
