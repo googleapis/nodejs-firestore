@@ -24,7 +24,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 
 import {google} from '../protos/firestore_v1_proto_api';
-import {Firestore} from '../src';
+import {DocumentReference, Firestore} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {
   ApiOverride,
@@ -100,6 +100,28 @@ describe('Partition Query', () => {
       partitions.push(partition);
     }
     return partitions;
+  }
+
+  function verifyPartition(
+    partition: FirebaseFirestore.QueryPartition,
+    startAt: string | null,
+    endBefore: string | null
+  ) {
+    if (startAt) {
+      expect(
+        partition.startAt?.map(value => (value as DocumentReference).path)
+      ).to.have.members([startAt]);
+    } else {
+      expect(partition.startAt).to.be.undefined;
+    }
+
+    if (endBefore) {
+      expect(
+        partition.endBefore?.map(value => (value as DocumentReference).path)
+      ).to.have.members([endBefore]);
+    } else {
+      expect(partition.endBefore).to.be.undefined;
+    }
   }
 
   it('requests one less than desired partitions', () => {
@@ -253,6 +275,37 @@ describe('Partition Query', () => {
       expect(result[0].endBefore![0]).to.be.a('number');
       expect(result[1].startAt![0]).to.be.a('number');
       return result[0].toQuery().get();
+    });
+  });
+
+  it('sorts partitions', () => {
+    const desiredPartitionsCount = 3;
+
+    const overrides: ApiOverride = {
+      partitionQueryStream: () => {
+        const doc1 = 'projects/p1/databases/d1/documents/coll/doc1';
+        const doc2 = 'projects/p1/databases/d1/documents/coll/doc2';
+
+        return stream<api.ICursor>(
+          {
+            values: [{referenceValue: doc2}],
+          },
+          {
+            values: [{referenceValue: doc1}],
+          }
+        );
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      const query = firestore.collectionGroup('collectionId');
+
+      const partitions = await getPartitions(query, desiredPartitionsCount);
+      expect(partitions.length).to.equal(3);
+
+      verifyPartition(partitions[0], null, 'coll/doc1');
+      verifyPartition(partitions[1], 'coll/doc1', 'coll/doc2');
+      verifyPartition(partitions[2], 'coll/doc2', null);
     });
   });
 });
