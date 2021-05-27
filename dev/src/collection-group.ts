@@ -36,8 +36,7 @@ import {defaultConverter} from './types';
  */
 export class CollectionGroup<T = firestore.DocumentData>
   extends Query<T>
-  implements firestore.CollectionGroup<T>
-{
+  implements firestore.CollectionGroup<T> {
   /** @hideconstructor */
   constructor(
     firestore: Firestore,
@@ -85,8 +84,7 @@ export class CollectionGroup<T = firestore.DocumentData>
     if (desiredPartitionCount > 1) {
       // Partition queries require explicit ordering by __name__.
       const queryWithDefaultOrder = this.orderBy(FieldPath.documentId());
-      const request: api.IPartitionQueryRequest =
-        queryWithDefaultOrder.toProto();
+      const request: api.IPartitionQueryRequest = queryWithDefaultOrder.toProto();
 
       // Since we are always returning an extra partition (with an empty endBefore
       // cursor), we reduce the desired partition count by one.

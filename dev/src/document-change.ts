@@ -27,8 +27,7 @@ export type DocumentChangeType = 'added' | 'removed' | 'modified';
  * @class DocumentChange
  */
 export class DocumentChange<T = firestore.DocumentData>
-  implements firestore.DocumentChange
-{
+  implements firestore.DocumentChange {
   private readonly _type: DocumentChangeType;
   private readonly _document: QueryDocumentSnapshot<T>;
   private readonly _oldIndex: number;

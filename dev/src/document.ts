@@ -97,8 +97,7 @@ export class DocumentSnapshotBuilder<T = firestore.DocumentData> {
  * @class DocumentSnapshot
  */
 export class DocumentSnapshot<T = firestore.DocumentData>
-  implements firestore.DocumentSnapshot<T>
-{
+  implements firestore.DocumentSnapshot<T> {
   private _ref: DocumentReference<T>;
   private _serializer: Serializer;
   private _readTime: Timestamp | undefined;
@@ -540,8 +539,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
  */
 export class QueryDocumentSnapshot<T = firestore.DocumentData>
   extends DocumentSnapshot<T>
-  implements firestore.QueryDocumentSnapshot<T>
-{
+  implements firestore.QueryDocumentSnapshot<T> {
   /**
    * The time the document was created.
    *
@@ -986,8 +984,8 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * @private
    */
   validate(): void {
-    const allowUndefined =
-      !!this.ref.firestore._settings.ignoreUndefinedProperties;
+    const allowUndefined = !!this.ref.firestore._settings
+      .ignoreUndefinedProperties;
     this.transforms.forEach(transform => transform.validate(allowUndefined));
   }
 

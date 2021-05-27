@@ -544,8 +544,8 @@ abstract class Watch<T = firestore.DocumentData> {
 
       const document = proto.documentChange.document!;
       const name = document.name!;
-      const relativeName =
-        QualifiedResourcePath.fromSlashSeparatedString(name).relativeName;
+      const relativeName = QualifiedResourcePath.fromSlashSeparatedString(name)
+        .relativeName;
 
       if (changed) {
         logger('Watch.onData', this.requestTag, 'Received document change');
@@ -564,8 +564,8 @@ abstract class Watch<T = firestore.DocumentData> {
     } else if (proto.documentDelete || proto.documentRemove) {
       logger('Watch.onData', this.requestTag, 'Processing remove event');
       const name = (proto.documentDelete || proto.documentRemove)!.document!;
-      const relativeName =
-        QualifiedResourcePath.fromSlashSeparatedString(name).relativeName;
+      const relativeName = QualifiedResourcePath.fromSlashSeparatedString(name)
+        .relativeName;
       this.changeMap.set(relativeName, REMOVED as DocumentSnapshotBuilder<T>);
     } else if (proto.filter) {
       logger('Watch.onData', this.requestTag, 'Processing filter update');

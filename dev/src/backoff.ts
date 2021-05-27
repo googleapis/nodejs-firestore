@@ -57,8 +57,10 @@ export const MAX_RETRY_ATTEMPTS = 10;
 /*!
  * The timeout handler used by `ExponentialBackoff` and `BulkWriter`.
  */
-export let delayExecution: (f: () => void, ms: number) => NodeJS.Timeout =
-  setTimeout;
+export let delayExecution: (
+  f: () => void,
+  ms: number
+) => NodeJS.Timeout = setTimeout;
 
 /**
  * Allows overriding of the timeout handler used by the exponential backoff

@@ -242,8 +242,7 @@ class DeferredListener<T> {
  * sequential invocations of the Listen API.
  */
 class StreamHelper {
-  private readonly deferredListener =
-    new DeferredListener<api.IListenRequest>();
+  private readonly deferredListener = new DeferredListener<api.IListenRequest>();
   private backendStream: Duplex | null = null;
 
   streamCount = 0; // The number of streams that the client has requested

@@ -169,9 +169,8 @@ describe('Bundle Builder', () => {
     );
 
     // Verify named query
-    const namedQuery = elements.find(
-      e => e.namedQuery?.name === 'test-query'
-    )!.namedQuery;
+    const namedQuery = elements.find(e => e.namedQuery?.name === 'test-query')!
+      .namedQuery;
     const newNamedQuery = elements.find(
       e => e.namedQuery?.name === 'test-query-new'
     )!.namedQuery;

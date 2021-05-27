@@ -1586,9 +1586,10 @@ export class Firestore implements firestore.Firestore {
     return this._clientPool.run(requestTag, async gapicClient => {
       try {
         logger('Firestore.request', requestTag, 'Sending request: %j', request);
-        const [result] = await (
-          gapicClient[methodName] as UnaryMethod<Req, Resp>
-        )(request, callOptions);
+        const [result] = await (gapicClient[methodName] as UnaryMethod<
+          Req,
+          Resp
+        >)(request, callOptions);
         logger(
           'Firestore.request',
           requestTag,
