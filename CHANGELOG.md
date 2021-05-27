@@ -4,6 +4,15 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.12.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.0...v4.12.1) (2021-05-27)
+
+
+### Bug Fixes
+
+* do not load google-gax at client startup ([#1517](https://www.github.com/googleapis/nodejs-firestore/issues/1517)) ([2141b08](https://www.github.com/googleapis/nodejs-firestore/commit/2141b0879cbccb1354f9821edcc917b6aa4ff0ab))
+* recursive delete: backporting changes from Java ([#1514](https://www.github.com/googleapis/nodejs-firestore/issues/1514)) ([92ea651](https://www.github.com/googleapis/nodejs-firestore/commit/92ea651adc84ba854ae7cd203af231573f885307))
+* return results from getPartitions() in order ([#1521](https://www.github.com/googleapis/nodejs-firestore/issues/1521)) ([c8168a8](https://www.github.com/googleapis/nodejs-firestore/commit/c8168a83a864dd77f88b1743adcd3568671702fe))
+
 ## [4.12.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.11.1...v4.12.0) (2021-05-19)
 
 
