@@ -28,10 +28,9 @@ import {PassThrough} from 'stream';
 import {protobuf, LROperation, operationsProtos} from 'google-gax';
 
 function generateSampleMessage<T extends object>(instance: T) {
-  const filledObject = (instance.constructor as typeof protobuf.Message).toObject(
-    instance as protobuf.Message<T>,
-    {defaults: true}
-  );
+  const filledObject = (
+    instance.constructor as typeof protobuf.Message
+  ).toObject(instance as protobuf.Message<T>, {defaults: true});
   return (instance.constructor as typeof protobuf.Message).fromObject(
     filledObject
   ) as T;
@@ -279,9 +278,8 @@ describe('v1.FirestoreAdminClient', () => {
       const expectedResponse = generateSampleMessage(
         new protos.google.firestore.admin.v1.Index()
       );
-      client.innerApiCalls.getIndex = stubSimpleCallWithCallback(
-        expectedResponse
-      );
+      client.innerApiCalls.getIndex =
+        stubSimpleCallWithCallback(expectedResponse);
       const promise = new Promise((resolve, reject) => {
         client.getIndex(
           request,
@@ -388,9 +386,8 @@ describe('v1.FirestoreAdminClient', () => {
       const expectedResponse = generateSampleMessage(
         new protos.google.protobuf.Empty()
       );
-      client.innerApiCalls.deleteIndex = stubSimpleCallWithCallback(
-        expectedResponse
-      );
+      client.innerApiCalls.deleteIndex =
+        stubSimpleCallWithCallback(expectedResponse);
       const promise = new Promise((resolve, reject) => {
         client.deleteIndex(
           request,
@@ -500,9 +497,8 @@ describe('v1.FirestoreAdminClient', () => {
       const expectedResponse = generateSampleMessage(
         new protos.google.firestore.admin.v1.Field()
       );
-      client.innerApiCalls.getField = stubSimpleCallWithCallback(
-        expectedResponse
-      );
+      client.innerApiCalls.getField =
+        stubSimpleCallWithCallback(expectedResponse);
       const promise = new Promise((resolve, reject) => {
         client.getField(
           request,
@@ -610,9 +606,8 @@ describe('v1.FirestoreAdminClient', () => {
       const expectedResponse = generateSampleMessage(
         new protos.google.longrunning.Operation()
       );
-      client.innerApiCalls.createIndex = stubLongRunningCallWithCallback(
-        expectedResponse
-      );
+      client.innerApiCalls.createIndex =
+        stubLongRunningCallWithCallback(expectedResponse);
       const promise = new Promise((resolve, reject) => {
         client.createIndex(
           request,
@@ -803,9 +798,8 @@ describe('v1.FirestoreAdminClient', () => {
       const expectedResponse = generateSampleMessage(
         new protos.google.longrunning.Operation()
       );
-      client.innerApiCalls.updateField = stubLongRunningCallWithCallback(
-        expectedResponse
-      );
+      client.innerApiCalls.updateField =
+        stubLongRunningCallWithCallback(expectedResponse);
       const promise = new Promise((resolve, reject) => {
         client.updateField(
           request,
@@ -964,9 +958,8 @@ describe('v1.FirestoreAdminClient', () => {
       const expectedResponse = generateSampleMessage(
         new protos.google.longrunning.Operation()
       );
-      client.innerApiCalls.exportDocuments = stubLongRunningCall(
-        expectedResponse
-      );
+      client.innerApiCalls.exportDocuments =
+        stubLongRunningCall(expectedResponse);
       const [operation] = await client.exportDocuments(request);
       const [response] = await operation.promise();
       assert.deepStrictEqual(response, expectedResponse);
@@ -998,9 +991,8 @@ describe('v1.FirestoreAdminClient', () => {
       const expectedResponse = generateSampleMessage(
         new protos.google.longrunning.Operation()
       );
-      client.innerApiCalls.exportDocuments = stubLongRunningCallWithCallback(
-        expectedResponse
-      );
+      client.innerApiCalls.exportDocuments =
+        stubLongRunningCallWithCallback(expectedResponse);
       const promise = new Promise((resolve, reject) => {
         client.exportDocuments(
           request,
@@ -1160,9 +1152,8 @@ describe('v1.FirestoreAdminClient', () => {
       const expectedResponse = generateSampleMessage(
         new protos.google.longrunning.Operation()
       );
-      client.innerApiCalls.importDocuments = stubLongRunningCall(
-        expectedResponse
-      );
+      client.innerApiCalls.importDocuments =
+        stubLongRunningCall(expectedResponse);
       const [operation] = await client.importDocuments(request);
       const [response] = await operation.promise();
       assert.deepStrictEqual(response, expectedResponse);
@@ -1194,9 +1185,8 @@ describe('v1.FirestoreAdminClient', () => {
       const expectedResponse = generateSampleMessage(
         new protos.google.longrunning.Operation()
       );
-      client.innerApiCalls.importDocuments = stubLongRunningCallWithCallback(
-        expectedResponse
-      );
+      client.innerApiCalls.importDocuments =
+        stubLongRunningCallWithCallback(expectedResponse);
       const promise = new Promise((resolve, reject) => {
         client.importDocuments(
           request,
@@ -1391,9 +1381,8 @@ describe('v1.FirestoreAdminClient', () => {
         generateSampleMessage(new protos.google.firestore.admin.v1.Index()),
         generateSampleMessage(new protos.google.firestore.admin.v1.Index()),
       ];
-      client.innerApiCalls.listIndexes = stubSimpleCallWithCallback(
-        expectedResponse
-      );
+      client.innerApiCalls.listIndexes =
+        stubSimpleCallWithCallback(expectedResponse);
       const promise = new Promise((resolve, reject) => {
         client.listIndexes(
           request,
@@ -1465,9 +1454,8 @@ describe('v1.FirestoreAdminClient', () => {
         generateSampleMessage(new protos.google.firestore.admin.v1.Index()),
         generateSampleMessage(new protos.google.firestore.admin.v1.Index()),
       ];
-      client.descriptors.page.listIndexes.createStream = stubPageStreamingCall(
-        expectedResponse
-      );
+      client.descriptors.page.listIndexes.createStream =
+        stubPageStreamingCall(expectedResponse);
       const stream = client.listIndexesStream(request);
       const promise = new Promise((resolve, reject) => {
         const responses: protos.google.firestore.admin.v1.Index[] = [];
@@ -1561,9 +1549,8 @@ describe('v1.FirestoreAdminClient', () => {
         generateSampleMessage(new protos.google.firestore.admin.v1.Index()),
         generateSampleMessage(new protos.google.firestore.admin.v1.Index()),
       ];
-      client.descriptors.page.listIndexes.asyncIterate = stubAsyncIterationCall(
-        expectedResponse
-      );
+      client.descriptors.page.listIndexes.asyncIterate =
+        stubAsyncIterationCall(expectedResponse);
       const responses: protos.google.firestore.admin.v1.IIndex[] = [];
       const iterable = client.listIndexesAsync(request);
       for await (const resource of iterable) {
@@ -1679,9 +1666,8 @@ describe('v1.FirestoreAdminClient', () => {
         generateSampleMessage(new protos.google.firestore.admin.v1.Field()),
         generateSampleMessage(new protos.google.firestore.admin.v1.Field()),
       ];
-      client.innerApiCalls.listFields = stubSimpleCallWithCallback(
-        expectedResponse
-      );
+      client.innerApiCalls.listFields =
+        stubSimpleCallWithCallback(expectedResponse);
       const promise = new Promise((resolve, reject) => {
         client.listFields(
           request,
@@ -1753,9 +1739,8 @@ describe('v1.FirestoreAdminClient', () => {
         generateSampleMessage(new protos.google.firestore.admin.v1.Field()),
         generateSampleMessage(new protos.google.firestore.admin.v1.Field()),
       ];
-      client.descriptors.page.listFields.createStream = stubPageStreamingCall(
-        expectedResponse
-      );
+      client.descriptors.page.listFields.createStream =
+        stubPageStreamingCall(expectedResponse);
       const stream = client.listFieldsStream(request);
       const promise = new Promise((resolve, reject) => {
         const responses: protos.google.firestore.admin.v1.Field[] = [];
@@ -1849,9 +1834,8 @@ describe('v1.FirestoreAdminClient', () => {
         generateSampleMessage(new protos.google.firestore.admin.v1.Field()),
         generateSampleMessage(new protos.google.firestore.admin.v1.Field()),
       ];
-      client.descriptors.page.listFields.asyncIterate = stubAsyncIterationCall(
-        expectedResponse
-      );
+      client.descriptors.page.listFields.asyncIterate =
+        stubAsyncIterationCall(expectedResponse);
       const responses: protos.google.firestore.admin.v1.IField[] = [];
       const iterable = client.listFieldsAsync(request);
       for await (const resource of iterable) {

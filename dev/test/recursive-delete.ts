@@ -466,7 +466,7 @@ describe('recursiveDelete() method:', () => {
       const refs: string[] = [];
       const bulkWriter = firestore.bulkWriter();
       bulkWriter.onWriteError(err => {
-        codes.push((err.code as unknown) as Status);
+        codes.push(err.code as unknown as Status);
         refs.push(err.documentRef.path);
         return false;
       });
@@ -641,8 +641,9 @@ describe('recursiveDelete() method:', () => {
       firestore = await createInstance();
       const bulkWriter = firestore.bulkWriter();
       await bulkWriter.close();
-      await expect(() => () =>
-        firestore.recursiveDelete(firestore.collection('foo'), bulkWriter)
+      await expect(
+        () => () =>
+          firestore.recursiveDelete(firestore.collection('foo'), bulkWriter)
       ).to.throw;
     });
   });
