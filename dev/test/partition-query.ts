@@ -18,13 +18,13 @@ import {
   QueryPartition,
 } from '@google-cloud/firestore';
 
-import {describe, it, beforeEach, afterEach} from 'mocha';
+import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 
 import {google} from '../protos/firestore_v1_proto_api';
-import {Firestore} from '../src';
+import {DocumentReference, Firestore} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {
   ApiOverride,
@@ -39,6 +39,8 @@ import api = google.firestore.v1;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
+const DOC1 = `${DATABASE_ROOT}/documents/coll/doc1`;
+const DOC2 = `${DATABASE_ROOT}/documents/coll/doc2`;
 
 export function partitionQueryEquals(
   actual: api.IPartitionQueryRequest | undefined,
@@ -102,10 +104,32 @@ describe('Partition Query', () => {
     return partitions;
   }
 
+  function verifyPartition(
+    partition: FirebaseFirestore.QueryPartition,
+    startAt: string | null,
+    endBefore: string | null
+  ) {
+    if (startAt) {
+      expect(
+        partition.startAt?.map(value => (value as DocumentReference).path)
+      ).to.have.members([startAt]);
+    } else {
+      expect(partition.startAt).to.be.undefined;
+    }
+
+    if (endBefore) {
+      expect(
+        partition.endBefore?.map(value => (value as DocumentReference).path)
+      ).to.have.members([endBefore]);
+    } else {
+      expect(partition.endBefore).to.be.undefined;
+    }
+  }
+
   it('requests one less than desired partitions', () => {
     const desiredPartitionsCount = 2;
     const cursorValue = {
-      values: [{referenceValue: 'projects/p1/databases/d1/documents/coll/doc'}],
+      values: [{referenceValue: DOC1}],
     };
 
     const overrides: ApiOverride = {
@@ -156,12 +180,12 @@ describe('Partition Query', () => {
 
     const expectedStartAt: Array<undefined | api.IValue> = [
       undefined,
-      {referenceValue: 'coll/doc1'},
-      {referenceValue: 'coll/doc2'},
+      {referenceValue: DOC1},
+      {referenceValue: DOC2},
     ];
     const expectedEndBefore: Array<undefined | api.IValue> = [
-      {referenceValue: 'coll/doc1'},
-      {referenceValue: 'coll/doc2'},
+      {referenceValue: DOC1},
+      {referenceValue: DOC2},
       undefined,
     ];
 
@@ -174,10 +198,10 @@ describe('Partition Query', () => {
 
         return stream<api.ICursor>(
           {
-            values: [{referenceValue: 'coll/doc1'}],
+            values: [{referenceValue: DOC1}],
           },
           {
-            values: [{referenceValue: 'coll/doc2'}],
+            values: [{referenceValue: DOC2}],
           }
         );
       },
@@ -253,6 +277,34 @@ describe('Partition Query', () => {
       expect(result[0].endBefore![0]).to.be.a('number');
       expect(result[1].startAt![0]).to.be.a('number');
       return result[0].toQuery().get();
+    });
+  });
+
+  it('sorts partitions', () => {
+    const desiredPartitionsCount = 3;
+
+    const overrides: ApiOverride = {
+      partitionQueryStream: () => {
+        return stream<api.ICursor>(
+          {
+            values: [{referenceValue: DOC2}],
+          },
+          {
+            values: [{referenceValue: DOC1}],
+          }
+        );
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      const query = firestore.collectionGroup('collectionId');
+
+      const partitions = await getPartitions(query, desiredPartitionsCount);
+      expect(partitions.length).to.equal(3);
+
+      verifyPartition(partitions[0], null, 'coll/doc1');
+      verifyPartition(partitions[1], 'coll/doc1', 'coll/doc2');
+      verifyPartition(partitions[2], 'coll/doc2', null);
     });
   });
 });

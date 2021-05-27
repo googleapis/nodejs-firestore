@@ -179,7 +179,7 @@ function compareGeoPoints(
 /*!
  * @private
  */
-function compareArrays(left: api.IValue[], right: api.IValue[]): number {
+export function compareArrays(left: api.IValue[], right: api.IValue[]): number {
   for (let i = 0; i < left.length && i < right.length; i++) {
     const valueComparison = compare(left[i], right[i]);
     if (valueComparison !== 0) {
