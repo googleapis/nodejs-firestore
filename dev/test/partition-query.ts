@@ -18,7 +18,7 @@ import {
   QueryPartition,
 } from '@google-cloud/firestore';
 
-import {describe, it, beforeEach, afterEach} from 'mocha';
+import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
@@ -283,15 +283,16 @@ describe('Partition Query', () => {
 
     const overrides: ApiOverride = {
       partitionQueryStream: () => {
-        const doc1 = 'projects/p1/databases/d1/documents/coll/doc1';
-        const doc2 = 'projects/p1/databases/d1/documents/coll/doc2';
-
         return stream<api.ICursor>(
           {
-            values: [{referenceValue: doc2}],
+            values: [
+              {referenceValue: 'projects/p1/databases/d1/documents/coll/doc2'},
+            ],
           },
           {
-            values: [{referenceValue: doc1}],
+            values: [
+              {referenceValue: 'projects/p1/databases/d1/documents/coll/doc1'},
+            ],
           }
         );
       },
