@@ -4,15 +4,15 @@
       "git": {
         "name": ".",
         "remote": "https://github.com/googleapis/nodejs-firestore.git",
-        "sha": "aa92a1545a64e1164d5454c24fb38fb99aa1fd24"
+        "sha": "c4096affaa69017ff1515d02631fd68614605528"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "6fa858c6489b1bbc505a7d7afe39f2dc45819c38",
-        "internalRef": "372656503"
+        "sha": "95fa72fdd0d69b02d72c33b37d1e4cc66d4b1446",
+        "internalRef": "375759421"
       }
     },
     {
