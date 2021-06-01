@@ -31,15 +31,13 @@ import {BulkWriterError} from './bulk-writer';
 import {QueryOptions} from './reference';
 import {StatusCode} from './status-code';
 
-/**
+/*!
  * Datastore allowed numeric IDs where Firestore only allows strings. Numeric
  * IDs are exposed to Firestore as __idNUM__, so this is the lowest possible
  * negative numeric value expressed in that format.
  *
  * This constant is used to specify startAt/endAt values when querying for all
  * descendants in a single collection.
- *
- * @private
  */
 export const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
 
@@ -51,7 +49,7 @@ export const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
 // Visible for testing.
 export const RECURSIVE_DELETE_MAX_PENDING_OPS = 5000;
 
-/**
+/*!
  * The number of pending BulkWriter operations at which RecursiveDelete
  * starts the next limit query to fetch descendants. By starting the query
  * while there are pending operations, Firestore can improve BulkWriter
