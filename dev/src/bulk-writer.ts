@@ -283,7 +283,7 @@ class BulkCommitBatch extends WriteBatch {
 }
 
 /**
- * Used to represent a batch on the BatchQueue.
+ * Used to represent a buffered BulkWriterOperation.
  *
  * @private
  */
