@@ -965,7 +965,7 @@ export class BulkWriter {
       this._bufferedOperations.length > 0
     ) {
       const nextOp = this._bufferedOperations.shift()!;
-      nextOp();
+      nextOp.sendFn();
     }
   }
 
