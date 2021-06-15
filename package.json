@@ -47,9 +47,7 @@
     "docs-test": "linkinator docs",
     "predocs-test": "npm run docs",
     "prelint": "cd samples; npm link ../; npm install",
-    "precompile": "gts clean",
-    "api-extractor": "api-extractor run --local",
-    "api-documenter": "api-documenter yaml --input-folder=temp"
+    "precompile": "gts clean"
   },
   "dependencies": {
     "fast-deep-equal": "^3.1.1",
@@ -63,7 +61,7 @@
     "@types/chai-as-promised": "^7.1.2",
     "@types/duplexify": "^3.5.0",
     "@types/extend": "^3.0.0",
-    "@types/mocha": "^7.0.0",
+    "@types/mocha": "^8.0.0",
     "@types/node": "^14.0.0",
     "@types/sinon": "^10.0.0",
     "@types/through2": "^2.0.34",
@@ -84,8 +82,6 @@
     "sinon": "^11.0.0",
     "ts-node": "^10.0.0",
     "typescript": "3.8.3",
-    "through2": "^4.0.0",
-    "@microsoft/api-documenter": "^7.8.10",
-    "@microsoft/api-extractor": "^7.8.10"
+    "through2": "^4.0.0"
   }
 }
