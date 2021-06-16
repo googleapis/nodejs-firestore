@@ -544,6 +544,68 @@ describe('BulkWriter', () => {
     });
   });
 
+  it('buffered operations are flushed after being enqueued', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([
+          setOp('doc1', 'bar'),
+          setOp('doc2', 'bar'),
+          setOp('doc3', 'bar'),
+        ]),
+        response: mergeResponses([
+          successResponse(1),
+          successResponse(2),
+          successResponse(3),
+        ]),
+      },
+      {
+        request: createRequest([
+          setOp('doc4', 'bar'),
+          setOp('doc5', 'bar'),
+          setOp('doc6', 'bar'),
+        ]),
+        response: mergeResponses([
+          successResponse(4),
+          successResponse(5),
+          successResponse(6),
+        ]),
+      },
+      {
+        request: createRequest([setOp('doc7', 'bar')]),
+        response: successResponse(7),
+      },
+    ]);
+    bulkWriter._setMaxPendingOpCount(6);
+    bulkWriter._maxBatchSize = 3;
+    bulkWriter
+      .set(firestore.doc('collectionId/doc1'), {foo: 'bar'})
+      .then(incrementOpCount);
+    bulkWriter
+      .set(firestore.doc('collectionId/doc2'), {foo: 'bar'})
+      .then(incrementOpCount);
+    bulkWriter
+      .set(firestore.doc('collectionId/doc3'), {foo: 'bar'})
+      .then(incrementOpCount);
+    bulkWriter
+      .set(firestore.doc('collectionId/doc4'), {foo: 'bar'})
+      .then(incrementOpCount);
+    bulkWriter
+      .set(firestore.doc('collectionId/doc5'), {foo: 'bar'})
+      .then(incrementOpCount);
+    bulkWriter
+      .set(firestore.doc('collectionId/doc6'), {foo: 'bar'})
+      .then(incrementOpCount);
+
+    // The 7th operation is buffered. We want to check that the operation is
+    // still sent even though it is not enqueued when close() is called.
+    bulkWriter
+      .set(firestore.doc('collectionId/doc7'), {foo: 'bar'})
+      .then(incrementOpCount);
+    return bulkWriter.close().then(async () => {
+      verifyOpCount(7);
+    });
+  });
+
   it('runs the success handler', async () => {
     const bulkWriter = await instantiateInstance([
       {
