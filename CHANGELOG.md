@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.12.3](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.2...v4.12.3) (2021-06-16)
+
+
+### Bug Fixes
+
+* bulkWriter: ensure buffered batches are sent after flush ([#1535](https://www.github.com/googleapis/nodejs-firestore/issues/1535)) ([115a134](https://www.github.com/googleapis/nodejs-firestore/commit/115a13407b907887a930b4299ebed042532c3ec2))
+* GoogleAdsError missing using generator version after 1.3.0 ([#1526](https://www.github.com/googleapis/nodejs-firestore/issues/1526)) ([adfe68e](https://www.github.com/googleapis/nodejs-firestore/commit/adfe68e194d518369d5b4f89e9be89f948efbdbb))
+
 ### [4.12.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.1...v4.12.2) (2021-05-27)
 
 
