@@ -28,9 +28,17 @@ declare namespace FirebaseFirestore {
   export type DocumentData = {[field: string]: any};
 
   /**
-   * Update data (for use with `DocumentReference.update()`) consists of field
-   * paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that contain dots
-   * reference nested fields within the document.
+   * Update data (for use with [update]{@link DocumentReference#update})
+   * that contains paths mapped to values. Fields that contain dots reference
+   * nested fields within the document.
+   *
+   * You can update a top-level field in your document by using the field name
+   * as a key (e.g. `foo`). The provided value completely replaces the contents
+   * for this field.
+   *
+   * You can also update a nested field directly by using its field path as a
+   * key (e.g. `foo.bar`). This nested field update replaces the contents at
+   * `bar` but does not modify other data under `foo`.
    */
   export type UpdateData = {[fieldPath: string]: any};
 
@@ -300,8 +308,22 @@ declare namespace FirebaseFirestore {
      * the transaction.
      *
      * You can use the transaction object passed to 'updateFunction' to read and
-     * modify Firestore documents under lock. Transactions are committed once
-     * 'updateFunction' resolves and attempted up to five times on failure.
+     * modify Firestore documents under lock. You have to perform all reads
+     * before before you perform any write.
+     *
+     * Documents read during a transaction are locked pessimistically. A
+     * transaction's lock on a document blocks other transactions, batched
+     * writes, and other non-transactional writes from changing that document.
+     * A transaction releases its document locks at commit time or once it times
+     * out or fails for any reason.
+     *
+     * Transactions are committed once 'updateFunction' resolves. If a
+     * transaction fails with contention, the transaction is retried up to five
+     * times. The `updateFunction` is invoked once for each attempt.
+     *
+     * Transactions time out after 60 seconds if no documents are read.
+     * Transactions that are not committed within than 270 seconds are also
+     * aborted.
      *
      * @param updateFunction The function to execute within the transaction
      * context.
