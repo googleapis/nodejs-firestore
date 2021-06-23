@@ -930,11 +930,12 @@ export class Firestore implements firestore.Firestore {
    * out or fails for any reason.
    *
    * Transactions are committed once 'updateFunction' resolves. If a transaction
-   * fails with contention, the transaction is retried five up to five times and
-   * its `updateFunction` is invoked again.
+   * fails with contention, the transaction is retried up to five times. The
+   * `updateFunction` is invoked once for each attempt.
    *
-   * Transaction time out after 270 seconds or 60 seconds of after the last
-   * document read.
+   * Transactions time out after 60 seconds if no documents are read.
+   * Transactions that are not committed within than 270 seconds are also
+   * aborted.
    *
    * @template T
    * @param {Firestore~updateFunction} updateFunction The user function to
