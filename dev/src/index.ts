@@ -937,8 +937,22 @@ export class Firestore implements firestore.Firestore {
    * the transaction.
    *
    * You can use the transaction object passed to 'updateFunction' to read and
-   * modify Firestore documents under lock. Transactions are committed once
-   * 'updateFunction' resolves and attempted up to five times on failure.
+   * modify Firestore documents under lock. You have to perform all reads before
+   * before you perform any write.
+   *
+   * Documents read during a transaction are locked pessimistically. A
+   * transaction's lock on a document blocks other transactions, batched
+   * writes, and other non-transactional writes from changing that document.
+   * A transaction releases its document locks at commit time or once it times
+   * out or fails for any reason.
+   *
+   * Transactions are committed once 'updateFunction' resolves. If a transaction
+   * fails with contention, the transaction is retried up to five times. The
+   * `updateFunction` is invoked once for each attempt.
+   *
+   * Transactions time out after 60 seconds if no documents are read.
+   * Transactions that are not committed within than 270 seconds are also
+   * aborted.
    *
    * @template T
    * @param {Firestore~updateFunction} updateFunction The user function to
