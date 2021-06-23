@@ -208,7 +208,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
 /**
  * Update data (for use with [update]{@link DocumentReference#update})
  * that contains paths mapped to values. Fields that contain dots
- * contain dots reference nested fields within the document.
+ * reference nested fields within the document.
  *
  * You can update a top-level field in your document by using the field name
  * as a key (e.g. `foo`). The provided value completely replaces the contents
