@@ -68,6 +68,7 @@ import {
   validateMinNumberOfArguments,
   validateObject,
   validateString,
+  validateTimestamp,
 } from './validate';
 import {WriteBatch} from './write-batch';
 
@@ -925,11 +926,35 @@ export class Firestore implements firestore.Firestore {
    *
    * @callback Firestore~updateFunction
    * @template T
-   * @param  {Transaction} transaction The transaction object for this
+   * @param {Transaction} transaction The transaction object for this
    * transaction.
    * @returns {Promise<T>} The promise returned at the end of the transaction.
    * This promise will be returned by {@link Firestore#runTransaction} if the
    * transaction completed successfully.
+   */
+
+  /**
+   * Options object for {@link Firestore#runTransaction} to configure a
+   * read-only transaction.
+   *
+   * @callback Firestore~ReadOnlyTransactionOptions
+   * @template T
+   * @param {true} readOnly Set to true to indicate a read-write transaction.
+   * @param {Timestamp=} readTime If specified, documents are read at the given
+   * time. This may not be more than 60 seconds in the past from when the
+   * request is processed by the server.
+   */
+
+  /**
+   * Options object for {@link Firestore#runTransaction} to configure a
+   * read-write transaction.
+   *
+   * @callback Firestore~ReadWriteTransactionOptions
+   * @template T
+   * @param {false=} readOnly Set to false or omitted to start a read-write
+   * transaction.
+   * @param {number=} maxAttempts The maximum number of attempts for this
+   * transaction. Defaults to five.
    */
 
   /**
@@ -940,11 +965,18 @@ export class Firestore implements firestore.Firestore {
    * modify Firestore documents under lock. You have to perform all reads before
    * before you perform any write.
    *
-   * Documents read during a transaction are locked pessimistically. A
-   * transaction's lock on a document blocks other transactions, batched
-   * writes, and other non-transactional writes from changing that document.
-   * A transaction releases its document locks at commit time or once it times
-   * out or fails for any reason.
+   * Transaction can be performed as read-only or read-write transactions. By
+   * default, transactions are executed in read-write mode.
+   *
+   * A read-write transaction obtains a pessimistic lock on all documents that
+   * are read during the transaction. These locks block other transactions,
+   * batched writes, and other non-transactional writes from changing that
+   * document. A transaction releases its document locks at commit time or if
+   * it fails for any reason.
+   *
+   * Read-only transaction do not lock documents. They can be used to read
+   * documents at a consistent snapshot in time, which may be up to 60 seconds
+   * in the past.
    *
    * Transactions are committed once 'updateFunction' resolves. If a transaction
    * fails with contention, the transaction is retried up to five times. The
@@ -952,14 +984,14 @@ export class Firestore implements firestore.Firestore {
    *
    * Transactions time out after 60 seconds if no documents are read.
    * Transactions that are not committed within than 270 seconds are also
-   * aborted.
+   * aborted. Any remaining locks are released when a transaction times out.
    *
    * @template T
    * @param {Firestore~updateFunction} updateFunction The user function to
    * execute within the transaction context.
-   * @param {object=} transactionOptions Transaction options.
-   * @param {number=} transactionOptions.maxAttempts - The maximum number of
-   * attempts for this transaction.
+   * @param {
+   * Firestore~ReadWriteTransactionOptions|Firestore~ReadOnlyTransactionOptions=
+   * } transactionOptions Transaction options.
    * @returns {Promise<T>} If the transaction completed successfully or was
    * explicitly aborted (by the updateFunction returning a failed Promise), the
    * Promise returned by the updateFunction will be returned here. Else if the
@@ -990,30 +1022,52 @@ export class Firestore implements firestore.Firestore {
    */
   runTransaction<T>(
     updateFunction: (transaction: Transaction) => Promise<T>,
-    transactionOptions?: {maxAttempts?: number}
+    transactionOptions?:
+      | firestore.ReadWriteTransactionOptions
+      | firestore.ReadOnlyTransactionOptions
   ): Promise<T> {
     validateFunction('updateFunction', updateFunction);
 
     const defaultAttempts = 5;
     const tag = requestTag();
 
-    let maxAttempts: number;
+    let maxAttempts = defaultAttempts;
+    let readOnly = false;
+    let readTime: Timestamp | undefined;
 
     if (transactionOptions) {
       validateObject('transactionOptions', transactionOptions);
-      validateInteger(
-        'transactionOptions.maxAttempts',
-        transactionOptions.maxAttempts,
-        {optional: true, minValue: 1}
+      validateBoolean(
+        'transactionOptions.readOnly',
+        transactionOptions.readOnly,
+        {optional: true}
       );
-      maxAttempts = transactionOptions.maxAttempts || defaultAttempts;
-    } else {
-      maxAttempts = defaultAttempts;
+      if (transactionOptions.readOnly) {
+        readOnly = true;
+        validateTimestamp(
+          'transactionOptions.readTime',
+          transactionOptions.readTime,
+          {optional: true}
+        );
+        readTime = transactionOptions.readTime as Timestamp | undefined;
+        maxAttempts = 1;
+      } else {
+        validateInteger(
+          'transactionOptions.maxAttempts',
+          transactionOptions.maxAttempts,
+          {optional: true, minValue: 1}
+        );
+        maxAttempts = transactionOptions.maxAttempts || defaultAttempts;
+      }
     }
 
     const transaction = new Transaction(this, tag);
     return this.initializeIfNeeded(tag).then(() =>
-      transaction.runTransaction(updateFunction, maxAttempts)
+      transaction.runTransaction(updateFunction, {
+        maxAttempts,
+        readOnly,
+        readTime,
+      })
     );
   }
 

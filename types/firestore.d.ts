@@ -174,6 +174,28 @@ declare namespace FirebaseFirestore {
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }
 
+  /** Options to configure a read-only transaction. */
+  export interface ReadOnlyTransactionOptions {
+    /** Set to true to indicate a read-write transaction. */
+    readOnly: true;
+    /**
+     * If specified, documents are read at the given time. This may not be more
+     * than 60 seconds in the past from when the request is processed by the
+     * server.
+     */
+    readTime?: Timestamp;
+  }
+
+  /** Options to configure a read-write transaction. */
+  export interface ReadWriteTransactionOptions {
+    /** Set to false or omitted to start a read-write transaction. */
+    readOnly?: false;
+    /**
+     * The maximum number of attempts for this transaction. Defaults to five.
+     */
+    maxAttempts?: number;
+  }
+
   /**
    * `Firestore` represents a Firestore Database and is the entry point for all
    * Firestore operations.
@@ -311,11 +333,18 @@ declare namespace FirebaseFirestore {
      * modify Firestore documents under lock. You have to perform all reads
      * before before you perform any write.
      *
-     * Documents read during a transaction are locked pessimistically. A
-     * transaction's lock on a document blocks other transactions, batched
-     * writes, and other non-transactional writes from changing that document.
-     * A transaction releases its document locks at commit time or once it times
-     * out or fails for any reason.
+     * Transaction can be performed as read-only or read-write transactions. By
+     * default, transactions are executed in read-write mode.
+     *
+     * A read-write transaction obtains a pessimistic lock on all documents that
+     * are read during the transaction. These locks block other transactions,
+     * batched writes, and other non-transactional writes from changing that
+     * document. A transaction releases its document locks at commit time or if
+     * it fails for any reason.
+     *
+     * Read-only transaction do not lock documents. They can be used to read
+     * documents at a consistent snapshot in time, which may be up to 60 seconds
+     * in the past.
      *
      * Transactions are committed once 'updateFunction' resolves. If a
      * transaction fails with contention, the transaction is retried up to five
@@ -323,13 +352,11 @@ declare namespace FirebaseFirestore {
      *
      * Transactions time out after 60 seconds if no documents are read.
      * Transactions that are not committed within than 270 seconds are also
-     * aborted.
+     * aborted. Any remaining locks are released when a transaction times out.
      *
      * @param updateFunction The function to execute within the transaction
      * context.
-     * @param {object=} transactionOptions Transaction options.
-     * @param {number=} transactionOptions.maxAttempts The maximum number of
-     * attempts for this transaction.
+     * @param transactionOptions Transaction options.
      * @return If the transaction completed successfully or was explicitly
      * aborted (by the updateFunction returning a failed Promise), the Promise
      * returned by the updateFunction will be returned here. Else if the
@@ -338,7 +365,9 @@ declare namespace FirebaseFirestore {
      */
     runTransaction<T>(
       updateFunction: (transaction: Transaction) => Promise<T>,
-      transactionOptions?: {maxAttempts?: number}
+      transactionOptions?:
+        | ReadWriteTransactionOptions
+        | ReadOnlyTransactionOptions
     ): Promise<T>;
 
     /**
