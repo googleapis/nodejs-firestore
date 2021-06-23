@@ -108,6 +108,9 @@ class BulkWriterOperation {
   private lastStatus?: StatusCode;
   private _backoffDuration = 0;
 
+  /** Whether flush() was called when this was the last enqueued operation. */
+  private _flushed = false;
+
   /**
    * @param ref The document reference being written to.
    * @param type The type of operation that created this write.
@@ -132,6 +135,14 @@ class BulkWriterOperation {
 
   get backoffDuration(): number {
     return this._backoffDuration;
+  }
+
+  markFlushed(): void {
+    this._flushed = true;
+  }
+
+  get flushed(): boolean {
+    return this._flushed;
   }
 
   onError(error: GoogleError): void {
@@ -272,6 +283,18 @@ class BulkCommitBatch extends WriteBatch {
 }
 
 /**
+ * Used to represent a buffered BulkWriterOperation.
+ *
+ * @private
+ */
+class BufferedOperation {
+  constructor(
+    readonly operation: BulkWriterOperation,
+    readonly sendFn: () => void
+  ) {}
+}
+
+/**
  * The error thrown when a BulkWriter operation fails.
  *
  * @class BulkWriterError
@@ -354,7 +377,7 @@ export class BulkWriter {
    * of pending operations has been enqueued.
    * @private
    */
-  private _bufferedOperations: Array<() => void> = [];
+  private _bufferedOperations: Array<BufferedOperation> = [];
 
   // Visible for testing.
   _getBufferedOperationsCount(): number {
@@ -751,6 +774,15 @@ export class BulkWriter {
   flush(): Promise<void> {
     this._verifyNotClosed();
     this._scheduleCurrentBatch(/* flush= */ true);
+
+    // Mark the most recent operation as flushed to ensure that the batch
+    // containing it will be sent once it's popped from the buffer.
+    if (this._bufferedOperations.length > 0) {
+      this._bufferedOperations[
+        this._bufferedOperations.length - 1
+      ].operation.markFlushed();
+    }
+
     return this._lastOp;
   }
 
@@ -898,10 +930,12 @@ export class BulkWriter {
       this._pendingOpsCount++;
       this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
     } else {
-      this._bufferedOperations.push(() => {
-        this._pendingOpsCount++;
-        this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
-      });
+      this._bufferedOperations.push(
+        new BufferedOperation(bulkWriterOp, () => {
+          this._pendingOpsCount++;
+          this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
+        })
+      );
     }
 
     // Chain the BulkWriter operation promise with the buffer processing logic
@@ -931,7 +965,7 @@ export class BulkWriter {
       this._bufferedOperations.length > 0
     ) {
       const nextOp = this._bufferedOperations.shift()!;
-      nextOp();
+      nextOp.sendFn();
     }
   }
 
@@ -956,6 +990,10 @@ export class BulkWriter {
 
     if (this._bulkCommitBatch._opCount === this._maxBatchSize) {
       this._scheduleCurrentBatch();
+    } else if (op.flushed) {
+      // If flush() was called before this operation was enqueued into a batch,
+      // we still need to schedule it.
+      this._scheduleCurrentBatch(/* flush= */ true);
     }
   }
 }
