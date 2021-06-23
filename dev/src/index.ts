@@ -207,8 +207,25 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
 
 /**
  * Update data (for use with [update]{@link DocumentReference#update})
- * that contains paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that
- * contain dots reference nested fields within the document.
+ * that contains paths mapped to values. Fields that contain dots
+ * reference nested fields within the document.
+ *
+ * You can update a top-level field in your document by using the field name
+ * as a key (e.g. `foo`). The provided value completely replaces the contents
+ * for this field.
+ *
+ * You can also update a nested field directly by using its field path as a key
+ * (e.g. `foo.bar`). This nested field update replaces the contents at `bar`
+ * but does not modify other data under `foo`.
+ *
+ * @example
+ * const documentRef = firestore.doc('coll/doc');
+ * documentRef.set({a1: {a2: 'val'}, b1: {b2: 'val'}, c1: {c2: 'val'}});
+ * documentRef.update({
+ *  b1: {b3: 'val'},
+ *  'c1.c3': 'val',
+ * });
+ * // Value is {a1: {a2: 'val'}, b1: {b3: 'val'}, c1: {c2: 'val', c3: 'val'}}
  *
  * @typedef {Object.<string, *>} UpdateData
  */

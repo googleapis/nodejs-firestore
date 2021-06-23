@@ -390,7 +390,7 @@ export class FirestoreAdminClient {
   // -- Service calls --
   // -------------------
   getIndex(
-    request: protos.google.firestore.admin.v1.IGetIndexRequest,
+    request?: protos.google.firestore.admin.v1.IGetIndexRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -435,7 +435,7 @@ export class FirestoreAdminClient {
    * const [response] = await client.getIndex(request);
    */
   getIndex(
-    request: protos.google.firestore.admin.v1.IGetIndexRequest,
+    request?: protos.google.firestore.admin.v1.IGetIndexRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -474,7 +474,7 @@ export class FirestoreAdminClient {
     return this.innerApiCalls.getIndex(request, options, callback);
   }
   deleteIndex(
-    request: protos.google.firestore.admin.v1.IDeleteIndexRequest,
+    request?: protos.google.firestore.admin.v1.IDeleteIndexRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -519,7 +519,7 @@ export class FirestoreAdminClient {
    * const [response] = await client.deleteIndex(request);
    */
   deleteIndex(
-    request: protos.google.firestore.admin.v1.IDeleteIndexRequest,
+    request?: protos.google.firestore.admin.v1.IDeleteIndexRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -560,7 +560,7 @@ export class FirestoreAdminClient {
     return this.innerApiCalls.deleteIndex(request, options, callback);
   }
   getField(
-    request: protos.google.firestore.admin.v1.IGetFieldRequest,
+    request?: protos.google.firestore.admin.v1.IGetFieldRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -605,7 +605,7 @@ export class FirestoreAdminClient {
    * const [response] = await client.getField(request);
    */
   getField(
-    request: protos.google.firestore.admin.v1.IGetFieldRequest,
+    request?: protos.google.firestore.admin.v1.IGetFieldRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -645,7 +645,7 @@ export class FirestoreAdminClient {
   }
 
   createIndex(
-    request: protos.google.firestore.admin.v1.ICreateIndexRequest,
+    request?: protos.google.firestore.admin.v1.ICreateIndexRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -706,7 +706,7 @@ export class FirestoreAdminClient {
    * const [response] = await operation.promise();
    */
   createIndex(
-    request: protos.google.firestore.admin.v1.ICreateIndexRequest,
+    request?: protos.google.firestore.admin.v1.ICreateIndexRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -791,7 +791,7 @@ export class FirestoreAdminClient {
     >;
   }
   updateField(
-    request: protos.google.firestore.admin.v1.IUpdateFieldRequest,
+    request?: protos.google.firestore.admin.v1.IUpdateFieldRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -862,7 +862,7 @@ export class FirestoreAdminClient {
    * const [response] = await operation.promise();
    */
   updateField(
-    request: protos.google.firestore.admin.v1.IUpdateFieldRequest,
+    request?: protos.google.firestore.admin.v1.IUpdateFieldRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -947,7 +947,7 @@ export class FirestoreAdminClient {
     >;
   }
   exportDocuments(
-    request: protos.google.firestore.admin.v1.IExportDocumentsRequest,
+    request?: protos.google.firestore.admin.v1.IExportDocumentsRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -1022,7 +1022,7 @@ export class FirestoreAdminClient {
    * const [response] = await operation.promise();
    */
   exportDocuments(
-    request: protos.google.firestore.admin.v1.IExportDocumentsRequest,
+    request?: protos.google.firestore.admin.v1.IExportDocumentsRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -1107,7 +1107,7 @@ export class FirestoreAdminClient {
     >;
   }
   importDocuments(
-    request: protos.google.firestore.admin.v1.IImportDocumentsRequest,
+    request?: protos.google.firestore.admin.v1.IImportDocumentsRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -1177,7 +1177,7 @@ export class FirestoreAdminClient {
    * const [response] = await operation.promise();
    */
   importDocuments(
-    request: protos.google.firestore.admin.v1.IImportDocumentsRequest,
+    request?: protos.google.firestore.admin.v1.IImportDocumentsRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -1262,7 +1262,7 @@ export class FirestoreAdminClient {
     >;
   }
   listIndexes(
-    request: protos.google.firestore.admin.v1.IListIndexesRequest,
+    request?: protos.google.firestore.admin.v1.IListIndexesRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -1318,7 +1318,7 @@ export class FirestoreAdminClient {
    *   for more details and examples.
    */
   listIndexes(
-    request: protos.google.firestore.admin.v1.IListIndexesRequest,
+    request?: protos.google.firestore.admin.v1.IListIndexesRequest,
     optionsOrCallback?:
       | CallOptions
       | PaginationCallback<
@@ -1462,7 +1462,7 @@ export class FirestoreAdminClient {
     ) as AsyncIterable<protos.google.firestore.admin.v1.IIndex>;
   }
   listFields(
-    request: protos.google.firestore.admin.v1.IListFieldsRequest,
+    request?: protos.google.firestore.admin.v1.IListFieldsRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -1527,7 +1527,7 @@ export class FirestoreAdminClient {
    *   for more details and examples.
    */
   listFields(
-    request: protos.google.firestore.admin.v1.IListFieldsRequest,
+    request?: protos.google.firestore.admin.v1.IListFieldsRequest,
     optionsOrCallback?:
       | CallOptions
       | PaginationCallback<
