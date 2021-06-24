@@ -138,8 +138,7 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 export const MAX_REQUEST_RETRIES = 5;
 
 /*!
- * The maximum number of times to attempt committing a transaction before
- * failing.
+ * The maximum number of times to attempt a transaction before failing.
  */
 export const DEFAULT_MAX_TRANSACTION_ATTEMPTS = 5;
 
