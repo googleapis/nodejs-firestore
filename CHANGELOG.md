@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.12.4](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.3...v4.12.4) (2021-06-24)
+
+
+### Bug Fixes
+
+* make request optional in all cases ([#1536](https://www.github.com/googleapis/nodejs-firestore/issues/1536)) ([f6edfc1](https://www.github.com/googleapis/nodejs-firestore/commit/f6edfc181ca39cd307eab6d141db08f377d5cfdf))
+
 ### [4.12.3](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.2...v4.12.3) (2021-06-16)
 
 
