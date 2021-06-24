@@ -26,6 +26,7 @@ import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
 import {BulkWriter} from './bulk-writer';
 import {BundleBuilder} from './bundle';
 import {fieldsFromJson, timestampFromJson} from './convert';
+import {DocumentReader} from './document-reader';
 import {
   DocumentSnapshot,
   DocumentSnapshotBuilder,
@@ -34,14 +35,12 @@ import {
 import {logger, setLibVersion} from './logger';
 import {
   DEFAULT_DATABASE_ID,
-  FieldPath,
   QualifiedResourcePath,
   ResourcePath,
   validateResourcePath,
 } from './path';
 import {ClientPool} from './pool';
-import {CollectionReference} from './reference';
-import {DocumentReference} from './reference';
+import {CollectionReference, DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
@@ -1077,136 +1076,14 @@ export class Firestore implements firestore.Firestore {
     const stack = Error().stack!;
 
     return this.initializeIfNeeded(tag)
-      .then(() => this.getAll_(documents, fieldMask, tag))
+      .then(() => {
+        const reader = new DocumentReader(this, documents);
+        reader.fieldMask = fieldMask || undefined;
+        return reader.get(tag);
+      })
       .catch(err => {
         throw wrapError(err, stack);
       });
-  }
-
-  /**
-   * Internal method to retrieve multiple documents from Firestore, optionally
-   * as part of a transaction.
-   *
-   * @private
-   * @param docRefs The documents to receive.
-   * @param fieldMask An optional field mask to apply to this read.
-   * @param requestTag A unique client-assigned identifier for this request.
-   * @param transactionId The transaction ID to use for this read.
-   * @returns A Promise that contains an array with the resulting documents.
-   */
-  getAll_<T>(
-    docRefs: Array<firestore.DocumentReference<T>>,
-    fieldMask: firestore.FieldPath[] | null,
-    requestTag: string,
-    transactionId?: Uint8Array
-  ): Promise<Array<DocumentSnapshot<T>>> {
-    const requestedDocuments = new Set<string>();
-    const retrievedDocuments = new Map<string, DocumentSnapshot>();
-
-    for (const docRef of docRefs) {
-      requestedDocuments.add((docRef as DocumentReference<T>).formattedName);
-    }
-
-    const request: api.IBatchGetDocumentsRequest = {
-      database: this.formattedName,
-      transaction: transactionId,
-      documents: Array.from(requestedDocuments),
-    };
-
-    if (fieldMask) {
-      const fieldPaths = fieldMask.map(
-        fieldPath => (fieldPath as FieldPath).formattedName
-      );
-      request.mask = {fieldPaths};
-    }
-
-    return this.requestStream('batchGetDocuments', request, requestTag).then(
-      stream => {
-        return new Promise<Array<DocumentSnapshot<T>>>((resolve, reject) => {
-          stream
-            .on('error', err => {
-              logger(
-                'Firestore.getAll_',
-                requestTag,
-                'GetAll failed with error:',
-                err
-              );
-              reject(err);
-            })
-            .on('data', (response: api.IBatchGetDocumentsResponse) => {
-              try {
-                let document;
-
-                if (response.found) {
-                  logger(
-                    'Firestore.getAll_',
-                    requestTag,
-                    'Received document: %s',
-                    response.found.name!
-                  );
-                  document = this.snapshot_(response.found, response.readTime!);
-                } else {
-                  logger(
-                    'Firestore.getAll_',
-                    requestTag,
-                    'Document missing: %s',
-                    response.missing!
-                  );
-                  document = this.snapshot_(
-                    response.missing!,
-                    response.readTime!
-                  );
-                }
-
-                const path = document.ref.path;
-                retrievedDocuments.set(path, document);
-              } catch (err) {
-                logger(
-                  'Firestore.getAll_',
-                  requestTag,
-                  'GetAll failed with exception:',
-                  err
-                );
-                reject(err);
-              }
-            })
-            .on('end', () => {
-              logger(
-                'Firestore.getAll_',
-                requestTag,
-                'Received %d results',
-                retrievedDocuments.size
-              );
-
-              // BatchGetDocuments doesn't preserve document order. We use
-              // the request order to sort the resulting documents.
-              const orderedDocuments: Array<DocumentSnapshot<T>> = [];
-
-              for (const docRef of docRefs) {
-                const document = retrievedDocuments.get(docRef.path);
-                if (document !== undefined) {
-                  // Recreate the DocumentSnapshot with the DocumentReference
-                  // containing the original converter.
-                  const finalDoc = new DocumentSnapshotBuilder(
-                    docRef as DocumentReference<T>
-                  );
-                  finalDoc.fieldsProto = document._fieldsProto;
-                  finalDoc.readTime = document.readTime;
-                  finalDoc.createTime = document.createTime;
-                  finalDoc.updateTime = document.updateTime;
-                  orderedDocuments.push(finalDoc.build());
-                } else {
-                  reject(
-                    new Error(`Did not receive document for "${docRef.path}".`)
-                  );
-                }
-              }
-              resolve(orderedDocuments);
-            });
-          stream.resume();
-        });
-      }
-    );
   }
 
   /**
