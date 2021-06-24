@@ -138,6 +138,11 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 export const MAX_REQUEST_RETRIES = 5;
 
 /*!
+ * The maximum number of times to attempt a transaction before failing.
+ */
+export const DEFAULT_MAX_TRANSACTION_ATTEMPTS = 5;
+
+/*!
  * The default number of idle GRPC channel to keep.
  */
 const DEFAULT_MAX_IDLE_CHANNELS = 1;
@@ -994,10 +999,9 @@ export class Firestore implements firestore.Firestore {
   ): Promise<T> {
     validateFunction('updateFunction', updateFunction);
 
-    const defaultAttempts = 5;
     const tag = requestTag();
 
-    let maxAttempts: number;
+    let maxAttempts = DEFAULT_MAX_TRANSACTION_ATTEMPTS;
 
     if (transactionOptions) {
       validateObject('transactionOptions', transactionOptions);
@@ -1006,9 +1010,8 @@ export class Firestore implements firestore.Firestore {
         transactionOptions.maxAttempts,
         {optional: true, minValue: 1}
       );
-      maxAttempts = transactionOptions.maxAttempts || defaultAttempts;
-    } else {
-      maxAttempts = defaultAttempts;
+      maxAttempts =
+        transactionOptions.maxAttempts || DEFAULT_MAX_TRANSACTION_ATTEMPTS;
     }
 
     const transaction = new Transaction(this, tag);
