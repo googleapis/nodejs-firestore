@@ -23,6 +23,7 @@ import {logger} from './logger';
 import {Firestore} from './index';
 
 import api = google.firestore.v1;
+import {DocumentData} from '@google-cloud/firestore';
 
 /**
  * A wrapper around BatchGetDocumentsRequest that retries request upon stream
@@ -90,36 +91,50 @@ export class DocumentReader<T> {
   }
 
   private async fetchAllDocuments(requestTag: string): Promise<void> {
-    while (this.remainingDocuments.size > 0) {
-      try {
-        return await this.fetchMoreDocuments(requestTag);
-      } catch (err) {
-        // If a non-transactional read failed, attempt to restart.
-        // Transactional reads are retried via the transaction runner.
-        if (
-          this.transactionId ||
-          isPermanentRpcError(err, 'batchGetDocuments')
-        ) {
+    let madeProgress = false;
+
+    return new Promise((resolve, reject) => {
+      this.fetchMoreDocuments(
+        requestTag,
+        document => {
+          madeProgress = true;
+          const path = document.ref.formattedName;
+          this.remainingDocuments.delete(path);
+          this.retrievedDocuments.set(path, document);
+        },
+        error => {
+          const retrying =
+            // If a non-transactional read failed, attempt to restart.
+            // Transactional reads are retried via the transaction runner.
+            !this.transactionId &&
+            madeProgress &&
+            !isPermanentRpcError(error, 'batchGetDocuments');
+
           logger(
             'DocumentReader.fetchAllDocuments',
             requestTag,
-            'BatchGetDocuments failed with non-retryable stream error:',
-            err
+            'BatchGetDocuments failed with error: %s. Retrying: %s',
+            error,
+            retrying
           );
-          throw err;
-        } else {
-          logger(
-            'DocumentReader.fetchAllDocuments',
-            requestTag,
-            'BatchGetDocuments failed with retryable stream error:',
-            err
-          );
-        }
-      }
-    }
+
+          if (retrying) {
+            this.fetchAllDocuments(requestTag).then(resolve, reject);
+          } else {
+            reject(error);
+          }
+        },
+        () => resolve()
+      );
+    });
   }
 
-  private fetchMoreDocuments(requestTag: string): Promise<void> {
+  private fetchMoreDocuments(
+    requestTag: string,
+    onNext: (snapshot: DocumentSnapshot<DocumentData>) => void,
+    onError: (error: Error) => void,
+    onComplete: () => void
+  ): void {
     const request: api.IBatchGetDocumentsRequest = {
       database: this.firestore.formattedName,
       transaction: this.transactionId,
@@ -135,59 +150,49 @@ export class DocumentReader<T> {
 
     let resultCount = 0;
 
-    return this.firestore
+    this.firestore
       .requestStream('batchGetDocuments', request, requestTag)
       .then(stream => {
-        return new Promise<void>((resolve, reject) => {
-          stream
-            .on('error', err => reject(err))
-            .on('data', (response: api.IBatchGetDocumentsResponse) => {
-              try {
-                let document;
-
-                if (response.found) {
-                  logger(
-                    'DocumentReader.fetchMoreDocuments',
-                    requestTag,
-                    'Received document: %s',
-                    response.found.name!
-                  );
-                  document = this.firestore.snapshot_(
-                    response.found,
-                    response.readTime!
-                  );
-                } else {
-                  logger(
-                    'DocumentReader.fetchMoreDocuments',
-                    requestTag,
-                    'Document missing: %s',
-                    response.missing!
-                  );
-                  document = this.firestore.snapshot_(
-                    response.missing!,
-                    response.readTime!
-                  );
-                }
-
-                const path = document.ref.formattedName;
-                this.remainingDocuments.delete(path);
-                this.retrievedDocuments.set(path, document);
-                ++resultCount;
-              } catch (err) {
-                reject(err);
-              }
-            })
-            .on('end', () => {
+        stream
+          .on('error', err => onError(err))
+          .on('data', (response: api.IBatchGetDocumentsResponse) => {
+            if (response.found) {
               logger(
                 'DocumentReader.fetchMoreDocuments',
                 requestTag,
-                'Received %d results',
-                resultCount
+                'Received document: %s',
+                response.found.name!
               );
-              resolve();
-            });
-          stream.resume();
-        });
+              const snapshot = this.firestore.snapshot_(
+                response.found,
+                response.readTime!
+              );
+              onNext(snapshot);
+            } else {
+              logger(
+                'DocumentReader.fetchMoreDocuments',
+                requestTag,
+                'Document missing: %s',
+                response.missing!
+              );
+              const snapshot = this.firestore.snapshot_(
+                response.missing!,
+                response.readTime!
+              );
+              onNext(snapshot);
+            }
+            ++resultCount;
+          })
+          .on('end', () => {
+            logger(
+              'DocumentReader.fetchMoreDocuments',
+              requestTag,
+              'Received %d results',
+              resultCount
+            );
+            onComplete();
+          });
+        stream.resume();
       });
   }
 }
