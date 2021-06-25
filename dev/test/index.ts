@@ -1024,31 +1024,6 @@ describe('getAll() method', () => {
     });
   });
 
-  it('handles stream exception after initialization', () => {
-    let attempts = 0;
-
-    const overrides: ApiOverride = {
-      batchGetDocuments: () => {
-        ++attempts;
-        return stream(found('documentId'), new Error('Expected exception'));
-      },
-    };
-
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .getAll(firestore.doc('collectionId/documentId'))
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          // We don't retry since the stream might have already been released
-          // to the end user.
-          expect(attempts).to.equal(1);
-          expect(err.message).to.equal('Expected exception');
-        });
-    });
-  });
-
   it('handles stream exception (before first result)', () => {
     let attempts = 0;
 

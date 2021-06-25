@@ -21,9 +21,8 @@ import {isPermanentRpcError} from './util';
 import {google} from '../protos/firestore_v1_proto_api';
 import {logger} from './logger';
 import {Firestore} from './index';
-
-import api = google.firestore.v1;
 import {DocumentData} from '@google-cloud/firestore';
+import api = google.firestore.v1;
 
 /**
  * A wrapper around BatchGetDocumentsRequest that retries request upon stream
@@ -63,7 +62,7 @@ export class DocumentReader<T> {
    * @param requestTag A unique client-assigned identifier for this request.
    */
   async get(requestTag: string): Promise<Array<DocumentSnapshot<T>>> {
-    await this.fetchAllDocuments(requestTag);
+    await this.fetchDocuments(requestTag);
 
     // BatchGetDocuments doesn't preserve document order. We use the request
     // order to sort the resulting documents.
@@ -90,51 +89,11 @@ export class DocumentReader<T> {
     return orderedDocuments;
   }
 
-  private async fetchAllDocuments(requestTag: string): Promise<void> {
-    let madeProgress = false;
+  private async fetchDocuments(requestTag: string): Promise<void> {
+    if (!this.remainingDocuments.size) {
+      return;
+    }
 
-    return new Promise((resolve, reject) => {
-      this.fetchMoreDocuments(
-        requestTag,
-        document => {
-          madeProgress = true;
-          const path = document.ref.formattedName;
-          this.remainingDocuments.delete(path);
-          this.retrievedDocuments.set(path, document);
-        },
-        error => {
-          const retrying =
-            // If a non-transactional read failed, attempt to restart.
-            // Transactional reads are retried via the transaction runner.
-            !this.transactionId &&
-            madeProgress &&
-            !isPermanentRpcError(error, 'batchGetDocuments');
-
-          logger(
-            'DocumentReader.fetchAllDocuments',
-            requestTag,
-            'BatchGetDocuments failed with error: %s. Retrying: %s',
-            error,
-            retrying
-          );
-
-          if (retrying) {
-            this.fetchAllDocuments(requestTag).then(resolve, reject);
-          } else {
-            reject(error);
-          }
-        },
-        () => resolve()
-      );
-    });
-  }
-
-  private fetchMoreDocuments(
-    requestTag: string,
-    onNext: (snapshot: DocumentSnapshot<DocumentData>) => void,
-    onError: (error: Error) => void,
-    onComplete: () => void
-  ): void {
     const request: api.IBatchGetDocumentsRequest = {
       database: this.firestore.formattedName,
       transaction: this.transactionId,
@@ -143,56 +102,81 @@ export class DocumentReader<T> {
 
     if (this.fieldMask) {
       const fieldPaths = this.fieldMask.map(
-        fieldPath => (fieldPath as FieldPath).formattedName
+        fieldPath => fieldPath.formattedName
       );
       request.mask = {fieldPaths};
     }
 
     let resultCount = 0;
 
-    this.firestore
-      .requestStream('batchGetDocuments', request, requestTag)
-      .then(stream => {
-        stream
-          .on('error', err => onError(err))
-          .on('data', (response: api.IBatchGetDocumentsResponse) => {
-            if (response.found) {
-              logger(
-                'DocumentReader.fetchMoreDocuments',
-                requestTag,
-                'Received document: %s',
-                response.found.name!
-              );
-              const snapshot = this.firestore.snapshot_(
-                response.found,
-                response.readTime!
-              );
-              onNext(snapshot);
-            } else {
-              logger(
-                'DocumentReader.fetchMoreDocuments',
-                requestTag,
-                'Document missing: %s',
-                response.missing!
-              );
-              const snapshot = this.firestore.snapshot_(
-                response.missing!,
-                response.readTime!
-              );
-              onNext(snapshot);
-            }
-            ++resultCount;
-          })
-          .on('end', () => {
-            logger(
-              'DocumentReader.fetchMoreDocuments',
-              requestTag,
-              'Received %d results',
-              resultCount
-            );
-            onComplete();
-          });
-        stream.resume();
-      });
+    try {
+      const stream = await this.firestore.requestStream(
+        'batchGetDocuments',
+        request,
+        requestTag
+      );
+      stream.resume();
+
+      for await (const response of stream) {
+        let snapshot: DocumentSnapshot<DocumentData>;
+
+        if (response.found) {
+          logger(
+            'DocumentReader.fetchDocuments',
+            requestTag,
+            'Received document: %s',
+            response.found.name!
+          );
+          snapshot = this.firestore.snapshot_(
+            response.found,
+            response.readTime!
+          );
+        } else {
+          logger(
+            'DocumentReader.fetchDocuments',
+            requestTag,
+            'Document missing: %s',
+            response.missing!
+          );
+          snapshot = this.firestore.snapshot_(
+            response.missing!,
+            response.readTime!
+          );
+        }
+
+        const path = snapshot.ref.formattedName;
+        this.remainingDocuments.delete(path);
+        this.retrievedDocuments.set(path, snapshot);
+        ++resultCount;
+      }
+    } catch (error) {
+      const shouldRetry =
+        // Transactional reads are retried via the transaction runner.
+        !this.transactionId &&
+        // Only retry if we made progress.
+        resultCount > 0 &&
+        // Don't retry permanent errors.
+        !isPermanentRpcError(error, 'batchGetDocuments');
+
+      logger(
+        'DocumentReader.fetchDocuments',
+        requestTag,
+        'BatchGetDocuments failed with error: %s. Retrying: %s',
+        error,
+        shouldRetry
+      );
+      if (shouldRetry) {
+        return this.fetchDocuments(requestTag);
+      } else {
+        throw error;
+      }
+    } finally {
+      logger(
+        'DocumentReader.fetchDocuments',
+        requestTag,
+        'Received %d results',
+        resultCount
+      );
+    }
   }
 }
