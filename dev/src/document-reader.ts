@@ -36,7 +36,7 @@ export class DocumentReader<T> {
   /** An optional transaction ID to use for this read. */
   transactionId?: Uint8Array;
 
-  private remainingDocuments = new Set<string>();
+  private outstandingDocuments = new Set<string>();
   private retrievedDocuments = new Map<string, DocumentSnapshot>();
 
   /**
@@ -44,7 +44,7 @@ export class DocumentReader<T> {
    * as part of a transaction.
    *
    * @param firestore The Firestore instance to use.
-   * @param allDocuments The documents to receive.
+   * @param allDocuments The documents to get.
    * @returns A Promise that contains an array with the resulting documents.
    */
   constructor(
@@ -52,7 +52,7 @@ export class DocumentReader<T> {
     private allDocuments: Array<DocumentReference<T>>
   ) {
     for (const docRef of this.allDocuments) {
-      this.remainingDocuments.add(docRef.formattedName);
+      this.outstandingDocuments.add(docRef.formattedName);
     }
   }
 
@@ -90,14 +90,14 @@ export class DocumentReader<T> {
   }
 
   private async fetchDocuments(requestTag: string): Promise<void> {
-    if (!this.remainingDocuments.size) {
+    if (!this.outstandingDocuments.size) {
       return;
     }
 
     const request: api.IBatchGetDocumentsRequest = {
       database: this.firestore.formattedName,
       transaction: this.transactionId,
-      documents: Array.from(this.remainingDocuments),
+      documents: Array.from(this.outstandingDocuments),
     };
 
     if (this.fieldMask) {
@@ -145,7 +145,7 @@ export class DocumentReader<T> {
         }
 
         const path = snapshot.ref.formattedName;
-        this.remainingDocuments.delete(path);
+        this.outstandingDocuments.delete(path);
         this.retrievedDocuments.set(path, snapshot);
         ++resultCount;
       }
