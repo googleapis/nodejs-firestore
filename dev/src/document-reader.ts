@@ -40,12 +40,11 @@ export class DocumentReader<T> {
   private retrievedDocuments = new Map<string, DocumentSnapshot>();
 
   /**
-   * Internal method to retrieve multiple documents from Firestore, optionally
-   * as part of a transaction.
+   * Creates a new DocumentReader that fetches the provided documents (via
+   * `get()`).
    *
    * @param firestore The Firestore instance to use.
    * @param allDocuments The documents to get.
-   * @returns A Promise that contains an array with the resulting documents.
    */
   constructor(
     private firestore: Firestore,
