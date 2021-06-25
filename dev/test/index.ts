@@ -1104,29 +1104,6 @@ describe('getAll() method', () => {
     });
   });
 
-  it('handles serialization error', () => {
-    const overrides: ApiOverride = {
-      batchGetDocuments: () => {
-        return stream(found('documentId'));
-      },
-    };
-
-    return createInstance(overrides).then(firestore => {
-      firestore['snapshot_'] = () => {
-        throw new Error('Expected exception');
-      };
-
-      return firestore
-        .getAll(firestore.doc('collectionId/documentId'))
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          expect(err.message).to.equal('Expected exception');
-        });
-    });
-  });
-
   it('retries based on error code', () => {
     const expectedErrorAttempts: {[key: number]: number} = {
       [Status.CANCELLED]: 1,

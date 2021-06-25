@@ -106,7 +106,8 @@ export class DocumentReader<T> {
       request.mask = {fieldPaths};
     }
 
-    const responses: api.BatchGetDocumentsResponse[] = [];
+    let resultCount = 0;
+
     try {
       const stream = await this.firestore.requestStream(
         'batchGetDocuments',
@@ -115,13 +116,7 @@ export class DocumentReader<T> {
       );
       stream.resume();
 
-      // Gather results in a temporary array since Node12 does not handle
-      // exceptions thrown within a `for await` loop.
       for await (const response of stream) {
-        responses.push(response);
-      }
-
-      for (const response of responses) {
         let snapshot: DocumentSnapshot<DocumentData>;
 
         if (response.found) {
@@ -151,13 +146,14 @@ export class DocumentReader<T> {
         const path = snapshot.ref.formattedName;
         this.outstandingDocuments.delete(path);
         this.retrievedDocuments.set(path, snapshot);
+        ++resultCount;
       }
     } catch (error) {
       const shouldRetry =
         // Transactional reads are retried via the transaction runner.
         !this.transactionId &&
         // Only retry if we made progress.
-        responses.length > 0 &&
+        resultCount > 0 &&
         // Don't retry permanent errors.
         error.code !== undefined &&
         !isPermanentRpcError(error, 'batchGetDocuments');
@@ -179,7 +175,7 @@ export class DocumentReader<T> {
         'DocumentReader.fetchDocuments',
         requestTag,
         'Received %d results',
-        responses.length
+        resultCount
       );
     }
   }
