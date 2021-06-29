@@ -1063,7 +1063,8 @@ export class Firestore implements firestore.Firestore {
           {optional: true, minValue: 1}
         );
 
-        maxAttempts = transactionOptions.maxAttempts || DEFAULT_MAX_TRANSACTION_ATTEMPTS;
+        maxAttempts =
+          transactionOptions.maxAttempts || DEFAULT_MAX_TRANSACTION_ATTEMPTS;
       }
     }
 
