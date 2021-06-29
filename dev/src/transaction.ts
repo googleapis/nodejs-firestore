@@ -39,7 +39,7 @@ import {
   validateMinNumberOfArguments,
   validateOptional,
 } from './validate';
-
+import {DocumentReader} from './document-reader';
 import api = proto.google.firestore.v1;
 
 /*!
@@ -126,16 +126,9 @@ export class Transaction implements firestore.Transaction {
     }
 
     if (refOrQuery instanceof DocumentReference) {
-      return this._firestore
-        .getAll_(
-          [refOrQuery],
-          /* fieldMask= */ null,
-          this._requestTag,
-          this._transactionId
-        )
-        .then(res => {
-          return Promise.resolve(res[0]);
-        });
+      const documentReader = new DocumentReader(this._firestore, [refOrQuery]);
+      documentReader.transactionId = this._transactionId;
+      return documentReader.get(this._requestTag).then(([res]) => res);
     }
 
     if (refOrQuery instanceof Query) {
@@ -192,12 +185,10 @@ export class Transaction implements firestore.Transaction {
       documentRefsOrReadOptions
     );
 
-    return this._firestore.getAll_(
-      documents,
-      fieldMask,
-      this._requestTag,
-      this._transactionId
-    );
+    const documentReader = new DocumentReader(this._firestore, documents);
+    documentReader.fieldMask = fieldMask || undefined;
+    documentReader.transactionId = this._transactionId;
+    return documentReader.get(this._requestTag);
   }
 
   /**
