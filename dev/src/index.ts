@@ -957,6 +957,13 @@ export class Firestore implements firestore.Firestore {
    * @template T
    * @param {false=} readOnly Set to false or omit to indicate a read-write
    * transaction.
+   * @param {boolean=} optimisticLocking Whether to use optimistic locking.
+   * By default, transactions lock documents pessimistically, which increases
+   * the chance that transactions succeed but blocks other clients from
+   * modifying the documents read during the transaction. When
+   * `optimisticLocking` is enabled, writes are not blocked. When other clients
+   * modify a document, the transaction is instead retried. Optimistic
+   * transactions do not support queries.
    * @param {number=} maxAttempts The maximum number of attempts for this
    * transaction. Defaults to five.
    */
@@ -972,10 +979,16 @@ export class Firestore implements firestore.Firestore {
    * Transactions can be performed as read-only or read-write transactions. By
    * default, transactions are executed in read-write mode.
    *
-   * A read-write transaction obtains a pessimistic lock on all documents that
-   * are read during the transaction. These locks block other transactions,
-   * batched writes, and other non-transactional writes from changing that
-   * document. Any writes in a read-write transactions are committed once
+   * By default, read-write transactions obtain a pessimistic locks on all
+   * documents that are read during the transaction. These locks block other
+   * transactions, batched writes, and other non-transactional writes from
+   * changing that document. If you enable optimistic locking, other clients
+   * can continue to modify these documents. The transaction will be retried
+   * if a concurrent write affects the data read during the transaction.
+   *
+   * A transaction can modify up to 500 documents. If you enable optimistic
+   * locking, any document read during the transaction also counts against
+   * this limit. Any writes in a read-write transactions are committed once
    * 'updateFunction' resolves, which also releases all locks.
    *
    * If a read-write transaction fails with contention, the transaction is
@@ -1037,6 +1050,7 @@ export class Firestore implements firestore.Firestore {
     let maxAttempts = DEFAULT_MAX_TRANSACTION_ATTEMPTS;
     let readOnly = false;
     let readTime: Timestamp | undefined;
+    let optimisticLocking = false;
 
     if (transactionOptions) {
       validateObject('transactionOptions', transactionOptions);
@@ -1062,13 +1076,18 @@ export class Firestore implements firestore.Firestore {
           transactionOptions.maxAttempts,
           {optional: true, minValue: 1}
         );
-
         maxAttempts =
           transactionOptions.maxAttempts || DEFAULT_MAX_TRANSACTION_ATTEMPTS;
+        validateBoolean(
+          'transactionOptions.optimisticLocking',
+          transactionOptions.optimisticLocking,
+          {optional: true}
+        );
+        optimisticLocking = transactionOptions.optimisticLocking || false;
       }
     }
 
-    const transaction = new Transaction(this, tag);
+    const transaction = new Transaction(this, optimisticLocking, tag);
     return this.initializeIfNeeded(tag).then(() =>
       transaction.runTransaction(updateFunction, {
         maxAttempts,

@@ -52,13 +52,17 @@ const DOCUMENT_NAME = `${COLLECTION_ROOT}/${DOCUMENT_ID}`;
 Firestore.setLogFunction(null);
 
 /** Helper to create a transaction ID from either a string or a Uint8Array. */
-function transactionId(transaction?: Uint8Array | string): Uint8Array {
+function transactionId(
+  transaction?: Uint8Array | string
+): Uint8Array | undefined {
   if (transaction === undefined) {
     return Buffer.from('foo');
-  } else if (typeof transaction === 'string') {
+  } else if (typeof transaction === 'string' && transaction.length > 0) {
     return Buffer.from(transaction);
-  } else {
+  } else if (transaction instanceof Uint8Array && transaction.length > 0) {
     return transaction;
+  } else {
+    return undefined;
   }
 }
 
@@ -225,6 +229,33 @@ function getDocument(
   return getAll([DOCUMENT_ID], undefined, transaction, error);
 }
 
+function getMissing(doc: string = DOCUMENT_ID): TransactionStep {
+  const name = `${COLLECTION_ROOT}/${doc}`;
+  const request: api.IBatchGetDocumentsRequest = {
+    database: DATABASE_ROOT,
+    documents: [name],
+    transaction: undefined,
+  };
+
+  const stream = through2.obj();
+  setImmediate(() => {
+    stream.push({
+      missing: name,
+      readTime: {seconds: 5, nanos: 6},
+    });
+  });
+  setImmediate(() => {
+    stream.push(null);
+  });
+
+  return {
+    type: 'getDocument',
+    request,
+    error: undefined,
+    stream,
+  };
+}
+
 function query(
   transaction?: Uint8Array | string,
   error?: Error
@@ -377,7 +408,7 @@ function runTransaction<T>(
   });
 }
 
-describe('successful transactions', () => {
+describe('successful transactions (with pessimistic locking)', () => {
   it('empty transaction', () => {
     return runTransaction(
       /* transactionOptions= */ {},
@@ -727,7 +758,7 @@ describe('successful transactions', () => {
   });
 });
 
-describe('failed transactions', () => {
+describe('failed transactions (with pessimistic locking)', () => {
   const retryBehavior: {[code: number]: boolean} = {
     [Status.CANCELLED]: true,
     [Status.UNKNOWN]: true,
@@ -1038,6 +1069,177 @@ describe('failed transactions', () => {
       backoff(/* maxDelay= */ true),
       begin({transactionId: 'foo2', readWrite: {prevTransactionId: 'foo1'}}),
       commit('foo2')
+    );
+  });
+});
+
+describe('successful transactions (with optimistic locking)', () => {
+  it('uses lastUpdateTime precondition for existing documents', () => {
+    const verify = {
+      verify: DOCUMENT_NAME,
+      currentDocument: {
+        updateTime: {
+          seconds: '3',
+          nanos: 4,
+        },
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {optimisticLocking: true},
+      (transaction, docRef) => {
+        return transaction.get(docRef).then(doc => {
+          expect(doc.id).to.equal('documentId');
+        });
+      },
+      begin(),
+      getDocument(/* transaction= */ ''),
+      commit(undefined, [verify])
+    );
+  });
+
+  it('uses exists precondition for missing documents', () => {
+    const verify = {
+      verify: DOCUMENT_NAME,
+      currentDocument: {
+        exists: false,
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {optimisticLocking: true},
+      (transaction, docRef) => {
+        return transaction.get(docRef).then(doc => {
+          expect(doc.exists).to.equal(false);
+        });
+      },
+      begin(),
+      getMissing(),
+      commit(undefined, [verify])
+    );
+  });
+
+  it('combines precondition with existing write', () => {
+    const set = {
+      update: {
+        fields: {},
+        name: DOCUMENT_NAME,
+      },
+      currentDocument: {
+        updateTime: {
+          seconds: '3',
+          nanos: 4,
+        },
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {optimisticLocking: true},
+      (transaction, docRef) => {
+        return transaction.get(docRef).then(() => {
+          transaction.set(docRef, {});
+        });
+      },
+      begin(),
+      getDocument(/* transaction= */ ''),
+      commit(undefined, [set])
+    );
+  });
+
+  it('does not combines precondition if already set', () => {
+    const set = {
+      update: {
+        fields: {
+          a: {
+            mapValue: {
+              fields: {
+                b: {
+                  stringValue: 'c',
+                },
+              },
+            },
+          },
+        },
+        name: DOCUMENT_NAME,
+      },
+      updateMask: {
+        fieldPaths: ['a.b'],
+      },
+      currentDocument: {
+        updateTime: {
+          seconds: '1',
+          nanos: 2,
+        },
+      },
+    };
+    const verify = {
+      verify: DOCUMENT_NAME,
+      currentDocument: {
+        updateTime: {
+          seconds: '3',
+          nanos: 4,
+        },
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {optimisticLocking: true},
+      (transaction, docRef) => {
+        return transaction.get(docRef).then(() => {
+          transaction.update(
+            docRef,
+            {'a.b': 'c'},
+            {lastUpdateTime: new Timestamp(1, 2)}
+          );
+        });
+      },
+      begin(),
+      getDocument(/* transaction= */ ''),
+      commit(undefined, [set, verify])
+    );
+  });
+});
+
+describe('failed transactions (with optimistic locking)', () => {
+  it('retries commit for failed precondition', () => {
+    const serverError = new GoogleError('');
+    serverError.code = Status.FAILED_PRECONDITION;
+
+    const verify = {
+      verify: DOCUMENT_NAME,
+      currentDocument: {
+        exists: false,
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {optimisticLocking: true},
+      (transaction, docRef) => {
+        return transaction.get(docRef);
+      },
+      begin({transactionId: 'foo1'}),
+      getMissing(),
+      commit('foo1', [verify], serverError),
+      rollback('foo1'),
+      backoff(),
+      begin({transactionId: 'foo2', readWrite: {prevTransactionId: 'foo1'}}),
+      getMissing(),
+      commit('foo2', [verify])
+    );
+  });
+
+  it('rejects queries', () => {
+    return expect(
+      runTransaction(
+        /* transactionOptions= */ {optimisticLocking: true},
+        (transaction, docRef) => {
+          return transaction.get(docRef.parent);
+        },
+        begin(),
+        rollback()
+      )
+    ).to.eventually.be.rejectedWith(
+      'Queries are not supported for transactions that use optimistic locking.'
     );
   });
 });

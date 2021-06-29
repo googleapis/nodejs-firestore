@@ -20,7 +20,7 @@ import {GoogleError} from 'google-gax';
 import * as proto from '../protos/firestore_v1_proto_api';
 
 import {ExponentialBackoff} from './backoff';
-import {DocumentSnapshot} from './document';
+import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';
 import {Timestamp} from './timestamp';
 import {logger} from './logger';
@@ -32,7 +32,7 @@ import {
   QuerySnapshot,
   validateDocumentReference,
 } from './reference';
-import {isObject, isPlainObject} from './util';
+import {getRetryCodes, isObject, isPlainObject} from './util';
 import {
   invalidArgumentMessage,
   RequiredArgumentOptions,
@@ -59,23 +59,26 @@ const READ_AFTER_WRITE_ERROR_MSG =
  * @class Transaction
  */
 export class Transaction implements firestore.Transaction {
-  private _firestore: Firestore;
   private _writeBatch: WriteBatch;
   private _backoff: ExponentialBackoff;
-  private _requestTag: string;
+  private _locks = new Map<string, Precondition>();
   private _transactionId?: Uint8Array;
 
   /**
    * @hideconstructor
    *
-   * @param firestore The Firestore Database client.
-   * @param requestTag A unique client-assigned identifier for the scope of
+   * @param _firestore The Firestore Database client.
+   * @param _optimisticLocking If true, uses optimistic locking for all
+   * documents read during this transaction.
+   * @param _requestTag A unique client-assigned identifier for the scope of
    * this transaction.
    */
-  constructor(firestore: Firestore, requestTag: string) {
-    this._firestore = firestore;
-    this._writeBatch = firestore.batch();
-    this._requestTag = requestTag;
+  constructor(
+    private readonly _firestore: Firestore,
+    private readonly _optimisticLocking: boolean,
+    private readonly _requestTag: string
+  ) {
+    this._writeBatch = _firestore.batch();
     this._backoff = new ExponentialBackoff();
   }
 
@@ -126,12 +129,13 @@ export class Transaction implements firestore.Transaction {
     }
 
     if (refOrQuery instanceof DocumentReference) {
-      const documentReader = new DocumentReader(this._firestore, [refOrQuery]);
-      documentReader.transactionId = this._transactionId;
-      return documentReader.get(this._requestTag).then(([res]) => res);
-    }
-
-    if (refOrQuery instanceof Query) {
+      return this.getAll(refOrQuery).then(([doc]) => doc);
+    } else if (refOrQuery instanceof Query) {
+      if (this._optimisticLocking) {
+        throw new Error(
+          'Queries are not supported for transactions that use optimistic locking.'
+        );
+      }
       return refOrQuery._get(this._transactionId);
     }
 
@@ -187,8 +191,29 @@ export class Transaction implements firestore.Transaction {
 
     const documentReader = new DocumentReader(this._firestore, documents);
     documentReader.fieldMask = fieldMask || undefined;
-    documentReader.transactionId = this._transactionId;
-    return documentReader.get(this._requestTag);
+
+    if (!this._optimisticLocking) {
+      documentReader.transactionId = this._transactionId;
+    }
+
+    return documentReader.get(this._requestTag).then(docs => {
+      for (const doc of docs) {
+        if (doc.exists) {
+          this._locks.set(
+            doc.ref.formattedName,
+            new Precondition({
+              lastUpdateTime: doc.updateTime,
+            })
+          );
+        } else {
+          this._locks.set(
+            doc.ref.formattedName,
+            new Precondition({exists: false})
+          );
+        }
+      }
+      return docs;
+    });
   }
 
   /**
@@ -385,8 +410,40 @@ export class Transaction implements firestore.Transaction {
   commit(): Promise<void> {
     return this._writeBatch
       ._commit({
-        transactionId: this._transactionId,
         requestTag: this._requestTag,
+        preproccessor: commitRequest => {
+          commitRequest.transaction = this._transactionId;
+          commitRequest.writes = commitRequest.writes || [];
+
+          if (!this._optimisticLocking) {
+            return commitRequest;
+          }
+
+          const locks = new Map(this._locks);
+
+          // Attempt to attach the precondition to existing writes. This saves
+          // some costs and lets the user issue more writes (as there is a fixed
+          // limit on the number of operations).
+          for (const write of commitRequest.writes) {
+            const path = (write.delete ||
+              write.update?.name ||
+              write.verify) as string;
+            const precondition = locks.get(path);
+            if (write.currentDocument === undefined && precondition) {
+              write.currentDocument = precondition.toProto();
+              locks.delete(path);
+            }
+          }
+
+          // For any remaining locks add verify preconditions.
+          for (const [path, precondition] of locks) {
+            commitRequest.writes.push({
+              verify: path,
+              currentDocument: precondition.toProto(),
+            });
+          }
+          return commitRequest;
+        },
       })
       .then(() => {});
   }
@@ -411,8 +468,6 @@ export class Transaction implements firestore.Transaction {
    * @private
    * @param updateFunction The user function to execute within the transaction
    * context.
-   * @param requestTag A unique client-assigned identifier for the scope of
-   * this transaction.
    * @param options The user-defined options for this transaction.
    */
   async runTransaction<T>(
@@ -439,6 +494,7 @@ export class Transaction implements firestore.Transaction {
         }
 
         this._writeBatch._reset();
+        this._locks.clear();
         await this.maybeBackoff(lastError);
 
         await this.begin(options.readOnly, options.readTime);
@@ -462,7 +518,10 @@ export class Transaction implements firestore.Transaction {
 
         lastError = err;
 
-        if (!this._transactionId || !isRetryableTransactionError(err)) {
+        if (
+          !this._transactionId ||
+          !isRetryableTransactionError(err, this._optimisticLocking)
+        ) {
           break;
         }
       }
@@ -591,7 +650,10 @@ function validateReadOptions(
   }
 }
 
-function isRetryableTransactionError(error: GoogleError): boolean {
+function isRetryableTransactionError(
+  error: GoogleError,
+  optimisticLocking: boolean
+): boolean {
   if (error.code !== undefined) {
     // This list is based on https://github.com/firebase/firebase-js-sdk/blob/master/packages/firestore/src/core/transaction_runner.ts#L112
     switch (error.code as number) {
@@ -609,6 +671,8 @@ function isRetryableTransactionError(error: GoogleError): boolean {
         // IDs that have expired. While INVALID_ARGUMENT is generally not
         // retryable, we retry this specific case.
         return !!error.message.match(/transaction has expired/);
+      case StatusCode.FAILED_PRECONDITION:
+        return optimisticLocking;
       default:
         return false;
     }
