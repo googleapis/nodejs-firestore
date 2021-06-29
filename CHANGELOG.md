@@ -4,6 +4,20 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.13.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.3...v4.13.0) (2021-06-29)
+
+
+### Features
+
+* add read-only transactions ([#1541](https://www.github.com/googleapis/nodejs-firestore/issues/1541)) ([ca4241e](https://www.github.com/googleapis/nodejs-firestore/commit/ca4241eb3ee4abb8453b6da0911397187dc18dde))
+* retry BatchGetDocuments RPCs that fail with errors ([#1544](https://www.github.com/googleapis/nodejs-firestore/issues/1544)) ([b39dd3c](https://www.github.com/googleapis/nodejs-firestore/commit/b39dd3c65549fb1a651c1722d8ea2c038e152417))
+
+
+### Bug Fixes
+
+* **deps:** google-gax v2.17.0 with mTLS ([#1546](https://www.github.com/googleapis/nodejs-firestore/issues/1546)) ([a322345](https://www.github.com/googleapis/nodejs-firestore/commit/a32234510d487982b950c88575b9425c531c2d94))
+* make request optional in all cases ([#1536](https://www.github.com/googleapis/nodejs-firestore/issues/1536)) ([f6edfc1](https://www.github.com/googleapis/nodejs-firestore/commit/f6edfc181ca39cd307eab6d141db08f377d5cfdf))
+
 ### [4.12.3](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.2...v4.12.3) (2021-06-16)
 
 
