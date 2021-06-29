@@ -2369,14 +2369,20 @@ describe('Transaction class', () => {
   });
 
   it('fails read-only with writes', async () => {
+    let attempts = 0;
+
     const ref = randomCol.doc('doc');
     try {
       await firestore.runTransaction(
-        async updateFunction => updateFunction.set(ref, {}),
+        async updateFunction => {
+          ++attempts;
+          updateFunction.set(ref, {});
+        },
         {readOnly: true}
       );
       expect.fail();
     } catch (e) {
+      expect(attempts).to.equal(1);
       expect(e.code).to.equal(Status.INVALID_ARGUMENT);
     }
   });

@@ -176,7 +176,7 @@ declare namespace FirebaseFirestore {
 
   /** Options to configure a read-only transaction. */
   export interface ReadOnlyTransactionOptions {
-    /** Set to true to indicate a read-write transaction. */
+    /** Set to true to indicate a read-only transaction. */
     readOnly: true;
     /**
      * If specified, documents are read at the given time. This may not be more
@@ -188,7 +188,7 @@ declare namespace FirebaseFirestore {
 
   /** Options to configure a read-write transaction. */
   export interface ReadWriteTransactionOptions {
-    /** Set to false or omitted to start a read-write transaction. */
+    /** Set to false or omit to indicate a read-write transaction. */
     readOnly?: false;
     /**
      * The maximum number of attempts for this transaction. Defaults to five.
@@ -333,22 +333,22 @@ declare namespace FirebaseFirestore {
      * modify Firestore documents under lock. You have to perform all reads
      * before before you perform any write.
      *
-     * Transaction can be performed as read-only or read-write transactions. By
+     * Transactions can be performed as read-only or read-write transactions. By
      * default, transactions are executed in read-write mode.
      *
      * A read-write transaction obtains a pessimistic lock on all documents that
      * are read during the transaction. These locks block other transactions,
      * batched writes, and other non-transactional writes from changing that
-     * document. A transaction releases its document locks at commit time or if
-     * it fails for any reason.
+     * document. Any writes in a read-write transactions are committed once
+     * 'updateFunction' resolves, which also releases all locks.
      *
-     * Read-only transaction do not lock documents. They can be used to read
+     * If a read-write transaction fails with contention, the transaction is
+     * retried up to five times. The `updateFunction` is invoked once for each
+     * attempt.
+     *
+     * Read-only transactions do not lock documents. They can be used to read
      * documents at a consistent snapshot in time, which may be up to 60 seconds
-     * in the past.
-     *
-     * Transactions are committed once 'updateFunction' resolves. If a
-     * transaction fails with contention, the transaction is retried up to five
-     * times. The `updateFunction` is invoked once for each attempt.
+     * in the past. Read-only transactions are not retried.
      *
      * Transactions time out after 60 seconds if no documents are read.
      * Transactions that are not committed within than 270 seconds are also
