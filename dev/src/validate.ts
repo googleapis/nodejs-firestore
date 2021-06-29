@@ -17,6 +17,7 @@
 import {URL} from 'url';
 import {FieldPath} from './path';
 import {isFunction, isObject} from './util';
+import {Timestamp} from './timestamp';
 
 /**
  * Options to allow argument omission.
@@ -274,6 +275,26 @@ export function validateInteger(
           arg
         )} must be within [${min}, ${max}] inclusive, but was: ${value}`
       );
+    }
+  }
+}
+
+/**
+ * Validates that 'value' is a Timestamp.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ * @param options Options that specify whether the Timestamp can be omitted.
+ */
+export function validateTimestamp(
+  arg: string | number,
+  value: unknown,
+  options?: RequiredArgumentOptions
+): void {
+  if (!validateOptional(value, options)) {
+    if (!(value instanceof Timestamp)) {
+      throw new Error(invalidArgumentMessage(arg, 'Timestamp'));
     }
   }
 }
