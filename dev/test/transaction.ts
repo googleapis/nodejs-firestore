@@ -22,7 +22,7 @@ import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 import * as Firestore from '../src';
-import {DocumentReference, FieldPath, Transaction} from '../src';
+import {DocumentReference, FieldPath, Timestamp, Transaction} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {
   ApiOverride,
@@ -35,6 +35,10 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
+import {
+  ReadOnlyTransactionOptions,
+  ReadWriteTransactionOptions,
+} from '@google-cloud/firestore';
 
 use(chaiAsPromised);
 
@@ -128,29 +132,38 @@ function rollback(
   };
 }
 
-function begin(
-  transaction?: Uint8Array | string,
-  prevTransaction?: Uint8Array | string,
-  error?: Error
-): TransactionStep {
+function begin(options?: {
+  transactionId?: Uint8Array | string;
+  readOnly?: {readTime?: {seconds?: number; nanos?: number}};
+  readWrite?: {
+    prevTransactionId?: Uint8Array | string;
+  };
+  error?: Error;
+}): TransactionStep {
   const proto: api.IBeginTransactionRequest = {database: DATABASE_ROOT};
 
-  if (prevTransaction) {
+  if (options?.readOnly) {
+    proto.options = {
+      readOnly: {
+        readTime: options.readOnly.readTime,
+      },
+    };
+  } else if (options?.readWrite?.prevTransactionId) {
     proto.options = {
       readWrite: {
-        retryTransaction: transactionId(prevTransaction),
+        retryTransaction: transactionId(options.readWrite.prevTransactionId),
       },
     };
   }
 
   const response = {
-    transaction: transactionId(transaction),
+    transaction: transactionId(options?.transactionId),
   };
 
   return {
     type: 'begin',
     request: proto,
-    error,
+    error: options?.error,
     response,
   };
 }
@@ -278,6 +291,7 @@ function backoff(maxDelay?: boolean): TransactionStep {
  * Asserts that the given transaction function issues the expected requests.
  */
 function runTransaction<T>(
+  transactionOptions: ReadWriteTransactionOptions | ReadOnlyTransactionOptions,
   transactionCallback: (
     transaction: Transaction,
     docRef: DocumentReference
@@ -352,7 +366,7 @@ function runTransaction<T>(
       return await firestore.runTransaction(transaction => {
         const docRef = firestore.doc('collectionId/documentId');
         return transactionCallback(transaction, docRef);
-      });
+      }, transactionOptions);
     } finally {
       setTimeoutHandler(setTimeout);
       expect(expectedRequests.length).to.equal(
@@ -366,6 +380,7 @@ function runTransaction<T>(
 describe('successful transactions', () => {
   it('empty transaction', () => {
     return runTransaction(
+      /* transactionOptions= */ {},
       () => {
         return Promise.resolve();
       },
@@ -376,6 +391,7 @@ describe('successful transactions', () => {
 
   it('returns value', () => {
     return runTransaction(
+      /* transactionOptions= */ {},
       () => {
         return Promise.resolve('bar');
       },
@@ -415,19 +431,24 @@ describe('failed transactions', () => {
 
       if (retry) {
         await runTransaction(
+          /* transactionOptions= */ {},
           transactionFunction,
-          begin('foo1'),
+          begin({transactionId: 'foo1'}),
           commit('foo1', undefined, serverError),
           rollback('foo1'),
           backoff(),
-          begin('foo2', 'foo1'),
+          begin({
+            transactionId: 'foo2',
+            readWrite: {prevTransactionId: 'foo1'},
+          }),
           commit('foo2')
         );
       } else {
         await expect(
           runTransaction(
+            /* transactionOptions= */ {},
             transactionFunction,
-            begin('foo1'),
+            begin({transactionId: 'foo1'}),
             commit('foo1', undefined, serverError),
             rollback('foo1')
           )
@@ -445,12 +466,13 @@ describe('failed transactions', () => {
     serverError.code = Status.INVALID_ARGUMENT;
 
     await runTransaction(
+      /* transactionOptions= */ {},
       transactionFunction,
-      begin('foo1'),
+      begin({transactionId: 'foo1'}),
       commit('foo1', undefined, serverError),
       rollback('foo1'),
       backoff(),
-      begin('foo2', 'foo1'),
+      begin({transactionId: 'foo2', readWrite: {prevTransactionId: 'foo1'}}),
       commit('foo2')
     );
   });
@@ -470,20 +492,25 @@ describe('failed transactions', () => {
 
       if (retry) {
         await runTransaction(
+          /* transactionOptions= */ {},
           transactionFunction,
-          begin('foo1'),
+          begin({transactionId: 'foo1'}),
           query('foo1', serverError),
           rollback('foo1'),
           backoff(),
-          begin('foo2', 'foo1'),
+          begin({
+            transactionId: 'foo2',
+            readWrite: {prevTransactionId: 'foo1'},
+          }),
           query('foo2'),
           commit('foo2')
         );
       } else {
         await expect(
           runTransaction(
+            /* transactionOptions= */ {},
             transactionFunction,
-            begin('foo1'),
+            begin({transactionId: 'foo1'}),
             query('foo1', serverError),
             rollback('foo1')
           )
@@ -506,20 +533,25 @@ describe('failed transactions', () => {
 
       if (retry) {
         await runTransaction(
+          /* transactionOptions= */ {},
           transactionFunction,
-          begin('foo1'),
+          begin({transactionId: 'foo1'}),
           getDocument('foo1', serverError),
           rollback('foo1'),
           backoff(),
-          begin('foo2', 'foo1'),
+          begin({
+            transactionId: 'foo2',
+            readWrite: {prevTransactionId: 'foo1'},
+          }),
           getDocument('foo2'),
           commit('foo2')
         );
       } else {
         await expect(
           runTransaction(
+            /* transactionOptions= */ {},
             transactionFunction,
-            begin('foo1'),
+            begin({transactionId: 'foo1'}),
             getDocument('foo1', serverError),
             rollback('foo1')
           )
@@ -537,20 +569,25 @@ describe('failed transactions', () => {
 
       if (retry) {
         await runTransaction(
+          /* transactionOptions= */ {},
           transactionFunction,
-          begin('foo1'),
+          begin({transactionId: 'foo1'}),
           commit('foo1', /* writes=*/ undefined, serverError),
           rollback('foo1', serverError),
           rollback('foo1'),
           backoff(),
-          begin('foo2', 'foo1'),
+          begin({
+            transactionId: 'foo2',
+            readWrite: {prevTransactionId: 'foo1'},
+          }),
           commit('foo2')
         );
       } else {
         await expect(
           runTransaction(
+            /* transactionOptions= */ {},
             transactionFunction,
-            begin('foo1'),
+            begin({transactionId: 'foo1'}),
             commit('foo1', /* writes=*/ undefined, serverError),
             rollback('foo1', serverError)
           )
@@ -595,7 +632,12 @@ describe('failed transactions', () => {
 
   it('requires a promise', () => {
     return expect(
-      runTransaction((() => {}) as InvalidApiUsage, begin(), rollback())
+      runTransaction(
+        /* transactionOptions= */ {},
+        (() => {}) as InvalidApiUsage,
+        begin(),
+        rollback()
+      )
     ).to.eventually.be.rejectedWith(
       'You must return a Promise in your transaction()-callback.'
     );
@@ -618,6 +660,7 @@ describe('failed transactions', () => {
   it("doesn't retry custom user exceptions in callback", () => {
     return expect(
       runTransaction(
+        /* transactionOptions= */ {},
         () => {
           return Promise.reject('request exception');
         },
@@ -633,24 +676,25 @@ describe('failed transactions', () => {
 
     return expect(
       runTransaction(
+        /* transactionOptions= */ {},
         () => Promise.resolve(),
-        begin('foo1'),
+        begin({transactionId: 'foo1'}),
         commit('foo1', [], err),
         rollback('foo1'),
         backoff(),
-        begin('foo2', 'foo1'),
+        begin({transactionId: 'foo2', readWrite: {prevTransactionId: 'foo1'}}),
         commit('foo2', [], err),
         rollback('foo2'),
         backoff(),
-        begin('foo3', 'foo2'),
+        begin({transactionId: 'foo3', readWrite: {prevTransactionId: 'foo2'}}),
         commit('foo3', [], err),
         rollback('foo3'),
         backoff(),
-        begin('foo4', 'foo3'),
+        begin({transactionId: 'foo4', readWrite: {prevTransactionId: 'foo3'}}),
         commit('foo4', [], err),
         rollback('foo4'),
         backoff(),
-        begin('foo5', 'foo4'),
+        begin({transactionId: 'foo5', readWrite: {prevTransactionId: 'foo4'}}),
         commit('foo5', [], new Error('Final exception')),
         rollback('foo5')
       )
@@ -662,12 +706,13 @@ describe('failed transactions', () => {
     err.code = Status.RESOURCE_EXHAUSTED;
 
     return runTransaction(
+      /* transactionOptions= */ {},
       async () => {},
-      begin('foo1'),
+      begin({transactionId: 'foo1'}),
       commit('foo1', [], err),
       rollback('foo1'),
       backoff(/* maxDelay= */ true),
-      begin('foo2', 'foo1'),
+      begin({transactionId: 'foo2', readWrite: {prevTransactionId: 'foo1'}}),
       commit('foo2')
     );
   });
@@ -676,6 +721,7 @@ describe('failed transactions', () => {
 describe('transaction operations', () => {
   it('support get with document ref', () => {
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         return transaction.get(docRef).then(doc => {
           expect(doc.id).to.equal('documentId');
@@ -689,6 +735,7 @@ describe('transaction operations', () => {
 
   it('requires a query or document for get', () => {
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction: InvalidApiUsage) => {
         expect(() => transaction.get()).to.throw(
           'Value for argument "refOrQuery" must be a DocumentReference or a Query.'
@@ -708,6 +755,7 @@ describe('transaction operations', () => {
   it('enforce that gets come before writes', () => {
     return expect(
       runTransaction(
+        /* transactionOptions= */ {},
         (transaction, docRef) => {
           transaction.set(docRef, {foo: 'bar'});
           return transaction.get(docRef);
@@ -722,6 +770,7 @@ describe('transaction operations', () => {
 
   it('support get with query', () => {
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         const query = docRef.parent.where('foo', '==', 'bar');
         return transaction.get(query).then(results => {
@@ -734,8 +783,32 @@ describe('transaction operations', () => {
     );
   });
 
+  it('supports read-only transactions', () => {
+    return runTransaction(
+      {readOnly: true},
+      (transaction, docRef) => transaction.get(docRef),
+      begin({readOnly: {}}),
+      getDocument(),
+      commit()
+    );
+  });
+
+  it('supports read-only transactions with read time', () => {
+    return runTransaction(
+      {
+        readOnly: true,
+        readTime: Timestamp.fromMillis(1),
+      },
+      (transaction, docRef) => transaction.get(docRef),
+      begin({readOnly: {readTime: {nanos: 1000000}}}),
+      getDocument(),
+      commit()
+    );
+  });
+
   it('support getAll', () => {
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         const firstDoc = docRef.parent.doc('firstDocument');
         const secondDoc = docRef.parent.doc('secondDocument');
@@ -754,6 +827,7 @@ describe('transaction operations', () => {
 
   it('support getAll with field mask', () => {
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         const doc = docRef.parent.doc('doc');
 
@@ -770,6 +844,7 @@ describe('transaction operations', () => {
   it('enforce that getAll come before writes', () => {
     return expect(
       runTransaction(
+        /* transactionOptions= */ {},
         (transaction, docRef) => {
           transaction.set(docRef, {foo: 'bar'});
           return transaction.getAll(docRef);
@@ -794,6 +869,7 @@ describe('transaction operations', () => {
     };
 
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         transaction.create(docRef, {});
         return Promise.resolve();
@@ -828,6 +904,7 @@ describe('transaction operations', () => {
     };
 
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         transaction.update(docRef, {'a.b': 'c'});
         transaction.update(docRef, 'a.b', 'c');
@@ -852,6 +929,7 @@ describe('transaction operations', () => {
     };
 
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         transaction.set(docRef, {'a.b': 'c'});
         return Promise.resolve();
@@ -877,6 +955,7 @@ describe('transaction operations', () => {
     };
 
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         transaction.set(docRef, {'a.b': 'c'}, {merge: true});
         return Promise.resolve();
@@ -902,6 +981,7 @@ describe('transaction operations', () => {
     };
 
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         const postRef = docRef.withConverter(postConverterMerge);
         transaction.set(postRef, {title: 'story'} as Partial<Post>, {
@@ -930,6 +1010,7 @@ describe('transaction operations', () => {
     };
 
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         const postRef = docRef.withConverter(postConverter);
         transaction.set(
@@ -952,6 +1033,7 @@ describe('transaction operations', () => {
     };
 
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         transaction.delete(docRef);
         return Promise.resolve();
@@ -974,6 +1056,7 @@ describe('transaction operations', () => {
     };
 
     return runTransaction(
+      /* transactionOptions= */ {},
       (transaction, docRef) => {
         transaction.delete(docRef).set(docRef, {});
         return Promise.resolve();
