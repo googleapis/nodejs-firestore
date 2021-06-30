@@ -32,7 +32,7 @@ import {
   QuerySnapshot,
   validateDocumentReference,
 } from './reference';
-import {getRetryCodes, isObject, isPlainObject} from './util';
+import {isObject, isPlainObject} from './util';
 import {
   invalidArgumentMessage,
   RequiredArgumentOptions,
@@ -435,7 +435,7 @@ export class Transaction implements firestore.Transaction {
             }
           }
 
-          // For any remaining locks add verify preconditions.
+          // Add verify preconditions for any remaining locks.
           for (const [path, precondition] of locks) {
             commitRequest.writes.push({
               verify: path,

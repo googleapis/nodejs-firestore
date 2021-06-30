@@ -193,10 +193,9 @@ declare namespace FirebaseFirestore {
     /**
      * Whether to use optimistic locking. By default, transactions lock
      * documents pessimistically, which increases the chance that transactions
-     * succeed but blocks other clients from modifying the documents read during
-     * the transaction. When `optimisticLocking` is enabled, writes are not
-     * blocked. When other clients modify a document, the transaction is instead
-     * retried.
+     * succeed but blocks other clients` modifications. With
+     * `optimisticLocking`, writes are not blocked. When other clients modify a
+     * document, the transaction is instead retried.
      *
      * Optimistic transactions do not support queries.
      */

@@ -1086,7 +1086,7 @@ describe('successful transactions (with optimistic locking)', () => {
     };
 
     return runTransaction(
-      /* transactionOptions= */ {optimisticLocking: true},
+      {optimisticLocking: true},
       (transaction, docRef) => {
         return transaction.get(docRef).then(doc => {
           expect(doc.id).to.equal('documentId');
@@ -1107,7 +1107,7 @@ describe('successful transactions (with optimistic locking)', () => {
     };
 
     return runTransaction(
-      /* transactionOptions= */ {optimisticLocking: true},
+      {optimisticLocking: true},
       (transaction, docRef) => {
         return transaction.get(docRef).then(doc => {
           expect(doc.exists).to.equal(false);
@@ -1134,7 +1134,7 @@ describe('successful transactions (with optimistic locking)', () => {
     };
 
     return runTransaction(
-      /* transactionOptions= */ {optimisticLocking: true},
+      {optimisticLocking: true},
       (transaction, docRef) => {
         return transaction.get(docRef).then(() => {
           transaction.set(docRef, {});
@@ -1183,7 +1183,7 @@ describe('successful transactions (with optimistic locking)', () => {
     };
 
     return runTransaction(
-      /* transactionOptions= */ {optimisticLocking: true},
+      {optimisticLocking: true},
       (transaction, docRef) => {
         return transaction.get(docRef).then(() => {
           transaction.update(
@@ -1213,7 +1213,7 @@ describe('failed transactions (with optimistic locking)', () => {
     };
 
     return runTransaction(
-      /* transactionOptions= */ {optimisticLocking: true},
+      {optimisticLocking: true},
       (transaction, docRef) => {
         return transaction.get(docRef);
       },
@@ -1231,7 +1231,7 @@ describe('failed transactions (with optimistic locking)', () => {
   it('rejects queries', () => {
     return expect(
       runTransaction(
-        /* transactionOptions= */ {optimisticLocking: true},
+        {optimisticLocking: true},
         (transaction, docRef) => {
           return transaction.get(docRef.parent);
         },
