@@ -38,6 +38,7 @@ import {
   DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT,
   DEFAULT_JITTER_FACTOR,
   DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT,
+  RETRY_MAX_BATCH_SIZE,
 } from '../src/bulk-writer';
 import {
   ApiOverride,
@@ -576,7 +577,7 @@ describe('BulkWriter', () => {
       },
     ]);
     bulkWriter._setMaxPendingOpCount(6);
-    bulkWriter._maxBatchSize = 3;
+    bulkWriter._setMaxBatchSize(3);
     bulkWriter
       .set(firestore.doc('collectionId/doc1'), {foo: 'bar'})
       .then(incrementOpCount);
@@ -822,6 +823,46 @@ describe('BulkWriter', () => {
     expect(timeoutHandlerCounter).to.equal(3);
   });
 
+  it('retries with smaller batch size', async () => {
+    const nLengthArray = (n: number): number[] => Array.from(Array(n).keys());
+
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest(
+          nLengthArray(15).map((_, i) => setOp('doc' + i, 'bar'))
+        ),
+        response: mergeResponses(
+          nLengthArray(15).map(() => failedResponse(Status.ABORTED))
+        ),
+      },
+      {
+        request: createRequest(
+          nLengthArray(RETRY_MAX_BATCH_SIZE).map((_, i) =>
+            setOp('doc' + i, 'bar')
+          )
+        ),
+        response: mergeResponses(
+          nLengthArray(RETRY_MAX_BATCH_SIZE).map(() => successResponse(1))
+        ),
+      },
+      {
+        request: createRequest(
+          nLengthArray(15 - RETRY_MAX_BATCH_SIZE).map((_, i) =>
+            setOp('doc' + i + RETRY_MAX_BATCH_SIZE, 'bar')
+          )
+        ),
+        response: mergeResponses(
+          nLengthArray(15 - RETRY_MAX_BATCH_SIZE).map(() => successResponse(1))
+        ),
+      },
+    ]);
+    for (let i = 0; i < 15; i++) {
+      bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
+    }
+
+    await bulkWriter.close();
+  });
+
   it('retries maintain correct write resolution ordering', async () => {
     const bulkWriter = await instantiateInstance([
       {
@@ -910,7 +951,7 @@ describe('BulkWriter', () => {
       },
     ]);
 
-    bulkWriter._maxBatchSize = 2;
+    bulkWriter._setMaxBatchSize(2);
     for (let i = 0; i < 6; i++) {
       bulkWriter
         .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
@@ -942,7 +983,7 @@ describe('BulkWriter', () => {
       },
     ]);
 
-    bulkWriter._maxBatchSize = 3;
+    bulkWriter._setMaxBatchSize(3);
     const promise1 = bulkWriter
       .set(firestore.doc('collectionId/doc1'), {foo: 'bar'})
       .then(incrementOpCount);

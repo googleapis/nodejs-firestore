@@ -346,7 +346,7 @@ describe('recursiveDelete() method:', () => {
       const firestore = await createInstance(overrides);
 
       const bulkWriter = firestore.bulkWriter();
-      bulkWriter._maxBatchSize = maxBatchSize;
+      bulkWriter._setMaxBatchSize(maxBatchSize);
       await firestore._recursiveDelete(
         firestore.collection('root'),
         maxPendingOps,
