@@ -873,6 +873,9 @@ export class BulkWriter {
     const backoffMsWithJitter = BulkWriter._applyJitter(highestBackoffDuration);
     const delayedExecution = new Deferred<void>();
 
+    // A backoff duration greater than 0 implies that this batch is a retry.
+    // Retried writes are sent with a batch size of 10 in order to guarantee
+    // that the batch is under the 10MiB limit.
     const maxBatchSize =
       highestBackoffDuration > 0 ? RETRY_MAX_BATCH_SIZE : this._maxBatchSize;
     this._bulkCommitBatch = new BulkCommitBatch(this.firestore, maxBatchSize);
