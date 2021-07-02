@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {DocumentData} from '@google-cloud/firestore';
+import * as assert from 'assert';
+
 import {DocumentSnapshot, DocumentSnapshotBuilder} from './document';
 import {DocumentReference} from './reference';
 import {FieldPath} from './path';
@@ -21,7 +24,7 @@ import {isPermanentRpcError} from './util';
 import {google} from '../protos/firestore_v1_proto_api';
 import {logger} from './logger';
 import {Firestore} from './index';
-import {DocumentData} from '@google-cloud/firestore';
+import {Timestamp} from './timestamp';
 import api = google.firestore.v1;
 
 /**
@@ -33,8 +36,16 @@ import api = google.firestore.v1;
 export class DocumentReader<T> {
   /** An optional field mask to apply to this read. */
   fieldMask?: FieldPath[];
-  /** An optional transaction ID to use for this read. */
+  /**
+   * An optional transaction ID to use for this read. Reads can only specify a
+   * transaction ID or a read time but not both.
+   */
   transactionId?: Uint8Array;
+  /**
+   * An optional time to read the documents at. Reads can only specify a
+   * transaction ID or a read time but not both.
+   */
+  readTime?: Timestamp;
 
   private outstandingDocuments = new Set<string>();
   private retrievedDocuments = new Map<string, DocumentSnapshot>();
@@ -93,9 +104,15 @@ export class DocumentReader<T> {
       return;
     }
 
+    assert(
+      !(this.transactionId && this.readTime),
+      'Cannot specify both a transaction ID and a read time'
+    );
+
     const request: api.IBatchGetDocumentsRequest = {
       database: this.firestore.formattedName,
       transaction: this.transactionId,
+      readTime: this.readTime?.toProto()?.timestampValue,
       documents: Array.from(this.outstandingDocuments),
     };
 

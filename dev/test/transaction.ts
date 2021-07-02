@@ -177,12 +177,14 @@ function getAll(
   fieldMask?: string[],
   transaction?: Uint8Array | string,
   error?: Error,
-  updateTime?: {seconds: number; nanos: number}
+  updateTime?: {seconds: string; nanos: number},
+  readTime?: {seconds: string; nanos: number}
 ): TransactionStep {
   const request: api.IBatchGetDocumentsRequest = {
     database: DATABASE_ROOT,
     documents: [],
     transaction: transactionId(transaction),
+    readTime,
   };
 
   if (fieldMask) {
@@ -226,17 +228,29 @@ function getAll(
 function getDocument(
   transaction?: Uint8Array | string,
   error?: Error,
-  updateTime?: {seconds: number; nanos: number}
+  updateTime?: {seconds: string; nanos: number},
+  readTime?: {seconds: string; nanos: number}
 ): TransactionStep {
-  return getAll([DOCUMENT_ID], undefined, transaction, error, updateTime);
+  return getAll(
+    [DOCUMENT_ID],
+    undefined,
+    transaction,
+    error,
+    updateTime,
+    readTime
+  );
 }
 
-function getMissing(doc: string = DOCUMENT_ID): TransactionStep {
+function getMissing(
+  doc: string = DOCUMENT_ID,
+  readTime?: {seconds: string; nanos: number}
+): TransactionStep {
   const name = `${COLLECTION_ROOT}/${doc}`;
   const request: api.IBatchGetDocumentsRequest = {
     database: DATABASE_ROOT,
     documents: [name],
     transaction: undefined,
+    readTime,
   };
 
   const stream = through2.obj();
@@ -1200,6 +1214,34 @@ describe('successful transactions (with optimistic locking)', () => {
       commit(undefined, [set, verify])
     );
   });
+
+  it('uses the same readTime for all document reads', () => {
+    const verify1 = {
+      verify: `${DOCUMENT_NAME}_1`,
+      currentDocument: {
+        exists: false,
+      },
+    };
+    const verify2 = {
+      verify: `${DOCUMENT_NAME}_2`,
+      currentDocument: {
+        exists: false,
+      },
+    };
+
+    return runTransaction(
+      {optimisticLocking: true},
+      async (transaction, docRef) => {
+        const collection = docRef.parent;
+        await transaction.get(collection.doc(`${DOCUMENT_ID}_1`));
+        await transaction.get(collection.doc(`${DOCUMENT_ID}_2`));
+      },
+      begin(),
+      getMissing(`${DOCUMENT_ID}_1`),
+      getMissing(`${DOCUMENT_ID}_2`, {seconds: '5', nanos: 6}),
+      commit(undefined, [verify1, verify2])
+    );
+  });
 });
 
 describe('failed transactions (with optimistic locking)', () => {
@@ -1267,24 +1309,40 @@ describe('failed transactions (with optimistic locking)', () => {
       },
       begin({transactionId: 'foo1'}),
       getDocument(/* transaction= */ '', /* error= */ undefined, {
-        seconds: 1,
+        seconds: '1',
         nanos: 2,
       }),
-      getDocument(/* transaction= */ '', /* error= */ undefined, {
-        seconds: 2,
-        nanos: 3,
-      }),
+      getDocument(
+        /* transaction= */ '',
+        /* error= */ undefined,
+        {
+          seconds: '2',
+          nanos: 3,
+        },
+        {
+          seconds: '5',
+          nanos: 6,
+        }
+      ),
       rollback('foo1'),
       backoff(),
       begin({transactionId: 'foo2', readWrite: {prevTransactionId: 'foo1'}}),
       getDocument(/* transaction= */ '', /* error= */ undefined, {
-        seconds: 1,
+        seconds: '1',
         nanos: 2,
       }),
-      getDocument(/* transaction= */ '', /* error= */ undefined, {
-        seconds: 1,
-        nanos: 2,
-      }),
+      getDocument(
+        /* transaction= */ '',
+        /* error= */ undefined,
+        {
+          seconds: '1',
+          nanos: 2,
+        },
+        {
+          seconds: '5',
+          nanos: 6,
+        }
+      ),
       commit('foo2', [verify])
     );
   });

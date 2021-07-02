@@ -76,6 +76,13 @@ export class Transaction implements firestore.Transaction {
   >();
 
   /**
+   * The read time at which to run this transaction. This can be user-specified
+   * for read-only transactions. For read-write transaction, this is the read
+   * time of the first document fetch.
+   */
+  private _readTime?: Timestamp;
+
+  /**
    * @hideconstructor
    *
    * @param _firestore The Firestore Database client.
@@ -209,6 +216,8 @@ export class Transaction implements firestore.Transaction {
     // verify that the document has not changed during the commit.
     if (!this._optimisticLocking) {
       documentReader.transactionId = this._transactionId;
+    } else {
+      documentReader.readTime = this._readTime;
     }
 
     return documentReader.get(this._requestTag).then(docs => {
@@ -228,6 +237,8 @@ export class Transaction implements firestore.Transaction {
         } else {
           this._readVersions.set(doc.ref.formattedName, version);
         }
+
+        this._readTime = doc.readTime;
       }
       return docs;
     });
@@ -512,6 +523,7 @@ export class Transaction implements firestore.Transaction {
 
         this._writeBatch._reset();
         this._readVersions.clear();
+        this._readTime = undefined;
         await this.maybeBackoff(lastError);
 
         await this.begin(options.readOnly, options.readTime);

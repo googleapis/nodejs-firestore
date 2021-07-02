@@ -2360,6 +2360,34 @@ describe('Transaction class', () => {
     expect(doc.get('updated')).to.equal(true);
   });
 
+  it('optimistic transactions enforce consistency', async () => {
+    let attempts = 0;
+    const ref1 = randomCol.doc('doc1');
+    await ref1.set({ver: 1});
+    const ref2 = randomCol.doc('doc1');
+    await ref2.set({ver: 1});
+    await firestore.runTransaction(
+      async txn => {
+        if (attempts === 0) {
+          // Read two documents at the same version.
+          let doc = await txn.get(ref1);
+          expect(doc.get('ver')).to.equal(1);
+          await ref2.set({ver: 2});
+          doc = await txn.get(ref2);
+          expect(doc.get('ver')).to.equal(1);
+          // In the first attempt, the commit fails because ref2's version
+          // changed. We could possibly even fail the transaction after
+          // reading ref2 since we can detect that the document was modified
+          // after ref1's document's read time. This would not work for
+          // deletes, however, and would require more special handling.
+        }
+        ++attempts;
+      },
+      {optimisticLocking: true}
+    );
+    expect(attempts).to.equal(2);
+  });
+
   it('retries transaction with optimistic locks', async () => {
     let attempts = 0;
     const ref = randomCol.doc('doc1');
