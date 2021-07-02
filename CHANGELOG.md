@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.13.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.13.0...v4.13.1) (2021-07-01)
+
+
+### Bug Fixes
+
+* lower batch size on BulkWriter retry ([#1549](https://www.github.com/googleapis/nodejs-firestore/issues/1549)) ([26d480b](https://www.github.com/googleapis/nodejs-firestore/commit/26d480b4a7fbeb26e99bb23d7aa1fbd4802b738a))
+
 ## [4.13.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.3...v4.13.0) (2021-06-29)
 
 
