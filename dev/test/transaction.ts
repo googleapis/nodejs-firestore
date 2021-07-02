@@ -176,7 +176,8 @@ function getAll(
   docs: string[],
   fieldMask?: string[],
   transaction?: Uint8Array | string,
-  error?: Error
+  error?: Error,
+  updateTime?: {seconds: number; nanos: number}
 ): TransactionStep {
   const request: api.IBatchGetDocumentsRequest = {
     database: DATABASE_ROOT,
@@ -199,7 +200,7 @@ function getAll(
         found: {
           name,
           createTime: {seconds: 1, nanos: 2},
-          updateTime: {seconds: 3, nanos: 4},
+          updateTime: updateTime || {seconds: 3, nanos: 4},
         },
         readTime: {seconds: 5, nanos: 6},
       });
@@ -224,9 +225,10 @@ function getAll(
 
 function getDocument(
   transaction?: Uint8Array | string,
-  error?: Error
+  error?: Error,
+  updateTime?: {seconds: number; nanos: number}
 ): TransactionStep {
-  return getAll([DOCUMENT_ID], undefined, transaction, error);
+  return getAll([DOCUMENT_ID], undefined, transaction, error, updateTime);
 }
 
 function getMissing(doc: string = DOCUMENT_ID): TransactionStep {
@@ -1146,7 +1148,7 @@ describe('successful transactions (with optimistic locking)', () => {
     );
   });
 
-  it('does not combines precondition if already set', () => {
+  it('does not combine precondition if already set', () => {
     const set = {
       update: {
         fields: {
@@ -1240,6 +1242,50 @@ describe('failed transactions (with optimistic locking)', () => {
       )
     ).to.eventually.be.rejectedWith(
       'Queries are not supported for transactions that use optimistic locking.'
+    );
+  });
+
+  it('cannot read a document twice if version changed', () => {
+    const serverError = new GoogleError('');
+    serverError.code = Status.FAILED_PRECONDITION;
+
+    const verify = {
+      verify: DOCUMENT_NAME,
+      currentDocument: {
+        updateTime: {
+          seconds: '1',
+          nanos: 2,
+        },
+      },
+    };
+
+    return runTransaction(
+      {optimisticLocking: true},
+      async (transaction, docRef) => {
+        await transaction.get(docRef);
+        await transaction.get(docRef);
+      },
+      begin({transactionId: 'foo1'}),
+      getDocument(/* transaction= */ '', /* error= */ undefined, {
+        seconds: 1,
+        nanos: 2,
+      }),
+      getDocument(/* transaction= */ '', /* error= */ undefined, {
+        seconds: 2,
+        nanos: 3,
+      }),
+      rollback('foo1'),
+      backoff(),
+      begin({transactionId: 'foo2', readWrite: {prevTransactionId: 'foo1'}}),
+      getDocument(/* transaction= */ '', /* error= */ undefined, {
+        seconds: 1,
+        nanos: 2,
+      }),
+      getDocument(/* transaction= */ '', /* error= */ undefined, {
+        seconds: 1,
+        nanos: 2,
+      }),
+      commit('foo2', [verify])
     );
   });
 });
