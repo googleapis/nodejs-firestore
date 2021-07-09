@@ -2345,6 +2345,47 @@ describe('Transaction class', () => {
     const finalSnapshot = await ref.get();
     expect(finalSnapshot.data()).to.deep.equal({first: true, second: true});
   });
+
+  it('supports read-only transactions', async () => {
+    const ref = randomCol.doc('doc');
+    await ref.set({foo: 'bar'});
+    const snapshot = await firestore.runTransaction(
+      updateFunction => updateFunction.get(ref),
+      {readOnly: true}
+    );
+    expect(snapshot.exists).to.be.true;
+  });
+
+  it('supports read-only transactions with custom read-time', async () => {
+    const ref = randomCol.doc('doc');
+    const writeResult = await ref.set({foo: 1});
+    await ref.set({foo: 2});
+    const snapshot = await firestore.runTransaction(
+      updateFunction => updateFunction.get(ref),
+      {readOnly: true, readTime: writeResult.writeTime}
+    );
+    expect(snapshot.exists).to.be.true;
+    expect(snapshot.get('foo')).to.equal(1);
+  });
+
+  it('fails read-only with writes', async () => {
+    let attempts = 0;
+
+    const ref = randomCol.doc('doc');
+    try {
+      await firestore.runTransaction(
+        async updateFunction => {
+          ++attempts;
+          updateFunction.set(ref, {});
+        },
+        {readOnly: true}
+      );
+      expect.fail();
+    } catch (e) {
+      expect(attempts).to.equal(1);
+      expect(e.code).to.equal(Status.INVALID_ARGUMENT);
+    }
+  });
 });
 
 describe('WriteBatch class', () => {

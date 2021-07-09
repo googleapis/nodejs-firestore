@@ -22,6 +22,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshot} from './document';
 import {Firestore, WriteBatch} from './index';
+import {Timestamp} from './timestamp';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {StatusCode} from './status-code';
@@ -38,7 +39,7 @@ import {
   validateMinNumberOfArguments,
   validateOptional,
 } from './validate';
-
+import {DocumentReader} from './document-reader';
 import api = proto.google.firestore.v1;
 
 /*!
@@ -125,16 +126,9 @@ export class Transaction implements firestore.Transaction {
     }
 
     if (refOrQuery instanceof DocumentReference) {
-      return this._firestore
-        .getAll_(
-          [refOrQuery],
-          /* fieldMask= */ null,
-          this._requestTag,
-          this._transactionId
-        )
-        .then(res => {
-          return Promise.resolve(res[0]);
-        });
+      const documentReader = new DocumentReader(this._firestore, [refOrQuery]);
+      documentReader.transactionId = this._transactionId;
+      return documentReader.get(this._requestTag).then(([res]) => res);
     }
 
     if (refOrQuery instanceof Query) {
@@ -191,12 +185,10 @@ export class Transaction implements firestore.Transaction {
       documentRefsOrReadOptions
     );
 
-    return this._firestore.getAll_(
-      documents,
-      fieldMask,
-      this._requestTag,
-      this._transactionId
-    );
+    const documentReader = new DocumentReader(this._firestore, documents);
+    documentReader.fieldMask = fieldMask || undefined;
+    documentReader.transactionId = this._transactionId;
+    return documentReader.get(this._requestTag);
   }
 
   /**
@@ -355,12 +347,18 @@ export class Transaction implements firestore.Transaction {
    *
    * @private
    */
-  begin(): Promise<void> {
+  begin(readOnly: boolean, readTime: Timestamp | undefined): Promise<void> {
     const request: api.IBeginTransactionRequest = {
       database: this._firestore.formattedName,
     };
 
-    if (this._transactionId) {
+    if (readOnly) {
+      request.options = {
+        readOnly: {
+          readTime: readTime?.toProto()?.timestampValue,
+        },
+      };
+    } else if (this._transactionId) {
       request.options = {
         readWrite: {
           retryTransaction: this._transactionId,
@@ -415,16 +413,20 @@ export class Transaction implements firestore.Transaction {
    * context.
    * @param requestTag A unique client-assigned identifier for the scope of
    * this transaction.
-   * @param maxAttempts The maximum number of attempts for this transaction.
+   * @param options The user-defined options for this transaction.
    */
   async runTransaction<T>(
     updateFunction: (transaction: Transaction) => Promise<T>,
-    maxAttempts: number
+    options: {
+      maxAttempts: number;
+      readOnly: boolean;
+      readTime?: Timestamp;
+    }
   ): Promise<T> {
     let result: T;
     let lastError: GoogleError | undefined = undefined;
 
-    for (let attempt = 0; attempt < maxAttempts; ++attempt) {
+    for (let attempt = 0; attempt < options.maxAttempts; ++attempt) {
       try {
         if (lastError) {
           logger(
@@ -439,7 +441,7 @@ export class Transaction implements firestore.Transaction {
         this._writeBatch._reset();
         await this.maybeBackoff(lastError);
 
-        await this.begin();
+        await this.begin(options.readOnly, options.readTime);
 
         const promise = updateFunction(this);
         if (!(promise instanceof Promise)) {

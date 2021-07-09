@@ -57,6 +57,11 @@ import api = google.firestore.v1;
 const MAX_BATCH_SIZE = 20;
 
 /*!
+ * The maximum number of writes can be can in a single batch that is being retried.
+ */
+export const RETRY_MAX_BATCH_SIZE = 10;
+
+/*!
  * The starting maximum number of operations per second as allowed by the
  * 500/50/5 rule.
  *
@@ -213,6 +218,13 @@ class BulkCommitBatch extends WriteBatch {
   // been resolved.
   readonly pendingOps: Array<BulkWriterOperation> = [];
 
+  readonly maxBatchSize: number;
+
+  constructor(firestore: Firestore, maxBatchSize: number) {
+    super(firestore);
+    this.maxBatchSize = maxBatchSize;
+  }
+
   has(documentRef: firestore.DocumentReference<unknown>): boolean {
     return this.docPaths.has(documentRef.path);
   }
@@ -333,14 +345,17 @@ export class BulkWriter {
    * Visible for testing.
    * @private
    */
-  _maxBatchSize = MAX_BATCH_SIZE;
+  private _maxBatchSize = MAX_BATCH_SIZE;
 
   /**
    * The batch that is currently used to schedule operations. Once this batch
    * reaches maximum capacity, a new batch is created.
    * @private
    */
-  private _bulkCommitBatch = new BulkCommitBatch(this.firestore);
+  private _bulkCommitBatch = new BulkCommitBatch(
+    this.firestore,
+    this._maxBatchSize
+  );
 
   /**
    * A pointer to the tail of all active BulkWriter operations. This pointer
@@ -382,6 +397,16 @@ export class BulkWriter {
   // Visible for testing.
   _getBufferedOperationsCount(): number {
     return this._bufferedOperations.length;
+  }
+
+  // Visible for testing.
+  _setMaxBatchSize(size: number): void {
+    assert(
+      this._bulkCommitBatch.pendingOps.length === 0,
+      'BulkCommitBatch should be empty'
+    );
+    this._maxBatchSize = size;
+    this._bulkCommitBatch = new BulkCommitBatch(this.firestore, size);
   }
 
   /**
@@ -840,7 +865,6 @@ export class BulkWriter {
     if (this._bulkCommitBatch._opCount === 0) return;
 
     const pendingBatch = this._bulkCommitBatch;
-    this._bulkCommitBatch = new BulkCommitBatch(this.firestore);
 
     // Use the write with the longest backoff duration when determining backoff.
     const highestBackoffDuration = pendingBatch.pendingOps.reduce((prev, cur) =>
@@ -848,6 +872,13 @@ export class BulkWriter {
     ).backoffDuration;
     const backoffMsWithJitter = BulkWriter._applyJitter(highestBackoffDuration);
     const delayedExecution = new Deferred<void>();
+
+    // A backoff duration greater than 0 implies that this batch is a retry.
+    // Retried writes are sent with a batch size of 10 in order to guarantee
+    // that the batch is under the 10MiB limit.
+    const maxBatchSize =
+      highestBackoffDuration > 0 ? RETRY_MAX_BATCH_SIZE : this._maxBatchSize;
+    this._bulkCommitBatch = new BulkCommitBatch(this.firestore, maxBatchSize);
 
     if (backoffMsWithJitter > 0) {
       delayExecution(() => delayedExecution.resolve(), backoffMsWithJitter);
@@ -988,7 +1019,7 @@ export class BulkWriter {
     enqueueOnBatchCallback(this._bulkCommitBatch);
     this._bulkCommitBatch.processLastOperation(op);
 
-    if (this._bulkCommitBatch._opCount === this._maxBatchSize) {
+    if (this._bulkCommitBatch._opCount === this._bulkCommitBatch.maxBatchSize) {
       this._scheduleCurrentBatch();
     } else if (op.flushed) {
       // If flush() was called before this operation was enqueued into a batch,

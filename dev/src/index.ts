@@ -26,6 +26,7 @@ import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
 import {BulkWriter} from './bulk-writer';
 import {BundleBuilder} from './bundle';
 import {fieldsFromJson, timestampFromJson} from './convert';
+import {DocumentReader} from './document-reader';
 import {
   DocumentSnapshot,
   DocumentSnapshotBuilder,
@@ -34,14 +35,12 @@ import {
 import {logger, setLibVersion} from './logger';
 import {
   DEFAULT_DATABASE_ID,
-  FieldPath,
   QualifiedResourcePath,
   ResourcePath,
   validateResourcePath,
 } from './path';
 import {ClientPool} from './pool';
-import {CollectionReference} from './reference';
-import {DocumentReference} from './reference';
+import {CollectionReference, DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
@@ -68,6 +67,7 @@ import {
   validateMinNumberOfArguments,
   validateObject,
   validateString,
+  validateTimestamp,
 } from './validate';
 import {WriteBatch} from './write-batch';
 
@@ -136,6 +136,11 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
  * The maximum number of times to retry idempotent requests.
  */
 export const MAX_REQUEST_RETRIES = 5;
+
+/*!
+ * The maximum number of times to attempt a transaction before failing.
+ */
+export const DEFAULT_MAX_TRANSACTION_ATTEMPTS = 5;
 
 /*!
  * The default number of idle GRPC channel to keep.
@@ -207,8 +212,25 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
 
 /**
  * Update data (for use with [update]{@link DocumentReference#update})
- * that contains paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that
- * contain dots reference nested fields within the document.
+ * that contains paths mapped to values. Fields that contain dots
+ * reference nested fields within the document.
+ *
+ * You can update a top-level field in your document by using the field name
+ * as a key (e.g. `foo`). The provided value completely replaces the contents
+ * for this field.
+ *
+ * You can also update a nested field directly by using its field path as a key
+ * (e.g. `foo.bar`). This nested field update replaces the contents at `bar`
+ * but does not modify other data under `foo`.
+ *
+ * @example
+ * const documentRef = firestore.doc('coll/doc');
+ * documentRef.set({a1: {a2: 'val'}, b1: {b2: 'val'}, c1: {c2: 'val'}});
+ * documentRef.update({
+ *  b1: {b3: 'val'},
+ *  'c1.c3': 'val',
+ * });
+ * // Value is {a1: {a2: 'val'}, b1: {b3: 'val'}, c1: {c2: 'val', c3: 'val'}}
  *
  * @typedef {Object.<string, *>} UpdateData
  */
@@ -908,7 +930,7 @@ export class Firestore implements firestore.Firestore {
    *
    * @callback Firestore~updateFunction
    * @template T
-   * @param  {Transaction} transaction The transaction object for this
+   * @param {Transaction} transaction The transaction object for this
    * transaction.
    * @returns {Promise<T>} The promise returned at the end of the transaction.
    * This promise will be returned by {@link Firestore#runTransaction} if the
@@ -916,19 +938,64 @@ export class Firestore implements firestore.Firestore {
    */
 
   /**
+   * Options object for {@link Firestore#runTransaction} to configure a
+   * read-only transaction.
+   *
+   * @callback Firestore~ReadOnlyTransactionOptions
+   * @template T
+   * @param {true} readOnly Set to true to indicate a read-only transaction.
+   * @param {Timestamp=} readTime If specified, documents are read at the given
+   * time. This may not be more than 60 seconds in the past from when the
+   * request is processed by the server.
+   */
+
+  /**
+   * Options object for {@link Firestore#runTransaction} to configure a
+   * read-write transaction.
+   *
+   * @callback Firestore~ReadWriteTransactionOptions
+   * @template T
+   * @param {false=} readOnly Set to false or omit to indicate a read-write
+   * transaction.
+   * @param {number=} maxAttempts The maximum number of attempts for this
+   * transaction. Defaults to five.
+   */
+
+  /**
    * Executes the given updateFunction and commits the changes applied within
    * the transaction.
    *
    * You can use the transaction object passed to 'updateFunction' to read and
-   * modify Firestore documents under lock. Transactions are committed once
-   * 'updateFunction' resolves and attempted up to five times on failure.
+   * modify Firestore documents under lock. You have to perform all reads before
+   * before you perform any write.
+   *
+   * Transactions can be performed as read-only or read-write transactions. By
+   * default, transactions are executed in read-write mode.
+   *
+   * A read-write transaction obtains a pessimistic lock on all documents that
+   * are read during the transaction. These locks block other transactions,
+   * batched writes, and other non-transactional writes from changing that
+   * document. Any writes in a read-write transactions are committed once
+   * 'updateFunction' resolves, which also releases all locks.
+   *
+   * If a read-write transaction fails with contention, the transaction is
+   * retried up to five times. The `updateFunction` is invoked once for each
+   * attempt.
+   *
+   * Read-only transactions do not lock documents. They can be used to read
+   * documents at a consistent snapshot in time, which may be up to 60 seconds
+   * in the past. Read-only transactions are not retried.
+   *
+   * Transactions time out after 60 seconds if no documents are read.
+   * Transactions that are not committed within than 270 seconds are also
+   * aborted. Any remaining locks are released when a transaction times out.
    *
    * @template T
    * @param {Firestore~updateFunction} updateFunction The user function to
    * execute within the transaction context.
-   * @param {object=} transactionOptions Transaction options.
-   * @param {number=} transactionOptions.maxAttempts - The maximum number of
-   * attempts for this transaction.
+   * @param {
+   * Firestore~ReadWriteTransactionOptions|Firestore~ReadOnlyTransactionOptions=
+   * } transactionOptions Transaction options.
    * @returns {Promise<T>} If the transaction completed successfully or was
    * explicitly aborted (by the updateFunction returning a failed Promise), the
    * Promise returned by the updateFunction will be returned here. Else if the
@@ -959,30 +1026,55 @@ export class Firestore implements firestore.Firestore {
    */
   runTransaction<T>(
     updateFunction: (transaction: Transaction) => Promise<T>,
-    transactionOptions?: {maxAttempts?: number}
+    transactionOptions?:
+      | firestore.ReadWriteTransactionOptions
+      | firestore.ReadOnlyTransactionOptions
   ): Promise<T> {
     validateFunction('updateFunction', updateFunction);
 
-    const defaultAttempts = 5;
     const tag = requestTag();
 
-    let maxAttempts: number;
+    let maxAttempts = DEFAULT_MAX_TRANSACTION_ATTEMPTS;
+    let readOnly = false;
+    let readTime: Timestamp | undefined;
 
     if (transactionOptions) {
       validateObject('transactionOptions', transactionOptions);
-      validateInteger(
-        'transactionOptions.maxAttempts',
-        transactionOptions.maxAttempts,
-        {optional: true, minValue: 1}
+      validateBoolean(
+        'transactionOptions.readOnly',
+        transactionOptions.readOnly,
+        {optional: true}
       );
-      maxAttempts = transactionOptions.maxAttempts || defaultAttempts;
-    } else {
-      maxAttempts = defaultAttempts;
+
+      if (transactionOptions.readOnly) {
+        validateTimestamp(
+          'transactionOptions.readTime',
+          transactionOptions.readTime,
+          {optional: true}
+        );
+
+        readOnly = true;
+        readTime = transactionOptions.readTime as Timestamp | undefined;
+        maxAttempts = 1;
+      } else {
+        validateInteger(
+          'transactionOptions.maxAttempts',
+          transactionOptions.maxAttempts,
+          {optional: true, minValue: 1}
+        );
+
+        maxAttempts =
+          transactionOptions.maxAttempts || DEFAULT_MAX_TRANSACTION_ATTEMPTS;
+      }
     }
 
     const transaction = new Transaction(this, tag);
     return this.initializeIfNeeded(tag).then(() =>
-      transaction.runTransaction(updateFunction, maxAttempts)
+      transaction.runTransaction(updateFunction, {
+        maxAttempts,
+        readOnly,
+        readTime,
+      })
     );
   }
 
@@ -1046,136 +1138,14 @@ export class Firestore implements firestore.Firestore {
     const stack = Error().stack!;
 
     return this.initializeIfNeeded(tag)
-      .then(() => this.getAll_(documents, fieldMask, tag))
+      .then(() => {
+        const reader = new DocumentReader(this, documents);
+        reader.fieldMask = fieldMask || undefined;
+        return reader.get(tag);
+      })
       .catch(err => {
         throw wrapError(err, stack);
       });
-  }
-
-  /**
-   * Internal method to retrieve multiple documents from Firestore, optionally
-   * as part of a transaction.
-   *
-   * @private
-   * @param docRefs The documents to receive.
-   * @param fieldMask An optional field mask to apply to this read.
-   * @param requestTag A unique client-assigned identifier for this request.
-   * @param transactionId The transaction ID to use for this read.
-   * @returns A Promise that contains an array with the resulting documents.
-   */
-  getAll_<T>(
-    docRefs: Array<firestore.DocumentReference<T>>,
-    fieldMask: firestore.FieldPath[] | null,
-    requestTag: string,
-    transactionId?: Uint8Array
-  ): Promise<Array<DocumentSnapshot<T>>> {
-    const requestedDocuments = new Set<string>();
-    const retrievedDocuments = new Map<string, DocumentSnapshot>();
-
-    for (const docRef of docRefs) {
-      requestedDocuments.add((docRef as DocumentReference<T>).formattedName);
-    }
-
-    const request: api.IBatchGetDocumentsRequest = {
-      database: this.formattedName,
-      transaction: transactionId,
-      documents: Array.from(requestedDocuments),
-    };
-
-    if (fieldMask) {
-      const fieldPaths = fieldMask.map(
-        fieldPath => (fieldPath as FieldPath).formattedName
-      );
-      request.mask = {fieldPaths};
-    }
-
-    return this.requestStream('batchGetDocuments', request, requestTag).then(
-      stream => {
-        return new Promise<Array<DocumentSnapshot<T>>>((resolve, reject) => {
-          stream
-            .on('error', err => {
-              logger(
-                'Firestore.getAll_',
-                requestTag,
-                'GetAll failed with error:',
-                err
-              );
-              reject(err);
-            })
-            .on('data', (response: api.IBatchGetDocumentsResponse) => {
-              try {
-                let document;
-
-                if (response.found) {
-                  logger(
-                    'Firestore.getAll_',
-                    requestTag,
-                    'Received document: %s',
-                    response.found.name!
-                  );
-                  document = this.snapshot_(response.found, response.readTime!);
-                } else {
-                  logger(
-                    'Firestore.getAll_',
-                    requestTag,
-                    'Document missing: %s',
-                    response.missing!
-                  );
-                  document = this.snapshot_(
-                    response.missing!,
-                    response.readTime!
-                  );
-                }
-
-                const path = document.ref.path;
-                retrievedDocuments.set(path, document);
-              } catch (err) {
-                logger(
-                  'Firestore.getAll_',
-                  requestTag,
-                  'GetAll failed with exception:',
-                  err
-                );
-                reject(err);
-              }
-            })
-            .on('end', () => {
-              logger(
-                'Firestore.getAll_',
-                requestTag,
-                'Received %d results',
-                retrievedDocuments.size
-              );
-
-              // BatchGetDocuments doesn't preserve document order. We use
-              // the request order to sort the resulting documents.
-              const orderedDocuments: Array<DocumentSnapshot<T>> = [];
-
-              for (const docRef of docRefs) {
-                const document = retrievedDocuments.get(docRef.path);
-                if (document !== undefined) {
-                  // Recreate the DocumentSnapshot with the DocumentReference
-                  // containing the original converter.
-                  const finalDoc = new DocumentSnapshotBuilder(
-                    docRef as DocumentReference<T>
-                  );
-                  finalDoc.fieldsProto = document._fieldsProto;
-                  finalDoc.readTime = document.readTime;
-                  finalDoc.createTime = document.createTime;
-                  finalDoc.updateTime = document.updateTime;
-                  orderedDocuments.push(finalDoc.build());
-                } else {
-                  reject(
-                    new Error(`Did not receive document for "${docRef.path}".`)
-                  );
-                }
-              }
-              resolve(orderedDocuments);
-            });
-          stream.resume();
-        });
-      }
-    );
   }
 
   /**
