@@ -655,7 +655,7 @@ describe('BulkWriter', () => {
       },
       {
         request: createRequest([
-          setOp('doc12', 'bar'),
+          setOp('doc1', 'bar'),
           updateOp('doc2', 'bar'),
           deleteOp('doc3'),
         ]),
