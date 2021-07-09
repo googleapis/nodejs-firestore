@@ -47,11 +47,14 @@ jobs:
       - run: npm install
       - run: npm run lint
   docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 14
+    - run: npm install
+    - run: npm run docs
+    - uses: JustinBeckwith/linkinator-action@v1
         with:
-          node-version: 14
-      - run: npm install
-      - run: npm run docs-test
+          paths: docs/
