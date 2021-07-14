@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.13.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.13.1...v4.13.2) (2021-07-14)
+
+
+### Bug Fixes
+
+* **deps:** google-gax v2.17.1 ([#1557](https://www.github.com/googleapis/nodejs-firestore/issues/1557)) ([866bd25](https://www.github.com/googleapis/nodejs-firestore/commit/866bd255d930850956609a0941d4010847c0d196))
+* lower batch size on BulkWriter retry to stay under throughput limits ([#1556](https://www.github.com/googleapis/nodejs-firestore/issues/1556)) ([f17a36e](https://www.github.com/googleapis/nodejs-firestore/commit/f17a36e3fa1ce532c1c68ed63ea1845408368469))
+
 ### [4.13.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.13.0...v4.13.1) (2021-07-01)
 
 
