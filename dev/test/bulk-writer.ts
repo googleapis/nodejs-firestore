@@ -848,7 +848,7 @@ describe('BulkWriter', () => {
       {
         request: createRequest(
           nLengthArray(15 - RETRY_MAX_BATCH_SIZE).map((_, i) =>
-            setOp('doc' + i + RETRY_MAX_BATCH_SIZE, 'bar')
+            setOp('doc' + (i + RETRY_MAX_BATCH_SIZE), 'bar')
           )
         ),
         response: mergeResponses(
@@ -857,10 +857,13 @@ describe('BulkWriter', () => {
       },
     ]);
     for (let i = 0; i < 15; i++) {
-      bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
+      bulkWriter
+        .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
+        .then(incrementOpCount);
     }
 
     await bulkWriter.close();
+    expect(opCount).to.equal(15);
   });
 
   it('retries maintain correct write resolution ordering', async () => {
