@@ -218,11 +218,23 @@ class BulkCommitBatch extends WriteBatch {
   // been resolved.
   readonly pendingOps: Array<BulkWriterOperation> = [];
 
-  readonly maxBatchSize: number;
+  private _maxBatchSize: number;
 
   constructor(firestore: Firestore, maxBatchSize: number) {
     super(firestore);
-    this.maxBatchSize = maxBatchSize;
+    this._maxBatchSize = maxBatchSize;
+  }
+
+  get maxBatchSize(): number {
+    return this._maxBatchSize;
+  }
+
+  setMaxBatchSize(size: number): void {
+    assert(
+      this.pendingOps.length <= size,
+      'New batch size cannot be less than the number of enqueued writes'
+    );
+    this._maxBatchSize = size;
   }
 
   has(documentRef: firestore.DocumentReference<unknown>): boolean {
@@ -865,6 +877,10 @@ export class BulkWriter {
     if (this._bulkCommitBatch._opCount === 0) return;
 
     const pendingBatch = this._bulkCommitBatch;
+    this._bulkCommitBatch = new BulkCommitBatch(
+      this.firestore,
+      this._maxBatchSize
+    );
 
     // Use the write with the longest backoff duration when determining backoff.
     const highestBackoffDuration = pendingBatch.pendingOps.reduce((prev, cur) =>
@@ -872,13 +888,6 @@ export class BulkWriter {
     ).backoffDuration;
     const backoffMsWithJitter = BulkWriter._applyJitter(highestBackoffDuration);
     const delayedExecution = new Deferred<void>();
-
-    // A backoff duration greater than 0 implies that this batch is a retry.
-    // Retried writes are sent with a batch size of 10 in order to guarantee
-    // that the batch is under the 10MiB limit.
-    const maxBatchSize =
-      highestBackoffDuration > 0 ? RETRY_MAX_BATCH_SIZE : this._maxBatchSize;
-    this._bulkCommitBatch = new BulkCommitBatch(this.firestore, maxBatchSize);
 
     if (backoffMsWithJitter > 0) {
       delayExecution(() => delayedExecution.resolve(), backoffMsWithJitter);
@@ -1010,6 +1019,16 @@ export class BulkWriter {
     enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
     op: BulkWriterOperation
   ): void {
+    // A backoff duration greater than 0 implies that this batch is a retry.
+    // Retried writes are sent with a batch size of 10 in order to guarantee
+    // that the batch is under the 10MiB limit.
+    if (op.backoffDuration > 0) {
+      if (this._bulkCommitBatch.pendingOps.length >= RETRY_MAX_BATCH_SIZE) {
+        this._scheduleCurrentBatch(/* flush= */ false);
+      }
+      this._bulkCommitBatch.setMaxBatchSize(RETRY_MAX_BATCH_SIZE);
+    }
+
     if (this._bulkCommitBatch.has(op.ref)) {
       // Create a new batch since the backend doesn't support batches with two
       // writes to the same document.
