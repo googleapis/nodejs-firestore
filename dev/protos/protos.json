@@ -2133,6 +2133,7 @@
                       "oneof": [
                         "update",
                         "delete",
+                        "verify",
                         "transform"
                       ]
                     }
@@ -2145,6 +2146,10 @@
                     "delete": {
                       "type": "string",
                       "id": 2
+                    },
+                    "verify": {
+                      "type": "string",
+                      "id": 5
                     },
                     "transform": {
                       "type": "DocumentTransform",

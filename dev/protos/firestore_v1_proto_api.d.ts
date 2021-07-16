@@ -5727,6 +5727,9 @@ export namespace google {
                 /** Write delete */
                 "delete"?: (string|null);
 
+                /** Write verify */
+                verify?: (string|null);
+
                 /** Write transform */
                 transform?: (google.firestore.v1.IDocumentTransform|null);
 
@@ -5755,6 +5758,9 @@ export namespace google {
                 /** Write delete. */
                 public delete?: (string|null);
 
+                /** Write verify. */
+                public verify?: (string|null);
+
                 /** Write transform. */
                 public transform?: (google.firestore.v1.IDocumentTransform|null);
 
@@ -5768,7 +5774,7 @@ export namespace google {
                 public currentDocument?: (google.firestore.v1.IPrecondition|null);
 
                 /** Write operation. */
-                public operation?: ("update"|"delete"|"transform");
+                public operation?: ("update"|"delete"|"verify"|"transform");
 
                 /**
                  * Creates a Write message from a plain object. Also converts values to their respective internal types.
