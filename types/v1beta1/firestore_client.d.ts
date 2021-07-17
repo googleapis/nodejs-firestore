@@ -41,12 +41,14 @@ import * as protos from '../protos/firestore_v1beta1_proto_api';
 export declare class FirestoreClient {
   private _terminated;
   private _opts;
+  private _providedCustomServicePath;
   private _gaxModule;
   private _gaxGrpc;
   private _protos;
   private _defaults;
   auth: gax.GoogleAuth;
   descriptors: Descriptors;
+  warn: (code: string, message: string, warnType?: string) => void;
   innerApiCalls: {
     [name: string]: Function;
   };
