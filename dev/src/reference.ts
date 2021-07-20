@@ -555,6 +555,10 @@ export class DocumentReference<T = firestore.DocumentData>
     return {referenceValue: this.formattedName};
   }
 
+  withConverter(converter: null): DocumentReference<firestore.DocumentData>;
+  withConverter<U>(
+    converter: firestore.FirestoreDataConverter<U>
+  ): DocumentReference<U>;
   /**
    * Applies a custom data converter to this DocumentReference, allowing you to
    * use your own custom model objects with Firestore. When you call set(),
@@ -603,10 +607,6 @@ export class DocumentReference<T = firestore.DocumentData>
    * from Firestore. Passing in `null` removes the current converter.
    * @return A DocumentReference<U> that uses the provided converter.
    */
-  withConverter(converter: null): DocumentReference<firestore.DocumentData>;
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U>
-  ): DocumentReference<U>;
   withConverter<U>(
     converter: firestore.FirestoreDataConverter<U> | null
   ): DocumentReference<U> {
@@ -2311,6 +2311,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     };
   }
 
+  withConverter(converter: null): Query<firestore.DocumentData>;
+  withConverter<U>(converter: firestore.FirestoreDataConverter<U>): Query<U>;
   /**
    * Applies a custom data converter to this Query, allowing you to use your
    * own custom model objects with Firestore. When you call get() on the
@@ -2359,8 +2361,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * from Firestore. Passing in `null` removes the current converter.
    * @return A Query<U> that uses the provided converter.
    */
-  withConverter(converter: null): Query<firestore.DocumentData>;
-  withConverter<U>(converter: firestore.FirestoreDataConverter<U>): Query<U>;
   withConverter<U>(
     converter: firestore.FirestoreDataConverter<U> | null
   ): Query<U> {
@@ -2609,6 +2609,10 @@ export class CollectionReference<T = firestore.DocumentData>
     );
   }
 
+  withConverter(converter: null): CollectionReference<firestore.DocumentData>;
+  withConverter<U>(
+    converter: firestore.FirestoreDataConverter<U>
+  ): CollectionReference<U>;
   /**
    * Applies a custom data converter to this CollectionReference, allowing you
    * to use your own custom model objects with Firestore. When you call add() on
@@ -2657,10 +2661,6 @@ export class CollectionReference<T = firestore.DocumentData>
    * from Firestore. Passing in `null` removes the current converter.
    * @return A CollectionReference<U> that uses the provided converter.
    */
-  withConverter(converter: null): CollectionReference<firestore.DocumentData>;
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U>
-  ): CollectionReference<U>;
   withConverter<U>(
     converter: firestore.FirestoreDataConverter<U> | null
   ): CollectionReference<U> {
