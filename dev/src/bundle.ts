@@ -138,6 +138,7 @@ export class BundleBuilder {
    * Converts a IBundleElement to a Buffer whose content is the length prefixed JSON representation
    * of the element.
    * @private
+   * @internal
    */
   private elementToLengthPrefixedBuffer(
     bundleElement: firestore.IBundleElement
@@ -201,6 +202,7 @@ export class BundleBuilder {
 /**
  * Convenient class to hold both the metadata and the actual content of a document to be bundled.
  * @private
+ * @internal
  */
 class BundledDocument {
   constructor(
@@ -213,6 +215,7 @@ class BundledDocument {
  * Validates that 'value' is DocumentSnapshot.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  */
@@ -226,6 +229,7 @@ function validateDocumentSnapshot(arg: string | number, value: unknown): void {
  * Validates that 'value' is QuerySnapshot.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  */

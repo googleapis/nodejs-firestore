@@ -24,6 +24,7 @@ import * as gapicConfig from './v1/firestore_client_config.json';
 /**
  * A Promise implementation that supports deferred resolution.
  * @private
+ * @internal
  */
 export class Deferred<R> {
   promise: Promise<R>;
@@ -49,6 +50,7 @@ export class Deferred<R> {
  * Used for the creation of new documents.
  *
  * @private
+ * @internal
  * @returns {string} A unique 20-character wide identifier.
  */
 export function autoId(): string {
@@ -76,6 +78,7 @@ export function autoId(): string {
  * Used for the creation of request tags.
  *
  * @private
+ * @internal
  * @returns {string} A random 5-character wide identifier.
  */
 export function requestTag(): string {
@@ -86,6 +89,7 @@ export function requestTag(): string {
  * Determines whether `value` is a JavaScript object.
  *
  * @private
+ * @internal
  */
 export function isObject(value: unknown): value is {[k: string]: unknown} {
   return Object.prototype.toString.call(value) === '[object Object]';
@@ -96,6 +100,7 @@ export function isObject(value: unknown): value is {[k: string]: unknown} {
  * 'Map' in Firestore.
  *
  * @private
+ * @internal
  * @param input The argument to verify.
  * @returns 'true' if the input can be a treated as a plain object.
  */
@@ -112,6 +117,7 @@ export function isPlainObject(input: unknown): input is DocumentData {
  * Returns whether `value` has no custom properties.
  *
  * @private
+ * @internal
  */
 export function isEmpty(value: {}): boolean {
   return Object.keys(value).length === 0;
@@ -121,6 +127,7 @@ export function isEmpty(value: {}): boolean {
  * Determines whether `value` is a JavaScript function.
  *
  * @private
+ * @internal
  */
 export function isFunction(value: unknown): boolean {
   return typeof value === 'function';
@@ -131,6 +138,7 @@ export function isFunction(value: unknown): boolean {
  * RPC.
  *
  * @private
+ * @internal
  */
 export function isPermanentRpcError(
   err: GoogleError,
@@ -163,6 +171,7 @@ function getServiceConfig(methodName: string): CallSettings | undefined {
  * Returns the list of retryable error codes specified in the service
  * configuration.
  * @private
+ * @internal
  */
 export function getRetryCodes(methodName: string): number[] {
   return getServiceConfig(methodName)?.retry?.retryCodes ?? [];
@@ -171,6 +180,7 @@ export function getRetryCodes(methodName: string): number[] {
 /**
  * Returns the backoff setting from the service configuration.
  * @private
+ * @internal
  */
 export function getRetryParams(methodName: string): BackoffSettings {
   return (
@@ -187,6 +197,7 @@ export function getRetryParams(methodName: string): BackoffSettings {
  * the promise will be discarded.
  *
  * @private
+ * @internal
  */
 export function silencePromise(promise: Promise<unknown>): Promise<void> {
   return promise.then(
@@ -200,6 +211,7 @@ export function silencePromise(promise: Promise<unknown>): Promise<void> {
  *
  * Used to preserve stack traces across async calls.
  * @private
+ * @internal
  */
 export function wrapError(err: Error, stack: string): Error {
   err.stack += '\nCaused by: ' + stack;

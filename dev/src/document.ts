@@ -36,6 +36,7 @@ import api = google.firestore.v1;
  * Invoke `.build()' to assemble the final snapshot.
  *
  * @private
+ * @internal
  */
 export class DocumentSnapshotBuilder<T = firestore.DocumentData> {
   /** The fields of the Firestore `Document` Protobuf backing this document. */
@@ -58,6 +59,7 @@ export class DocumentSnapshotBuilder<T = firestore.DocumentData> {
    * Builds the DocumentSnapshot.
    *
    * @private
+   * @internal
    * @returns Returns either a QueryDocumentSnapshot (if `fieldsProto` was
    * provided) or a DocumentSnapshot.
    */
@@ -136,6 +138,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * Creates a DocumentSnapshot from an object.
    *
    * @private
+   * @internal
    * @param ref The reference to the document.
    * @param obj The object to store in the DocumentSnapshot.
    * @return The created DocumentSnapshot.
@@ -157,6 +160,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * turns { foo.bar : foobar } into { foo { bar : foobar }}
    *
    * @private
+   * @internal
    * @param ref The reference to the document.
    * @param data The field/value map to expand.
    * @return The created DocumentSnapshot.
@@ -450,6 +454,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * representation.
    *
    * @private
+   * @internal
    * @param field The path (e.g. 'foo' or 'foo.bar') to a specific field.
    * @returns The Protobuf-encoded data at the specified field location or
    * undefined if no such field exists.
@@ -479,6 +484,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * Convert a document snapshot to the Firestore 'Write' proto.
    *
    * @private
+   * @internal
    */
   toWriteProto(): api.IWrite {
     return {
@@ -493,6 +499,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * Convert a document snapshot to the Firestore 'Document' proto.
    *
    * @private
+   * @internal
    */
   toDocumentProto(): api.IDocument {
     return {
@@ -612,12 +619,14 @@ export class QueryDocumentSnapshot<T = firestore.DocumentData>
  *
  * @class
  * @private
+ * @internal
  */
 export class DocumentMask {
   private _sortedPaths: FieldPath[];
 
   /**
    * @private
+   * @internal
    * @hideconstructor
    *
    * @param fieldPaths The field paths in this mask.
@@ -631,6 +640,7 @@ export class DocumentMask {
    * Creates a document mask with the field paths of a document.
    *
    * @private
+   * @internal
    * @param data A map with fields to modify. Only the keys are used to extract
    * the document mask.
    */
@@ -650,6 +660,7 @@ export class DocumentMask {
    * Creates a document mask from an array of field paths.
    *
    * @private
+   * @internal
    * @param fieldMask A list of field paths.
    */
   static fromFieldMask(
@@ -668,6 +679,7 @@ export class DocumentMask {
    * Creates a document mask with the field names of a document.
    *
    * @private
+   * @internal
    * @param data An object with fields to modify. Only the keys are used to
    * extract the document mask.
    */
@@ -720,6 +732,7 @@ export class DocumentMask {
    * Returns true if this document mask contains no fields.
    *
    * @private
+   * @internal
    * @return {boolean} Whether this document mask is empty.
    */
   get isEmpty(): boolean {
@@ -730,6 +743,7 @@ export class DocumentMask {
    * Removes the specified values from a sorted field path array.
    *
    * @private
+   * @internal
    * @param input A sorted array of FieldPaths.
    * @param values An array of FieldPaths to remove.
    */
@@ -758,6 +772,7 @@ export class DocumentMask {
    * Removes the field path specified in 'fieldPaths' from this document mask.
    *
    * @private
+   * @internal
    * @param fieldPaths An array of FieldPaths.
    */
   removeFields(fieldPaths: FieldPath[]): void {
@@ -768,6 +783,7 @@ export class DocumentMask {
    * Returns whether this document mask contains 'fieldPath'.
    *
    * @private
+   * @internal
    * @param fieldPath The field path to test.
    * @return Whether this document mask contains 'fieldPath'.
    */
@@ -790,6 +806,7 @@ export class DocumentMask {
    * mask.
    *
    * @private
+   * @internal
    * @param data An object to filter.
    * @return A shallow copy of the object filtered by this document mask.
    */
@@ -856,6 +873,7 @@ export class DocumentMask {
    * Converts a document mask to the Firestore 'DocumentMask' Proto.
    *
    * @private
+   * @internal
    * @returns A Firestore 'DocumentMask' Proto.
    */
   toProto(): api.IDocumentMask {
@@ -881,11 +899,13 @@ export class DocumentMask {
  * corresponding field paths.
  *
  * @private
+ * @internal
  * @class
  */
 export class DocumentTransform<T = firestore.DocumentData> {
   /**
    * @private
+   * @internal
    * @hideconstructor
    *
    * @param ref The DocumentReference for this transform.
@@ -900,6 +920,7 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * Generates a DocumentTransform from a JavaScript object.
    *
    * @private
+   * @internal
    * @param ref The `DocumentReference` to use for the DocumentTransform.
    * @param obj The object to extract the transformations from.
    * @returns The Document Transform.
@@ -921,6 +942,7 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * Generates a DocumentTransform from an Update Map.
    *
    * @private
+   * @internal
    * @param ref The `DocumentReference` to use for the DocumentTransform.
    * @param data The update data to extract the transformations from.
    * @returns The Document Transform.
@@ -967,6 +989,7 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * Whether this DocumentTransform contains any actionable transformations.
    *
    * @private
+   * @internal
    */
   get isEmpty(): boolean {
     return this.transforms.size === 0;
@@ -976,6 +999,7 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * Returns the array of fields in this DocumentTransform.
    *
    * @private
+   * @internal
    */
   get fields(): FieldPath[] {
     return Array.from(this.transforms.keys());
@@ -984,6 +1008,7 @@ export class DocumentTransform<T = firestore.DocumentData> {
   /**
    * Validates the user provided field values in this document transform.
    * @private
+   * @internal
    */
   validate(): void {
     const allowUndefined =
@@ -995,6 +1020,7 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * Converts a document transform to the Firestore 'FieldTransform' Proto.
    *
    * @private
+   * @internal
    * @param serializer The Firestore serializer
    * @returns A list of Firestore 'FieldTransform' Protos
    */
@@ -1009,6 +1035,7 @@ export class DocumentTransform<T = firestore.DocumentData> {
  * A Firestore Precondition encapsulates options for database writes.
  *
  * @private
+ * @internal
  * @class
  */
 export class Precondition {
@@ -1017,6 +1044,7 @@ export class Precondition {
 
   /**
    * @private
+   * @internal
    * @hideconstructor
    *
    * @param options.exists - Whether the referenced document should exist in
@@ -1039,6 +1067,7 @@ export class Precondition {
    * Generates the Protobuf `Preconditon` object for this precondition.
    *
    * @private
+   * @internal
    * @returns The `Preconditon` Protobuf object or 'null' if there are no
    * preconditions.
    */
@@ -1062,6 +1091,7 @@ export class Precondition {
    * Whether this DocumentTransform contains any enforcement.
    *
    * @private
+   * @internal
    */
   get isEmpty(): boolean {
     return this._exists === undefined && !this._lastUpdateTime;

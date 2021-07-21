@@ -111,6 +111,7 @@ export type RBTree = any;
  * inside defaultConverter(), object equality when comparing default converters
  * is preserved.
  * @private
+ * @internal
  */
 const defaultConverterObj: FirestoreDataConverter<DocumentData> = {
   toFirestore(modelObject: DocumentData): DocumentData {
@@ -124,6 +125,7 @@ const defaultConverterObj: FirestoreDataConverter<DocumentData> = {
 /**
  * A default converter to use when none is provided.
  * @private
+ * @internal
  */
 export function defaultConverter<T>(): FirestoreDataConverter<T> {
   return defaultConverterObj as FirestoreDataConverter<T>;
@@ -137,6 +139,7 @@ export type UpdateMap = Map<FieldPath, unknown>;
 /**
  * Internal user data validation options.
  * @private
+ * @internal
  */
 export interface ValidationOptions {
   /** At what level field deletes are supported. */
@@ -155,6 +158,7 @@ export interface ValidationOptions {
 /**
  * A Firestore Proto value in ProtoJs format.
  * @private
+ * @internal
  */
 export interface ProtobufJsValue extends api.IValue {
   valueType?: string;

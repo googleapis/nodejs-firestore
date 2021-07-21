@@ -29,6 +29,7 @@ import api = google.firestore.v1;
  * failure and returns ordered results.
  *
  * @private
+ * @internal
  */
 export class DocumentReader<T> {
   /** An optional field mask to apply to this read. */

@@ -63,6 +63,7 @@ import api = protos.google.firestore.v1;
  * (descending or ascending).
  *
  * @private
+ * @internal
  */
 const directionOperators: {[k: string]: api.StructuredQuery.Direction} = {
   asc: 'ASCENDING',
@@ -75,6 +76,7 @@ const directionOperators: {[k: string]: api.StructuredQuery.Direction} = {
  * and 'array-contains-any'.
  *
  * @private
+ * @internal
  */
 const comparisonOperators: {
   [k: string]: api.StructuredQuery.FieldFilter.Operator;
@@ -140,6 +142,7 @@ export class DocumentReference<T = firestore.DocumentData>
   /**
    * The string representation of the DocumentReference's location.
    * @private
+   * @internal
    * @type {string}
    * @name DocumentReference#formattedName
    */
@@ -208,6 +211,7 @@ export class DocumentReference<T = firestore.DocumentData>
   /**
    * Returns a resource path for this document.
    * @private
+   * @internal
    */
   get _resourcePath(): ResourcePath {
     return this._path;
@@ -550,6 +554,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * Converts this DocumentReference to the Firestore Proto representation.
    *
    * @private
+   * @internal
    */
   toProto(): api.IValue {
     return {referenceValue: this.formattedName};
@@ -622,6 +627,7 @@ export class DocumentReference<T = firestore.DocumentData>
  * A Query order-by field.
  *
  * @private
+ * @internal
  * @class
  */
 export class FieldOrder {
@@ -639,6 +645,7 @@ export class FieldOrder {
   /**
    * Generates the proto representation for this field order.
    * @private
+   * @internal
    */
   toProto(): api.StructuredQuery.IOrder {
     return {
@@ -654,6 +661,7 @@ export class FieldOrder {
  * A field constraint for a Query where clause.
  *
  * @private
+ * @internal
  * @class
  */
 class FieldFilter {
@@ -675,6 +683,7 @@ class FieldFilter {
    * Returns whether this FieldFilter uses an equals comparison.
    *
    * @private
+   * @internal
    */
   isInequalityFilter(): boolean {
     switch (this.op) {
@@ -692,6 +701,7 @@ class FieldFilter {
    * Generates the proto representation for this field filter.
    *
    * @private
+   * @internal
    */
   toProto(): api.StructuredQuery.IFilter {
     if (typeof this.value === 'number' && isNaN(this.value)) {
@@ -995,6 +1005,7 @@ enum LimitType {
  *
  * These options are immutable. Modified options can be created using `with()`.
  * @private
+ * @internal
  */
 export class QueryOptions<T> {
   constructor(
@@ -1022,6 +1033,7 @@ export class QueryOptions<T> {
   /**
    * Returns query options for a collection group query.
    * @private
+   * @internal
    */
   static forCollectionGroupQuery<T = firestore.DocumentData>(
     collectionId: string,
@@ -1040,6 +1052,7 @@ export class QueryOptions<T> {
   /**
    * Returns query options for a single-collection query.
    * @private
+   * @internal
    */
   static forCollectionQuery<T = firestore.DocumentData>(
     collectionRef: ResourcePath,
@@ -1060,6 +1073,7 @@ export class QueryOptions<T> {
    * specified reference.
    *
    * @private
+   * @internal
    */
   static forKindlessAllDescendants<T = firestore.DocumentData>(
     parent: ResourcePath,
@@ -1085,6 +1099,7 @@ export class QueryOptions<T> {
   /**
    * Returns the union of the current and the provided options.
    * @private
+   * @internal
    */
   with(settings: Partial<Omit<QueryOptions<T>, 'converter'>>): QueryOptions<T> {
     return new QueryOptions(
@@ -1182,11 +1197,13 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * field order.
    *
    * @private
+   * @internal
    * @param documentSnapshot The document to extract the fields from.
    * @param fieldOrders The field order that defines what fields we should
    * extract.
    * @return {Array.<*>} The field values to use.
    * @private
+   * @internal
    */
   static _extractFieldValues(
     documentSnapshot: DocumentSnapshot,
@@ -1509,6 +1526,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * Computes the backend ordering semantics for DocumentSnapshot cursors.
    *
    * @private
+   * @internal
    * @param cursorValuesOrDocumentSnapshot The snapshot of the document or the
    * set of field values to use as the boundary.
    * @returns The implicit ordering semantics.
@@ -1561,6 +1579,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * Builds a Firestore 'Position' proto message.
    *
    * @private
+   * @internal
    * @param {Array.<FieldOrder>} fieldOrders The field orders to use for this
    * cursor.
    * @param {Array.<DocumentSnapshot|*>} cursorValuesOrDocumentSnapshot The
@@ -1622,6 +1641,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @return If valid, returns a DocumentReference that can be used with the
    * query.
    * @private
+   * @internal
    */
   private validateReference(val: unknown): DocumentReference<T> {
     const basePath = this._queryOptions.allDescendants
@@ -1878,6 +1898,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * Internal get() method that accepts an optional transaction id.
    *
    * @private
+   * @internal
    * @param {bytes=} transactionId A transaction ID.
    */
   _get(transactionId?: Uint8Array): Promise<QuerySnapshot<T>> {
@@ -1971,6 +1992,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *
    * @param cursor The original cursor value
    * @private
+   * @internal
    */
   private toCursor(cursor: QueryCursor | undefined): api.ICursor | undefined {
     if (cursor) {
@@ -1989,6 +2011,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @param transactionIdOrReadTime A transaction ID or the read time at which
    * to execute the query.
    * @private
+   * @internal
    * @returns Serialized JSON for the query.
    */
   toProto(
@@ -2050,6 +2073,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * Converts current Query to an IBundledQuery.
    *
    * @private
+   * @internal
    */
   _toBundledQuery(): protos.firestore.IBundledQuery {
     const projectId = this.firestore.projectId;
@@ -2124,6 +2148,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *
    * @param transactionId A transaction ID.
    * @private
+   * @internal
    * @returns A stream of document results.
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
@@ -2268,6 +2293,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * according to the sort criteria of this query.
    *
    * @private
+   * @internal
    */
   comparator(): (
     s1: QueryDocumentSnapshot<T>,
@@ -2400,6 +2426,7 @@ export class CollectionReference<T = firestore.DocumentData>
   /**
    * Returns a resource path for this collection.
    * @private
+   * @internal
    */
   get _resourcePath(): ResourcePath {
     return this._queryOptions.parentPath.append(
@@ -2676,6 +2703,7 @@ export class CollectionReference<T = firestore.DocumentData>
  * Validates the input string as a field order direction.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param op Order direction to validate.
  * @throws when the direction is invalid
@@ -2696,6 +2724,7 @@ export function validateQueryOrder(
  * Validates the input string as a field comparison operator.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param op Field comparison operator to validate.
  * @param fieldValue Value that is used in the filter.
@@ -2739,6 +2768,7 @@ export function validateQueryOperator(
  * Validates that 'value' is a DocumentReference.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The argument to validate.
  * @return the DocumentReference if valid
@@ -2757,6 +2787,7 @@ export function validateDocumentReference(
  * Validates that 'value' can be used as a query value.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The argument to validate.
  * @param allowUndefined Whether to allow nested properties that are `undefined`.
@@ -2777,6 +2808,7 @@ function validateQueryValue(
  * Verifies equality for an array of objects using the `isEqual` interface.
  *
  * @private
+ * @internal
  * @param left Array of objects supporting `isEqual`.
  * @param right Array of objects supporting `isEqual`.
  * @return True if arrays are equal.
@@ -2801,6 +2833,7 @@ function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
 /**
  * Returns the first non-undefined value or `undefined` if no such value exists.
  * @private
+ * @internal
  */
 function coalesce<T>(...values: Array<T | undefined>): T | undefined {
   return values.find(value => value !== undefined);

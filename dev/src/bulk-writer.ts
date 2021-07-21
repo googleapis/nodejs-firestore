@@ -106,6 +106,7 @@ const DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT = 500;
  * Represents a single write for BulkWriter, encapsulating operation dispatch
  * and error handling.
  * @private
+ * @internal
  */
 class BulkWriterOperation {
   private deferred = new Deferred<WriteResult>();
@@ -209,6 +210,7 @@ class BulkWriterOperation {
  * Used to represent a batch on the BatchQueue.
  *
  * @private
+ * @internal
  */
 class BulkCommitBatch extends WriteBatch {
   // The set of document reference paths present in the WriteBatch.
@@ -310,6 +312,7 @@ class BulkCommitBatch extends WriteBatch {
  * Used to represent a buffered BulkWriterOperation.
  *
  * @private
+ * @internal
  */
 class BufferedOperation {
   constructor(
@@ -356,6 +359,7 @@ export class BulkWriter {
    * The maximum number of writes that can be in a single batch.
    * Visible for testing.
    * @private
+   * @internal
    */
   private _maxBatchSize = MAX_BATCH_SIZE;
 
@@ -363,6 +367,7 @@ export class BulkWriter {
    * The batch that is currently used to schedule operations. Once this batch
    * reaches maximum capacity, a new batch is created.
    * @private
+   * @internal
    */
   private _bulkCommitBatch = new BulkCommitBatch(
     this.firestore,
@@ -373,6 +378,7 @@ export class BulkWriter {
    * A pointer to the tail of all active BulkWriter operations. This pointer
    * is advanced every time a new write is enqueued.
    * @private
+   * @internal
    */
   private _lastOp: Promise<void> = Promise.resolve();
 
@@ -381,6 +387,7 @@ export class BulkWriter {
    * new operations can be enqueued, except for retry operations scheduled by
    * the error handler.
    * @private
+   * @internal
    */
   private _closing = false;
 
@@ -388,6 +395,7 @@ export class BulkWriter {
    * Rate limiter used to throttle requests as per the 500/50/5 rule.
    * Visible for testing.
    * @private
+   * @internal
    */
   readonly _rateLimiter: RateLimiter;
 
@@ -396,6 +404,7 @@ export class BulkWriter {
    * An operation is considered pending if BulkWriter has sent it via RPC and
    * is awaiting the result.
    * @private
+   * @internal
    */
   private _pendingOpsCount = 0;
 
@@ -403,6 +412,7 @@ export class BulkWriter {
    * An array containing buffered BulkWriter operations after the maximum number
    * of pending operations has been enqueued.
    * @private
+   * @internal
    */
   private _bufferedOperations: Array<BufferedOperation> = [];
 
@@ -426,6 +436,7 @@ export class BulkWriter {
    * BulkWriter instance. Once the this number of writes have been enqueued,
    * subsequent writes are buffered.
    * @private
+   * @internal
    */
   private _maxPendingOpCount = DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT;
 
@@ -438,6 +449,7 @@ export class BulkWriter {
    * The user-provided callback to be run every time a BulkWriter operation
    * successfully completes.
    * @private
+   * @internal
    */
   private _successFn: (
     document: firestore.DocumentReference<unknown>,
@@ -448,6 +460,7 @@ export class BulkWriter {
    * The user-provided callback to be run every time a BulkWriter operation
    * fails.
    * @private
+   * @internal
    */
   private _errorFn: (error: BulkWriterError) => boolean = error => {
     const isRetryableDeleteError =
@@ -858,6 +871,7 @@ export class BulkWriter {
   /**
    * Throws an error if the BulkWriter instance has been closed.
    * @private
+   * @internal
    */
   _verifyNotClosed(): void {
     if (this._closing) {
@@ -872,6 +886,7 @@ export class BulkWriter {
    * operations are enqueued. This allows retries to resolve as part of a
    * `flush()` or `close()` call.
    * @private
+   * @internal
    */
   private _scheduleCurrentBatch(flush = false): void {
     if (this._bulkCommitBatch._opCount === 0) return;
@@ -901,6 +916,7 @@ export class BulkWriter {
   /**
    * Sends the provided batch once the rate limiter does not require any delay.
    * @private
+   * @internal
    */
   private async _sendBatch(
     batch: BulkCommitBatch,
@@ -929,6 +945,7 @@ export class BulkWriter {
    * Adds a 30% jitter to the provided backoff.
    *
    * @private
+   * @internal
    */
   private static _applyJitter(backoffMs: number): number {
     if (backoffMs === 0) return 0;
@@ -943,6 +960,7 @@ export class BulkWriter {
   /**
    * Schedules and runs the provided operation on the next available batch.
    * @private
+   * @internal
    */
   private _enqueue(
     ref: firestore.DocumentReference<unknown>,
@@ -998,6 +1016,7 @@ export class BulkWriter {
    * Manages the pending operation counter and schedules the next BulkWriter
    * operation if we're under the maximum limit.
    * @private
+   * @internal
    */
   private _processBufferedOps(): void {
     if (
@@ -1014,6 +1033,7 @@ export class BulkWriter {
    * Sends the BulkCommitBatch if it reaches maximum capacity.
    *
    * @private
+   * @internal
    */
   _sendFn(
     enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
@@ -1052,6 +1072,7 @@ export class BulkWriter {
  * Validates the use of 'value' as BulkWriterOptions.
  *
  * @private
+ * @internal
  * @param value The BulkWriterOptions object to validate.
  * @throws if the input is not a valid BulkWriterOptions object.
  */
