@@ -34,6 +34,7 @@ import api = proto.google.firestore.v1;
  * The maximum depth of a Firestore object.
  *
  * @private
+ * @internal
  */
 const MAX_DEPTH = 20;
 
@@ -41,6 +42,7 @@ const MAX_DEPTH = 20;
  * An interface for Firestore types that can be serialized to Protobuf.
  *
  * @private
+ * @internal
  */
 export interface Serializable {
   toProto(): api.IValue;
@@ -51,6 +53,7 @@ export interface Serializable {
  * Firestore Protobuf representation.
  *
  * @private
+ * @internal
  */
 export class Serializer {
   private allowUndefined: boolean;
@@ -71,6 +74,7 @@ export class Serializer {
    * Encodes a JavaScript object into the Firestore 'Fields' representation.
    *
    * @private
+   * @internal
    * @param obj The object to encode.
    * @returns The Firestore 'Fields' representation
    */
@@ -92,6 +96,7 @@ export class Serializer {
    * Encodes a JavaScript value into the Firestore 'Value' representation.
    *
    * @private
+   * @internal
    * @param val The object to encode
    * @returns The Firestore Proto or null if we are deleting a field.
    */
@@ -215,6 +220,7 @@ export class Serializer {
    * Decodes a single Firestore 'Value' Protobuf.
    *
    * @private
+   * @internal
    * @param proto A Firestore 'Value' Protobuf.
    * @returns The converted JS type.
    */
@@ -285,6 +291,7 @@ export class Serializer {
  * Validates a JavaScript value for usage as a Firestore value.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value JavaScript value to validate.
  * @param desc A description of the expected type.
@@ -428,6 +435,7 @@ export function validateUserInput(
 /**
  * Returns true if value is a MomentJs date object.
  * @private
+ * @internal
  */
 function isMomentJsType(value: unknown): value is {toDate(): Date} {
   return (

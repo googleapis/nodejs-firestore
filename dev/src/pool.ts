@@ -32,6 +32,7 @@ export const CLIENT_TERMINATED_ERROR_MSG =
  * concurrent operations.
  *
  * @private
+ * @internal
  */
 export class ClientPool<T> {
   /**
@@ -81,6 +82,7 @@ export class ClientPool<T> {
    * of concurrent operations or initializes and returns a new client.
    *
    * @private
+   * @internal
    */
   private acquire(requestTag: string): T {
     let selectedClient: T | null = null;
@@ -126,6 +128,7 @@ export class ClientPool<T> {
    * Reduces the number of operations for the provided client, potentially
    * removing it from the pool of active clients.
    * @private
+   * @internal
    */
   private async release(requestTag: string, client: T): Promise<void> {
     const requestCount = this.activeClients.get(client) || 0;
@@ -147,6 +150,7 @@ export class ClientPool<T> {
    * Given the current operation counts, determines if the given client should
    * be garbage collected.
    * @private
+   * @internal
    */
   private shouldGarbageCollectClient(client: T): boolean {
     // Don't garbage collect clients that have active requests.
@@ -176,6 +180,7 @@ export class ClientPool<T> {
    *
    * @return Number of currently registered clients.
    * @private
+   * @internal
    */
   // Visible for testing.
   get size(): number {
@@ -187,6 +192,7 @@ export class ClientPool<T> {
    *
    * @return Number of currently active operations.
    * @private
+   * @internal
    */
   // Visible for testing.
   get opCount(): number {
@@ -205,6 +211,7 @@ export class ClientPool<T> {
    * be returned to the pool when callback finishes.
    * @return A Promise that resolves with the result of `op`.
    * @private
+   * @internal
    */
   run<V>(requestTag: string, op: (client: T) => Promise<V>): Promise<V> {
     if (this.terminated) {

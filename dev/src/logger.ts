@@ -29,6 +29,7 @@ let logFunction: ((msg: string) => void) | null = null;
  * logging.
  *
  * @private
+ * @internal
  */
 export function logger(
   methodName: string,
@@ -63,6 +64,7 @@ export function setLogFunction(logger: ((msg: string) => void) | null): void {
  * Sets the library version to be used in log messages.
  *
  * @private
+ * @internal
  */
 export function setLibVersion(version: string): void {
   libVersion = version;

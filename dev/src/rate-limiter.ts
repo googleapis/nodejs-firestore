@@ -29,6 +29,7 @@ import {logger} from './logger';
  * (https://firebase.google.com/docs/firestore/best-practices#ramping_up_traffic).
  *
  * @private
+ * @internal
  */
 export class RateLimiter {
   // Number of tokens available. Each operation consumes one token.
@@ -70,6 +71,7 @@ export class RateLimiter {
    * @param requestTimeMillis The time used to calculate the number of available
    * tokens. Used for testing the limiter.
    * @private
+   * @internal
    */
   tryMakeRequest(
     numOperations: number,
@@ -92,6 +94,7 @@ export class RateLimiter {
    * @param requestTimeMillis The time used to calculate the number of available
    * tokens. Used for testing the limiter.
    * @private
+   * @internal
    */
   getNextRequestDelayMs(
     numOperations: number,
@@ -118,6 +121,7 @@ export class RateLimiter {
    * @param requestTimeMillis The time used to calculate the number of available
    * tokens. Used for testing the limiter.
    * @private
+   * @internal
    */
   private refillTokens(requestTimeMillis: number): void {
     if (requestTimeMillis >= this.lastRefillTimeMillis) {
@@ -142,6 +146,7 @@ export class RateLimiter {
    * Calculates the maximum capacity based on the provided date.
    *
    * @private
+   * @internal
    */
   // Visible for testing.
   calculateCapacity(requestTimeMillis: number): number {

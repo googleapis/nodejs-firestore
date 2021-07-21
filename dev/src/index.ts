@@ -376,18 +376,21 @@ export class Firestore implements firestore.Firestore {
    * A client pool to distribute requests over multiple GAPIC clients in order
    * to work around a connection limit of 100 concurrent requests per client.
    * @private
+   * @internal
    */
   private _clientPool: ClientPool<GapicClient>;
 
   /**
    * The configuration options for the GAPIC client.
    * @private
+   * @internal
    */
   _settings: firestore.Settings = {};
 
   /**
    * Settings for the exponential backoff used by the streaming endpoints.
    * @private
+   * @internal
    */
   private _backoffSettings: ExponentialBackoffSetting;
 
@@ -395,12 +398,14 @@ export class Firestore implements firestore.Firestore {
    * Whether the initialization settings can still be changed by invoking
    * `settings()`.
    * @private
+   * @internal
    */
   private _settingsFrozen = false;
 
   /**
    * The serializer to use for the Protobuf transformation.
    * @private
+   * @internal
    */
   _serializer: Serializer | null = null;
 
@@ -410,6 +415,7 @@ export class Firestore implements firestore.Firestore {
    * The project ID is auto-detected during the first request unless a project
    * ID is passed to the constructor (or provided via `.settings()`).
    * @private
+   * @internal
    */
   private _projectId: string | undefined = undefined;
 
@@ -419,6 +425,7 @@ export class Firestore implements firestore.Firestore {
    * The client can only be terminated when there are no pending writes or
    * registered listeners.
    * @private
+   * @internal
    */
   private registeredListenersCount = 0;
 
@@ -427,6 +434,7 @@ export class Firestore implements firestore.Firestore {
    * BulkWriter instance is provided.
    *
    * @private
+   * @internal
    */
   private _bulkWriter: BulkWriter | undefined;
 
@@ -434,6 +442,7 @@ export class Firestore implements firestore.Firestore {
    * Lazy-load the Firestore's default BulkWriter.
    *
    * @private
+   * @internal
    */
   private getBulkWriter(): BulkWriter {
     if (!this._bulkWriter) {
@@ -448,6 +457,7 @@ export class Firestore implements firestore.Firestore {
    * The client can only be terminated when there are no pending writes or
    * registered listeners.
    * @private
+   * @internal
    */
   private bulkWritersCount = 0;
 
@@ -637,6 +647,7 @@ export class Firestore implements firestore.Firestore {
    * `initializeIfNeeded()` was called before.
    *
    * @private
+   * @internal
    */
   get projectId(): string {
     if (this._projectId === undefined) {
@@ -652,6 +663,7 @@ export class Firestore implements firestore.Firestore {
    * `initializeIfNeeded()` was called before.
    *
    * @private
+   * @internal
    */
   get formattedName(): string {
     return `projects/${this.projectId}/databases/${DEFAULT_DATABASE_ID}`;
@@ -813,6 +825,7 @@ export class Firestore implements firestore.Firestore {
    * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
+   * @internal
    * @param documentOrName The Firestore 'Document' proto or the resource name
    * of a missing document.
    * @param readTime A 'Timestamp' proto indicating the time this document was
@@ -1154,6 +1167,7 @@ export class Firestore implements firestore.Firestore {
    * called.
    *
    * @private
+   * @internal
    */
   registerListener(): void {
     this.registeredListenersCount += 1;
@@ -1165,6 +1179,7 @@ export class Firestore implements firestore.Firestore {
    * is called.
    *
    * @private
+   * @internal
    */
   unregisterListener(): void {
     this.registeredListenersCount -= 1;
@@ -1175,6 +1190,7 @@ export class Firestore implements firestore.Firestore {
    * that all pending operations are complete when terminate() is called.
    *
    * @private
+   * @internal
    */
   _incrementBulkWritersCount(): void {
     this.bulkWritersCount += 1;
@@ -1185,6 +1201,7 @@ export class Firestore implements firestore.Firestore {
    * that all pending operations are complete when terminate() is called.
    *
    * @private
+   * @internal
    */
   _decrementBulkWritersCount(): void {
     this.bulkWritersCount -= 1;
@@ -1244,6 +1261,7 @@ export class Firestore implements firestore.Firestore {
    * startAfter() once the RecursiveDelete instance has MAX_PENDING_OPS pending.
    *
    * @private
+   * @internal
    */
   // Visible for testing
   _recursiveDelete(
@@ -1297,6 +1315,7 @@ export class Firestore implements firestore.Firestore {
    * SDK can be used after this method completes.
    *
    * @private
+   * @internal
    * @param requestTag A unique client-assigned identifier that caused this
    * initialization.
    * @return A Promise that resolves when the client is initialized.
@@ -1344,6 +1363,7 @@ export class Firestore implements firestore.Firestore {
   /**
    * Returns GAX call options that set the cloud resource header.
    * @private
+   * @internal
    */
   private createCallOptions(
     methodName: string,
@@ -1374,6 +1394,7 @@ export class Firestore implements firestore.Firestore {
    * A function returning a Promise that can be retried.
    *
    * @private
+   * @internal
    * @callback retryFunction
    * @returns {Promise} A Promise indicating the function's success.
    */
@@ -1386,6 +1407,7 @@ export class Firestore implements firestore.Firestore {
    * for further attempts.
    *
    * @private
+   * @internal
    * @param methodName Name of the Veneer API endpoint that takes a request
    * and GAX options.
    * @param requestTag A unique client-assigned identifier for this request.
@@ -1439,6 +1461,7 @@ export class Firestore implements firestore.Firestore {
    * method rejects the returned Promise.
    *
    * @private
+   * @internal
    * @param backendStream The Node stream to monitor.
    * @param lifetime A Promise that resolves when the stream receives an 'end',
    * 'close' or 'finish' message.
@@ -1547,6 +1570,7 @@ export class Firestore implements firestore.Firestore {
    * necessary within the request options.
    *
    * @private
+   * @internal
    * @param methodName Name of the Veneer API endpoint that takes a request
    * and GAX options.
    * @param request The Protobuf request to send.
@@ -1591,6 +1615,7 @@ export class Firestore implements firestore.Firestore {
    * listeners are attached.
    *
    * @private
+   * @internal
    * @param methodName Name of the streaming Veneer API endpoint that
    * takes a request and GAX options.
    * @param request The Protobuf request to send.
@@ -1711,6 +1736,7 @@ module.exports = Object.assign(module.exports, existingExports);
  * {@link v1beta1} factory function.
  *
  * @private
+ * @internal
  * @name Firestore.v1beta1
  * @type {function}
  */
@@ -1724,6 +1750,7 @@ Object.defineProperty(module.exports, 'v1beta1', {
  * {@link v1} factory function.
  *
  * @private
+ * @internal
  * @name Firestore.v1
  * @type {function}
  */
@@ -1737,6 +1764,7 @@ Object.defineProperty(module.exports, 'v1', {
  * {@link Status} factory function.
  *
  * @private
+ * @internal
  * @name Firestore.GrpcStatus
  * @type {function}
  */

@@ -214,6 +214,7 @@ export class FieldValue implements firestore.FieldValue {
  * is 'true').
  *
  * @private
+ * @internal
  * @abstract
  */
 export abstract class FieldTransform extends FieldValue {
@@ -253,11 +254,13 @@ export abstract class FieldTransform extends FieldValue {
  * A transform that deletes a field from a Firestore document.
  *
  * @private
+ * @internal
  */
 export class DeleteTransform extends FieldTransform {
   /**
    * Sentinel value for a field delete.
    * @private
+   * @internal
    */
   static DELETE_SENTINEL = new DeleteTransform();
 
@@ -268,6 +271,7 @@ export class DeleteTransform extends FieldTransform {
   /**
    * Deletes are included in document masks.
    * @private
+   * @internal
    */
   get includeInDocumentMask(): true {
     return true;
@@ -276,6 +280,7 @@ export class DeleteTransform extends FieldTransform {
   /**
    * Deletes are are omitted from document transforms.
    * @private
+   * @internal
    */
   get includeInDocumentTransform(): false {
     return false;
@@ -298,12 +303,14 @@ export class DeleteTransform extends FieldTransform {
  * A transform that sets a field to the Firestore server time.
  *
  * @private
+ * @internal
  */
 class ServerTimestampTransform extends FieldTransform {
   /**
    * Sentinel value for a server timestamp.
    *
    * @private
+   * @internal
    */
   static SERVER_TIMESTAMP_SENTINEL = new ServerTimestampTransform();
 
@@ -315,6 +322,7 @@ class ServerTimestampTransform extends FieldTransform {
    * Server timestamps are omitted from document masks.
    *
    * @private
+   * @internal
    */
   get includeInDocumentMask(): false {
     return false;
@@ -324,6 +332,7 @@ class ServerTimestampTransform extends FieldTransform {
    * Server timestamps are included in document transforms.
    *
    * @private
+   * @internal
    */
   get includeInDocumentTransform(): true {
     return true;
@@ -350,6 +359,7 @@ class ServerTimestampTransform extends FieldTransform {
  * Increments a field value on the backend.
  *
  * @private
+ * @internal
  */
 class NumericIncrementTransform extends FieldTransform {
   constructor(private readonly operand: number) {
@@ -360,6 +370,7 @@ class NumericIncrementTransform extends FieldTransform {
    * Numeric transforms are omitted from document masks.
    *
    * @private
+   * @internal
    */
   get includeInDocumentMask(): false {
     return false;
@@ -369,6 +380,7 @@ class NumericIncrementTransform extends FieldTransform {
    * Numeric transforms are included in document transforms.
    *
    * @private
+   * @internal
    */
   get includeInDocumentTransform(): true {
     return true;
@@ -403,6 +415,7 @@ class NumericIncrementTransform extends FieldTransform {
  * Transforms an array value via a union operation.
  *
  * @private
+ * @internal
  */
 class ArrayUnionTransform extends FieldTransform {
   constructor(private readonly elements: unknown[]) {
@@ -412,6 +425,7 @@ class ArrayUnionTransform extends FieldTransform {
   /**
    * Array transforms are omitted from document masks.
    * @private
+   * @internal
    */
   get includeInDocumentMask(): false {
     return false;
@@ -420,6 +434,7 @@ class ArrayUnionTransform extends FieldTransform {
   /**
    * Array transforms are included in document transforms.
    * @private
+   * @internal
    */
   get includeInDocumentTransform(): true {
     return true;
@@ -459,6 +474,7 @@ class ArrayUnionTransform extends FieldTransform {
  * Transforms an array value via a remove operation.
  *
  * @private
+ * @internal
  */
 class ArrayRemoveTransform extends FieldTransform {
   constructor(private readonly elements: unknown[]) {
@@ -468,6 +484,7 @@ class ArrayRemoveTransform extends FieldTransform {
   /**
    * Array transforms are omitted from document masks.
    * @private
+   * @internal
    */
   get includeInDocumentMask(): false {
     return false;
@@ -476,6 +493,7 @@ class ArrayRemoveTransform extends FieldTransform {
   /**
    * Array transforms are included in document transforms.
    * @private
+   * @internal
    */
   get includeInDocumentTransform(): true {
     return true;
@@ -517,6 +535,7 @@ class ArrayRemoveTransform extends FieldTransform {
  * rejected.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The value to validate.
  * @param allowUndefined Whether to allow nested properties that are `undefined`.
