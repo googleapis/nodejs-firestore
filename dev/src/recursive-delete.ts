@@ -62,11 +62,13 @@ export const RECURSIVE_DELETE_MIN_PENDING_OPS = 1000;
  * Class used to store state required for running a recursive delete operation.
  * Each recursive delete call should use a new instance of the class.
  * @private
+ * @internal
  */
 export class RecursiveDelete {
   /**
    * The number of deletes that failed with a permanent error.
    * @private
+   * @internal
    */
   private errorCount = 0;
 
@@ -74,24 +76,28 @@ export class RecursiveDelete {
    * The most recently thrown error. Used to populate the developer-facing
    * error message when the recursive delete operation completes.
    * @private
+   * @internal
    */
   private lastError: GoogleError | BulkWriterError | undefined;
 
   /**
    * Whether there are still documents to delete that still need to be fetched.
    * @private
+   * @internal
    */
   private documentsPending = true;
 
   /**
    * Whether run() has been called.
    * @private
+   * @internal
    */
   private started = false;
 
   /**
    * Query limit to use when fetching all descendants.
    * @private
+   * @internal
    */
   private readonly maxPendingOps: number;
 
@@ -99,6 +105,7 @@ export class RecursiveDelete {
    * The number of pending BulkWriter operations at which RecursiveDelete
    * starts the next limit query to fetch descendants.
    * @private
+   * @internal
    */
   private readonly minPendingOps: number;
 
@@ -106,6 +113,7 @@ export class RecursiveDelete {
    * A deferred promise that resolves when the recursive delete operation
    * is completed.
    * @private
+   * @internal
    */
   private readonly completionDeferred = new Deferred<void>();
 
@@ -113,6 +121,7 @@ export class RecursiveDelete {
    * Whether a query stream is currently in progress. Only one stream can be
    * run at a time.
    * @private
+   * @internal
    */
   private streamInProgress = false;
 
@@ -120,6 +129,7 @@ export class RecursiveDelete {
    * The last document snapshot returned by the stream. Used to set the
    * startAfter() field in the subsequent stream.
    * @private
+   * @internal
    */
   private lastDocumentSnap: QueryDocumentSnapshot | undefined;
 
@@ -127,6 +137,7 @@ export class RecursiveDelete {
    * The number of pending BulkWriter operations. Used to determine when the
    * next query can be run.
    * @private
+   * @internal
    */
   private pendingOpsCount = 0;
 
@@ -173,6 +184,7 @@ export class RecursiveDelete {
   /**
    * Creates a query stream and attaches event handlers to it.
    * @private
+   * @internal
    */
   private setupStream(): void {
     const stream = this.getAllDescendants(
@@ -210,6 +222,7 @@ export class RecursiveDelete {
    * Retrieves all descendant documents nested under the provided reference.
    * @param ref The reference to fetch all descendants for.
    * @private
+   * @internal
    * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
    */
   private getAllDescendants(
@@ -267,6 +280,7 @@ export class RecursiveDelete {
    * or if a permanent error occurs during the stream. Deletes the developer
    * provided reference and wraps any errors that occurred.
    * @private
+   * @internal
    */
   private onQueryEnd(): void {
     this.documentsPending = false;
@@ -301,6 +315,7 @@ export class RecursiveDelete {
    * Deletes the provided reference and starts the next stream if conditions
    * are met.
    * @private
+   * @internal
    */
   private deleteRef(docRef: DocumentReference): void {
     this.pendingOpsCount++;

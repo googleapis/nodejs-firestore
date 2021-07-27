@@ -24,6 +24,7 @@ import api = google.firestore.v1;
 /*!
  * @module firestore/convert
  * @private
+ * @internal
  *
  * This module contains utility functions to convert
  * `firestore.v1.Documents` from Proto3 JSON to their equivalent
@@ -37,6 +38,7 @@ import api = google.firestore.v1;
  * Converts an ISO 8601 or google.protobuf.Timestamp proto into Protobuf JS.
  *
  * @private
+ * @internal
  * @param timestampValue The value to convert.
  * @param argumentName The argument name to use in the error message if the
  * conversion fails. If omitted, 'timestampValue' is used.
@@ -89,6 +91,7 @@ export function timestampFromJson(
  * Converts a Proto3 JSON 'bytesValue' field into Protobuf JS.
  *
  * @private
+ * @internal
  * @param bytesValue The value to convert.
  * @return The value as expected by Protobuf JS.
  */
@@ -104,6 +107,7 @@ function bytesFromJson(bytesValue: string | Uint8Array): Uint8Array {
  * Detects 'valueType' from a Proto3 JSON `firestore.v1.Value` proto.
  *
  * @private
+ * @internal
  * @param proto The `firestore.v1.Value` proto.
  * @return The string value for 'valueType'.
  */
@@ -162,6 +166,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
  * Protobuf JS format expected by this client.
  *
  * @private
+ * @internal
  * @param fieldValue The `firestore.v1.Value` in Proto3 JSON format.
  * @return The `firestore.v1.Value` in Protobuf JS format.
  */
@@ -219,6 +224,7 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
  * fields.
  *
  * @private
+ * @internal
  * @param document An object with IValues in Proto3 JSON format.
  * @return The object in Protobuf JS format.
  */

@@ -115,6 +115,7 @@ export class Timestamp implements firestore.Timestamp {
    * Generates a `Timestamp` object from a Timestamp proto.
    *
    * @private
+   * @internal
    * @param {Object} timestamp The `Timestamp` Protobuf object.
    */
   static fromProto(timestamp: google.protobuf.ITimestamp): Timestamp {
@@ -253,6 +254,7 @@ export class Timestamp implements firestore.Timestamp {
    * Generates the Protobuf `Timestamp` object for this timestamp.
    *
    * @private
+   * @internal
    * @returns {Object} The `Timestamp` Protobuf object.
    */
   toProto(): api.IValue {

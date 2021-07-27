@@ -68,6 +68,7 @@ const FIELD_PATH_RE = /^[^*~/[\]]+$/;
  * Subclasses have to implement `split()` and `canonicalString()`.
  *
  * @private
+ * @internal
  * @class
  */
 abstract class Path<T> {
@@ -75,6 +76,7 @@ abstract class Path<T> {
    * Creates a new Path with the given segments.
    *
    * @private
+   * @internal
    * @hideconstructor
    * @param segments Sequence of parts of a path.
    */
@@ -84,6 +86,7 @@ abstract class Path<T> {
    * Returns the number of segments of this field path.
    *
    * @private
+   * @internal
    */
   get size(): number {
     return this.segments.length;
@@ -96,6 +99,7 @@ abstract class Path<T> {
    * Create a child path beneath the current level.
    *
    * @private
+   * @internal
    * @param relativePath Relative path to append to the current path.
    * @returns The new path.
    */
@@ -110,6 +114,7 @@ abstract class Path<T> {
    * Returns the path of the parent node.
    *
    * @private
+   * @internal
    * @returns The new path or null if we are already at the root.
    */
   parent(): T | null {
@@ -124,6 +129,7 @@ abstract class Path<T> {
    * Checks whether the current path is a prefix of the specified path.
    *
    * @private
+   * @internal
    * @param other The path to check against.
    * @returns 'true' iff the current path is a prefix match with 'other'.
    */
@@ -145,6 +151,7 @@ abstract class Path<T> {
    * Compare the current path against another Path object.
    *
    * @private
+   * @internal
    * @param other The path to compare to.
    * @returns -1 if current < other, 1 if current > other, 0 if equal
    */
@@ -171,6 +178,7 @@ abstract class Path<T> {
    * Returns a copy of the underlying segments.
    *
    * @private
+   * @internal
    * @returns A copy of the segments that make up this path.
    */
   toArray(): string[] {
@@ -182,6 +190,7 @@ abstract class Path<T> {
    * `Path`.
    *
    * @private
+   * @internal
    * @returns The newly created Path.
    */
   popLast(): T {
@@ -193,6 +202,7 @@ abstract class Path<T> {
    * Returns true if this `Path` is equal to the provided value.
    *
    * @private
+   * @internal
    * @param other The value to compare against.
    * @return true if this `Path` is equal to the provided value.
    */
@@ -206,11 +216,13 @@ abstract class Path<T> {
  * instance.
  *
  * @private
+ * @internal
  */
 export class ResourcePath extends Path<ResourcePath> {
   /**
    * A default instance pointing to the root collection.
    * @private
+   * @internal
    */
   static EMPTY = new ResourcePath();
 
@@ -218,6 +230,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * Constructs a ResourcePath.
    *
    * @private
+   * @internal
    * @param segments Sequence of names of the parts of the path.
    */
   constructor(...segments: string[]) {
@@ -227,6 +240,7 @@ export class ResourcePath extends Path<ResourcePath> {
   /**
    * Indicates whether this path points to a document.
    * @private
+   * @internal
    */
   get isDocument(): boolean {
     return this.segments.length > 0 && this.segments.length % 2 === 0;
@@ -235,6 +249,7 @@ export class ResourcePath extends Path<ResourcePath> {
   /**
    * Indicates whether this path points to a collection.
    * @private
+   * @internal
    */
   get isCollection(): boolean {
     return this.segments.length % 2 === 1;
@@ -243,6 +258,7 @@ export class ResourcePath extends Path<ResourcePath> {
   /**
    * The last component of the path.
    * @private
+   * @internal
    */
   get id(): string | null {
     if (this.segments.length > 0) {
@@ -255,6 +271,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * Returns the location of this path relative to the root of the project's
    * database.
    * @private
+   * @internal
    */
   get relativeName(): string {
     return this.segments.join('/');
@@ -264,6 +281,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * Constructs a new instance of ResourcePath.
    *
    * @private
+   * @internal
    * @param segments Sequence of parts of the path.
    * @returns The newly created ResourcePath.
    */
@@ -275,6 +293,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * Splits a string into path segments, using slashes as separators.
    *
    * @private
+   * @internal
    * @param relativePath The path to split.
    * @returns The split path segments.
    */
@@ -288,6 +307,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * Converts this path to a fully qualified ResourcePath.
    *
    * @private
+   * @internal
    * @param projectIdIfMissing The project ID of the current Firestore project.
    * The project ID is only used if it's not provided as part of this
    * ResourcePath.
@@ -307,6 +327,7 @@ export class ResourcePath extends Path<ResourcePath> {
  * to resources in any Firestore project.
  *
  * @private
+ * @internal
  */
 export class QualifiedResourcePath extends ResourcePath {
   /**
@@ -323,6 +344,7 @@ export class QualifiedResourcePath extends ResourcePath {
    * Constructs a Firestore Resource Path.
    *
    * @private
+   * @internal
    * @param projectId The Firestore project id.
    * @param databaseId The Firestore database id.
    * @param segments Sequence of names of the parts of the path.
@@ -337,6 +359,7 @@ export class QualifiedResourcePath extends ResourcePath {
   /**
    * String representation of the path relative to the database root.
    * @private
+   * @internal
    */
   get relativeName(): string {
     return this.segments.join('/');
@@ -346,6 +369,7 @@ export class QualifiedResourcePath extends ResourcePath {
    * Creates a resource path from an absolute Firestore path.
    *
    * @private
+   * @internal
    * @param absolutePath A string representation of a Resource Path.
    * @returns The new ResourcePath.
    */
@@ -366,6 +390,7 @@ export class QualifiedResourcePath extends ResourcePath {
    * Create a child path beneath the current level.
    *
    * @private
+   * @internal
    * @param relativePath Relative path to append to the current path.
    * @returns The new path.
    */
@@ -379,6 +404,7 @@ export class QualifiedResourcePath extends ResourcePath {
    * Create a child path beneath the current level.
    *
    * @private
+   * @internal
    * @returns The new path.
    */
   parent(): QualifiedResourcePath | null {
@@ -389,6 +415,7 @@ export class QualifiedResourcePath extends ResourcePath {
    * String representation of a ResourcePath as expected by the API.
    *
    * @private
+   * @internal
    * @returns The representation as expected by the API.
    */
   get formattedName(): string {
@@ -409,6 +436,7 @@ export class QualifiedResourcePath extends ResourcePath {
    * methods.
    *
    * @private
+   * @internal
    * @param segments Sequence of names of the parts of the path.
    * @returns The newly created QualifiedResourcePath.
    */
@@ -425,6 +453,7 @@ export class QualifiedResourcePath extends ResourcePath {
    * returns the current instance.
    *
    * @private
+   * @internal
    */
   toQualifiedResourcePath(): QualifiedResourcePath {
     return this;
@@ -434,6 +463,7 @@ export class QualifiedResourcePath extends ResourcePath {
    * Compare the current path against another ResourcePath object.
    *
    * @private
+   * @internal
    * @param other The path to compare to.
    * @returns -1 if current < other, 1 if current > other, 0 if equal
    */
@@ -460,6 +490,7 @@ export class QualifiedResourcePath extends ResourcePath {
   /**
    * Converts this ResourcePath to the Firestore Proto representation.
    * @private
+   * @internal
    */
   toProto(): api.IValue {
     return {
@@ -473,6 +504,7 @@ export class QualifiedResourcePath extends ResourcePath {
  * resource path.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param resourcePath The path to validate.
  * @throws if the string can't be used as a resource path.
@@ -510,6 +542,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    * A special sentinel value to refer to the ID of a document.
    *
    * @private
+   * @internal
    */
   private static _DOCUMENT_ID = new FieldPath('__name__');
 
@@ -564,6 +597,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    * strings.
    *
    * @private
+   * @internal
    * @param {string|FieldPath} fieldPath The FieldPath to create.
    * @returns {FieldPath} A field path representation.
    */
@@ -579,6 +613,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    * String representation of a FieldPath as expected by the API.
    *
    * @private
+   * @internal
    * @override
    * @returns {string} The representation as expected by the API.
    */
@@ -596,6 +631,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    * Returns a string representation of this path.
    *
    * @private
+   * @internal
    * @returns A string representing this path.
    */
   toString(): string {
@@ -606,6 +642,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    * Splits a string into path segments, using dots as separators.
    *
    * @private
+   * @internal
    * @override
    * @param {string} fieldPath The path to split.
    * @returns {Array.<string>} - The split path segments.
@@ -620,6 +657,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    * methods.
    *
    * @private
+   * @internal
    * @override
    * @param segments Sequence of field names.
    * @returns The newly created FieldPath.
@@ -643,6 +681,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
  * Validates that the provided value can be used as a field path argument.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param fieldPath The value to verify.
  * @throws if the string can't be used as a field path.
