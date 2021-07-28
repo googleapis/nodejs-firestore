@@ -54,6 +54,7 @@ import {
   verifyInstance,
 } from './util/helpers';
 import api = proto.google.firestore.v1;
+import {Deferred} from '../src/util';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(null);
@@ -391,7 +392,14 @@ describe('BulkWriter', () => {
     return bulkWriter.close().then(async () => verifyOpCount(1));
   });
 
-  it('swallows UnhandledPromiseRejections even if the error is not caught', async () => {
+  it('throws UnhandledPromiseRejections if no error handler is passed in', async () => {
+    let errorThrown = false;
+    const unhandledDeferred = new Deferred<void>();
+    process.on('unhandledRejection', () => {
+      errorThrown = true;
+      unhandledDeferred.resolve();
+    });
+
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
@@ -400,6 +408,23 @@ describe('BulkWriter', () => {
     ]);
 
     const doc = firestore.doc('collectionId/doc');
+    bulkWriter.set(doc, {foo: 'bar'});
+
+    await bulkWriter.close();
+    await unhandledDeferred.promise;
+    expect(errorThrown).to.be.true;
+  });
+
+  it('swallows UnhandledPromiseRejections if an error handler is passed in', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(),
+      },
+    ]);
+
+    const doc = firestore.doc('collectionId/doc');
+    bulkWriter.onWriteError(() => false);
     bulkWriter.set(doc, {foo: 'bar'});
     return bulkWriter.close();
   });

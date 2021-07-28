@@ -416,6 +416,16 @@ export class BulkWriter {
    */
   private _bufferedOperations: Array<BufferedOperation> = [];
 
+  /**
+   * Whether a custom error handler has been set. BulkWriter only swallows
+   * errors if an error handler is set. Otherwise, an UnhandledPromiseRejection
+   * is thrown by Node if an operation promise is rejected without being
+   * handled.
+   * @private
+   * @internal
+   */
+  private _errorHandlerSet = false;
+
   // Visible for testing.
   _getBufferedOperationsCount(): number {
     return this._bufferedOperations.length;
@@ -558,7 +568,7 @@ export class BulkWriter {
     const op = this._enqueue(documentRef, 'create', bulkCommitBatch =>
       bulkCommitBatch.create(documentRef, data)
     );
-    silencePromise(op);
+    this._silencePromiseIfErrorHandlerSet(op);
     return op;
   }
 
@@ -598,7 +608,7 @@ export class BulkWriter {
     const op = this._enqueue(documentRef, 'delete', bulkCommitBatch =>
       bulkCommitBatch.delete(documentRef, precondition)
     );
-    silencePromise(op);
+    this._silencePromiseIfErrorHandlerSet(op);
     return op;
   }
 
@@ -655,7 +665,7 @@ export class BulkWriter {
     const op = this._enqueue(documentRef, 'set', bulkCommitBatch =>
       bulkCommitBatch.set(documentRef, data, options)
     );
-    silencePromise(op);
+    this._silencePromiseIfErrorHandlerSet(op);
     return op;
   }
 
@@ -711,7 +721,7 @@ export class BulkWriter {
     const op = this._enqueue(documentRef, 'update', bulkCommitBatch =>
       bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues)
     );
-    silencePromise(op);
+    this._silencePromiseIfErrorHandlerSet(op);
     return op;
   }
 
@@ -793,6 +803,7 @@ export class BulkWriter {
    *   });
    */
   onWriteError(shouldRetryCallback: (error: BulkWriterError) => boolean): void {
+    this._errorHandlerSet = true;
     this._errorFn = shouldRetryCallback;
   }
 
@@ -1025,6 +1036,19 @@ export class BulkWriter {
     ) {
       const nextOp = this._bufferedOperations.shift()!;
       nextOp.sendFn();
+    }
+  }
+
+  /**
+   * Silences the promise if an error handler has been passed in. This prevents
+   * UnhandledPromiseRejections from being thrown if a floating BulkWriter
+   * operation promise fails.
+   * @private
+   * @internal
+   */
+  private _silencePromiseIfErrorHandlerSet(promise: Promise<unknown>): void {
+    if (this._errorHandlerSet) {
+      silencePromise(promise);
     }
   }
 
