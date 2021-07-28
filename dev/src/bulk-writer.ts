@@ -173,6 +173,16 @@ class BulkWriterOperation {
         ' for document:',
         this.ref.path
       );
+      console.warn(
+          'BulkWriter.errorFn',
+          null,
+          'Ran error callback on error code:',
+          error.code,
+          ', shouldRetry:',
+          shouldRetry,
+          'for document:',
+          this.ref.path
+      );
 
       if (shouldRetry) {
         this.lastStatus = error.code as number;
