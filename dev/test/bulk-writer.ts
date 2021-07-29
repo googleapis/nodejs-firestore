@@ -424,8 +424,10 @@ describe('BulkWriter', () => {
     ]);
 
     const doc = firestore.doc('collectionId/doc');
-    bulkWriter.onWriteError(() => false);
     bulkWriter.set(doc, {foo: 'bar'});
+    // Set the error handler after calling set() to ensure that the check is
+    // performed when the promise resolves.
+    bulkWriter.onWriteError(() => false);
     return bulkWriter.close();
   });
 
