@@ -173,15 +173,16 @@ class BulkWriterOperation {
         ' for document:',
         this.ref.path
       );
+      // eslint-disable-next-line no-console
       console.warn(
-          'BulkWriter.errorFn',
-          null,
-          'Ran error callback on error code:',
-          error.code,
-          ', shouldRetry:',
-          shouldRetry,
-          'for document:',
-          this.ref.path
+        'BulkWriter.errorFn',
+        null,
+        'Ran error callback on error code:',
+        error.code,
+        ', shouldRetry:',
+        shouldRetry,
+        'for document:',
+        this.ref.path
       );
 
       if (shouldRetry) {
