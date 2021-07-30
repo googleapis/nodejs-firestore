@@ -416,6 +416,16 @@ export class BulkWriter {
    */
   private _bufferedOperations: Array<BufferedOperation> = [];
 
+  /**
+   * Whether a custom error handler has been set. BulkWriter only swallows
+   * errors if an error handler is set. Otherwise, an UnhandledPromiseRejection
+   * is thrown by Node if an operation promise is rejected without being
+   * handled.
+   * @private
+   * @internal
+   */
+  private _errorHandlerSet = false;
+
   // Visible for testing.
   _getBufferedOperationsCount(): number {
     return this._bufferedOperations.length;
@@ -555,11 +565,9 @@ export class BulkWriter {
     data: T
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    const op = this._enqueue(documentRef, 'create', bulkCommitBatch =>
+    return this._enqueue(documentRef, 'create', bulkCommitBatch =>
       bulkCommitBatch.create(documentRef, data)
     );
-    silencePromise(op);
-    return op;
   }
 
   /**
@@ -595,11 +603,9 @@ export class BulkWriter {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    const op = this._enqueue(documentRef, 'delete', bulkCommitBatch =>
+    return this._enqueue(documentRef, 'delete', bulkCommitBatch =>
       bulkCommitBatch.delete(documentRef, precondition)
     );
-    silencePromise(op);
-    return op;
   }
 
   set<T>(
@@ -652,11 +658,9 @@ export class BulkWriter {
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    const op = this._enqueue(documentRef, 'set', bulkCommitBatch =>
+    return this._enqueue(documentRef, 'set', bulkCommitBatch =>
       bulkCommitBatch.set(documentRef, data, options)
     );
-    silencePromise(op);
-    return op;
   }
 
   /**
@@ -708,11 +712,9 @@ export class BulkWriter {
     >
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    const op = this._enqueue(documentRef, 'update', bulkCommitBatch =>
+    return this._enqueue(documentRef, 'update', bulkCommitBatch =>
       bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues)
     );
-    silencePromise(op);
-    return op;
   }
 
   /**
@@ -793,6 +795,7 @@ export class BulkWriter {
    *   });
    */
   onWriteError(shouldRetryCallback: (error: BulkWriterError) => boolean): void {
+    this._errorHandlerSet = true;
     this._errorFn = shouldRetryCallback;
   }
 
@@ -975,11 +978,23 @@ export class BulkWriter {
       this._successFn.bind(this)
     );
 
+    // Swallow the error if the developer has set an error listener. This
+    // prevents UnhandledPromiseRejections from being thrown if a floating
+    // BulkWriter operation promise fails when an error handler is specified.
+    //
+    // This is done here in order to chain the caught promise onto `lastOp`,
+    // which ensures that flush() resolves after the operation promise.
+    const userPromise = bulkWriterOp.promise.catch(err => {
+      if (!this._errorHandlerSet) {
+        throw err;
+      } else {
+        return bulkWriterOp.promise;
+      }
+    });
+
     // Advance the `_lastOp` pointer. This ensures that `_lastOp` only resolves
-    // when both the previous and the current write resolves.
-    this._lastOp = this._lastOp.then(() =>
-      silencePromise(bulkWriterOp.promise)
-    );
+    // when both the previous and the current write resolve.
+    this._lastOp = this._lastOp.then(() => silencePromise(userPromise));
 
     // Schedule the operation if the BulkWriter has fewer than the maximum
     // number of allowed pending operations, or add the operation to the
@@ -999,7 +1014,7 @@ export class BulkWriter {
     // Chain the BulkWriter operation promise with the buffer processing logic
     // in order to ensure that it runs and that subsequent operations are
     // enqueued before the next batch is scheduled in `_sendBatch()`.
-    return bulkWriterOp.promise
+    return userPromise
       .then(res => {
         this._pendingOpsCount--;
         this._processBufferedOps();
