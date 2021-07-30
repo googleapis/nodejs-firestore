@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.14.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.13.2...v4.14.0) (2021-07-30)
+
+
+### Features
+
+* add "NON_EMPTY_DEFAULT" FieldBehavior ([#1554](https://www.github.com/googleapis/nodejs-firestore/issues/1554)) ([8d9c503](https://www.github.com/googleapis/nodejs-firestore/commit/8d9c50381eedf6ee8043eed681d03b44262b9820))
+* allow UnhandledPromiseRejection errors in BulkWriter if no error handler is specified ([#1572](https://www.github.com/googleapis/nodejs-firestore/issues/1572)) ([e862ac8](https://www.github.com/googleapis/nodejs-firestore/commit/e862ac81cbb99287a226989b184fc2e683defa16))
+
 ### [4.13.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.13.1...v4.13.2) (2021-07-14)
 
 
