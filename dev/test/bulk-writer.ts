@@ -40,6 +40,7 @@ import {
   DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT,
   RETRY_MAX_BATCH_SIZE,
 } from '../src/bulk-writer';
+import {Deferred} from '../src/util';
 import {
   ApiOverride,
   create,
@@ -54,7 +55,6 @@ import {
   verifyInstance,
 } from './util/helpers';
 import api = proto.google.firestore.v1;
-import {Deferred} from '../src/util';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(null);

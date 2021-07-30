@@ -984,7 +984,7 @@ export class BulkWriter {
     //
     // This is done here in order to chain the caught promise onto `lastOp`,
     // which ensures that flush() resolves after the operation promise.
-    const returnedBulkWriterPromise = bulkWriterOp.promise.catch(err => {
+    const userPromise = bulkWriterOp.promise.catch(err => {
       if (!this._errorHandlerSet) {
         throw err;
       } else {
@@ -994,9 +994,7 @@ export class BulkWriter {
 
     // Advance the `_lastOp` pointer. This ensures that `_lastOp` only resolves
     // when both the previous and the current write resolve.
-    this._lastOp = this._lastOp.then(() =>
-      silencePromise(returnedBulkWriterPromise)
-    );
+    this._lastOp = this._lastOp.then(() => silencePromise(userPromise));
 
     // Schedule the operation if the BulkWriter has fewer than the maximum
     // number of allowed pending operations, or add the operation to the
@@ -1016,7 +1014,7 @@ export class BulkWriter {
     // Chain the BulkWriter operation promise with the buffer processing logic
     // in order to ensure that it runs and that subsequent operations are
     // enqueued before the next batch is scheduled in `_sendBatch()`.
-    return returnedBulkWriterPromise
+    return userPromise
       .then(res => {
         this._pendingOpsCount--;
         this._processBufferedOps();
