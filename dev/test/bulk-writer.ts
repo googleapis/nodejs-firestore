@@ -40,6 +40,7 @@ import {
   DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT,
   RETRY_MAX_BATCH_SIZE,
 } from '../src/bulk-writer';
+import {Deferred} from '../src/util';
 import {
   ApiOverride,
   create,
@@ -391,7 +392,14 @@ describe('BulkWriter', () => {
     return bulkWriter.close().then(async () => verifyOpCount(1));
   });
 
-  it('swallows UnhandledPromiseRejections even if the error is not caught', async () => {
+  it('throws UnhandledPromiseRejections if no error handler is passed in', async () => {
+    let errorThrown = false;
+    const unhandledDeferred = new Deferred<void>();
+    process.on('unhandledRejection', () => {
+      errorThrown = true;
+      unhandledDeferred.resolve();
+    });
+
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
@@ -401,6 +409,25 @@ describe('BulkWriter', () => {
 
     const doc = firestore.doc('collectionId/doc');
     bulkWriter.set(doc, {foo: 'bar'});
+
+    await bulkWriter.close();
+    await unhandledDeferred.promise;
+    expect(errorThrown).to.be.true;
+  });
+
+  it('swallows UnhandledPromiseRejections if an error handler is passed in', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(),
+      },
+    ]);
+
+    const doc = firestore.doc('collectionId/doc');
+    bulkWriter.set(doc, {foo: 'bar'});
+    // Set the error handler after calling set() to ensure that the check is
+    // performed when the promise resolves.
+    bulkWriter.onWriteError(() => false);
     return bulkWriter.close();
   });
 

@@ -346,6 +346,7 @@ export class Transaction implements firestore.Transaction {
    * Starts a transaction and obtains the transaction id from the server.
    *
    * @private
+   * @internal
    */
   begin(readOnly: boolean, readTime: Timestamp | undefined): Promise<void> {
     const request: api.IBeginTransactionRequest = {
@@ -381,6 +382,7 @@ export class Transaction implements firestore.Transaction {
    * Commits all queued-up changes in this transaction and releases all locks.
    *
    * @private
+   * @internal
    */
   commit(): Promise<void> {
     return this._writeBatch
@@ -395,6 +397,7 @@ export class Transaction implements firestore.Transaction {
    * Releases all locks and rolls back this transaction.
    *
    * @private
+   * @internal
    */
   rollback(): Promise<void> {
     const request = {
@@ -409,6 +412,7 @@ export class Transaction implements firestore.Transaction {
    * Executes `updateFunction()` and commits the transaction with retry.
    *
    * @private
+   * @internal
    * @param updateFunction The user function to execute within the transaction
    * context.
    * @param requestTag A unique client-assigned identifier for the scope of
@@ -483,6 +487,7 @@ export class Transaction implements firestore.Transaction {
    * Delays further operations based on the provided error.
    *
    * @private
+   * @internal
    * @return A Promise that resolves after the delay expired.
    */
   private async maybeBackoff(error?: GoogleError): Promise<void> {
@@ -498,6 +503,7 @@ export class Transaction implements firestore.Transaction {
  * and Transaction class.
  *
  * @private
+ * @internal
  * @param documentRefsOrReadOptions An array of document references followed by
  * an optional ReadOptions object.
  */
@@ -547,6 +553,7 @@ export function parseGetAllArguments<T>(
  * is an array of strings or field paths.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  * @param options Options that specify whether the ReadOptions can be omitted.
