@@ -39,11 +39,12 @@ import {TEST_BUNDLE_ID, verifyMetadata} from '../test/bundle';
 import {
   bundleToElementArray,
   Classroom,
+  ClassroomFieldValue,
   classroomConverter,
   Post,
   postConverter,
   postConverterMerge,
-  verifyInstance,
+  verifyInstance, classroomConverterFieldValue,
 } from '../test/util/helpers';
 import {BulkWriter} from '../src/bulk-writer';
 import {Status} from 'google-gax';
@@ -2437,7 +2438,7 @@ describe('WriteBatch class', () => {
     const ref = randomCol.doc('doc').withConverter(postConverterMerge);
     await ref.set(new Post('walnut', 'author'));
     const batch = firestore.batch();
-    batch.set(ref, {title: undefined}, {merge: true});
+    batch.set(ref, {title: 'olive'}, {merge: true});
     return batch
       .commit()
       .then(() => {
@@ -2450,41 +2451,70 @@ describe('WriteBatch class', () => {
   });
 
   it('set supports partials with fieldValue', async () => {
-    const ref = randomCol.doc('doc').withConverter(classroomConverter);
+    const ref = randomCol.doc('doc').withConverter(classroomConverterFieldValue);
     await ref.set(
-      new Classroom('Grade 5', [12345, 12346], {zip: 98765, nestedArr: ['foo']})
+      new ClassroomFieldValue('Grade 5', [12345, 12346], {zip: 98765, nestedStringArray: ['foo']})
     );
-    await ref.set({studentIds: FieldValue.arrayRemove(12345)}, {merge: true});
+    await ref.set({numberArray: FieldValue.arrayRemove(12345)}, {merge: true});
     const doc = await ref.get();
     expect(doc.get('name')).to.equal('Grade 5');
     expect(doc.get('studentIds')).to.deep.equal([12346]);
   });
 
   it('nested partial support', async () => {
-    const ref = randomCol.doc('doc').withConverter(classroomConverter);
+    const ref = randomCol.doc('doc').withConverter(classroomConverterFieldValue);
     await ref.set(
-      new Classroom('Grade 5', [12345, 12346], {zip: 98765, nestedArr: ['foo']})
+      new ClassroomFieldValue('Grade 5', [12345, 12346], {zip: 98765, nestedStringArray: ['foo']})
     );
 
     // These should be allowed.
-    await ref.set({address: {nestedArr: ['bar']}}, {merge: true});
+    await ref.set({address: {nestedStringArray: ['bar']}}, {merge: true});
     await ref.set({number: 3}, {merge: true});
     await ref.set({number: undefined}, {merge: true});
     await ref.set({number: FieldValue.increment(1)}, {merge: true});
     await ref.set({number: FieldValue.delete()}, {merge: true});
-    await ref.set({address: {nestedArr: FieldValue.delete()}}, {merge: true});
+    await ref.set({address: {nestedStringArray: FieldValue.delete()}}, {merge: true});
     await ref.set(
-      {address: {nestedArr: FieldValue.arrayUnion('baz')}},
+      {address: {nestedStringArray: FieldValue.arrayUnion('baz')}},
       {merge: true}
     );
 
     // These should error.
-    await ref.set({studentIds: FieldValue.increment(12345)}, {merge: true});
-    await ref.set({studentIds: ['not-number']}, {merge: true});
+    await ref.set({numberArray: FieldValue.increment(12345)}, {merge: true});
+    await ref.set({numberArray: ['not-number']}, {merge: true});
     await ref.set({number: 'not-number'}, {merge: true});
     await ref.set({number: null}, {merge: true});
     await ref.set({number: FieldValue.arrayUnion(4)}, {merge: true});
-    await ref.set({address: {nestedArr: 'not-array'}}, {merge: true});
+    await ref.set({address: {nestedStringArray: 'not-array'}}, {merge: true});
+
+    // NumericFieldValue Allowed
+    await ref.set({number: FieldValue.increment(1)}, {merge: true});
+    await ref.set({number: FieldValue.delete()}, {merge: true});
+
+    // NumericFieldValue Error
+    await ref.set({number: FieldValue.arrayUnion(4)}, {merge: true});
+    await ref.set({number: FieldValue.arrayRemove(4)}, {merge: true});
+    await ref.set({number: FieldValue.serverTimestamp}, {merge: true});
+
+    // TimestampFieldValue Allowed
+    await ref.set({timestamp: FieldValue.serverTimestamp()}, {merge: true});
+    await ref.set({timestamp: FieldValue.delete()}, {merge: true});
+
+    // TimestampFieldValue Error
+    await ref.set({timestamp: FieldValue.increment(1)}, {merge: true});
+    await ref.set({timestamp: FieldValue.arrayUnion(4)}, {merge: true});
+    await ref.set({timestamp: FieldValue.arrayRemove(4)}, {merge: true});
+    await ref.set({timestamp: 3}, {merge: true});
+
+    // ArrayFieldValue Allowed
+    await ref.set({numberArray: FieldValue.arrayUnion(123)}, {merge: true});
+    await ref.set({numberArray: FieldValue.arrayRemove(12345)}, {merge: true});
+    await ref.set({numberArray: FieldValue.delete()}, {merge: true});
+
+    // ArrayFieldValue Error
+    await ref.set({numberArray: FieldValue.increment(12345)}, {merge: true});
+    await ref.set({numberArray: FieldValue.serverTimestamp()}, {merge: true});
+
 
     const doc = await ref.get();
   });

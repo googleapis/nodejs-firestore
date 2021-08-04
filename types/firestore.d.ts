@@ -50,9 +50,9 @@ declare namespace FirebaseFirestore {
    */
   function setLogFunction(logger: ((msg: string) => void) | null): void;
 
-  export type DataWithFieldValue<T> = {[P in keyof T]: T[P] | FieldValue};
+  export type DataWithFieldValue<T> = {[P in keyof T]: WithFieldValue<P>};
 
-  type ToFieldValue<T> = T extends number
+  type WithFieldValue<T> = T extends number
     ? T | NumericFieldValue
     : T extends Timestamp
     ? T | TimestampFieldValue
@@ -60,16 +60,28 @@ declare namespace FirebaseFirestore {
     ? T | ArrayFieldValue
     : T;
 
-  type Primitive = number | boolean | string | null | undefined;
-  type NestedPartial<T> = {
-    [P in keyof T]?: T[P] extends Primitive[] // Check for array primitives.
-      ? T[P]
-      : T[P] extends (infer U)[] // Check for array objects.
-      ? NestedPartial<U>[]
-      : NestedPartial<T[P]>; // recurse for all non-array and non-primitive values
-  };
+  // type Primitive = number | boolean | string | null | undefined;
+  // type NestedPartial<T> = {
+  //   [P in keyof T]?: T[P] extends Primitive[] // Check for array primitives.
+  //     ? T[P]
+  //     : T[P] extends Array<infer U> // Check for array objects.
+  //     ? NestedPartial<U>[]
+  //     : NestedPartial<T[P]>; // recurse for all non-array and non-primitive values
+  // };
 
-  // type ToFieldValue<T> = T extends number ? T | Increment : T extends Timestamp ? T | ServerTimestamp : T;
+  export type Primitive = string | number | boolean | bigint | symbol | undefined | null;
+  export type Builtin = Primitive | Function | Date | Error | RegExp;
+
+  /** Like Partial but recursive */
+  export type NestedPartial<T> = T extends Builtin
+      ? T
+      : T extends Map<infer K, infer V>
+          ? Map<NestedPartial<K>, NestedPartial<V>>
+          : T extends Array<infer U>
+              ? Array<NestedPartial<U>>
+              : T extends {}
+                  ? { [K in keyof T]?: NestedPartial<T[K]> }
+                  : Partial<T>;
 
   /**
    * Converter used by `withConverter()` to transform user objects of type T
@@ -117,9 +129,9 @@ declare namespace FirebaseFirestore {
      * Firestore database). To use set() with `merge` and `mergeFields`,
      * toFirestore() must be defined with `Partial<T>`.
      */
-    toFirestore(modelObject: DataWithFieldValue<T>): DocumentData;
+    toFirestore(modelObject: T): DocumentData;
     toFirestore(
-      modelObject: NestedPartial<DataWithFieldValue<T>>,
+      modelObject: NestedPartial<T>,
       options: SetOptions
     ): DocumentData;
 

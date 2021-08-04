@@ -16,12 +16,11 @@ import {
   DocumentData,
   Settings,
   SetOptions,
-  DataWithFieldValue,
   FieldValue,
   NestedPartial,
   ArrayFieldValue,
   NumericFieldValue,
-  ToFieldValue,
+  WithFieldValue, Timestamp, DataWithFieldValue,
 } from '@google-cloud/firestore';
 
 import {expect} from 'chai';
@@ -354,37 +353,67 @@ export const postConverter = {
   },
 };
 
-export class Classroom {
+export class ClassroomFieldValue {
   constructor(
     readonly name: string,
-    readonly studentIds: ToFieldValue<number[]>,
-    readonly address: {zip: number; nestedArr: ToFieldValue<string[]>},
-    readonly number: ToFieldValue<number> = 3
+    readonly numberArray: WithFieldValue<number[]>,
+    readonly address: {zip: number; nestedStringArray: WithFieldValue<string[]>},
+    readonly number: WithFieldValue<number> = 3,
+    readonly timestamp?: WithFieldValue<Timestamp>
   ) {}
   toString(): string {
-    return this.name + ' has students: ' + this.studentIds;
+    return this.name + ' has students: ' + this.numberArray;
   }
 }
 
-export const classroomConverter = {
+export const classroomConverterFieldValue = {
   toFirestore(
-    classroom: NestedPartial<DataWithFieldValue<Classroom>>
+    classroom: NestedPartial<ClassroomFieldValue>
   ): DocumentData {
     const result: DocumentData = {};
     if (classroom.name) result.name = classroom.name;
-    if (classroom.studentIds) result.studentIds = classroom.studentIds;
+    if (classroom.numberArray) result.studentIds = classroom.numberArray;
     if (classroom.address) result.address = classroom.address;
     return result;
   },
-  fromFirestore(snapshot: QueryDocumentSnapshot): Classroom {
+  fromFirestore(snapshot: QueryDocumentSnapshot): ClassroomFieldValue {
     const data = snapshot.data();
-    return new Classroom(data.name, data.studentIds, data.address);
+    return new ClassroomFieldValue(data.name, data.numberArray, data.address);
   },
 };
 
+// export class Classroom {
+//   constructor(
+//       readonly name: string,
+//       readonly numberArray: number[],
+//       readonly address: {zip: number; nestedStringArray: string[]},
+//       readonly number: number = 3,
+//       readonly timestamp?: Timestamp
+//   ) {}
+//   toString(): string {
+//     return this.name + ' has students: ' + this.numberArray;
+//   }
+// }
+//
+// export const classroomConverter = {
+//   toFirestore(
+//       classroom: NestedPartial<Classroom>
+//   ): DocumentData {
+//     const result: DocumentData = {};
+//     if (classroom.name) result.name = classroom.name;
+//     if (classroom.numberArray) result.studentIds = classroom.numberArray;
+//     if (classroom.address) result.address = classroom.address;
+//     return result;
+//   },
+//   fromFirestore(snapshot: QueryDocumentSnapshot): Classroom {
+//     const data = snapshot.data();
+//     return new Classroom(data.name, data.numberArray, data.address);
+//   },
+// };
+
 export const postConverterMerge = {
   toFirestore(
-    post: Partial<DataWithFieldValue<Post>>,
+    post: Partial<Post>,
     options?: SetOptions
   ): DocumentData {
     if (options && (options.merge || options.mergeFields)) {
