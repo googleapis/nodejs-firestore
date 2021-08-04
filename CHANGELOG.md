@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.14.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.14.0...v4.14.1) (2021-08-02)
+
+
+### Bug Fixes
+
+* avoid destructuring undefined timestamps ([#1575](https://www.github.com/googleapis/nodejs-firestore/issues/1575)) ([a61a24a](https://www.github.com/googleapis/nodejs-firestore/commit/a61a24a44e70a9693f552a3a39f4579d861fd77f))
+
 ## [4.14.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.13.2...v4.14.0) (2021-07-30)
 
 
