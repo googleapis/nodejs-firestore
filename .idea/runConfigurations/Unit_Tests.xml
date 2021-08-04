@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Unit Tests" type="mocha-javascript-test-runner">
-    <node-interpreter>node</node-interpreter>
+    <node-interpreter>$USER_HOME$/.nvm/versions/node/v12.15.0/bin/node</node-interpreter>
     <node-options />
     <mocha-package>$PROJECT_DIR$/node_modules/mocha</mocha-package>
     <working-directory>$PROJECT_DIR$/dev</working-directory>

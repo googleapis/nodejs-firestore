@@ -38,6 +38,8 @@ import {autoId, Deferred} from '../src/util';
 import {TEST_BUNDLE_ID, verifyMetadata} from '../test/bundle';
 import {
   bundleToElementArray,
+  Classroom,
+  classroomConverter,
   Post,
   postConverter,
   postConverterMerge,
@@ -2431,11 +2433,11 @@ describe('WriteBatch class', () => {
       });
   });
 
-  it('set supports partials', async () => {
+  it.only('set supports partials', async () => {
     const ref = randomCol.doc('doc').withConverter(postConverterMerge);
     await ref.set(new Post('walnut', 'author'));
     const batch = firestore.batch();
-    batch.set(ref, {title: 'olive'}, {merge: true});
+    batch.set(ref, {title: undefined}, {merge: true});
     return batch
       .commit()
       .then(() => {
@@ -2445,6 +2447,46 @@ describe('WriteBatch class', () => {
         expect(doc.get('title')).to.equal('olive');
         expect(doc.get('author')).to.equal('author');
       });
+  });
+
+  it('set supports partials with fieldValue', async () => {
+    const ref = randomCol.doc('doc').withConverter(classroomConverter);
+    await ref.set(
+      new Classroom('Grade 5', [12345, 12346], {zip: 98765, nestedArr: ['foo']})
+    );
+    await ref.set({studentIds: FieldValue.arrayRemove(12345)}, {merge: true});
+    const doc = await ref.get();
+    expect(doc.get('name')).to.equal('Grade 5');
+    expect(doc.get('studentIds')).to.deep.equal([12346]);
+  });
+
+  it('nested partial support', async () => {
+    const ref = randomCol.doc('doc').withConverter(classroomConverter);
+    await ref.set(
+      new Classroom('Grade 5', [12345, 12346], {zip: 98765, nestedArr: ['foo']})
+    );
+
+    // These should be allowed.
+    await ref.set({address: {nestedArr: ['bar']}}, {merge: true});
+    await ref.set({number: 3}, {merge: true});
+    await ref.set({number: undefined}, {merge: true});
+    await ref.set({number: FieldValue.increment(1)}, {merge: true});
+    await ref.set({number: FieldValue.delete()}, {merge: true});
+    await ref.set({address: {nestedArr: FieldValue.delete()}}, {merge: true});
+    await ref.set(
+      {address: {nestedArr: FieldValue.arrayUnion('baz')}},
+      {merge: true}
+    );
+
+    // These should error.
+    await ref.set({studentIds: FieldValue.increment(12345)}, {merge: true});
+    await ref.set({studentIds: ['not-number']}, {merge: true});
+    await ref.set({number: 'not-number'}, {merge: true});
+    await ref.set({number: null}, {merge: true});
+    await ref.set({number: FieldValue.arrayUnion(4)}, {merge: true});
+    await ref.set({address: {nestedArr: 'not-array'}}, {merge: true});
+
+    const doc = await ref.get();
   });
 
   it('set()', () => {

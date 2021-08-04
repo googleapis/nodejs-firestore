@@ -41,6 +41,7 @@ import {
 } from './validate';
 import {DocumentReader} from './document-reader';
 import api = proto.google.firestore.v1;
+import {NestedPartial} from '@google-cloud/firestore';
 
 /*!
  * Error message for transactional reads that were executed after performing
@@ -219,7 +220,7 @@ export class Transaction implements firestore.Transaction {
 
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: Partial<T>,
+    data: NestedPartial<T>,
     options: firestore.SetOptions
   ): Transaction;
   set<T>(documentRef: firestore.DocumentReference<T>, data: T): Transaction;
@@ -252,7 +253,7 @@ export class Transaction implements firestore.Transaction {
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T | Partial<T>,
+    data: T | NestedPartial<T>,
     options?: firestore.SetOptions
   ): Transaction {
     this._writeBatch.set(documentRef, data, options);

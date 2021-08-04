@@ -50,6 +50,27 @@ declare namespace FirebaseFirestore {
    */
   function setLogFunction(logger: ((msg: string) => void) | null): void;
 
+  export type DataWithFieldValue<T> = {[P in keyof T]: T[P] | FieldValue};
+
+  type ToFieldValue<T> = T extends number
+    ? T | NumericFieldValue
+    : T extends Timestamp
+    ? T | TimestampFieldValue
+    : T extends (infer U)[]
+    ? T | ArrayFieldValue
+    : T;
+
+  type Primitive = number | boolean | string | null | undefined;
+  type NestedPartial<T> = {
+    [P in keyof T]?: T[P] extends Primitive[] // Check for array primitives.
+      ? T[P]
+      : T[P] extends (infer U)[] // Check for array objects.
+      ? NestedPartial<U>[]
+      : NestedPartial<T[P]>; // recurse for all non-array and non-primitive values
+  };
+
+  // type ToFieldValue<T> = T extends number ? T | Increment : T extends Timestamp ? T | ServerTimestamp : T;
+
   /**
    * Converter used by `withConverter()` to transform user objects of type T
    * into Firestore data.
@@ -59,7 +80,7 @@ declare namespace FirebaseFirestore {
    *
    * @example
    * class Post {
-   *   constructor(readonly title: string, readonly author: string) {}
+   *   constructor(readonly title: string, readonly author: string) {}'
    *
    *   toString(): string {
    *     return this.title + ', by ' + this.author;
@@ -96,8 +117,11 @@ declare namespace FirebaseFirestore {
      * Firestore database). To use set() with `merge` and `mergeFields`,
      * toFirestore() must be defined with `Partial<T>`.
      */
-    toFirestore(modelObject: T): DocumentData;
-    toFirestore(modelObject: Partial<T>, options: SetOptions): DocumentData;
+    toFirestore(modelObject: DataWithFieldValue<T>): DocumentData;
+    toFirestore(
+      modelObject: NestedPartial<DataWithFieldValue<T>>,
+      options: SetOptions
+    ): DocumentData;
 
     /**
      * Called by the Firestore SDK to convert Firestore data into an object of
@@ -1064,7 +1088,7 @@ declare namespace FirebaseFirestore {
      * @param options An object to configure the set behavior.
      * @return A Promise resolved with the write time of this set.
      */
-    set(data: Partial<T>, options: SetOptions): Promise<WriteResult>;
+    set(data: NestedPartial<T>, options: SetOptions): Promise<WriteResult>;
     set(data: T): Promise<WriteResult>;
 
     /**
@@ -1826,6 +1850,18 @@ declare namespace FirebaseFirestore {
     toQuery(): Query<T>;
   }
 
+  export interface NumericFieldValue extends FieldValue {
+    type: 'numeric';
+  }
+
+  export interface TimestampFieldValue extends FieldValue {
+    type: 'timestamp';
+  }
+
+  export interface ArrayFieldValue extends FieldValue {
+    type: 'array';
+  }
+
   /**
    * Sentinel values that can be used when writing document fields with set(),
    * create() or update().
@@ -1840,7 +1876,7 @@ declare namespace FirebaseFirestore {
      * @return The FieldValue sentinel for use in a call to set(), create() or
      * update().
      */
-    static serverTimestamp(): FieldValue;
+    static serverTimestamp(): TimestampFieldValue;
 
     /**
      * Returns a sentinel for use with update() or set() with {merge:true} to
@@ -1867,7 +1903,7 @@ declare namespace FirebaseFirestore {
      * @return The FieldValue sentinel for use in a call to set(), create() or
      * update().
      */
-    static increment(n: number): FieldValue;
+    static increment(n: number): NumericFieldValue;
 
     /**
      * Returns a special value that can be used with set(), create() or update()
@@ -1881,7 +1917,7 @@ declare namespace FirebaseFirestore {
      * @return The FieldValue sentinel for use in a call to set(), create() or
      * update().
      */
-    static arrayUnion(...elements: any[]): FieldValue;
+    static arrayUnion(...elements: any[]): ArrayFieldValue;
 
     /**
      * Returns a special value that can be used with set(), create() or update()
@@ -1894,7 +1930,7 @@ declare namespace FirebaseFirestore {
      * @return The FieldValue sentinel for use in a call to set(), create() or
      * update().
      */
-    static arrayRemove(...elements: any[]): FieldValue;
+    static arrayRemove(...elements: any[]): ArrayFieldValue;
 
     /**
      * Returns true if this `FieldValue` is equal to the provided one.

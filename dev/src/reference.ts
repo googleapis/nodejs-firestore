@@ -57,6 +57,7 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = protos.google.firestore.v1;
+import {NestedPartial} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -395,7 +396,10 @@ export class DocumentReference<T = firestore.DocumentData>
       .then(([writeResult]) => writeResult);
   }
 
-  set(data: Partial<T>, options: firestore.SetOptions): Promise<WriteResult>;
+  set(
+    data: NestedPartial<T>,
+    options: firestore.SetOptions
+  ): Promise<WriteResult>;
   set(data: T): Promise<WriteResult>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
@@ -421,7 +425,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * });
    */
   set(
-    data: T | Partial<T>,
+    data: T | NestedPartial<T>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);

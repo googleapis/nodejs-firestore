@@ -12,7 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData, Settings, SetOptions} from '@google-cloud/firestore';
+import {
+  DocumentData,
+  Settings,
+  SetOptions,
+  DataWithFieldValue,
+  FieldValue,
+  NestedPartial,
+  ArrayFieldValue,
+  NumericFieldValue,
+  ToFieldValue,
+} from '@google-cloud/firestore';
 
 import {expect} from 'chai';
 import * as extend from 'extend';
@@ -344,8 +354,39 @@ export const postConverter = {
   },
 };
 
+export class Classroom {
+  constructor(
+    readonly name: string,
+    readonly studentIds: ToFieldValue<number[]>,
+    readonly address: {zip: number; nestedArr: ToFieldValue<string[]>},
+    readonly number: ToFieldValue<number> = 3
+  ) {}
+  toString(): string {
+    return this.name + ' has students: ' + this.studentIds;
+  }
+}
+
+export const classroomConverter = {
+  toFirestore(
+    classroom: NestedPartial<DataWithFieldValue<Classroom>>
+  ): DocumentData {
+    const result: DocumentData = {};
+    if (classroom.name) result.name = classroom.name;
+    if (classroom.studentIds) result.studentIds = classroom.studentIds;
+    if (classroom.address) result.address = classroom.address;
+    return result;
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot): Classroom {
+    const data = snapshot.data();
+    return new Classroom(data.name, data.studentIds, data.address);
+  },
+};
+
 export const postConverterMerge = {
-  toFirestore(post: Partial<Post>, options?: SetOptions): DocumentData {
+  toFirestore(
+    post: Partial<DataWithFieldValue<Post>>,
+    options?: SetOptions
+  ): DocumentData {
     if (options && (options.merge || options.mergeFields)) {
       expect(post).to.not.be.an.instanceOf(Post);
     } else {
