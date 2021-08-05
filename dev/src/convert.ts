@@ -49,7 +49,7 @@ export function timestampFromJson(
   timestampValue?: string | google.protobuf.ITimestamp,
   argumentName?: string
 ): google.protobuf.ITimestamp | undefined {
-  let timestampProto: google.protobuf.ITimestamp | undefined;
+  let timestampProto: google.protobuf.ITimestamp = {};
 
   if (typeof timestampValue === 'string') {
     const date = new Date(timestampValue);
