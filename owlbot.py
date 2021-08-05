@@ -149,9 +149,8 @@ if staging.is_dir():
     # Remove auto-generated packaging tests
     os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
 
-    node.install()
     os.chdir("dev")
-    node.compile_protos()
+    node.compile_protos_hermetic()
     os.chdir("protos")
     os.unlink('protos.js')
     os.unlink('protos.d.ts')
@@ -191,5 +190,3 @@ templates = common_templates.node_library(
 )
 
 s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*", ".github/CODEOWNERS"])
-
-node.postprocess_gapic_library_hermetic()
