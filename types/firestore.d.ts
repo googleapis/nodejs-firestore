@@ -52,13 +52,13 @@ declare namespace FirebaseFirestore {
 
   // export type DataWithFieldValue<T> = {[P in keyof T]: T[P] | FieldValue};
   //
-  // type WithFieldValue<T> = T extends number
-  //   ? T | NumericFieldValue
-  //   : T extends Timestamp
-  //   ? T | TimestampFieldValue
-  //   : T extends (infer U)[]
-  //   ? T | ArrayFieldValue
-  //   : T;
+  type WithFieldValue<T> = T extends number
+    ? T | NumericFieldValue
+    : T extends Timestamp
+    ? T | TimestampFieldValue
+    : T extends Array<infer U>
+    ? T | ArrayFieldValue
+    : T;
 
   export type Primitive =
     | string
@@ -68,7 +68,7 @@ declare namespace FirebaseFirestore {
     | symbol
     | undefined
     | null;
-  export type Builtin = Primitive | Function | Date | Error | RegExp;
+  export type Builtin = Primitive | Function;
 
   /** Like Partial but recursive */
   export type NestedPartial<T> = T extends Builtin
@@ -78,7 +78,7 @@ declare namespace FirebaseFirestore {
     : T extends Array<infer U>
     ? Array<NestedPartial<U>>
     : T extends {}
-    ? {[K in keyof T]?: NestedPartial<T[K] | FieldValue>}
+    ? {[K in keyof T]?: NestedPartial<T[K] | WithFieldValue<T[K]>>}
     : Partial<T>;
 
   /**

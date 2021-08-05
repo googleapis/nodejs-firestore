@@ -2473,14 +2473,48 @@ describe('WriteBatch class', () => {
       {address: {nestedStringArray: FieldValue.arrayUnion('baz')}},
       {merge: true}
     );
+    await ref.set(
+      {address: {nestedStringArray: FieldValue.arrayRemove('baz')}},
+      {merge: true}
+    );
 
     // These should error.
     await ref.set({numberArray: ['not-number']}, {merge: true});
     await ref.set({number: 'not-number'}, {merge: true});
     await ref.set({number: null}, {merge: true});
     await ref.set({address: {nestedStringArray: 'not-array'}}, {merge: true});
+    await ref.set(
+      {address: {nestedStringArray: FieldValue.serverTimestamp()}},
+      {merge: true}
+    );
 
-    const doc = await ref.get();
+    // NumericFieldValue Allowed
+    await ref.set({number: FieldValue.increment(1)}, {merge: true});
+    await ref.set({number: FieldValue.delete()}, {merge: true});
+
+    // NumericFieldValue Error
+    await ref.set({number: FieldValue.arrayUnion(4)}, {merge: true});
+    await ref.set({number: FieldValue.arrayRemove(4)}, {merge: true});
+    await ref.set({number: FieldValue.serverTimestamp()}, {merge: true});
+
+    // TimestampFieldValue Allowed
+    await ref.set({timestamp: FieldValue.serverTimestamp()}, {merge: true});
+    await ref.set({timestamp: FieldValue.delete()}, {merge: true});
+
+    // TimestampFieldValue Error
+    await ref.set({timestamp: FieldValue.increment(1)}, {merge: true});
+    await ref.set({timestamp: FieldValue.arrayUnion(4)}, {merge: true});
+    await ref.set({timestamp: FieldValue.arrayRemove(4)}, {merge: true});
+    await ref.set({timestamp: 3}, {merge: true});
+
+    // ArrayFieldValue Allowed
+    await ref.set({numberArray: FieldValue.arrayUnion(123)}, {merge: true});
+    await ref.set({numberArray: FieldValue.arrayRemove(12345)}, {merge: true});
+    await ref.set({numberArray: FieldValue.delete()}, {merge: true});
+
+    // ArrayFieldValue Error
+    await ref.set({numberArray: FieldValue.increment(12345)}, {merge: true});
+    await ref.set({numberArray: FieldValue.serverTimestamp()}, {merge: true});
   });
 
   it('set()', () => {

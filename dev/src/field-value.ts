@@ -29,6 +29,11 @@ import {
 } from './validate';
 
 import api = proto.google.firestore.v1;
+import {
+  ArrayFieldValue,
+  NumericFieldValue,
+  TimestampFieldValue,
+} from '@google-cloud/firestore';
 
 /**
  * Sentinel values that can be used when writing documents with set(), create()
@@ -80,7 +85,7 @@ export class FieldValue implements firestore.FieldValue {
    *   console.log(`Server time set to ${doc.get('time')}`);
    * });
    */
-  static serverTimestamp(): FieldValue {
+  static serverTimestamp(): TimestampFieldValue {
     return ServerTimestampTransform.SERVER_TIMESTAMP_SENTINEL;
   }
 
@@ -112,7 +117,7 @@ export class FieldValue implements firestore.FieldValue {
    *   // doc.get('counter') was incremented
    * });
    */
-  static increment(n: number): FieldValue {
+  static increment(n: number): NumericFieldValue {
     // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('FieldValue.increment', arguments, 1);
     return new NumericIncrementTransform(n);
@@ -141,7 +146,7 @@ export class FieldValue implements firestore.FieldValue {
    *   // doc.get('array') contains field 'foo'
    * });
    */
-  static arrayUnion(...elements: unknown[]): FieldValue {
+  static arrayUnion(...elements: unknown[]): ArrayFieldValue {
     validateMinNumberOfArguments('FieldValue.arrayUnion', elements, 1);
     return new ArrayUnionTransform(elements);
   }
@@ -168,7 +173,7 @@ export class FieldValue implements firestore.FieldValue {
    *   // doc.get('array') no longer contains field 'foo'
    * });
    */
-  static arrayRemove(...elements: unknown[]): FieldValue {
+  static arrayRemove(...elements: unknown[]): ArrayFieldValue {
     validateMinNumberOfArguments('FieldValue.arrayRemove', elements, 1);
     return new ArrayRemoveTransform(elements);
   }
@@ -318,6 +323,8 @@ class ServerTimestampTransform extends FieldTransform {
     super();
   }
 
+  readonly type = 'timestamp';
+
   /**
    * Server timestamps are omitted from document masks.
    *
@@ -365,6 +372,8 @@ class NumericIncrementTransform extends FieldTransform {
   constructor(private readonly operand: number) {
     super();
   }
+
+  readonly type = 'numeric';
 
   /**
    * Numeric transforms are omitted from document masks.
@@ -421,6 +430,8 @@ class ArrayUnionTransform extends FieldTransform {
   constructor(private readonly elements: unknown[]) {
     super();
   }
+
+  readonly type = 'array';
 
   /**
    * Array transforms are omitted from document masks.
@@ -480,6 +491,8 @@ class ArrayRemoveTransform extends FieldTransform {
   constructor(private readonly elements: unknown[]) {
     super();
   }
+
+  readonly type = 'array';
 
   /**
    * Array transforms are omitted from document masks.
