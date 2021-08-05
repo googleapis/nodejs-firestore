@@ -50,6 +50,37 @@ declare namespace FirebaseFirestore {
    */
   function setLogFunction(logger: ((msg: string) => void) | null): void;
 
+  // export type DataWithFieldValue<T> = {[P in keyof T]: T[P] | FieldValue};
+  //
+  // type WithFieldValue<T> = T extends number
+  //   ? T | NumericFieldValue
+  //   : T extends Timestamp
+  //   ? T | TimestampFieldValue
+  //   : T extends (infer U)[]
+  //   ? T | ArrayFieldValue
+  //   : T;
+
+  export type Primitive =
+    | string
+    | number
+    | boolean
+    | bigint
+    | symbol
+    | undefined
+    | null;
+  export type Builtin = Primitive | Function | Date | Error | RegExp;
+
+  /** Like Partial but recursive */
+  export type NestedPartial<T> = T extends Builtin
+    ? T
+    : T extends Map<infer K, infer V>
+    ? Map<NestedPartial<K>, NestedPartial<V>>
+    : T extends Array<infer U>
+    ? Array<NestedPartial<U>>
+    : T extends {}
+    ? {[K in keyof T]?: NestedPartial<T[K] | FieldValue>}
+    : Partial<T>;
+
   /**
    * Converter used by `withConverter()` to transform user objects of type T
    * into Firestore data.
@@ -97,7 +128,10 @@ declare namespace FirebaseFirestore {
      * toFirestore() must be defined with `Partial<T>`.
      */
     toFirestore(modelObject: T): DocumentData;
-    toFirestore(modelObject: Partial<T>, options: SetOptions): DocumentData;
+    toFirestore(
+      modelObject: NestedPartial<T>,
+      options: SetOptions
+    ): DocumentData;
 
     /**
      * Called by the Firestore SDK to convert Firestore data into an object of
@@ -1064,7 +1098,7 @@ declare namespace FirebaseFirestore {
      * @param options An object to configure the set behavior.
      * @return A Promise resolved with the write time of this set.
      */
-    set(data: Partial<T>, options: SetOptions): Promise<WriteResult>;
+    set(data: NestedPartial<T>, options: SetOptions): Promise<WriteResult>;
     set(data: T): Promise<WriteResult>;
 
     /**
@@ -1824,6 +1858,19 @@ declare namespace FirebaseFirestore {
      * Query#endBefore} cursor.
      */
     toQuery(): Query<T>;
+  }
+
+  // TODO: implement granular FieldValue return types
+  export interface NumericFieldValue extends FieldValue {
+    type: 'numeric';
+  }
+
+  export interface TimestampFieldValue extends FieldValue {
+    type: 'timestamp';
+  }
+
+  export interface ArrayFieldValue extends FieldValue {
+    type: 'array';
   }
 
   /**

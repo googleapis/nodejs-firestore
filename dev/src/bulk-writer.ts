@@ -50,6 +50,7 @@ import {StatusCode} from './status-code';
 // eslint-disable-next-line no-undef
 import GrpcStatus = FirebaseFirestore.GrpcStatus;
 import api = google.firestore.v1;
+import {NestedPartial} from '@google-cloud/firestore';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -610,7 +611,7 @@ export class BulkWriter {
 
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: Partial<T>,
+    data: NestedPartial<T>,
     options: firestore.SetOptions
   ): Promise<WriteResult>;
   set<T>(
@@ -654,7 +655,7 @@ export class BulkWriter {
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T | Partial<T>,
+    data: T | NestedPartial<T>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this._verifyNotClosed();

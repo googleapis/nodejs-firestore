@@ -38,6 +38,8 @@ import {autoId, Deferred} from '../src/util';
 import {TEST_BUNDLE_ID, verifyMetadata} from '../test/bundle';
 import {
   bundleToElementArray,
+  Classroom,
+  classroomConverter,
   Post,
   postConverter,
   postConverterMerge,
@@ -2445,6 +2447,40 @@ describe('WriteBatch class', () => {
         expect(doc.get('title')).to.equal('olive');
         expect(doc.get('author')).to.equal('author');
       });
+  });
+
+  it('nested partial support', async () => {
+    const ref = randomCol.doc('doc').withConverter(classroomConverter);
+    await ref.set(
+      new Classroom('Grade 5', [12345, 12346], {
+        zip: 98765,
+        nestedStringArray: ['foo'],
+      })
+    );
+
+    // These should be allowed.
+    await ref.set({address: {nestedStringArray: ['bar']}}, {merge: true});
+    await ref.set({number: 3}, {merge: true});
+    await ref.set({number: undefined}, {merge: true});
+    await ref.set({number: FieldValue.increment(1)}, {merge: true});
+    await ref.set({number: FieldValue.delete()}, {merge: true});
+    await ref.set({address: {zip: FieldValue.delete()}}, {merge: true});
+    await ref.set(
+      {address: {nestedStringArray: FieldValue.delete()}},
+      {merge: true}
+    );
+    await ref.set(
+      {address: {nestedStringArray: FieldValue.arrayUnion('baz')}},
+      {merge: true}
+    );
+
+    // These should error.
+    await ref.set({numberArray: ['not-number']}, {merge: true});
+    await ref.set({number: 'not-number'}, {merge: true});
+    await ref.set({number: null}, {merge: true});
+    await ref.set({address: {nestedStringArray: 'not-array'}}, {merge: true});
+
+    const doc = await ref.get();
   });
 
   it('set()', () => {

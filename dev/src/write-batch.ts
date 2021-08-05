@@ -48,6 +48,7 @@ import {
 import {StatusCode} from './status-code';
 
 import api = google.firestore.v1;
+import {NestedPartial} from '@google-cloud/firestore';
 
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
@@ -268,13 +269,13 @@ export class WriteBatch implements firestore.WriteBatch {
 
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: Partial<T>,
+    data: NestedPartial<T>,
     options: firestore.SetOptions
   ): WriteBatch;
   set<T>(documentRef: firestore.DocumentReference<T>, data: T): WriteBatch;
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T | Partial<T>,
+    data: T | NestedPartial<T>,
     options?: firestore.SetOptions
   ): WriteBatch;
   /**
@@ -308,7 +309,7 @@ export class WriteBatch implements firestore.WriteBatch {
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T | Partial<T>,
+    data: T | NestedPartial<T>,
     options?: firestore.SetOptions
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});

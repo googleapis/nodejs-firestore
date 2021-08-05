@@ -12,7 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData, Settings, SetOptions} from '@google-cloud/firestore';
+import {
+  DocumentData,
+  Settings,
+  SetOptions,
+  FieldValue,
+  NestedPartial,
+  ArrayFieldValue,
+  NumericFieldValue,
+  Timestamp,
+} from '@google-cloud/firestore';
 
 import {expect} from 'chai';
 import * as extend from 'extend';
@@ -341,6 +350,33 @@ export const postConverter = {
   fromFirestore(snapshot: QueryDocumentSnapshot): Post {
     const data = snapshot.data();
     return new Post(data.title, data.author);
+  },
+};
+
+export class Classroom {
+  constructor(
+    readonly name: string,
+    readonly numberArray: number[],
+    readonly address: {zip: number; nestedStringArray: string[]},
+    readonly number: number = 3,
+    readonly timestamp?: Timestamp
+  ) {}
+  toString(): string {
+    return this.name + ' has students: ' + this.numberArray;
+  }
+}
+
+export const classroomConverter = {
+  toFirestore(classroom: NestedPartial<Classroom>): DocumentData {
+    const result: DocumentData = {};
+    if (classroom.name) result.name = classroom.name;
+    if (classroom.numberArray) result.studentIds = classroom.numberArray;
+    if (classroom.address) result.address = classroom.address;
+    return result;
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot): Classroom {
+    const data = snapshot.data();
+    return new Classroom(data.name, data.numberArray, data.address);
   },
 };
 
