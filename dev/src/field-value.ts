@@ -31,6 +31,7 @@ import {
 import api = proto.google.firestore.v1;
 import {
   ArrayFieldValue,
+  DeleteFieldValue,
   NumericFieldValue,
   TimestampFieldValue,
 } from '@google-cloud/firestore';
@@ -63,7 +64,7 @@ export class FieldValue implements firestore.FieldValue {
    *   // Document now only contains { c: 'd' }
    * });
    */
-  static delete(): FieldValue {
+  static delete(): DeleteFieldValue {
     return DeleteTransform.DELETE_SENTINEL;
   }
 
@@ -272,6 +273,8 @@ export class DeleteTransform extends FieldTransform {
   private constructor() {
     super();
   }
+
+  readonly type = 'delete';
 
   /**
    * Deletes are included in document masks.

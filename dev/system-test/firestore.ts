@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {QuerySnapshot, DocumentData} from '@google-cloud/firestore';
+import {
+  QuerySnapshot,
+  DocumentData,
+  TypedUpdateData,
+} from '@google-cloud/firestore';
 
 import {describe, it, before, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
@@ -155,6 +159,11 @@ describe('Firestore class', () => {
     const ref2 = randomCol.doc('doc2').withConverter(postConverter);
     await ref1.set(new Post('post1', 'author1'));
     await ref2.set(new Post('post2', 'author2'));
+    const postPartial: TypedUpdateData<Post> = {title: 2};
+    const postPartial2: TypedUpdateData<Post> = {title: FieldValue.delete()};
+    await ref1.update({title: 'boo'});
+    await ref1.update({title: 2});
+    await ref1.update({title: FieldValue.delete()});
 
     const docs = await firestore.getAll(ref1, ref2);
     expect(docs[0].data()!.toString()).to.deep.equal('post1, by author1');
@@ -446,7 +455,7 @@ describe('DocumentReference class', () => {
   });
 
   it('has set() method', () => {
-    const allSupportedTypesObject = {
+    const allSupportedTypesObject: {[k: string]: any} = {
       stringValue: 'a',
       trueValue: true,
       falseValue: false,
@@ -2478,6 +2487,12 @@ describe('WriteBatch class', () => {
       {merge: true}
     );
 
+    // TODO: Allow nested FieldValue
+    await ref.update({address: {nestedStringArray: FieldValue.delete()}});
+    await ref.update({
+      address: {nestedStringArray: FieldValue.arrayUnion('baz')},
+    });
+
     // These should error.
     await ref.set({numberArray: ['not-number']}, {merge: true});
     await ref.set({number: 'not-number'}, {merge: true});
@@ -2515,6 +2530,15 @@ describe('WriteBatch class', () => {
     // ArrayFieldValue Error
     await ref.set({numberArray: FieldValue.increment(12345)}, {merge: true});
     await ref.set({numberArray: FieldValue.serverTimestamp()}, {merge: true});
+
+    // Non-special type Allowed
+    await ref.set({name: FieldValue.delete()}, {merge: true});
+
+    // Non-special type Error
+    await ref.set({name: FieldValue.increment(12345)}, {merge: true});
+    await ref.set({name: FieldValue.serverTimestamp()}, {merge: true});
+    await ref.set({name: FieldValue.arrayUnion(123)}, {merge: true});
+    await ref.set({name: FieldValue.arrayRemove(12345)}, {merge: true});
   });
 
   it('set()', () => {

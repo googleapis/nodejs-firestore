@@ -57,7 +57,11 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = protos.google.firestore.v1;
-import {NestedPartial} from '@google-cloud/firestore';
+import {
+  NestedPartial,
+  TypedUpdateData,
+  UpdateData,
+} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -465,7 +469,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * });
    */
   update(
-    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
+    dataOrField: TypedUpdateData<T> | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
       unknown | string | firestore.FieldPath | firestore.Precondition
     >

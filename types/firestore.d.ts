@@ -42,6 +42,40 @@ declare namespace FirebaseFirestore {
    */
   export type UpdateData = {[fieldPath: string]: any};
 
+  // Represents an update object to Firestore document data, which can contain either fields like {a: 2}
+  // or dot-separated paths such as {"a.b" : 2} (which updates the nested property "b" in map field "a").
+  export type TypedUpdateData<T extends Record<string, any>> = {
+    [K in keyof T]?: WithFieldValue<T[K]>;
+  } &
+    NestedUpdateFields<T>;
+
+  // For each field (e.g. "bar"), calculate its nested keys (e.g. {"bar.baz": T1, "bar.quax": T2}), and then
+  // intersect them together to make one giant map containing all possible keys (all marked as optional).
+  export type NestedUpdateFields<T extends Record<string, any>> =
+    UnionToIntersection<
+      {
+        [K in keyof T & string]: T[K] extends Record<string, any> // Only allow nesting for map values
+          ? AddPrefixToKeys<K, TypedUpdateData<T[K]> | FieldValue> // Recurse into map and add "bar." in front of every key
+          : never;
+      }[keyof T & string]
+    >;
+
+  // Return a new map where every key is prepended with Prefix + dot.
+  export type AddPrefixToKeys<
+    Prefix extends string,
+    T extends Record<string, any>
+  > =
+    // Remap K => Prefix.K. See https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
+    {[K in keyof T & string as `${Prefix}.${K}`]+?: T[K] | FieldValue};
+
+  // This takes union type U = T1 | T2 | ... and returns a intersected type (T1 & T2 & ...)
+  export type UnionToIntersection<U> =
+    // Works because "multiple candidates for the same type variable in contra-variant positions causes an intersection type to be inferred"
+    // https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-inference-in-conditional-types
+    (U extends any ? (k: U) => void : never) extends (k: infer I) => void
+      ? I
+      : never;
+
   /**
    * Sets or disables the log function for all active Firestore instances.
    *
@@ -50,15 +84,13 @@ declare namespace FirebaseFirestore {
    */
   function setLogFunction(logger: ((msg: string) => void) | null): void;
 
-  // export type DataWithFieldValue<T> = {[P in keyof T]: T[P] | FieldValue};
-  //
   type WithFieldValue<T> = T extends number
-    ? T | NumericFieldValue
+    ? T | NumericFieldValue | DeleteFieldValue
     : T extends Timestamp
-    ? T | TimestampFieldValue
+    ? T | TimestampFieldValue | DeleteFieldValue
     : T extends Array<infer U>
-    ? T | ArrayFieldValue
-    : T;
+    ? T | ArrayFieldValue | DeleteFieldValue
+    : T | DeleteFieldValue;
 
   export type Primitive =
     | string
@@ -78,7 +110,7 @@ declare namespace FirebaseFirestore {
     : T extends Array<infer U>
     ? Array<NestedPartial<U>>
     : T extends {}
-    ? {[K in keyof T]?: NestedPartial<T[K] | WithFieldValue<T[K]>>}
+    ? {[K in keyof T]?: NestedPartial<WithFieldValue<T[K]>>}
     : Partial<T>;
 
   /**
@@ -1113,7 +1145,10 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce on this update.
      * @return A Promise resolved with the write time of this update.
      */
-    update(data: UpdateData, precondition?: Precondition): Promise<WriteResult>;
+    update(
+      data: TypedUpdateData<T>,
+      precondition?: Precondition
+    ): Promise<WriteResult>;
 
     /**
      * Updates fields in the document referred to by this `DocumentReference`.
@@ -1860,7 +1895,10 @@ declare namespace FirebaseFirestore {
     toQuery(): Query<T>;
   }
 
-  // TODO: implement granular FieldValue return types
+  export interface DeleteFieldValue extends FieldValue {
+    type: 'delete';
+  }
+
   export interface NumericFieldValue extends FieldValue {
     type: 'numeric';
   }
@@ -1887,7 +1925,7 @@ declare namespace FirebaseFirestore {
      * @return The FieldValue sentinel for use in a call to set(), create() or
      * update().
      */
-    static serverTimestamp(): FieldValue;
+    static serverTimestamp(): TimestampFieldValue;
 
     /**
      * Returns a sentinel for use with update() or set() with {merge:true} to
@@ -1895,7 +1933,7 @@ declare namespace FirebaseFirestore {
      *
      * @return The FieldValue sentinel for use in a call to set() or update().
      */
-    static delete(): FieldValue;
+    static delete(): DeleteFieldValue;
 
     /**
      * Returns a special value that can be used with set(), create() or update()
@@ -1914,7 +1952,7 @@ declare namespace FirebaseFirestore {
      * @return The FieldValue sentinel for use in a call to set(), create() or
      * update().
      */
-    static increment(n: number): FieldValue;
+    static increment(n: number): NumericFieldValue;
 
     /**
      * Returns a special value that can be used with set(), create() or update()
@@ -1928,7 +1966,7 @@ declare namespace FirebaseFirestore {
      * @return The FieldValue sentinel for use in a call to set(), create() or
      * update().
      */
-    static arrayUnion(...elements: any[]): FieldValue;
+    static arrayUnion(...elements: any[]): ArrayFieldValue;
 
     /**
      * Returns a special value that can be used with set(), create() or update()
@@ -1941,7 +1979,7 @@ declare namespace FirebaseFirestore {
      * @return The FieldValue sentinel for use in a call to set(), create() or
      * update().
      */
-    static arrayRemove(...elements: any[]): FieldValue;
+    static arrayRemove(...elements: any[]): ArrayFieldValue;
 
     /**
      * Returns true if this `FieldValue` is equal to the provided one.
