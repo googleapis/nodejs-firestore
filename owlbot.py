@@ -190,3 +190,5 @@ templates = common_templates.node_library(
 )
 
 s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*", ".github/CODEOWNERS"])
+
+node.fix_hermetic()  # fix formatting
