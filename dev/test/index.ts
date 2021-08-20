@@ -262,7 +262,8 @@ const allSupportedTypesInput = {
   bytesValue: Buffer.from([0x1, 0x2]),
 };
 
-const allSupportedTypesOutput = {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const allSupportedTypesOutput: {[field: string]: any} = {
   stringValue: 'a',
   trueValue: true,
   falseValue: false,

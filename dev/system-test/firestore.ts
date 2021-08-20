@@ -444,7 +444,8 @@ describe('DocumentReference class', () => {
   });
 
   it('has set() method', () => {
-    const allSupportedTypesObject = {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    const allSupportedTypesObject: {[field: string]: any} = {
       stringValue: 'a',
       trueValue: true,
       falseValue: false,
