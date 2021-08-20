@@ -432,7 +432,7 @@ function runTest(spec: ConformanceProto) {
     };
 
     return createInstance(overrides).then(() => {
-      return new Promise((resolve, reject) => {
+      return new Promise<void>((resolve, reject) => {
         const unlisten = watchQuery().onSnapshot(
           actualSnap => {
             const expectedSnapshot = expectedSnapshots.shift();

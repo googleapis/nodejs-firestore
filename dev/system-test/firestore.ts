@@ -444,7 +444,7 @@ describe('DocumentReference class', () => {
   });
 
   it('has set() method', () => {
-    const allSupportedTypesObject = {
+    const allSupportedTypesObject: {[field: string]: unknown} = {
       stringValue: 'a',
       trueValue: true,
       falseValue: false,
@@ -474,7 +474,7 @@ describe('DocumentReference class', () => {
       .then(doc => {
         const data = doc.data()!;
         expect(data.pathValue.path).to.equal(
-          allSupportedTypesObject.pathValue.path
+          (allSupportedTypesObject.pathValue as DocumentReference).path
         );
         delete data.pathValue;
         delete allSupportedTypesObject.pathValue;
