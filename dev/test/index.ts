@@ -262,8 +262,7 @@ const allSupportedTypesInput = {
   bytesValue: Buffer.from([0x1, 0x2]),
 };
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const allSupportedTypesOutput: {[field: string]: any} = {
+const allSupportedTypesOutput: {[field: string]: unknown} = {
   stringValue: 'a',
   trueValue: true,
   falseValue: false,
@@ -677,7 +676,8 @@ describe('snapshot_() method', () => {
     // Deep Equal doesn't support matching instances of DocumentRefs, so we
     // compare them manually and remove them from the resulting object.
     expect(actualObject.get('pathValue').formattedName).to.equal(
-      expected.pathValue.formattedName
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      (expected.pathValue as any).formattedName
     );
     const data = actualObject.data()!;
     delete data.pathValue;

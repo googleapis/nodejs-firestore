@@ -444,8 +444,7 @@ describe('DocumentReference class', () => {
   });
 
   it('has set() method', () => {
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    const allSupportedTypesObject: {[field: string]: any} = {
+    const allSupportedTypesObject: {[field: string]: unknown} = {
       stringValue: 'a',
       trueValue: true,
       falseValue: false,
@@ -475,7 +474,8 @@ describe('DocumentReference class', () => {
       .then(doc => {
         const data = doc.data()!;
         expect(data.pathValue.path).to.equal(
-          allSupportedTypesObject.pathValue.path
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          (allSupportedTypesObject.pathValue as any).path
         );
         delete data.pathValue;
         delete allSupportedTypesObject.pathValue;
