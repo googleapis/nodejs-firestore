@@ -562,7 +562,7 @@ export class BulkWriter {
    */
   create<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T
+    data: firestore.WithFieldValue<T>
   ): Promise<WriteResult> {
     this._verifyNotClosed();
     return this._enqueue(documentRef, 'create', bulkCommitBatch =>
@@ -654,13 +654,20 @@ export class BulkWriter {
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T | Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    return this._enqueue(documentRef, 'set', bulkCommitBatch =>
-      bulkCommitBatch.set(documentRef, data, options)
-    );
+    return this._enqueue(documentRef, 'set', bulkCommitBatch => {
+      if (options) {
+        return bulkCommitBatch.set(documentRef, data, options);
+      } else {
+        return bulkCommitBatch.set(
+          documentRef,
+          data as firestore.WithFieldValue<T>
+        );
+      }
+    });
   }
 
   /**
@@ -706,7 +713,7 @@ export class BulkWriter {
    */
   update<T>(
     documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData | string | FieldPath,
+    dataOrField: firestore.UpdateData<T> | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
