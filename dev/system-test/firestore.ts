@@ -474,8 +474,7 @@ describe('DocumentReference class', () => {
       .then(doc => {
         const data = doc.data()!;
         expect(data.pathValue.path).to.equal(
-          /* eslint-disable @typescript-eslint/no-explicit-any */
-          (allSupportedTypesObject.pathValue as any).path
+          (allSupportedTypesObject.pathValue as DocumentReference).path
         );
         delete data.pathValue;
         delete allSupportedTypesObject.pathValue;

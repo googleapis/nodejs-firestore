@@ -676,8 +676,7 @@ describe('snapshot_() method', () => {
     // Deep Equal doesn't support matching instances of DocumentRefs, so we
     // compare them manually and remove them from the resulting object.
     expect(actualObject.get('pathValue').formattedName).to.equal(
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      (expected.pathValue as any).formattedName
+      (expected.pathValue as Firestore.DocumentReference).formattedName
     );
     const data = actualObject.data()!;
     delete data.pathValue;
