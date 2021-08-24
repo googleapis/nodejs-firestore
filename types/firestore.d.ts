@@ -168,8 +168,23 @@ declare namespace FirebaseFirestore {
      * into a plain Javascript object (suitable for writing directly to the
      * Firestore database). To use set() with `merge` and `mergeFields`,
      * toFirestore() must be defined with `Partial<T>`.
+     *
+     * The `WithFieldValue<T>` type extends `T` to also allow FieldValues such
+     * as `FieldValue.delete()` to be used as property values.
      */
     toFirestore(modelObject: WithFieldValue<T>): DocumentData;
+
+    /**
+     * Called by the Firestore SDK to convert a custom model object of type T
+     * into a plain Javascript object (suitable for writing directly to the
+     * Firestore database). To use set() with `merge` and `mergeFields`,
+     * toFirestore() must be defined with `Partial<T>`.
+     *
+     * The `PartialWithFieldValue<T>` type extends `Partial<T>` to allow
+     * FieldValues such as `FieldValue.delete()` to be used as property values.
+     * It also supports nested `Partial` by allowing nested fields to be
+     * omitted.
+     */
     toFirestore(
       modelObject: PartialWithFieldValue<T>,
       options: SetOptions
