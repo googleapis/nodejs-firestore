@@ -3159,9 +3159,9 @@ describe('Types test', () => {
       // Check top-level fields.
       await ref.set(
         {
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           outerString: 3,
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           outerArr: null,
         },
         {merge: true}
@@ -3172,10 +3172,10 @@ describe('Types test', () => {
         {
           nested: {
             innerNested: {
-              // @ts-expect-error Should fail to compile.
+              // @ts-expect-error Should fail to transpile.
               innerNestedNum: 'string',
             },
-            // @ts-expect-error Should fail to compile.
+            // @ts-expect-error Should fail to transpile.
             innerArr: null,
           },
         },
@@ -3183,7 +3183,7 @@ describe('Types test', () => {
       );
       await ref.set(
         {
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           nested: 3,
         },
         {merge: true}
@@ -3195,7 +3195,7 @@ describe('Types test', () => {
       // Top-level property.
       await ref.set(
         {
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           nonexistent: 'foo',
         },
         {merge: true}
@@ -3205,7 +3205,7 @@ describe('Types test', () => {
       await ref.set(
         {
           nested: {
-            // @ts-expect-error Should fail to compile.
+            // @ts-expect-error Should fail to transpile.
             nonexistent: 'foo',
           },
         },
@@ -3266,9 +3266,9 @@ describe('Types test', () => {
       // Check top-level fields.
       await ref.set(
         {
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           outerString: 3,
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           outerArr: null,
         },
         {merge: true}
@@ -3279,10 +3279,10 @@ describe('Types test', () => {
         {
           nested: {
             innerNested: {
-              // @ts-expect-error Should fail to compile.
+              // @ts-expect-error Should fail to transpile.
               innerNestedNum: 'string',
             },
-            // @ts-expect-error Should fail to compile.
+            // @ts-expect-error Should fail to transpile.
             innerArr: null,
           },
         },
@@ -3290,7 +3290,7 @@ describe('Types test', () => {
       );
       await ref.set(
         {
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           nested: 3,
         },
         {merge: true}
@@ -3302,7 +3302,7 @@ describe('Types test', () => {
       // Top-level property.
       await ref.set(
         {
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           nonexistent: 'foo',
         },
         {merge: true}
@@ -3312,7 +3312,7 @@ describe('Types test', () => {
       await ref.set(
         {
           nested: {
-            // @ts-expect-error Should fail to compile.
+            // @ts-expect-error Should fail to transpile.
             nonexistent: 'foo',
           },
         },
@@ -3343,7 +3343,7 @@ describe('Types test', () => {
       const ref = doc.withConverter(testConverter);
 
       // Allow Field Values and nested partials.
-      // @ts-expect-error Should fail to compile.
+      // @ts-expect-error Should fail to transpile.
       await ref.set({
         outerArr: [],
         nested: {
@@ -3361,11 +3361,11 @@ describe('Types test', () => {
 
       await ref.set({
         outerString: 'foo',
-        // @ts-expect-error Should fail to compile.
+        // @ts-expect-error Should fail to transpile.
         outerArr: 2,
         nested: {
           innerNested: {
-            // @ts-expect-error Should fail to compile.
+            // @ts-expect-error Should fail to transpile.
             innerNestedNum: 'string',
           },
           innerArr: FieldValue.arrayUnion(2),
@@ -3380,7 +3380,7 @@ describe('Types test', () => {
       // Top-level nonexistent fields should error
       await ref.set({
         outerString: 'foo',
-        // @ts-expect-error Should fail to compile.
+        // @ts-expect-error Should fail to transpile.
         outerNum: 3,
         outerArr: [],
         nested: {
@@ -3399,7 +3399,7 @@ describe('Types test', () => {
         outerArr: [],
         nested: {
           innerNested: {
-            // @ts-expect-error Should fail to compile.
+            // @ts-expect-error Should fail to transpile.
             nonexistent: 'string',
             innerNestedNum: 2,
           },
@@ -3427,14 +3427,14 @@ describe('Types test', () => {
     it('validates inner and outer fields', async () => {
       const ref = doc.withConverter(testConverter);
       await ref.update({
-        // @ts-expect-error Should fail to compile.
+        // @ts-expect-error Should fail to transpile.
         outerString: 3,
         nested: {
           innerNested: {
-            // @ts-expect-error Should fail to compile.
+            // @ts-expect-error Should fail to transpile.
             innerNestedNum: 'string',
           },
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           innerArr: 2,
         },
       });
@@ -3443,11 +3443,11 @@ describe('Types test', () => {
     it('supports string-separated fields', async () => {
       const ref = doc.withConverter(testConverter);
       await ref.update({
-        // @ts-expect-error Should fail to compile.
+        // @ts-expect-error Should fail to transpile.
         outerString: 3,
-        // @ts-expect-error Should fail to compile.
+        // @ts-expect-error Should fail to transpile.
         'nested.innerNested.innerNestedNum': 'string',
-        // @ts-expect-error Should fail to compile.
+        // @ts-expect-error Should fail to transpile.
         'nested.innerArr': 3,
         'nested.timestamp': FieldValue.serverTimestamp(),
       });
@@ -3456,10 +3456,10 @@ describe('Types test', () => {
       await ref.update({
         nested: {
           innerNested: {
-            // @ts-expect-error Should fail to compile.
+            // @ts-expect-error Should fail to transpile.
             innerNestedNum: 'string',
           },
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           innerArr: 3,
         },
       });
@@ -3470,25 +3470,25 @@ describe('Types test', () => {
 
       // Top-level fields.
       await ref.update({
-        // @ts-expect-error Should fail to compile.
+        // @ts-expect-error Should fail to transpile.
         nonexistent: 'foo',
       });
 
       // Nested Fields.
       await ref.update({
         nested: {
-          // @ts-expect-error Should fail to compile.
+          // @ts-expect-error Should fail to transpile.
           nonexistent: 'foo',
         },
       });
 
       // String fields.
       await ref.update({
-        // @ts-expect-error Should fail to compile.
+        // @ts-expect-error Should fail to transpile.
         nonexistent: 'foo',
       });
       await ref.update({
-        // @ts-expect-error Should fail to compile.
+        // @ts-expect-error Should fail to transpile.
         'nested.nonexistent': 'foo',
       });
     });
@@ -3499,7 +3499,7 @@ describe('Types test', () => {
       const ref = randomCol.withConverter(testConverter);
 
       // Requires all fields to be present
-      // @ts-expect-error Should fail to compile.
+      // @ts-expect-error Should fail to transpile.
       await ref.add({
         outerArr: [],
         nested: {
@@ -3517,7 +3517,7 @@ describe('Types test', () => {
       const batch = firestore.batch();
 
       // Requires full object if {merge: true} is not set.
-      // @ts-expect-error Should fail to compile.
+      // @ts-expect-error Should fail to transpile.
       batch.set(ref, {
         outerArr: [],
         nested: {
@@ -3564,7 +3564,7 @@ describe('Types test', () => {
 
       return firestore.runTransaction(async tx => {
         // Requires full object if {merge: true} is not set.
-        // @ts-expect-error Should fail to compile.
+        // @ts-expect-error Should fail to transpile.
         tx.set(ref, {
           outerArr: [],
           nested: {
