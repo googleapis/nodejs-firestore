@@ -12,7 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {QuerySnapshot, DocumentData} from '@google-cloud/firestore';
+import {
+  QuerySnapshot,
+  DocumentData,
+  WithFieldValue,
+  PartialWithFieldValue,
+  SetOptions,
+} from '@google-cloud/firestore';
 
 import {describe, it, before, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
@@ -2908,7 +2914,11 @@ describe('Bundle building', () => {
       ref1.set({name: '1', sort: 1, value: 'string value'}),
       ref2.set({name: '2', sort: 2, value: 42}),
       ref3.set({name: '3', sort: 3, value: {nested: 'nested value'}}),
-      ref4.set({name: '4', sort: 4, value: FieldValue.serverTimestamp()}),
+      ref4.set({
+        name: '4',
+        sort: 4,
+        value: FieldValue.serverTimestamp(),
+      }),
     ]);
   });
 
@@ -3043,5 +3053,561 @@ describe('Bundle building', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (expected.fields!.value as any).valueType;
     expect(bundledDoc).to.deep.equal(expected);
+  });
+});
+
+describe('Types test', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+  let doc: DocumentReference;
+
+  class TestObject {
+    constructor(
+      readonly outerString: string,
+      readonly outerArr: string[],
+      readonly nested: {
+        innerNested: {
+          innerNestedNum: number;
+        };
+        innerArr: number[];
+        timestamp: Timestamp;
+      }
+    ) {}
+  }
+
+  const testConverter = {
+    toFirestore(testObj: WithFieldValue<TestObject>) {
+      return {...testObj};
+    },
+    fromFirestore(snapshot: QueryDocumentSnapshot): TestObject {
+      const data = snapshot.data();
+      return new TestObject(data.outerString, data.outerArr, data.nested);
+    },
+  };
+
+  const initialData = {
+    outerString: 'foo',
+    outerArr: [],
+    nested: {
+      innerNested: {
+        innerNestedNum: 2,
+      },
+      innerArr: FieldValue.arrayUnion(2),
+      timestamp: FieldValue.serverTimestamp(),
+    },
+  };
+
+  beforeEach(async () => {
+    firestore = new Firestore({});
+    randomCol = getTestRoot(firestore);
+    doc = randomCol.doc();
+
+    await doc.set(initialData);
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  describe('NestedPartial', () => {
+    const testConverterMerge = {
+      toFirestore(
+        testObj: PartialWithFieldValue<TestObject>,
+        options?: SetOptions
+      ) {
+        if (options && (options.merge || options.mergeFields)) {
+          expect(testObj).to.not.be.an.instanceOf(TestObject);
+        } else {
+          expect(testObj).to.be.an.instanceOf(TestObject);
+        }
+        return {...testObj};
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot): TestObject {
+        const data = snapshot.data();
+        return new TestObject(data.outerString, data.outerArr, data.nested);
+      },
+    };
+
+    it('supports FieldValues', async () => {
+      const ref = doc.withConverter(testConverterMerge);
+
+      // Allow Field Values in nested partials.
+      await ref.set(
+        {
+          outerString: FieldValue.delete(),
+          nested: {
+            innerNested: {
+              innerNestedNum: FieldValue.increment(1),
+            },
+            innerArr: FieldValue.arrayUnion(2),
+            timestamp: FieldValue.serverTimestamp(),
+          },
+        },
+        {merge: true}
+      );
+
+      // Allow setting FieldValue on entire object field.
+      await ref.set(
+        {
+          nested: FieldValue.delete(),
+        },
+        {merge: true}
+      );
+    });
+
+    it('validates types in outer and inner fields', async () => {
+      const ref = doc.withConverter(testConverterMerge);
+
+      // Check top-level fields.
+      await ref.set(
+        {
+          // @ts-expect-error Should fail to transpile.
+          outerString: 3,
+          // @ts-expect-error Should fail to transpile.
+          outerArr: null,
+        },
+        {merge: true}
+      );
+
+      // Check nested fields.
+      await ref.set(
+        {
+          nested: {
+            innerNested: {
+              // @ts-expect-error Should fail to transpile.
+              innerNestedNum: 'string',
+            },
+            // @ts-expect-error Should fail to transpile.
+            innerArr: null,
+          },
+        },
+        {merge: true}
+      );
+      await ref.set(
+        {
+          // @ts-expect-error Should fail to transpile.
+          nested: 3,
+        },
+        {merge: true}
+      );
+    });
+
+    it('checks for nonexistent properties', async () => {
+      const ref = doc.withConverter(testConverterMerge);
+      // Top-level property.
+      await ref.set(
+        {
+          // @ts-expect-error Should fail to transpile.
+          nonexistent: 'foo',
+        },
+        {merge: true}
+      );
+
+      // Nested property
+      await ref.set(
+        {
+          nested: {
+            // @ts-expect-error Should fail to transpile.
+            nonexistent: 'foo',
+          },
+        },
+        {merge: true}
+      );
+    });
+  });
+
+  describe('NestedPartial', () => {
+    const testConverterMerge = {
+      toFirestore(
+        testObj: PartialWithFieldValue<TestObject>,
+        options?: SetOptions
+      ) {
+        if (options && (options.merge || options.mergeFields)) {
+          expect(testObj).to.not.be.an.instanceOf(TestObject);
+        } else {
+          expect(testObj).to.be.an.instanceOf(TestObject);
+        }
+        return {...testObj};
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot): TestObject {
+        const data = snapshot.data();
+        return new TestObject(data.outerString, data.outerArr, data.nested);
+      },
+    };
+
+    it('supports FieldValues', async () => {
+      const ref = doc.withConverter(testConverterMerge);
+
+      // Allow Field Values in nested partials.
+      await ref.set(
+        {
+          outerString: FieldValue.delete(),
+          nested: {
+            innerNested: {
+              innerNestedNum: FieldValue.increment(1),
+            },
+            innerArr: FieldValue.arrayUnion(2),
+            timestamp: FieldValue.serverTimestamp(),
+          },
+        },
+        {merge: true}
+      );
+
+      // Allow setting FieldValue on entire object field.
+      await ref.set(
+        {
+          nested: FieldValue.delete(),
+        },
+        {merge: true}
+      );
+    });
+
+    it('validates types in outer and inner fields', async () => {
+      const ref = doc.withConverter(testConverterMerge);
+
+      // Check top-level fields.
+      await ref.set(
+        {
+          // @ts-expect-error Should fail to transpile.
+          outerString: 3,
+          // @ts-expect-error Should fail to transpile.
+          outerArr: null,
+        },
+        {merge: true}
+      );
+
+      // Check nested fields.
+      await ref.set(
+        {
+          nested: {
+            innerNested: {
+              // @ts-expect-error Should fail to transpile.
+              innerNestedNum: 'string',
+            },
+            // @ts-expect-error Should fail to transpile.
+            innerArr: null,
+          },
+        },
+        {merge: true}
+      );
+      await ref.set(
+        {
+          // @ts-expect-error Should fail to transpile.
+          nested: 3,
+        },
+        {merge: true}
+      );
+    });
+
+    it('checks for nonexistent properties', async () => {
+      const ref = doc.withConverter(testConverterMerge);
+      // Top-level property.
+      await ref.set(
+        {
+          // @ts-expect-error Should fail to transpile.
+          nonexistent: 'foo',
+        },
+        {merge: true}
+      );
+
+      // Nested property
+      await ref.set(
+        {
+          nested: {
+            // @ts-expect-error Should fail to transpile.
+            nonexistent: 'foo',
+          },
+        },
+        {merge: true}
+      );
+    });
+  });
+
+  describe('WithFieldValue', () => {
+    it('supports FieldValues', async () => {
+      const ref = doc.withConverter(testConverter);
+
+      // Allow Field Values and nested partials.
+      await ref.set({
+        outerString: 'foo',
+        outerArr: [],
+        nested: {
+          innerNested: {
+            innerNestedNum: FieldValue.increment(1),
+          },
+          innerArr: FieldValue.arrayUnion(2),
+          timestamp: FieldValue.serverTimestamp(),
+        },
+      });
+    });
+
+    it('requires all fields to be present', async () => {
+      const ref = doc.withConverter(testConverter);
+
+      // Allow Field Values and nested partials.
+      // @ts-expect-error Should fail to transpile.
+      await ref.set({
+        outerArr: [],
+        nested: {
+          innerNested: {
+            innerNestedNum: FieldValue.increment(1),
+          },
+          innerArr: FieldValue.arrayUnion(2),
+          timestamp: FieldValue.serverTimestamp(),
+        },
+      });
+    });
+
+    it('validates inner and outer fields', async () => {
+      const ref = doc.withConverter(testConverter);
+
+      await ref.set({
+        outerString: 'foo',
+        // @ts-expect-error Should fail to transpile.
+        outerArr: 2,
+        nested: {
+          innerNested: {
+            // @ts-expect-error Should fail to transpile.
+            innerNestedNum: 'string',
+          },
+          innerArr: FieldValue.arrayUnion(2),
+          timestamp: FieldValue.serverTimestamp(),
+        },
+      });
+    });
+
+    it('checks for nonexistent properties', async () => {
+      const ref = doc.withConverter(testConverter);
+
+      // Top-level nonexistent fields should error
+      await ref.set({
+        outerString: 'foo',
+        // @ts-expect-error Should fail to transpile.
+        outerNum: 3,
+        outerArr: [],
+        nested: {
+          innerNested: {
+            innerNestedNum: 2,
+          },
+          innerArr: FieldValue.arrayUnion(2),
+          timestamp: FieldValue.serverTimestamp(),
+        },
+      });
+
+      // Nested nonexistent fields should error
+      await ref.set({
+        outerString: 'foo',
+        outerNum: 3,
+        outerArr: [],
+        nested: {
+          innerNested: {
+            // @ts-expect-error Should fail to transpile.
+            nonexistent: 'string',
+            innerNestedNum: 2,
+          },
+          innerArr: FieldValue.arrayUnion(2),
+          timestamp: FieldValue.serverTimestamp(),
+        },
+      });
+    });
+  });
+
+  describe('UpdateData', () => {
+    it('supports FieldValues', async () => {
+      const ref = doc.withConverter(testConverter);
+      await ref.update({
+        outerString: FieldValue.delete(),
+        nested: {
+          innerNested: {
+            innerNestedNum: FieldValue.increment(2),
+          },
+          innerArr: FieldValue.arrayUnion(3),
+        },
+      });
+    });
+
+    it('validates inner and outer fields', async () => {
+      const ref = doc.withConverter(testConverter);
+      await ref.update({
+        // @ts-expect-error Should fail to transpile.
+        outerString: 3,
+        nested: {
+          innerNested: {
+            // @ts-expect-error Should fail to transpile.
+            innerNestedNum: 'string',
+          },
+          // @ts-expect-error Should fail to transpile.
+          innerArr: 2,
+        },
+      });
+    });
+
+    it('supports string-separated fields', async () => {
+      const ref = doc.withConverter(testConverter);
+      await ref.update({
+        // @ts-expect-error Should fail to transpile.
+        outerString: 3,
+        // @ts-expect-error Should fail to transpile.
+        'nested.innerNested.innerNestedNum': 'string',
+        // @ts-expect-error Should fail to transpile.
+        'nested.innerArr': 3,
+        'nested.timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // String comprehension works in nested fields.
+      await ref.update({
+        nested: {
+          innerNested: {
+            // @ts-expect-error Should fail to transpile.
+            innerNestedNum: 'string',
+          },
+          // @ts-expect-error Should fail to transpile.
+          innerArr: 3,
+        },
+      });
+    });
+
+    it('checks for nonexistent fields', async () => {
+      const ref = doc.withConverter(testConverter);
+
+      // Top-level fields.
+      await ref.update({
+        // @ts-expect-error Should fail to transpile.
+        nonexistent: 'foo',
+      });
+
+      // Nested Fields.
+      await ref.update({
+        nested: {
+          // @ts-expect-error Should fail to transpile.
+          nonexistent: 'foo',
+        },
+      });
+
+      // String fields.
+      await ref.update({
+        // @ts-expect-error Should fail to transpile.
+        nonexistent: 'foo',
+      });
+      await ref.update({
+        // @ts-expect-error Should fail to transpile.
+        'nested.nonexistent': 'foo',
+      });
+    });
+  });
+
+  describe('methods', () => {
+    it('CollectionReference.add()', async () => {
+      const ref = randomCol.withConverter(testConverter);
+
+      // Requires all fields to be present
+      // @ts-expect-error Should fail to transpile.
+      await ref.add({
+        outerArr: [],
+        nested: {
+          innerNested: {
+            innerNestedNum: 2,
+          },
+          innerArr: [],
+          timestamp: FieldValue.serverTimestamp(),
+        },
+      });
+    });
+
+    it('WriteBatch.set()', () => {
+      const ref = doc.withConverter(testConverter);
+      const batch = firestore.batch();
+
+      // Requires full object if {merge: true} is not set.
+      // @ts-expect-error Should fail to transpile.
+      batch.set(ref, {
+        outerArr: [],
+        nested: {
+          innerNested: {
+            innerNestedNum: FieldValue.increment(1),
+          },
+          innerArr: FieldValue.arrayUnion(2),
+          timestamp: FieldValue.serverTimestamp(),
+        },
+      });
+
+      batch.set(
+        ref,
+        {
+          outerArr: [],
+          nested: {
+            innerNested: {
+              innerNestedNum: FieldValue.increment(1),
+            },
+            innerArr: FieldValue.arrayUnion(2),
+            timestamp: FieldValue.serverTimestamp(),
+          },
+        },
+        {merge: true}
+      );
+    });
+
+    it('WriteBatch.update()', () => {
+      const ref = doc.withConverter(testConverter);
+      const batch = firestore.batch();
+
+      batch.update(ref, {
+        outerArr: [],
+        nested: {
+          'innerNested.innerNestedNum': FieldValue.increment(1),
+          innerArr: FieldValue.arrayUnion(2),
+          timestamp: FieldValue.serverTimestamp(),
+        },
+      });
+    });
+
+    it('Transaction.set()', async () => {
+      const ref = doc.withConverter(testConverter);
+
+      return firestore.runTransaction(async tx => {
+        // Requires full object if {merge: true} is not set.
+        // @ts-expect-error Should fail to transpile.
+        tx.set(ref, {
+          outerArr: [],
+          nested: {
+            innerNested: {
+              innerNestedNum: FieldValue.increment(1),
+            },
+            innerArr: FieldValue.arrayUnion(2),
+            timestamp: FieldValue.serverTimestamp(),
+          },
+        });
+
+        tx.set(
+          ref,
+          {
+            outerArr: [],
+            nested: {
+              innerNested: {
+                innerNestedNum: FieldValue.increment(1),
+              },
+              innerArr: FieldValue.arrayUnion(2),
+              timestamp: FieldValue.serverTimestamp(),
+            },
+          },
+          {merge: true}
+        );
+      });
+    });
+
+    it('Transaction.update()', async () => {
+      const ref = doc.withConverter(testConverter);
+
+      return firestore.runTransaction(async tx => {
+        tx.update(ref, {
+          outerArr: [],
+          nested: {
+            innerNested: {
+              innerNestedNum: FieldValue.increment(1),
+            },
+            innerArr: FieldValue.arrayUnion(2),
+            timestamp: FieldValue.serverTimestamp(),
+          },
+        });
+      });
+    });
   });
 });
