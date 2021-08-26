@@ -19,6 +19,7 @@ import {logger} from './logger';
 /*
  * @module firestore/backoff
  * @private
+ * @internal
  *
  * Contains backoff logic to facilitate RPC error handling. This class derives
  * its implementation from the Firestore Mobile Web Client.
@@ -30,17 +31,17 @@ import {logger} from './logger';
  * The default initial backoff time in milliseconds after an error.
  * Set to 1s according to https://cloud.google.com/apis/design/errors.
  */
-const DEFAULT_BACKOFF_INITIAL_DELAY_MS = 1000;
+export const DEFAULT_BACKOFF_INITIAL_DELAY_MS = 1000;
 
 /*!
  * The default maximum backoff time in milliseconds.
  */
-const DEFAULT_BACKOFF_MAX_DELAY_MS = 60 * 1000;
+export const DEFAULT_BACKOFF_MAX_DELAY_MS = 60 * 1000;
 
 /*!
  * The default factor to increase the backup by after each failed attempt.
  */
-const DEFAULT_BACKOFF_FACTOR = 1.5;
+export const DEFAULT_BACKOFF_FACTOR = 1.5;
 
 /*!
  * The default jitter to distribute the backoff attempts by (0 means no
@@ -57,10 +58,8 @@ export const MAX_RETRY_ATTEMPTS = 10;
 /*!
  * The timeout handler used by `ExponentialBackoff` and `BulkWriter`.
  */
-export let delayExecution: (
-  f: () => void,
-  ms: number
-) => NodeJS.Timeout = setTimeout;
+export let delayExecution: (f: () => void, ms: number) => NodeJS.Timeout =
+  setTimeout;
 
 /**
  * Allows overriding of the timeout handler used by the exponential backoff
@@ -69,6 +68,7 @@ export let delayExecution: (
  * Used only in testing.
  *
  * @private
+ * @internal
  * @param {function} handler A handler than matches the API of `setTimeout()`.
  */
 export function setTimeoutHandler(
@@ -102,6 +102,7 @@ export function setTimeoutHandler(
  * algorithm.
  *
  * @private
+ * @internal
  */
 export interface ExponentialBackoffSetting {
   /** Optional override for the initial retry delay. */
@@ -128,6 +129,7 @@ export interface ExponentialBackoffSetting {
  * synchronizing their delays causing spikes of load to the backend.
  *
  * @private
+ * @internal
  */
 export class ExponentialBackoff {
   /**
@@ -136,6 +138,7 @@ export class ExponentialBackoff {
    * little as 0.5*initialDelayMs (based on a jitter factor of 1.0).
    *
    * @private
+   * @internal
    */
   private readonly initialDelayMs: number;
 
@@ -144,6 +147,7 @@ export class ExponentialBackoff {
    * attempt.
    *
    * @private
+   * @internal
    */
   private readonly backoffFactor: number;
 
@@ -153,6 +157,7 @@ export class ExponentialBackoff {
    * much as 1.5*maxDelayMs (based on a jitter factor of 1.0).
    *
    * @private
+   * @internal
    */
   private readonly maxDelayMs: number;
 
@@ -161,6 +166,7 @@ export class ExponentialBackoff {
    * points.
    *
    * @private
+   * @internal
    */
   private readonly jitterFactor: number;
 
@@ -168,6 +174,7 @@ export class ExponentialBackoff {
    * The number of retries that has been attempted.
    *
    * @private
+   * @internal
    */
   private _retryCount = 0;
 
@@ -175,6 +182,7 @@ export class ExponentialBackoff {
    * The backoff delay of the current attempt.
    *
    * @private
+   * @internal
    */
   private currentBaseMs = 0;
 
@@ -182,6 +190,7 @@ export class ExponentialBackoff {
    * Whether we are currently waiting for backoff to complete.
    *
    * @private
+   * @internal
    */
   private awaitingBackoffCompletion = false;
 
@@ -212,6 +221,7 @@ export class ExponentialBackoff {
    * subsequent ones will increase according to the backoffFactor.
    *
    * @private
+   * @internal
    */
   reset(): void {
     this._retryCount = 0;
@@ -223,6 +233,7 @@ export class ExponentialBackoff {
    * RESOURCE_EXHAUSTED error).
    *
    * @private
+   * @internal
    */
   resetToMax(): void {
     this.currentBaseMs = this.maxDelayMs;
@@ -234,6 +245,7 @@ export class ExponentialBackoff {
    *
    * @return A Promise that resolves when the current delay elapsed.
    * @private
+   * @internal
    */
   backoffAndWait(): Promise<void> {
     if (this.awaitingBackoffCompletion) {
@@ -287,6 +299,7 @@ export class ExponentialBackoff {
    *
    * @returns {number} The jitter to apply based on the current delay.
    * @private
+   * @internal
    */
   private jitterDelayMs(): number {
     return (Math.random() - 0.5) * this.jitterFactor * this.currentBaseMs;

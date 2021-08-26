@@ -81,12 +81,14 @@ const EMPTY_FUNCTION: () => void = () => {};
 
 /**
  * @private
+ * @internal
  * @callback docsCallback
  * @returns {Array.<QueryDocumentSnapshot>} An ordered list of documents.
  */
 
 /**
  * @private
+ * @internal
  * @callback changeCallback
  * @returns {Array.<DocumentChange>} An ordered list of document
  * changes.
@@ -96,6 +98,7 @@ const EMPTY_FUNCTION: () => void = () => {};
  * onSnapshot() callback that receives the updated query state.
  *
  * @private
+ * @internal
  * @callback watchSnapshotCallback
  *
  * @param {Timestamp} readTime The time at which this snapshot was obtained.
@@ -123,6 +126,7 @@ interface DocumentChangeSet<T = firestore.DocumentData> {
  *
  * @class
  * @private
+ * @internal
  */
 abstract class Watch<T = firestore.DocumentData> {
   protected readonly firestore: Firestore;
@@ -133,24 +137,28 @@ abstract class Watch<T = firestore.DocumentData> {
    * Indicates whether we are interested in data from the stream. Set to false in the
    * 'unsubscribe()' callback.
    * @private
+   * @internal
    */
   private isActive = true;
 
   /**
    * The current stream to the backend.
    * @private
+   * @internal
    */
   private currentStream: Duplex | null = null;
 
   /**
    * The server assigns and updates the resume token.
    * @private
+   * @internal
    */
   private resumeToken: Uint8Array | undefined = undefined;
 
   /**
    * A map of document names to QueryDocumentSnapshots for the last sent snapshot.
    * @private
+   * @internal
    */
   private docMap = new Map<string, QueryDocumentSnapshot<T>>();
 
@@ -158,12 +166,14 @@ abstract class Watch<T = firestore.DocumentData> {
    * The accumulated map of document changes (keyed by document name) for the
    * current snapshot.
    * @private
+   * @internal
    */
   private changeMap = new Map<string, DocumentSnapshotBuilder<T>>();
 
   /**
    * The current state of the query results. *
    * @private
+   * @internal
    */
   private current = false;
 
@@ -171,6 +181,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * The sorted tree of QueryDocumentSnapshots as sent in the last snapshot.
    * We only look at the keys.
    * @private
+   * @internal
    */
   private docTree: RBTree | undefined;
 
@@ -179,6 +190,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * since we should push those even when there are no changes, if there
    * aren't docs.
    * @private
+   * @internal
    */
   private hasPushed = false;
 
@@ -199,6 +211,7 @@ abstract class Watch<T = firestore.DocumentData> {
 
   /**
    * @private
+   * @internal
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
@@ -227,6 +240,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * Starts a watch and attaches a listener for document change events.
    *
    * @private
+   * @internal
    * @param onNext A callback to be called every time a new snapshot is
    * available.
    * @param onError A callback to be called if the listen fails or is cancelled.
@@ -277,6 +291,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * Returns the current count of all documents, including the changes from
    * the current changeMap.
    * @private
+   * @internal
    */
   private currentSize(): number {
     const changes = this.extractCurrentChanges(Timestamp.now());
@@ -286,6 +301,7 @@ abstract class Watch<T = firestore.DocumentData> {
   /**
    * Splits up document changes into removals, additions, and updates.
    * @private
+   * @internal
    */
   private extractCurrentChanges(readTime: Timestamp): DocumentChangeSet<T> {
     const deletes: string[] = [];
@@ -312,6 +328,7 @@ abstract class Watch<T = firestore.DocumentData> {
   /**
    * Helper to clear the docs on RESET or filter mismatch.
    * @private
+   * @internal
    */
   private resetDocs(): void {
     logger('Watch.resetDocs', this.requestTag, 'Resetting documents');
@@ -333,6 +350,7 @@ abstract class Watch<T = firestore.DocumentData> {
   /**
    * Closes the stream and calls onError() if the stream is still active.
    * @private
+   * @internal
    */
   private closeStream(err: GoogleError): void {
     if (this.isActive) {
@@ -346,6 +364,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * Re-opens the stream unless the specified error is considered permanent.
    * Clears the change map.
    * @private
+   * @internal
    */
   private maybeReopenStream(err: GoogleError): void {
     if (this.isActive && !this.isPermanentWatchError(err)) {
@@ -371,6 +390,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * Cancels the current idle timeout and reschedules a new timer.
    *
    * @private
+   * @internal
    */
   private resetIdleTimeout(): void {
     if (this.idleTimeoutHandle) {
@@ -395,6 +415,7 @@ abstract class Watch<T = firestore.DocumentData> {
   /**
    * Helper to restart the outgoing stream to the backend.
    * @private
+   * @internal
    */
   private resetStream(): void {
     logger('Watch.resetStream', this.requestTag, 'Restarting stream');
@@ -408,6 +429,7 @@ abstract class Watch<T = firestore.DocumentData> {
   /**
    * Initializes a new stream to the backend with backoff.
    * @private
+   * @internal
    */
   private initStream(): void {
     this.backoff
@@ -477,6 +499,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * Handles 'data' events and closes the stream if the response type is
    * invalid.
    * @private
+   * @internal
    */
   private onData(proto: api.IListenResponse): void {
     if (proto.targetChange) {
@@ -544,8 +567,8 @@ abstract class Watch<T = firestore.DocumentData> {
 
       const document = proto.documentChange.document!;
       const name = document.name!;
-      const relativeName = QualifiedResourcePath.fromSlashSeparatedString(name)
-        .relativeName;
+      const relativeName =
+        QualifiedResourcePath.fromSlashSeparatedString(name).relativeName;
 
       if (changed) {
         logger('Watch.onData', this.requestTag, 'Received document change');
@@ -564,8 +587,8 @@ abstract class Watch<T = firestore.DocumentData> {
     } else if (proto.documentDelete || proto.documentRemove) {
       logger('Watch.onData', this.requestTag, 'Processing remove event');
       const name = (proto.documentDelete || proto.documentRemove)!.document!;
-      const relativeName = QualifiedResourcePath.fromSlashSeparatedString(name)
-        .relativeName;
+      const relativeName =
+        QualifiedResourcePath.fromSlashSeparatedString(name).relativeName;
       this.changeMap.set(relativeName, REMOVED as DocumentSnapshotBuilder<T>);
     } else if (proto.filter) {
       logger('Watch.onData', this.requestTag, 'Processing filter update');
@@ -586,6 +609,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * Checks if the current target id is included in the list of target ids.
    * If no targetIds are provided, returns true.
    * @private
+   * @internal
    */
   private affectsTarget(
     targetIds: number[] | undefined,
@@ -608,6 +632,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * Assembles a new snapshot from the current set of changes and invokes the
    * user's callback. Clears the current changes on completion.
    * @private
+   * @internal
    */
   private pushSnapshot(
     readTime: Timestamp,
@@ -642,6 +667,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * Applies a document delete to the document tree and the document map.
    * Returns the corresponding DocumentChange event.
    * @private
+   * @internal
    */
   private deleteDoc(name: string): DocumentChange<T> {
     assert(this.docMap.has(name), 'Document to delete does not exist');
@@ -657,6 +683,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * Applies a document add to the document tree and the document map. Returns
    * the corresponding DocumentChange event.
    * @private
+   * @internal
    */
   private addDoc(newDocument: QueryDocumentSnapshot<T>): DocumentChange<T> {
     const name = newDocument.ref.path;
@@ -671,6 +698,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * Applies a document modification to the document tree and the document map.
    * Returns the DocumentChange event for successful modifications.
    * @private
+   * @internal
    */
   private modifyDoc(
     newDocument: QueryDocumentSnapshot<T>
@@ -696,6 +724,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * document lookup map. Modified docMap in-place and returns the updated
    * state.
    * @private
+   * @internal
    */
   private computeSnapshot(readTime: Timestamp): Array<DocumentChange<T>> {
     const changeSet = this.extractCurrentChanges(readTime);
@@ -745,6 +774,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * transient in this context.
    *
    * @private
+   * @internal
    * @param error An error object.
    * @return Whether the error is permanent.
    */
@@ -779,6 +809,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * overload.
    *
    * @private
+   * @internal
    * @param error A GRPC Error object that exposes an error code.
    * @return Whether we need to back off our retries.
    */
@@ -806,6 +837,7 @@ abstract class Watch<T = firestore.DocumentData> {
  * Creates a new Watch instance to listen on DocumentReferences.
  *
  * @private
+ * @internal
  */
 export class DocumentWatch<T = firestore.DocumentData> extends Watch<T> {
   constructor(
@@ -835,6 +867,7 @@ export class DocumentWatch<T = firestore.DocumentData> extends Watch<T> {
  * Creates a new Watch instance to listen on Queries.
  *
  * @private
+ * @internal
  */
 export class QueryWatch<T = firestore.DocumentData> extends Watch<T> {
   private comparator: DocumentComparator<T>;

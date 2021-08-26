@@ -4,6 +4,137 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.14.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.14.1...v4.14.2) (2021-08-17)
+
+
+### Bug Fixes
+
+* **deps:** google-gax v2.24.1 ([#1588](https://www.github.com/googleapis/nodejs-firestore/issues/1588)) ([56150b6](https://www.github.com/googleapis/nodejs-firestore/commit/56150b62f55d765c0c221aed70b999477f867ace))
+
+### [4.14.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.14.0...v4.14.1) (2021-08-02)
+
+
+### Bug Fixes
+
+* avoid destructuring undefined timestamps ([#1575](https://www.github.com/googleapis/nodejs-firestore/issues/1575)) ([a61a24a](https://www.github.com/googleapis/nodejs-firestore/commit/a61a24a44e70a9693f552a3a39f4579d861fd77f))
+
+## [4.14.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.13.2...v4.14.0) (2021-07-30)
+
+
+### Features
+
+* add "NON_EMPTY_DEFAULT" FieldBehavior ([#1554](https://www.github.com/googleapis/nodejs-firestore/issues/1554)) ([8d9c503](https://www.github.com/googleapis/nodejs-firestore/commit/8d9c50381eedf6ee8043eed681d03b44262b9820))
+* allow UnhandledPromiseRejection errors in BulkWriter if no error handler is specified ([#1572](https://www.github.com/googleapis/nodejs-firestore/issues/1572)) ([e862ac8](https://www.github.com/googleapis/nodejs-firestore/commit/e862ac81cbb99287a226989b184fc2e683defa16))
+
+### [4.13.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.13.1...v4.13.2) (2021-07-14)
+
+
+### Bug Fixes
+
+* **deps:** google-gax v2.17.1 ([#1557](https://www.github.com/googleapis/nodejs-firestore/issues/1557)) ([866bd25](https://www.github.com/googleapis/nodejs-firestore/commit/866bd255d930850956609a0941d4010847c0d196))
+* lower batch size on BulkWriter retry to stay under throughput limits ([#1556](https://www.github.com/googleapis/nodejs-firestore/issues/1556)) ([f17a36e](https://www.github.com/googleapis/nodejs-firestore/commit/f17a36e3fa1ce532c1c68ed63ea1845408368469))
+
+### [4.13.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.13.0...v4.13.1) (2021-07-01)
+
+
+### Bug Fixes
+
+* lower batch size on BulkWriter retry ([#1549](https://www.github.com/googleapis/nodejs-firestore/issues/1549)) ([26d480b](https://www.github.com/googleapis/nodejs-firestore/commit/26d480b4a7fbeb26e99bb23d7aa1fbd4802b738a))
+
+## [4.13.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.3...v4.13.0) (2021-06-29)
+
+
+### Features
+
+* add read-only transactions ([#1541](https://www.github.com/googleapis/nodejs-firestore/issues/1541)) ([ca4241e](https://www.github.com/googleapis/nodejs-firestore/commit/ca4241eb3ee4abb8453b6da0911397187dc18dde))
+* retry BatchGetDocuments RPCs that fail with errors ([#1544](https://www.github.com/googleapis/nodejs-firestore/issues/1544)) ([b39dd3c](https://www.github.com/googleapis/nodejs-firestore/commit/b39dd3c65549fb1a651c1722d8ea2c038e152417))
+
+
+### Bug Fixes
+
+* **deps:** google-gax v2.17.0 with mTLS ([#1546](https://www.github.com/googleapis/nodejs-firestore/issues/1546)) ([a322345](https://www.github.com/googleapis/nodejs-firestore/commit/a32234510d487982b950c88575b9425c531c2d94))
+* make request optional in all cases ([#1536](https://www.github.com/googleapis/nodejs-firestore/issues/1536)) ([f6edfc1](https://www.github.com/googleapis/nodejs-firestore/commit/f6edfc181ca39cd307eab6d141db08f377d5cfdf))
+
+### [4.12.3](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.2...v4.12.3) (2021-06-16)
+
+
+### Bug Fixes
+
+* bulkWriter: ensure buffered batches are sent after flush ([#1535](https://www.github.com/googleapis/nodejs-firestore/issues/1535)) ([115a134](https://www.github.com/googleapis/nodejs-firestore/commit/115a13407b907887a930b4299ebed042532c3ec2))
+* GoogleAdsError missing using generator version after 1.3.0 ([#1526](https://www.github.com/googleapis/nodejs-firestore/issues/1526)) ([adfe68e](https://www.github.com/googleapis/nodejs-firestore/commit/adfe68e194d518369d5b4f89e9be89f948efbdbb))
+
+### [4.12.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.1...v4.12.2) (2021-05-27)
+
+
+### Bug Fixes
+
+* do not leak credentials in Firestore.toJSON() ([#1522](https://www.github.com/googleapis/nodejs-firestore/issues/1522)) ([791310f](https://www.github.com/googleapis/nodejs-firestore/commit/791310ff4b0a828ca6d1f5c0fa03a110972afb1f))
+
+### [4.12.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.12.0...v4.12.1) (2021-05-27)
+
+
+### Bug Fixes
+
+* do not load google-gax at client startup ([#1517](https://www.github.com/googleapis/nodejs-firestore/issues/1517)) ([2141b08](https://www.github.com/googleapis/nodejs-firestore/commit/2141b0879cbccb1354f9821edcc917b6aa4ff0ab))
+* recursive delete: backporting changes from Java ([#1514](https://www.github.com/googleapis/nodejs-firestore/issues/1514)) ([92ea651](https://www.github.com/googleapis/nodejs-firestore/commit/92ea651adc84ba854ae7cd203af231573f885307))
+* return results from getPartitions() in order ([#1521](https://www.github.com/googleapis/nodejs-firestore/issues/1521)) ([c8168a8](https://www.github.com/googleapis/nodejs-firestore/commit/c8168a83a864dd77f88b1743adcd3568671702fe))
+
+## [4.12.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.11.1...v4.12.0) (2021-05-19)
+
+
+### Features
+
+* add `gcf-owl-bot[bot]` to `ignoreAuthors` ([#1506](https://www.github.com/googleapis/nodejs-firestore/issues/1506)) ([6fa1d4d](https://www.github.com/googleapis/nodejs-firestore/commit/6fa1d4da627f17d76cf2d6109765862fd5083e03))
+* add Precondition.exists to delete() ([#1505](https://www.github.com/googleapis/nodejs-firestore/issues/1505)) ([28d645b](https://www.github.com/googleapis/nodejs-firestore/commit/28d645bd3e368abde592bfa2611de3378ca175a6))
+
+### [4.11.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.11.0...v4.11.1) (2021-05-13)
+
+
+### Bug Fixes
+
+* **deps:** require google-gax v2.12.0 ([#1497](https://www.github.com/googleapis/nodejs-firestore/issues/1497)) ([a8d5f0b](https://www.github.com/googleapis/nodejs-firestore/commit/a8d5f0b1e4503ef9f0d289dbf8ed67a30eb9ed4b))
+
+## [4.11.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.10.1...v4.11.0) (2021-05-05)
+
+
+### Features
+
+* add recursive delete to Firestore class ([#1494](https://www.github.com/googleapis/nodejs-firestore/issues/1494)) ([6f1e304](https://www.github.com/googleapis/nodejs-firestore/commit/6f1e3040800d0dcc5ed3f9f7cef16fe41804266a))
+
+### [4.10.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.10.0...v4.10.1) (2021-04-28)
+
+
+### Bug Fixes
+
+* type of QuerySnapshot.docChanges() should be generic ([#1484](https://www.github.com/googleapis/nodejs-firestore/issues/1484)) ([3ed1929](https://www.github.com/googleapis/nodejs-firestore/commit/3ed1929a06b4c019bbb0b1db3e1abcd62ee668d2))
+
+## [4.10.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.9...v4.10.0) (2021-04-15)
+
+
+### Features
+
+* add buffering layer to BulkWriter ([#1470](https://www.github.com/googleapis/nodejs-firestore/issues/1470)) ([9cc9548](https://www.github.com/googleapis/nodejs-firestore/commit/9cc954849c74199f01e52b24fc7ba045d5b56be4))
+
+
+### Bug Fixes
+
+* use BigInt when calculating nanos in Timestamp.fromMillis() ([#1468](https://www.github.com/googleapis/nodejs-firestore/issues/1468)) ([cf1949f](https://www.github.com/googleapis/nodejs-firestore/commit/cf1949f99f840d1e34edfa31a223418abdf48372))
+
+### [4.9.9](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.8...v4.9.9) (2021-04-07)
+
+
+### Bug Fixes
+
+* BulkWriter: apply rate limiter before sending batch ([#1451](https://www.github.com/googleapis/nodejs-firestore/issues/1451)) ([3a50f8b](https://www.github.com/googleapis/nodejs-firestore/commit/3a50f8b524a73d60c6034d4828682b9dc1b49d6e))
+* remove floating point rounding error in Timestamp.fromMillis() ([#1464](https://www.github.com/googleapis/nodejs-firestore/issues/1464)) ([97e7281](https://www.github.com/googleapis/nodejs-firestore/commit/97e728188a097760bd52099ec852a716a25b4745))
+
+### [4.9.8](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.7...v4.9.8) (2021-03-15)
+
+
+### Bug Fixes
+
+* BulkWriter: add backoff on retries ([#1447](https://www.github.com/googleapis/nodejs-firestore/issues/1447)) ([f483083](https://www.github.com/googleapis/nodejs-firestore/commit/f48308344a90d2da48af99a878f0384b7b93f704))
+
 ### [4.9.7](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.6...v4.9.7) (2021-03-09)
 
 

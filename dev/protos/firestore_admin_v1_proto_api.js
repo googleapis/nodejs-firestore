@@ -1996,19 +1996,19 @@
     
                             /**
                              * IndexField order.
-                             * @member {google.firestore.admin.v1.Index.IndexField.Order} order
+                             * @member {google.firestore.admin.v1.Index.IndexField.Order|null|undefined} order
                              * @memberof google.firestore.admin.v1.Index.IndexField
                              * @instance
                              */
-                            IndexField.prototype.order = 0;
+                            IndexField.prototype.order = null;
     
                             /**
                              * IndexField arrayConfig.
-                             * @member {google.firestore.admin.v1.Index.IndexField.ArrayConfig} arrayConfig
+                             * @member {google.firestore.admin.v1.Index.IndexField.ArrayConfig|null|undefined} arrayConfig
                              * @memberof google.firestore.admin.v1.Index.IndexField
                              * @instance
                              */
-                            IndexField.prototype.arrayConfig = 0;
+                            IndexField.prototype.arrayConfig = null;
     
                             // OneOf field names bound to virtual getters and setters
                             var $oneOfFields;
@@ -3619,43 +3619,43 @@
     
                 /**
                  * HttpRule get.
-                 * @member {string} get
+                 * @member {string|null|undefined} get
                  * @memberof google.api.HttpRule
                  * @instance
                  */
-                HttpRule.prototype.get = "";
+                HttpRule.prototype.get = null;
     
                 /**
                  * HttpRule put.
-                 * @member {string} put
+                 * @member {string|null|undefined} put
                  * @memberof google.api.HttpRule
                  * @instance
                  */
-                HttpRule.prototype.put = "";
+                HttpRule.prototype.put = null;
     
                 /**
                  * HttpRule post.
-                 * @member {string} post
+                 * @member {string|null|undefined} post
                  * @memberof google.api.HttpRule
                  * @instance
                  */
-                HttpRule.prototype.post = "";
+                HttpRule.prototype.post = null;
     
                 /**
                  * HttpRule delete.
-                 * @member {string} delete
+                 * @member {string|null|undefined} delete
                  * @memberof google.api.HttpRule
                  * @instance
                  */
-                HttpRule.prototype["delete"] = "";
+                HttpRule.prototype["delete"] = null;
     
                 /**
                  * HttpRule patch.
-                 * @member {string} patch
+                 * @member {string|null|undefined} patch
                  * @memberof google.api.HttpRule
                  * @instance
                  */
-                HttpRule.prototype.patch = "";
+                HttpRule.prototype.patch = null;
     
                 /**
                  * HttpRule custom.
@@ -3931,6 +3931,7 @@
              * @property {string} INPUT_ONLY=INPUT_ONLY INPUT_ONLY value
              * @property {string} IMMUTABLE=IMMUTABLE IMMUTABLE value
              * @property {string} UNORDERED_LIST=UNORDERED_LIST UNORDERED_LIST value
+             * @property {string} NON_EMPTY_DEFAULT=NON_EMPTY_DEFAULT NON_EMPTY_DEFAULT value
              */
             api.FieldBehavior = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
@@ -3941,6 +3942,7 @@
                 values[valuesById[4] = "INPUT_ONLY"] = "INPUT_ONLY";
                 values[valuesById[5] = "IMMUTABLE"] = "IMMUTABLE";
                 values[valuesById[6] = "UNORDERED_LIST"] = "UNORDERED_LIST";
+                values[valuesById[7] = "NON_EMPTY_DEFAULT"] = "NON_EMPTY_DEFAULT";
                 return values;
             })();
     
@@ -6919,6 +6921,10 @@
                             case 6:
                                 message[".google.api.fieldBehavior"][i] = 6;
                                 break;
+                            case "NON_EMPTY_DEFAULT":
+                            case 7:
+                                message[".google.api.fieldBehavior"][i] = 7;
+                                break;
                             }
                     }
                     if (object[".google.api.resourceReference"] != null) {
@@ -8979,35 +8985,35 @@
     
                 /**
                  * Value nullValue.
-                 * @member {google.protobuf.NullValue} nullValue
+                 * @member {google.protobuf.NullValue|null|undefined} nullValue
                  * @memberof google.protobuf.Value
                  * @instance
                  */
-                Value.prototype.nullValue = 0;
+                Value.prototype.nullValue = null;
     
                 /**
                  * Value numberValue.
-                 * @member {number} numberValue
+                 * @member {number|null|undefined} numberValue
                  * @memberof google.protobuf.Value
                  * @instance
                  */
-                Value.prototype.numberValue = 0;
+                Value.prototype.numberValue = null;
     
                 /**
                  * Value stringValue.
-                 * @member {string} stringValue
+                 * @member {string|null|undefined} stringValue
                  * @memberof google.protobuf.Value
                  * @instance
                  */
-                Value.prototype.stringValue = "";
+                Value.prototype.stringValue = null;
     
                 /**
                  * Value boolValue.
-                 * @member {boolean} boolValue
+                 * @member {boolean|null|undefined} boolValue
                  * @memberof google.protobuf.Value
                  * @instance
                  */
-                Value.prototype.boolValue = false;
+                Value.prototype.boolValue = null;
     
                 /**
                  * Value structValue.

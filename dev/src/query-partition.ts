@@ -33,7 +33,8 @@ import api = protos.google.firestore.v1;
  * @class QueryPartition
  */
 export class QueryPartition<T = firestore.DocumentData>
-  implements firestore.QueryPartition<T> {
+  implements firestore.QueryPartition<T>
+{
   private readonly _serializer: Serializer;
   private _memoizedStartAt: unknown[] | undefined;
   private _memoizedEndBefore: unknown[] | undefined;

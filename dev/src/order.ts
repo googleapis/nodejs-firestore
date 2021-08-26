@@ -39,6 +39,7 @@ enum TypeOrder {
 
 /*!
  * @private
+ * @internal
  */
 function typeOrder(val: api.IValue): TypeOrder {
   const valueType = detectValueType(val);
@@ -73,6 +74,7 @@ function typeOrder(val: api.IValue): TypeOrder {
 
 /*!
  * @private
+ * @internal
  */
 export function primitiveComparator(
   left: string | boolean | number,
@@ -90,6 +92,7 @@ export function primitiveComparator(
 /*!
  * Utility function to compare doubles (using Firestore semantics for NaN).
  * @private
+ * @internal
  */
 function compareNumbers(left: number, right: number): number {
   if (left < right) {
@@ -110,6 +113,7 @@ function compareNumbers(left: number, right: number): number {
 
 /*!
  * @private
+ * @internal
  */
 function compareNumberProtos(left: api.IValue, right: api.IValue): number {
   let leftValue, rightValue;
@@ -128,6 +132,7 @@ function compareNumberProtos(left: api.IValue, right: api.IValue): number {
 
 /*!
  * @private
+ * @internal
  */
 function compareTimestamps(
   left: google.protobuf.ITimestamp,
@@ -142,6 +147,7 @@ function compareTimestamps(
 
 /*!
  * @private
+ * @internal
  */
 function compareBlobs(left: Uint8Array, right: Uint8Array): number {
   if (!(left instanceof Buffer) || !(right instanceof Buffer)) {
@@ -152,6 +158,7 @@ function compareBlobs(left: Uint8Array, right: Uint8Array): number {
 
 /*!
  * @private
+ * @internal
  */
 function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
   const leftPath = QualifiedResourcePath.fromSlashSeparatedString(
@@ -165,6 +172,7 @@ function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
 
 /*!
  * @private
+ * @internal
  */
 function compareGeoPoints(
   left: google.type.ILatLng,
@@ -178,8 +186,9 @@ function compareGeoPoints(
 
 /*!
  * @private
+ * @internal
  */
-function compareArrays(left: api.IValue[], right: api.IValue[]): number {
+export function compareArrays(left: api.IValue[], right: api.IValue[]): number {
   for (let i = 0; i < left.length && i < right.length; i++) {
     const valueComparison = compare(left[i], right[i]);
     if (valueComparison !== 0) {
@@ -192,6 +201,7 @@ function compareArrays(left: api.IValue[], right: api.IValue[]): number {
 
 /*!
  * @private
+ * @internal
  */
 function compareObjects(left: ApiMapValue, right: ApiMapValue): number {
   // This requires iterating over the keys in the object in order and doing a
@@ -217,6 +227,7 @@ function compareObjects(left: ApiMapValue, right: ApiMapValue): number {
 
 /*!
  * @private
+ * @internal
  */
 export function compare(left: api.IValue, right: api.IValue): number {
   // First compare the types.

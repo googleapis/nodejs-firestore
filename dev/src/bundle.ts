@@ -25,7 +25,6 @@ import {
 } from './validate';
 
 import api = google.firestore.v1;
-import BundleElement = firestore.BundleElement;
 
 const BUNDLE_VERSION = 1;
 
@@ -139,6 +138,7 @@ export class BundleBuilder {
    * Converts a IBundleElement to a Buffer whose content is the length prefixed JSON representation
    * of the element.
    * @private
+   * @internal
    */
   private elementToLengthPrefixedBuffer(
     bundleElement: firestore.IBundleElement
@@ -146,7 +146,10 @@ export class BundleBuilder {
     // Convert to a valid proto message object then take its JSON representation.
     // This take cares of stuff like converting internal byte array fields
     // to Base64 encodings.
-    const message = BundleElement.fromObject(bundleElement).toJSON();
+    // We lazy-load the Proto file to reduce cold-start times.
+    const message = require('../protos/firestore_v1_proto_api')
+      .firestore.BundleElement.fromObject(bundleElement)
+      .toJSON();
     const buffer = Buffer.from(JSON.stringify(message), 'utf-8');
     const lengthBuffer = Buffer.from(buffer.length.toString());
     return Buffer.concat([lengthBuffer, buffer]);
@@ -199,6 +202,7 @@ export class BundleBuilder {
 /**
  * Convenient class to hold both the metadata and the actual content of a document to be bundled.
  * @private
+ * @internal
  */
 class BundledDocument {
   constructor(
@@ -211,6 +215,7 @@ class BundledDocument {
  * Validates that 'value' is DocumentSnapshot.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  */
@@ -224,6 +229,7 @@ function validateDocumentSnapshot(arg: string | number, value: unknown): void {
  * Validates that 'value' is QuerySnapshot.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  */

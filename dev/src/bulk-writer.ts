@@ -16,10 +16,17 @@
 import * as firestore from '@google-cloud/firestore';
 
 import * as assert from 'assert';
+import {GoogleError} from 'google-gax';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath, Firestore} from '.';
-import {delayExecution, MAX_RETRY_ATTEMPTS} from './backoff';
+import {
+  DEFAULT_BACKOFF_FACTOR,
+  DEFAULT_BACKOFF_INITIAL_DELAY_MS,
+  DEFAULT_BACKOFF_MAX_DELAY_MS,
+  delayExecution,
+  MAX_RETRY_ATTEMPTS,
+} from './backoff';
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
@@ -38,7 +45,7 @@ import {
   validateOptional,
 } from './validate';
 import {logger} from './logger';
-import {GoogleError, Status} from 'google-gax';
+import {StatusCode} from './status-code';
 
 // eslint-disable-next-line no-undef
 import GrpcStatus = FirebaseFirestore.GrpcStatus;
@@ -48,6 +55,11 @@ import api = google.firestore.v1;
  * The maximum number of writes that can be in a single batch.
  */
 const MAX_BATCH_SIZE = 20;
+
+/*!
+ * The maximum number of writes can be can in a single batch that is being retried.
+ */
+export const RETRY_MAX_BATCH_SIZE = 10;
 
 /*!
  * The starting maximum number of operations per second as allowed by the
@@ -66,6 +78,12 @@ export const DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT = 500;
 export const DEFAULT_MAXIMUM_OPS_PER_SECOND_LIMIT = 10000;
 
 /*!
+ * The default jitter to apply to the exponential backoff used in retries. For
+ * example, a factor of 0.3 means a 30% jitter is applied.
+ */
+export const DEFAULT_JITTER_FACTOR = 0.3;
+
+/*!
  * The rate by which to increase the capacity as specified by the 500/50/5 rule.
  */
 const RATE_LIMITER_MULTIPLIER = 1.5;
@@ -76,14 +94,28 @@ const RATE_LIMITER_MULTIPLIER = 1.5;
  */
 const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 
+/*!
+ * The default maximum number of pending operations that can be enqueued onto a
+ * BulkWriter instance. An operation is considered pending if BulkWriter has
+ * sent it via RPC and is awaiting the result. BulkWriter buffers additional
+ * writes after this many pending operations in order to avoiding going OOM.
+ */
+const DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT = 500;
+
 /**
  * Represents a single write for BulkWriter, encapsulating operation dispatch
  * and error handling.
  * @private
+ * @internal
  */
 class BulkWriterOperation {
   private deferred = new Deferred<WriteResult>();
   private failedAttempts = 0;
+  private lastStatus?: StatusCode;
+  private _backoffDuration = 0;
+
+  /** Whether flush() was called when this was the last enqueued operation. */
+  private _flushed = false;
 
   /**
    * @param ref The document reference being written to.
@@ -107,12 +139,24 @@ class BulkWriterOperation {
     return this.deferred.promise;
   }
 
+  get backoffDuration(): number {
+    return this._backoffDuration;
+  }
+
+  markFlushed(): void {
+    this._flushed = true;
+  }
+
+  get flushed(): boolean {
+    return this._flushed;
+  }
+
   onError(error: GoogleError): void {
     ++this.failedAttempts;
 
     try {
       const bulkWriterError = new BulkWriterError(
-        (error.code as number) as GrpcStatus,
+        error.code as number as GrpcStatus,
         error.message,
         this.ref,
         this.type,
@@ -131,12 +175,24 @@ class BulkWriterOperation {
       );
 
       if (shouldRetry) {
+        this.lastStatus = error.code as number;
+        this.updateBackoffDuration();
         this.sendFn(this);
       } else {
         this.deferred.reject(bulkWriterError);
       }
     } catch (userCallbackError) {
       this.deferred.reject(userCallbackError);
+    }
+  }
+
+  private updateBackoffDuration(): void {
+    if (this.lastStatus === StatusCode.RESOURCE_EXHAUSTED) {
+      this._backoffDuration = DEFAULT_BACKOFF_MAX_DELAY_MS;
+    } else if (this._backoffDuration === 0) {
+      this._backoffDuration = DEFAULT_BACKOFF_INITIAL_DELAY_MS;
+    } else {
+      this._backoffDuration *= DEFAULT_BACKOFF_FACTOR;
     }
   }
 
@@ -154,6 +210,7 @@ class BulkWriterOperation {
  * Used to represent a batch on the BatchQueue.
  *
  * @private
+ * @internal
  */
 class BulkCommitBatch extends WriteBatch {
   // The set of document reference paths present in the WriteBatch.
@@ -161,7 +218,26 @@ class BulkCommitBatch extends WriteBatch {
 
   // An array of pending write operations. Only contains writes that have not
   // been resolved.
-  private pendingOps: Array<BulkWriterOperation> = [];
+  readonly pendingOps: Array<BulkWriterOperation> = [];
+
+  private _maxBatchSize: number;
+
+  constructor(firestore: Firestore, maxBatchSize: number) {
+    super(firestore);
+    this._maxBatchSize = maxBatchSize;
+  }
+
+  get maxBatchSize(): number {
+    return this._maxBatchSize;
+  }
+
+  setMaxBatchSize(size: number): void {
+    assert(
+      this.pendingOps.length <= size,
+      'New batch size cannot be less than the number of enqueued writes'
+    );
+    this._maxBatchSize = size;
+  }
 
   has(documentRef: firestore.DocumentReference<unknown>): boolean {
     return this.docPaths.has(documentRef.path);
@@ -203,14 +279,16 @@ class BulkCommitBatch extends WriteBatch {
       const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
 
       const status = (response.status || [])[i];
-      if (status.code === Status.OK) {
+      if (status.code === StatusCode.OK) {
         const updateTime = Timestamp.fromProto(
           response.writeResults![i].updateTime || DELETE_TIMESTAMP_SENTINEL
         );
         this.pendingOps[i].onSuccess(new WriteResult(updateTime));
       } else {
-        const error = new GoogleError(status.message || undefined);
-        error.code = status.code as Status;
+        const error = new (require('google-gax').GoogleError)(
+          status.message || undefined
+        );
+        error.code = status.code as number;
         this.pendingOps[i].onError(wrapError(error, stack));
       }
     }
@@ -228,6 +306,19 @@ class BulkCommitBatch extends WriteBatch {
     this.docPaths.add(op.ref.path);
     this.pendingOps.push(op);
   }
+}
+
+/**
+ * Used to represent a buffered BulkWriterOperation.
+ *
+ * @private
+ * @internal
+ */
+class BufferedOperation {
+  constructor(
+    readonly operation: BulkWriterOperation,
+    readonly sendFn: () => void
+  ) {}
 }
 
 /**
@@ -268,20 +359,26 @@ export class BulkWriter {
    * The maximum number of writes that can be in a single batch.
    * Visible for testing.
    * @private
+   * @internal
    */
-  _maxBatchSize = MAX_BATCH_SIZE;
+  private _maxBatchSize = MAX_BATCH_SIZE;
 
   /**
    * The batch that is currently used to schedule operations. Once this batch
    * reaches maximum capacity, a new batch is created.
    * @private
+   * @internal
    */
-  private _bulkCommitBatch = new BulkCommitBatch(this.firestore);
+  private _bulkCommitBatch = new BulkCommitBatch(
+    this.firestore,
+    this._maxBatchSize
+  );
 
   /**
-   * A pointer to the tail of all active BulkWriter applications. This pointer
+   * A pointer to the tail of all active BulkWriter operations. This pointer
    * is advanced every time a new write is enqueued.
    * @private
+   * @internal
    */
   private _lastOp: Promise<void> = Promise.resolve();
 
@@ -290,6 +387,7 @@ export class BulkWriter {
    * new operations can be enqueued, except for retry operations scheduled by
    * the error handler.
    * @private
+   * @internal
    */
   private _closing = false;
 
@@ -297,13 +395,71 @@ export class BulkWriter {
    * Rate limiter used to throttle requests as per the 500/50/5 rule.
    * Visible for testing.
    * @private
+   * @internal
    */
   readonly _rateLimiter: RateLimiter;
+
+  /**
+   * The number of pending operations enqueued on this BulkWriter instance.
+   * An operation is considered pending if BulkWriter has sent it via RPC and
+   * is awaiting the result.
+   * @private
+   * @internal
+   */
+  private _pendingOpsCount = 0;
+
+  /**
+   * An array containing buffered BulkWriter operations after the maximum number
+   * of pending operations has been enqueued.
+   * @private
+   * @internal
+   */
+  private _bufferedOperations: Array<BufferedOperation> = [];
+
+  /**
+   * Whether a custom error handler has been set. BulkWriter only swallows
+   * errors if an error handler is set. Otherwise, an UnhandledPromiseRejection
+   * is thrown by Node if an operation promise is rejected without being
+   * handled.
+   * @private
+   * @internal
+   */
+  private _errorHandlerSet = false;
+
+  // Visible for testing.
+  _getBufferedOperationsCount(): number {
+    return this._bufferedOperations.length;
+  }
+
+  // Visible for testing.
+  _setMaxBatchSize(size: number): void {
+    assert(
+      this._bulkCommitBatch.pendingOps.length === 0,
+      'BulkCommitBatch should be empty'
+    );
+    this._maxBatchSize = size;
+    this._bulkCommitBatch = new BulkCommitBatch(this.firestore, size);
+  }
+
+  /**
+   * The maximum number of pending operations that can be enqueued onto this
+   * BulkWriter instance. Once the this number of writes have been enqueued,
+   * subsequent writes are buffered.
+   * @private
+   * @internal
+   */
+  private _maxPendingOpCount = DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT;
+
+  // Visible for testing.
+  _setMaxPendingOpCount(newMax: number): void {
+    this._maxPendingOpCount = newMax;
+  }
 
   /**
    * The user-provided callback to be run every time a BulkWriter operation
    * successfully completes.
    * @private
+   * @internal
    */
   private _successFn: (
     document: firestore.DocumentReference<unknown>,
@@ -314,11 +470,12 @@ export class BulkWriter {
    * The user-provided callback to be run every time a BulkWriter operation
    * fails.
    * @private
+   * @internal
    */
   private _errorFn: (error: BulkWriterError) => boolean = error => {
     const isRetryableDeleteError =
       error.operationType === 'delete' &&
-      (error.code as number) === Status.INTERNAL;
+      (error.code as number) === StatusCode.INTERNAL;
     const retryCodes = getRetryCodes('batchWrite');
     return (
       (retryCodes.includes(error.code) || isRetryableDeleteError) &&
@@ -408,11 +565,9 @@ export class BulkWriter {
     data: T
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    const op = this._enqueue(documentRef, 'create', bulkCommitBatch =>
+    return this._enqueue(documentRef, 'create', bulkCommitBatch =>
       bulkCommitBatch.create(documentRef, data)
     );
-    silencePromise(op);
-    return op;
   }
 
   /**
@@ -448,11 +603,9 @@ export class BulkWriter {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    const op = this._enqueue(documentRef, 'delete', bulkCommitBatch =>
+    return this._enqueue(documentRef, 'delete', bulkCommitBatch =>
       bulkCommitBatch.delete(documentRef, precondition)
     );
-    silencePromise(op);
-    return op;
   }
 
   set<T>(
@@ -505,11 +658,9 @@ export class BulkWriter {
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    const op = this._enqueue(documentRef, 'set', bulkCommitBatch =>
+    return this._enqueue(documentRef, 'set', bulkCommitBatch =>
       bulkCommitBatch.set(documentRef, data, options)
     );
-    silencePromise(op);
-    return op;
   }
 
   /**
@@ -561,19 +712,27 @@ export class BulkWriter {
     >
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    const op = this._enqueue(documentRef, 'update', bulkCommitBatch =>
+    return this._enqueue(documentRef, 'update', bulkCommitBatch =>
       bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues)
     );
-    silencePromise(op);
-    return op;
   }
+
+  /**
+   * Callback function set by {@link BulkWriter#onWriteResult} that is run
+   * every time a {@link BulkWriter} operation successfully completes.
+   *
+   * @callback BulkWriter~successCallback
+   * @param {DocumentReference} documentRef The document reference the
+   * operation was performed on
+   * @param {WriteResult} result The server write time of the operation.
+   */
 
   /**
    * Attaches a listener that is run every time a BulkWriter operation
    * successfully completes.
    *
-   * @param callback A callback to be called every time a BulkWriter operation
-   * successfully completes.
+   * @param {BulkWriter~successCallback} successCallback A callback to be
+   * called every time a BulkWriter operation successfully completes.
    * @example
    * let bulkWriter = firestore.bulkWriter();
    *
@@ -588,13 +747,25 @@ export class BulkWriter {
    *   });
    */
   onWriteResult(
-    callback: (
+    successCallback: (
       documentRef: firestore.DocumentReference<unknown>,
       result: WriteResult
     ) => void
   ): void {
-    this._successFn = callback;
+    this._successFn = successCallback;
   }
+
+  /**
+   * Callback function set by {@link BulkWriter#onWriteError} that is run when
+   * a write fails in order to determine whether {@link BulkWriter} should
+   * retry the operation.
+   *
+   * @callback BulkWriter~shouldRetryCallback
+   * @param {BulkWriterError} error The error object with information about the
+   * operation and error.
+   * @returns {boolean} Whether or not to retry the failed operation. Returning
+   * `true` retries the operation. Returning `false` will stop the retry loop.
+   */
 
   /**
    * Attaches an error handler listener that is run every time a BulkWriter
@@ -604,9 +775,9 @@ export class BulkWriter {
    * ABORTED errors up to a maximum of 10 failed attempts. When an error
    * handler is specified, the default error handler will be overwritten.
    *
-   * @param shouldRetryCallback A callback to be called every time a BulkWriter
-   * operation fails. Returning `true` will retry the operation. Returning
-   * `false` will stop the retry loop.
+   * @param shouldRetryCallback {BulkWriter~shouldRetryCallback} A callback to
+   * be called every time a BulkWriter operation fails. Returning `true` will
+   * retry the operation. Returning `false` will stop the retry loop.
    * @example
    * let bulkWriter = firestore.bulkWriter();
    *
@@ -624,6 +795,7 @@ export class BulkWriter {
    *   });
    */
   onWriteError(shouldRetryCallback: (error: BulkWriterError) => boolean): void {
+    this._errorHandlerSet = true;
     this._errorFn = shouldRetryCallback;
   }
 
@@ -654,7 +826,16 @@ export class BulkWriter {
    */
   flush(): Promise<void> {
     this._verifyNotClosed();
-    this._sendCurrentBatch(/* flush= */ true);
+    this._scheduleCurrentBatch(/* flush= */ true);
+
+    // Mark the most recent operation as flushed to ensure that the batch
+    // containing it will be sent once it's popped from the buffer.
+    if (this._bufferedOperations.length > 0) {
+      this._bufferedOperations[
+        this._bufferedOperations.length - 1
+      ].operation.markFlushed();
+    }
+
     return this._lastOp;
   }
 
@@ -693,8 +874,9 @@ export class BulkWriter {
   /**
    * Throws an error if the BulkWriter instance has been closed.
    * @private
+   * @internal
    */
-  private _verifyNotClosed(): void {
+  _verifyNotClosed(): void {
     if (this._closing) {
       throw new Error('BulkWriter has already been closed.');
     }
@@ -707,45 +889,81 @@ export class BulkWriter {
    * operations are enqueued. This allows retries to resolve as part of a
    * `flush()` or `close()` call.
    * @private
+   * @internal
    */
-  private _sendCurrentBatch(flush = false): void {
+  private _scheduleCurrentBatch(flush = false): void {
     if (this._bulkCommitBatch._opCount === 0) return;
 
-    const tag = requestTag();
     const pendingBatch = this._bulkCommitBatch;
-
-    this._bulkCommitBatch = new BulkCommitBatch(this.firestore);
-
-    // Send the batch if it is under the rate limit, or schedule another
-    // attempt after the appropriate timeout.
-    const underRateLimit = this._rateLimiter.tryMakeRequest(
-      pendingBatch._opCount
+    this._bulkCommitBatch = new BulkCommitBatch(
+      this.firestore,
+      this._maxBatchSize
     );
 
+    // Use the write with the longest backoff duration when determining backoff.
+    const highestBackoffDuration = pendingBatch.pendingOps.reduce((prev, cur) =>
+      prev.backoffDuration > cur.backoffDuration ? prev : cur
+    ).backoffDuration;
+    const backoffMsWithJitter = BulkWriter._applyJitter(highestBackoffDuration);
     const delayedExecution = new Deferred<void>();
-    if (underRateLimit) {
-      delayedExecution.resolve();
+
+    if (backoffMsWithJitter > 0) {
+      delayExecution(() => delayedExecution.resolve(), backoffMsWithJitter);
     } else {
-      const delayMs = this._rateLimiter.getNextRequestDelayMs(
-        pendingBatch._opCount
-      );
+      delayedExecution.resolve();
+    }
+
+    delayedExecution.promise.then(() => this._sendBatch(pendingBatch, flush));
+  }
+
+  /**
+   * Sends the provided batch once the rate limiter does not require any delay.
+   * @private
+   * @internal
+   */
+  private async _sendBatch(
+    batch: BulkCommitBatch,
+    flush = false
+  ): Promise<void> {
+    const tag = requestTag();
+
+    // Send the batch if it is does not require any delay, or schedule another
+    // attempt after the appropriate timeout.
+    const underRateLimit = this._rateLimiter.tryMakeRequest(batch._opCount);
+    if (underRateLimit) {
+      await batch.bulkCommit({requestTag: tag});
+      if (flush) this._scheduleCurrentBatch(flush);
+    } else {
+      const delayMs = this._rateLimiter.getNextRequestDelayMs(batch._opCount);
       logger(
-        'BulkWriter._sendCurrentBatch',
+        'BulkWriter._sendBatch',
         tag,
         `Backing off for ${delayMs} seconds`
       );
-      delayExecution(() => delayedExecution.resolve(), delayMs);
+      delayExecution(() => this._sendBatch(batch, flush), delayMs);
     }
+  }
 
-    delayedExecution.promise.then(async () => {
-      await pendingBatch.bulkCommit({requestTag: tag});
-      if (flush) this._sendCurrentBatch(flush);
-    });
+  /**
+   * Adds a 30% jitter to the provided backoff.
+   *
+   * @private
+   * @internal
+   */
+  private static _applyJitter(backoffMs: number): number {
+    if (backoffMs === 0) return 0;
+    // Random value in [-0.3, 0.3].
+    const jitter = DEFAULT_JITTER_FACTOR * (Math.random() * 2 - 1);
+    return Math.min(
+      DEFAULT_BACKOFF_MAX_DELAY_MS,
+      backoffMs + jitter * backoffMs
+    );
   }
 
   /**
    * Schedules and runs the provided operation on the next available batch.
    * @private
+   * @internal
    */
   private _enqueue(
     ref: firestore.DocumentReference<unknown>,
@@ -759,8 +977,70 @@ export class BulkWriter {
       this._errorFn.bind(this),
       this._successFn.bind(this)
     );
-    this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
-    return bulkWriterOp.promise;
+
+    // Swallow the error if the developer has set an error listener. This
+    // prevents UnhandledPromiseRejections from being thrown if a floating
+    // BulkWriter operation promise fails when an error handler is specified.
+    //
+    // This is done here in order to chain the caught promise onto `lastOp`,
+    // which ensures that flush() resolves after the operation promise.
+    const userPromise = bulkWriterOp.promise.catch(err => {
+      if (!this._errorHandlerSet) {
+        throw err;
+      } else {
+        return bulkWriterOp.promise;
+      }
+    });
+
+    // Advance the `_lastOp` pointer. This ensures that `_lastOp` only resolves
+    // when both the previous and the current write resolve.
+    this._lastOp = this._lastOp.then(() => silencePromise(userPromise));
+
+    // Schedule the operation if the BulkWriter has fewer than the maximum
+    // number of allowed pending operations, or add the operation to the
+    // buffer.
+    if (this._pendingOpsCount < this._maxPendingOpCount) {
+      this._pendingOpsCount++;
+      this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
+    } else {
+      this._bufferedOperations.push(
+        new BufferedOperation(bulkWriterOp, () => {
+          this._pendingOpsCount++;
+          this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
+        })
+      );
+    }
+
+    // Chain the BulkWriter operation promise with the buffer processing logic
+    // in order to ensure that it runs and that subsequent operations are
+    // enqueued before the next batch is scheduled in `_sendBatch()`.
+    return userPromise
+      .then(res => {
+        this._pendingOpsCount--;
+        this._processBufferedOps();
+        return res;
+      })
+      .catch(err => {
+        this._pendingOpsCount--;
+        this._processBufferedOps();
+        throw err;
+      });
+  }
+
+  /**
+   * Manages the pending operation counter and schedules the next BulkWriter
+   * operation if we're under the maximum limit.
+   * @private
+   * @internal
+   */
+  private _processBufferedOps(): void {
+    if (
+      this._pendingOpsCount < this._maxPendingOpCount &&
+      this._bufferedOperations.length > 0
+    ) {
+      const nextOp = this._bufferedOperations.shift()!;
+      nextOp.sendFn();
+    }
   }
 
   /**
@@ -768,26 +1048,37 @@ export class BulkWriter {
    * Sends the BulkCommitBatch if it reaches maximum capacity.
    *
    * @private
+   * @internal
    */
   _sendFn(
     enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
     op: BulkWriterOperation
   ): void {
+    // A backoff duration greater than 0 implies that this batch is a retry.
+    // Retried writes are sent with a batch size of 10 in order to guarantee
+    // that the batch is under the 10MiB limit.
+    if (op.backoffDuration > 0) {
+      if (this._bulkCommitBatch.pendingOps.length >= RETRY_MAX_BATCH_SIZE) {
+        this._scheduleCurrentBatch(/* flush= */ false);
+      }
+      this._bulkCommitBatch.setMaxBatchSize(RETRY_MAX_BATCH_SIZE);
+    }
+
     if (this._bulkCommitBatch.has(op.ref)) {
       // Create a new batch since the backend doesn't support batches with two
       // writes to the same document.
-      this._sendCurrentBatch();
+      this._scheduleCurrentBatch();
     }
 
-    // Run the operation on the current batch and advance the `_lastOp` pointer.
-    // This ensures that `_lastOp` only resolves when both the previous and the
-    // current write resolves.
     enqueueOnBatchCallback(this._bulkCommitBatch);
     this._bulkCommitBatch.processLastOperation(op);
-    this._lastOp = this._lastOp.then(() => silencePromise(op.promise));
 
-    if (this._bulkCommitBatch._opCount === this._maxBatchSize) {
-      this._sendCurrentBatch();
+    if (this._bulkCommitBatch._opCount === this._bulkCommitBatch.maxBatchSize) {
+      this._scheduleCurrentBatch();
+    } else if (op.flushed) {
+      // If flush() was called before this operation was enqueued into a batch,
+      // we still need to schedule it.
+      this._scheduleCurrentBatch(/* flush= */ true);
     }
   }
 }
@@ -796,6 +1087,7 @@ export class BulkWriter {
  * Validates the use of 'value' as BulkWriterOptions.
  *
  * @private
+ * @internal
  * @param value The BulkWriterOptions object to validate.
  * @throws if the input is not a valid BulkWriterOptions object.
  */

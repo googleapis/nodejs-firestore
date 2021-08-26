@@ -2056,16 +2056,16 @@ export namespace google {
             constructor(properties?: google.protobuf.IValue);
 
             /** Value nullValue. */
-            public nullValue: google.protobuf.NullValue;
+            public nullValue?: (google.protobuf.NullValue|null);
 
             /** Value numberValue. */
-            public numberValue: number;
+            public numberValue?: (number|null);
 
             /** Value stringValue. */
-            public stringValue: string;
+            public stringValue?: (string|null);
 
             /** Value boolValue. */
-            public boolValue: boolean;
+            public boolValue?: (boolean|null);
 
             /** Value structValue. */
             public structValue?: (google.protobuf.IStruct|null);
@@ -2750,7 +2750,7 @@ export namespace google {
                 constructor(properties?: google.firestore.v1.IPrecondition);
 
                 /** Precondition exists. */
-                public exists: boolean;
+                public exists?: (boolean|null);
 
                 /** Precondition updateTime. */
                 public updateTime?: (google.protobuf.ITimestamp|null);
@@ -3024,28 +3024,28 @@ export namespace google {
                 constructor(properties?: google.firestore.v1.IValue);
 
                 /** Value nullValue. */
-                public nullValue: google.protobuf.NullValue;
+                public nullValue?: (google.protobuf.NullValue|null);
 
                 /** Value booleanValue. */
-                public booleanValue: boolean;
+                public booleanValue?: (boolean|null);
 
                 /** Value integerValue. */
-                public integerValue: (number|string);
+                public integerValue?: (number|string|null);
 
                 /** Value doubleValue. */
-                public doubleValue: number;
+                public doubleValue?: (number|null);
 
                 /** Value timestampValue. */
                 public timestampValue?: (google.protobuf.ITimestamp|null);
 
                 /** Value stringValue. */
-                public stringValue: string;
+                public stringValue?: (string|null);
 
                 /** Value bytesValue. */
-                public bytesValue: Uint8Array;
+                public bytesValue?: (Uint8Array|null);
 
                 /** Value referenceValue. */
-                public referenceValue: string;
+                public referenceValue?: (string|null);
 
                 /** Value geoPointValue. */
                 public geoPointValue?: (google.type.ILatLng|null);
@@ -3525,7 +3525,7 @@ export namespace google {
                 public mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** GetDocumentRequest transaction. */
-                public transaction: Uint8Array;
+                public transaction?: (Uint8Array|null);
 
                 /** GetDocumentRequest readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
@@ -3614,7 +3614,7 @@ export namespace google {
                 public mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** ListDocumentsRequest transaction. */
-                public transaction: Uint8Array;
+                public transaction?: (Uint8Array|null);
 
                 /** ListDocumentsRequest readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
@@ -3906,7 +3906,7 @@ export namespace google {
                 public mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** BatchGetDocumentsRequest transaction. */
-                public transaction: Uint8Array;
+                public transaction?: (Uint8Array|null);
 
                 /** BatchGetDocumentsRequest newTransaction. */
                 public newTransaction?: (google.firestore.v1.ITransactionOptions|null);
@@ -3968,7 +3968,7 @@ export namespace google {
                 public found?: (google.firestore.v1.IDocument|null);
 
                 /** BatchGetDocumentsResponse missing. */
-                public missing: string;
+                public missing?: (string|null);
 
                 /** BatchGetDocumentsResponse transaction. */
                 public transaction: Uint8Array;
@@ -4271,7 +4271,7 @@ export namespace google {
                 public structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
 
                 /** RunQueryRequest transaction. */
-                public transaction: Uint8Array;
+                public transaction?: (Uint8Array|null);
 
                 /** RunQueryRequest newTransaction. */
                 public newTransaction?: (google.firestore.v1.ITransactionOptions|null);
@@ -4637,7 +4637,7 @@ export namespace google {
                 public addTarget?: (google.firestore.v1.ITarget|null);
 
                 /** ListenRequest removeTarget. */
-                public removeTarget: number;
+                public removeTarget?: (number|null);
 
                 /** ListenRequest labels. */
                 public labels: { [k: string]: string };
@@ -4773,7 +4773,7 @@ export namespace google {
                 public documents?: (google.firestore.v1.Target.IDocumentsTarget|null);
 
                 /** Target resumeToken. */
-                public resumeToken: Uint8Array;
+                public resumeToken?: (Uint8Array|null);
 
                 /** Target readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
@@ -5753,7 +5753,7 @@ export namespace google {
                 public update?: (google.firestore.v1.IDocument|null);
 
                 /** Write delete. */
-                public delete: string;
+                public delete?: (string|null);
 
                 /** Write transform. */
                 public transform?: (google.firestore.v1.IDocumentTransform|null);
@@ -5879,7 +5879,7 @@ export namespace google {
                     public fieldPath: string;
 
                     /** FieldTransform setToServerValue. */
-                    public setToServerValue: google.firestore.v1.DocumentTransform.FieldTransform.ServerValue;
+                    public setToServerValue?: (google.firestore.v1.DocumentTransform.FieldTransform.ServerValue|null);
 
                     /** FieldTransform increment. */
                     public increment?: (google.firestore.v1.IValue|null);
@@ -6269,19 +6269,19 @@ export namespace google {
             constructor(properties?: google.api.IHttpRule);
 
             /** HttpRule get. */
-            public get: string;
+            public get?: (string|null);
 
             /** HttpRule put. */
-            public put: string;
+            public put?: (string|null);
 
             /** HttpRule post. */
-            public post: string;
+            public post?: (string|null);
 
             /** HttpRule delete. */
-            public delete: string;
+            public delete?: (string|null);
 
             /** HttpRule patch. */
-            public patch: string;
+            public patch?: (string|null);
 
             /** HttpRule custom. */
             public custom?: (google.api.ICustomHttpPattern|null);
@@ -6369,7 +6369,7 @@ export namespace google {
 
         /** FieldBehavior enum. */
         type FieldBehavior =
-            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE"| "UNORDERED_LIST";
+            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE"| "UNORDERED_LIST"| "NON_EMPTY_DEFAULT";
 
         /** Properties of a ResourceDescriptor. */
         interface IResourceDescriptor {

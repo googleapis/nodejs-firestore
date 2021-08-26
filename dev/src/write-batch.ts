@@ -45,7 +45,8 @@ import {
   validateMinNumberOfArguments,
   validateOptional,
 } from './validate';
-import {Status} from 'google-gax';
+import {StatusCode} from './status-code';
+
 import api = google.firestore.v1;
 
 /**
@@ -99,6 +100,7 @@ export class WriteResult implements firestore.WriteResult {
  * A lazily-evaluated write that allows us to detect the Project ID before
  * serializing the request.
  * @private
+ * @internal
  */
 export type PendingWriteOp = () => api.IWrite;
 
@@ -119,6 +121,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * the backend.
    *
    * @private
+   * @internal
    */
   private readonly _ops: Array<{docPath: string; op: PendingWriteOp}> = [];
 
@@ -144,6 +147,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * Checks if this write batch has any pending operations.
    *
    * @private
+   * @internal
    */
   get isEmpty(): boolean {
     return this._ops.length === 0;
@@ -153,6 +157,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * Throws an error if this batch has already been committed.
    *
    * @private
+   * @internal
    */
   private verifyNotCommitted(): void {
     if (this._committed) {
@@ -222,6 +227,8 @@ export class WriteBatch implements firestore.WriteBatch {
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime. Fails the batch if the
    * document doesn't exist or was last updated at a different time.
+   * @param {boolean= } precondition.exists If set to true, enforces that the target
+   * document must or must not exist.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
@@ -542,7 +549,7 @@ export class WriteBatch implements firestore.WriteBatch {
     const stack = Error().stack!;
 
     // Commits should also be retried when they fail with status code ABORTED.
-    const retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
+    const retryCodes = [StatusCode.ABORTED, ...getRetryCodes('commit')];
 
     return this._commit<api.CommitRequest, api.CommitResponse>({retryCodes})
       .then(response => {
@@ -564,6 +571,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * Commit method that takes an optional transaction ID.
    *
    * @private
+   * @internal
    * @param commitOptions Options to use for this commit.
    * @param commitOptions.transactionId The transaction ID of this commit.
    * @param commitOptions.requestTag A unique client-assigned identifier for
@@ -611,6 +619,7 @@ export class WriteBatch implements firestore.WriteBatch {
   /**
    * Resets the WriteBatch and dequeues all pending operations.
    * @private
+   * @internal
    */
   _reset(): void {
     this._ops.splice(0);
@@ -623,6 +632,7 @@ export class WriteBatch implements firestore.WriteBatch {
  * and 'lastUpdateTime' use valid types.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The object to validate
  * @param allowExists Whether to allow the 'exists' preconditions.
@@ -686,6 +696,7 @@ function validatePrecondition(
  * Validates the use of 'value' as an update Precondition.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The object to validate.
  * @param options Optional validation options specifying whether the value can
@@ -705,6 +716,7 @@ function validateUpdatePrecondition(
  * Validates the use of 'value' as a delete Precondition.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The object to validate.
  * @param options Optional validation options specifying whether the value can
@@ -725,6 +737,7 @@ function validateDeletePrecondition(
  * boolean.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The object to validate.
  * @param options Optional validation options specifying whether the value can
@@ -796,6 +809,7 @@ export function validateSetOptions(
  * Validates a JavaScript object for usage as a Firestore document.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param obj JavaScript object to validate.
  * @param allowDeletes Whether to allow FieldValue.delete() sentinels.
@@ -823,6 +837,7 @@ export function validateDocumentData(
  * Validates that a value can be used as field value during an update.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param val The value to verify.
  * @param allowUndefined Whether to allow nested properties that are `undefined`.
@@ -848,6 +863,7 @@ export function validateFieldValue(
  * definitions (such as 'a.b' and 'a').
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param data An update map with field/value pairs.
  */
@@ -877,6 +893,7 @@ function validateNoConflictingFields(
  * Validates that a JavaScript object is a map of field paths to field values.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param obj JavaScript object to validate.
  * @param allowUndefined Whether to allow nested properties that are `undefined`.

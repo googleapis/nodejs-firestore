@@ -287,9 +287,8 @@ describe('CollectionGroup class', () => {
   });
 
   it('partition query with converter', async () => {
-    const collectionGroupWithConverter = collectionGroup.withConverter(
-      postConverter
-    );
+    const collectionGroupWithConverter =
+      collectionGroup.withConverter(postConverter);
     const partitions = await getPartitions(
       collectionGroupWithConverter,
       desiredPartitionCount
@@ -734,6 +733,16 @@ describe('DocumentReference class', () => {
   it('can delete() a non-existing document', () => {
     const ref = firestore.collection('col').doc();
     return ref.delete();
+  });
+
+  it('will fail to delete document with exists: true if doc does not exist', () => {
+    const ref = randomCol.doc();
+    return ref
+      .delete({exists: true})
+      .then(() => Promise.reject('Delete should have failed'))
+      .catch((err: Error) => {
+        expect(err.message).to.contain('NOT_FOUND: No document to update');
+      });
   });
 
   it('supports non-alphanumeric field names', () => {
@@ -2336,6 +2345,47 @@ describe('Transaction class', () => {
     const finalSnapshot = await ref.get();
     expect(finalSnapshot.data()).to.deep.equal({first: true, second: true});
   });
+
+  it('supports read-only transactions', async () => {
+    const ref = randomCol.doc('doc');
+    await ref.set({foo: 'bar'});
+    const snapshot = await firestore.runTransaction(
+      updateFunction => updateFunction.get(ref),
+      {readOnly: true}
+    );
+    expect(snapshot.exists).to.be.true;
+  });
+
+  it('supports read-only transactions with custom read-time', async () => {
+    const ref = randomCol.doc('doc');
+    const writeResult = await ref.set({foo: 1});
+    await ref.set({foo: 2});
+    const snapshot = await firestore.runTransaction(
+      updateFunction => updateFunction.get(ref),
+      {readOnly: true, readTime: writeResult.writeTime}
+    );
+    expect(snapshot.exists).to.be.true;
+    expect(snapshot.get('foo')).to.equal(1);
+  });
+
+  it('fails read-only with writes', async () => {
+    let attempts = 0;
+
+    const ref = randomCol.doc('doc');
+    try {
+      await firestore.runTransaction(
+        async updateFunction => {
+          ++attempts;
+          updateFunction.set(ref, {});
+        },
+        {readOnly: true}
+      );
+      expect.fail();
+    } catch (e) {
+      expect(attempts).to.equal(1);
+      expect(e.code).to.equal(Status.INVALID_ARGUMENT);
+    }
+  });
 });
 
 describe('WriteBatch class', () => {
@@ -2629,69 +2679,105 @@ describe('BulkWriter class', () => {
     return firestore.terminate();
   });
 
-  // TODO(chenbrian): This is a temporary test used to validate that the
-  //  StructuredQuery calls work properly. Remove these tests after adding
-  //  recursive delete tests.
-  it('finds nested documents and collection', async () => {
-    // ROOT-DB
-    // └── randomCol
-    //     ├── anna
-    //     └── bob
-    //         └── parentsCol
-    //             ├── charlie
-    //             └── daniel
-    //                 └── childCol
-    //                     ├── ernie
-    //                     └── francis
-    const batch = firestore.batch();
-    batch.set(randomCol.doc('anna'), {name: 'anna'});
-    batch.set(randomCol.doc('bob'), {name: 'bob'});
-    batch.set(randomCol.doc('bob/parentsCol/charlie'), {name: 'charlie'});
-    batch.set(randomCol.doc('bob/parentsCol/daniel'), {name: 'daniel'});
-    batch.set(randomCol.doc('bob/parentsCol/daniel/childCol/ernie'), {
-      name: 'ernie',
-    });
-    batch.set(randomCol.doc('bob/parentsCol/daniel/childCol/francis'), {
-      name: 'francis',
-    });
-    await batch.commit();
-
-    const numStreamItems = async (
-      stream: NodeJS.ReadableStream
-    ): Promise<number> => {
+  describe('recursiveDelete()', () => {
+    async function countDocumentChildren(
+      ref: DocumentReference
+    ): Promise<number> {
       let count = 0;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for await (const _ of stream) {
-        ++count;
+      const collections = await ref.listCollections();
+      for (const collection of collections) {
+        count += await countCollectionChildren(collection);
       }
       return count;
-    };
+    }
 
-    // Query all descendants of collections.
-    let descendantsStream = await firestore._getAllDescendants(randomCol);
-    expect(await numStreamItems(descendantsStream)).to.equal(6);
-    descendantsStream = await firestore._getAllDescendants(
-      randomCol.doc('bob').collection('parentsCol')
-    );
-    expect(await numStreamItems(descendantsStream)).to.equal(4);
-    descendantsStream = await firestore._getAllDescendants(
-      randomCol.doc('bob').collection('parentsCol/daniel/childCol')
-    );
-    expect(await numStreamItems(descendantsStream)).to.equal(2);
+    async function countCollectionChildren(
+      ref: CollectionReference
+    ): Promise<number> {
+      let count = 0;
+      const docs = await ref.listDocuments();
+      for (const doc of docs) {
+        count += (await countDocumentChildren(doc)) + 1;
+      }
+      return count;
+    }
 
-    // Query all descendants of documents.
-    descendantsStream = await firestore._getAllDescendants(
-      randomCol.doc('bob')
-    );
-    expect(await numStreamItems(descendantsStream)).to.equal(4);
-    descendantsStream = await firestore._getAllDescendants(
-      randomCol.doc('bob/parentsCol/daniel')
-    );
-    expect(await numStreamItems(descendantsStream)).to.equal(2);
-    descendantsStream = await firestore._getAllDescendants(
-      randomCol.doc('anna')
-    );
-    expect(await numStreamItems(descendantsStream)).to.equal(0);
+    beforeEach(async () => {
+      // ROOT-DB
+      // └── randomCol
+      //     ├── anna
+      //     └── bob
+      //         └── parentsCol
+      //             ├── charlie
+      //             └── daniel
+      //                 └── childCol
+      //                     ├── ernie
+      //                     └── francis
+      const batch = firestore.batch();
+      batch.set(randomCol.doc('anna'), {name: 'anna'});
+      batch.set(randomCol.doc('bob'), {name: 'bob'});
+      batch.set(randomCol.doc('bob/parentsCol/charlie'), {name: 'charlie'});
+      batch.set(randomCol.doc('bob/parentsCol/daniel'), {name: 'daniel'});
+      batch.set(randomCol.doc('bob/parentsCol/daniel/childCol/ernie'), {
+        name: 'ernie',
+      });
+      batch.set(randomCol.doc('bob/parentsCol/daniel/childCol/francis'), {
+        name: 'francis',
+      });
+      await batch.commit();
+    });
+
+    it('on top-level collection', async () => {
+      await firestore.recursiveDelete(randomCol);
+      expect(await countCollectionChildren(randomCol)).to.equal(0);
+    });
+
+    it('on nested collection', async () => {
+      const coll = randomCol.doc('bob').collection('parentsCol');
+      await firestore.recursiveDelete(coll);
+
+      expect(await countCollectionChildren(coll)).to.equal(0);
+      expect(await countCollectionChildren(randomCol)).to.equal(2);
+    });
+
+    it('on nested document', async () => {
+      const doc = randomCol.doc('bob/parentsCol/daniel');
+      await firestore.recursiveDelete(doc);
+
+      const docSnap = await doc.get();
+      expect(docSnap.exists).to.be.false;
+      expect(await countDocumentChildren(randomCol.doc('bob'))).to.equal(1);
+      expect(await countCollectionChildren(randomCol)).to.equal(3);
+    });
+
+    it('on leaf document', async () => {
+      const doc = randomCol.doc('bob/parentsCol/daniel/childCol/ernie');
+      await firestore.recursiveDelete(doc);
+
+      const docSnap = await doc.get();
+      expect(docSnap.exists).to.be.false;
+      expect(await countCollectionChildren(randomCol)).to.equal(5);
+    });
+
+    it('does not affect other collections', async () => {
+      // Add other nested collection that shouldn't be deleted.
+      const collB = firestore.collection('doggos');
+      await collB.doc('doggo').set({name: 'goodboi'});
+
+      await firestore.recursiveDelete(collB);
+      expect(await countCollectionChildren(randomCol)).to.equal(6);
+      expect(await countCollectionChildren(collB)).to.equal(0);
+    });
+
+    it('with custom BulkWriter instance', async () => {
+      const bulkWriter = firestore.bulkWriter();
+      let callbackCount = 0;
+      bulkWriter.onWriteResult(() => {
+        callbackCount++;
+      });
+      await firestore.recursiveDelete(randomCol, bulkWriter);
+      expect(callbackCount).to.equal(6);
+    });
   });
 
   it('can retry failed writes with a provided callback', async () => {
@@ -2714,85 +2800,88 @@ describe('BulkWriter class', () => {
 });
 
 describe('Client initialization', () => {
-  const ops: Array<
-    [string, (coll: CollectionReference) => Promise<unknown>]
-  > = [
-    ['CollectionReference.get()', randomColl => randomColl.get()],
-    ['CollectionReference.add()', randomColl => randomColl.add({})],
+  const ops: Array<[string, (coll: CollectionReference) => Promise<unknown>]> =
     [
-      'CollectionReference.stream()',
-      randomColl => {
-        const deferred = new Deferred<void>();
-        randomColl.stream().on('finish', () => {
-          deferred.resolve();
-        });
-        return deferred.promise;
-      },
-    ],
-    [
-      'CollectionReference.listDocuments()',
-      randomColl => randomColl.listDocuments(),
-    ],
-    [
-      'CollectionReference.onSnapshot()',
-      randomColl => {
-        const deferred = new Deferred<void>();
-        const unsubscribe = randomColl.onSnapshot(() => {
-          unsubscribe();
-          deferred.resolve();
-        });
-        return deferred.promise;
-      },
-    ],
-    ['DocumentReference.get()', randomColl => randomColl.doc().get()],
-    ['DocumentReference.create()', randomColl => randomColl.doc().create({})],
-    ['DocumentReference.set()', randomColl => randomColl.doc().set({})],
-    [
-      'DocumentReference.update()',
-      async randomColl => {
-        const update = randomColl.doc().update('foo', 'bar');
-        await expect(update).to.eventually.be.rejectedWith(
-          'No document to update'
-        );
-      },
-    ],
-    ['DocumentReference.delete()', randomColl => randomColl.doc().delete()],
-    [
-      'DocumentReference.listCollections()',
-      randomColl => randomColl.doc().listCollections(),
-    ],
-    [
-      'DocumentReference.onSnapshot()',
-      randomColl => {
-        const deferred = new Deferred<void>();
-        const unsubscribe = randomColl.doc().onSnapshot(() => {
-          unsubscribe();
-          deferred.resolve();
-        });
-        return deferred.promise;
-      },
-    ],
-    [
-      'CollectionGroup.getPartitions()',
-      async randomColl => {
-        const partitions = randomColl.firestore
-          .collectionGroup('id')
-          .getPartitions(2);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for await (const _ of partitions);
-      },
-    ],
-    [
-      'Firestore.runTransaction()',
-      randomColl => randomColl.firestore.runTransaction(t => t.get(randomColl)),
-    ],
-    [
-      'Firestore.getAll()',
-      randomColl => randomColl.firestore.getAll(randomColl.doc()),
-    ],
-    ['Firestore.batch()', randomColl => randomColl.firestore.batch().commit()],
-    ['Firestore.terminate()', randomColl => randomColl.firestore.terminate()],
-  ];
+      ['CollectionReference.get()', randomColl => randomColl.get()],
+      ['CollectionReference.add()', randomColl => randomColl.add({})],
+      [
+        'CollectionReference.stream()',
+        randomColl => {
+          const deferred = new Deferred<void>();
+          randomColl.stream().on('finish', () => {
+            deferred.resolve();
+          });
+          return deferred.promise;
+        },
+      ],
+      [
+        'CollectionReference.listDocuments()',
+        randomColl => randomColl.listDocuments(),
+      ],
+      [
+        'CollectionReference.onSnapshot()',
+        randomColl => {
+          const deferred = new Deferred<void>();
+          const unsubscribe = randomColl.onSnapshot(() => {
+            unsubscribe();
+            deferred.resolve();
+          });
+          return deferred.promise;
+        },
+      ],
+      ['DocumentReference.get()', randomColl => randomColl.doc().get()],
+      ['DocumentReference.create()', randomColl => randomColl.doc().create({})],
+      ['DocumentReference.set()', randomColl => randomColl.doc().set({})],
+      [
+        'DocumentReference.update()',
+        async randomColl => {
+          const update = randomColl.doc().update('foo', 'bar');
+          await expect(update).to.eventually.be.rejectedWith(
+            'No document to update'
+          );
+        },
+      ],
+      ['DocumentReference.delete()', randomColl => randomColl.doc().delete()],
+      [
+        'DocumentReference.listCollections()',
+        randomColl => randomColl.doc().listCollections(),
+      ],
+      [
+        'DocumentReference.onSnapshot()',
+        randomColl => {
+          const deferred = new Deferred<void>();
+          const unsubscribe = randomColl.doc().onSnapshot(() => {
+            unsubscribe();
+            deferred.resolve();
+          });
+          return deferred.promise;
+        },
+      ],
+      [
+        'CollectionGroup.getPartitions()',
+        async randomColl => {
+          const partitions = randomColl.firestore
+            .collectionGroup('id')
+            .getPartitions(2);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          for await (const _ of partitions);
+        },
+      ],
+      [
+        'Firestore.runTransaction()',
+        randomColl =>
+          randomColl.firestore.runTransaction(t => t.get(randomColl)),
+      ],
+      [
+        'Firestore.getAll()',
+        randomColl => randomColl.firestore.getAll(randomColl.doc()),
+      ],
+      [
+        'Firestore.batch()',
+        randomColl => randomColl.firestore.batch().commit(),
+      ],
+      ['Firestore.terminate()', randomColl => randomColl.firestore.terminate()],
+    ];
 
   for (const [description, op] of ops) {
     it(`succeeds for ${description}`, () => {

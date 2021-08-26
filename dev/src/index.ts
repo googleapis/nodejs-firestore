@@ -16,7 +16,7 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions, grpc, RetryOptions} from 'google-gax';
+import {CallOptions} from 'google-gax';
 import {Duplex, PassThrough, Transform} from 'stream';
 
 import {URL} from 'url';
@@ -26,6 +26,7 @@ import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
 import {BulkWriter} from './bulk-writer';
 import {BundleBuilder} from './bundle';
 import {fieldsFromJson, timestampFromJson} from './convert';
+import {DocumentReader} from './document-reader';
 import {
   DocumentSnapshot,
   DocumentSnapshotBuilder,
@@ -34,14 +35,12 @@ import {
 import {logger, setLibVersion} from './logger';
 import {
   DEFAULT_DATABASE_ID,
-  FieldPath,
   QualifiedResourcePath,
   ResourcePath,
   validateResourcePath,
 } from './path';
 import {ClientPool} from './pool';
-import {CollectionReference, Query, QueryOptions} from './reference';
-import {DocumentReference} from './reference';
+import {CollectionReference, DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
@@ -68,6 +67,7 @@ import {
   validateMinNumberOfArguments,
   validateObject,
   validateString,
+  validateTimestamp,
 } from './validate';
 import {WriteBatch} from './write-batch';
 
@@ -76,6 +76,11 @@ const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
 import {CollectionGroup} from './collection-group';
+import {
+  RECURSIVE_DELETE_MAX_PENDING_OPS,
+  RECURSIVE_DELETE_MIN_PENDING_OPS,
+  RecursiveDelete,
+} from './recursive-delete';
 
 export {
   CollectionReference,
@@ -95,7 +100,6 @@ export {GeoPoint} from './geo-point';
 export {CollectionGroup};
 export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
-export {Status as GrpcStatus} from 'google-gax';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
@@ -123,16 +127,6 @@ setLibVersion(libVersion);
  */
 
 /*!
- * @see v1
- */
-let v1: unknown; // Lazy-loaded in `_runRequest()`
-
-/*!
- * @see v1beta1
- */
-let v1beta1: unknown; // Lazy-loaded upon access.
-
-/*!
  * HTTP header for the resource prefix to improve routing and project isolation
  * by the backend.
  */
@@ -141,7 +135,12 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 /*!
  * The maximum number of times to retry idempotent requests.
  */
-const MAX_REQUEST_RETRIES = 5;
+export const MAX_REQUEST_RETRIES = 5;
+
+/*!
+ * The maximum number of times to attempt a transaction before failing.
+ */
+export const DEFAULT_MAX_TRANSACTION_ATTEMPTS = 5;
 
 /*!
  * The default number of idle GRPC channel to keep.
@@ -155,18 +154,6 @@ const DEFAULT_MAX_IDLE_CHANNELS = 1;
  * multiplex all requests over a single channel.
  */
 const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
-
-/**
- * Datastore allowed numeric IDs where Firestore only allows strings. Numeric
- * IDs are exposed to Firestore as __idNUM__, so this is the lowest possible
- * negative numeric value expressed in that format.
- *
- * This constant is used to specify startAt/endAt values when querying for all
- * descendants in a single collection.
- *
- * @private
- */
-const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
 
 /**
  * Document data (e.g. for use with
@@ -225,8 +212,25 @@ const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
 
 /**
  * Update data (for use with [update]{@link DocumentReference#update})
- * that contains paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that
- * contain dots reference nested fields within the document.
+ * that contains paths mapped to values. Fields that contain dots
+ * reference nested fields within the document.
+ *
+ * You can update a top-level field in your document by using the field name
+ * as a key (e.g. `foo`). The provided value completely replaces the contents
+ * for this field.
+ *
+ * You can also update a nested field directly by using its field path as a key
+ * (e.g. `foo.bar`). This nested field update replaces the contents at `bar`
+ * but does not modify other data under `foo`.
+ *
+ * @example
+ * const documentRef = firestore.doc('coll/doc');
+ * documentRef.set({a1: {a2: 'val'}, b1: {b2: 'val'}, c1: {c2: 'val'}});
+ * documentRef.update({
+ *  b1: {b3: 'val'},
+ *  'c1.c3': 'val',
+ * });
+ * // Value is {a1: {a2: 'val'}, b1: {b3: 'val'}, c1: {c2: 'val', c3: 'val'}}
  *
  * @typedef {Object.<string, *>} UpdateData
  */
@@ -236,7 +240,7 @@ const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
  * [update()]{@link DocumentReference#update} and
  * [delete()]{@link DocumentReference#delete} calls in
  * [DocumentReference]{@link DocumentReference},
- * [WriteBatch]{@link WriteBatch}, and
+ * [WriteBatch]{@link WriteBatch}, [BulkWriter]{@link BulkWriter}, and
  * [Transaction]{@link Transaction}. Using Preconditions, these calls
  * can be restricted to only apply to documents that match the specified
  * conditions.
@@ -254,6 +258,8 @@ const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
  * @property {Timestamp} lastUpdateTime The update time to enforce. If set,
  *  enforces that the document was last updated at lastUpdateTime. Fails the
  *  operation if the document was last updated at a different time.
+ * @property {boolean} exists If set, enforces that the target document must
+ * or must not exist.
  * @typedef {Object} Precondition
  */
 
@@ -311,6 +317,23 @@ const REFERENCE_NAME_MIN_ID = '__id-9223372036854775808__';
  */
 
 /**
+ * An error thrown when a BulkWriter operation fails.
+ *
+ * The error used by {@link BulkWriter~shouldRetryCallback} set in
+ * {@link BulkWriter#onWriteError}.
+ *
+ * @property {GrpcStatus} code The status code of the error.
+ * @property {string} message The error message of the error.
+ * @property {DocumentReference} documentRef The document reference the operation was
+ * performed on.
+ * @property {'create' | 'set' | 'update' | 'delete'} operationType The type
+ * of operation performed.
+ * @property {number} failedAttempts How many times this operation has been
+ * attempted unsuccessfully.
+ * @typedef {Error} BulkWriterError
+ */
+
+/**
  * Status codes returned by GRPC operations.
  *
  * @see https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
@@ -353,18 +376,21 @@ export class Firestore implements firestore.Firestore {
    * A client pool to distribute requests over multiple GAPIC clients in order
    * to work around a connection limit of 100 concurrent requests per client.
    * @private
+   * @internal
    */
   private _clientPool: ClientPool<GapicClient>;
 
   /**
    * The configuration options for the GAPIC client.
    * @private
+   * @internal
    */
   _settings: firestore.Settings = {};
 
   /**
    * Settings for the exponential backoff used by the streaming endpoints.
    * @private
+   * @internal
    */
   private _backoffSettings: ExponentialBackoffSetting;
 
@@ -372,12 +398,14 @@ export class Firestore implements firestore.Firestore {
    * Whether the initialization settings can still be changed by invoking
    * `settings()`.
    * @private
+   * @internal
    */
   private _settingsFrozen = false;
 
   /**
    * The serializer to use for the Protobuf transformation.
    * @private
+   * @internal
    */
   _serializer: Serializer | null = null;
 
@@ -387,6 +415,7 @@ export class Firestore implements firestore.Firestore {
    * The project ID is auto-detected during the first request unless a project
    * ID is passed to the constructor (or provided via `.settings()`).
    * @private
+   * @internal
    */
   private _projectId: string | undefined = undefined;
 
@@ -396,8 +425,31 @@ export class Firestore implements firestore.Firestore {
    * The client can only be terminated when there are no pending writes or
    * registered listeners.
    * @private
+   * @internal
    */
   private registeredListenersCount = 0;
+
+  /**
+   * A lazy-loaded BulkWriter instance to be used with recursiveDelete() if no
+   * BulkWriter instance is provided.
+   *
+   * @private
+   * @internal
+   */
+  private _bulkWriter: BulkWriter | undefined;
+
+  /**
+   * Lazy-load the Firestore's default BulkWriter.
+   *
+   * @private
+   * @internal
+   */
+  private getBulkWriter(): BulkWriter {
+    if (!this._bulkWriter) {
+      this._bulkWriter = this.bulkWriter();
+    }
+    return this._bulkWriter;
+  }
 
   /**
    * Number of pending operations on the client.
@@ -405,6 +457,7 @@ export class Firestore implements firestore.Firestore {
    * The client can only be terminated when there are no pending writes or
    * registered listeners.
    * @private
+   * @internal
    */
   private bulkWritersCount = 0;
 
@@ -472,7 +525,7 @@ export class Firestore implements firestore.Firestore {
         let client: GapicClient;
 
         if (this._settings.ssl === false) {
-          const grpcModule = this._settings.grpc ?? grpc;
+          const grpcModule = this._settings.grpc ?? require('google-gax').grpc;
           const sslCreds = grpcModule.credentials.createInsecure();
 
           client = new module.exports.v1({
@@ -594,6 +647,7 @@ export class Firestore implements firestore.Firestore {
    * `initializeIfNeeded()` was called before.
    *
    * @private
+   * @internal
    */
   get projectId(): string {
     if (this._projectId === undefined) {
@@ -609,6 +663,7 @@ export class Firestore implements firestore.Firestore {
    * `initializeIfNeeded()` was called before.
    *
    * @private
+   * @internal
    */
   get formattedName(): string {
     return `projects/${this.projectId}/databases/${DEFAULT_DATABASE_ID}`;
@@ -770,6 +825,7 @@ export class Firestore implements firestore.Firestore {
    * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
+   * @internal
    * @param documentOrName The Firestore 'Document' proto or the resource name
    * of a missing document.
    * @param readTime A 'Timestamp' proto indicating the time this document was
@@ -887,7 +943,7 @@ export class Firestore implements firestore.Firestore {
    *
    * @callback Firestore~updateFunction
    * @template T
-   * @param  {Transaction} transaction The transaction object for this
+   * @param {Transaction} transaction The transaction object for this
    * transaction.
    * @returns {Promise<T>} The promise returned at the end of the transaction.
    * This promise will be returned by {@link Firestore#runTransaction} if the
@@ -895,19 +951,64 @@ export class Firestore implements firestore.Firestore {
    */
 
   /**
+   * Options object for {@link Firestore#runTransaction} to configure a
+   * read-only transaction.
+   *
+   * @callback Firestore~ReadOnlyTransactionOptions
+   * @template T
+   * @param {true} readOnly Set to true to indicate a read-only transaction.
+   * @param {Timestamp=} readTime If specified, documents are read at the given
+   * time. This may not be more than 60 seconds in the past from when the
+   * request is processed by the server.
+   */
+
+  /**
+   * Options object for {@link Firestore#runTransaction} to configure a
+   * read-write transaction.
+   *
+   * @callback Firestore~ReadWriteTransactionOptions
+   * @template T
+   * @param {false=} readOnly Set to false or omit to indicate a read-write
+   * transaction.
+   * @param {number=} maxAttempts The maximum number of attempts for this
+   * transaction. Defaults to five.
+   */
+
+  /**
    * Executes the given updateFunction and commits the changes applied within
    * the transaction.
    *
    * You can use the transaction object passed to 'updateFunction' to read and
-   * modify Firestore documents under lock. Transactions are committed once
-   * 'updateFunction' resolves and attempted up to five times on failure.
+   * modify Firestore documents under lock. You have to perform all reads before
+   * before you perform any write.
+   *
+   * Transactions can be performed as read-only or read-write transactions. By
+   * default, transactions are executed in read-write mode.
+   *
+   * A read-write transaction obtains a pessimistic lock on all documents that
+   * are read during the transaction. These locks block other transactions,
+   * batched writes, and other non-transactional writes from changing that
+   * document. Any writes in a read-write transactions are committed once
+   * 'updateFunction' resolves, which also releases all locks.
+   *
+   * If a read-write transaction fails with contention, the transaction is
+   * retried up to five times. The `updateFunction` is invoked once for each
+   * attempt.
+   *
+   * Read-only transactions do not lock documents. They can be used to read
+   * documents at a consistent snapshot in time, which may be up to 60 seconds
+   * in the past. Read-only transactions are not retried.
+   *
+   * Transactions time out after 60 seconds if no documents are read.
+   * Transactions that are not committed within than 270 seconds are also
+   * aborted. Any remaining locks are released when a transaction times out.
    *
    * @template T
    * @param {Firestore~updateFunction} updateFunction The user function to
    * execute within the transaction context.
-   * @param {object=} transactionOptions Transaction options.
-   * @param {number=} transactionOptions.maxAttempts - The maximum number of
-   * attempts for this transaction.
+   * @param {
+   * Firestore~ReadWriteTransactionOptions|Firestore~ReadOnlyTransactionOptions=
+   * } transactionOptions Transaction options.
    * @returns {Promise<T>} If the transaction completed successfully or was
    * explicitly aborted (by the updateFunction returning a failed Promise), the
    * Promise returned by the updateFunction will be returned here. Else if the
@@ -938,30 +1039,55 @@ export class Firestore implements firestore.Firestore {
    */
   runTransaction<T>(
     updateFunction: (transaction: Transaction) => Promise<T>,
-    transactionOptions?: {maxAttempts?: number}
+    transactionOptions?:
+      | firestore.ReadWriteTransactionOptions
+      | firestore.ReadOnlyTransactionOptions
   ): Promise<T> {
     validateFunction('updateFunction', updateFunction);
 
-    const defaultAttempts = 5;
     const tag = requestTag();
 
-    let maxAttempts: number;
+    let maxAttempts = DEFAULT_MAX_TRANSACTION_ATTEMPTS;
+    let readOnly = false;
+    let readTime: Timestamp | undefined;
 
     if (transactionOptions) {
       validateObject('transactionOptions', transactionOptions);
-      validateInteger(
-        'transactionOptions.maxAttempts',
-        transactionOptions.maxAttempts,
-        {optional: true, minValue: 1}
+      validateBoolean(
+        'transactionOptions.readOnly',
+        transactionOptions.readOnly,
+        {optional: true}
       );
-      maxAttempts = transactionOptions.maxAttempts || defaultAttempts;
-    } else {
-      maxAttempts = defaultAttempts;
+
+      if (transactionOptions.readOnly) {
+        validateTimestamp(
+          'transactionOptions.readTime',
+          transactionOptions.readTime,
+          {optional: true}
+        );
+
+        readOnly = true;
+        readTime = transactionOptions.readTime as Timestamp | undefined;
+        maxAttempts = 1;
+      } else {
+        validateInteger(
+          'transactionOptions.maxAttempts',
+          transactionOptions.maxAttempts,
+          {optional: true, minValue: 1}
+        );
+
+        maxAttempts =
+          transactionOptions.maxAttempts || DEFAULT_MAX_TRANSACTION_ATTEMPTS;
+      }
     }
 
     const transaction = new Transaction(this, tag);
     return this.initializeIfNeeded(tag).then(() =>
-      transaction.runTransaction(updateFunction, maxAttempts)
+      transaction.runTransaction(updateFunction, {
+        maxAttempts,
+        readOnly,
+        readTime,
+      })
     );
   }
 
@@ -1025,136 +1151,14 @@ export class Firestore implements firestore.Firestore {
     const stack = Error().stack!;
 
     return this.initializeIfNeeded(tag)
-      .then(() => this.getAll_(documents, fieldMask, tag))
+      .then(() => {
+        const reader = new DocumentReader(this, documents);
+        reader.fieldMask = fieldMask || undefined;
+        return reader.get(tag);
+      })
       .catch(err => {
         throw wrapError(err, stack);
       });
-  }
-
-  /**
-   * Internal method to retrieve multiple documents from Firestore, optionally
-   * as part of a transaction.
-   *
-   * @private
-   * @param docRefs The documents to receive.
-   * @param fieldMask An optional field mask to apply to this read.
-   * @param requestTag A unique client-assigned identifier for this request.
-   * @param transactionId The transaction ID to use for this read.
-   * @returns A Promise that contains an array with the resulting documents.
-   */
-  getAll_<T>(
-    docRefs: Array<firestore.DocumentReference<T>>,
-    fieldMask: firestore.FieldPath[] | null,
-    requestTag: string,
-    transactionId?: Uint8Array
-  ): Promise<Array<DocumentSnapshot<T>>> {
-    const requestedDocuments = new Set<string>();
-    const retrievedDocuments = new Map<string, DocumentSnapshot>();
-
-    for (const docRef of docRefs) {
-      requestedDocuments.add((docRef as DocumentReference<T>).formattedName);
-    }
-
-    const request: api.IBatchGetDocumentsRequest = {
-      database: this.formattedName,
-      transaction: transactionId,
-      documents: Array.from(requestedDocuments),
-    };
-
-    if (fieldMask) {
-      const fieldPaths = fieldMask.map(
-        fieldPath => (fieldPath as FieldPath).formattedName
-      );
-      request.mask = {fieldPaths};
-    }
-
-    return this.requestStream('batchGetDocuments', request, requestTag).then(
-      stream => {
-        return new Promise<Array<DocumentSnapshot<T>>>((resolve, reject) => {
-          stream
-            .on('error', err => {
-              logger(
-                'Firestore.getAll_',
-                requestTag,
-                'GetAll failed with error:',
-                err
-              );
-              reject(err);
-            })
-            .on('data', (response: api.IBatchGetDocumentsResponse) => {
-              try {
-                let document;
-
-                if (response.found) {
-                  logger(
-                    'Firestore.getAll_',
-                    requestTag,
-                    'Received document: %s',
-                    response.found.name!
-                  );
-                  document = this.snapshot_(response.found, response.readTime!);
-                } else {
-                  logger(
-                    'Firestore.getAll_',
-                    requestTag,
-                    'Document missing: %s',
-                    response.missing!
-                  );
-                  document = this.snapshot_(
-                    response.missing!,
-                    response.readTime!
-                  );
-                }
-
-                const path = document.ref.path;
-                retrievedDocuments.set(path, document);
-              } catch (err) {
-                logger(
-                  'Firestore.getAll_',
-                  requestTag,
-                  'GetAll failed with exception:',
-                  err
-                );
-                reject(err);
-              }
-            })
-            .on('end', () => {
-              logger(
-                'Firestore.getAll_',
-                requestTag,
-                'Received %d results',
-                retrievedDocuments.size
-              );
-
-              // BatchGetDocuments doesn't preserve document order. We use
-              // the request order to sort the resulting documents.
-              const orderedDocuments: Array<DocumentSnapshot<T>> = [];
-
-              for (const docRef of docRefs) {
-                const document = retrievedDocuments.get(docRef.path);
-                if (document !== undefined) {
-                  // Recreate the DocumentSnapshot with the DocumentReference
-                  // containing the original converter.
-                  const finalDoc = new DocumentSnapshotBuilder(
-                    docRef as DocumentReference<T>
-                  );
-                  finalDoc.fieldsProto = document._fieldsProto;
-                  finalDoc.readTime = document.readTime;
-                  finalDoc.createTime = document.createTime;
-                  finalDoc.updateTime = document.updateTime;
-                  orderedDocuments.push(finalDoc.build());
-                } else {
-                  reject(
-                    new Error(`Did not receive document for "${docRef.path}".`)
-                  );
-                }
-              }
-              resolve(orderedDocuments);
-            });
-          stream.resume();
-        });
-      }
-    );
   }
 
   /**
@@ -1163,6 +1167,7 @@ export class Firestore implements firestore.Firestore {
    * called.
    *
    * @private
+   * @internal
    */
   registerListener(): void {
     this.registeredListenersCount += 1;
@@ -1174,6 +1179,7 @@ export class Firestore implements firestore.Firestore {
    * is called.
    *
    * @private
+   * @internal
    */
   unregisterListener(): void {
     this.registeredListenersCount -= 1;
@@ -1184,6 +1190,7 @@ export class Firestore implements firestore.Firestore {
    * that all pending operations are complete when terminate() is called.
    *
    * @private
+   * @internal
    */
   _incrementBulkWritersCount(): void {
     this.bulkWritersCount += 1;
@@ -1194,56 +1201,86 @@ export class Firestore implements firestore.Firestore {
    * that all pending operations are complete when terminate() is called.
    *
    * @private
+   * @internal
    */
   _decrementBulkWritersCount(): void {
     this.bulkWritersCount -= 1;
   }
 
   /**
-   * Retrieves all descendant documents nested under the provided reference.
+   * Recursively deletes all documents and subcollections at and under the
+   * specified level.
+   *
+   * If any delete fails, the promise is rejected with an error message
+   * containing the number of failed deletes and the stack trace of the last
+   * failed delete. The provided reference is deleted regardless of whether
+   * all deletes succeeded.
+   *
+   * `recursiveDelete()` uses a BulkWriter instance with default settings to
+   * perform the deletes. To customize throttling rates or add success/error
+   * callbacks, pass in a custom BulkWriter instance.
+   *
+   * @param ref The reference of a document or collection to delete.
+   * @param bulkWriter A custom BulkWriter instance used to perform the
+   * deletes.
+   * @return A promise that resolves when all deletes have been performed.
+   * The promise is rejected if any of the deletes fail.
+   *
+   * @example
+   * // Recursively delete a reference and log the references of failures.
+   * const bulkWriter = firestore.bulkWriter();
+   * bulkWriter
+   *   .onWriteError((error) => {
+   *     if (
+   *       error.failedAttempts < MAX_RETRY_ATTEMPTS
+   *     ) {
+   *       return true;
+   *     } else {
+   *       console.log('Failed write at document: ', error.documentRef.path);
+   *       return false;
+   *     }
+   *   });
+   * await firestore.recursiveDelete(docRef, bulkWriter);
+   */
+  recursiveDelete(
+    ref:
+      | firestore.CollectionReference<unknown>
+      | firestore.DocumentReference<unknown>,
+    bulkWriter?: BulkWriter
+  ): Promise<void> {
+    return this._recursiveDelete(
+      ref,
+      RECURSIVE_DELETE_MAX_PENDING_OPS,
+      RECURSIVE_DELETE_MIN_PENDING_OPS,
+      bulkWriter
+    );
+  }
+
+  /**
+   * This overload is not private in order to test the query resumption with
+   * startAfter() once the RecursiveDelete instance has MAX_PENDING_OPS pending.
    *
    * @private
-   * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
+   * @internal
    */
-  // TODO(chenbrian): Make this a private method after adding recursive delete.
-  _getAllDescendants(
-    ref: CollectionReference | DocumentReference
-  ): NodeJS.ReadableStream {
-    // The parent is the closest ancestor document to the location we're
-    // deleting. If we are deleting a document, the parent is the path of that
-    // document. If we are deleting a collection, the parent is the path of the
-    // document containing that collection (or the database root, if it is a
-    // root collection).
-    let parentPath = ref._resourcePath;
-    if (ref instanceof CollectionReference) {
-      parentPath = parentPath.popLast();
-    }
-    const collectionId =
-      ref instanceof CollectionReference ? ref.id : ref.parent.id;
-
-    let query: Query = new Query(
+  // Visible for testing
+  _recursiveDelete(
+    ref:
+      | firestore.CollectionReference<unknown>
+      | firestore.DocumentReference<unknown>,
+    maxPendingOps: number,
+    minPendingOps: number,
+    bulkWriter?: BulkWriter
+  ): Promise<void> {
+    const writer = bulkWriter ?? this.getBulkWriter();
+    const deleter = new RecursiveDelete(
       this,
-      QueryOptions.forKindlessAllDescendants(parentPath, collectionId)
+      writer,
+      ref,
+      maxPendingOps,
+      minPendingOps
     );
-
-    // Query for names only to fetch empty snapshots.
-    query = query.select(FieldPath.documentId());
-
-    if (ref instanceof CollectionReference) {
-      // To find all descendants of a collection reference, we need to use a
-      // composite filter that captures all documents that start with the
-      // collection prefix. The MIN_KEY constant represents the minimum key in
-      // this collection, and a null byte + the MIN_KEY represents the minimum
-      // key is the next possible collection.
-      const nullChar = String.fromCharCode(0);
-      const startAt = collectionId + '/' + REFERENCE_NAME_MIN_ID;
-      const endAt = collectionId + nullChar + '/' + REFERENCE_NAME_MIN_ID;
-      query = query
-        .where(FieldPath.documentId(), '>=', startAt)
-        .where(FieldPath.documentId(), '<', endAt);
-    }
-
-    return query.stream();
+    return deleter.run();
   }
 
   /**
@@ -1264,10 +1301,21 @@ export class Firestore implements firestore.Firestore {
   }
 
   /**
+   * Returns the Project ID to serve as the JSON representation of this
+   * Firestore instance.
+   *
+   * @return An object that contains the project ID (or `undefined` if not yet
+   * available).
+   */
+  toJSON(): object {
+    return {projectId: this._projectId};
+  }
+  /**
    * Initializes the client if it is not already initialized. All methods in the
    * SDK can be used after this method completes.
    *
    * @private
+   * @internal
    * @param requestTag A unique client-assigned identifier that caused this
    * initialization.
    * @return A Promise that resolves when the client is initialized.
@@ -1315,6 +1363,7 @@ export class Firestore implements firestore.Firestore {
   /**
    * Returns GAX call options that set the cloud resource header.
    * @private
+   * @internal
    */
   private createCallOptions(
     methodName: string,
@@ -1332,7 +1381,10 @@ export class Firestore implements firestore.Firestore {
 
     if (retryCodes) {
       const retryParams = getRetryParams(methodName);
-      callOptions.retry = new RetryOptions(retryCodes, retryParams);
+      callOptions.retry = new (require('google-gax').RetryOptions)(
+        retryCodes,
+        retryParams
+      );
     }
 
     return callOptions;
@@ -1342,6 +1394,7 @@ export class Firestore implements firestore.Firestore {
    * A function returning a Promise that can be retried.
    *
    * @private
+   * @internal
    * @callback retryFunction
    * @returns {Promise} A Promise indicating the function's success.
    */
@@ -1354,6 +1407,7 @@ export class Firestore implements firestore.Firestore {
    * for further attempts.
    *
    * @private
+   * @internal
    * @param methodName Name of the Veneer API endpoint that takes a request
    * and GAX options.
    * @param requestTag A unique client-assigned identifier for this request.
@@ -1407,6 +1461,7 @@ export class Firestore implements firestore.Firestore {
    * method rejects the returned Promise.
    *
    * @private
+   * @internal
    * @param backendStream The Node stream to monitor.
    * @param lifetime A Promise that resolves when the stream receives an 'end',
    * 'close' or 'finish' message.
@@ -1515,6 +1570,7 @@ export class Firestore implements firestore.Firestore {
    * necessary within the request options.
    *
    * @private
+   * @internal
    * @param methodName Name of the Veneer API endpoint that takes a request
    * and GAX options.
    * @param request The Protobuf request to send.
@@ -1534,10 +1590,9 @@ export class Firestore implements firestore.Firestore {
     return this._clientPool.run(requestTag, async gapicClient => {
       try {
         logger('Firestore.request', requestTag, 'Sending request: %j', request);
-        const [result] = await (gapicClient[methodName] as UnaryMethod<
-          Req,
-          Resp
-        >)(request, callOptions);
+        const [result] = await (
+          gapicClient[methodName] as UnaryMethod<Req, Resp>
+        )(request, callOptions);
         logger(
           'Firestore.request',
           requestTag,
@@ -1560,6 +1615,7 @@ export class Firestore implements firestore.Firestore {
    * listeners are attached.
    *
    * @private
+   * @internal
    * @param methodName Name of the streaming Veneer API endpoint that
    * takes a request and GAX options.
    * @param request The Protobuf request to send.
@@ -1680,36 +1736,40 @@ module.exports = Object.assign(module.exports, existingExports);
  * {@link v1beta1} factory function.
  *
  * @private
+ * @internal
  * @name Firestore.v1beta1
- * @see v1beta1
  * @type {function}
  */
 Object.defineProperty(module.exports, 'v1beta1', {
   // The v1beta1 module is very large. To avoid pulling it in from static
-  // scope, we lazy-load and cache the module.
-  get: () => {
-    if (!v1beta1) {
-      v1beta1 = require('./v1beta1');
-    }
-    return v1beta1;
-  },
+  // scope, we lazy-load the module.
+  get: () => require('./v1beta1'),
 });
 
 /**
  * {@link v1} factory function.
  *
  * @private
+ * @internal
  * @name Firestore.v1
- * @see v1
  * @type {function}
  */
 Object.defineProperty(module.exports, 'v1', {
   // The v1 module is very large. To avoid pulling it in from static
-  // scope, we lazy-load and cache the module.
-  get: () => {
-    if (!v1) {
-      v1 = require('./v1');
-    }
-    return v1;
-  },
+  // scope, we lazy-load  the module.
+  get: () => require('./v1'),
+});
+
+/**
+ * {@link Status} factory function.
+ *
+ * @private
+ * @internal
+ * @name Firestore.GrpcStatus
+ * @type {function}
+ */
+Object.defineProperty(module.exports, 'GrpcStatus', {
+  // The gax module is very large. To avoid pulling it in from static
+  // scope, we lazy-load the module.
+  get: () => require('google-gax').Status,
 });

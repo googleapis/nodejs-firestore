@@ -27,6 +27,7 @@ import {validateInteger} from './validate';
 
 import api = protos.google.firestore.v1;
 import {defaultConverter} from './types';
+import {compareArrays} from './order';
 
 /**
  * A `CollectionGroup` refers to all documents that are contained in a
@@ -36,7 +37,8 @@ import {defaultConverter} from './types';
  */
 export class CollectionGroup<T = firestore.DocumentData>
   extends Query<T>
-  implements firestore.CollectionGroup<T> {
+  implements firestore.CollectionGroup<T>
+{
   /** @hideconstructor */
   constructor(
     firestore: Firestore,
@@ -78,13 +80,13 @@ export class CollectionGroup<T = firestore.DocumentData>
     const tag = requestTag();
     await this.firestore.initializeIfNeeded(tag);
 
-    let lastValues: api.IValue[] | undefined = undefined;
-    let partitionCount = 0;
+    const partitions: Array<api.IValue>[] = [];
 
     if (desiredPartitionCount > 1) {
       // Partition queries require explicit ordering by __name__.
       const queryWithDefaultOrder = this.orderBy(FieldPath.documentId());
-      const request: api.IPartitionQueryRequest = queryWithDefaultOrder.toProto();
+      const request: api.IPartitionQueryRequest =
+        queryWithDefaultOrder.toProto();
 
       // Since we are always returning an extra partition (with an empty endBefore
       // cursor), we reduce the desired partition count by one.
@@ -98,16 +100,7 @@ export class CollectionGroup<T = firestore.DocumentData>
       stream.resume();
 
       for await (const currentCursor of stream) {
-        ++partitionCount;
-        const currentValues = currentCursor.values ?? [];
-        yield new QueryPartition(
-          this._firestore,
-          this._queryOptions.collectionId,
-          this._queryOptions.converter,
-          lastValues,
-          currentValues
-        );
-        lastValues = currentValues;
+        partitions.push(currentCursor.values ?? []);
       }
     }
 
@@ -115,15 +108,28 @@ export class CollectionGroup<T = firestore.DocumentData>
       'Firestore.getPartitions',
       tag,
       'Received %d partitions',
-      partitionCount
+      partitions.length
     );
+
+    // Sort the partitions as they may not be ordered if responses are paged.
+    partitions.sort((l, r) => compareArrays(l, r));
+
+    for (let i = 0; i < partitions.length; ++i) {
+      yield new QueryPartition(
+        this._firestore,
+        this._queryOptions.collectionId,
+        this._queryOptions.converter,
+        i > 0 ? partitions[i - 1] : undefined,
+        partitions[i]
+      );
+    }
 
     // Return the extra partition with the empty cursor.
     yield new QueryPartition(
       this._firestore,
       this._queryOptions.collectionId,
       this._queryOptions.converter,
-      lastValues,
+      partitions.pop(),
       undefined
     );
   }

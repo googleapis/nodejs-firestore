@@ -28,9 +28,17 @@ declare namespace FirebaseFirestore {
   export type DocumentData = {[field: string]: any};
 
   /**
-   * Update data (for use with `DocumentReference.update()`) consists of field
-   * paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that contain dots
-   * reference nested fields within the document.
+   * Update data (for use with [update]{@link DocumentReference#update})
+   * that contains paths mapped to values. Fields that contain dots reference
+   * nested fields within the document.
+   *
+   * You can update a top-level field in your document by using the field name
+   * as a key (e.g. `foo`). The provided value completely replaces the contents
+   * for this field.
+   *
+   * You can also update a nested field directly by using its field path as a
+   * key (e.g. `foo.bar`). This nested field update replaces the contents at
+   * `bar` but does not modify other data under `foo`.
    */
   export type UpdateData = {[fieldPath: string]: any};
 
@@ -166,6 +174,28 @@ declare namespace FirebaseFirestore {
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }
 
+  /** Options to configure a read-only transaction. */
+  export interface ReadOnlyTransactionOptions {
+    /** Set to true to indicate a read-only transaction. */
+    readOnly: true;
+    /**
+     * If specified, documents are read at the given time. This may not be more
+     * than 60 seconds in the past from when the request is processed by the
+     * server.
+     */
+    readTime?: Timestamp;
+  }
+
+  /** Options to configure a read-write transaction. */
+  export interface ReadWriteTransactionOptions {
+    /** Set to false or omit to indicate a read-write transaction. */
+    readOnly?: false;
+    /**
+     * The maximum number of attempts for this transaction. Defaults to five.
+     */
+    maxAttempts?: number;
+  }
+
   /**
    * `Firestore` represents a Firestore Database and is the entry point for all
    * Firestore operations.
@@ -241,6 +271,46 @@ declare namespace FirebaseFirestore {
     ): Promise<Array<DocumentSnapshot<DocumentData>>>;
 
     /**
+     * Recursively deletes all documents and subcollections at and under the
+     * specified level.
+     *
+     * If any delete fails, the promise is rejected with an error message
+     * containing the number of failed deletes and the stack trace of the last
+     * failed delete. The provided reference is deleted regardless of whether
+     * all deletes succeeded.
+     *
+     * `recursiveDelete()` uses a BulkWriter instance with default settings to
+     * perform the deletes. To customize throttling rates or add success/error
+     * callbacks, pass in a custom BulkWriter instance.
+     *
+     * @param ref The reference of a document or collection to delete.
+     * @param bulkWriter A custom BulkWriter instance used to perform the
+     * deletes.
+     * @return A promise that resolves when all deletes have been performed.
+     * The promise is rejected if any of the deletes fail.
+     *
+     * @example
+     * // Recursively delete a reference and log the references of failures.
+     * const bulkWriter = firestore.bulkWriter();
+     * bulkWriter
+     *   .onWriteError((error) => {
+     *     if (
+     *       error.failedAttempts < MAX_RETRY_ATTEMPTS
+     *     ) {
+     *       return true;
+     *     } else {
+     *       console.log('Failed write at document: ', error.documentRef.path);
+     *       return false;
+     *     }
+     *   });
+     * await firestore.recursiveDelete(docRef, bulkWriter);
+     */
+    recursiveDelete(
+      ref: CollectionReference<unknown> | DocumentReference<unknown>,
+      bulkWriter?: BulkWriter
+    ): Promise<void>;
+
+    /**
      * Terminates the Firestore client and closes all open streams.
      *
      * @return A Promise that resolves when the client is terminated.
@@ -260,14 +330,33 @@ declare namespace FirebaseFirestore {
      * the transaction.
      *
      * You can use the transaction object passed to 'updateFunction' to read and
-     * modify Firestore documents under lock. Transactions are committed once
-     * 'updateFunction' resolves and attempted up to five times on failure.
+     * modify Firestore documents under lock. You have to perform all reads
+     * before before you perform any write.
+     *
+     * Transactions can be performed as read-only or read-write transactions. By
+     * default, transactions are executed in read-write mode.
+     *
+     * A read-write transaction obtains a pessimistic lock on all documents that
+     * are read during the transaction. These locks block other transactions,
+     * batched writes, and other non-transactional writes from changing that
+     * document. Any writes in a read-write transactions are committed once
+     * 'updateFunction' resolves, which also releases all locks.
+     *
+     * If a read-write transaction fails with contention, the transaction is
+     * retried up to five times. The `updateFunction` is invoked once for each
+     * attempt.
+     *
+     * Read-only transactions do not lock documents. They can be used to read
+     * documents at a consistent snapshot in time, which may be up to 60 seconds
+     * in the past. Read-only transactions are not retried.
+     *
+     * Transactions time out after 60 seconds if no documents are read.
+     * Transactions that are not committed within than 270 seconds are also
+     * aborted. Any remaining locks are released when a transaction times out.
      *
      * @param updateFunction The function to execute within the transaction
      * context.
-     * @param {object=} transactionOptions Transaction options.
-     * @param {number=} transactionOptions.maxAttempts The maximum number of
-     * attempts for this transaction.
+     * @param transactionOptions Transaction options.
      * @return If the transaction completed successfully or was explicitly
      * aborted (by the updateFunction returning a failed Promise), the Promise
      * returned by the updateFunction will be returned here. Else if the
@@ -276,7 +365,9 @@ declare namespace FirebaseFirestore {
      */
     runTransaction<T>(
       updateFunction: (transaction: Transaction) => Promise<T>,
-      transactionOptions?: {maxAttempts?: number}
+      transactionOptions?:
+        | ReadWriteTransactionOptions
+        | ReadOnlyTransactionOptions
     ): Promise<T>;
 
     /**
@@ -511,6 +602,8 @@ declare namespace FirebaseFirestore {
      * @param precondition.lastUpdateTime If set, enforces that the
      * document was last updated at lastUpdateTime. Fails the batch if the
      * document doesn't exist or was last updated at a different time.
+     * @param precondition.exists If set, enforces that the target document
+     * must or must not exist.
      * @returns A promise that resolves with the result of the delete. If the
      * delete fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
@@ -838,6 +931,11 @@ declare namespace FirebaseFirestore {
      * If set, the last update time to enforce.
      */
     readonly lastUpdateTime?: Timestamp;
+
+    /**
+     * If set, enforces that the target document must or must not exist.
+     */
+    readonly exists?: boolean;
   }
 
   /**
@@ -1464,7 +1562,7 @@ declare namespace FirebaseFirestore {
      * this is the first snapshot, all documents will be in the list as added
      * changes.
      */
-    docChanges(): DocumentChange[];
+    docChanges(): DocumentChange<T>[];
 
     /**
      * Enumerates all of the documents in the QuerySnapshot.

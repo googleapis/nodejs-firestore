@@ -49,6 +49,7 @@ import {
 } from './util/helpers';
 
 import api = google.firestore.v1;
+import protobuf = google.protobuf;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -202,7 +203,7 @@ export function orderBy(
   return {orderBy};
 }
 
-function limit(n: number): api.IStructuredQuery {
+export function limit(n: number): api.IStructuredQuery {
   return {
     limit: {
       value: n,
@@ -216,11 +217,14 @@ function offset(n: number): api.IStructuredQuery {
   };
 }
 
-function allDescendants(): api.IStructuredQuery {
+export function allDescendants(kindless = false): api.IStructuredQuery {
+  if (kindless) {
+    return {from: [{allDescendants: true}]};
+  }
   return {from: [{collectionId: 'collectionId', allDescendants: true}]};
 }
 
-function select(...fields: string[]): api.IStructuredQuery {
+export function select(...fields: string[]): api.IStructuredQuery {
   const select: api.StructuredQuery.IProjection = {
     fields: [],
   };
@@ -282,25 +286,48 @@ function endAt(
   return {endAt: cursor};
 }
 
-export function queryEquals(
+/**
+ * Returns the timestamp value for the provided readTimes, or the default
+ * readTime value used in tests if no values are provided.
+ */
+export function readTime(
+  seconds?: number,
+  nanos?: number
+): protobuf.ITimestamp {
+  if (seconds === undefined && nanos === undefined) {
+    return {seconds: '5', nanos: 6};
+  }
+  return {seconds: String(seconds), nanos: nanos};
+}
+
+export function queryEqualsWithParent(
   actual: api.IRunQueryRequest | undefined,
+  parent: string,
   ...protoComponents: api.IStructuredQuery[]
-) {
+): void {
   expect(actual).to.not.be.undefined;
 
+  if (parent !== '') {
+    parent = '/' + parent;
+  }
+
   const query: api.IRunQueryRequest = {
-    parent: DATABASE_ROOT + '/documents',
-    structuredQuery: {
-      from: [
-        {
-          collectionId: 'collectionId',
-        },
-      ],
-    },
+    parent: DATABASE_ROOT + '/documents' + parent,
+    structuredQuery: {},
   };
 
   for (const protoComponent of protoComponents) {
     extend(true, query.structuredQuery, protoComponent);
+  }
+
+  // We add the `from` selector here in order to avoid setting collectionId on
+  // kindless queries.
+  if (query.structuredQuery!.from === undefined) {
+    query.structuredQuery!.from = [
+      {
+        collectionId: 'collectionId',
+      },
+    ];
   }
 
   // 'extend' removes undefined fields in the request object. The backend
@@ -308,6 +335,13 @@ export function queryEquals(
   // the expected and the actual request.
   actual = extend(true, {}, actual);
   expect(actual).to.deep.eq(query);
+}
+
+export function queryEquals(
+  actual: api.IRunQueryRequest | undefined,
+  ...protoComponents: api.IStructuredQuery[]
+): void {
+  queryEqualsWithParent(actual, /* parent= */ '', ...protoComponents);
 }
 
 function bundledQueryEquals(

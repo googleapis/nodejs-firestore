@@ -3524,6 +3524,10 @@
                             case 6:
                                 message[".google.api.fieldBehavior"][i] = 6;
                                 break;
+                            case "NON_EMPTY_DEFAULT":
+                            case 7:
+                                message[".google.api.fieldBehavior"][i] = 7;
+                                break;
                             }
                     }
                     if (object[".google.api.resourceReference"] != null) {
@@ -5209,35 +5213,35 @@
     
                 /**
                  * Value nullValue.
-                 * @member {google.protobuf.NullValue} nullValue
+                 * @member {google.protobuf.NullValue|null|undefined} nullValue
                  * @memberof google.protobuf.Value
                  * @instance
                  */
-                Value.prototype.nullValue = 0;
+                Value.prototype.nullValue = null;
     
                 /**
                  * Value numberValue.
-                 * @member {number} numberValue
+                 * @member {number|null|undefined} numberValue
                  * @memberof google.protobuf.Value
                  * @instance
                  */
-                Value.prototype.numberValue = 0;
+                Value.prototype.numberValue = null;
     
                 /**
                  * Value stringValue.
-                 * @member {string} stringValue
+                 * @member {string|null|undefined} stringValue
                  * @memberof google.protobuf.Value
                  * @instance
                  */
-                Value.prototype.stringValue = "";
+                Value.prototype.stringValue = null;
     
                 /**
                  * Value boolValue.
-                 * @member {boolean} boolValue
+                 * @member {boolean|null|undefined} boolValue
                  * @memberof google.protobuf.Value
                  * @instance
                  */
-                Value.prototype.boolValue = false;
+                Value.prototype.boolValue = null;
     
                 /**
                  * Value structValue.
@@ -6772,11 +6776,11 @@
     
                     /**
                      * Precondition exists.
-                     * @member {boolean} exists
+                     * @member {boolean|null|undefined} exists
                      * @memberof google.firestore.v1.Precondition
                      * @instance
                      */
-                    Precondition.prototype.exists = false;
+                    Precondition.prototype.exists = null;
     
                     /**
                      * Precondition updateTime.
@@ -7357,35 +7361,35 @@
     
                     /**
                      * Value nullValue.
-                     * @member {google.protobuf.NullValue} nullValue
+                     * @member {google.protobuf.NullValue|null|undefined} nullValue
                      * @memberof google.firestore.v1.Value
                      * @instance
                      */
-                    Value.prototype.nullValue = 0;
+                    Value.prototype.nullValue = null;
     
                     /**
                      * Value booleanValue.
-                     * @member {boolean} booleanValue
+                     * @member {boolean|null|undefined} booleanValue
                      * @memberof google.firestore.v1.Value
                      * @instance
                      */
-                    Value.prototype.booleanValue = false;
+                    Value.prototype.booleanValue = null;
     
                     /**
                      * Value integerValue.
-                     * @member {number|string} integerValue
+                     * @member {number|string|null|undefined} integerValue
                      * @memberof google.firestore.v1.Value
                      * @instance
                      */
-                    Value.prototype.integerValue = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+                    Value.prototype.integerValue = null;
     
                     /**
                      * Value doubleValue.
-                     * @member {number} doubleValue
+                     * @member {number|null|undefined} doubleValue
                      * @memberof google.firestore.v1.Value
                      * @instance
                      */
-                    Value.prototype.doubleValue = 0;
+                    Value.prototype.doubleValue = null;
     
                     /**
                      * Value timestampValue.
@@ -7397,27 +7401,27 @@
     
                     /**
                      * Value stringValue.
-                     * @member {string} stringValue
+                     * @member {string|null|undefined} stringValue
                      * @memberof google.firestore.v1.Value
                      * @instance
                      */
-                    Value.prototype.stringValue = "";
+                    Value.prototype.stringValue = null;
     
                     /**
                      * Value bytesValue.
-                     * @member {Uint8Array} bytesValue
+                     * @member {Uint8Array|null|undefined} bytesValue
                      * @memberof google.firestore.v1.Value
                      * @instance
                      */
-                    Value.prototype.bytesValue = $util.newBuffer([]);
+                    Value.prototype.bytesValue = null;
     
                     /**
                      * Value referenceValue.
-                     * @member {string} referenceValue
+                     * @member {string|null|undefined} referenceValue
                      * @memberof google.firestore.v1.Value
                      * @instance
                      */
-                    Value.prototype.referenceValue = "";
+                    Value.prototype.referenceValue = null;
     
                     /**
                      * Value geoPointValue.
@@ -8360,11 +8364,11 @@
     
                     /**
                      * GetDocumentRequest transaction.
-                     * @member {Uint8Array} transaction
+                     * @member {Uint8Array|null|undefined} transaction
                      * @memberof google.firestore.v1.GetDocumentRequest
                      * @instance
                      */
-                    GetDocumentRequest.prototype.transaction = $util.newBuffer([]);
+                    GetDocumentRequest.prototype.transaction = null;
     
                     /**
                      * GetDocumentRequest readTime.
@@ -8550,11 +8554,11 @@
     
                     /**
                      * ListDocumentsRequest transaction.
-                     * @member {Uint8Array} transaction
+                     * @member {Uint8Array|null|undefined} transaction
                      * @memberof google.firestore.v1.ListDocumentsRequest
                      * @instance
                      */
-                    ListDocumentsRequest.prototype.transaction = $util.newBuffer([]);
+                    ListDocumentsRequest.prototype.transaction = null;
     
                     /**
                      * ListDocumentsRequest readTime.
@@ -9242,11 +9246,11 @@
     
                     /**
                      * BatchGetDocumentsRequest transaction.
-                     * @member {Uint8Array} transaction
+                     * @member {Uint8Array|null|undefined} transaction
                      * @memberof google.firestore.v1.BatchGetDocumentsRequest
                      * @instance
                      */
-                    BatchGetDocumentsRequest.prototype.transaction = $util.newBuffer([]);
+                    BatchGetDocumentsRequest.prototype.transaction = null;
     
                     /**
                      * BatchGetDocumentsRequest newTransaction.
@@ -9419,11 +9423,11 @@
     
                     /**
                      * BatchGetDocumentsResponse missing.
-                     * @member {string} missing
+                     * @member {string|null|undefined} missing
                      * @memberof google.firestore.v1.BatchGetDocumentsResponse
                      * @instance
                      */
-                    BatchGetDocumentsResponse.prototype.missing = "";
+                    BatchGetDocumentsResponse.prototype.missing = null;
     
                     /**
                      * BatchGetDocumentsResponse transaction.
@@ -10134,11 +10138,11 @@
     
                     /**
                      * RunQueryRequest transaction.
-                     * @member {Uint8Array} transaction
+                     * @member {Uint8Array|null|undefined} transaction
                      * @memberof google.firestore.v1.RunQueryRequest
                      * @instance
                      */
-                    RunQueryRequest.prototype.transaction = $util.newBuffer([]);
+                    RunQueryRequest.prototype.transaction = null;
     
                     /**
                      * RunQueryRequest newTransaction.
@@ -11066,11 +11070,11 @@
     
                     /**
                      * ListenRequest removeTarget.
-                     * @member {number} removeTarget
+                     * @member {number|null|undefined} removeTarget
                      * @memberof google.firestore.v1.ListenRequest
                      * @instance
                      */
-                    ListenRequest.prototype.removeTarget = 0;
+                    ListenRequest.prototype.removeTarget = null;
     
                     /**
                      * ListenRequest labels.
@@ -11401,11 +11405,11 @@
     
                     /**
                      * Target resumeToken.
-                     * @member {Uint8Array} resumeToken
+                     * @member {Uint8Array|null|undefined} resumeToken
                      * @memberof google.firestore.v1.Target
                      * @instance
                      */
-                    Target.prototype.resumeToken = $util.newBuffer([]);
+                    Target.prototype.resumeToken = null;
     
                     /**
                      * Target readTime.
@@ -13841,11 +13845,11 @@
     
                     /**
                      * Write delete.
-                     * @member {string} delete
+                     * @member {string|null|undefined} delete
                      * @memberof google.firestore.v1.Write
                      * @instance
                      */
-                    Write.prototype["delete"] = "";
+                    Write.prototype["delete"] = null;
     
                     /**
                      * Write transform.
@@ -14147,11 +14151,11 @@
     
                         /**
                          * FieldTransform setToServerValue.
-                         * @member {google.firestore.v1.DocumentTransform.FieldTransform.ServerValue} setToServerValue
+                         * @member {google.firestore.v1.DocumentTransform.FieldTransform.ServerValue|null|undefined} setToServerValue
                          * @memberof google.firestore.v1.DocumentTransform.FieldTransform
                          * @instance
                          */
-                        FieldTransform.prototype.setToServerValue = 0;
+                        FieldTransform.prototype.setToServerValue = null;
     
                         /**
                          * FieldTransform increment.
@@ -15080,43 +15084,43 @@
     
                 /**
                  * HttpRule get.
-                 * @member {string} get
+                 * @member {string|null|undefined} get
                  * @memberof google.api.HttpRule
                  * @instance
                  */
-                HttpRule.prototype.get = "";
+                HttpRule.prototype.get = null;
     
                 /**
                  * HttpRule put.
-                 * @member {string} put
+                 * @member {string|null|undefined} put
                  * @memberof google.api.HttpRule
                  * @instance
                  */
-                HttpRule.prototype.put = "";
+                HttpRule.prototype.put = null;
     
                 /**
                  * HttpRule post.
-                 * @member {string} post
+                 * @member {string|null|undefined} post
                  * @memberof google.api.HttpRule
                  * @instance
                  */
-                HttpRule.prototype.post = "";
+                HttpRule.prototype.post = null;
     
                 /**
                  * HttpRule delete.
-                 * @member {string} delete
+                 * @member {string|null|undefined} delete
                  * @memberof google.api.HttpRule
                  * @instance
                  */
-                HttpRule.prototype["delete"] = "";
+                HttpRule.prototype["delete"] = null;
     
                 /**
                  * HttpRule patch.
-                 * @member {string} patch
+                 * @member {string|null|undefined} patch
                  * @memberof google.api.HttpRule
                  * @instance
                  */
-                HttpRule.prototype.patch = "";
+                HttpRule.prototype.patch = null;
     
                 /**
                  * HttpRule custom.
@@ -15392,6 +15396,7 @@
              * @property {string} INPUT_ONLY=INPUT_ONLY INPUT_ONLY value
              * @property {string} IMMUTABLE=IMMUTABLE IMMUTABLE value
              * @property {string} UNORDERED_LIST=UNORDERED_LIST UNORDERED_LIST value
+             * @property {string} NON_EMPTY_DEFAULT=NON_EMPTY_DEFAULT NON_EMPTY_DEFAULT value
              */
             api.FieldBehavior = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
@@ -15402,6 +15407,7 @@
                 values[valuesById[4] = "INPUT_ONLY"] = "INPUT_ONLY";
                 values[valuesById[5] = "IMMUTABLE"] = "IMMUTABLE";
                 values[valuesById[6] = "UNORDERED_LIST"] = "UNORDERED_LIST";
+                values[valuesById[7] = "NON_EMPTY_DEFAULT"] = "NON_EMPTY_DEFAULT";
                 return values;
             })();
     

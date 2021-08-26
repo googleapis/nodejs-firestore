@@ -1024,32 +1024,7 @@ describe('getAll() method', () => {
     });
   });
 
-  it('handles stream exception after initialization', () => {
-    let attempts = 0;
-
-    const overrides: ApiOverride = {
-      batchGetDocuments: () => {
-        ++attempts;
-        return stream(found('documentId'), new Error('Expected exception'));
-      },
-    };
-
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .getAll(firestore.doc('collectionId/documentId'))
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          // We don't retry since the stream might have already been released
-          // to the end user.
-          expect(attempts).to.equal(1);
-          expect(err.message).to.equal('Expected exception');
-        });
-    });
-  });
-
-  it('handles intermittent stream exception', () => {
+  it('handles stream exception (before first result)', () => {
     let attempts = 0;
 
     const overrides: ApiOverride = {
@@ -1073,26 +1048,59 @@ describe('getAll() method', () => {
     });
   });
 
-  it('handles serialization error', () => {
+  it('handles stream exception (with retryable error)', () => {
+    let attempts = 0;
+
+    const error = new GoogleError('Expected exception');
+    error.code = Status.DEADLINE_EXCEEDED;
+
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
-        return stream(found('documentId'));
+        ++attempts;
+        return stream(found(document(`doc${attempts}`)), error);
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      firestore['snapshot_'] = () => {
-        throw new Error('Expected exception');
-      };
+    return createInstance(overrides).then(async firestore => {
+      const docs = await firestore.getAll(
+        firestore.doc('collectionId/doc1'),
+        firestore.doc('collectionId/doc2'),
+        firestore.doc('collectionId/doc3')
+      );
 
-      return firestore
-        .getAll(firestore.doc('collectionId/documentId'))
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          expect(err.message).to.equal('Expected exception');
-        });
+      expect(attempts).to.equal(3);
+      expect(docs.length).to.equal(3);
+      expect(docs[0].ref.path).to.equal('collectionId/doc1');
+      expect(docs[1].ref.path).to.equal('collectionId/doc2');
+      expect(docs[2].ref.path).to.equal('collectionId/doc3');
+    });
+  });
+
+  it('handles stream exception (with non-retryable error)', () => {
+    let attempts = 0;
+
+    const error = new GoogleError('Expected exception');
+    error.code = Status.PERMISSION_DENIED;
+
+    const overrides: ApiOverride = {
+      batchGetDocuments: () => {
+        ++attempts;
+        return stream(found(document(`doc${attempts}`)), error);
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      try {
+        await firestore.getAll(
+          firestore.doc('collectionId/doc1'),
+          firestore.doc('collectionId/doc2'),
+          firestore.doc('collectionId/doc3')
+        );
+        expect.fail();
+      } catch (err) {
+        expect(attempts).to.equal(1);
+        expect(err.code).to.equal(Status.PERMISSION_DENIED);
+      }
     });
   });
 
@@ -1105,7 +1113,7 @@ describe('getAll() method', () => {
       [Status.NOT_FOUND]: 1,
       [Status.ALREADY_EXISTS]: 1,
       [Status.PERMISSION_DENIED]: 1,
-      [Status.RESOURCE_EXHAUSTED]: 1,
+      [Status.RESOURCE_EXHAUSTED]: 5,
       [Status.FAILED_PRECONDITION]: 1,
       [Status.ABORTED]: 1,
       [Status.OUT_OF_RANGE]: 1,

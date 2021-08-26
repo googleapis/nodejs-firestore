@@ -96,6 +96,7 @@ export class GeoPoint implements Serializable, firestore.GeoPoint {
   /**
    * Converts the GeoPoint to a google.type.LatLng proto.
    * @private
+   * @internal
    */
   toProto(): api.IValue {
     return {
@@ -109,6 +110,7 @@ export class GeoPoint implements Serializable, firestore.GeoPoint {
   /**
    * Converts a google.type.LatLng proto to its GeoPoint representation.
    * @private
+   * @internal
    */
   static fromProto(proto: google.type.ILatLng): GeoPoint {
     return new GeoPoint(proto.latitude || 0, proto.longitude || 0);

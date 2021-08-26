@@ -26,11 +26,11 @@ import {
   PaginationCallback,
   GaxCall,
 } from 'google-gax';
-import * as path from 'path';
 
 import {Transform} from 'stream';
 import {RequestType} from 'google-gax/build/src/apitypes';
 import * as protos from '../../protos/firestore_v1beta1_proto_api';
+import jsonProtos = require('../../protos/protos.json');
 /**
  * Client JSON configuration object, loaded from
  * `src/v1beta1/firestore_client_config.json`.
@@ -45,20 +45,12 @@ const version = require('../../../package.json').version;
 /**
  *  The Cloud Firestore service.
  *
- *  This service exposes several types of comparable timestamps:
- *
- *  *    `create_time` - The time at which a document was created. Changes only
- *       when a document is deleted, then re-created. Increases in a strict
- *        monotonic fashion.
- *  *    `update_time` - The time at which a document was last updated. Changes
- *       every time a document is modified. Does not change when a write results
- *       in no modifications. Increases in a strict monotonic fashion.
- *  *    `read_time` - The time at which a particular state was observed. Used
- *       to denote a consistent snapshot of the database or the time at which a
- *       Document was observed to not exist.
- *  *    `commit_time` - The time at which the writes in a transaction were
- *       committed. Any read with an equal or greater `read_time` is guaranteed
- *       to see the effects of the transaction.
+ *  Cloud Firestore is a fast, fully managed, serverless, cloud-native NoSQL
+ *  document database that simplifies storing, syncing, and querying data for
+ *  your mobile, web, and IoT apps at global scale. Its client libraries provide
+ *  live synchronization and offline support, while its security features and
+ *  integrations with Firebase and Google Cloud Platform (GCP) accelerate
+ *  building truly serverless apps.
  * @class
  * @deprecated Use v1/firestore_client instead.
  * @memberof v1beta1
@@ -66,6 +58,7 @@ const version = require('../../../package.json').version;
 export class FirestoreClient {
   private _terminated = false;
   private _opts: ClientOptions;
+  private _providedCustomServicePath: boolean;
   private _gaxModule: typeof gax | typeof gax.fallback;
   private _gaxGrpc: gax.GrpcClient | gax.fallback.GrpcClient;
   private _protos: {};
@@ -77,6 +70,7 @@ export class FirestoreClient {
     longrunning: {},
     batching: {},
   };
+  warn: (code: string, message: string, warnType?: string) => void;
   innerApiCalls: {[name: string]: Function};
   firestoreStub?: Promise<{[name: string]: Function}>;
 
@@ -119,6 +113,9 @@ export class FirestoreClient {
     const staticMembers = this.constructor as typeof FirestoreClient;
     const servicePath =
       opts?.servicePath || opts?.apiEndpoint || staticMembers.servicePath;
+    this._providedCustomServicePath = !!(
+      opts?.servicePath || opts?.apiEndpoint
+    );
     const port = opts?.port || staticMembers.port;
     const clientConfig = opts?.clientConfig ?? {};
     const fallback =
@@ -143,6 +140,12 @@ export class FirestoreClient {
     // Save the auth object to the client, for use by other methods.
     this.auth = this._gaxGrpc.auth as gax.GoogleAuth;
 
+    // Set useJWTAccessWithScope on the auth object.
+    this.auth.useJWTAccessWithScope = true;
+
+    // Set defaultServicePath on the auth object.
+    this.auth.defaultServicePath = staticMembers.servicePath;
+
     // Set the default scopes in auth client if needed.
     if (servicePath === staticMembers.servicePath) {
       this.auth.defaultScopes = staticMembers.scopes;
@@ -157,27 +160,14 @@ export class FirestoreClient {
     }
     if (!opts.fallback) {
       clientHeader.push(`grpc/${this._gaxGrpc.grpcVersion}`);
+    } else if (opts.fallback === 'rest') {
+      clientHeader.push(`rest/${this._gaxGrpc.grpcVersion}`);
     }
     if (opts.libName && opts.libVersion) {
       clientHeader.push(`${opts.libName}/${opts.libVersion}`);
     }
     // Load the applicable protos.
-    // For Node.js, pass the path to JSON proto file.
-    // For browsers, pass the JSON content.
-
-    const nodejsProtoPath = path.join(
-      __dirname,
-      '..',
-      '..',
-      'protos',
-      'protos.json'
-    );
-    this._protos = this._gaxGrpc.loadProto(
-      opts.fallback
-        ? // eslint-disable-next-line @typescript-eslint/no-var-requires
-          require('../../protos/protos.json')
-        : nodejsProtoPath
-    );
+    this._protos = this._gaxGrpc.loadProtoJSON(jsonProtos);
 
     // Some of the methods on this service return "paged" results,
     // (e.g. 50 results at a time, with tokens to get subsequent
@@ -187,6 +177,11 @@ export class FirestoreClient {
         'pageToken',
         'nextPageToken',
         'documents'
+      ),
+      partitionQuery: new this._gaxModule.PageDescriptor(
+        'pageToken',
+        'nextPageToken',
+        'partitions'
       ),
       listCollectionIds: new this._gaxModule.PageDescriptor(
         'pageToken',
@@ -224,6 +219,9 @@ export class FirestoreClient {
     // of calling the API is handled in `google-gax`, with this code
     // merely providing the destination and request information.
     this.innerApiCalls = {};
+
+    // Add a warn function to the client constructor so it can be easily tested.
+    this.warn = gax.warn;
   }
 
   /**
@@ -252,7 +250,8 @@ export class FirestoreClient {
           )
         : // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (this._protos as any).google.firestore.v1beta1.Firestore,
-      this._opts
+      this._opts,
+      this._providedCustomServicePath
     ) as Promise<{[method: string]: Function}>;
 
     // Iterate over each of the methods that the service provides
@@ -260,7 +259,6 @@ export class FirestoreClient {
     const firestoreStubMethods = [
       'getDocument',
       'listDocuments',
-      'createDocument',
       'updateDocument',
       'deleteDocument',
       'batchGetDocuments',
@@ -268,19 +266,23 @@ export class FirestoreClient {
       'commit',
       'rollback',
       'runQuery',
+      'partitionQuery',
       'write',
       'listen',
       'listCollectionIds',
+      'batchWrite',
+      'createDocument',
     ];
     for (const methodName of firestoreStubMethods) {
       const callPromise = this.firestoreStub.then(
-        stub => (...args: Array<{}>) => {
-          if (this._terminated) {
-            return Promise.reject('The client has already been closed.');
-          }
-          const func = stub[methodName];
-          return func.apply(stub, args);
-        },
+        stub =>
+          (...args: Array<{}>) => {
+            if (this._terminated) {
+              return Promise.reject('The client has already been closed.');
+            }
+            const func = stub[methodName];
+            return func.apply(stub, args);
+          },
         (err: Error | null | undefined) => () => {
           throw err;
         }
@@ -359,7 +361,7 @@ export class FirestoreClient {
   // -- Service calls --
   // -------------------
   getDocument(
-    request: protos.google.firestore.v1beta1.IGetDocumentRequest,
+    request?: protos.google.firestore.v1beta1.IGetDocumentRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -402,7 +404,7 @@ export class FirestoreClient {
    *   Reads the document in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads the version of the document at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -414,7 +416,7 @@ export class FirestoreClient {
    * const [response] = await client.getDocument(request);
    */
   getDocument(
-    request: protos.google.firestore.v1beta1.IGetDocumentRequest,
+    request?: protos.google.firestore.v1beta1.IGetDocumentRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -447,117 +449,15 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      name: request.name || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        name: request.name || '',
+      });
     this.initialize();
     return this.innerApiCalls.getDocument(request, options, callback);
   }
-  createDocument(
-    request: protos.google.firestore.v1beta1.ICreateDocumentRequest,
-    options?: CallOptions
-  ): Promise<
-    [
-      protos.google.firestore.v1beta1.IDocument,
-      protos.google.firestore.v1beta1.ICreateDocumentRequest | undefined,
-      {} | undefined
-    ]
-  >;
-  createDocument(
-    request: protos.google.firestore.v1beta1.ICreateDocumentRequest,
-    options: CallOptions,
-    callback: Callback<
-      protos.google.firestore.v1beta1.IDocument,
-      protos.google.firestore.v1beta1.ICreateDocumentRequest | null | undefined,
-      {} | null | undefined
-    >
-  ): void;
-  createDocument(
-    request: protos.google.firestore.v1beta1.ICreateDocumentRequest,
-    callback: Callback<
-      protos.google.firestore.v1beta1.IDocument,
-      protos.google.firestore.v1beta1.ICreateDocumentRequest | null | undefined,
-      {} | null | undefined
-    >
-  ): void;
-  /**
-   * Creates a new document.
-   *
-   * @param {Object} request
-   *   The request object that will be sent.
-   * @param {string} request.parent
-   *   Required. The parent resource. For example:
-   *   `projects/{project_id}/databases/{database_id}/documents` or
-   *   `projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}`
-   * @param {string} request.collectionId
-   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`.
-   * @param {string} request.documentId
-   *   The client-assigned document ID to use for this document.
-   *
-   *   Optional. If not specified, an ID will be assigned by the service.
-   * @param {google.firestore.v1beta1.Document} request.document
-   *   Required. The document to create. `name` must not be set.
-   * @param {google.firestore.v1beta1.DocumentMask} request.mask
-   *   The fields to return. If not set, returns all fields.
-   *
-   *   If the document has a field that is not present in this mask, that field
-   *   will not be returned in the response.
-   * @param {object} [options]
-   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
-   * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Document]{@link google.firestore.v1beta1.Document}.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
-   *   for more details and examples.
-   * @example
-   * const [response] = await client.createDocument(request);
-   */
-  createDocument(
-    request: protos.google.firestore.v1beta1.ICreateDocumentRequest,
-    optionsOrCallback?:
-      | CallOptions
-      | Callback<
-          protos.google.firestore.v1beta1.IDocument,
-          | protos.google.firestore.v1beta1.ICreateDocumentRequest
-          | null
-          | undefined,
-          {} | null | undefined
-        >,
-    callback?: Callback<
-      protos.google.firestore.v1beta1.IDocument,
-      protos.google.firestore.v1beta1.ICreateDocumentRequest | null | undefined,
-      {} | null | undefined
-    >
-  ): Promise<
-    [
-      protos.google.firestore.v1beta1.IDocument,
-      protos.google.firestore.v1beta1.ICreateDocumentRequest | undefined,
-      {} | undefined
-    ]
-  > | void {
-    request = request || {};
-    let options: CallOptions;
-    if (typeof optionsOrCallback === 'function' && callback === undefined) {
-      callback = optionsOrCallback;
-      options = {};
-    } else {
-      options = optionsOrCallback as CallOptions;
-    }
-    options = options || {};
-    options.otherArgs = options.otherArgs || {};
-    options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      parent: request.parent || '',
-    });
-    this.initialize();
-    return this.innerApiCalls.createDocument(request, options, callback);
-  }
   updateDocument(
-    request: protos.google.firestore.v1beta1.IUpdateDocumentRequest,
+    request?: protos.google.firestore.v1beta1.IUpdateDocumentRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -618,7 +518,7 @@ export class FirestoreClient {
    * const [response] = await client.updateDocument(request);
    */
   updateDocument(
-    request: protos.google.firestore.v1beta1.IUpdateDocumentRequest,
+    request?: protos.google.firestore.v1beta1.IUpdateDocumentRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -651,16 +551,15 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      'document.name': request.document!.name || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        'document.name': request.document!.name || '',
+      });
     this.initialize();
     return this.innerApiCalls.updateDocument(request, options, callback);
   }
   deleteDocument(
-    request: protos.google.firestore.v1beta1.IDeleteDocumentRequest,
+    request?: protos.google.firestore.v1beta1.IDeleteDocumentRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -708,7 +607,7 @@ export class FirestoreClient {
    * const [response] = await client.deleteDocument(request);
    */
   deleteDocument(
-    request: protos.google.firestore.v1beta1.IDeleteDocumentRequest,
+    request?: protos.google.firestore.v1beta1.IDeleteDocumentRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -741,16 +640,15 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      name: request.name || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        name: request.name || '',
+      });
     this.initialize();
     return this.innerApiCalls.deleteDocument(request, options, callback);
   }
   beginTransaction(
-    request: protos.google.firestore.v1beta1.IBeginTransactionRequest,
+    request?: protos.google.firestore.v1beta1.IBeginTransactionRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -802,7 +700,7 @@ export class FirestoreClient {
    * const [response] = await client.beginTransaction(request);
    */
   beginTransaction(
-    request: protos.google.firestore.v1beta1.IBeginTransactionRequest,
+    request?: protos.google.firestore.v1beta1.IBeginTransactionRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -837,16 +735,15 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      database: request.database || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        database: request.database || '',
+      });
     this.initialize();
     return this.innerApiCalls.beginTransaction(request, options, callback);
   }
   commit(
-    request: protos.google.firestore.v1beta1.ICommitRequest,
+    request?: protos.google.firestore.v1beta1.ICommitRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -897,7 +794,7 @@ export class FirestoreClient {
    * const [response] = await client.commit(request);
    */
   commit(
-    request: protos.google.firestore.v1beta1.ICommitRequest,
+    request?: protos.google.firestore.v1beta1.ICommitRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -928,16 +825,15 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      database: request.database || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        database: request.database || '',
+      });
     this.initialize();
     return this.innerApiCalls.commit(request, options, callback);
   }
   rollback(
-    request: protos.google.firestore.v1beta1.IRollbackRequest,
+    request?: protos.google.firestore.v1beta1.IRollbackRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -984,7 +880,7 @@ export class FirestoreClient {
    * const [response] = await client.rollback(request);
    */
   rollback(
-    request: protos.google.firestore.v1beta1.IRollbackRequest,
+    request?: protos.google.firestore.v1beta1.IRollbackRequest,
     optionsOrCallback?:
       | CallOptions
       | Callback<
@@ -1015,13 +911,212 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      database: request.database || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        database: request.database || '',
+      });
     this.initialize();
     return this.innerApiCalls.rollback(request, options, callback);
+  }
+  batchWrite(
+    request?: protos.google.firestore.v1beta1.IBatchWriteRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.v1beta1.IBatchWriteResponse,
+      protos.google.firestore.v1beta1.IBatchWriteRequest | undefined,
+      {} | undefined
+    ]
+  >;
+  batchWrite(
+    request: protos.google.firestore.v1beta1.IBatchWriteRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.firestore.v1beta1.IBatchWriteResponse,
+      protos.google.firestore.v1beta1.IBatchWriteRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  batchWrite(
+    request: protos.google.firestore.v1beta1.IBatchWriteRequest,
+    callback: Callback<
+      protos.google.firestore.v1beta1.IBatchWriteResponse,
+      protos.google.firestore.v1beta1.IBatchWriteRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  /**
+   * Applies a batch of write operations.
+   *
+   * The BatchWrite method does not apply the write operations atomically
+   * and can apply them out of order. Method does not allow more than one write
+   * per document. Each write succeeds or fails independently. See the
+   * {@link google.firestore.v1beta1.BatchWriteResponse|BatchWriteResponse} for the success status of each write.
+   *
+   * If you require an atomically applied set of writes, use
+   * {@link google.firestore.v1beta1.Firestore.Commit|Commit} instead.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.database
+   *   Required. The database name. In the format:
+   *   `projects/{project_id}/databases/{database_id}`.
+   * @param {number[]} request.writes
+   *   The writes to apply.
+   *
+   *   Method does not apply writes atomically and does not guarantee ordering.
+   *   Each write succeeds or fails independently. You cannot write to the same
+   *   document more than once per request.
+   * @param {number[]} request.labels
+   *   Labels associated with this batch write.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [BatchWriteResponse]{@link google.firestore.v1beta1.BatchWriteResponse}.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   for more details and examples.
+   * @example
+   * const [response] = await client.batchWrite(request);
+   */
+  batchWrite(
+    request?: protos.google.firestore.v1beta1.IBatchWriteRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          protos.google.firestore.v1beta1.IBatchWriteResponse,
+          protos.google.firestore.v1beta1.IBatchWriteRequest | null | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.firestore.v1beta1.IBatchWriteResponse,
+      protos.google.firestore.v1beta1.IBatchWriteRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.firestore.v1beta1.IBatchWriteResponse,
+      protos.google.firestore.v1beta1.IBatchWriteRequest | undefined,
+      {} | undefined
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        database: request.database || '',
+      });
+    this.initialize();
+    return this.innerApiCalls.batchWrite(request, options, callback);
+  }
+  createDocument(
+    request?: protos.google.firestore.v1beta1.ICreateDocumentRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.v1beta1.IDocument,
+      protos.google.firestore.v1beta1.ICreateDocumentRequest | undefined,
+      {} | undefined
+    ]
+  >;
+  createDocument(
+    request: protos.google.firestore.v1beta1.ICreateDocumentRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.firestore.v1beta1.IDocument,
+      protos.google.firestore.v1beta1.ICreateDocumentRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  createDocument(
+    request: protos.google.firestore.v1beta1.ICreateDocumentRequest,
+    callback: Callback<
+      protos.google.firestore.v1beta1.IDocument,
+      protos.google.firestore.v1beta1.ICreateDocumentRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  /**
+   * Creates a new document.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource. For example:
+   *   `projects/{project_id}/databases/{database_id}/documents` or
+   *   `projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}`
+   * @param {string} request.collectionId
+   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`.
+   * @param {string} request.documentId
+   *   The client-assigned document ID to use for this document.
+   *
+   *   Optional. If not specified, an ID will be assigned by the service.
+   * @param {google.firestore.v1beta1.Document} request.document
+   *   Required. The document to create. `name` must not be set.
+   * @param {google.firestore.v1beta1.DocumentMask} request.mask
+   *   The fields to return. If not set, returns all fields.
+   *
+   *   If the document has a field that is not present in this mask, that field
+   *   will not be returned in the response.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [Document]{@link google.firestore.v1beta1.Document}.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   for more details and examples.
+   * @example
+   * const [response] = await client.createDocument(request);
+   */
+  createDocument(
+    request?: protos.google.firestore.v1beta1.ICreateDocumentRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          protos.google.firestore.v1beta1.IDocument,
+          | protos.google.firestore.v1beta1.ICreateDocumentRequest
+          | null
+          | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.firestore.v1beta1.IDocument,
+      protos.google.firestore.v1beta1.ICreateDocumentRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.firestore.v1beta1.IDocument,
+      protos.google.firestore.v1beta1.ICreateDocumentRequest | undefined,
+      {} | undefined
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
+    this.initialize();
+    return this.innerApiCalls.createDocument(request, options, callback);
   }
 
   /**
@@ -1054,7 +1149,7 @@ export class FirestoreClient {
    *   stream.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1075,11 +1170,10 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      database: request.database || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        database: request.database || '',
+      });
     this.initialize();
     return this.innerApiCalls.batchGetDocuments(request, options);
   }
@@ -1107,7 +1201,7 @@ export class FirestoreClient {
    *   stream.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1128,11 +1222,10 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      parent: request.parent || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
     this.initialize();
     return this.innerApiCalls.runQuery(request, options);
   }
@@ -1186,7 +1279,7 @@ export class FirestoreClient {
   }
 
   listDocuments(
-    request: protos.google.firestore.v1beta1.IListDocumentsRequest,
+    request?: protos.google.firestore.v1beta1.IListDocumentsRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -1242,7 +1335,7 @@ export class FirestoreClient {
    *   Reads documents in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
@@ -1265,7 +1358,7 @@ export class FirestoreClient {
    *   for more details and examples.
    */
   listDocuments(
-    request: protos.google.firestore.v1beta1.IListDocumentsRequest,
+    request?: protos.google.firestore.v1beta1.IListDocumentsRequest,
     optionsOrCallback?:
       | CallOptions
       | PaginationCallback<
@@ -1298,11 +1391,10 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      parent: request.parent || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
     this.initialize();
     return this.innerApiCalls.listDocuments(request, options, callback);
   }
@@ -1336,7 +1428,7 @@ export class FirestoreClient {
    *   Reads documents in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
@@ -1365,11 +1457,10 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      parent: request.parent || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
     const callSettings = new gax.CallSettings(options);
     this.initialize();
     return this.descriptors.page.listDocuments.createStream(
@@ -1410,7 +1501,7 @@ export class FirestoreClient {
    *   Reads documents in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
@@ -1443,22 +1534,319 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      parent: request.parent || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
     options = options || {};
     const callSettings = new gax.CallSettings(options);
     this.initialize();
     return this.descriptors.page.listDocuments.asyncIterate(
       this.innerApiCalls['listDocuments'] as GaxCall,
-      (request as unknown) as RequestType,
+      request as unknown as RequestType,
       callSettings
     ) as AsyncIterable<protos.google.firestore.v1beta1.IDocument>;
   }
+  partitionQuery(
+    request?: protos.google.firestore.v1beta1.IPartitionQueryRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.v1beta1.ICursor[],
+      protos.google.firestore.v1beta1.IPartitionQueryRequest | null,
+      protos.google.firestore.v1beta1.IPartitionQueryResponse
+    ]
+  >;
+  partitionQuery(
+    request: protos.google.firestore.v1beta1.IPartitionQueryRequest,
+    options: CallOptions,
+    callback: PaginationCallback<
+      protos.google.firestore.v1beta1.IPartitionQueryRequest,
+      | protos.google.firestore.v1beta1.IPartitionQueryResponse
+      | null
+      | undefined,
+      protos.google.firestore.v1beta1.ICursor
+    >
+  ): void;
+  partitionQuery(
+    request: protos.google.firestore.v1beta1.IPartitionQueryRequest,
+    callback: PaginationCallback<
+      protos.google.firestore.v1beta1.IPartitionQueryRequest,
+      | protos.google.firestore.v1beta1.IPartitionQueryResponse
+      | null
+      | undefined,
+      protos.google.firestore.v1beta1.ICursor
+    >
+  ): void;
+  /**
+   * Partitions a query by returning partition cursors that can be used to run
+   * the query in parallel. The returned partition cursors are split points that
+   * can be used by RunQuery as starting/end points for the query results.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents`.
+   *   Document resource names are not supported; only database resource names
+   *   can be specified.
+   * @param {google.firestore.v1beta1.StructuredQuery} request.structuredQuery
+   *   A structured query.
+   *   Query must specify collection with all descendants and be ordered by name
+   *   ascending. Other filters, order bys, limits, offsets, and start/end
+   *   cursors are not supported.
+   * @param {number} request.partitionCount
+   *   The desired maximum number of partition points.
+   *   The partitions may be returned across multiple pages of results.
+   *   The number must be positive. The actual number of partitions
+   *   returned may be fewer.
+   *
+   *   For example, this may be set to one fewer than the number of parallel
+   *   queries to be run, or in running a data pipeline job, one fewer than the
+   *   number of workers or compute instances available.
+   * @param {string} request.pageToken
+   *   The `next_page_token` value returned from a previous call to
+   *   PartitionQuery that may be used to get an additional set of results.
+   *   There are no ordering guarantees between sets of results. Thus, using
+   *   multiple sets of results will require merging the different result sets.
+   *
+   *   For example, two subsequent calls using a page_token may return:
+   *
+   *    * cursor B, cursor M, cursor Q
+   *    * cursor A, cursor U, cursor W
+   *
+   *   To obtain a complete result set ordered with respect to the results of the
+   *   query supplied to PartitionQuery, the results sets should be merged:
+   *   cursor A, cursor B, cursor M, cursor Q, cursor U, cursor W
+   * @param {number} request.pageSize
+   *   The maximum number of partitions to return in this call, subject to
+   *   `partition_count`.
+   *
+   *   For example, if `partition_count` = 10 and `page_size` = 8, the first call
+   *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
+   *   if more results exist. A second call to PartitionQuery will return up to
+   *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is Array of [Cursor]{@link google.firestore.v1beta1.Cursor}.
+   *   The client library will perform auto-pagination by default: it will call the API as many
+   *   times as needed and will merge results from all the pages into this array.
+   *   Note that it can affect your quota.
+   *   We recommend using `partitionQueryAsync()`
+   *   method described below for async iteration which you can stop as needed.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   for more details and examples.
+   */
+  partitionQuery(
+    request?: protos.google.firestore.v1beta1.IPartitionQueryRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | PaginationCallback<
+          protos.google.firestore.v1beta1.IPartitionQueryRequest,
+          | protos.google.firestore.v1beta1.IPartitionQueryResponse
+          | null
+          | undefined,
+          protos.google.firestore.v1beta1.ICursor
+        >,
+    callback?: PaginationCallback<
+      protos.google.firestore.v1beta1.IPartitionQueryRequest,
+      | protos.google.firestore.v1beta1.IPartitionQueryResponse
+      | null
+      | undefined,
+      protos.google.firestore.v1beta1.ICursor
+    >
+  ): Promise<
+    [
+      protos.google.firestore.v1beta1.ICursor[],
+      protos.google.firestore.v1beta1.IPartitionQueryRequest | null,
+      protos.google.firestore.v1beta1.IPartitionQueryResponse
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
+    this.initialize();
+    return this.innerApiCalls.partitionQuery(request, options, callback);
+  }
+
+  /**
+   * Equivalent to `method.name.toCamelCase()`, but returns a NodeJS Stream object.
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents`.
+   *   Document resource names are not supported; only database resource names
+   *   can be specified.
+   * @param {google.firestore.v1beta1.StructuredQuery} request.structuredQuery
+   *   A structured query.
+   *   Query must specify collection with all descendants and be ordered by name
+   *   ascending. Other filters, order bys, limits, offsets, and start/end
+   *   cursors are not supported.
+   * @param {number} request.partitionCount
+   *   The desired maximum number of partition points.
+   *   The partitions may be returned across multiple pages of results.
+   *   The number must be positive. The actual number of partitions
+   *   returned may be fewer.
+   *
+   *   For example, this may be set to one fewer than the number of parallel
+   *   queries to be run, or in running a data pipeline job, one fewer than the
+   *   number of workers or compute instances available.
+   * @param {string} request.pageToken
+   *   The `next_page_token` value returned from a previous call to
+   *   PartitionQuery that may be used to get an additional set of results.
+   *   There are no ordering guarantees between sets of results. Thus, using
+   *   multiple sets of results will require merging the different result sets.
+   *
+   *   For example, two subsequent calls using a page_token may return:
+   *
+   *    * cursor B, cursor M, cursor Q
+   *    * cursor A, cursor U, cursor W
+   *
+   *   To obtain a complete result set ordered with respect to the results of the
+   *   query supplied to PartitionQuery, the results sets should be merged:
+   *   cursor A, cursor B, cursor M, cursor Q, cursor U, cursor W
+   * @param {number} request.pageSize
+   *   The maximum number of partitions to return in this call, subject to
+   *   `partition_count`.
+   *
+   *   For example, if `partition_count` = 10 and `page_size` = 8, the first call
+   *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
+   *   if more results exist. A second call to PartitionQuery will return up to
+   *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Stream}
+   *   An object stream which emits an object representing [Cursor]{@link google.firestore.v1beta1.Cursor} on 'data' event.
+   *   The client library will perform auto-pagination by default: it will call the API as many
+   *   times as needed. Note that it can affect your quota.
+   *   We recommend using `partitionQueryAsync()`
+   *   method described below for async iteration which you can stop as needed.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   for more details and examples.
+   */
+  partitionQueryStream(
+    request?: protos.google.firestore.v1beta1.IPartitionQueryRequest,
+    options?: CallOptions
+  ): Transform {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
+    const callSettings = new gax.CallSettings(options);
+    this.initialize();
+    return this.descriptors.page.partitionQuery.createStream(
+      this.innerApiCalls.partitionQuery as gax.GaxCall,
+      request,
+      callSettings
+    );
+  }
+
+  /**
+   * Equivalent to `partitionQuery`, but returns an iterable object.
+   *
+   * `for`-`await`-`of` syntax is used with the iterable to get response elements on-demand.
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents`.
+   *   Document resource names are not supported; only database resource names
+   *   can be specified.
+   * @param {google.firestore.v1beta1.StructuredQuery} request.structuredQuery
+   *   A structured query.
+   *   Query must specify collection with all descendants and be ordered by name
+   *   ascending. Other filters, order bys, limits, offsets, and start/end
+   *   cursors are not supported.
+   * @param {number} request.partitionCount
+   *   The desired maximum number of partition points.
+   *   The partitions may be returned across multiple pages of results.
+   *   The number must be positive. The actual number of partitions
+   *   returned may be fewer.
+   *
+   *   For example, this may be set to one fewer than the number of parallel
+   *   queries to be run, or in running a data pipeline job, one fewer than the
+   *   number of workers or compute instances available.
+   * @param {string} request.pageToken
+   *   The `next_page_token` value returned from a previous call to
+   *   PartitionQuery that may be used to get an additional set of results.
+   *   There are no ordering guarantees between sets of results. Thus, using
+   *   multiple sets of results will require merging the different result sets.
+   *
+   *   For example, two subsequent calls using a page_token may return:
+   *
+   *    * cursor B, cursor M, cursor Q
+   *    * cursor A, cursor U, cursor W
+   *
+   *   To obtain a complete result set ordered with respect to the results of the
+   *   query supplied to PartitionQuery, the results sets should be merged:
+   *   cursor A, cursor B, cursor M, cursor Q, cursor U, cursor W
+   * @param {number} request.pageSize
+   *   The maximum number of partitions to return in this call, subject to
+   *   `partition_count`.
+   *
+   *   For example, if `partition_count` = 10 and `page_size` = 8, the first call
+   *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
+   *   if more results exist. A second call to PartitionQuery will return up to
+   *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Object}
+   *   An iterable Object that allows [async iteration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols).
+   *   When you iterate the returned iterable, each element will be an object representing
+   *   [Cursor]{@link google.firestore.v1beta1.Cursor}. The API will be called under the hood as needed, once per the page,
+   *   so you can stop the iteration when you don't need more results.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   for more details and examples.
+   * @example
+   * const iterable = client.partitionQueryAsync(request);
+   * for await (const response of iterable) {
+   *   // process response
+   * }
+   */
+  partitionQueryAsync(
+    request?: protos.google.firestore.v1beta1.IPartitionQueryRequest,
+    options?: CallOptions
+  ): AsyncIterable<protos.google.firestore.v1beta1.ICursor> {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
+    options = options || {};
+    const callSettings = new gax.CallSettings(options);
+    this.initialize();
+    return this.descriptors.page.partitionQuery.asyncIterate(
+      this.innerApiCalls['partitionQuery'] as GaxCall,
+      request as unknown as RequestType,
+      callSettings
+    ) as AsyncIterable<protos.google.firestore.v1beta1.ICursor>;
+  }
   listCollectionIds(
-    request: protos.google.firestore.v1beta1.IListCollectionIdsRequest,
+    request?: protos.google.firestore.v1beta1.IListCollectionIdsRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -1517,7 +1905,7 @@ export class FirestoreClient {
    *   for more details and examples.
    */
   listCollectionIds(
-    request: protos.google.firestore.v1beta1.IListCollectionIdsRequest,
+    request?: protos.google.firestore.v1beta1.IListCollectionIdsRequest,
     optionsOrCallback?:
       | CallOptions
       | PaginationCallback<
@@ -1552,11 +1940,10 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      parent: request.parent || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
     this.initialize();
     return this.innerApiCalls.listCollectionIds(request, options, callback);
   }
@@ -1595,11 +1982,10 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      parent: request.parent || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
     const callSettings = new gax.CallSettings(options);
     this.initialize();
     return this.descriptors.page.listCollectionIds.createStream(
@@ -1649,17 +2035,16 @@ export class FirestoreClient {
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      parent: request.parent || '',
-    });
+    options.otherArgs.headers['x-goog-request-params'] =
+      gax.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
     options = options || {};
     const callSettings = new gax.CallSettings(options);
     this.initialize();
     return this.descriptors.page.listCollectionIds.asyncIterate(
       this.innerApiCalls['listCollectionIds'] as GaxCall,
-      (request as unknown) as RequestType,
+      request as unknown as RequestType,
       callSettings
     ) as AsyncIterable<string>;
   }

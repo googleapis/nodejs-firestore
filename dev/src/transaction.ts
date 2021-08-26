@@ -16,15 +16,16 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {GoogleError, Status} from 'google-gax';
-
+import {GoogleError} from 'google-gax';
 import * as proto from '../protos/firestore_v1_proto_api';
 
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshot} from './document';
 import {Firestore, WriteBatch} from './index';
+import {Timestamp} from './timestamp';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
+import {StatusCode} from './status-code';
 import {
   DocumentReference,
   Query,
@@ -38,7 +39,7 @@ import {
   validateMinNumberOfArguments,
   validateOptional,
 } from './validate';
-
+import {DocumentReader} from './document-reader';
 import api = proto.google.firestore.v1;
 
 /*!
@@ -125,16 +126,9 @@ export class Transaction implements firestore.Transaction {
     }
 
     if (refOrQuery instanceof DocumentReference) {
-      return this._firestore
-        .getAll_(
-          [refOrQuery],
-          /* fieldMask= */ null,
-          this._requestTag,
-          this._transactionId
-        )
-        .then(res => {
-          return Promise.resolve(res[0]);
-        });
+      const documentReader = new DocumentReader(this._firestore, [refOrQuery]);
+      documentReader.transactionId = this._transactionId;
+      return documentReader.get(this._requestTag).then(([res]) => res);
     }
 
     if (refOrQuery instanceof Query) {
@@ -191,12 +185,10 @@ export class Transaction implements firestore.Transaction {
       documentRefsOrReadOptions
     );
 
-    return this._firestore.getAll_(
-      documents,
-      fieldMask,
-      this._requestTag,
-      this._transactionId
-    );
+    const documentReader = new DocumentReader(this._firestore, documents);
+    documentReader.fieldMask = fieldMask || undefined;
+    documentReader.transactionId = this._transactionId;
+    return documentReader.get(this._requestTag);
   }
 
   /**
@@ -330,6 +322,8 @@ export class Transaction implements firestore.Transaction {
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime. Fails the transaction if the
    * document doesn't exist or was last updated at a different time.
+   * @param {boolean=} precondition.exists If set, enforces that the target
+   * document must or must not exist.
    * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *
@@ -352,13 +346,20 @@ export class Transaction implements firestore.Transaction {
    * Starts a transaction and obtains the transaction id from the server.
    *
    * @private
+   * @internal
    */
-  begin(): Promise<void> {
+  begin(readOnly: boolean, readTime: Timestamp | undefined): Promise<void> {
     const request: api.IBeginTransactionRequest = {
       database: this._firestore.formattedName,
     };
 
-    if (this._transactionId) {
+    if (readOnly) {
+      request.options = {
+        readOnly: {
+          readTime: readTime?.toProto()?.timestampValue,
+        },
+      };
+    } else if (this._transactionId) {
       request.options = {
         readWrite: {
           retryTransaction: this._transactionId,
@@ -381,6 +382,7 @@ export class Transaction implements firestore.Transaction {
    * Commits all queued-up changes in this transaction and releases all locks.
    *
    * @private
+   * @internal
    */
   commit(): Promise<void> {
     return this._writeBatch
@@ -395,6 +397,7 @@ export class Transaction implements firestore.Transaction {
    * Releases all locks and rolls back this transaction.
    *
    * @private
+   * @internal
    */
   rollback(): Promise<void> {
     const request = {
@@ -409,20 +412,25 @@ export class Transaction implements firestore.Transaction {
    * Executes `updateFunction()` and commits the transaction with retry.
    *
    * @private
+   * @internal
    * @param updateFunction The user function to execute within the transaction
    * context.
    * @param requestTag A unique client-assigned identifier for the scope of
    * this transaction.
-   * @param maxAttempts The maximum number of attempts for this transaction.
+   * @param options The user-defined options for this transaction.
    */
   async runTransaction<T>(
     updateFunction: (transaction: Transaction) => Promise<T>,
-    maxAttempts: number
+    options: {
+      maxAttempts: number;
+      readOnly: boolean;
+      readTime?: Timestamp;
+    }
   ): Promise<T> {
     let result: T;
     let lastError: GoogleError | undefined = undefined;
 
-    for (let attempt = 0; attempt < maxAttempts; ++attempt) {
+    for (let attempt = 0; attempt < options.maxAttempts; ++attempt) {
       try {
         if (lastError) {
           logger(
@@ -437,7 +445,7 @@ export class Transaction implements firestore.Transaction {
         this._writeBatch._reset();
         await this.maybeBackoff(lastError);
 
-        await this.begin();
+        await this.begin(options.readOnly, options.readTime);
 
         const promise = updateFunction(this);
         if (!(promise instanceof Promise)) {
@@ -479,10 +487,11 @@ export class Transaction implements firestore.Transaction {
    * Delays further operations based on the provided error.
    *
    * @private
+   * @internal
    * @return A Promise that resolves after the delay expired.
    */
   private async maybeBackoff(error?: GoogleError): Promise<void> {
-    if (error && error.code === Status.RESOURCE_EXHAUSTED) {
+    if ((error?.code as number | undefined) === StatusCode.RESOURCE_EXHAUSTED) {
       this._backoff.resetToMax();
     }
     await this._backoff.backoffAndWait();
@@ -494,6 +503,7 @@ export class Transaction implements firestore.Transaction {
  * and Transaction class.
  *
  * @private
+ * @internal
  * @param documentRefsOrReadOptions An array of document references followed by
  * an optional ReadOptions object.
  */
@@ -543,6 +553,7 @@ export function parseGetAllArguments<T>(
  * is an array of strings or field paths.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  * @param options Options that specify whether the ReadOptions can be omitted.
@@ -590,17 +601,17 @@ function validateReadOptions(
 function isRetryableTransactionError(error: GoogleError): boolean {
   if (error.code !== undefined) {
     // This list is based on https://github.com/firebase/firebase-js-sdk/blob/master/packages/firestore/src/core/transaction_runner.ts#L112
-    switch (error.code) {
-      case Status.ABORTED:
-      case Status.CANCELLED:
-      case Status.UNKNOWN:
-      case Status.DEADLINE_EXCEEDED:
-      case Status.INTERNAL:
-      case Status.UNAVAILABLE:
-      case Status.UNAUTHENTICATED:
-      case Status.RESOURCE_EXHAUSTED:
+    switch (error.code as number) {
+      case StatusCode.ABORTED:
+      case StatusCode.CANCELLED:
+      case StatusCode.UNKNOWN:
+      case StatusCode.DEADLINE_EXCEEDED:
+      case StatusCode.INTERNAL:
+      case StatusCode.UNAVAILABLE:
+      case StatusCode.UNAUTHENTICATED:
+      case StatusCode.RESOURCE_EXHAUSTED:
         return true;
-      case Status.INVALID_ARGUMENT:
+      case StatusCode.INVALID_ARGUMENT:
         // The Firestore backend uses "INVALID_ARGUMENT" for transactions
         // IDs that have expired. While INVALID_ARGUMENT is generally not
         // retryable, we retry this specific case.

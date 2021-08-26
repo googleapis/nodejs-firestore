@@ -40,12 +40,14 @@ import * as protos from '../protos/firestore_v1_proto_api';
 export declare class FirestoreClient {
   private _terminated;
   private _opts;
+  private _providedCustomServicePath;
   private _gaxModule;
   private _gaxGrpc;
   private _protos;
   private _defaults;
   auth: gax.GoogleAuth;
   descriptors: Descriptors;
+  warn: (code: string, message: string, warnType?: string) => void;
   innerApiCalls: {
     [name: string]: Function;
   };
@@ -126,7 +128,7 @@ export declare class FirestoreClient {
   getProjectId(): Promise<string>;
   getProjectId(callback: Callback<string, undefined, undefined>): void;
   getDocument(
-    request: protos.google.firestore.v1.IGetDocumentRequest,
+    request?: protos.google.firestore.v1.IGetDocumentRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -153,7 +155,7 @@ export declare class FirestoreClient {
     >
   ): void;
   updateDocument(
-    request: protos.google.firestore.v1.IUpdateDocumentRequest,
+    request?: protos.google.firestore.v1.IUpdateDocumentRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -180,7 +182,7 @@ export declare class FirestoreClient {
     >
   ): void;
   deleteDocument(
-    request: protos.google.firestore.v1.IDeleteDocumentRequest,
+    request?: protos.google.firestore.v1.IDeleteDocumentRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -207,7 +209,7 @@ export declare class FirestoreClient {
     >
   ): void;
   beginTransaction(
-    request: protos.google.firestore.v1.IBeginTransactionRequest,
+    request?: protos.google.firestore.v1.IBeginTransactionRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -234,7 +236,7 @@ export declare class FirestoreClient {
     >
   ): void;
   commit(
-    request: protos.google.firestore.v1.ICommitRequest,
+    request?: protos.google.firestore.v1.ICommitRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -261,7 +263,7 @@ export declare class FirestoreClient {
     >
   ): void;
   rollback(
-    request: protos.google.firestore.v1.IRollbackRequest,
+    request?: protos.google.firestore.v1.IRollbackRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -288,7 +290,7 @@ export declare class FirestoreClient {
     >
   ): void;
   batchWrite(
-    request: protos.google.firestore.v1.IBatchWriteRequest,
+    request?: protos.google.firestore.v1.IBatchWriteRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -315,7 +317,7 @@ export declare class FirestoreClient {
     >
   ): void;
   createDocument(
-    request: protos.google.firestore.v1.ICreateDocumentRequest,
+    request?: protos.google.firestore.v1.ICreateDocumentRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -469,7 +471,7 @@ export declare class FirestoreClient {
    */
   listen(options?: CallOptions): gax.CancellableStream;
   listDocuments(
-    request: protos.google.firestore.v1.IListDocumentsRequest,
+    request?: protos.google.firestore.v1.IListDocumentsRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -610,7 +612,7 @@ export declare class FirestoreClient {
     options?: CallOptions
   ): AsyncIterable<protos.google.firestore.v1.IDocument>;
   partitionQuery(
-    request: protos.google.firestore.v1.IPartitionQueryRequest,
+    request?: protos.google.firestore.v1.IPartitionQueryRequest,
     options?: CallOptions
   ): Promise<
     [
@@ -765,7 +767,7 @@ export declare class FirestoreClient {
     options?: CallOptions
   ): AsyncIterable<protos.google.firestore.v1.ICursor>;
   listCollectionIds(
-    request: protos.google.firestore.v1.IListCollectionIdsRequest,
+    request?: protos.google.firestore.v1.IListCollectionIdsRequest,
     options?: CallOptions
   ): Promise<
     [

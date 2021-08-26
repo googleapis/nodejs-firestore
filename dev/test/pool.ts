@@ -216,9 +216,9 @@ describe('Client pool', () => {
 
     operationPromises.forEach(deferred => deferred.reject(new Error()));
 
-    return Promise.all(
-      completionPromises.map(p => p.catch(() => {}))
-    ).then(() => expect(clientPool.size).to.equal(0));
+    return Promise.all(completionPromises.map(p => p.catch(() => {}))).then(
+      () => expect(clientPool.size).to.equal(0)
+    );
   });
 
   it('garbage collection calls destructor', () => {

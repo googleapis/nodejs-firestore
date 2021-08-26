@@ -17,11 +17,13 @@
 import {URL} from 'url';
 import {FieldPath} from './path';
 import {isFunction, isObject} from './util';
+import {Timestamp} from './timestamp';
 
 /**
  * Options to allow argument omission.
  *
  * @private
+ * @internal
  */
 export interface RequiredArgumentOptions {
   optional?: boolean;
@@ -31,6 +33,7 @@ export interface RequiredArgumentOptions {
  * Options to limit the range of numbers.
  *
  * @private
+ * @internal
  */
 export interface NumericRangeOptions {
   minValue?: number;
@@ -42,6 +45,7 @@ export interface NumericRangeOptions {
  * serialized.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The value that failed serialization.
  * @param path The field path that the object is assigned to.
@@ -99,6 +103,7 @@ export function customObjectMessage(
  * Validates that 'value' is a function.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  * @param options Options that specify whether the function can be omitted.
@@ -119,6 +124,7 @@ export function validateFunction(
  * Validates that 'value' is an object.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  * @param options Options that specify whether the object can be omitted.
@@ -139,6 +145,7 @@ export function validateObject(
  * Validates that 'value' is a string.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  * @param options Options that specify whether the string can be omitted.
@@ -159,6 +166,7 @@ export function validateString(
  * Validates that 'value' is a host.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  * @param options Options that specify whether the host can be omitted.
@@ -192,6 +200,7 @@ export function validateHost(
  * Validates that 'value' is a boolean.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  * @param options Options that specify whether the boolean can be omitted.
@@ -212,6 +221,7 @@ export function validateBoolean(
  * Validates that 'value' is a number.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  * @param options Options that specify whether the number can be omitted.
@@ -247,6 +257,7 @@ export function validateNumber(
  * Validates that 'value' is a integer.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  * @param options Options that specify whether the integer can be omitted.
@@ -279,9 +290,31 @@ export function validateInteger(
 }
 
 /**
+ * Validates that 'value' is a Timestamp.
+ *
+ * @private
+ * @internal
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ * @param options Options that specify whether the Timestamp can be omitted.
+ */
+export function validateTimestamp(
+  arg: string | number,
+  value: unknown,
+  options?: RequiredArgumentOptions
+): void {
+  if (!validateOptional(value, options)) {
+    if (!(value instanceof Timestamp)) {
+      throw new Error(invalidArgumentMessage(arg, 'Timestamp'));
+    }
+  }
+}
+
+/**
  * Generates an error message to use with invalid arguments.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param expectedType The expected input type.
  */
@@ -296,6 +329,7 @@ export function invalidArgumentMessage(
  * Enforces the 'options.optional' constraint for 'value'.
  *
  * @private
+ * @internal
  * @param value The input to validate.
  * @param options Whether the function can be omitted.
  * @return Whether the object is omitted and is allowed to be omitted.
@@ -313,6 +347,7 @@ export function validateOptional(
  * Formats the given word as plural conditionally given the preceding number.
  *
  * @private
+ * @internal
  * @param num The number to use for formatting.
  * @param str The string to format.
  */
@@ -324,6 +359,7 @@ function formatPlural(num: number, str: string): string {
  * Creates a descriptive name for the provided argument name or index.
  *
  * @private
+ * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @return Either the argument name or its index description.
  */
@@ -337,6 +373,7 @@ function formatArgumentName(arg: string | number): string {
  * Verifies that 'args' has at least 'minSize' elements.
  *
  * @private
+ * @internal
  * @param funcName The function name to use in the error message.
  * @param args The array (or array-like structure) to verify.
  * @param minSize The minimum number of elements to enforce.
@@ -359,6 +396,7 @@ export function validateMinNumberOfArguments(
  * Verifies that 'args' has at most 'maxSize' elements.
  *
  * @private
+ * @internal
  * @param funcName The function name to use in the error message.
  * @param args The array (or array-like structure) to verify.
  * @param maxSize The maximum number of elements to enforce.
@@ -385,6 +423,7 @@ export function validateMaxNumberOfArguments(
  * @param allowedValues A list of expected values.
  * @param options Whether the input can be omitted.
  * @private
+ * @internal
  */
 export function validateEnumValue(
   arg: string | number,
