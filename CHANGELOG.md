@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.15.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.15.0...v4.15.1) (2021-09-03)
+
+
+### Bug Fixes
+
+* **build:** migrate to main branch ([#1601](https://www.github.com/googleapis/nodejs-firestore/issues/1601)) ([6f16b9a](https://www.github.com/googleapis/nodejs-firestore/commit/6f16b9ab9e1365b99498e9df4d56a88db313f9a6))
+
 ## [4.15.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.14.2...v4.15.0) (2021-08-26)
 
 
