@@ -83,7 +83,7 @@ export class BundleBuilder {
   }
 
   private addBundledDocument(snap: DocumentSnapshot, queryName?: string): void {
-    const originalDocument = this.documents.get(snap.id);
+    const originalDocument = this.documents.get(snap.ref.path);
     const originalQueries = originalDocument?.metadata.queries;
 
     // Update with document built from `snap` because it is newer.
@@ -92,7 +92,7 @@ export class BundleBuilder {
       Timestamp.fromProto(originalDocument.metadata.readTime!) < snap.readTime
     ) {
       const docProto = snap.toDocumentProto();
-      this.documents.set(snap.id, {
+      this.documents.set(snap.ref.path, {
         document: snap.exists ? docProto : undefined,
         metadata: {
           name: docProto.name,
@@ -103,7 +103,7 @@ export class BundleBuilder {
     }
 
     // Update `queries` to include both original and `queryName`.
-    const newDocument = this.documents.get(snap.id)!;
+    const newDocument = this.documents.get(snap.ref.path)!;
     newDocument.metadata.queries = originalQueries || [];
     if (queryName) {
       newDocument.metadata.queries!.push(queryName);

@@ -302,6 +302,66 @@ describe('Bundle Builder', () => {
       true
     );
   });
+
+  it('handles identical document id from different collections', async () => {
+    const bundle = firestore.bundle(TEST_BUNDLE_ID);
+    const snap1 = firestore.snapshot_(
+      {
+        name: `${DATABASE_ROOT}/documents/collectionId_A/doc1`,
+        fields: {foo: {stringValue: 'value'}, bar: {integerValue: '42'}},
+        createTime: '1970-01-01T00:00:01.002Z',
+        updateTime: '1970-01-01T00:00:03.000004Z',
+      },
+      // This should be the bundle read time.
+      '2020-01-01T00:00:05.000000006Z',
+      'json'
+    );
+    // Same document id but different collection
+    const snap2 = firestore.snapshot_(
+      {
+        name: `${DATABASE_ROOT}/documents/collectionId_B/doc1`,
+        fields: {foo: {stringValue: 'value'}, bar: {integerValue: '-42'}},
+        createTime: '1970-01-01T00:00:01.002Z',
+        updateTime: '1970-01-01T00:00:03.000004Z',
+      },
+      '1970-01-01T00:00:05.000000006Z',
+      'json'
+    );
+
+    bundle.add(snap1);
+    bundle.add(snap2);
+    // Bundle is expected to be [bundleMeta, snap1Meta, snap1, snap2Meta, snap2] because `snap1` is newer.
+    const elements = await bundleToElementArray(bundle.build());
+    expect(elements.length).to.equal(5);
+
+    const meta = (elements[0] as IBundleElement).metadata;
+    verifyMetadata(
+      meta!,
+      // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
+      snap1.readTime.toProto().timestampValue!,
+      2
+    );
+
+    // Verify doc1Meta and doc1Snap
+    let docMeta = (elements[1] as IBundleElement).documentMetadata;
+    let docSnap = (elements[2] as IBundleElement).document;
+    expect(docMeta).to.deep.equal({
+      name: snap1.toDocumentProto().name,
+      readTime: snap1.readTime.toProto().timestampValue,
+      exists: true,
+    });
+    expect(docSnap).to.deep.equal(snap1.toDocumentProto());
+
+    // Verify doc2Meta and doc2Snap
+    docMeta = (elements[3] as IBundleElement).documentMetadata;
+    docSnap = (elements[4] as IBundleElement).document;
+    expect(docMeta).to.deep.equal({
+      name: snap2.toDocumentProto().name,
+      readTime: snap2.readTime.toProto().timestampValue,
+      exists: true,
+    });
+    expect(docSnap).to.deep.equal(snap2.toDocumentProto());
+  });
 });
 
 describe('Bundle Builder using BigInt', () => {

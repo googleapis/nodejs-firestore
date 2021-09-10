@@ -4,6 +4,25 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.15.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.15.0...v4.15.1) (2021-09-03)
+
+
+### Bug Fixes
+
+* **build:** migrate to main branch ([#1601](https://www.github.com/googleapis/nodejs-firestore/issues/1601)) ([6f16b9a](https://www.github.com/googleapis/nodejs-firestore/commit/6f16b9ab9e1365b99498e9df4d56a88db313f9a6))
+
+## [4.15.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.14.2...v4.15.0) (2021-08-26)
+
+
+### Features
+
+* turns on self-signed JWT feature flag ([#1593](https://www.github.com/googleapis/nodejs-firestore/issues/1593)) ([feee8cc](https://www.github.com/googleapis/nodejs-firestore/commit/feee8cc1b32ab04613f654806ca31477328059ff))
+
+
+### Bug Fixes
+
+* Handles identical document ids from different collections. ([#1599](https://www.github.com/googleapis/nodejs-firestore/issues/1599)) ([745b608](https://www.github.com/googleapis/nodejs-firestore/commit/745b608a7883a27ccb1c4d1f7800fdcc9a7917b1))
+
 ### [4.14.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.14.1...v4.14.2) (2021-08-17)
 
 
