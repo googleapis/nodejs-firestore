@@ -3465,6 +3465,131 @@ describe('Types test', () => {
       });
     });
 
+    it('supports optional fields', async () => {
+      interface TestObjectOptional {
+        optionalStr?: string;
+        nested?: {
+          requiredStr: string;
+        };
+      }
+
+      const testConverterOptional = {
+        toFirestore(testObj: WithFieldValue<TestObjectOptional>) {
+          return {...testObj};
+        },
+        fromFirestore(snapshot: QueryDocumentSnapshot): TestObjectOptional {
+          const data = snapshot.data();
+          return {
+            optionalStr: data.optionalStr,
+            nested: data.nested,
+          };
+        },
+      };
+
+      const ref = doc.withConverter(testConverterOptional);
+
+      await ref.update({
+        optionalStr: 'foo',
+      });
+      await ref.update({
+        optionalStr: 'foo',
+      });
+
+      await ref.update({
+        nested: {
+          requiredStr: 'foo',
+        },
+      });
+      await ref.update({
+        'nested.requiredStr': 'foo',
+      });
+    });
+
+    it('supports null fields', async () => {
+      interface TestObjectOptional {
+        optionalStr?: string;
+        nested?: {
+          strOrNull: string | null;
+        };
+      }
+
+      const testConverterOptional = {
+        toFirestore(testObj: WithFieldValue<TestObjectOptional>) {
+          return {...testObj};
+        },
+        fromFirestore(snapshot: QueryDocumentSnapshot): TestObjectOptional {
+          const data = snapshot.data();
+          return {
+            optionalStr: data.optionalStr,
+            nested: data.nested,
+          };
+        },
+      };
+      const ref = doc.withConverter(testConverterOptional);
+
+      await ref.update({
+        nested: {
+          strOrNull: null,
+        },
+      });
+      await ref.update({
+        'nested.strOrNull': null,
+      });
+    });
+
+    it('supports union fields', async () => {
+      interface TestObjectUnion {
+        optionalStr?: string;
+        nested?:
+          | {
+              requiredStr: string;
+            }
+          | {requiredNumber: number};
+      }
+
+      const testConverterUnion = {
+        toFirestore(testObj: WithFieldValue<TestObjectUnion>) {
+          return {...testObj};
+        },
+        fromFirestore(snapshot: QueryDocumentSnapshot): TestObjectUnion {
+          const data = snapshot.data();
+          return {
+            optionalStr: data.optionalStr,
+            nested: data.nested,
+          };
+        },
+      };
+
+      const ref = doc.withConverter(testConverterUnion);
+
+      await ref.update({
+        nested: {
+          requiredStr: 'foo',
+        },
+      });
+
+      await ref.update({
+        'nested.requiredStr': 'foo',
+      });
+      await ref.update({
+        // @ts-expect-error Should fail to transpile.
+        'nested.requiredStr': 1,
+      });
+
+      await ref.update({
+        'nested.requiredNumber': 1,
+      });
+
+      await ref.update({
+        // @ts-expect-error Should fail to transpile.
+        'nested.requiredNumber': 'foo',
+      });
+      await ref.update({
+        // @ts-expect-error Should fail to transpile.
+        'nested.requiredNumber': null,
+      });
+    });
+
     it('checks for nonexistent fields', async () => {
       const ref = doc.withConverter(testConverter);
 
