@@ -184,7 +184,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *     return {title: post.title, author: post.author};
  *   },
  *   fromFirestore(
- *     data: FirebaseFirestore.QueryDocumentSnapshot
+ *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
  *   ): Post {
  *     const data = snapshot.data();
  *     return new Post(data.title, data.author);
