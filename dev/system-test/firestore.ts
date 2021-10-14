@@ -3113,7 +3113,7 @@ describe('Types test', () => {
         testObj: PartialWithFieldValue<TestObject>,
         options?: SetOptions
       ) {
-        if (options && (options.merge || options.mergeFields)) {
+        if (options) {
           expect(testObj).to.not.be.an.instanceOf(TestObject);
         } else {
           expect(testObj).to.be.an.instanceOf(TestObject);
@@ -3220,7 +3220,7 @@ describe('Types test', () => {
         testObj: PartialWithFieldValue<TestObject>,
         options?: SetOptions
       ) {
-        if (options && (options.merge || options.mergeFields)) {
+        if (options) {
           expect(testObj).to.not.be.an.instanceOf(TestObject);
         } else {
           expect(testObj).to.be.an.instanceOf(TestObject);
