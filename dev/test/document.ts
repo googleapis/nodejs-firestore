@@ -1309,47 +1309,6 @@ describe('set document', () => {
 
   it('validates merge option', () => {
     expect(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .set({foo: 'bar'}, 'foo' as InvalidApiUsage);
-    }).to.throw(
-      'Value for argument "options" is not a valid set() options argument. Input is not an object.'
-    );
-
-    expect(() => {
-      firestore.doc('collectionId/documentId').set(
-        {foo: 'bar'},
-        {
-          merge: 42 as InvalidApiUsage,
-        }
-      );
-    }).to.throw(
-      'Value for argument "options" is not a valid set() options argument. "merge" is not a boolean.'
-    );
-
-    expect(() => {
-      firestore.doc('collectionId/documentId').set(
-        {foo: 'bar'},
-        {
-          mergeFields: 42 as InvalidApiUsage,
-        }
-      );
-    }).to.throw(
-      'Value for argument "options" is not a valid set() options argument. "mergeFields" is not an array.'
-    );
-
-    expect(() => {
-      firestore.doc('collectionId/documentId').set(
-        {foo: 'bar'},
-        {
-          mergeFields: [null as InvalidApiUsage],
-        }
-      );
-    }).to.throw(
-      'Value for argument "options" is not a valid set() options argument. "mergeFields" is not valid: Element at index 0 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.'
-    );
-
-    expect(() => {
       firestore.doc('collectionId/documentId').set(
         {foo: 'bar'},
         {
@@ -1357,6 +1316,19 @@ describe('set document', () => {
         }
       );
     }).to.throw('Input data is missing for field "foobar".');
+
+    expect(() => {
+      firestore.doc('collectionId/documentId').set(
+        {foo: 'bar'},
+        {
+          mergeFields: ['foobar..'],
+        }
+      );
+    }).to.throw(
+      'Value for argument "options" is not a valid set() options argument. ' +
+        '"mergeFields" is not valid: Element at index 0 is not a valid ' +
+        'field path. Paths must not contain ".." in them.'
+    );
 
     expect(() => {
       firestore

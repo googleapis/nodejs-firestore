@@ -1065,25 +1065,22 @@ declare namespace FirebaseFirestore {
    * `DocumentReference`, `WriteBatch` and `Transaction`. These calls can be
    * configured to perform granular merges instead of overwriting the target
    * documents in their entirety.
+   *
+   * @param merge Changes the behavior of a set() call to only replace the
+   * values specified in its data argument. Fields omitted from the set() call
+   * remain untouched.
+   *
+   * @param mergeFields Changes the behavior of set() calls to only replace
+   * the specified field paths. Any field path that is not specified is ignored
+   * and remains untouched.
    */
-  export interface SetOptions {
-    /**
-     * Changes the behavior of a set() call to only replace the values specified
-     * in its data argument. Fields omitted from the set() call remain
-     * untouched.
-     */
-    readonly merge?: boolean;
-
-    /**
-     * Changes the behavior of set() calls to only replace the specified field
-     * paths. Any field path that is not specified is ignored and remains
-     * untouched.
-     *
-     * It is an error to pass a SetOptions object to a set() call that is
-     * missing a value for any of the fields specified here.
-     */
-    readonly mergeFields?: (string | FieldPath)[];
-  }
+  export type SetOptions =
+    | {
+        readonly merge?: boolean;
+      }
+    | {
+        readonly mergeFields?: Array<string | FieldPath>;
+      };
 
   /**
    * An options object that can be used to configure the behavior of `getAll()`

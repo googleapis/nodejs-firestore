@@ -315,8 +315,8 @@ export class WriteBatch implements firestore.WriteBatch {
     options?: firestore.SetOptions
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});
-    const mergeLeaves = options && options.merge === true;
-    const mergePaths = options && options.mergeFields;
+    const mergeLeaves = options && 'merge' in options && options.merge;
+    const mergePaths = options && 'mergeFields' in options;
     const ref = validateDocumentReference('documentRef', documentRef);
     let firestoreData: firestore.DocumentData;
     if (mergeLeaves || mergePaths) {
@@ -763,27 +763,9 @@ export function validateSetOptions(
       );
     }
 
-    const setOptions = value as {[k: string]: unknown};
-
-    if ('merge' in setOptions && typeof setOptions.merge !== 'boolean') {
-      throw new Error(
-        `${invalidArgumentMessage(
-          arg,
-          'set() options argument'
-        )} "merge" is not a boolean.`
-      );
-    }
+    const setOptions = value as {mergeFields: Array<string | FieldPath>};
 
     if ('mergeFields' in setOptions) {
-      if (!Array.isArray(setOptions.mergeFields)) {
-        throw new Error(
-          `${invalidArgumentMessage(
-            arg,
-            'set() options argument'
-          )} "mergeFields" is not an array.`
-        );
-      }
-
       for (let i = 0; i < setOptions.mergeFields.length; ++i) {
         try {
           validateFieldPath(i, setOptions.mergeFields[i]);
