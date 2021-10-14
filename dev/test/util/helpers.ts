@@ -354,7 +354,7 @@ export const postConverterMerge = {
     post: PartialWithFieldValue<Post>,
     options?: SetOptions
   ): DocumentData {
-    if (options && (options.merge || options.mergeFields)) {
+    if (options) {
       expect(post).to.not.be.an.instanceOf(Post);
     } else {
       expect(post).to.be.an.instanceof(Post);
