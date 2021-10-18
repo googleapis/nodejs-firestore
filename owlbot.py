@@ -7,6 +7,7 @@ import subprocess
 from pathlib import Path
 from synthtool import _tracked_paths
 import shutil
+from synthtool import shell
 
 logging.basicConfig(level=logging.DEBUG)
 
