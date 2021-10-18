@@ -192,3 +192,6 @@ templates = common_templates.node_library(
 s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*", ".github/CODEOWNERS"])
 
 node.fix_hermetic()  # fix formatting
+
+# Remove generated samples from veneer library:
+shell.run(('rm', '-rf', 'samples/generated'), hide_output = False)
