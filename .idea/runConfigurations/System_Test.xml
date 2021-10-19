@@ -9,7 +9,7 @@
       <env name="TS_NODE_FILES" value="true" />
     </envs>
     <ui>bdd</ui>
-    <extra-mocha-options>--require ts-node/register/type-check --no-cache --timeout 60000</extra-mocha-options>
+    <extra-mocha-options>--require ts-node/register/type-check --no-cache --timeout 5000</extra-mocha-options>
     <test-kind>TEST_FILE</test-kind>
     <test-file>$PROJECT_DIR$/dev/system-test/firestore.ts</test-file>
     <method v="2" />

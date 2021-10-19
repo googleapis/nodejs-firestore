@@ -597,6 +597,8 @@ export class WriteBatch implements firestore.WriteBatch {
       writes: this._ops.map(op => op.op()),
     };
 
+    console.log(JSON.stringify(request));
+
     if (commitOptions?.transactionId) {
       request.transaction = commitOptions.transactionId;
     }
