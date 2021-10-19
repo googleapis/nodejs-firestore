@@ -195,4 +195,4 @@ s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*", ".github/CODEOWNER
 node.fix_hermetic()  # fix formatting
 
 # Remove generated samples from veneer library:
-shell.run(('rm', '-rf', 'samples/generated'), hide_output = False)
+shell.run(('rm', '-rf', 'dev/samples/generated'), hide_output = False)
