@@ -1413,7 +1413,8 @@ export class FirestoreAdminClient {
       gax.routingHeader.fromParams({
         parent: request.parent || '',
       });
-    const callSettings = new gax.CallSettings(options);
+    const defaultCallSettings = this._defaults['listIndexes'];
+    const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listIndexes.createStream(
       this.innerApiCalls.listIndexes as gax.GaxCall,
@@ -1468,7 +1469,8 @@ export class FirestoreAdminClient {
         parent: request.parent || '',
       });
     options = options || {};
-    const callSettings = new gax.CallSettings(options);
+    const defaultCallSettings = this._defaults['listIndexes'];
+    const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listIndexes.asyncIterate(
       this.innerApiCalls['listIndexes'] as GaxCall,
@@ -1626,7 +1628,8 @@ export class FirestoreAdminClient {
       gax.routingHeader.fromParams({
         parent: request.parent || '',
       });
-    const callSettings = new gax.CallSettings(options);
+    const defaultCallSettings = this._defaults['listFields'];
+    const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listFields.createStream(
       this.innerApiCalls.listFields as gax.GaxCall,
@@ -1685,7 +1688,8 @@ export class FirestoreAdminClient {
         parent: request.parent || '',
       });
     options = options || {};
-    const callSettings = new gax.CallSettings(options);
+    const defaultCallSettings = this._defaults['listFields'];
+    const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listFields.asyncIterate(
       this.innerApiCalls['listFields'] as GaxCall,
