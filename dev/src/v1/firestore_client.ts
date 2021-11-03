@@ -137,6 +137,12 @@ export class FirestoreClient {
     // Save the auth object to the client, for use by other methods.
     this.auth = this._gaxGrpc.auth as gax.GoogleAuth;
 
+    // Set useJWTAccessWithScope on the auth object.
+    this.auth.useJWTAccessWithScope = true;
+
+    // Set defaultServicePath on the auth object.
+    this.auth.defaultServicePath = staticMembers.servicePath;
+
     // Set the default scopes in auth client if needed.
     if (servicePath === staticMembers.servicePath) {
       this.auth.defaultScopes = staticMembers.scopes;
@@ -1436,7 +1442,8 @@ export class FirestoreClient {
       gax.routingHeader.fromParams({
         parent: request.parent || '',
       });
-    const callSettings = new gax.CallSettings(options);
+    const defaultCallSettings = this._defaults['listDocuments'];
+    const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listDocuments.createStream(
       this.innerApiCalls.listDocuments as gax.GaxCall,
@@ -1514,7 +1521,8 @@ export class FirestoreClient {
         parent: request.parent || '',
       });
     options = options || {};
-    const callSettings = new gax.CallSettings(options);
+    const defaultCallSettings = this._defaults['listDocuments'];
+    const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listDocuments.asyncIterate(
       this.innerApiCalls['listDocuments'] as GaxCall,
@@ -1719,7 +1727,8 @@ export class FirestoreClient {
       gax.routingHeader.fromParams({
         parent: request.parent || '',
       });
-    const callSettings = new gax.CallSettings(options);
+    const defaultCallSettings = this._defaults['partitionQuery'];
+    const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.partitionQuery.createStream(
       this.innerApiCalls.partitionQuery as gax.GaxCall,
@@ -1804,7 +1813,8 @@ export class FirestoreClient {
         parent: request.parent || '',
       });
     options = options || {};
-    const callSettings = new gax.CallSettings(options);
+    const defaultCallSettings = this._defaults['partitionQuery'];
+    const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.partitionQuery.asyncIterate(
       this.innerApiCalls['partitionQuery'] as GaxCall,
@@ -1947,7 +1957,8 @@ export class FirestoreClient {
       gax.routingHeader.fromParams({
         parent: request.parent || '',
       });
-    const callSettings = new gax.CallSettings(options);
+    const defaultCallSettings = this._defaults['listCollectionIds'];
+    const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listCollectionIds.createStream(
       this.innerApiCalls.listCollectionIds as gax.GaxCall,
@@ -2001,7 +2012,8 @@ export class FirestoreClient {
         parent: request.parent || '',
       });
     options = options || {};
-    const callSettings = new gax.CallSettings(options);
+    const defaultCallSettings = this._defaults['listCollectionIds'];
+    const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listCollectionIds.asyncIterate(
       this.innerApiCalls['listCollectionIds'] as GaxCall,
