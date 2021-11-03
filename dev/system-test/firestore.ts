@@ -1231,6 +1231,41 @@ describe('DocumentReference class', () => {
     expect(post).to.not.be.undefined;
     expect(post!.toString()).to.equal('post, by author');
   });
+
+  it('supports primitive types with valid converter', async () => {
+    type Primitive = number;
+    const primitiveConverter = {
+      toFirestore(value: Primitive): DocumentData {
+        return {value};
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot): Primitive {
+        const data = snapshot.data();
+        return data.value;
+      },
+    };
+
+    type ArrayValue = number[];
+    const arrayConverter = {
+      toFirestore(value: ArrayValue): DocumentData {
+        return {values: value};
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot): ArrayValue {
+        const data = snapshot.data();
+        return data.values;
+      },
+    };
+
+    const coll = firestore.collection('tests');
+    const ref = coll.doc('number').withConverter(primitiveConverter);
+    await ref.set(3);
+    const result = await ref.get();
+    expect(result.data()).to.equal(3);
+
+    const ref2 = coll.doc('array').withConverter(arrayConverter);
+    await ref2.set([1, 2, 3]);
+    const result2 = await ref2.get();
+    expect(result2.data()).to.deep.equal([1, 2, 3]);
+  });
 });
 
 describe('Query class', () => {
@@ -3107,7 +3142,7 @@ describe('Types test', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  describe('NestedPartial', () => {
+  describe('Nested partial support', () => {
     const testConverterMerge = {
       toFirestore(
         testObj: PartialWithFieldValue<TestObject>,
@@ -3207,6 +3242,39 @@ describe('Types test', () => {
           nested: {
             // @ts-expect-error Should fail to transpile.
             nonexistent: 'foo',
+          },
+        },
+        {merge: true}
+      );
+    });
+
+    it('allows omitting fields', async () => {
+      const ref = doc.withConverter(testConverterMerge);
+      // Omit outer fields.
+      await ref.set(
+        {
+          outerString: '',
+          nested: {
+            innerNested: {
+              innerNestedNum: FieldValue.increment(1),
+            },
+            innerArr: FieldValue.arrayUnion(2),
+            timestamp: FieldValue.serverTimestamp(),
+          },
+        },
+        {merge: true}
+      );
+
+      // Omit inner fields
+      await ref.set(
+        {
+          outerString: '',
+          outerArr: [],
+          nested: {
+            innerNested: {
+              innerNestedNum: FieldValue.increment(1),
+            },
+            timestamp: FieldValue.serverTimestamp(),
           },
         },
         {merge: true}
@@ -3339,10 +3407,9 @@ describe('Types test', () => {
       });
     });
 
-    it('requires all fields to be present', async () => {
+    it('requires all outer fields to be present', async () => {
       const ref = doc.withConverter(testConverter);
 
-      // Allow Field Values and nested partials.
       // @ts-expect-error Should fail to transpile.
       await ref.set({
         outerArr: [],
@@ -3351,6 +3418,22 @@ describe('Types test', () => {
             innerNestedNum: FieldValue.increment(1),
           },
           innerArr: FieldValue.arrayUnion(2),
+          timestamp: FieldValue.serverTimestamp(),
+        },
+      });
+    });
+
+    it('requires all inner fields to be present', async () => {
+      const ref = doc.withConverter(testConverter);
+
+      await ref.set({
+        outerString: '',
+        outerArr: [],
+        // @ts-expect-error Should fail to transpile.
+        nested: {
+          innerNested: {
+            innerNestedNum: FieldValue.increment(1),
+          },
           timestamp: FieldValue.serverTimestamp(),
         },
       });
@@ -3406,6 +3489,81 @@ describe('Types test', () => {
           innerArr: FieldValue.arrayUnion(2),
           timestamp: FieldValue.serverTimestamp(),
         },
+      });
+    });
+
+    it('allows certain types for not others', async () => {
+      const withTryCatch = async (
+        fn: () => Promise<WriteResult>
+      ): Promise<void> => {
+        try {
+          await fn();
+        } catch {
+          // This is expected.
+        }
+      };
+
+      // These tests exist to establish which object types are allowed to be
+      // passed in by default when `T = DocumentData`. Some objects extend
+      // the Javascript `{}`, which is why they're allowed whereas others
+      // throw an error.
+      // @ts-expect-error This should fail to transpile.
+      await withTryCatch(() => doc.set(1));
+      // @ts-expect-error This should fail to transpile.
+      await withTryCatch(() => doc.set('foo'));
+      // @ts-expect-error This should fail to transpile.
+      await withTryCatch(() => doc.set(false));
+      // @ts-expect-error This should fail to transpile.
+      await withTryCatch(() => doc.set(undefined));
+      // @ts-expect-error This should fail to transpile.
+      await withTryCatch(() => doc.set(null));
+      await withTryCatch(() => doc.set([0]));
+      await withTryCatch(() => doc.set(new Set<string>()));
+      await withTryCatch(() => doc.set(new Map<string, number>()));
+    });
+
+    describe('used as a type', () => {
+      class ObjectWrapper<T> {
+        withFieldValueT(value: WithFieldValue<T>): WithFieldValue<T> {
+          return value;
+        }
+
+        withPartialFieldValueT(
+          value: PartialWithFieldValue<T>
+        ): PartialWithFieldValue<T> {
+          return value;
+        }
+
+        // Wrapper to avoid having Firebase types in non-Firebase code.
+        withT(value: T): void {
+          this.withFieldValueT(value);
+        }
+
+        // Wrapper to avoid having Firebase types in non-Firebase code.
+        withPartialT(value: Partial<T>): void {
+          this.withPartialFieldValueT(value);
+        }
+      }
+
+      it('supports passing in the object as `T`', () => {
+        interface Foo {
+          id: string;
+          foo: number;
+        }
+        const foo = new ObjectWrapper<Foo>();
+        foo.withFieldValueT({id: '', foo: FieldValue.increment(1)});
+        foo.withPartialFieldValueT({foo: FieldValue.increment(1)});
+        foo.withT({id: '', foo: 1});
+        foo.withPartialT({foo: 1});
+      });
+
+      it('does not allow primitive types to use FieldValue', () => {
+        type Bar = number;
+        const bar = new ObjectWrapper<Bar>();
+        // @ts-expect-error This should fail to transpile.
+        bar.withFieldValueT(FieldValue.increment(1));
+        // @ts-expect-error This should fail to transpile.
+        bar.withPartialFieldValueT(FieldValue.increment(1));
       });
     });
   });
