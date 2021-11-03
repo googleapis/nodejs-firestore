@@ -427,11 +427,19 @@ export class BulkWriter {
   private _errorHandlerSet = false;
 
   // Visible for testing.
+  /**
+   * @private
+   * @internal
+   */
   _getBufferedOperationsCount(): number {
     return this._bufferedOperations.length;
   }
 
   // Visible for testing.
+  /**
+   * @private
+   * @internal
+   */
   _setMaxBatchSize(size: number): void {
     assert(
       this._bulkCommitBatch.pendingOps.length === 0,
@@ -451,6 +459,10 @@ export class BulkWriter {
   private _maxPendingOpCount = DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT;
 
   // Visible for testing.
+  /**
+   * @private
+   * @internal
+   */
   _setMaxPendingOpCount(newMax: number): void {
     this._maxPendingOpCount = newMax;
   }
