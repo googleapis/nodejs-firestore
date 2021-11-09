@@ -71,11 +71,13 @@ export class WriteResult implements firestore.WriteResult {
    * @readonly
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.set({foo: 'bar'}).then(writeResult => {
    *   console.log(`Document written at: ${writeResult.writeTime.toDate()}`);
    * });
+   * ```
    */
   get writeTime(): Timestamp {
     return this._writeTime;
@@ -176,6 +178,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * method calls.
    *
    * @example
+   * ```
    * let writeBatch = firestore.batch();
    * let documentRef = firestore.collection('col').doc();
    *
@@ -184,6 +187,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * writeBatch.commit().then(() => {
    *   console.log('Successfully executed batch.');
    * });
+   * ```
    */
   create<T>(documentRef: firestore.DocumentReference<T>, data: T): WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
@@ -233,6 +237,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * method calls.
    *
    * @example
+   * ```
    * let writeBatch = firestore.batch();
    * let documentRef = firestore.doc('col/doc');
    *
@@ -241,6 +246,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * writeBatch.commit().then(() => {
    *   console.log('Successfully executed batch.');
    * });
+   * ```
    */
   delete<T>(
     documentRef: firestore.DocumentReference<T>,
@@ -297,6 +303,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * method calls.
    *
    * @example
+   * ```
    * let writeBatch = firestore.batch();
    * let documentRef = firestore.doc('col/doc');
    *
@@ -305,6 +312,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * writeBatch.commit().then(() => {
    *   console.log('Successfully executed batch.');
    * });
+   * ```
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
@@ -394,6 +402,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * method calls.
    *
    * @example
+   * ```
    * let writeBatch = firestore.batch();
    * let documentRef = firestore.doc('col/doc');
    *
@@ -402,6 +411,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * writeBatch.commit().then(() => {
    *   console.log('Successfully executed batch.');
    * });
+   * ```
    */
   update<T = firestore.DocumentData>(
     documentRef: firestore.DocumentReference<T>,
@@ -535,6 +545,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * when this batch completes.
    *
    * @example
+   * ```
    * let writeBatch = firestore.batch();
    * let documentRef = firestore.doc('col/doc');
    *
@@ -543,6 +554,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * writeBatch.commit().then(() => {
    *   console.log('Successfully executed batch.');
    * });
+   * ```
    */
   commit(): Promise<WriteResult[]> {
     // Capture the error stack to preserve stack tracing across async calls.

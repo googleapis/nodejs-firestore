@@ -49,6 +49,7 @@ export class FieldValue implements firestore.FieldValue {
    * @returns {FieldValue} The sentinel value to use in your objects.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    * let data = { a: 'b', c: 'd' };
    *
@@ -57,6 +58,7 @@ export class FieldValue implements firestore.FieldValue {
    * }).then(() => {
    *   // Document now only contains { c: 'd' }
    * });
+   * ```
    */
   static delete(): FieldValue {
     return DeleteTransform.DELETE_SENTINEL;
@@ -70,6 +72,7 @@ export class FieldValue implements firestore.FieldValue {
    * create() or update().
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.set({
@@ -79,6 +82,7 @@ export class FieldValue implements firestore.FieldValue {
    * }).then(doc => {
    *   console.log(`Server time set to ${doc.get('time')}`);
    * });
+   * ```
    */
   static serverTimestamp(): FieldValue {
     return ServerTimestampTransform.SERVER_TIMESTAMP_SENTINEL;
@@ -102,6 +106,7 @@ export class FieldValue implements firestore.FieldValue {
    * create() or update().
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.update(
@@ -111,6 +116,7 @@ export class FieldValue implements firestore.FieldValue {
    * }).then(doc => {
    *   // doc.get('counter') was incremented
    * });
+   * ```
    */
   static increment(n: number): FieldValue {
     // eslint-disable-next-line prefer-rest-params
@@ -131,6 +137,7 @@ export class FieldValue implements firestore.FieldValue {
    * create() or update().
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.update(
@@ -140,6 +147,7 @@ export class FieldValue implements firestore.FieldValue {
    * }).then(doc => {
    *   // doc.get('array') contains field 'foo'
    * });
+   * ```
    */
   static arrayUnion(...elements: unknown[]): FieldValue {
     validateMinNumberOfArguments('FieldValue.arrayUnion', elements, 1);
@@ -158,6 +166,7 @@ export class FieldValue implements firestore.FieldValue {
    * create() or update().
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.update(
@@ -167,6 +176,7 @@ export class FieldValue implements firestore.FieldValue {
    * }).then(doc => {
    *   // doc.get('array') no longer contains field 'foo'
    * });
+   * ```
    */
   static arrayRemove(...elements: unknown[]): FieldValue {
     validateMinNumberOfArguments('FieldValue.arrayRemove', elements, 1);
@@ -180,6 +190,7 @@ export class FieldValue implements firestore.FieldValue {
    * @return {boolean} true if this `FieldValue` is equal to the provided value.
    *
    * @example
+   * ```
    * let fieldValues = [
    *   Firestore.FieldValue.increment(-1.0),
    *   Firestore.FieldValue.increment(-1),
@@ -200,6 +211,7 @@ export class FieldValue implements firestore.FieldValue {
    *   }
    * }
    * console.log(`Found ${equal} equalities.`);
+   * ```
    */
   isEqual(other: firestore.FieldValue): boolean {
     return this === other;

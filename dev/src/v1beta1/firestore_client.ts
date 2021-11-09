@@ -413,7 +413,9 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.getDocument(request);
+   * ```
    */
   getDocument(
     request?: protos.google.firestore.v1beta1.IGetDocumentRequest,
@@ -515,7 +517,9 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.updateDocument(request);
+   * ```
    */
   updateDocument(
     request?: protos.google.firestore.v1beta1.IUpdateDocumentRequest,
@@ -604,7 +608,9 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.deleteDocument(request);
+   * ```
    */
   deleteDocument(
     request?: protos.google.firestore.v1beta1.IDeleteDocumentRequest,
@@ -697,7 +703,9 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.beginTransaction(request);
+   * ```
    */
   beginTransaction(
     request?: protos.google.firestore.v1beta1.IBeginTransactionRequest,
@@ -791,7 +799,9 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.commit(request);
+   * ```
    */
   commit(
     request?: protos.google.firestore.v1beta1.ICommitRequest,
@@ -877,7 +887,9 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.rollback(request);
+   * ```
    */
   rollback(
     request?: protos.google.firestore.v1beta1.IRollbackRequest,
@@ -977,7 +989,9 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.batchWrite(request);
+   * ```
    */
   batchWrite(
     request?: protos.google.firestore.v1beta1.IBatchWriteRequest,
@@ -1075,7 +1089,9 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.createDocument(request);
+   * ```
    */
   createDocument(
     request?: protos.google.firestore.v1beta1.ICreateDocumentRequest,
@@ -1158,9 +1174,11 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#server-streaming)
    *   for more details and examples.
    * @example
+   * ```
    * const stream = client.batchGetDocuments(request);
    * stream.on('data', (response) => { ... });
    * stream.on('end', () => { ... });
+   * ```
    */
   batchGetDocuments(
     request?: protos.google.firestore.v1beta1.IBatchGetDocumentsRequest,
@@ -1210,9 +1228,11 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#server-streaming)
    *   for more details and examples.
    * @example
+   * ```
    * const stream = client.runQuery(request);
    * stream.on('data', (response) => { ... });
    * stream.on('end', () => { ... });
+   * ```
    */
   runQuery(
     request?: protos.google.firestore.v1beta1.IRunQueryRequest,
@@ -1243,11 +1263,13 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#bi-directional-streaming)
    *   for more details and examples.
    * @example
+   * ```
    * const stream = client.write();
    * stream.on('data', (response) => { ... });
    * stream.on('end', () => { ... });
    * stream.write(request);
    * stream.end();
+   * ```
    */
   write(options?: CallOptions): gax.CancellableStream {
     this.initialize();
@@ -1267,11 +1289,13 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#bi-directional-streaming)
    *   for more details and examples.
    * @example
+   * ```
    * const stream = client.listen();
    * stream.on('data', (response) => { ... });
    * stream.on('end', () => { ... });
    * stream.write(request);
    * stream.end();
+   * ```
    */
   listen(options?: CallOptions): gax.CancellableStream {
     this.initialize();
@@ -1522,10 +1546,12 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
    *   for more details and examples.
    * @example
+   * ```
    * const iterable = client.listDocumentsAsync(request);
    * for await (const response of iterable) {
    *   // process response
    * }
+   * ```
    */
   listDocumentsAsync(
     request?: protos.google.firestore.v1beta1.IListDocumentsRequest,
@@ -1822,10 +1848,12 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
    *   for more details and examples.
    * @example
+   * ```
    * const iterable = client.partitionQueryAsync(request);
    * for await (const response of iterable) {
    *   // process response
    * }
+   * ```
    */
   partitionQueryAsync(
     request?: protos.google.firestore.v1beta1.IPartitionQueryRequest,
@@ -2027,10 +2055,12 @@ export class FirestoreClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
    *   for more details and examples.
    * @example
+   * ```
    * const iterable = client.listCollectionIdsAsync(request);
    * for await (const response of iterable) {
    *   // process response
    * }
+   * ```
    */
   listCollectionIdsAsync(
     request?: protos.google.firestore.v1beta1.IListCollectionIdsRequest,
