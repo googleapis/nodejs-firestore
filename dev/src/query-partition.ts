@@ -57,6 +57,7 @@ export class QueryPartition<T = firestore.DocumentData>
    * `query.startAt(...queryPartition.startAt)`).
    *
    * @example
+   * ```
    * const query = firestore.collectionGroup('collectionId');
    * for await (const partition of query.getPartitions(42)) {
    *   let partitionedQuery = query.orderBy(FieldPath.documentId());
@@ -70,6 +71,7 @@ export class QueryPartition<T = firestore.DocumentData>
    *   console.log(`Partition contained ${querySnapshot.length} documents`);
    * }
    *
+   * ```
    * @type {Array<*>}
    * @return {Array<*>} A cursor value that can be used with {@link
    * Query#startAt} or `undefined` if this is the first partition.
@@ -91,6 +93,7 @@ export class QueryPartition<T = firestore.DocumentData>
    * `query.endBefore(...queryPartition.endBefore)`).
    *
    * @example
+   * ```
    * const query = firestore.collectionGroup('collectionId');
    * for await (const partition of query.getPartitions(42)) {
    *   let partitionedQuery = query.orderBy(FieldPath.documentId());
@@ -104,6 +107,7 @@ export class QueryPartition<T = firestore.DocumentData>
    *   console.log(`Partition contained ${querySnapshot.length} documents`);
    * }
    *
+   * ```
    * @type {Array<*>}
    * @return {Array<*>} A cursor value that can be used with {@link
    * Query#endBefore} or `undefined` if this is the last partition.
@@ -122,6 +126,7 @@ export class QueryPartition<T = firestore.DocumentData>
    * Returns a query that only encapsulates the documents for this partition.
    *
    * @example
+   * ```
    * const query = firestore.collectionGroup('collectionId');
    * for await (const partition of query.getPartitions(42)) {
    *   const partitionedQuery = partition.toQuery();
@@ -129,6 +134,7 @@ export class QueryPartition<T = firestore.DocumentData>
    *   console.log(`Partition contained ${querySnapshot.length} documents`);
    * }
    *
+   * ```
    * @return {Query<T>} A query partitioned by a {@link Query#startAt} and
    * {@link Query#endBefore} cursor.
    */

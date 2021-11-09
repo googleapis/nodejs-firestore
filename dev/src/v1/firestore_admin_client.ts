@@ -447,7 +447,9 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.getIndex(request);
+   * ```
    */
   getIndex(
     request?: protos.google.firestore.admin.v1.IGetIndexRequest,
@@ -531,7 +533,9 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.deleteIndex(request);
+   * ```
    */
   deleteIndex(
     request?: protos.google.firestore.admin.v1.IDeleteIndexRequest,
@@ -617,7 +621,9 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
    * @example
+   * ```
    * const [response] = await client.getField(request);
+   * ```
    */
   getField(
     request?: protos.google.firestore.admin.v1.IGetFieldRequest,
@@ -717,8 +723,10 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
    * @example
+   * ```
    * const [operation] = await client.createIndex(request);
    * const [response] = await operation.promise();
+   * ```
    */
   createIndex(
     request?: protos.google.firestore.admin.v1.ICreateIndexRequest,
@@ -778,10 +786,12 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
    * @example
+   * ```
    * const decodedOperation = await checkCreateIndexProgress(name);
    * console.log(decodedOperation.result);
    * console.log(decodedOperation.done);
    * console.log(decodedOperation.metadata);
+   * ```
    */
   async checkCreateIndexProgress(
     name: string
@@ -873,8 +883,10 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
    * @example
+   * ```
    * const [operation] = await client.updateField(request);
    * const [response] = await operation.promise();
+   * ```
    */
   updateField(
     request?: protos.google.firestore.admin.v1.IUpdateFieldRequest,
@@ -934,10 +946,12 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
    * @example
+   * ```
    * const decodedOperation = await checkUpdateFieldProgress(name);
    * console.log(decodedOperation.result);
    * console.log(decodedOperation.done);
    * console.log(decodedOperation.metadata);
+   * ```
    */
   async checkUpdateFieldProgress(
     name: string
@@ -1033,8 +1047,10 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
    * @example
+   * ```
    * const [operation] = await client.exportDocuments(request);
    * const [response] = await operation.promise();
+   * ```
    */
   exportDocuments(
     request?: protos.google.firestore.admin.v1.IExportDocumentsRequest,
@@ -1094,10 +1110,12 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
    * @example
+   * ```
    * const decodedOperation = await checkExportDocumentsProgress(name);
    * console.log(decodedOperation.result);
    * console.log(decodedOperation.done);
    * console.log(decodedOperation.metadata);
+   * ```
    */
   async checkExportDocumentsProgress(
     name: string
@@ -1188,8 +1206,10 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
    * @example
+   * ```
    * const [operation] = await client.importDocuments(request);
    * const [response] = await operation.promise();
+   * ```
    */
   importDocuments(
     request?: protos.google.firestore.admin.v1.IImportDocumentsRequest,
@@ -1249,10 +1269,12 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
    * @example
+   * ```
    * const decodedOperation = await checkImportDocumentsProgress(name);
    * console.log(decodedOperation.result);
    * console.log(decodedOperation.done);
    * console.log(decodedOperation.metadata);
+   * ```
    */
   async checkImportDocumentsProgress(
     name: string
@@ -1451,10 +1473,12 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
    *   for more details and examples.
    * @example
+   * ```
    * const iterable = client.listIndexesAsync(request);
    * for await (const response of iterable) {
    *   // process response
    * }
+   * ```
    */
   listIndexesAsync(
     request?: protos.google.firestore.admin.v1.IListIndexesRequest,
@@ -1670,10 +1694,12 @@ export class FirestoreAdminClient {
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
    *   for more details and examples.
    * @example
+   * ```
    * const iterable = client.listFieldsAsync(request);
    * for await (const response of iterable) {
    *   // process response
    * }
+   * ```
    */
   listFieldsAsync(
     request?: protos.google.firestore.admin.v1.IListFieldsRequest,

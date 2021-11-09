@@ -53,6 +53,7 @@ export class BundleBuilder {
    * @returns {BundleBuilder} This instance.
    *
    * @example
+   * ```
    * const bundle = firestore.bundle('data-bundle');
    * const docSnapshot = await firestore.doc('abc/123').get();
    * const querySnapshot = await firestore.collection('coll').get();
@@ -61,6 +62,7 @@ export class BundleBuilder {
    *                            .add('coll-query', querySnapshot) // Add a named query.
    *                            .build()
    * // Save `bundleBuffer` to CDN or stream it to clients.
+   * ```
    */
   add(
     documentOrName: DocumentSnapshot | string,
