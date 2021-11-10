@@ -42,8 +42,6 @@ export class BundleBuilder {
 
   constructor(readonly bundleId: string) {}
 
-  add(documentSnapshot: DocumentSnapshot): BundleBuilder;
-  add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;
   /**
    * Adds a Firestore document snapshot or query snapshot to the bundle.
    * Both the documents data and the query read time will be included in the bundle.
@@ -64,6 +62,8 @@ export class BundleBuilder {
    * // Save `bundleBuffer` to CDN or stream it to clients.
    * ```
    */
+  add(documentSnapshot: DocumentSnapshot): BundleBuilder;
+  add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;
   add(
     documentOrName: DocumentSnapshot | string,
     querySnapshot?: QuerySnapshot

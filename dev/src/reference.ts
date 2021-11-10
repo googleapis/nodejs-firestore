@@ -413,8 +413,6 @@ export class DocumentReference<T = firestore.DocumentData>
       .then(([writeResult]) => writeResult);
   }
 
-  set(data: Partial<T>, options: firestore.SetOptions): Promise<WriteResult>;
-  set(data: T): Promise<WriteResult>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
    * document does not yet exist, it will be created. If you pass
@@ -440,6 +438,8 @@ export class DocumentReference<T = firestore.DocumentData>
    * });
    * ```
    */
+  set(data: Partial<T>, options: firestore.SetOptions): Promise<WriteResult>;
+  set(data: T): Promise<WriteResult>;
   set(
     data: T | Partial<T>,
     options?: firestore.SetOptions
@@ -2631,8 +2631,6 @@ export class CollectionReference<T = firestore.DocumentData>
     });
   }
 
-  doc(): DocumentReference<T>;
-  doc(documentPath: string): DocumentReference<T>;
   /**
    * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path. If no path is specified, an
@@ -2652,6 +2650,8 @@ export class CollectionReference<T = firestore.DocumentData>
    * console.log(`Reference with auto-id: ${documentRefWithAutoId.path}`);
    * ```
    */
+  doc(): DocumentReference<T>;
+  doc(documentPath: string): DocumentReference<T>;
   doc(documentPath?: string): DocumentReference<T> {
     if (arguments.length === 0) {
       documentPath = autoId();
