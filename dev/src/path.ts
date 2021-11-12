@@ -552,6 +552,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    * @param {...string} segments Sequence of field names that form this path.
    *
    * @example
+   * ```
    * let query = firestore.collection('col');
    * let fieldPath = new FieldPath('f.o.o', 'bar');
    *
@@ -560,6 +561,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    *     console.log(`Document contains {'f.o.o' : {'bar' : 42}}`);
    *   });
    * });
+   * ```
    */
   constructor(...segments: string[]) {
     if (Array.isArray(segments[0])) {

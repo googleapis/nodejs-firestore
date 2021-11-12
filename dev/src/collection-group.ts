@@ -57,6 +57,7 @@ export class CollectionGroup<T = firestore.DocumentData>
    * used as starting and end points for individual query invocations.
    *
    * @example
+   * ```
    * const query = firestore.collectionGroup('collectionId');
    * for await (const partition of query.getPartitions(42)) {
    *   const partitionedQuery = partition.toQuery();
@@ -64,6 +65,7 @@ export class CollectionGroup<T = firestore.DocumentData>
    *   console.log(`Partition contained ${querySnapshot.length} documents`);
    * }
    *
+   * ```
    * @param {number} desiredPartitionCount The desired maximum number of
    * partition points. The number must be strictly positive. The actual number
    * of partitions returned may be fewer.
@@ -147,6 +149,7 @@ export class CollectionGroup<T = firestore.DocumentData>
    * converter.
    *
    * @example
+   * ```
    * class Post {
    *   constructor(readonly title: string, readonly author: string) {}
    *
@@ -178,6 +181,7 @@ export class CollectionGroup<T = firestore.DocumentData>
    *   post.someNonExistentProperty; // TS error
    * }
    *
+   * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
    * @return {CollectionGroup} A `CollectionGroup<U>` that uses the provided

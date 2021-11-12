@@ -65,10 +65,12 @@ export class Timestamp implements firestore.Timestamp {
    * Creates a new timestamp with the current date, with millisecond precision.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.set({ updateTime:Firestore.Timestamp.now() });
    *
+   * ```
    * @return {Timestamp} A new `Timestamp` representing the current date.
    */
   static now(): Timestamp {
@@ -79,11 +81,13 @@ export class Timestamp implements firestore.Timestamp {
    * Creates a new timestamp from the given date.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * let date = Date.parse('01 Jan 2000 00:00:00 GMT');
    * documentRef.set({ startTime:Firestore.Timestamp.fromDate(date) });
    *
+   * ```
    * @param {Date} date The date to initialize the `Timestamp` from.
    * @return {Timestamp} A new `Timestamp` representing the same point in time
    * as the given date.
@@ -96,10 +100,12 @@ export class Timestamp implements firestore.Timestamp {
    * Creates a new timestamp from the given number of milliseconds.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.set({ startTime:Firestore.Timestamp.fromMillis(42) });
    *
+   * ```
    * @param {number} milliseconds Number of milliseconds since Unix epoch
    * 1970-01-01T00:00:00Z.
    * @return {Timestamp}  A new `Timestamp` representing the same point in time
@@ -126,10 +132,12 @@ export class Timestamp implements firestore.Timestamp {
    * Creates a new timestamp.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.set({ startTime:new Firestore.Timestamp(42, 0) });
    *
+   * ```
    * @param {number} seconds The number of seconds of UTC time since Unix epoch
    * 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
    * 9999-12-31T23:59:59Z inclusive.
@@ -156,6 +164,7 @@ export class Timestamp implements firestore.Timestamp {
    * The number of seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(snap => {
@@ -163,6 +172,7 @@ export class Timestamp implements firestore.Timestamp {
    *   console.log(`Updated at ${updated.seconds}s ${updated.nanoseconds}ns`);
    * });
    *
+   * ```
    * @type {number}
    */
   get seconds(): number {
@@ -173,6 +183,7 @@ export class Timestamp implements firestore.Timestamp {
    * The non-negative fractions of a second at nanosecond resolution.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(snap => {
@@ -180,6 +191,7 @@ export class Timestamp implements firestore.Timestamp {
    *   console.log(`Updated at ${updated.seconds}s ${updated.nanoseconds}ns`);
    * });
    *
+   * ```
    * @type {number}
    */
   get nanoseconds(): number {
@@ -191,12 +203,14 @@ export class Timestamp implements firestore.Timestamp {
    * precision.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(snap => {
    *   console.log(`Document updated at: ${snap.updateTime.toDate()}`);
    * });
    *
+   * ```
    * @return {Date} JavaScript `Date` object representing the same point in time
    * as this `Timestamp`, with millisecond precision.
    */
@@ -210,6 +224,7 @@ export class Timestamp implements firestore.Timestamp {
    * Returns the number of milliseconds since Unix epoch 1970-01-01T00:00:00Z.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(snap => {
@@ -218,6 +233,7 @@ export class Timestamp implements firestore.Timestamp {
    *   console.log(`Duration: ${endTime - startTime}`);
    * });
    *
+   * ```
    * @return {number} The point in time corresponding to this timestamp,
    * represented as the number of milliseconds since Unix epoch
    * 1970-01-01T00:00:00Z.
@@ -230,6 +246,7 @@ export class Timestamp implements firestore.Timestamp {
    * Returns 'true' if this `Timestamp` is equal to the provided one.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(snap => {
@@ -238,6 +255,7 @@ export class Timestamp implements firestore.Timestamp {
    *   }
    * });
    *
+   * ```
    * @param {any} other The `Timestamp` to compare against.
    * @return {boolean} 'true' if this `Timestamp` is equal to the provided one.
    */

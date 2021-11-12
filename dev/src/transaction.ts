@@ -107,6 +107,7 @@ export class Transaction implements firestore.Transaction {
    * QuerySnapshot for the returned documents.
    *
    * @example
+   * ```
    * firestore.runTransaction(transaction => {
    *   let documentRef = firestore.doc('col/doc');
    *   return transaction.get(documentRef).then(doc => {
@@ -117,6 +118,7 @@ export class Transaction implements firestore.Transaction {
    *     }
    *   });
    * });
+   * ```
    */
   get<T>(
     refOrQuery: DocumentReference<T> | Query<T>
@@ -154,6 +156,7 @@ export class Transaction implements firestore.Transaction {
    * contains an array with the resulting document snapshots.
    *
    * @example
+   * ```
    * let firstDoc = firestore.doc('col/doc1');
    * let secondDoc = firestore.doc('col/doc2');
    * let resultDoc = firestore.doc('col/doc3');
@@ -165,6 +168,7 @@ export class Transaction implements firestore.Transaction {
    *     });
    *   });
    * });
+   * ```
    */
   getAll<T>(
     ...documentRefsOrReadOptions: Array<
@@ -203,6 +207,7 @@ export class Transaction implements firestore.Transaction {
    * chaining method calls.
    *
    * @example
+   * ```
    * firestore.runTransaction(transaction => {
    *   let documentRef = firestore.doc('col/doc');
    *   return transaction.get(documentRef).then(doc => {
@@ -211,6 +216,7 @@ export class Transaction implements firestore.Transaction {
    *     }
    *   });
    * });
+   * ```
    */
   create<T>(documentRef: firestore.DocumentReference<T>, data: T): Transaction {
     this._writeBatch.create(documentRef, data);
@@ -244,11 +250,13 @@ export class Transaction implements firestore.Transaction {
    * chaining method calls.
    *
    * @example
+   * ```
    * firestore.runTransaction(transaction => {
    *   let documentRef = firestore.doc('col/doc');
    *   transaction.set(documentRef, { foo: 'bar' });
    *   return Promise.resolve();
    * });
+   * ```
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
@@ -286,6 +294,7 @@ export class Transaction implements firestore.Transaction {
    * chaining method calls.
    *
    * @example
+   * ```
    * firestore.runTransaction(transaction => {
    *   let documentRef = firestore.doc('col/doc');
    *   return transaction.get(documentRef).then(doc => {
@@ -296,6 +305,7 @@ export class Transaction implements firestore.Transaction {
    *     }
    *   });
    * });
+   * ```
    */
   update<T>(
     documentRef: firestore.DocumentReference<T>,
@@ -328,11 +338,13 @@ export class Transaction implements firestore.Transaction {
    * chaining method calls.
    *
    * @example
+   * ```
    * firestore.runTransaction(transaction => {
    *   let documentRef = firestore.doc('col/doc');
    *   transaction.delete(documentRef);
    *   return Promise.resolve();
    * });
+   * ```
    */
   delete<T>(
     documentRef: DocumentReference<T>,

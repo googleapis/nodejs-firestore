@@ -427,11 +427,19 @@ export class BulkWriter {
   private _errorHandlerSet = false;
 
   // Visible for testing.
+  /**
+   * @private
+   * @internal
+   */
   _getBufferedOperationsCount(): number {
     return this._bufferedOperations.length;
   }
 
   // Visible for testing.
+  /**
+   * @private
+   * @internal
+   */
   _setMaxBatchSize(size: number): void {
     assert(
       this._bulkCommitBatch.pendingOps.length === 0,
@@ -451,6 +459,10 @@ export class BulkWriter {
   private _maxPendingOpCount = DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT;
 
   // Visible for testing.
+  /**
+   * @private
+   * @internal
+   */
   _setMaxPendingOpCount(newMax: number): void {
     this._maxPendingOpCount = newMax;
   }
@@ -547,6 +559,7 @@ export class BulkWriter {
    * [BulkWriterError]{@link BulkWriterError}.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    * let documentRef = firestore.collection('col').doc();
    *
@@ -559,6 +572,7 @@ export class BulkWriter {
    *    console.log('Write failed with: ', err);
    *  });
    * });
+   * ```
    */
   create<T>(
     documentRef: firestore.DocumentReference<T>,
@@ -585,6 +599,7 @@ export class BulkWriter {
    * [BulkWriterError]{@link BulkWriterError}.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    * let documentRef = firestore.doc('col/doc');
    *
@@ -597,6 +612,7 @@ export class BulkWriter {
    *    console.log('Delete failed with: ', err);
    *  });
    * });
+   * ```
    */
   delete<T>(
     documentRef: firestore.DocumentReference<T>,
@@ -639,6 +655,7 @@ export class BulkWriter {
    *
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    * let documentRef = firestore.collection('col').doc();
    *
@@ -651,6 +668,7 @@ export class BulkWriter {
    *    console.log('Write failed with: ', err);
    *  });
    * });
+   * ```
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
@@ -691,6 +709,7 @@ export class BulkWriter {
    * [BulkWriterError]{@link BulkWriterError}.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    * let documentRef = firestore.doc('col/doc');
    *
@@ -703,6 +722,7 @@ export class BulkWriter {
    *    console.log('Write failed with: ', err);
    *  });
    * });
+   * ```
    */
   update<T>(
     documentRef: firestore.DocumentReference<T>,
@@ -734,6 +754,7 @@ export class BulkWriter {
    * @param {BulkWriter~successCallback} successCallback A callback to be
    * called every time a BulkWriter operation successfully completes.
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    *
    * bulkWriter
@@ -745,6 +766,7 @@ export class BulkWriter {
    *       result
    *     );
    *   });
+   * ```
    */
   onWriteResult(
     successCallback: (
@@ -779,6 +801,7 @@ export class BulkWriter {
    * be called every time a BulkWriter operation fails. Returning `true` will
    * retry the operation. Returning `false` will stop the retry loop.
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    *
    * bulkWriter
@@ -793,6 +816,7 @@ export class BulkWriter {
    *       return false;
    *     }
    *   });
+   * ```
    */
   onWriteError(shouldRetryCallback: (error: BulkWriterError) => boolean): void {
     this._errorHandlerSet = true;
@@ -815,6 +839,7 @@ export class BulkWriter {
    * up to this point have been committed.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    *
    * bulkWriter.create(documentRef, {foo: 'bar'});
@@ -823,6 +848,7 @@ export class BulkWriter {
    * await flush().then(() => {
    *   console.log('Executed all writes');
    * });
+   * ```
    */
   flush(): Promise<void> {
     this._verifyNotClosed();
@@ -854,6 +880,7 @@ export class BulkWriter {
    * up to this point have been committed.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    *
    * bulkWriter.create(documentRef, {foo: 'bar'});
@@ -862,6 +889,7 @@ export class BulkWriter {
    * await close().then(() => {
    *   console.log('Executed all writes');
    * });
+   * ```
    */
   close(): Promise<void> {
     this._verifyNotClosed();

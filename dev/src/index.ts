@@ -171,6 +171,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * and retrieving objects from Firestore.
  *
  * @example
+ * ```
  * class Post {
  *   constructor(readonly title: string, readonly author: string) {}
  *
@@ -184,7 +185,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *     return {title: post.title, author: post.author};
  *   },
  *   fromFirestore(
- *     data: FirebaseFirestore.QueryDocumentSnapshot
+ *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
  *   ): Post {
  *     const data = snapshot.data();
  *     return new Post(data.title, data.author);
@@ -202,6 +203,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *   post.someNonExistentProperty; // TS error
  * }
  *
+ * ```
  * @property {Function} toFirestore Called by the Firestore SDK to convert a
  * custom model object of type T into a plain Javascript object (suitable for
  * writing directly to the Firestore database).
@@ -224,6 +226,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * but does not modify other data under `foo`.
  *
  * @example
+ * ```
  * const documentRef = firestore.doc('coll/doc');
  * documentRef.set({a1: {a2: 'val'}, b1: {b2: 'val'}, c1: {c2: 'val'}});
  * documentRef.update({
@@ -232,6 +235,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * });
  * // Value is {a1: {a2: 'val'}, b1: {b3: 'val'}, c1: {c2: 'val', c3: 'val'}}
  *
+ * ```
  * @typedef {Object.<string, *>} UpdateData
  */
 
@@ -246,6 +250,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * conditions.
  *
  * @example
+ * ```
  * const documentRef = firestore.doc('coll/doc');
  *
  * documentRef.get().then(snapshot => {
@@ -255,6 +260,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *   return documentRef.delete({ lastUpdateTime: updateTime });
  * });
  *
+ * ```
  * @property {Timestamp} lastUpdateTime The update time to enforce. If set,
  *  enforces that the document was last updated at lastUpdateTime. Fails the
  *  operation if the document was last updated at a different time.
@@ -350,23 +356,28 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *
  * @class
  *
- * @example <caption>Install the client library with <a
- * href="https://www.npmjs.com/">npm</a>:</caption> npm install --save
- * @google-cloud/firestore
+ * @example Install the client library with <a href="https://www.npmjs.com/">npm</a>:
+ * ```
+ * npm install --save @google-cloud/firestore
  *
- * @example <caption>Import the client library</caption>
+ * ```
+ * @example Import the client library
+ * ```
  * var Firestore = require('@google-cloud/firestore');
  *
- * @example <caption>Create a client that uses <a
- * href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application
- * Default Credentials (ADC)</a>:</caption> var firestore = new Firestore();
+ * ```
+ * @example Create a client that uses <a href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application Default Credentials (ADC)</a>:
+ * ```
+ * var firestore = new Firestore();
  *
- * @example <caption>Create a client with <a
- * href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit
- * credentials</a>:</caption> var firestore = new Firestore({ projectId:
+ * ```
+ * @example Create a client with <a href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit credentials</a>:
+ * ```
+ * var firestore = new Firestore({ projectId:
  * 'your-project-id', keyFilename: '/path/to/keyfile.json'
  * });
  *
+ * ```
  * @example <caption>include:samples/quickstart.js</caption>
  * region_tag:firestore_quickstart
  * Full quickstart example:
@@ -678,8 +689,10 @@ export class Firestore implements firestore.Firestore {
    * [DocumentReference]{@link DocumentReference} instance.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('collection/document');
    * console.log(`Path of document is ${documentRef.path}`);
+   * ```
    */
   doc(documentPath: string): DocumentReference {
     validateResourcePath('documentPath', documentPath);
@@ -703,12 +716,14 @@ export class Firestore implements firestore.Firestore {
    * [CollectionReference]{@link CollectionReference} instance.
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('collection');
    *
    * // Add a document with an auto-generated ID.
    * collectionRef.add({foo: 'bar'}).then((documentRef) => {
    *   console.log(`Added document at ${documentRef.path})`);
    * });
+   * ```
    */
   collection(collectionPath: string): CollectionReference {
     validateResourcePath('collectionPath', collectionPath);
@@ -734,6 +749,7 @@ export class Firestore implements firestore.Firestore {
    * @returns {CollectionGroup} The created CollectionGroup.
    *
    * @example
+   * ```
    * let docA = firestore.doc('mygroup/docA').set({foo: 'bar'});
    * let docB = firestore.doc('abc/def/mygroup/docB').set({foo: 'bar'});
    *
@@ -744,6 +760,7 @@ export class Firestore implements firestore.Firestore {
    *       console.log(`Found ${snapshot.size} documents.`);
    *    });
    * });
+   * ```
    */
   collectionGroup(collectionId: string): CollectionGroup {
     if (collectionId.indexOf('/') !== -1) {
@@ -763,6 +780,7 @@ export class Firestore implements firestore.Firestore {
    * client.
    *
    * @example
+   * ```
    * let writeBatch = firestore.batch();
    *
    * // Add two documents in an atomic batch.
@@ -773,6 +791,7 @@ export class Firestore implements firestore.Firestore {
    * writeBatch.commit().then(res => {
    *   console.log('Successfully executed batch.');
    * });
+   * ```
    */
   batch(): WriteBatch {
     return new WriteBatch(this);
@@ -793,6 +812,7 @@ export class Firestore implements firestore.Firestore {
    * client.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    *
    * bulkWriter.create(firestore.doc('col/doc1'), {foo: 'bar'})
@@ -810,6 +830,7 @@ export class Firestore implements firestore.Firestore {
    * await bulkWriter.close().then(() => {
    *   console.log('Executed all writes');
    * });
+   * ```
    */
   bulkWriter(options?: firestore.BulkWriterOptions): BulkWriter {
     return new BulkWriter(this, options);
@@ -1016,6 +1037,7 @@ export class Firestore implements firestore.Firestore {
    * error will be returned.
    *
    * @example
+   * ```
    * let counterTransaction = firestore.runTransaction(transaction => {
    *   let documentRef = firestore.doc('col/doc');
    *   return transaction.get(documentRef).then(doc => {
@@ -1036,6 +1058,7 @@ export class Firestore implements firestore.Firestore {
    * counterTransaction.then(res => {
    *   console.log(`Count updated to ${res}`);
    * });
+   * ```
    */
   runTransaction<T>(
     updateFunction: (transaction: Transaction) => Promise<T>,
@@ -1099,11 +1122,13 @@ export class Firestore implements firestore.Firestore {
    * with an array of CollectionReferences.
    *
    * @example
+   * ```
    * firestore.listCollections().then(collections => {
    *   for (let collection of collections) {
    *     console.log(`Found collection with id: ${collection.id}`);
    *   }
    * });
+   * ```
    */
   listCollections(): Promise<CollectionReference[]> {
     const rootDocument = new DocumentReference(this, ResourcePath.EMPTY);
@@ -1123,6 +1148,7 @@ export class Firestore implements firestore.Firestore {
    * contains an array with the resulting document snapshots.
    *
    * @example
+   * ```
    * let docRef1 = firestore.doc('col/doc1');
    * let docRef2 = firestore.doc('col/doc2');
    *
@@ -1130,6 +1156,7 @@ export class Firestore implements firestore.Firestore {
    *   console.log(`First document: ${JSON.stringify(docs[0])}`);
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
+   * ```
    */
   getAll<T>(
     ...documentRefsOrReadOptions: Array<
@@ -1227,6 +1254,7 @@ export class Firestore implements firestore.Firestore {
    * The promise is rejected if any of the deletes fail.
    *
    * @example
+   * ```
    * // Recursively delete a reference and log the references of failures.
    * const bulkWriter = firestore.bulkWriter();
    * bulkWriter
@@ -1241,6 +1269,7 @@ export class Firestore implements firestore.Firestore {
    *     }
    *   });
    * await firestore.recursiveDelete(docRef, bulkWriter);
+   * ```
    */
   recursiveDelete(
     ref:
@@ -1701,23 +1730,28 @@ export class Firestore implements firestore.Firestore {
  * @module {Firestore} @google-cloud/firestore
  * @alias nodejs-firestore
  *
- * @example <caption>Install the client library with <a
- * href="https://www.npmjs.com/">npm</a>:</caption> npm install --save
- * @google-cloud/firestore
+ * @example Install the client library with <a href="https://www.npmjs.com/">npm</a>:
+ * ```
+ * npm install --save @google-cloud/firestore
  *
- * @example <caption>Import the client library</caption>
+ * ```
+ * @example Import the client library
+ * ```
  * var Firestore = require('@google-cloud/firestore');
  *
- * @example <caption>Create a client that uses <a
- * href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application
- * Default Credentials (ADC)</a>:</caption> var firestore = new Firestore();
+ * ```
+ * @example Create a client that uses <a href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application Default Credentials (ADC)</a>:
+ * ```
+ * var firestore = new Firestore();
  *
- * @example <caption>Create a client with <a
- * href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit
- * credentials</a>:</caption> var firestore = new Firestore({ projectId:
- * 'your-project-id', keyFilename: '/path/to/keyfile.json'
+ * ```
+ * @example Create a client with <a href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit credentials</a>:
+ * ```
+ * var firestore = new Firestore({ projectId:
+ *   'your-project-id', keyFilename: '/path/to/keyfile.json'
  * });
  *
+ * ```
  * @example <caption>include:samples/quickstart.js</caption>
  * region_tag:firestore_quickstart
  * Full quickstart example:

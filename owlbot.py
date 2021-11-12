@@ -7,6 +7,7 @@ import subprocess
 from pathlib import Path
 from synthtool import _tracked_paths
 import shutil
+from synthtool import shell
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -192,3 +193,6 @@ templates = common_templates.node_library(
 s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*", ".github/CODEOWNERS"])
 
 node.fix_hermetic()  # fix formatting
+
+# Remove generated samples from veneer library:
+shell.run(('rm', '-rf', 'dev/samples/generated'), hide_output = False)
