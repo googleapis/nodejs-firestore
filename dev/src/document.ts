@@ -250,6 +250,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then((documentSnapshot) => {
@@ -257,6 +258,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    *     console.log(`Data: ${JSON.stringify(documentSnapshot.data())}`);
    *   }
    * });
+   * ```
    */
   get exists(): boolean {
     return this._fieldsProto !== undefined;
@@ -271,6 +273,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then((documentSnapshot) => {
@@ -278,6 +281,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    *     console.log(`Found document at '${documentSnapshot.ref.path}'`);
    *   }
    * });
+   * ```
    */
   get ref(): DocumentReference<T> {
     return this._ref;
@@ -291,6 +295,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then((documentSnapshot) => {
@@ -298,6 +303,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    *     console.log(`Document found with name '${documentSnapshot.id}'`);
    *   }
    * });
+   * ```
    */
   get id(): string {
     return this._ref.id;
@@ -312,6 +318,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(documentSnapshot => {
@@ -320,6 +327,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    *     console.log(`Document created at '${createTime.toDate()}'`);
    *   }
    * });
+   * ```
    */
   get createTime(): Timestamp | undefined {
     return this._createTime;
@@ -334,6 +342,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(documentSnapshot => {
@@ -342,6 +351,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    *     console.log(`Document updated at '${updateTime.toDate()}'`);
    *   }
    * });
+   * ```
    */
   get updateTime(): Timestamp | undefined {
     return this._updateTime;
@@ -355,12 +365,14 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(documentSnapshot => {
    *   let readTime = documentSnapshot.readTime;
    *   console.log(`Document read at '${readTime.toDate()}'`);
    * });
+   * ```
    */
   get readTime(): Timestamp {
     if (this._readTime === undefined) {
@@ -377,12 +389,14 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * 'undefined' if the document doesn't exist.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(documentSnapshot => {
    *   let data = documentSnapshot.data();
    *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
    * });
+   * ```
    */
   data(): T | undefined {
     const fields = this._fieldsProto;
@@ -425,6 +439,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * such field exists.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.set({ a: { b: 'c' }}).then(() => {
@@ -433,6 +448,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    *   let field = documentSnapshot.get('a.b');
    *   console.log(`Retrieved field value: ${field}`);
    * });
+   * ```
    */
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
@@ -558,11 +574,13 @@ export class QueryDocumentSnapshot<T = firestore.DocumentData>
    * @override
    *
    * @example
+   * ```
    * let query = firestore.collection('col');
    *
    * query.get().forEach(snapshot => {
    *   console.log(`Document created at '${snapshot.createTime.toDate()}'`);
    * });
+   * ```
    */
   get createTime(): Timestamp {
     return super.createTime!;
@@ -578,11 +596,13 @@ export class QueryDocumentSnapshot<T = firestore.DocumentData>
    * @override
    *
    * @example
+   * ```
    * let query = firestore.collection('col');
    *
    * query.get().forEach(snapshot => {
    *   console.log(`Document updated at '${snapshot.updateTime.toDate()}'`);
    * });
+   * ```
    */
   get updateTime(): Timestamp {
     return super.updateTime!;
@@ -596,12 +616,14 @@ export class QueryDocumentSnapshot<T = firestore.DocumentData>
    * @returns {T} An object containing all fields in the document.
    *
    * @example
+   * ```
    * let query = firestore.collection('col');
    *
    * query.get().forEach(documentSnapshot => {
    *   let data = documentSnapshot.data();
    *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
    * });
+   * ```
    */
   data(): T {
     const data = super.data();

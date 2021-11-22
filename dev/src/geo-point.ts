@@ -39,6 +39,7 @@ export class GeoPoint implements Serializable, firestore.GeoPoint {
    * @param {number} longitude The longitude as a number between -180 and 180.
    *
    * @example
+   * ```
    * let data = {
    *   google: new Firestore.GeoPoint(37.422, 122.084)
    * };
@@ -47,6 +48,7 @@ export class GeoPoint implements Serializable, firestore.GeoPoint {
    *   console.log(`Location is ${data.google.latitude}, ` +
    *     `${data.google.longitude}`);
    * });
+   * ```
    */
   constructor(latitude: number, longitude: number) {
     validateNumber('latitude', latitude, {minValue: -90, maxValue: 90});
