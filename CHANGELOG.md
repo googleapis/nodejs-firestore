@@ -4,6 +4,17 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [5.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.15.1...v5.0.0) (2021-11-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade Typescript to v4.1.5 and add converter and typing upgrades (#1632)
+
+### Features
+
+* upgrade Typescript to v4.1.5 and add converter and typing upgrades ([#1632](https://www.github.com/googleapis/nodejs-firestore/issues/1632)) ([c293955](https://www.github.com/googleapis/nodejs-firestore/commit/c293955fecd19d12abcb9c441c39ef2664cb011b))
+
 ### [4.15.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.15.0...v4.15.1) (2021-09-03)
 
 
