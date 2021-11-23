@@ -12,7 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData, Settings, SetOptions} from '@google-cloud/firestore';
+import {
+  DocumentData,
+  Settings,
+  SetOptions,
+  PartialWithFieldValue,
+} from '@google-cloud/firestore';
 
 import {expect} from 'chai';
 import * as extend from 'extend';
@@ -345,8 +350,11 @@ export const postConverter = {
 };
 
 export const postConverterMerge = {
-  toFirestore(post: Partial<Post>, options?: SetOptions): DocumentData {
-    if (options && (options.merge || options.mergeFields)) {
+  toFirestore(
+    post: PartialWithFieldValue<Post>,
+    options?: SetOptions
+  ): DocumentData {
+    if (options) {
       expect(post).to.not.be.an.instanceOf(Post);
     } else {
       expect(post).to.be.an.instanceof(Post);

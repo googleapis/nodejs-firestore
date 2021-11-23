@@ -28,9 +28,34 @@ declare namespace FirebaseFirestore {
   export type DocumentData = {[field: string]: any};
 
   /**
+   * Similar to Typescript's `Partial<T>`, but allows nested fields to be
+   * omitted and FieldValues to be passed in as property values.
+   */
+  export type PartialWithFieldValue<T> =
+    | Partial<T>
+    | (T extends Primitive
+        ? T
+        : T extends {}
+        ? {[K in keyof T]?: PartialWithFieldValue<T[K]> | FieldValue}
+        : never);
+
+  /**
+   * Allows FieldValues to be passed in as a property value while maintaining
+   * type safety.
+   */
+  export type WithFieldValue<T> =
+    | T
+    | (T extends Primitive
+        ? T
+        : T extends {}
+        ? {[K in keyof T]: WithFieldValue<T[K]> | FieldValue}
+        : never);
+
+  /**
    * Update data (for use with [update]{@link DocumentReference#update})
    * that contains paths mapped to values. Fields that contain dots reference
-   * nested fields within the document.
+   * nested fields within the document. FieldValues can be passed in
+   * as property values.
    *
    * You can update a top-level field in your document by using the field name
    * as a key (e.g. `foo`). The provided value completely replaces the contents
@@ -40,7 +65,72 @@ declare namespace FirebaseFirestore {
    * key (e.g. `foo.bar`). This nested field update replaces the contents at
    * `bar` but does not modify other data under `foo`.
    */
-  export type UpdateData = {[fieldPath: string]: any};
+  export type UpdateData<T> = T extends Primitive
+    ? T
+    : T extends {}
+    ? {[K in keyof T]?: UpdateData<T[K]> | FieldValue} & NestedUpdateFields<T>
+    : Partial<T>;
+
+  /** Primitive types. */
+  export type Primitive = string | number | boolean | undefined | null;
+
+  /**
+   * For each field (e.g. 'bar'), find all nested keys (e.g. {'bar.baz': T1,
+   * 'bar.qux': T2}). Intersect them together to make a single map containing
+   * all possible keys that are all marked as optional
+   */
+  export type NestedUpdateFields<T extends Record<string, unknown>> =
+    UnionToIntersection<
+      {
+        [K in keyof T & string]: ChildUpdateFields<K, T[K]>;
+      }[keyof T & string] // Also include the generated prefix-string keys.
+    >;
+
+  /**
+   * Helper for calculating the nested fields for a given type T1. This is needed
+   * to distribute union types such as `undefined | {...}` (happens for optional
+   * props) or `{a: A} | {b: B}`.
+   *
+   * In this use case, `V` is used to distribute the union types of `T[K]` on
+   * `Record`, since `T[K]` is evaluated as an expression and not distributed.
+   *
+   * See https://www.typescriptlang.org/docs/handbook/advanced-types.html#distributive-conditional-types
+   */
+  export type ChildUpdateFields<K extends string, V> =
+    // Only allow nesting for map values
+    V extends Record<string, unknown>
+      ? // Recurse into the map and add the prefix in front of each key
+        // (e.g. Prefix 'bar.' to create: 'bar.baz' and 'bar.qux'.
+        AddPrefixToKeys<K, UpdateData<V>>
+      : // UpdateData is always a map of values.
+        never;
+
+  /**
+   * Returns a new map where every key is prefixed with the outer key appended
+   * to a dot.
+   */
+  export type AddPrefixToKeys<
+    Prefix extends string,
+    T extends Record<string, unknown>
+  > =
+    // Remap K => Prefix.K. See https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
+    {[K in keyof T & string as `${Prefix}.${K}`]+?: T[K]};
+
+  /**
+   * Given a union type `U = T1 | T2 | ...`, returns an intersected type
+   * `(T1 & T2 & ...)`.
+   *
+   * Uses distributive conditional types and inference from conditional types.
+   * This works because multiple candidates for the same type variable in
+   * contra-variant positions causes an intersection type to be inferred.
+   * https://www.typescriptlang.org/docs/handbook/advanced-types.html#type-inference-in-conditional-types
+   * https://stackoverflow.com/questions/50374908/transform-union-type-to-intersection-type
+   */
+  export type UnionToIntersection<U> = (
+    U extends unknown ? (k: U) => void : never
+  ) extends (k: infer I) => void
+    ? I
+    : never;
 
   /**
    * Sets or disables the log function for all active Firestore instances.
@@ -95,9 +185,27 @@ declare namespace FirebaseFirestore {
      * into a plain Javascript object (suitable for writing directly to the
      * Firestore database). To use set() with `merge` and `mergeFields`,
      * toFirestore() must be defined with `Partial<T>`.
+     *
+     * The `WithFieldValue<T>` type extends `T` to also allow FieldValues such
+     * as `FieldValue.delete()` to be used as property values.
      */
-    toFirestore(modelObject: T): DocumentData;
-    toFirestore(modelObject: Partial<T>, options: SetOptions): DocumentData;
+    toFirestore(modelObject: WithFieldValue<T>): DocumentData;
+
+    /**
+     * Called by the Firestore SDK to convert a custom model object of type T
+     * into a plain Javascript object (suitable for writing directly to the
+     * Firestore database). To use set() with `merge` and `mergeFields`,
+     * toFirestore() must be defined with `Partial<T>`.
+     *
+     * The `PartialWithFieldValue<T>` type extends `Partial<T>` to allow
+     * FieldValues such as `FieldValue.delete()` to be used as property values.
+     * It also supports nested `Partial` by allowing nested fields to be
+     * omitted.
+     */
+    toFirestore(
+      modelObject: PartialWithFieldValue<T>,
+      options: SetOptions
+    ): DocumentData;
 
     /**
      * Called by the Firestore SDK to convert Firestore data into an object of
@@ -492,7 +600,10 @@ declare namespace FirebaseFirestore {
      * @param data The object data to serialize as the document.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    create<T>(documentRef: DocumentReference<T>, data: T): Transaction;
+    create<T>(
+      documentRef: DocumentReference<T>,
+      data: WithFieldValue<T>
+    ): Transaction;
 
     /**
      * Writes to the document referred to by the provided `DocumentReference`.
@@ -506,10 +617,13 @@ declare namespace FirebaseFirestore {
      */
     set<T>(
       documentRef: DocumentReference<T>,
-      data: Partial<T>,
+      data: PartialWithFieldValue<T>,
       options: SetOptions
     ): Transaction;
-    set<T>(documentRef: DocumentReference<T>, data: T): Transaction;
+    set<T>(
+      documentRef: DocumentReference<T>,
+      data: WithFieldValue<T>
+    ): Transaction;
 
     /**
      * Updates fields in the document referred to by the provided
@@ -525,9 +639,9 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce on this update.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    update(
-      documentRef: DocumentReference<any>,
-      data: UpdateData,
+    update<T>(
+      documentRef: DocumentReference<T>,
+      data: UpdateData<T>,
       precondition?: Precondition
     ): Transaction;
 
@@ -590,7 +704,10 @@ declare namespace FirebaseFirestore {
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
-    create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
+    create<T>(
+      documentRef: DocumentReference<T>,
+      data: WithFieldValue<T>
+    ): Promise<WriteResult>;
 
     /**
      * Delete a document from the database.
@@ -636,10 +753,13 @@ declare namespace FirebaseFirestore {
      */
     set<T>(
       documentRef: DocumentReference<T>,
-      data: Partial<T>,
+      data: PartialWithFieldValue<T>,
       options: SetOptions
     ): Promise<WriteResult>;
-    set<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
+    set<T>(
+      documentRef: DocumentReference<T>,
+      data: WithFieldValue<T>
+    ): Promise<WriteResult>;
 
     /**
      * Update fields of the document referred to by the provided
@@ -664,9 +784,9 @@ declare namespace FirebaseFirestore {
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
-    update(
-      documentRef: DocumentReference<any>,
-      data: UpdateData,
+    update<T>(
+      documentRef: DocumentReference<T>,
+      data: UpdateData<T>,
       precondition?: Precondition
     ): Promise<WriteResult>;
 
@@ -835,7 +955,10 @@ declare namespace FirebaseFirestore {
      * @param data The object data to serialize as the document.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    create<T>(documentRef: DocumentReference<T>, data: T): WriteBatch;
+    create<T>(
+      documentRef: DocumentReference<T>,
+      data: WithFieldValue<T>
+    ): WriteBatch;
 
     /**
      * Write to the document referred to by the provided `DocumentReference`.
@@ -849,10 +972,13 @@ declare namespace FirebaseFirestore {
      */
     set<T>(
       documentRef: DocumentReference<T>,
-      data: Partial<T>,
+      data: PartialWithFieldValue<T>,
       options: SetOptions
     ): WriteBatch;
-    set<T>(documentRef: DocumentReference<T>, data: T): WriteBatch;
+    set<T>(
+      documentRef: DocumentReference<T>,
+      data: WithFieldValue<T>
+    ): WriteBatch;
 
     /**
      * Update fields of the document referred to by the provided
@@ -868,9 +994,9 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce on this update.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    update(
-      documentRef: DocumentReference<any>,
-      data: UpdateData,
+    update<T>(
+      documentRef: DocumentReference<T>,
+      data: UpdateData<T>,
       precondition?: Precondition
     ): WriteBatch;
 
@@ -943,25 +1069,22 @@ declare namespace FirebaseFirestore {
    * `DocumentReference`, `WriteBatch` and `Transaction`. These calls can be
    * configured to perform granular merges instead of overwriting the target
    * documents in their entirety.
+   *
+   * @param merge Changes the behavior of a set() call to only replace the
+   * values specified in its data argument. Fields omitted from the set() call
+   * remain untouched.
+   *
+   * @param mergeFields Changes the behavior of set() calls to only replace
+   * the specified field paths. Any field path that is not specified is ignored
+   * and remains untouched.
    */
-  export interface SetOptions {
-    /**
-     * Changes the behavior of a set() call to only replace the values specified
-     * in its data argument. Fields omitted from the set() call remain
-     * untouched.
-     */
-    readonly merge?: boolean;
-
-    /**
-     * Changes the behavior of set() calls to only replace the specified field
-     * paths. Any field path that is not specified is ignored and remains
-     * untouched.
-     *
-     * It is an error to pass a SetOptions object to a set() call that is
-     * missing a value for any of the fields specified here.
-     */
-    readonly mergeFields?: (string | FieldPath)[];
-  }
+  export type SetOptions =
+    | {
+        readonly merge?: boolean;
+      }
+    | {
+        readonly mergeFields?: Array<string | FieldPath>;
+      };
 
   /**
    * An options object that can be used to configure the behavior of `getAll()`
@@ -1053,7 +1176,7 @@ declare namespace FirebaseFirestore {
      * @param data The object data to serialize as the document.
      * @return A Promise resolved with the write time of this create.
      */
-    create(data: T): Promise<WriteResult>;
+    create(data: WithFieldValue<T>): Promise<WriteResult>;
 
     /**
      * Writes to the document referred to by this `DocumentReference`. If the
@@ -1064,8 +1187,11 @@ declare namespace FirebaseFirestore {
      * @param options An object to configure the set behavior.
      * @return A Promise resolved with the write time of this set.
      */
-    set(data: Partial<T>, options: SetOptions): Promise<WriteResult>;
-    set(data: T): Promise<WriteResult>;
+    set(
+      data: PartialWithFieldValue<T>,
+      options: SetOptions
+    ): Promise<WriteResult>;
+    set(data: WithFieldValue<T>): Promise<WriteResult>;
 
     /**
      * Updates fields in the document referred to by this `DocumentReference`.
@@ -1079,7 +1205,10 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce on this update.
      * @return A Promise resolved with the write time of this update.
      */
-    update(data: UpdateData, precondition?: Precondition): Promise<WriteResult>;
+    update(
+      data: UpdateData<T>,
+      precondition?: Precondition
+    ): Promise<WriteResult>;
 
     /**
      * Updates fields in the document referred to by this `DocumentReference`.
@@ -1690,7 +1819,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise resolved with a `DocumentReference` pointing to the
      * newly created document after it has been written to the backend.
      */
-    add(data: T): Promise<DocumentReference<T>>;
+    add(data: WithFieldValue<T>): Promise<DocumentReference<T>>;
 
     /**
      * Returns true if this `CollectionReference` is equal to the provided one.

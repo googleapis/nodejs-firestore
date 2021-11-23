@@ -218,17 +218,23 @@ export class Transaction implements firestore.Transaction {
    * });
    * ```
    */
-  create<T>(documentRef: firestore.DocumentReference<T>, data: T): Transaction {
+  create<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: firestore.WithFieldValue<T>
+  ): Transaction {
     this._writeBatch.create(documentRef, data);
     return this;
   }
 
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options: firestore.SetOptions
   ): Transaction;
-  set<T>(documentRef: firestore.DocumentReference<T>, data: T): Transaction;
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: firestore.WithFieldValue<T>
+  ): Transaction;
   /**
    * Writes to the document referred to by the provided
    * [DocumentReference]{@link DocumentReference}. If the document
@@ -260,10 +266,14 @@ export class Transaction implements firestore.Transaction {
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T | Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options?: firestore.SetOptions
   ): Transaction {
-    this._writeBatch.set(documentRef, data, options);
+    if (options) {
+      this._writeBatch.set(documentRef, data, options);
+    } else {
+      this._writeBatch.set(documentRef, data as firestore.WithFieldValue<T>);
+    }
     return this;
   }
 
@@ -309,7 +319,7 @@ export class Transaction implements firestore.Transaction {
    */
   update<T>(
     documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
+    dataOrField: firestore.UpdateData<T> | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
       firestore.Precondition | unknown | string | firestore.FieldPath
     >

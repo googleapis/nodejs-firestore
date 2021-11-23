@@ -28,14 +28,14 @@ import * as gapicConfig from './v1/firestore_client_config.json';
  */
 export class Deferred<R> {
   promise: Promise<R>;
-  resolve: (value?: R | Promise<R>) => void = () => {};
-  reject: (reason?: Error) => void = () => {};
+  resolve: (value: R | Promise<R>) => void = () => {};
+  reject: (reason: Error) => void = () => {};
 
   constructor() {
-    this.promise = new Promise(
+    this.promise = new Promise<R>(
       (
-        resolve: (value?: R | Promise<R>) => void,
-        reject: (reason?: Error) => void
+        resolve: (value: R | Promise<R>) => void,
+        reject: (reason: Error) => void
       ) => {
         this.resolve = resolve;
         this.reject = reject;

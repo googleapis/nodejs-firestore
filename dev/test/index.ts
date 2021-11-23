@@ -262,7 +262,7 @@ const allSupportedTypesInput = {
   bytesValue: Buffer.from([0x1, 0x2]),
 };
 
-const allSupportedTypesOutput = {
+const allSupportedTypesOutput: {[field: string]: unknown} = {
   stringValue: 'a',
   trueValue: true,
   falseValue: false,
@@ -676,7 +676,7 @@ describe('snapshot_() method', () => {
     // Deep Equal doesn't support matching instances of DocumentRefs, so we
     // compare them manually and remove them from the resulting object.
     expect(actualObject.get('pathValue').formattedName).to.equal(
-      expected.pathValue.formattedName
+      (expected.pathValue as Firestore.DocumentReference).formattedName
     );
     const data = actualObject.data()!;
     delete data.pathValue;

@@ -132,6 +132,7 @@ export class DocumentReference<T = firestore.DocumentData>
    *
    * @param _firestore The Firestore Database client.
    * @param _path The Path of this reference.
+   * @param _converter The converter to use when serializing data.
    */
   constructor(
     private readonly _firestore: Firestore,
@@ -372,7 +373,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * });
    * ```
    */
-  create(data: T): Promise<WriteResult> {
+  create(data: firestore.WithFieldValue<T>): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
       .create(this, data)
@@ -413,8 +414,11 @@ export class DocumentReference<T = firestore.DocumentData>
       .then(([writeResult]) => writeResult);
   }
 
-  set(data: Partial<T>, options: firestore.SetOptions): Promise<WriteResult>;
-  set(data: T): Promise<WriteResult>;
+  set(
+    data: firestore.PartialWithFieldValue<T>,
+    options: firestore.SetOptions
+  ): Promise<WriteResult>;
+  set(data: firestore.WithFieldValue<T>): Promise<WriteResult>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
    * document does not yet exist, it will be created. If you pass
@@ -441,14 +445,16 @@ export class DocumentReference<T = firestore.DocumentData>
    * ```
    */
   set(
-    data: T | Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-      .set(this, data, options)
-      .commit()
-      .then(([writeResult]) => writeResult);
+    let writeBatch = new WriteBatch(this._firestore);
+    if (options) {
+      writeBatch = writeBatch.set(this, data, options);
+    } else {
+      writeBatch = writeBatch.set(this, data as firestore.WithFieldValue<T>);
+    }
+    return writeBatch.commit().then(([writeResult]) => writeResult);
   }
 
   /**
@@ -483,7 +489,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * ```
    */
   update(
-    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
+    dataOrField: firestore.UpdateData<T> | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
       unknown | string | firestore.FieldPath | firestore.Precondition
     >
@@ -2691,7 +2697,7 @@ export class CollectionReference<T = firestore.DocumentData>
    * });
    * ```
    */
-  add(data: T): Promise<DocumentReference<T>> {
+  add(data: firestore.WithFieldValue<T>): Promise<DocumentReference<T>> {
     const firestoreData = this._queryOptions.converter.toFirestore(data);
     validateDocumentData(
       'data',
