@@ -118,12 +118,8 @@ export class Serializer {
     }
 
     if (typeof val === 'number') {
-      const isNegativeZero = val === 0 && 1 / val === -Infinity;
-      if (isNegativeZero) {
-        return {
-          doubleValue: -0,
-        };
-      } else if (Number.isSafeInteger(val)) {
+      const isNegativeZero = val === 0 && 1 / val === 1 / -0;
+      if (Number.isSafeInteger(val) && !isNegativeZero) {
         return {
           integerValue: val as number,
         };
