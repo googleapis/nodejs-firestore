@@ -118,7 +118,7 @@ export class Serializer {
     }
 
     if (typeof val === 'number') {
-      const isNegativeZero = value === 0 && 1 / value === -Infinity;
+      const isNegativeZero = val === 0 && 1 / val === -Infinity;
       if (isNegativeZero) {
         return {
           doubleValue: -0,
