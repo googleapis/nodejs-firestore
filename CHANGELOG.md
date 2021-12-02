@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [5.0.1](https://www.github.com/googleapis/nodejs-firestore/compare/v5.0.0...v5.0.1) (2021-12-02)
+
+
+### Bug Fixes
+
+* save negative zero as doubleValue ([#1639](https://www.github.com/googleapis/nodejs-firestore/issues/1639)) ([a6ba5cc](https://www.github.com/googleapis/nodejs-firestore/commit/a6ba5ccf8b21dbe117e5d8ad5fc1e26d16ed0d1d))
+
 ## [5.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.15.1...v5.0.0) (2021-11-23)
 
 
