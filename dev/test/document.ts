@@ -224,6 +224,29 @@ describe('serialize document', () => {
     });
   });
 
+  it('serializes negative zero into double', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'negativeZero', {
+              doubleValue: -0,
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        // Set to -0, which should be stored as a double.
+        negativeZero: -0,
+      });
+    });
+  });
+
   it('serializes date before 1970', () => {
     const overrides: ApiOverride = {
       commit: request => {
