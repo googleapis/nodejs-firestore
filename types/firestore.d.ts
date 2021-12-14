@@ -1442,7 +1442,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     where(
-      fieldPath: string | FieldPath,
+      fieldPath: keyof T | FieldPath,
       opStr: WhereFilterOp,
       value: any
     ): Query<T>;
