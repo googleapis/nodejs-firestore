@@ -336,7 +336,7 @@ declare namespace FirebaseFirestore {
      * @param collectionPath A slash-separated path to a collection.
      * @return The `CollectionReference` instance.
      */
-    collection(collectionPath: string): CollectionReference<DocumentData>;
+    collection<T extends DocumentData = DocumentData>(collectionPath: string): CollectionReference<T>;
 
     /**
      * Gets a `DocumentReference` instance that refers to the document at the
@@ -345,7 +345,7 @@ declare namespace FirebaseFirestore {
      * @param documentPath A slash-separated path to a document.
      * @return The `DocumentReference` instance.
      */
-    doc(documentPath: string): DocumentReference<DocumentData>;
+    doc<T extends DocumentData = DocumentData>(documentPath: string): DocumentReference<T>;
 
     /**
      * Creates and returns a new Query that includes all documents in the
@@ -357,7 +357,7 @@ declare namespace FirebaseFirestore {
      * will be included. Cannot contain a slash.
      * @return The created `CollectionGroup`.
      */
-    collectionGroup(collectionId: string): CollectionGroup<DocumentData>;
+    collectionGroup<T extends DocumentData = DocumentData>(collectionId: string): CollectionGroup<T>;
 
     /**
      * Retrieves multiple documents from Firestore.
@@ -372,11 +372,11 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll(
+    getAll<T extends DocumentData = DocumentData>(
       ...documentRefsOrReadOptions: Array<
-        DocumentReference<DocumentData> | ReadOptions
+        DocumentReference<T> | ReadOptions
       >
-    ): Promise<Array<DocumentSnapshot<DocumentData>>>;
+    ): Promise<Array<DocumentSnapshot<T>>>;
 
     /**
      * Recursively deletes all documents and subcollections at and under the
@@ -431,7 +431,7 @@ declare namespace FirebaseFirestore {
      *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
-    listCollections(): Promise<Array<CollectionReference<DocumentData>>>;
+    listCollections<T extends DocumentData = DocumentData>(): Promise<Array<CollectionReference<T>>>;
 
     /**
      * Executes the given updateFunction and commits the changes applied within
