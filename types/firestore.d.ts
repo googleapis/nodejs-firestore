@@ -613,6 +613,14 @@ declare namespace FirebaseFirestore {
      * @param documentRef A reference to the document to be set.
      * @param data An object of the fields and values for the document.
      * @param options An object to configure the set behavior.
+     * @param  options.merge - If true, set() merges the values specified in its
+     * data argument. Fields omitted from this set() call remain untouched. If
+     * your input sets any field to an empty map, all nested fields at this
+     * location are overwritten.
+     * @param options.mergeFields - If provided, set() only replaces the
+     * specified field paths. Any field path that is not specified is ignored
+     * and remains untouched. If your input sets any field to an empty map, all
+     * nested fields at this location are overwritten.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
     set<T>(
@@ -741,12 +749,14 @@ declare namespace FirebaseFirestore {
      * set.
      * @param data The object to serialize as the document.
      * @param options An object to configure the set behavior.
-     * @param  options.merge - If true, set() merges the values
-     * specified in its data argument. Fields omitted from this set() call
-     * remain untouched.
-     * @param options.mergeFields - If provided,
-     * set() only replaces the specified field paths. Any field path that is not
-     * specified is ignored and remains untouched.
+     * @param  options.merge - If true, set() merges the values specified in its
+     * data argument. Fields omitted from this set() call remain untouched. If
+     * your input sets any field to an empty map, all nested fields at this
+     * location are overwritten.
+     * @param options.mergeFields - If provided, set() only replaces the
+     * specified field paths. Any field path that is not specified is ignored
+     * and remains untouched. If your input sets any field to an empty map, all
+     * nested fields at this location are overwritten.
      * @returns A promise that resolves with the result of the write. If the
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
@@ -968,6 +978,14 @@ declare namespace FirebaseFirestore {
      * @param documentRef A reference to the document to be set.
      * @param data An object of the fields and values for the document.
      * @param options An object to configure the set behavior.
+     * @param  options.merge - If true, set() merges the values specified in its
+     * data argument. Fields omitted from this set() call remain untouched. If
+     * your input sets any field to an empty map, all nested fields at this
+     * location are overwritten.
+     * @param options.mergeFields - If provided, set() only replaces the
+     * specified field paths. Any field path that is not specified is ignored
+     * and remains untouched. If your input sets any field to an empty map, all
+     * nested fields at this location are overwritten.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
     set<T>(
@@ -1072,11 +1090,13 @@ declare namespace FirebaseFirestore {
    *
    * @param merge Changes the behavior of a set() call to only replace the
    * values specified in its data argument. Fields omitted from the set() call
-   * remain untouched.
+   * remain untouched. If your input sets any field to an empty map, all nested
+   * fields at this location are overwritten.
    *
    * @param mergeFields Changes the behavior of set() calls to only replace
    * the specified field paths. Any field path that is not specified is ignored
-   * and remains untouched.
+   * and remains untouched. If your input sets any field to an empty map, all
+   * nested fields at this location are overwritten.
    */
   export type SetOptions =
     | {
@@ -1185,6 +1205,14 @@ declare namespace FirebaseFirestore {
      *
      * @param data A map of the fields and values for the document.
      * @param options An object to configure the set behavior.
+     * @param  options.merge - If true, set() merges the values specified in its
+     * data argument. Fields omitted from this set() call remain untouched. If
+     * your input sets any field to an empty map, all nested fields at this
+     * location are overwritten.
+     * @param options.mergeFields - If provided, set() only replaces the
+     * specified field paths. Any field path that is not specified is ignored
+     * and remains untouched. If your input sets any field to an empty map, all
+     * nested fields at this location are overwritten.
      * @return A Promise resolved with the write time of this set.
      */
     set(
