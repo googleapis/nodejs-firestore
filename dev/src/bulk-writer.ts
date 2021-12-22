@@ -554,6 +554,7 @@ export class BulkWriter {
    * @param {DocumentReference} documentRef A reference to the document to be
    * created.
    * @param {T} data The object to serialize as the document.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise<WriteResult>} A promise that resolves with the result of
    * the write. If the write fails, the promise is rejected with a
    * [BulkWriterError]{@link BulkWriterError}.
@@ -643,6 +644,7 @@ export class BulkWriter {
    * set.
    * @param {T} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call remain
    * untouched. If your input sets any field to an empty map, all nested fields
@@ -713,6 +715,7 @@ export class BulkWriter {
    * @param {...(Precondition|*|string|FieldPath)} preconditionOrValues - An
    * alternating list of field paths and values to update or a Precondition to
    * restrict this update
+   * @throws {Error} If the provided input is not valid Firestore data.
    * @returns {Promise<WriteResult>} A promise that resolves with the result of
    * the write. If the write fails, the promise is rejected with a
    * [BulkWriterError]{@link BulkWriterError}.

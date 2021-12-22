@@ -254,6 +254,7 @@ export class Transaction implements firestore.Transaction {
    * set() only replaces the specified field paths. Any field path that is not
    * specified is ignored and remains untouched. If your input sets any field to
    * an empty map, all nested fields are overwritten.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *
@@ -302,6 +303,7 @@ export class Transaction implements firestore.Transaction {
    * ...(Precondition|*|string|FieldPath)} preconditionOrValues -
    * An alternating list of field paths and values to update or a Precondition
    * to to enforce on this update.
+   * @throws {Error} If the provided input is not valid Firestore data.
    * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *
