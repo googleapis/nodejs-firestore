@@ -647,10 +647,12 @@ export class BulkWriter {
    * @throws {Error} If the provided input is not a valid Firestore document.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call remain
-   * untouched.
+   * untouched. If your input sets any field to an empty map, all nested fields
+   * are overwritten.
    * @param {Array.<string|FieldPath>=} options.mergeFields - If provided, set()
    * only replaces the specified field paths. Any field path that is not
-   * specified is ignored and remains untouched.
+   * specified is ignored and remains untouched. If your input sets any field to
+   * an empty map, all nested fields are overwritten.
    * @returns {Promise<WriteResult>} A promise that resolves with the result of
    * the write. If the write fails, the promise is rejected with a
    * [BulkWriterError]{@link BulkWriterError}.
