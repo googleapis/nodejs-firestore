@@ -359,6 +359,7 @@ export class DocumentReference<T = firestore.DocumentData>
    *
    * @param {DocumentData} data An object that contains the fields and data to
    * serialize as the document.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this create.
    *
@@ -432,6 +433,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * @param {Array.<string|FieldPath>=} options.mergeFields If provided,
    * set() only replaces the specified field paths. Any field path that is not
    * specified is ignored and remains untouched.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this set.
    *
@@ -476,6 +478,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * ...(*|string|FieldPath|Precondition)} preconditionOrValues An alternating
    * list of field paths and values to update or a Precondition to restrict
    * this update.
+   * @throws {Error} If the provided input is not valid Firestore data.
    * @returns {Promise.<WriteResult>} A Promise that resolves once the
    * data has been successfully written to the backend.
    *
@@ -2685,6 +2688,7 @@ export class CollectionReference<T = firestore.DocumentData>
    *
    * @param {DocumentData} data An Object containing the data for the new
    * document.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise.<DocumentReference>} A Promise resolved with a
    * [DocumentReference]{@link DocumentReference} pointing to the
    * newly created document.
