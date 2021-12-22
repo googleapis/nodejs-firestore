@@ -429,12 +429,12 @@ export class DocumentReference<T = firestore.DocumentData>
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge If true, set() merges the values specified
    * in its data argument. Fields omitted from this set() call remain untouched.
-   * If your input sets any field to an empty map, all nested fields at this
-   * location are overwritten.
+   * If your input sets any field to an empty map, all nested fields are
+   * overwritten.
    * @param {Array.<string|FieldPath>=} options.mergeFields If provided,
    * set() only replaces the specified field paths. Any field path that is not
    * specified is ignored and remains untouched. If your input sets any field to
-   * an empty map, all nested fields at this location are overwritten.
+   * an empty map, all nested fields are overwritten.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this set.
    *
