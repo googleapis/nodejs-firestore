@@ -13,5 +13,5 @@
   "client_documentation": "https://cloud.google.com/nodejs/docs/reference/firestore/latest",
   "release_level": "stable",
   "api_shortname": "firestore",
-  "library_type": ""
+  "library_type": "GAPIC_COMBO"
 }
