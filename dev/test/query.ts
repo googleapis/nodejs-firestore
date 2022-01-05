@@ -417,10 +417,12 @@ describe('query interface', () => {
     );
 
     queryEquals(
-        [queryA.where('a', '==', '1').where('b', '==',2), queryB.where('a', '==', '1',).where('b','==',2)],
-        []
+      [
+        queryA.where('a', '==', '1').where('b', '==', 2),
+        queryB.where('a', '==', '1').where('b', '==', 2),
+      ],
+      []
     );
-
 
     queryEquals(
       [
