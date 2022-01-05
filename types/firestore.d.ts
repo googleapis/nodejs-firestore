@@ -598,6 +598,7 @@ declare namespace FirebaseFirestore {
      *
      * @param documentRef A reference to the document to be create.
      * @param data The object data to serialize as the document.
+     * @throws Error If the provided input is not a valid Firestore document.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
     create<T>(
@@ -613,6 +614,15 @@ declare namespace FirebaseFirestore {
      * @param documentRef A reference to the document to be set.
      * @param data An object of the fields and values for the document.
      * @param options An object to configure the set behavior.
+     * @param  options.merge - If true, set() merges the values specified in its
+     * data argument. Fields omitted from this set() call remain untouched. If
+     * your input sets any field to an empty map, all nested fields are
+     * overwritten.
+     * @param options.mergeFields - If provided, set() only replaces the
+     * specified field paths. Any field path that is not specified is ignored
+     * and remains untouched. If your input sets any field to an empty map, all
+     * nested fields are overwritten.
+     * @throws Error If the provided input is not a valid Firestore document.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
     set<T>(
@@ -637,6 +647,7 @@ declare namespace FirebaseFirestore {
      * @param data An object containing the fields and values with which to
      * update the document.
      * @param precondition A Precondition to enforce on this update.
+     * @throws Error If the provided input is not valid Firestore data.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
     update<T>(
@@ -662,6 +673,7 @@ declare namespace FirebaseFirestore {
      * @param fieldsOrPrecondition An alternating list of field paths and values
      * to update, optionally followed by a `Precondition` to enforce on this
      * update.
+     * @throws Error If the provided input is not valid Firestore data.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
     update(
@@ -700,6 +712,7 @@ declare namespace FirebaseFirestore {
      * @param documentRef A reference to the document to be
      * created.
      * @param data The object to serialize as the document.
+     * @throws Error If the provided input is not a valid Firestore document.
      * @returns A promise that resolves with the result of the write. If the
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
@@ -741,12 +754,15 @@ declare namespace FirebaseFirestore {
      * set.
      * @param data The object to serialize as the document.
      * @param options An object to configure the set behavior.
-     * @param  options.merge - If true, set() merges the values
-     * specified in its data argument. Fields omitted from this set() call
-     * remain untouched.
-     * @param options.mergeFields - If provided,
-     * set() only replaces the specified field paths. Any field path that is not
-     * specified is ignored and remains untouched.
+     * @param  options.merge - If true, set() merges the values specified in its
+     * data argument. Fields omitted from this set() call remain untouched. If
+     * your input sets any field to an empty map, all nested fields are
+     * overwritten.
+     * @param options.mergeFields - If provided, set() only replaces the
+     * specified field paths. Any field path that is not specified is ignored
+     * and remains untouched. If your input sets any field to an empty map, all
+     * nested fields are overwritten.
+     * @throws Error If the provided input is not a valid Firestore document.
      * @returns A promise that resolves with the result of the write. If the
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
@@ -780,6 +796,7 @@ declare namespace FirebaseFirestore {
      * @param data An object containing the fields and values with which to
      * update the document.
      * @param precondition A Precondition to enforce on this update.
+     * @throws Error If the provided input is not valid Firestore data.
      * @returns A promise that resolves with the result of the write. If the
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
@@ -809,7 +826,9 @@ declare namespace FirebaseFirestore {
      * @param field The first field to update.
      * @param value The first value
      * @param fieldsOrPrecondition An alternating list of field paths and values
-     * to update, optionally followed a `Precondition` to enforce on this update.
+     * to update, optionally followed a `Precondition` to enforce on this
+     * update.
+     * @throws Error If the provided input is not valid Firestore data;
      * @returns A promise that resolves with the result of the write. If the
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
@@ -953,6 +972,7 @@ declare namespace FirebaseFirestore {
      *
      * @param documentRef A reference to the document to be created.
      * @param data The object data to serialize as the document.
+     * @throws Error If the provided input is not a valid Firestore document.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
     create<T>(
@@ -968,6 +988,15 @@ declare namespace FirebaseFirestore {
      * @param documentRef A reference to the document to be set.
      * @param data An object of the fields and values for the document.
      * @param options An object to configure the set behavior.
+     * @param  options.merge - If true, set() merges the values specified in its
+     * data argument. Fields omitted from this set() call remain untouched. If
+     * your input sets any field to an empty map, all nested fields are
+     * overwritten.
+     * @param options.mergeFields - If provided, set() only replaces the
+     * specified field paths. Any field path that is not specified is ignored
+     * and remains untouched. If your input sets any field to an empty map, all
+     * nested fields are overwritten.
+     * @throws Error If the provided input is not a valid Firestore document.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
     set<T>(
@@ -992,6 +1021,7 @@ declare namespace FirebaseFirestore {
      * @param data An object containing the fields and values with which to
      * update the document.
      * @param precondition A Precondition to enforce on this update.
+     * @throws Error If the provided input is not valid Firestore data.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
     update<T>(
@@ -1015,7 +1045,9 @@ declare namespace FirebaseFirestore {
      * @param field The first field to update.
      * @param value The first value
      * @param fieldsOrPrecondition An alternating list of field paths and values
-     * to update, optionally followed a `Precondition` to enforce on this update.
+     * to update, optionally followed a `Precondition` to enforce on this
+     * update.
+     * @throws Error If the provided input is not valid Firestore data.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
     update(
@@ -1072,11 +1104,13 @@ declare namespace FirebaseFirestore {
    *
    * @param merge Changes the behavior of a set() call to only replace the
    * values specified in its data argument. Fields omitted from the set() call
-   * remain untouched.
+   * remain untouched. If your input sets any field to an empty map, all nested
+   * fields are overwritten.
    *
    * @param mergeFields Changes the behavior of set() calls to only replace
    * the specified field paths. Any field path that is not specified is ignored
-   * and remains untouched.
+   * and remains untouched. If your input sets any field to an empty map, all
+   * nested fields are overwritten.
    */
   export type SetOptions =
     | {
@@ -1174,6 +1208,7 @@ declare namespace FirebaseFirestore {
      * provided object values. The write fails if the document already exists
      *
      * @param data The object data to serialize as the document.
+     * @throws Error If the provided input is not a valid Firestore document.
      * @return A Promise resolved with the write time of this create.
      */
     create(data: WithFieldValue<T>): Promise<WriteResult>;
@@ -1185,6 +1220,15 @@ declare namespace FirebaseFirestore {
      *
      * @param data A map of the fields and values for the document.
      * @param options An object to configure the set behavior.
+     * @param  options.merge - If true, set() merges the values specified in its
+     * data argument. Fields omitted from this set() call remain untouched. If
+     * your input sets any field to an empty map, all nested fields are
+     * overwritten.
+     * @param options.mergeFields - If provided, set() only replaces the
+     * specified field paths. Any field path that is not specified is ignored
+     * and remains untouched. If your input sets any field to an empty map, all
+     * nested fields are overwritten.
+     * @throws Error If the provided input is not a valid Firestore document.
      * @return A Promise resolved with the write time of this set.
      */
     set(
@@ -1203,6 +1247,7 @@ declare namespace FirebaseFirestore {
      * @param data An object containing the fields and values with which to
      * update the document.
      * @param precondition A Precondition to enforce on this update.
+     * @throws Error If the provided input is not valid Firestore data.
      * @return A Promise resolved with the write time of this update.
      */
     update(
@@ -1225,6 +1270,7 @@ declare namespace FirebaseFirestore {
      * @param moreFieldsOrPrecondition An alternating list of field paths and
      * values to update, optionally followed by a `Precondition` to enforce on
      * this update.
+     * @throws Error If the provided input is not valid Firestore data.
      * @return A Promise resolved with the write time of this update.
      */
     update(
@@ -1816,6 +1862,7 @@ declare namespace FirebaseFirestore {
      * it a document ID automatically.
      *
      * @param data An Object containing the data for the new document.
+     * @throws Error If the provided input is not a valid Firestore document.
      * @return A Promise resolved with a `DocumentReference` pointing to the
      * newly created document after it has been written to the backend.
      */

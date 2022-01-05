@@ -174,6 +174,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * @param {DocumentReference} documentRef A reference to the document to be
    * created.
    * @param {T} data The object to serialize as the document.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
@@ -298,10 +299,13 @@ export class WriteBatch implements firestore.WriteBatch {
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
-   * remain untouched.
+   * remain untouched. If your input sets any field to an empty map, all nested
+   * fields are overwritten.
    * @param {Array.<string|FieldPath>=} options.mergeFields - If provided,
-   * set() only replaces the specified field paths. Any field path that is not
-   * specified is ignored and remains untouched.
+   * set() only replaces the specified field paths. Any field path that is no
+   * specified is ignored and remains untouched. If your input sets any field to
+   * an empty map, all nested fields are overwritten.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
@@ -401,6 +405,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * ...(Precondition|*|string|FieldPath)} preconditionOrValues -
    * An alternating list of field paths and values to update or a Precondition
    * to restrict this update.
+   * @throws {Error} If the provided input is not valid Firestore data.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
