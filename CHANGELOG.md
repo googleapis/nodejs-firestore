@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [5.0.2](https://www.github.com/googleapis/nodejs-firestore/compare/v5.0.1...v5.0.2) (2022-01-07)
+
+
+### Bug Fixes
+
+* remove serializer check from Query.isEqual() ([#1654](https://www.github.com/googleapis/nodejs-firestore/issues/1654)) ([f13da18](https://www.github.com/googleapis/nodejs-firestore/commit/f13da184bd2b4f9abfe920f6d9f7af8f2f6f37cb))
+
 ### [5.0.1](https://www.github.com/googleapis/nodejs-firestore/compare/v5.0.0...v5.0.1) (2021-12-02)
 
 
