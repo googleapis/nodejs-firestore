@@ -774,6 +774,14 @@ class FieldFilter {
       },
     };
   }
+
+  isEqual(other: FieldFilter): boolean {
+    return (
+      this.field.isEqual(other.field) &&
+      this.op === other.op &&
+      deepEqual(this.value, other.value)
+    );
+  }
 }
 
 /**
@@ -1203,12 +1211,12 @@ export class QueryOptions<T> {
     return (
       other instanceof QueryOptions &&
       this.parentPath.isEqual(other.parentPath) &&
+      this.fieldFiltersEqual(other.fieldFilters) &&
       this.collectionId === other.collectionId &&
       this.converter === other.converter &&
       this.allDescendants === other.allDescendants &&
       this.limit === other.limit &&
       this.offset === other.offset &&
-      deepEqual(this.fieldFilters, other.fieldFilters) &&
       deepEqual(this.fieldOrders, other.fieldOrders) &&
       deepEqual(this.startAt, other.startAt) &&
       deepEqual(this.endAt, other.endAt) &&
@@ -1216,6 +1224,19 @@ export class QueryOptions<T> {
       this.kindless === other.kindless &&
       this.requireConsistency === other.requireConsistency
     );
+  }
+
+  private fieldFiltersEqual(other: FieldFilter[]): boolean {
+    if (this.fieldFilters.length !== other.length) {
+      return false;
+    }
+
+    for (let i = 0; i < other.length; i++) {
+      if (!this.fieldFilters[i].isEqual(other[i])) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
