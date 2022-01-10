@@ -132,6 +132,7 @@ export class DocumentReference<T = firestore.DocumentData>
    *
    * @param _firestore The Firestore Database client.
    * @param _path The Path of this reference.
+   * @param _converter The converter to use when serializing data.
    */
   constructor(
     private readonly _firestore: Firestore,
@@ -358,6 +359,7 @@ export class DocumentReference<T = firestore.DocumentData>
    *
    * @param {DocumentData} data An object that contains the fields and data to
    * serialize as the document.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this create.
    *
@@ -372,7 +374,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * });
    * ```
    */
-  create(data: T): Promise<WriteResult> {
+  create(data: firestore.WithFieldValue<T>): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
       .create(this, data)
@@ -413,8 +415,11 @@ export class DocumentReference<T = firestore.DocumentData>
       .then(([writeResult]) => writeResult);
   }
 
-  set(data: Partial<T>, options: firestore.SetOptions): Promise<WriteResult>;
-  set(data: T): Promise<WriteResult>;
+  set(
+    data: firestore.PartialWithFieldValue<T>,
+    options: firestore.SetOptions
+  ): Promise<WriteResult>;
+  set(data: firestore.WithFieldValue<T>): Promise<WriteResult>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
    * document does not yet exist, it will be created. If you pass
@@ -425,9 +430,13 @@ export class DocumentReference<T = firestore.DocumentData>
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge If true, set() merges the values specified
    * in its data argument. Fields omitted from this set() call remain untouched.
+   * If your input sets any field to an empty map, all nested fields are
+   * overwritten.
    * @param {Array.<string|FieldPath>=} options.mergeFields If provided,
    * set() only replaces the specified field paths. Any field path that is not
-   * specified is ignored and remains untouched.
+   * specified is ignored and remains untouched. If your input sets any field to
+   * an empty map, all nested fields are overwritten.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this set.
    *
@@ -441,14 +450,16 @@ export class DocumentReference<T = firestore.DocumentData>
    * ```
    */
   set(
-    data: T | Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-      .set(this, data, options)
-      .commit()
-      .then(([writeResult]) => writeResult);
+    let writeBatch = new WriteBatch(this._firestore);
+    if (options) {
+      writeBatch = writeBatch.set(this, data, options);
+    } else {
+      writeBatch = writeBatch.set(this, data as firestore.WithFieldValue<T>);
+    }
+    return writeBatch.commit().then(([writeResult]) => writeResult);
   }
 
   /**
@@ -470,6 +481,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * ...(*|string|FieldPath|Precondition)} preconditionOrValues An alternating
    * list of field paths and values to update or a Precondition to restrict
    * this update.
+   * @throws {Error} If the provided input is not valid Firestore data.
    * @returns {Promise.<WriteResult>} A Promise that resolves once the
    * data has been successfully written to the backend.
    *
@@ -483,7 +495,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * ```
    */
   update(
-    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
+    dataOrField: firestore.UpdateData<T> | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
       unknown | string | firestore.FieldPath | firestore.Precondition
     >
@@ -761,6 +773,14 @@ class FieldFilter {
         value: this.serializer.encodeValue(this.value),
       },
     };
+  }
+
+  isEqual(other: FieldFilter): boolean {
+    return (
+      this.field.isEqual(other.field) &&
+      this.op === other.op &&
+      deepEqual(this.value, other.value)
+    );
   }
 }
 
@@ -1191,12 +1211,12 @@ export class QueryOptions<T> {
     return (
       other instanceof QueryOptions &&
       this.parentPath.isEqual(other.parentPath) &&
+      this.fieldFiltersEqual(other.fieldFilters) &&
       this.collectionId === other.collectionId &&
       this.converter === other.converter &&
       this.allDescendants === other.allDescendants &&
       this.limit === other.limit &&
       this.offset === other.offset &&
-      deepEqual(this.fieldFilters, other.fieldFilters) &&
       deepEqual(this.fieldOrders, other.fieldOrders) &&
       deepEqual(this.startAt, other.startAt) &&
       deepEqual(this.endAt, other.endAt) &&
@@ -1204,6 +1224,19 @@ export class QueryOptions<T> {
       this.kindless === other.kindless &&
       this.requireConsistency === other.requireConsistency
     );
+  }
+
+  private fieldFiltersEqual(other: FieldFilter[]): boolean {
+    if (this.fieldFilters.length !== other.length) {
+      return false;
+    }
+
+    for (let i = 0; i < other.length; i++) {
+      if (!this.fieldFilters[i].isEqual(other[i])) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
@@ -2679,6 +2712,7 @@ export class CollectionReference<T = firestore.DocumentData>
    *
    * @param {DocumentData} data An Object containing the data for the new
    * document.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise.<DocumentReference>} A Promise resolved with a
    * [DocumentReference]{@link DocumentReference} pointing to the
    * newly created document.
@@ -2691,7 +2725,7 @@ export class CollectionReference<T = firestore.DocumentData>
    * });
    * ```
    */
-  add(data: T): Promise<DocumentReference<T>> {
+  add(data: firestore.WithFieldValue<T>): Promise<DocumentReference<T>> {
     const firestoreData = this._queryOptions.converter.toFirestore(data);
     validateDocumentData(
       'data',

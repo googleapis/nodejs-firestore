@@ -6,7 +6,8 @@
     "lib": [
       "es2016",
       "dom"
-    ]
+    ],
+    "useUnknownInCatchVariables": false,
   },
   "include": [
     "dev/src/*.d.ts",

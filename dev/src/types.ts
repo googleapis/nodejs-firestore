@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {FirestoreDataConverter, DocumentData} from '@google-cloud/firestore';
+import {
+  FirestoreDataConverter,
+  DocumentData,
+  WithFieldValue,
+} from '@google-cloud/firestore';
 
 import {CallOptions} from 'google-gax';
 import {Duplex} from 'stream';
@@ -114,7 +118,7 @@ export type RBTree = any;
  * @internal
  */
 const defaultConverterObj: FirestoreDataConverter<DocumentData> = {
-  toFirestore(modelObject: DocumentData): DocumentData {
+  toFirestore(modelObject: WithFieldValue<DocumentData>): DocumentData {
     return modelObject;
   },
   fromFirestore(snapshot: QueryDocumentSnapshot): DocumentData {

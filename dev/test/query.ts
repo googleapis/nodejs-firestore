@@ -394,7 +394,8 @@ describe('query interface', () => {
   });
 
   it('has isEqual() method', () => {
-    const query = firestore.collection('collectionId');
+    const queryA = firestore.collection('collectionId');
+    const queryB = firestore.collection('collectionId');
 
     const queryEquals = (equals: Query[], notEquals: Query[]) => {
       for (let i = 0; i < equals.length; ++i) {
@@ -411,69 +412,80 @@ describe('query interface', () => {
     };
 
     queryEquals(
-      [query.where('a', '==', '1'), query.where('a', '==', '1')],
-      [query.where('a', '=' as InvalidApiUsage, 1)]
+      [queryA.where('a', '==', '1'), queryB.where('a', '==', '1')],
+      [queryA.where('a', '=' as InvalidApiUsage, 1)]
     );
 
     queryEquals(
       [
-        query.orderBy('__name__'),
-        query.orderBy('__name__', 'asc'),
-        query.orderBy('__name__', 'ASC' as InvalidApiUsage),
-        query.orderBy(FieldPath.documentId()),
+        queryA.where('a', '==', '1').where('b', '==', 2),
+        queryB.where('a', '==', '1').where('b', '==', 2),
       ],
-      [query.orderBy('foo'), query.orderBy(FieldPath.documentId(), 'desc')]
+      []
     );
 
     queryEquals(
-      [query.limit(0), query.limit(0).limit(0)],
-      [query, query.limit(10)]
-    );
-
-    queryEquals(
-      [query.offset(0), query.offset(0).offset(0)],
-      [query, query.offset(10)]
-    );
-
-    queryEquals(
-      [query.orderBy('foo').startAt('a'), query.orderBy('foo').startAt('a')],
       [
-        query.orderBy('foo').startAfter('a'),
-        query.orderBy('foo').endAt('a'),
-        query.orderBy('foo').endBefore('a'),
-        query.orderBy('foo').startAt('b'),
-        query.orderBy('bar').startAt('a'),
+        queryA.orderBy('__name__'),
+        queryA.orderBy('__name__', 'asc'),
+        queryB.orderBy('__name__', 'ASC' as InvalidApiUsage),
+        queryB.orderBy(FieldPath.documentId()),
+      ],
+      [queryA.orderBy('foo'), queryB.orderBy(FieldPath.documentId(), 'desc')]
+    );
+
+    queryEquals(
+      [queryA.limit(0), queryB.limit(0).limit(0)],
+      [queryA, queryB.limit(10)]
+    );
+
+    queryEquals(
+      [queryA.offset(0), queryB.offset(0).offset(0)],
+      [queryA, queryB.offset(10)]
+    );
+
+    queryEquals(
+      [queryA.orderBy('foo').startAt('a'), queryB.orderBy('foo').startAt('a')],
+      [
+        queryA.orderBy('foo').startAfter('a'),
+        queryB.orderBy('foo').endAt('a'),
+        queryA.orderBy('foo').endBefore('a'),
+        queryB.orderBy('foo').startAt('b'),
+        queryA.orderBy('bar').startAt('a'),
       ]
     );
 
     queryEquals(
       [
-        query.orderBy('foo').startAfter('a'),
-        query.orderBy('foo').startAfter('a'),
+        queryA.orderBy('foo').startAfter('a'),
+        queryB.orderBy('foo').startAfter('a'),
       ],
       [
-        query.orderBy('foo').startAfter('b'),
-        query.orderBy('bar').startAfter('a'),
+        queryA.orderBy('foo').startAfter('b'),
+        queryB.orderBy('bar').startAfter('a'),
       ]
     );
 
     queryEquals(
       [
-        query.orderBy('foo').endBefore('a'),
-        query.orderBy('foo').endBefore('a'),
+        queryA.orderBy('foo').endBefore('a'),
+        queryB.orderBy('foo').endBefore('a'),
       ],
-      [query.orderBy('foo').endBefore('b'), query.orderBy('bar').endBefore('a')]
+      [
+        queryA.orderBy('foo').endBefore('b'),
+        queryB.orderBy('bar').endBefore('a'),
+      ]
     );
 
     queryEquals(
-      [query.orderBy('foo').endAt('a'), query.orderBy('foo').endAt('a')],
-      [query.orderBy('foo').endAt('b'), query.orderBy('bar').endAt('a')]
+      [queryA.orderBy('foo').endAt('a'), queryB.orderBy('foo').endAt('a')],
+      [queryA.orderBy('foo').endAt('b'), queryB.orderBy('bar').endAt('a')]
     );
 
     queryEquals(
       [
-        query.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
-        query.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
+        queryA.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
+        queryB.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
       ],
       []
     );

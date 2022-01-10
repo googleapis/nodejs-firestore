@@ -174,6 +174,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * @param {DocumentReference} documentRef A reference to the document to be
    * created.
    * @param {T} data The object to serialize as the document.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
@@ -189,9 +190,14 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  create<T>(documentRef: firestore.DocumentReference<T>, data: T): WriteBatch {
+  create<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: firestore.WithFieldValue<T>
+  ): WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
-    const firestoreData = ref._converter.toFirestore(data);
+    const firestoreData = ref._converter.toFirestore(
+      data as firestore.WithFieldValue<T>
+    );
     validateDocumentData(
       'data',
       firestoreData,
@@ -274,14 +280,12 @@ export class WriteBatch implements firestore.WriteBatch {
 
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options: firestore.SetOptions
   ): WriteBatch;
-  set<T>(documentRef: firestore.DocumentReference<T>, data: T): WriteBatch;
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T | Partial<T>,
-    options?: firestore.SetOptions
+    data: firestore.WithFieldValue<T>
   ): WriteBatch;
   /**
    * Write to the document referred to by the provided
@@ -295,10 +299,13 @@ export class WriteBatch implements firestore.WriteBatch {
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
-   * remain untouched.
+   * remain untouched. If your input sets any field to an empty map, all nested
+   * fields are overwritten.
    * @param {Array.<string|FieldPath>=} options.mergeFields - If provided,
-   * set() only replaces the specified field paths. Any field path that is not
-   * specified is ignored and remains untouched.
+   * set() only replaces the specified field paths. Any field path that is no
+   * specified is ignored and remains untouched. If your input sets any field to
+   * an empty map, all nested fields are overwritten.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
@@ -316,12 +323,12 @@ export class WriteBatch implements firestore.WriteBatch {
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T | Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options?: firestore.SetOptions
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});
-    const mergeLeaves = options && options.merge === true;
-    const mergePaths = options && options.mergeFields;
+    const mergeLeaves = options && 'merge' in options && options.merge;
+    const mergePaths = options && 'mergeFields' in options;
     const ref = validateDocumentReference('documentRef', documentRef);
     let firestoreData: firestore.DocumentData;
     if (mergeLeaves || mergePaths) {
@@ -398,6 +405,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * ...(Precondition|*|string|FieldPath)} preconditionOrValues -
    * An alternating list of field paths and values to update or a Precondition
    * to restrict this update.
+   * @throws {Error} If the provided input is not valid Firestore data.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
@@ -415,7 +423,7 @@ export class WriteBatch implements firestore.WriteBatch {
    */
   update<T = firestore.DocumentData>(
     documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
+    dataOrField: firestore.UpdateData<T> | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
       | {lastUpdateTime?: firestore.Timestamp}
       | unknown
@@ -480,15 +488,16 @@ export class WriteBatch implements firestore.WriteBatch {
         // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
 
-        const data = dataOrField as firestore.UpdateData;
-        Object.entries(data).forEach(([key, value]) => {
-          // Skip `undefined` values (can be hit if `ignoreUndefinedProperties`
-          // is set)
-          if (value !== undefined) {
-            validateFieldPath(key, key);
-            updateMap.set(FieldPath.fromArgument(key), value);
+        Object.entries(dataOrField as firestore.UpdateData<T>).forEach(
+          ([key, value]) => {
+            // Skip `undefined` values (can be hit if `ignoreUndefinedProperties`
+            // is set)
+            if (value !== undefined) {
+              validateFieldPath(key, key);
+              updateMap.set(FieldPath.fromArgument(key), value);
+            }
           }
-        });
+        );
 
         if (preconditionOrValues.length > 0) {
           validateUpdatePrecondition(
@@ -771,27 +780,9 @@ export function validateSetOptions(
       );
     }
 
-    const setOptions = value as {[k: string]: unknown};
-
-    if ('merge' in setOptions && typeof setOptions.merge !== 'boolean') {
-      throw new Error(
-        `${invalidArgumentMessage(
-          arg,
-          'set() options argument'
-        )} "merge" is not a boolean.`
-      );
-    }
+    const setOptions = value as {mergeFields: Array<string | FieldPath>};
 
     if ('mergeFields' in setOptions) {
-      if (!Array.isArray(setOptions.mergeFields)) {
-        throw new Error(
-          `${invalidArgumentMessage(
-            arg,
-            'set() options argument'
-          )} "mergeFields" is not an array.`
-        );
-      }
-
       for (let i = 0; i < setOptions.mergeFields.length; ++i) {
         try {
           validateFieldPath(i, setOptions.mergeFields[i]);

@@ -218,17 +218,23 @@ export class Transaction implements firestore.Transaction {
    * });
    * ```
    */
-  create<T>(documentRef: firestore.DocumentReference<T>, data: T): Transaction {
+  create<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: firestore.WithFieldValue<T>
+  ): Transaction {
     this._writeBatch.create(documentRef, data);
     return this;
   }
 
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options: firestore.SetOptions
   ): Transaction;
-  set<T>(documentRef: firestore.DocumentReference<T>, data: T): Transaction;
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: firestore.WithFieldValue<T>
+  ): Transaction;
   /**
    * Writes to the document referred to by the provided
    * [DocumentReference]{@link DocumentReference}. If the document
@@ -241,11 +247,14 @@ export class Transaction implements firestore.Transaction {
    * @param {T|Partial<T>} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
-   * specified in its data argument. Fields omitted from this set() call
-   * remain untouched.
+   * specified in its data argument. Fields omitted from this set() call remain
+   * untouched. If your input sets any field to an empty map, all nested fields
+   * are overwritten.
    * @param {Array.<string|FieldPath>=} options.mergeFields - If provided,
    * set() only replaces the specified field paths. Any field path that is not
-   * specified is ignored and remains untouched.
+   * specified is ignored and remains untouched. If your input sets any field to
+   * an empty map, all nested fields are overwritten.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *
@@ -260,10 +269,14 @@ export class Transaction implements firestore.Transaction {
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T | Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options?: firestore.SetOptions
   ): Transaction {
-    this._writeBatch.set(documentRef, data, options);
+    if (options) {
+      this._writeBatch.set(documentRef, data, options);
+    } else {
+      this._writeBatch.set(documentRef, data as firestore.WithFieldValue<T>);
+    }
     return this;
   }
 
@@ -290,6 +303,7 @@ export class Transaction implements firestore.Transaction {
    * ...(Precondition|*|string|FieldPath)} preconditionOrValues -
    * An alternating list of field paths and values to update or a Precondition
    * to to enforce on this update.
+   * @throws {Error} If the provided input is not valid Firestore data.
    * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *
@@ -309,7 +323,7 @@ export class Transaction implements firestore.Transaction {
    */
   update<T>(
     documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
+    dataOrField: firestore.UpdateData<T> | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
       firestore.Precondition | unknown | string | firestore.FieldPath
     >
