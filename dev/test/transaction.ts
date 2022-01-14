@@ -52,13 +52,17 @@ const DOCUMENT_NAME = `${COLLECTION_ROOT}/${DOCUMENT_ID}`;
 Firestore.setLogFunction(null);
 
 /** Helper to create a transaction ID from either a string or a Uint8Array. */
-function transactionId(transaction?: Uint8Array | string): Uint8Array {
+function transactionId(
+  transaction?: Uint8Array | string
+): Uint8Array | undefined {
   if (transaction === undefined) {
     return Buffer.from('foo');
-  } else if (typeof transaction === 'string') {
+  } else if (typeof transaction === 'string' && transaction.length > 0) {
     return Buffer.from(transaction);
-  } else {
+  } else if (transaction instanceof Uint8Array && transaction.length > 0) {
     return transaction;
+  } else {
+    return undefined;
   }
 }
 
@@ -172,12 +176,15 @@ function getAll(
   docs: string[],
   fieldMask?: string[],
   transaction?: Uint8Array | string,
-  error?: Error
+  error?: Error,
+  updateTime?: {seconds: string; nanos: number},
+  readTime?: {seconds: string; nanos: number}
 ): TransactionStep {
   const request: api.IBatchGetDocumentsRequest = {
     database: DATABASE_ROOT,
     documents: [],
     transaction: transactionId(transaction),
+    readTime,
   };
 
   if (fieldMask) {
@@ -195,7 +202,7 @@ function getAll(
         found: {
           name,
           createTime: {seconds: 1, nanos: 2},
-          updateTime: {seconds: 3, nanos: 4},
+          updateTime: updateTime || {seconds: 3, nanos: 4},
         },
         readTime: {seconds: 5, nanos: 6},
       });
@@ -220,9 +227,49 @@ function getAll(
 
 function getDocument(
   transaction?: Uint8Array | string,
-  error?: Error
+  error?: Error,
+  updateTime?: {seconds: string; nanos: number},
+  readTime?: {seconds: string; nanos: number}
 ): TransactionStep {
-  return getAll([DOCUMENT_ID], undefined, transaction, error);
+  return getAll(
+    [DOCUMENT_ID],
+    undefined,
+    transaction,
+    error,
+    updateTime,
+    readTime
+  );
+}
+
+function getMissing(
+  doc: string = DOCUMENT_ID,
+  readTime?: {seconds: string; nanos: number}
+): TransactionStep {
+  const name = `${COLLECTION_ROOT}/${doc}`;
+  const request: api.IBatchGetDocumentsRequest = {
+    database: DATABASE_ROOT,
+    documents: [name],
+    transaction: undefined,
+    readTime,
+  };
+
+  const stream = through2.obj();
+  setImmediate(() => {
+    stream.push({
+      missing: name,
+      readTime: {seconds: 5, nanos: 6},
+    });
+  });
+  setImmediate(() => {
+    stream.push(null);
+  });
+
+  return {
+    type: 'getDocument',
+    request,
+    error: undefined,
+    stream,
+  };
 }
 
 function query(
@@ -377,7 +424,7 @@ function runTransaction<T>(
   });
 }
 
-describe('successful transactions', () => {
+describe('successful transactions (with pessimistic locking)', () => {
   it('empty transaction', () => {
     return runTransaction(
       /* transactionOptions= */ {},
@@ -401,9 +448,333 @@ describe('successful transactions', () => {
       expect(val).to.equal('bar');
     });
   });
+
+  it('support get with document ref', () => {
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        return transaction.get(docRef).then(doc => {
+          expect(doc.id).to.equal('documentId');
+        });
+      },
+      begin(),
+      getDocument(),
+      commit()
+    );
+  });
+
+  it('requires a query or document for get', () => {
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction: InvalidApiUsage) => {
+        expect(() => transaction.get()).to.throw(
+          'Value for argument "refOrQuery" must be a DocumentReference or a Query.'
+        );
+
+        expect(() => transaction.get('foo')).to.throw(
+          'Value for argument "refOrQuery" must be a DocumentReference or a Query.'
+        );
+
+        return Promise.resolve();
+      },
+      begin(),
+      commit()
+    );
+  });
+
+  it('enforce that gets come before writes', () => {
+    return expect(
+      runTransaction(
+        /* transactionOptions= */ {},
+        (transaction, docRef) => {
+          transaction.set(docRef, {foo: 'bar'});
+          return transaction.get(docRef);
+        },
+        begin(),
+        rollback()
+      )
+    ).to.eventually.be.rejectedWith(
+      'Firestore transactions require all reads to be executed before all writes.'
+    );
+  });
+
+  it('support get with query', () => {
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        const query = docRef.parent.where('foo', '==', 'bar');
+        return transaction.get(query).then(results => {
+          expect(results.docs[0].id).to.equal('documentId');
+        });
+      },
+      begin(),
+      query(),
+      commit()
+    );
+  });
+
+  it('support getAll', () => {
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        const firstDoc = docRef.parent.doc('firstDocument');
+        const secondDoc = docRef.parent.doc('secondDocument');
+
+        return transaction.getAll(firstDoc, secondDoc).then(docs => {
+          expect(docs.length).to.equal(2);
+          expect(docs[0].id).to.equal('firstDocument');
+          expect(docs[1].id).to.equal('secondDocument');
+        });
+      },
+      begin(),
+      getAll(['firstDocument', 'secondDocument']),
+      commit()
+    );
+  });
+
+  it('support getAll with field mask', () => {
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        const doc = docRef.parent.doc('doc');
+
+        return transaction.getAll(doc, {
+          fieldMask: ['a.b', new FieldPath('a.b')],
+        });
+      },
+      begin(),
+      getAll(['doc'], ['a.b', '`a.b`']),
+      commit()
+    );
+  });
+
+  it('enforce that getAll come before writes', () => {
+    return expect(
+      runTransaction(
+        /* transactionOptions= */ {},
+        (transaction, docRef) => {
+          transaction.set(docRef, {foo: 'bar'});
+          return transaction.getAll(docRef);
+        },
+        begin(),
+        rollback()
+      )
+    ).to.eventually.be.rejectedWith(
+      'Firestore transactions require all reads to be executed before all writes.'
+    );
+  });
+
+  it('support create', () => {
+    const create = {
+      currentDocument: {
+        exists: false,
+      },
+      update: {
+        fields: {},
+        name: DOCUMENT_NAME,
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        transaction.create(docRef, {});
+        return Promise.resolve();
+      },
+      begin(),
+      commit(undefined, [create])
+    );
+  });
+
+  it('support update', () => {
+    const update = {
+      currentDocument: {
+        exists: true,
+      },
+      update: {
+        fields: {
+          a: {
+            mapValue: {
+              fields: {
+                b: {
+                  stringValue: 'c',
+                },
+              },
+            },
+          },
+        },
+        name: DOCUMENT_NAME,
+      },
+      updateMask: {
+        fieldPaths: ['a.b'],
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        transaction.update(docRef, {'a.b': 'c'});
+        transaction.update(docRef, 'a.b', 'c');
+        transaction.update(docRef, new Firestore.FieldPath('a', 'b'), 'c');
+        return Promise.resolve();
+      },
+      begin(),
+      commit(undefined, [update, update, update])
+    );
+  });
+
+  it('support set', () => {
+    const set = {
+      update: {
+        fields: {
+          'a.b': {
+            stringValue: 'c',
+          },
+        },
+        name: DOCUMENT_NAME,
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        transaction.set(docRef, {'a.b': 'c'});
+        return Promise.resolve();
+      },
+      begin(),
+      commit(undefined, [set])
+    );
+  });
+
+  it('support set with merge', () => {
+    const set = {
+      update: {
+        fields: {
+          'a.b': {
+            stringValue: 'c',
+          },
+        },
+        name: DOCUMENT_NAME,
+      },
+      updateMask: {
+        fieldPaths: ['`a.b`'],
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        transaction.set(docRef, {'a.b': 'c'}, {merge: true});
+        return Promise.resolve();
+      },
+      begin(),
+      commit(undefined, [set])
+    );
+  });
+
+  it('support set with partials and merge', () => {
+    const set = {
+      update: {
+        fields: {
+          title: {
+            stringValue: 'story',
+          },
+        },
+        name: DOCUMENT_NAME,
+      },
+      updateMask: {
+        fieldPaths: ['title'],
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        const postRef = docRef.withConverter(postConverterMerge);
+        transaction.set(postRef, {title: 'story'} as Partial<Post>, {
+          merge: true,
+        });
+        return Promise.resolve();
+      },
+      begin(),
+      commit(undefined, [set])
+    );
+  });
+
+  it('support set with partials and mergeFields', () => {
+    const set = {
+      update: {
+        fields: {
+          title: {
+            stringValue: 'story',
+          },
+        },
+        name: DOCUMENT_NAME,
+      },
+      updateMask: {
+        fieldPaths: ['title'],
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        const postRef = docRef.withConverter(postConverter);
+        transaction.set(
+          postRef,
+          {title: 'story', author: 'person'} as Partial<Post>,
+          {
+            mergeFields: ['title'],
+          }
+        );
+        return Promise.resolve();
+      },
+      begin(),
+      commit(undefined, [set])
+    );
+  });
+
+  it('support delete', () => {
+    const remove = {
+      delete: DOCUMENT_NAME,
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        transaction.delete(docRef);
+        return Promise.resolve();
+      },
+      begin(),
+      commit(undefined, [remove])
+    );
+  });
+
+  it('support multiple writes', () => {
+    const remove = {
+      delete: DOCUMENT_NAME,
+    };
+
+    const set = {
+      update: {
+        fields: {},
+        name: DOCUMENT_NAME,
+      },
+    };
+
+    return runTransaction(
+      /* transactionOptions= */ {},
+      (transaction, docRef) => {
+        transaction.delete(docRef).set(docRef, {});
+        return Promise.resolve();
+      },
+      begin(),
+      commit(undefined, [remove, set])
+    );
+  });
 });
 
-describe('failed transactions', () => {
+describe('failed transactions (with pessimistic locking)', () => {
   const retryBehavior: {[code: number]: boolean} = {
     [Status.CANCELLED]: true,
     [Status.UNKNOWN]: true,
@@ -718,172 +1089,81 @@ describe('failed transactions', () => {
   });
 });
 
-describe('transaction operations', () => {
-  it('support get with document ref', () => {
+describe('successful transactions (with optimistic locking)', () => {
+  it('uses lastUpdateTime precondition for existing documents', () => {
+    const verify = {
+      verify: DOCUMENT_NAME,
+      currentDocument: {
+        updateTime: {
+          seconds: '3',
+          nanos: 4,
+        },
+      },
+    };
+
     return runTransaction(
-      /* transactionOptions= */ {},
+      {optimisticLocking: true},
       (transaction, docRef) => {
         return transaction.get(docRef).then(doc => {
           expect(doc.id).to.equal('documentId');
         });
       },
       begin(),
-      getDocument(),
-      commit()
+      getDocument(/* transaction= */ ''),
+      commit(undefined, [verify])
     );
   });
 
-  it('requires a query or document for get', () => {
-    return runTransaction(
-      /* transactionOptions= */ {},
-      (transaction: InvalidApiUsage) => {
-        expect(() => transaction.get()).to.throw(
-          'Value for argument "refOrQuery" must be a DocumentReference or a Query.'
-        );
-
-        expect(() => transaction.get('foo')).to.throw(
-          'Value for argument "refOrQuery" must be a DocumentReference or a Query.'
-        );
-
-        return Promise.resolve();
-      },
-      begin(),
-      commit()
-    );
-  });
-
-  it('enforce that gets come before writes', () => {
-    return expect(
-      runTransaction(
-        /* transactionOptions= */ {},
-        (transaction, docRef) => {
-          transaction.set(docRef, {foo: 'bar'});
-          return transaction.get(docRef);
-        },
-        begin(),
-        rollback()
-      )
-    ).to.eventually.be.rejectedWith(
-      'Firestore transactions require all reads to be executed before all writes.'
-    );
-  });
-
-  it('support get with query', () => {
-    return runTransaction(
-      /* transactionOptions= */ {},
-      (transaction, docRef) => {
-        const query = docRef.parent.where('foo', '==', 'bar');
-        return transaction.get(query).then(results => {
-          expect(results.docs[0].id).to.equal('documentId');
-        });
-      },
-      begin(),
-      query(),
-      commit()
-    );
-  });
-
-  it('supports read-only transactions', () => {
-    return runTransaction(
-      {readOnly: true},
-      (transaction, docRef) => transaction.get(docRef),
-      begin({readOnly: {}}),
-      getDocument(),
-      commit()
-    );
-  });
-
-  it('supports read-only transactions with read time', () => {
-    return runTransaction(
-      {
-        readOnly: true,
-        readTime: Timestamp.fromMillis(1),
-      },
-      (transaction, docRef) => transaction.get(docRef),
-      begin({readOnly: {readTime: {nanos: 1000000}}}),
-      getDocument(),
-      commit()
-    );
-  });
-
-  it('support getAll', () => {
-    return runTransaction(
-      /* transactionOptions= */ {},
-      (transaction, docRef) => {
-        const firstDoc = docRef.parent.doc('firstDocument');
-        const secondDoc = docRef.parent.doc('secondDocument');
-
-        return transaction.getAll(firstDoc, secondDoc).then(docs => {
-          expect(docs.length).to.equal(2);
-          expect(docs[0].id).to.equal('firstDocument');
-          expect(docs[1].id).to.equal('secondDocument');
-        });
-      },
-      begin(),
-      getAll(['firstDocument', 'secondDocument']),
-      commit()
-    );
-  });
-
-  it('support getAll with field mask', () => {
-    return runTransaction(
-      /* transactionOptions= */ {},
-      (transaction, docRef) => {
-        const doc = docRef.parent.doc('doc');
-
-        return transaction.getAll(doc, {
-          fieldMask: ['a.b', new FieldPath('a.b')],
-        });
-      },
-      begin(),
-      getAll(['doc'], ['a.b', '`a.b`']),
-      commit()
-    );
-  });
-
-  it('enforce that getAll come before writes', () => {
-    return expect(
-      runTransaction(
-        /* transactionOptions= */ {},
-        (transaction, docRef) => {
-          transaction.set(docRef, {foo: 'bar'});
-          return transaction.getAll(docRef);
-        },
-        begin(),
-        rollback()
-      )
-    ).to.eventually.be.rejectedWith(
-      'Firestore transactions require all reads to be executed before all writes.'
-    );
-  });
-
-  it('support create', () => {
-    const create = {
+  it('uses exists precondition for missing documents', () => {
+    const verify = {
+      verify: DOCUMENT_NAME,
       currentDocument: {
         exists: false,
-      },
-      update: {
-        fields: {},
-        name: DOCUMENT_NAME,
       },
     };
 
     return runTransaction(
-      /* transactionOptions= */ {},
+      {optimisticLocking: true},
       (transaction, docRef) => {
-        transaction.create(docRef, {});
-        return Promise.resolve();
+        return transaction.get(docRef).then(doc => {
+          expect(doc.exists).to.equal(false);
+        });
       },
       begin(),
-      commit(undefined, [create])
+      getMissing(),
+      commit(undefined, [verify])
     );
   });
 
-  it('support update', () => {
-    const update = {
-      currentDocument: {
-        exists: true,
+  it('combines precondition with existing write', () => {
+    const set = {
+      update: {
+        fields: {},
+        name: DOCUMENT_NAME,
       },
+      currentDocument: {
+        updateTime: {
+          seconds: '3',
+          nanos: 4,
+        },
+      },
+    };
+
+    return runTransaction(
+      {optimisticLocking: true},
+      (transaction, docRef) => {
+        return transaction.get(docRef).then(() => {
+          transaction.set(docRef, {});
+        });
+      },
+      begin(),
+      getDocument(/* transaction= */ ''),
+      commit(undefined, [set])
+    );
+  });
+
+  it('does not combine precondition if already set', () => {
+    const set = {
       update: {
         fields: {
           a: {
@@ -901,168 +1181,194 @@ describe('transaction operations', () => {
       updateMask: {
         fieldPaths: ['a.b'],
       },
-    };
-
-    return runTransaction(
-      /* transactionOptions= */ {},
-      (transaction, docRef) => {
-        transaction.update(docRef, {'a.b': 'c'});
-        transaction.update(docRef, 'a.b', 'c');
-        transaction.update(docRef, new Firestore.FieldPath('a', 'b'), 'c');
-        return Promise.resolve();
-      },
-      begin(),
-      commit(undefined, [update, update, update])
-    );
-  });
-
-  it('support set', () => {
-    const set = {
-      update: {
-        fields: {
-          'a.b': {
-            stringValue: 'c',
-          },
+      currentDocument: {
+        updateTime: {
+          seconds: '1',
+          nanos: 2,
         },
-        name: DOCUMENT_NAME,
       },
     };
-
-    return runTransaction(
-      /* transactionOptions= */ {},
-      (transaction, docRef) => {
-        transaction.set(docRef, {'a.b': 'c'});
-        return Promise.resolve();
-      },
-      begin(),
-      commit(undefined, [set])
-    );
-  });
-
-  it('support set with merge', () => {
-    const set = {
-      update: {
-        fields: {
-          'a.b': {
-            stringValue: 'c',
-          },
+    const verify = {
+      verify: DOCUMENT_NAME,
+      currentDocument: {
+        updateTime: {
+          seconds: '3',
+          nanos: 4,
         },
-        name: DOCUMENT_NAME,
-      },
-      updateMask: {
-        fieldPaths: ['`a.b`'],
       },
     };
 
     return runTransaction(
-      /* transactionOptions= */ {},
+      {optimisticLocking: true},
       (transaction, docRef) => {
-        transaction.set(docRef, {'a.b': 'c'}, {merge: true});
-        return Promise.resolve();
-      },
-      begin(),
-      commit(undefined, [set])
-    );
-  });
-
-  it('support set with partials and merge', () => {
-    const set = {
-      update: {
-        fields: {
-          title: {
-            stringValue: 'story',
-          },
-        },
-        name: DOCUMENT_NAME,
-      },
-      updateMask: {
-        fieldPaths: ['title'],
-      },
-    };
-
-    return runTransaction(
-      /* transactionOptions= */ {},
-      (transaction, docRef) => {
-        const postRef = docRef.withConverter(postConverterMerge);
-        transaction.set(postRef, {title: 'story'} as Partial<Post>, {
-          merge: true,
+        return transaction.get(docRef).then(() => {
+          transaction.update(
+            docRef,
+            {'a.b': 'c'},
+            {lastUpdateTime: new Timestamp(1, 2)}
+          );
         });
-        return Promise.resolve();
       },
       begin(),
-      commit(undefined, [set])
+      getDocument(/* transaction= */ ''),
+      commit(undefined, [set, verify])
     );
   });
 
-  it('support set with partials and mergeFields', () => {
-    const set = {
-      update: {
-        fields: {
-          title: {
-            stringValue: 'story',
-          },
+  it('uses the same readTime for all document reads', () => {
+    const verify1 = {
+      verify: `${DOCUMENT_NAME}_1`,
+      currentDocument: {
+        exists: false,
+      },
+    };
+    const verify2 = {
+      verify: `${DOCUMENT_NAME}_2`,
+      currentDocument: {
+        exists: false,
+      },
+    };
+
+    return runTransaction(
+      {optimisticLocking: true},
+      async (transaction, docRef) => {
+        const collection = docRef.parent;
+        await transaction.get(collection.doc(`${DOCUMENT_ID}_1`));
+        await transaction.get(collection.doc(`${DOCUMENT_ID}_2`));
+      },
+      begin(),
+      getMissing(`${DOCUMENT_ID}_1`),
+      getMissing(`${DOCUMENT_ID}_2`, {seconds: '5', nanos: 6}),
+      commit(undefined, [verify1, verify2])
+    );
+  });
+});
+
+describe('failed transactions (with optimistic locking)', () => {
+  it('retries commit for failed precondition', () => {
+    const serverError = new GoogleError('');
+    serverError.code = Status.FAILED_PRECONDITION;
+
+    const verify = {
+      verify: DOCUMENT_NAME,
+      currentDocument: {
+        exists: false,
+      },
+    };
+
+    return runTransaction(
+      {optimisticLocking: true},
+      (transaction, docRef) => {
+        return transaction.get(docRef);
+      },
+      begin({transactionId: 'foo1'}),
+      getMissing(),
+      commit('foo1', [verify], serverError),
+      rollback('foo1'),
+      backoff(),
+      begin({transactionId: 'foo2', readWrite: {prevTransactionId: 'foo1'}}),
+      getMissing(),
+      commit('foo2', [verify])
+    );
+  });
+
+  it('rejects queries', () => {
+    return expect(
+      runTransaction(
+        {optimisticLocking: true},
+        (transaction, docRef) => {
+          return transaction.get(docRef.parent);
         },
-        name: DOCUMENT_NAME,
-      },
-      updateMask: {
-        fieldPaths: ['title'],
-      },
-    };
-
-    return runTransaction(
-      /* transactionOptions= */ {},
-      (transaction, docRef) => {
-        const postRef = docRef.withConverter(postConverter);
-        transaction.set(
-          postRef,
-          {title: 'story', author: 'person'} as Partial<Post>,
-          {
-            mergeFields: ['title'],
-          }
-        );
-        return Promise.resolve();
-      },
-      begin(),
-      commit(undefined, [set])
+        begin(),
+        rollback()
+      )
+    ).to.eventually.be.rejectedWith(
+      'Queries are not supported for transactions that use optimistic locking.'
     );
   });
 
-  it('support delete', () => {
-    const remove = {
-      delete: DOCUMENT_NAME,
+  it('cannot read a document twice if version changed', () => {
+    const serverError = new GoogleError('');
+    serverError.code = Status.FAILED_PRECONDITION;
+
+    const verify = {
+      verify: DOCUMENT_NAME,
+      currentDocument: {
+        updateTime: {
+          seconds: '1',
+          nanos: 2,
+        },
+      },
     };
 
     return runTransaction(
-      /* transactionOptions= */ {},
-      (transaction, docRef) => {
-        transaction.delete(docRef);
-        return Promise.resolve();
+      {optimisticLocking: true},
+      async (transaction, docRef) => {
+        await transaction.get(docRef);
+        await transaction.get(docRef);
       },
-      begin(),
-      commit(undefined, [remove])
+      begin({transactionId: 'foo1'}),
+      getDocument(/* transaction= */ '', /* error= */ undefined, {
+        seconds: '1',
+        nanos: 2,
+      }),
+      getDocument(
+        /* transaction= */ '',
+        /* error= */ undefined,
+        {
+          seconds: '2',
+          nanos: 3,
+        },
+        {
+          seconds: '5',
+          nanos: 6,
+        }
+      ),
+      rollback('foo1'),
+      backoff(),
+      begin({transactionId: 'foo2', readWrite: {prevTransactionId: 'foo1'}}),
+      getDocument(/* transaction= */ '', /* error= */ undefined, {
+        seconds: '1',
+        nanos: 2,
+      }),
+      getDocument(
+        /* transaction= */ '',
+        /* error= */ undefined,
+        {
+          seconds: '1',
+          nanos: 2,
+        },
+        {
+          seconds: '5',
+          nanos: 6,
+        }
+      ),
+      commit('foo2', [verify])
+    );
+  });
+});
+
+describe('read-only transactions', () => {
+  it('support get', () => {
+    return runTransaction(
+      {readOnly: true},
+      (transaction, docRef) => transaction.get(docRef),
+      begin({readOnly: {}}),
+      getDocument(),
+      commit()
     );
   });
 
-  it('support multiple writes', () => {
-    const remove = {
-      delete: DOCUMENT_NAME,
-    };
-
-    const set = {
-      update: {
-        fields: {},
-        name: DOCUMENT_NAME,
-      },
-    };
-
+  it('support get with read time', () => {
     return runTransaction(
-      /* transactionOptions= */ {},
-      (transaction, docRef) => {
-        transaction.delete(docRef).set(docRef, {});
-        return Promise.resolve();
+      {
+        readOnly: true,
+        readTime: Timestamp.fromMillis(1),
       },
-      begin(),
-      commit(undefined, [remove, set])
+      (transaction, docRef) => transaction.get(docRef),
+      begin({readOnly: {readTime: {nanos: 1000000}}}),
+      getDocument(),
+      commit()
     );
   });
 });

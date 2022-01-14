@@ -18,9 +18,10 @@ import * as firestore from '@google-cloud/firestore';
 
 import {GoogleError} from 'google-gax';
 import * as proto from '../protos/firestore_v1_proto_api';
+import * as deepEqual from 'fast-deep-equal';
 
 import {ExponentialBackoff} from './backoff';
-import {DocumentSnapshot} from './document';
+import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';
 import {Timestamp} from './timestamp';
 import {logger} from './logger';
@@ -59,23 +60,43 @@ const READ_AFTER_WRITE_ERROR_MSG =
  * @class Transaction
  */
 export class Transaction implements firestore.Transaction {
-  private _firestore: Firestore;
   private _writeBatch: WriteBatch;
   private _backoff: ExponentialBackoff;
-  private _requestTag: string;
   private _transactionId?: Uint8Array;
+
+  /*!
+   * A map of document paths to versions. This maps stores either an
+   * update time or `exists: false` for the documents read during
+   * the transaction. If optimistic locking is chosen, these versions
+   * are then verified during the transaction commit.
+   */
+  private _readVersions = new Map<
+    string,
+    {exists?: boolean; lastUpdateTime?: Timestamp}
+  >();
+
+  /**
+   * The read time at which to run this transaction. This can be user-specified
+   * for read-only transactions. For read-write transaction, this is the read
+   * time of the first document fetch.
+   */
+  private _readTime?: Timestamp;
 
   /**
    * @hideconstructor
    *
-   * @param firestore The Firestore Database client.
-   * @param requestTag A unique client-assigned identifier for the scope of
+   * @param _firestore The Firestore Database client.
+   * @param _optimisticLocking If true, uses optimistic locking for all
+   * documents read during this transaction.
+   * @param _requestTag A unique client-assigned identifier for the scope of
    * this transaction.
    */
-  constructor(firestore: Firestore, requestTag: string) {
-    this._firestore = firestore;
-    this._writeBatch = firestore.batch();
-    this._requestTag = requestTag;
+  constructor(
+    private readonly _firestore: Firestore,
+    private readonly _optimisticLocking: boolean,
+    private readonly _requestTag: string
+  ) {
+    this._writeBatch = _firestore.batch();
     this._backoff = new ExponentialBackoff();
   }
 
@@ -128,12 +149,13 @@ export class Transaction implements firestore.Transaction {
     }
 
     if (refOrQuery instanceof DocumentReference) {
-      const documentReader = new DocumentReader(this._firestore, [refOrQuery]);
-      documentReader.transactionId = this._transactionId;
-      return documentReader.get(this._requestTag).then(([res]) => res);
-    }
-
-    if (refOrQuery instanceof Query) {
+      return this.getAll(refOrQuery).then(([doc]) => doc);
+    } else if (refOrQuery instanceof Query) {
+      if (this._optimisticLocking) {
+        throw new Error(
+          'Queries are not supported for transactions that use optimistic locking.'
+        );
+      }
       return refOrQuery._get(this._transactionId);
     }
 
@@ -191,8 +213,39 @@ export class Transaction implements firestore.Transaction {
 
     const documentReader = new DocumentReader(this._firestore, documents);
     documentReader.fieldMask = fieldMask || undefined;
-    documentReader.transactionId = this._transactionId;
-    return documentReader.get(this._requestTag);
+
+    // If optimistic locking is chosen, document reads are not part of the
+    // server-side transaction. Instead, these reads are performed out of band.
+    // This means that the backend does not lock the document. Instead, we
+    // verify that the document has not changed during the commit.
+    if (!this._optimisticLocking) {
+      documentReader.transactionId = this._transactionId;
+    } else {
+      documentReader.readTime = this._readTime;
+    }
+
+    return documentReader.get(this._requestTag).then(docs => {
+      for (const doc of docs) {
+        const version = doc.exists
+          ? {lastUpdateTime: doc.updateTime}
+          : {exists: false};
+        if (this._readVersions.has(doc.ref.formattedName)) {
+          const existingVersion = this._readVersions.get(doc.ref.formattedName);
+          if (!deepEqual(version, existingVersion)) {
+            const error: GoogleError = new Error(
+              `Document version changed between reads (for ${doc.ref.path})`
+            );
+            error.code = StatusCode.ABORTED as number;
+            throw error;
+          }
+        } else {
+          this._readVersions.set(doc.ref.formattedName, version);
+        }
+
+        this._readTime = doc.readTime;
+      }
+      return docs;
+    });
   }
 
   /**
@@ -413,8 +466,40 @@ export class Transaction implements firestore.Transaction {
   commit(): Promise<void> {
     return this._writeBatch
       ._commit({
-        transactionId: this._transactionId,
         requestTag: this._requestTag,
+        preproccessor: commitRequest => {
+          commitRequest.transaction = this._transactionId;
+          commitRequest.writes = commitRequest.writes || [];
+
+          if (!this._optimisticLocking) {
+            return commitRequest;
+          }
+
+          const unwrittenDocs = new Map(this._readVersions);
+
+          // Attempt to attach the precondition to existing writes. This saves
+          // some costs and lets the user issue more writes (as there is a fixed
+          // limit on the number of operations).
+          for (const write of commitRequest.writes) {
+            const path = (write.delete ||
+              write.update?.name ||
+              write.verify) as string;
+            const version = unwrittenDocs.get(path);
+            if (write.currentDocument === undefined && version) {
+              write.currentDocument = new Precondition(version).toProto();
+              unwrittenDocs.delete(path);
+            }
+          }
+
+          // Add verify preconditions for any remaining documents.
+          for (const [path, version] of unwrittenDocs) {
+            commitRequest.writes.push({
+              verify: path,
+              currentDocument: new Precondition(version).toProto(),
+            });
+          }
+          return commitRequest;
+        },
       })
       .then(() => {});
   }
@@ -441,8 +526,6 @@ export class Transaction implements firestore.Transaction {
    * @internal
    * @param updateFunction The user function to execute within the transaction
    * context.
-   * @param requestTag A unique client-assigned identifier for the scope of
-   * this transaction.
    * @param options The user-defined options for this transaction.
    */
   async runTransaction<T>(
@@ -469,6 +552,8 @@ export class Transaction implements firestore.Transaction {
         }
 
         this._writeBatch._reset();
+        this._readVersions.clear();
+        this._readTime = undefined;
         await this.maybeBackoff(lastError);
 
         await this.begin(options.readOnly, options.readTime);
@@ -492,7 +577,10 @@ export class Transaction implements firestore.Transaction {
 
         lastError = err;
 
-        if (!this._transactionId || !isRetryableTransactionError(err)) {
+        if (
+          !this._transactionId ||
+          !isRetryableTransactionError(err, this._optimisticLocking)
+        ) {
           break;
         }
       }
@@ -624,7 +712,10 @@ function validateReadOptions(
   }
 }
 
-function isRetryableTransactionError(error: GoogleError): boolean {
+function isRetryableTransactionError(
+  error: GoogleError,
+  optimisticLocking: boolean
+): boolean {
   if (error.code !== undefined) {
     // This list is based on https://github.com/firebase/firebase-js-sdk/blob/master/packages/firestore/src/core/transaction_runner.ts#L112
     switch (error.code as number) {
@@ -642,6 +733,11 @@ function isRetryableTransactionError(error: GoogleError): boolean {
         // IDs that have expired. While INVALID_ARGUMENT is generally not
         // retryable, we retry this specific case.
         return !!error.message.match(/transaction has expired/);
+      case StatusCode.FAILED_PRECONDITION:
+        // Optimistic transactions use preconditions to verify that documents
+        // haven't changed during the lifetime of a transaction. If a document
+        // has changed, we retry the transaction to fetch the latest version.
+        return optimisticLocking;
       default:
         return false;
     }

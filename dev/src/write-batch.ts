@@ -594,16 +594,17 @@ export class WriteBatch implements firestore.WriteBatch {
    * @private
    * @internal
    * @param commitOptions Options to use for this commit.
-   * @param commitOptions.transactionId The transaction ID of this commit.
    * @param commitOptions.requestTag A unique client-assigned identifier for
    * this request.
+   * @param commitOptions.preprocessor A function that can be used to mutate
+   * the request before the commit.
    * @returns  A Promise that resolves when this batch completes.
    */
   async _commit<Req extends api.ICommitRequest, Resp>(commitOptions?: {
-    transactionId?: Uint8Array;
     requestTag?: string;
     retryCodes?: number[];
     methodName?: FirestoreUnaryMethod;
+    preproccessor?: (request: api.ICommitRequest) => api.ICommitRequest;
   }): Promise<Resp> {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
     this._committed = true;
@@ -613,13 +614,13 @@ export class WriteBatch implements firestore.WriteBatch {
 
     // Note that the request may not always be of type ICommitRequest. This is
     // just here to ensure type safety.
-    const request: api.ICommitRequest = {
+    let request: api.ICommitRequest = {
       database: this._firestore.formattedName,
       writes: this._ops.map(op => op.op()),
     };
 
-    if (commitOptions?.transactionId) {
-      request.transaction = commitOptions.transactionId;
+    if (commitOptions?.preproccessor) {
+      request = commitOptions?.preproccessor(request);
     }
 
     logger(

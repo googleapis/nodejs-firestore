@@ -299,6 +299,16 @@ declare namespace FirebaseFirestore {
     /** Set to false or omit to indicate a read-write transaction. */
     readOnly?: false;
     /**
+     * Whether to use optimistic locking. By default, transactions lock
+     * documents pessimistically, which increases the chance that transactions
+     * succeed but blocks other clients` modifications. With
+     * `optimisticLocking`, writes are not blocked. When other clients modify a
+     * document, the transaction is instead retried.
+     *
+     * Optimistic transactions do not support queries.
+     */
+    optimisticLocking?: boolean;
+    /**
      * The maximum number of attempts for this transaction. Defaults to five.
      */
     maxAttempts?: number;
@@ -444,10 +454,16 @@ declare namespace FirebaseFirestore {
      * Transactions can be performed as read-only or read-write transactions. By
      * default, transactions are executed in read-write mode.
      *
-     * A read-write transaction obtains a pessimistic lock on all documents that
-     * are read during the transaction. These locks block other transactions,
-     * batched writes, and other non-transactional writes from changing that
-     * document. Any writes in a read-write transactions are committed once
+     * By default, read-write transactions obtain a pessimistic locks on all
+     * documents that are read during the transaction. These locks block other
+     * transactions, batched writes, and other non-transactional writes from
+     * changing that document. If you enable optimistic locking, other clients
+     * can continue to modify these documents. The transaction will be retried
+     * if a concurrent write affects the data read during the transaction.
+     *
+     * A transaction can modify up to 500 documents. If you enable optimistic
+     * locking, any document read during the transaction also counts against
+     * this limit. Any writes in a read-write transactions are committed once
      * 'updateFunction' resolves, which also releases all locks.
      *
      * If a read-write transaction fails with contention, the transaction is
