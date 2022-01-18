@@ -11,7 +11,7 @@
                     "csharp_namespace": "Google.Cloud.Firestore.Admin.V1",
                     "go_package": "google.golang.org/genproto/googleapis/firestore/admin/v1;admin",
                     "java_multiple_files": true,
-                    "java_outer_classname": "OperationProto",
+                    "java_outer_classname": "LocationProto",
                     "java_package": "com.google.firestore.admin.v1",
                     "objc_class_prefix": "GCFS",
                     "php_namespace": "Google\\Cloud\\Firestore\\Admin\\V1",
@@ -20,6 +20,52 @@
                     "(google.api.resource_definition).pattern": "projects/{project}/databases/{database}/collectionGroups/{collection}"
                   },
                   "nested": {
+                    "Database": {
+                      "options": {
+                        "(google.api.resource).type": "firestore.googleapis.com/Database",
+                        "(google.api.resource).pattern": "projects/{project}/databases/{database}",
+                        "(google.api.resource).style": "DECLARATIVE_FRIENDLY"
+                      },
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "locationId": {
+                          "type": "string",
+                          "id": 9
+                        },
+                        "type": {
+                          "type": "DatabaseType",
+                          "id": 10
+                        },
+                        "concurrencyMode": {
+                          "type": "ConcurrencyMode",
+                          "id": 15
+                        },
+                        "etag": {
+                          "type": "string",
+                          "id": 99
+                        }
+                      },
+                      "nested": {
+                        "DatabaseType": {
+                          "values": {
+                            "DATABASE_TYPE_UNSPECIFIED": 0,
+                            "FIRESTORE_NATIVE": 1,
+                            "DATASTORE_MODE": 2
+                          }
+                        },
+                        "ConcurrencyMode": {
+                          "values": {
+                            "CONCURRENCY_MODE_UNSPECIFIED": 0,
+                            "OPTIMISTIC": 1,
+                            "PESSIMISTIC": 2,
+                            "OPTIMISTIC_WITH_ENTITY_GROUPS": 3
+                          }
+                        }
+                      }
+                    },
                     "Field": {
                       "options": {
                         "(google.api.resource).type": "firestore.googleapis.com/Field",
@@ -28,7 +74,10 @@
                       "fields": {
                         "name": {
                           "type": "string",
-                          "id": 1
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
                         },
                         "indexConfig": {
                           "type": "IndexConfig",
@@ -347,8 +396,123 @@
                               }
                             }
                           ]
+                        },
+                        "GetDatabase": {
+                          "requestType": "GetDatabaseRequest",
+                          "responseType": "Database",
+                          "options": {
+                            "(google.api.http).get": "/v1/{name=projects/*/databases/*}",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "get": "/v1/{name=projects/*/databases/*}"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
+                        "ListDatabases": {
+                          "requestType": "ListDatabasesRequest",
+                          "responseType": "ListDatabasesResponse",
+                          "options": {
+                            "(google.api.http).get": "/v1/{parent=projects/*}/databases",
+                            "(google.api.method_signature)": "parent"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "get": "/v1/{parent=projects/*}/databases"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "parent"
+                            }
+                          ]
+                        },
+                        "UpdateDatabase": {
+                          "requestType": "UpdateDatabaseRequest",
+                          "responseType": "google.longrunning.Operation",
+                          "options": {
+                            "(google.api.http).patch": "/v1/{database.name=projects/*/databases/*}",
+                            "(google.api.http).body": "database",
+                            "(google.api.method_signature)": "database,update_mask",
+                            "(google.longrunning.operation_info).response_type": "Database",
+                            "(google.longrunning.operation_info).metadata_type": "UpdateDatabaseMetadata"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "patch": "/v1/{database.name=projects/*/databases/*}",
+                                "body": "database"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "database,update_mask"
+                            },
+                            {
+                              "(google.longrunning.operation_info)": {
+                                "response_type": "Database",
+                                "metadata_type": "UpdateDatabaseMetadata"
+                              }
+                            }
+                          ]
                         }
                       }
+                    },
+                    "ListDatabasesRequest": {
+                      "fields": {
+                        "parent": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).child_type": "firestore.googleapis.com/Database"
+                          }
+                        }
+                      }
+                    },
+                    "ListDatabasesResponse": {
+                      "fields": {
+                        "databases": {
+                          "rule": "repeated",
+                          "type": "Database",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "GetDatabaseRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Database"
+                          }
+                        }
+                      }
+                    },
+                    "UpdateDatabaseRequest": {
+                      "fields": {
+                        "database": {
+                          "type": "Database",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "updateMask": {
+                          "type": "google.protobuf.FieldMask",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "UpdateDatabaseMetadata": {
+                      "fields": {}
                     },
                     "CreateIndexRequest": {
                       "fields": {
@@ -536,9 +700,6 @@
                         }
                       }
                     },
-                    "LocationMetadata": {
-                      "fields": {}
-                    },
                     "IndexOperationMetadata": {
                       "fields": {
                         "startTime": {
@@ -697,6 +858,18 @@
                         }
                       }
                     },
+                    "OperationState": {
+                      "values": {
+                        "OPERATION_STATE_UNSPECIFIED": 0,
+                        "INITIALIZING": 1,
+                        "PROCESSING": 2,
+                        "CANCELLING": 3,
+                        "FINALIZING": 4,
+                        "SUCCESSFUL": 5,
+                        "FAILED": 6,
+                        "CANCELLED": 7
+                      }
+                    },
                     "Progress": {
                       "fields": {
                         "estimatedWork": {
@@ -709,17 +882,8 @@
                         }
                       }
                     },
-                    "OperationState": {
-                      "values": {
-                        "OPERATION_STATE_UNSPECIFIED": 0,
-                        "INITIALIZING": 1,
-                        "PROCESSING": 2,
-                        "CANCELLING": 3,
-                        "FINALIZING": 4,
-                        "SUCCESSFUL": 5,
-                        "FAILED": 6,
-                        "CANCELLED": 7
-                      }
+                    "LocationMetadata": {
+                      "fields": {}
                     }
                   }
                 }
@@ -3901,14 +4065,32 @@
         },
         "api": {
           "options": {
-            "cc_enable_arenas": true,
             "go_package": "google.golang.org/genproto/googleapis/api/annotations;annotations",
             "java_multiple_files": true,
-            "java_outer_classname": "FieldBehaviorProto",
+            "java_outer_classname": "ClientProto",
             "java_package": "com.google.api",
-            "objc_class_prefix": "GAPI"
+            "objc_class_prefix": "GAPI",
+            "cc_enable_arenas": true
           },
           "nested": {
+            "fieldBehavior": {
+              "rule": "repeated",
+              "type": "google.api.FieldBehavior",
+              "id": 1052,
+              "extend": "google.protobuf.FieldOptions"
+            },
+            "FieldBehavior": {
+              "values": {
+                "FIELD_BEHAVIOR_UNSPECIFIED": 0,
+                "OPTIONAL": 1,
+                "REQUIRED": 2,
+                "OUTPUT_ONLY": 3,
+                "INPUT_ONLY": 4,
+                "IMMUTABLE": 5,
+                "UNORDERED_LIST": 6,
+                "NON_EMPTY_DEFAULT": 7
+              }
+            },
             "resourceReference": {
               "type": "google.api.ResourceReference",
               "id": 1055,
@@ -4088,24 +4270,6 @@
               "type": "string",
               "id": 1050,
               "extend": "google.protobuf.ServiceOptions"
-            },
-            "fieldBehavior": {
-              "rule": "repeated",
-              "type": "google.api.FieldBehavior",
-              "id": 1052,
-              "extend": "google.protobuf.FieldOptions"
-            },
-            "FieldBehavior": {
-              "values": {
-                "FIELD_BEHAVIOR_UNSPECIFIED": 0,
-                "OPTIONAL": 1,
-                "REQUIRED": 2,
-                "OUTPUT_ONLY": 3,
-                "INPUT_ONLY": 4,
-                "IMMUTABLE": 5,
-                "UNORDERED_LIST": 6,
-                "NON_EMPTY_DEFAULT": 7
-              }
             }
           }
         },
@@ -4671,6 +4835,18 @@
               ],
               "reserved": [
                 [
+                  4,
+                  4
+                ],
+                [
+                  5,
+                  5
+                ],
+                [
+                  6,
+                  6
+                ],
+                [
                   8,
                   8
                 ],
@@ -5004,18 +5180,6 @@
                 }
               }
             },
-            "Any": {
-              "fields": {
-                "type_url": {
-                  "type": "string",
-                  "id": 1
-                },
-                "value": {
-                  "type": "bytes",
-                  "id": 2
-                }
-              }
-            },
             "Duration": {
               "fields": {
                 "seconds": {
@@ -5024,6 +5188,30 @@
                 },
                 "nanos": {
                   "type": "int32",
+                  "id": 2
+                }
+              }
+            },
+            "Timestamp": {
+              "fields": {
+                "seconds": {
+                  "type": "int64",
+                  "id": 1
+                },
+                "nanos": {
+                  "type": "int32",
+                  "id": 2
+                }
+              }
+            },
+            "Any": {
+              "fields": {
+                "type_url": {
+                  "type": "string",
+                  "id": 1
+                },
+                "value": {
+                  "type": "bytes",
                   "id": 2
                 }
               }
@@ -5037,18 +5225,6 @@
                   "rule": "repeated",
                   "type": "string",
                   "id": 1
-                }
-              }
-            },
-            "Timestamp": {
-              "fields": {
-                "seconds": {
-                  "type": "int64",
-                  "id": 1
-                },
-                "nanos": {
-                  "type": "int32",
-                  "id": 2
                 }
               }
             },
