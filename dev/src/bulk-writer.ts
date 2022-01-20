@@ -427,11 +427,19 @@ export class BulkWriter {
   private _errorHandlerSet = false;
 
   // Visible for testing.
+  /**
+   * @private
+   * @internal
+   */
   _getBufferedOperationsCount(): number {
     return this._bufferedOperations.length;
   }
 
   // Visible for testing.
+  /**
+   * @private
+   * @internal
+   */
   _setMaxBatchSize(size: number): void {
     assert(
       this._bulkCommitBatch.pendingOps.length === 0,
@@ -451,6 +459,10 @@ export class BulkWriter {
   private _maxPendingOpCount = DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT;
 
   // Visible for testing.
+  /**
+   * @private
+   * @internal
+   */
   _setMaxPendingOpCount(newMax: number): void {
     this._maxPendingOpCount = newMax;
   }
@@ -542,11 +554,13 @@ export class BulkWriter {
    * @param {DocumentReference} documentRef A reference to the document to be
    * created.
    * @param {T} data The object to serialize as the document.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise<WriteResult>} A promise that resolves with the result of
    * the write. If the write fails, the promise is rejected with a
    * [BulkWriterError]{@link BulkWriterError}.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    * let documentRef = firestore.collection('col').doc();
    *
@@ -559,10 +573,11 @@ export class BulkWriter {
    *    console.log('Write failed with: ', err);
    *  });
    * });
+   * ```
    */
   create<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T
+    data: firestore.WithFieldValue<T>
   ): Promise<WriteResult> {
     this._verifyNotClosed();
     return this._enqueue(documentRef, 'create', bulkCommitBatch =>
@@ -585,6 +600,7 @@ export class BulkWriter {
    * [BulkWriterError]{@link BulkWriterError}.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    * let documentRef = firestore.doc('col/doc');
    *
@@ -597,6 +613,7 @@ export class BulkWriter {
    *    console.log('Delete failed with: ', err);
    *  });
    * });
+   * ```
    */
   delete<T>(
     documentRef: firestore.DocumentReference<T>,
@@ -627,18 +644,22 @@ export class BulkWriter {
    * set.
    * @param {T} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call remain
-   * untouched.
+   * untouched. If your input sets any field to an empty map, all nested fields
+   * are overwritten.
    * @param {Array.<string|FieldPath>=} options.mergeFields - If provided, set()
    * only replaces the specified field paths. Any field path that is not
-   * specified is ignored and remains untouched.
+   * specified is ignored and remains untouched. If your input sets any field to
+   * an empty map, all nested fields are overwritten.
    * @returns {Promise<WriteResult>} A promise that resolves with the result of
    * the write. If the write fails, the promise is rejected with a
    * [BulkWriterError]{@link BulkWriterError}.
    *
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    * let documentRef = firestore.collection('col').doc();
    *
@@ -651,16 +672,24 @@ export class BulkWriter {
    *    console.log('Write failed with: ', err);
    *  });
    * });
+   * ```
    */
   set<T>(
     documentRef: firestore.DocumentReference<T>,
-    data: T | Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    return this._enqueue(documentRef, 'set', bulkCommitBatch =>
-      bulkCommitBatch.set(documentRef, data, options)
-    );
+    return this._enqueue(documentRef, 'set', bulkCommitBatch => {
+      if (options) {
+        return bulkCommitBatch.set(documentRef, data, options);
+      } else {
+        return bulkCommitBatch.set(
+          documentRef,
+          data as firestore.WithFieldValue<T>
+        );
+      }
+    });
   }
 
   /**
@@ -686,11 +715,13 @@ export class BulkWriter {
    * @param {...(Precondition|*|string|FieldPath)} preconditionOrValues - An
    * alternating list of field paths and values to update or a Precondition to
    * restrict this update
+   * @throws {Error} If the provided input is not valid Firestore data.
    * @returns {Promise<WriteResult>} A promise that resolves with the result of
    * the write. If the write fails, the promise is rejected with a
    * [BulkWriterError]{@link BulkWriterError}.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    * let documentRef = firestore.doc('col/doc');
    *
@@ -703,10 +734,11 @@ export class BulkWriter {
    *    console.log('Write failed with: ', err);
    *  });
    * });
+   * ```
    */
   update<T>(
     documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData | string | FieldPath,
+    dataOrField: firestore.UpdateData<T> | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
@@ -734,6 +766,7 @@ export class BulkWriter {
    * @param {BulkWriter~successCallback} successCallback A callback to be
    * called every time a BulkWriter operation successfully completes.
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    *
    * bulkWriter
@@ -745,6 +778,7 @@ export class BulkWriter {
    *       result
    *     );
    *   });
+   * ```
    */
   onWriteResult(
     successCallback: (
@@ -779,6 +813,7 @@ export class BulkWriter {
    * be called every time a BulkWriter operation fails. Returning `true` will
    * retry the operation. Returning `false` will stop the retry loop.
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    *
    * bulkWriter
@@ -793,6 +828,7 @@ export class BulkWriter {
    *       return false;
    *     }
    *   });
+   * ```
    */
   onWriteError(shouldRetryCallback: (error: BulkWriterError) => boolean): void {
     this._errorHandlerSet = true;
@@ -815,6 +851,7 @@ export class BulkWriter {
    * up to this point have been committed.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    *
    * bulkWriter.create(documentRef, {foo: 'bar'});
@@ -823,6 +860,7 @@ export class BulkWriter {
    * await flush().then(() => {
    *   console.log('Executed all writes');
    * });
+   * ```
    */
   flush(): Promise<void> {
     this._verifyNotClosed();
@@ -854,6 +892,7 @@ export class BulkWriter {
    * up to this point have been committed.
    *
    * @example
+   * ```
    * let bulkWriter = firestore.bulkWriter();
    *
    * bulkWriter.create(documentRef, {foo: 'bar'});
@@ -862,6 +901,7 @@ export class BulkWriter {
    * await close().then(() => {
    *   console.log('Executed all writes');
    * });
+   * ```
    */
   close(): Promise<void> {
     this._verifyNotClosed();

@@ -132,6 +132,7 @@ export class DocumentReference<T = firestore.DocumentData>
    *
    * @param _firestore The Firestore Database client.
    * @param _path The Path of this reference.
+   * @param _converter The converter to use when serializing data.
    */
   constructor(
     private readonly _firestore: Firestore,
@@ -160,12 +161,14 @@ export class DocumentReference<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col');
    *
    * collectionRef.add({foo: 'bar'}).then(documentReference => {
    *   let firestore = documentReference.firestore;
    *   console.log(`Root location for document is ${firestore.formattedName}`);
    * });
+   * ```
    */
   get firestore(): Firestore {
     return this._firestore;
@@ -180,11 +183,13 @@ export class DocumentReference<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col');
    *
    * collectionRef.add({foo: 'bar'}).then(documentReference => {
    *   console.log(`Added document at '${documentReference.path}'`);
    * });
+   * ```
    */
   get path(): string {
     return this._path.relativeName;
@@ -198,11 +203,13 @@ export class DocumentReference<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col');
    *
    * collectionRef.add({foo: 'bar'}).then(documentReference => {
    *   console.log(`Added document with name '${documentReference.id}'`);
    * });
+   * ```
    */
   get id(): string {
     return this._path.id!;
@@ -225,12 +232,14 @@ export class DocumentReference<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    * let collectionRef = documentRef.parent;
    *
    * collectionRef.where('foo', '==', 'bar').get().then(results => {
    *   console.log(`Found ${results.size} matches in parent collection`);
    * }):
+   * ```
    */
   get parent(): CollectionReference<T> {
     return new CollectionReference<T>(
@@ -249,6 +258,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * other reasons, the Promise will be rejected.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(documentSnapshot => {
@@ -256,6 +266,7 @@ export class DocumentReference<T = firestore.DocumentData>
    *     console.log('Document retrieved successfully.');
    *   }
    * });
+   * ```
    */
   get(): Promise<DocumentSnapshot<T>> {
     return this._firestore.getAll(this).then(([result]) => result);
@@ -270,9 +281,11 @@ export class DocumentReference<T = firestore.DocumentData>
    * subcollection.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    * let subcollection = documentRef.collection('subcollection');
    * console.log(`Path to subcollection: ${subcollection.path}`);
+   * ```
    */
   collection(collectionPath: string): CollectionReference {
     validateResourcePath('collectionPath', collectionPath);
@@ -294,6 +307,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * with an array of CollectionReferences.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.listCollections().then(collections => {
@@ -301,6 +315,7 @@ export class DocumentReference<T = firestore.DocumentData>
    *     console.log(`Found subcollection with id: ${collection.id}`);
    *   }
    * });
+   * ```
    */
   listCollections(): Promise<
     Array<CollectionReference<firestore.DocumentData>>
@@ -344,10 +359,12 @@ export class DocumentReference<T = firestore.DocumentData>
    *
    * @param {DocumentData} data An object that contains the fields and data to
    * serialize as the document.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this create.
    *
    * @example
+   * ```
    * let documentRef = firestore.collection('col').doc();
    *
    * documentRef.create({foo: 'bar'}).then((res) => {
@@ -355,8 +372,9 @@ export class DocumentReference<T = firestore.DocumentData>
    * }).catch((err) => {
    *   console.log(`Failed to create document: ${err}`);
    * });
+   * ```
    */
-  create(data: T): Promise<WriteResult> {
+  create(data: firestore.WithFieldValue<T>): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
       .create(this, data)
@@ -381,11 +399,13 @@ export class DocumentReference<T = firestore.DocumentData>
    * delete time.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.delete().then(() => {
    *   console.log('Document successfully deleted.');
    * });
+   * ```
    */
   delete(precondition?: firestore.Precondition): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
@@ -395,8 +415,11 @@ export class DocumentReference<T = firestore.DocumentData>
       .then(([writeResult]) => writeResult);
   }
 
-  set(data: Partial<T>, options: firestore.SetOptions): Promise<WriteResult>;
-  set(data: T): Promise<WriteResult>;
+  set(
+    data: firestore.PartialWithFieldValue<T>,
+    options: firestore.SetOptions
+  ): Promise<WriteResult>;
+  set(data: firestore.WithFieldValue<T>): Promise<WriteResult>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
    * document does not yet exist, it will be created. If you pass
@@ -407,28 +430,36 @@ export class DocumentReference<T = firestore.DocumentData>
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge If true, set() merges the values specified
    * in its data argument. Fields omitted from this set() call remain untouched.
+   * If your input sets any field to an empty map, all nested fields are
+   * overwritten.
    * @param {Array.<string|FieldPath>=} options.mergeFields If provided,
    * set() only replaces the specified field paths. Any field path that is not
-   * specified is ignored and remains untouched.
+   * specified is ignored and remains untouched. If your input sets any field to
+   * an empty map, all nested fields are overwritten.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this set.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.set({foo: 'bar'}).then(res => {
    *   console.log(`Document written at ${res.updateTime}`);
    * });
+   * ```
    */
   set(
-    data: T | Partial<T>,
+    data: firestore.PartialWithFieldValue<T>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-      .set(this, data, options)
-      .commit()
-      .then(([writeResult]) => writeResult);
+    let writeBatch = new WriteBatch(this._firestore);
+    if (options) {
+      writeBatch = writeBatch.set(this, data, options);
+    } else {
+      writeBatch = writeBatch.set(this, data as firestore.WithFieldValue<T>);
+    }
+    return writeBatch.commit().then(([writeResult]) => writeResult);
   }
 
   /**
@@ -450,18 +481,21 @@ export class DocumentReference<T = firestore.DocumentData>
    * ...(*|string|FieldPath|Precondition)} preconditionOrValues An alternating
    * list of field paths and values to update or a Precondition to restrict
    * this update.
+   * @throws {Error} If the provided input is not valid Firestore data.
    * @returns {Promise.<WriteResult>} A Promise that resolves once the
    * data has been successfully written to the backend.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.update({foo: 'bar'}).then(res => {
    *   console.log(`Document updated at ${res.updateTime}`);
    * });
+   * ```
    */
   update(
-    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
+    dataOrField: firestore.UpdateData<T> | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
       unknown | string | firestore.FieldPath | firestore.Precondition
     >
@@ -489,6 +523,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * the snapshot listener.
    *
    * @example
+   * ```
    * let documentRef = firestore.doc('col/doc');
    *
    * let unsubscribe = documentRef.onSnapshot(documentSnapshot => {
@@ -501,6 +536,7 @@ export class DocumentReference<T = firestore.DocumentData>
    *
    * // Remove this listener.
    * unsubscribe();
+   * ```
    */
   onSnapshot(
     onNext: (snapshot: firestore.DocumentSnapshot<T>) => void,
@@ -577,6 +613,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * converter.
    *
    * @example
+   * ```
    * class Post {
    *   constructor(readonly title: string, readonly author: string) {}
    *
@@ -608,6 +645,7 @@ export class DocumentReference<T = firestore.DocumentData>
    *   post.someNonExistentProperty; // TS error
    * }
    *
+   * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
    * @return A DocumentReference<U> that uses the provided converter.
@@ -736,6 +774,14 @@ class FieldFilter {
       },
     };
   }
+
+  isEqual(other: FieldFilter): boolean {
+    return (
+      this.field.isEqual(other.field) &&
+      this.op === other.op &&
+      deepEqual(this.value, other.value)
+    );
+  }
 }
 
 /**
@@ -789,6 +835,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * query.limit(10).get().then(querySnapshot => {
@@ -798,6 +845,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * }).then(() => {
    *   console.log(`Returned second batch of results`);
    * });
+   * ```
    */
   get query(): Query<T> {
     return this._query;
@@ -811,6 +859,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * query.get().then(querySnapshot => {
@@ -819,6 +868,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    *     console.log(`Document found at path: ${doc.ref.path}`);
    *   }
    * });
+   * ```
    */
   get docs(): Array<QueryDocumentSnapshot<T>> {
     if (this._materializedDocs) {
@@ -837,6 +887,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * query.get().then(querySnapshot => {
@@ -844,6 +895,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    *     console.log('No documents found.');
    *   }
    * });
+   * ```
    */
   get empty(): boolean {
     return this._size === 0;
@@ -857,11 +909,13 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * query.get().then(querySnapshot => {
    *   console.log(`Found ${querySnapshot.size} documents.`);
    * });
+   * ```
    */
   get size(): number {
     return this._size;
@@ -874,12 +928,14 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * @name QuerySnapshot#readTime
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * query.get().then((querySnapshot) => {
    *   let readTime = querySnapshot.readTime;
    *   console.log(`Query results returned at '${readTime.toDate()}'`);
    * });
+   * ```
    */
   get readTime(): Timestamp {
     return this._readTime;
@@ -893,6 +949,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * @return {Array.<DocumentChange>}
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * query.onSnapshot(querySnapshot => {
@@ -901,6 +958,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    *     console.log(`A document was ${change.type}.`);
    *   }
    * });
+   * ```
    */
   docChanges(): Array<DocumentChange<T>> {
     if (this._materializedChanges) {
@@ -922,6 +980,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * @param {*=} thisArg The `this` binding for the callback..
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * query.get().then(querySnapshot => {
@@ -929,6 +988,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    *     console.log(`Document found at path: ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   forEach(
     callback: (result: firestore.QueryDocumentSnapshot<T>) => void,
@@ -1151,12 +1211,12 @@ export class QueryOptions<T> {
     return (
       other instanceof QueryOptions &&
       this.parentPath.isEqual(other.parentPath) &&
+      this.fieldFiltersEqual(other.fieldFilters) &&
       this.collectionId === other.collectionId &&
       this.converter === other.converter &&
       this.allDescendants === other.allDescendants &&
       this.limit === other.limit &&
       this.offset === other.offset &&
-      deepEqual(this.fieldFilters, other.fieldFilters) &&
       deepEqual(this.fieldOrders, other.fieldOrders) &&
       deepEqual(this.startAt, other.startAt) &&
       deepEqual(this.endAt, other.endAt) &&
@@ -1164,6 +1224,19 @@ export class QueryOptions<T> {
       this.kindless === other.kindless &&
       this.requireConsistency === other.requireConsistency
     );
+  }
+
+  private fieldFiltersEqual(other: FieldFilter[]): boolean {
+    if (this.fieldFilters.length !== other.length) {
+      return false;
+    }
+
+    for (let i = 0; i < other.length; i++) {
+      if (!this.fieldFilters[i].isEqual(other[i])) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
@@ -1239,12 +1312,14 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @readonly
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col');
    *
    * collectionRef.add({foo: 'bar'}).then(documentReference => {
    *   let firestore = documentReference.firestore;
    *   console.log(`Root location for document is ${firestore.formattedName}`);
    * });
+   * ```
    */
   get firestore(): Firestore {
     return this._firestore;
@@ -1268,6 +1343,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @returns {Query} The created Query.
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col');
    *
    * collectionRef.where('foo', '==', 'bar').get().then(querySnapshot => {
@@ -1275,6 +1351,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   where(
     fieldPath: string | firestore.FieldPath,
@@ -1343,6 +1420,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @returns {Query} The created Query.
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col');
    * let documentRef = collectionRef.doc('doc');
    *
@@ -1351,6 +1429,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * }).then((res) => {
    *   console.log(`y is ${res.docs[0].get('y')}.`);
    * });
+   * ```
    */
   select(
     ...fieldPaths: Array<string | FieldPath>
@@ -1390,6 +1469,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @returns {Query} The created Query.
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '>', 42);
    *
    * query.orderBy('foo', 'desc').get().then(querySnapshot => {
@@ -1397,6 +1477,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   orderBy(
     fieldPath: string | firestore.FieldPath,
@@ -1434,6 +1515,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @returns {Query} The created Query.
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '>', 42);
    *
    * query.limit(1).get().then(querySnapshot => {
@@ -1441,6 +1523,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   limit(limit: number): Query<T> {
     validateInteger('limit', limit);
@@ -1465,6 +1548,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @return The created Query.
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '>', 42);
    *
    * query.limitToLast(1).get().then(querySnapshot => {
@@ -1472,6 +1556,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     console.log(`Last matching document is ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   limitToLast(limit: number): Query<T> {
     validateInteger('limitToLast', limit);
@@ -1491,6 +1576,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @returns {Query} The created Query.
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '>', 42);
    *
    * query.limit(10).offset(20).get().then(querySnapshot => {
@@ -1498,6 +1584,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   offset(offset: number): Query<T> {
     validateInteger('offset', offset);
@@ -1712,6 +1799,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @returns {Query} A query with the new starting point.
    *
    * @example
+   * ```
    * let query = firestore.collection('col');
    *
    * query.orderBy('foo').startAt(42).get().then(querySnapshot => {
@@ -1719,6 +1807,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   startAt(
     ...fieldValuesOrDocumentSnapshot: Array<
@@ -1756,6 +1845,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @returns {Query} A query with the new starting point.
    *
    * @example
+   * ```
    * let query = firestore.collection('col');
    *
    * query.orderBy('foo').startAfter(42).get().then(querySnapshot => {
@@ -1763,6 +1853,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   startAfter(
     ...fieldValuesOrDocumentSnapshot: Array<
@@ -1799,6 +1890,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @returns {Query} A query with the new ending point.
    *
    * @example
+   * ```
    * let query = firestore.collection('col');
    *
    * query.orderBy('foo').endBefore(42).get().then(querySnapshot => {
@@ -1806,6 +1898,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   endBefore(
     ...fieldValuesOrDocumentSnapshot: Array<
@@ -1842,6 +1935,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @returns {Query} A query with the new ending point.
    *
    * @example
+   * ```
    * let query = firestore.collection('col');
    *
    * query.orderBy('foo').endAt(42).get().then(querySnapshot => {
@@ -1849,6 +1943,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   endAt(
     ...fieldValuesOrDocumentSnapshot: Array<
@@ -1882,6 +1977,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * of the Query.
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * query.get().then(querySnapshot => {
@@ -1889,6 +1985,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
+   * ```
    */
   get(): Promise<QuerySnapshot<T>> {
     return this._get();
@@ -1955,6 +2052,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * QueryDocumentSnapshots.
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * let count = 0;
@@ -1965,6 +2063,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * }).on('end', () => {
    *   console.log(`Total count is ${count}`);
    * });
+   * ```
    */
   stream(): NodeJS.ReadableStream {
     if (this._queryOptions.limitType === LimitType.Last) {
@@ -2259,6 +2358,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * the snapshot listener.
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * let unsubscribe = query.onSnapshot(querySnapshot => {
@@ -2269,6 +2369,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *
    * // Remove this listener.
    * unsubscribe();
+   * ```
    */
   onSnapshot(
     onNext: (snapshot: firestore.QuerySnapshot<T>) => void,
@@ -2352,6 +2453,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * converter.
    *
    * @example
+   * ```
    * class Post {
    *   constructor(readonly title: string, readonly author: string) {}
    *
@@ -2383,6 +2485,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *   post.someNonExistentProperty; // TS error
    * }
    *
+   * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
    * @return A Query<U> that uses the provided converter.
@@ -2442,8 +2545,10 @@ export class CollectionReference<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col/doc/subcollection');
    * console.log(`ID of the subcollection: ${collectionRef.id}`);
+   * ```
    */
   get id(): string {
     return this._queryOptions.collectionId;
@@ -2458,9 +2563,11 @@ export class CollectionReference<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col/doc/subcollection');
    * let documentRef = collectionRef.parent;
    * console.log(`Parent name: ${documentRef.path}`);
+   * ```
    */
   get parent(): DocumentReference<firestore.DocumentData> | null {
     if (this._queryOptions.parentPath.isDocument) {
@@ -2482,8 +2589,10 @@ export class CollectionReference<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col/doc/subcollection');
    * console.log(`Path of the subcollection: ${collectionRef.path}`);
+   * ```
    */
   get path(): string {
     return this._resourcePath.relativeName;
@@ -2502,6 +2611,7 @@ export class CollectionReference<T = firestore.DocumentData>
    * collection.
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col');
    *
    * return collectionRef.listDocuments().then(documentRefs => {
@@ -2515,6 +2625,7 @@ export class CollectionReference<T = firestore.DocumentData>
    *       }
    *    }
    * });
+   * ```
    */
   listDocuments(): Promise<Array<DocumentReference<T>>> {
     const tag = requestTag();
@@ -2566,11 +2677,13 @@ export class CollectionReference<T = firestore.DocumentData>
    * instance.
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col');
    * let documentRefWithName = collectionRef.doc('doc');
    * let documentRefWithAutoId = collectionRef.doc();
    * console.log(`Reference with name: ${documentRefWithName.path}`);
    * console.log(`Reference with auto-id: ${documentRefWithAutoId.path}`);
+   * ```
    */
   doc(documentPath?: string): DocumentReference<T> {
     if (arguments.length === 0) {
@@ -2599,17 +2712,20 @@ export class CollectionReference<T = firestore.DocumentData>
    *
    * @param {DocumentData} data An Object containing the data for the new
    * document.
+   * @throws {Error} If the provided input is not a valid Firestore document.
    * @returns {Promise.<DocumentReference>} A Promise resolved with a
    * [DocumentReference]{@link DocumentReference} pointing to the
    * newly created document.
    *
    * @example
+   * ```
    * let collectionRef = firestore.collection('col');
    * collectionRef.add({foo: 'bar'}).then(documentReference => {
    *   console.log(`Added document with name: ${documentReference.id}`);
    * });
+   * ```
    */
-  add(data: T): Promise<DocumentReference<T>> {
+  add(data: firestore.WithFieldValue<T>): Promise<DocumentReference<T>> {
     const firestoreData = this._queryOptions.converter.toFirestore(data);
     validateDocumentData(
       'data',
@@ -2653,6 +2769,7 @@ export class CollectionReference<T = firestore.DocumentData>
    * converter.
    *
    * @example
+   * ```
    * class Post {
    *   constructor(readonly title: string, readonly author: string) {}
    *
@@ -2684,6 +2801,7 @@ export class CollectionReference<T = firestore.DocumentData>
    *   post.someNonExistentProperty; // TS error
    * }
    *
+   * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
    * @return A CollectionReference<U> that uses the provided converter.

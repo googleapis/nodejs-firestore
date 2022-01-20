@@ -27,7 +27,7 @@ export type DocumentChangeType = 'added' | 'removed' | 'modified';
  * @class DocumentChange
  */
 export class DocumentChange<T = firestore.DocumentData>
-  implements firestore.DocumentChange
+  implements firestore.DocumentChange<T>
 {
   private readonly _type: DocumentChangeType;
   private readonly _document: QueryDocumentSnapshot<T>;
@@ -64,6 +64,7 @@ export class DocumentChange<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    * let docsArray = [];
    *
@@ -75,6 +76,7 @@ export class DocumentChange<T = firestore.DocumentData>
    *
    * // Remove this listener.
    * unsubscribe();
+   * ```
    */
   get type(): DocumentChangeType {
     return this._type;
@@ -88,6 +90,7 @@ export class DocumentChange<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * let unsubscribe = query.onSnapshot(querySnapshot => {
@@ -98,6 +101,7 @@ export class DocumentChange<T = firestore.DocumentData>
    *
    * // Remove this listener.
    * unsubscribe();
+   * ```
    */
   get doc(): QueryDocumentSnapshot<T> {
     return this._document;
@@ -113,6 +117,7 @@ export class DocumentChange<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    * let docsArray = [];
    *
@@ -129,6 +134,7 @@ export class DocumentChange<T = firestore.DocumentData>
    *
    * // Remove this listener.
    * unsubscribe();
+   * ```
    */
   get oldIndex(): number {
     return this._oldIndex;
@@ -145,6 +151,7 @@ export class DocumentChange<T = firestore.DocumentData>
    * @readonly
    *
    * @example
+   * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    * let docsArray = [];
    *
@@ -161,6 +168,7 @@ export class DocumentChange<T = firestore.DocumentData>
    *
    * // Remove this listener.
    * unsubscribe();
+   * ```
    */
   get newIndex(): number {
     return this._newIndex;
