@@ -115,4 +115,16 @@ perl -pi -e 's/number\|Long/number\|string/g' firestore_admin_v1_proto_api.js
 perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
 "${PBTS}" -o firestore_v1beta1_proto_api.d.ts firestore_v1beta1_proto_api.js
 
+"${PBJS}" --proto_path=. --target=json -o v1.json \
+  -r firestore_v1 \
+  "${PROTOS_DIR}/google/firestore/v1/*.proto" \
+  "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
+  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
+
+"${PBJS}" --proto_path=. --target=json -o v1beta1.json \
+  -r firestore_v1beta1 \
+  "${PROTOS_DIR}/google/firestore/v1beta1/*.proto" \
+  "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
+  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
+
 node  ../../scripts/license.js *.d.ts *.js

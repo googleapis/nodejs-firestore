@@ -30,7 +30,7 @@ import {
 import {Transform} from 'stream';
 import {RequestType} from 'google-gax/build/src/apitypes';
 import * as protos from '../../protos/firestore_v1_proto_api';
-import jsonProtos = require('../../protos/protos.json');
+import jsonProtos = require('../../protos/v1.json');
 /**
  * Client JSON configuration object, loaded from
  * `src/v1/firestore_client_config.json`.
