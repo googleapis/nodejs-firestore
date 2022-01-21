@@ -132,7 +132,7 @@ if staging.is_dir():
     s.replace(
        "dev/src/v1/firestore_admin_client.ts",
        "\.\./\.\./protos/protos.json",
-       "../../protos/v1.json"
+       "../../protos/admin_v1.json"
     )
     s.replace(
        "dev/src/v1beta1/firestore_client.ts",
