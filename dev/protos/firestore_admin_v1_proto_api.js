@@ -68,6 +68,208 @@
                      */
                     var v1 = {};
     
+                    v1.Database = (function() {
+    
+                        /**
+                         * Properties of a Database.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDatabase
+                         * @property {string|null} [name] Database name
+                         * @property {string|null} [locationId] Database locationId
+                         * @property {google.firestore.admin.v1.Database.DatabaseType|null} [type] Database type
+                         * @property {google.firestore.admin.v1.Database.ConcurrencyMode|null} [concurrencyMode] Database concurrencyMode
+                         * @property {string|null} [etag] Database etag
+                         */
+    
+                        /**
+                         * Constructs a new Database.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a Database.
+                         * @implements IDatabase
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDatabase=} [properties] Properties to set
+                         */
+                        function Database(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Database name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.name = "";
+    
+                        /**
+                         * Database locationId.
+                         * @member {string} locationId
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.locationId = "";
+    
+                        /**
+                         * Database type.
+                         * @member {google.firestore.admin.v1.Database.DatabaseType} type
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.type = 0;
+    
+                        /**
+                         * Database concurrencyMode.
+                         * @member {google.firestore.admin.v1.Database.ConcurrencyMode} concurrencyMode
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.concurrencyMode = 0;
+    
+                        /**
+                         * Database etag.
+                         * @member {string} etag
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.etag = "";
+    
+                        /**
+                         * Creates a Database message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.Database
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.Database} Database
+                         */
+                        Database.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.Database)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.Database();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            if (object.locationId != null)
+                                message.locationId = String(object.locationId);
+                            switch (object.type) {
+                            case "DATABASE_TYPE_UNSPECIFIED":
+                            case 0:
+                                message.type = 0;
+                                break;
+                            case "FIRESTORE_NATIVE":
+                            case 1:
+                                message.type = 1;
+                                break;
+                            case "DATASTORE_MODE":
+                            case 2:
+                                message.type = 2;
+                                break;
+                            }
+                            switch (object.concurrencyMode) {
+                            case "CONCURRENCY_MODE_UNSPECIFIED":
+                            case 0:
+                                message.concurrencyMode = 0;
+                                break;
+                            case "OPTIMISTIC":
+                            case 1:
+                                message.concurrencyMode = 1;
+                                break;
+                            case "PESSIMISTIC":
+                            case 2:
+                                message.concurrencyMode = 2;
+                                break;
+                            case "OPTIMISTIC_WITH_ENTITY_GROUPS":
+                            case 3:
+                                message.concurrencyMode = 3;
+                                break;
+                            }
+                            if (object.etag != null)
+                                message.etag = String(object.etag);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a Database message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.Database
+                         * @static
+                         * @param {google.firestore.admin.v1.Database} message Database
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Database.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.name = "";
+                                object.locationId = "";
+                                object.type = options.enums === String ? "DATABASE_TYPE_UNSPECIFIED" : 0;
+                                object.concurrencyMode = options.enums === String ? "CONCURRENCY_MODE_UNSPECIFIED" : 0;
+                                object.etag = "";
+                            }
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.locationId != null && message.hasOwnProperty("locationId"))
+                                object.locationId = message.locationId;
+                            if (message.type != null && message.hasOwnProperty("type"))
+                                object.type = options.enums === String ? $root.google.firestore.admin.v1.Database.DatabaseType[message.type] : message.type;
+                            if (message.concurrencyMode != null && message.hasOwnProperty("concurrencyMode"))
+                                object.concurrencyMode = options.enums === String ? $root.google.firestore.admin.v1.Database.ConcurrencyMode[message.concurrencyMode] : message.concurrencyMode;
+                            if (message.etag != null && message.hasOwnProperty("etag"))
+                                object.etag = message.etag;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Database to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Database.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * DatabaseType enum.
+                         * @name google.firestore.admin.v1.Database.DatabaseType
+                         * @enum {string}
+                         * @property {string} DATABASE_TYPE_UNSPECIFIED=DATABASE_TYPE_UNSPECIFIED DATABASE_TYPE_UNSPECIFIED value
+                         * @property {string} FIRESTORE_NATIVE=FIRESTORE_NATIVE FIRESTORE_NATIVE value
+                         * @property {string} DATASTORE_MODE=DATASTORE_MODE DATASTORE_MODE value
+                         */
+                        Database.DatabaseType = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "DATABASE_TYPE_UNSPECIFIED"] = "DATABASE_TYPE_UNSPECIFIED";
+                            values[valuesById[1] = "FIRESTORE_NATIVE"] = "FIRESTORE_NATIVE";
+                            values[valuesById[2] = "DATASTORE_MODE"] = "DATASTORE_MODE";
+                            return values;
+                        })();
+    
+                        /**
+                         * ConcurrencyMode enum.
+                         * @name google.firestore.admin.v1.Database.ConcurrencyMode
+                         * @enum {string}
+                         * @property {string} CONCURRENCY_MODE_UNSPECIFIED=CONCURRENCY_MODE_UNSPECIFIED CONCURRENCY_MODE_UNSPECIFIED value
+                         * @property {string} OPTIMISTIC=OPTIMISTIC OPTIMISTIC value
+                         * @property {string} PESSIMISTIC=PESSIMISTIC PESSIMISTIC value
+                         * @property {string} OPTIMISTIC_WITH_ENTITY_GROUPS=OPTIMISTIC_WITH_ENTITY_GROUPS OPTIMISTIC_WITH_ENTITY_GROUPS value
+                         */
+                        Database.ConcurrencyMode = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "CONCURRENCY_MODE_UNSPECIFIED"] = "CONCURRENCY_MODE_UNSPECIFIED";
+                            values[valuesById[1] = "OPTIMISTIC"] = "OPTIMISTIC";
+                            values[valuesById[2] = "PESSIMISTIC"] = "PESSIMISTIC";
+                            values[valuesById[3] = "OPTIMISTIC_WITH_ENTITY_GROUPS"] = "OPTIMISTIC_WITH_ENTITY_GROUPS";
+                            return values;
+                        })();
+    
+                        return Database;
+                    })();
+    
                     v1.Field = (function() {
     
                         /**
@@ -623,7 +825,535 @@
                          * @variation 2
                          */
     
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getDatabase}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef GetDatabaseCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.Database} [response] Database
+                         */
+    
+                        /**
+                         * Calls GetDatabase.
+                         * @function getDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetDatabaseRequest} request GetDatabaseRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.GetDatabaseCallback} callback Node-style callback called with the error, if any, and Database
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.getDatabase = function getDatabase(request, callback) {
+                            return this.rpcCall(getDatabase, $root.google.firestore.admin.v1.GetDatabaseRequest, $root.google.firestore.admin.v1.Database, request, callback);
+                        }, "name", { value: "GetDatabase" });
+    
+                        /**
+                         * Calls GetDatabase.
+                         * @function getDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetDatabaseRequest} request GetDatabaseRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.Database>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listDatabases}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef ListDatabasesCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.ListDatabasesResponse} [response] ListDatabasesResponse
+                         */
+    
+                        /**
+                         * Calls ListDatabases.
+                         * @function listDatabases
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListDatabasesRequest} request ListDatabasesRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.ListDatabasesCallback} callback Node-style callback called with the error, if any, and ListDatabasesResponse
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.listDatabases = function listDatabases(request, callback) {
+                            return this.rpcCall(listDatabases, $root.google.firestore.admin.v1.ListDatabasesRequest, $root.google.firestore.admin.v1.ListDatabasesResponse, request, callback);
+                        }, "name", { value: "ListDatabases" });
+    
+                        /**
+                         * Calls ListDatabases.
+                         * @function listDatabases
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListDatabasesRequest} request ListDatabasesRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.ListDatabasesResponse>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#updateDatabase}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef UpdateDatabaseCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.longrunning.Operation} [response] Operation
+                         */
+    
+                        /**
+                         * Calls UpdateDatabase.
+                         * @function updateDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IUpdateDatabaseRequest} request UpdateDatabaseRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.UpdateDatabaseCallback} callback Node-style callback called with the error, if any, and Operation
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.updateDatabase = function updateDatabase(request, callback) {
+                            return this.rpcCall(updateDatabase, $root.google.firestore.admin.v1.UpdateDatabaseRequest, $root.google.longrunning.Operation, request, callback);
+                        }, "name", { value: "UpdateDatabase" });
+    
+                        /**
+                         * Calls UpdateDatabase.
+                         * @function updateDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IUpdateDatabaseRequest} request UpdateDatabaseRequest message or plain object
+                         * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
                         return FirestoreAdmin;
+                    })();
+    
+                    v1.ListDatabasesRequest = (function() {
+    
+                        /**
+                         * Properties of a ListDatabasesRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListDatabasesRequest
+                         * @property {string|null} [parent] ListDatabasesRequest parent
+                         */
+    
+                        /**
+                         * Constructs a new ListDatabasesRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListDatabasesRequest.
+                         * @implements IListDatabasesRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListDatabasesRequest=} [properties] Properties to set
+                         */
+                        function ListDatabasesRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListDatabasesRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @instance
+                         */
+                        ListDatabasesRequest.prototype.parent = "";
+    
+                        /**
+                         * Creates a ListDatabasesRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListDatabasesRequest} ListDatabasesRequest
+                         */
+                        ListDatabasesRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListDatabasesRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListDatabasesRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListDatabasesRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ListDatabasesRequest} message ListDatabasesRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListDatabasesRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.parent = "";
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListDatabasesRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListDatabasesRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        return ListDatabasesRequest;
+                    })();
+    
+                    v1.ListDatabasesResponse = (function() {
+    
+                        /**
+                         * Properties of a ListDatabasesResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListDatabasesResponse
+                         * @property {Array.<google.firestore.admin.v1.IDatabase>|null} [databases] ListDatabasesResponse databases
+                         */
+    
+                        /**
+                         * Constructs a new ListDatabasesResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListDatabasesResponse.
+                         * @implements IListDatabasesResponse
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListDatabasesResponse=} [properties] Properties to set
+                         */
+                        function ListDatabasesResponse(properties) {
+                            this.databases = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListDatabasesResponse databases.
+                         * @member {Array.<google.firestore.admin.v1.IDatabase>} databases
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @instance
+                         */
+                        ListDatabasesResponse.prototype.databases = $util.emptyArray;
+    
+                        /**
+                         * Creates a ListDatabasesResponse message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListDatabasesResponse} ListDatabasesResponse
+                         */
+                        ListDatabasesResponse.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListDatabasesResponse)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListDatabasesResponse();
+                            if (object.databases) {
+                                if (!Array.isArray(object.databases))
+                                    throw TypeError(".google.firestore.admin.v1.ListDatabasesResponse.databases: array expected");
+                                message.databases = [];
+                                for (var i = 0; i < object.databases.length; ++i) {
+                                    if (typeof object.databases[i] !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.ListDatabasesResponse.databases: object expected");
+                                    message.databases[i] = $root.google.firestore.admin.v1.Database.fromObject(object.databases[i]);
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListDatabasesResponse message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @static
+                         * @param {google.firestore.admin.v1.ListDatabasesResponse} message ListDatabasesResponse
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListDatabasesResponse.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.databases = [];
+                            if (message.databases && message.databases.length) {
+                                object.databases = [];
+                                for (var j = 0; j < message.databases.length; ++j)
+                                    object.databases[j] = $root.google.firestore.admin.v1.Database.toObject(message.databases[j], options);
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListDatabasesResponse to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListDatabasesResponse.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        return ListDatabasesResponse;
+                    })();
+    
+                    v1.GetDatabaseRequest = (function() {
+    
+                        /**
+                         * Properties of a GetDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IGetDatabaseRequest
+                         * @property {string|null} [name] GetDatabaseRequest name
+                         */
+    
+                        /**
+                         * Constructs a new GetDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a GetDatabaseRequest.
+                         * @implements IGetDatabaseRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IGetDatabaseRequest=} [properties] Properties to set
+                         */
+                        function GetDatabaseRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * GetDatabaseRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.GetDatabaseRequest
+                         * @instance
+                         */
+                        GetDatabaseRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a GetDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.GetDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.GetDatabaseRequest} GetDatabaseRequest
+                         */
+                        GetDatabaseRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.GetDatabaseRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.GetDatabaseRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a GetDatabaseRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.GetDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.GetDatabaseRequest} message GetDatabaseRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        GetDatabaseRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this GetDatabaseRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.GetDatabaseRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        GetDatabaseRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        return GetDatabaseRequest;
+                    })();
+    
+                    v1.UpdateDatabaseRequest = (function() {
+    
+                        /**
+                         * Properties of an UpdateDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IUpdateDatabaseRequest
+                         * @property {google.firestore.admin.v1.IDatabase|null} [database] UpdateDatabaseRequest database
+                         * @property {google.protobuf.IFieldMask|null} [updateMask] UpdateDatabaseRequest updateMask
+                         */
+    
+                        /**
+                         * Constructs a new UpdateDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents an UpdateDatabaseRequest.
+                         * @implements IUpdateDatabaseRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IUpdateDatabaseRequest=} [properties] Properties to set
+                         */
+                        function UpdateDatabaseRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * UpdateDatabaseRequest database.
+                         * @member {google.firestore.admin.v1.IDatabase|null|undefined} database
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @instance
+                         */
+                        UpdateDatabaseRequest.prototype.database = null;
+    
+                        /**
+                         * UpdateDatabaseRequest updateMask.
+                         * @member {google.protobuf.IFieldMask|null|undefined} updateMask
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @instance
+                         */
+                        UpdateDatabaseRequest.prototype.updateMask = null;
+    
+                        /**
+                         * Creates an UpdateDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.UpdateDatabaseRequest} UpdateDatabaseRequest
+                         */
+                        UpdateDatabaseRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.UpdateDatabaseRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.UpdateDatabaseRequest();
+                            if (object.database != null) {
+                                if (typeof object.database !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UpdateDatabaseRequest.database: object expected");
+                                message.database = $root.google.firestore.admin.v1.Database.fromObject(object.database);
+                            }
+                            if (object.updateMask != null) {
+                                if (typeof object.updateMask !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UpdateDatabaseRequest.updateMask: object expected");
+                                message.updateMask = $root.google.protobuf.FieldMask.fromObject(object.updateMask);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from an UpdateDatabaseRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.UpdateDatabaseRequest} message UpdateDatabaseRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        UpdateDatabaseRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.database = null;
+                                object.updateMask = null;
+                            }
+                            if (message.database != null && message.hasOwnProperty("database"))
+                                object.database = $root.google.firestore.admin.v1.Database.toObject(message.database, options);
+                            if (message.updateMask != null && message.hasOwnProperty("updateMask"))
+                                object.updateMask = $root.google.protobuf.FieldMask.toObject(message.updateMask, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this UpdateDatabaseRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        UpdateDatabaseRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        return UpdateDatabaseRequest;
+                    })();
+    
+                    v1.UpdateDatabaseMetadata = (function() {
+    
+                        /**
+                         * Properties of an UpdateDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IUpdateDatabaseMetadata
+                         */
+    
+                        /**
+                         * Constructs a new UpdateDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents an UpdateDatabaseMetadata.
+                         * @implements IUpdateDatabaseMetadata
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IUpdateDatabaseMetadata=} [properties] Properties to set
+                         */
+                        function UpdateDatabaseMetadata(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Creates an UpdateDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseMetadata
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.UpdateDatabaseMetadata} UpdateDatabaseMetadata
+                         */
+                        UpdateDatabaseMetadata.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.UpdateDatabaseMetadata)
+                                return object;
+                            return new $root.google.firestore.admin.v1.UpdateDatabaseMetadata();
+                        };
+    
+                        /**
+                         * Creates a plain object from an UpdateDatabaseMetadata message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.UpdateDatabaseMetadata} message UpdateDatabaseMetadata
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        UpdateDatabaseMetadata.toObject = function toObject() {
+                            return {};
+                        };
+    
+                        /**
+                         * Converts this UpdateDatabaseMetadata to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseMetadata
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        UpdateDatabaseMetadata.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        return UpdateDatabaseMetadata;
                     })();
     
                     v1.CreateIndexRequest = (function() {
@@ -3319,6 +4049,32 @@
                         return ExportDocumentsResponse;
                     })();
     
+                    /**
+                     * OperationState enum.
+                     * @name google.firestore.admin.v1.OperationState
+                     * @enum {string}
+                     * @property {string} OPERATION_STATE_UNSPECIFIED=OPERATION_STATE_UNSPECIFIED OPERATION_STATE_UNSPECIFIED value
+                     * @property {string} INITIALIZING=INITIALIZING INITIALIZING value
+                     * @property {string} PROCESSING=PROCESSING PROCESSING value
+                     * @property {string} CANCELLING=CANCELLING CANCELLING value
+                     * @property {string} FINALIZING=FINALIZING FINALIZING value
+                     * @property {string} SUCCESSFUL=SUCCESSFUL SUCCESSFUL value
+                     * @property {string} FAILED=FAILED FAILED value
+                     * @property {string} CANCELLED=CANCELLED CANCELLED value
+                     */
+                    v1.OperationState = (function() {
+                        var valuesById = {}, values = Object.create(valuesById);
+                        values[valuesById[0] = "OPERATION_STATE_UNSPECIFIED"] = "OPERATION_STATE_UNSPECIFIED";
+                        values[valuesById[1] = "INITIALIZING"] = "INITIALIZING";
+                        values[valuesById[2] = "PROCESSING"] = "PROCESSING";
+                        values[valuesById[3] = "CANCELLING"] = "CANCELLING";
+                        values[valuesById[4] = "FINALIZING"] = "FINALIZING";
+                        values[valuesById[5] = "SUCCESSFUL"] = "SUCCESSFUL";
+                        values[valuesById[6] = "FAILED"] = "FAILED";
+                        values[valuesById[7] = "CANCELLED"] = "CANCELLED";
+                        return values;
+                    })();
+    
                     v1.Progress = (function() {
     
                         /**
@@ -3443,32 +4199,6 @@
                         };
     
                         return Progress;
-                    })();
-    
-                    /**
-                     * OperationState enum.
-                     * @name google.firestore.admin.v1.OperationState
-                     * @enum {string}
-                     * @property {string} OPERATION_STATE_UNSPECIFIED=OPERATION_STATE_UNSPECIFIED OPERATION_STATE_UNSPECIFIED value
-                     * @property {string} INITIALIZING=INITIALIZING INITIALIZING value
-                     * @property {string} PROCESSING=PROCESSING PROCESSING value
-                     * @property {string} CANCELLING=CANCELLING CANCELLING value
-                     * @property {string} FINALIZING=FINALIZING FINALIZING value
-                     * @property {string} SUCCESSFUL=SUCCESSFUL SUCCESSFUL value
-                     * @property {string} FAILED=FAILED FAILED value
-                     * @property {string} CANCELLED=CANCELLED CANCELLED value
-                     */
-                    v1.OperationState = (function() {
-                        var valuesById = {}, values = Object.create(valuesById);
-                        values[valuesById[0] = "OPERATION_STATE_UNSPECIFIED"] = "OPERATION_STATE_UNSPECIFIED";
-                        values[valuesById[1] = "INITIALIZING"] = "INITIALIZING";
-                        values[valuesById[2] = "PROCESSING"] = "PROCESSING";
-                        values[valuesById[3] = "CANCELLING"] = "CANCELLING";
-                        values[valuesById[4] = "FINALIZING"] = "FINALIZING";
-                        values[valuesById[5] = "SUCCESSFUL"] = "SUCCESSFUL";
-                        values[valuesById[6] = "FAILED"] = "FAILED";
-                        values[valuesById[7] = "CANCELLED"] = "CANCELLED";
-                        return values;
                     })();
     
                     return v1;

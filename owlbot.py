@@ -124,6 +124,21 @@ if staging.is_dir():
       "firestoreModule\.v1beta1",
       "firestoreModule"
     )
+    s.replace(
+       "dev/src/v1/firestore_client.ts",
+       "\.\./\.\./protos/protos.json",
+       "../../protos/v1.json"
+    )
+    s.replace(
+       "dev/src/v1/firestore_admin_client.ts",
+       "\.\./\.\./protos/protos.json",
+       "../../protos/admin_v1.json"
+    )
+    s.replace(
+       "dev/src/v1beta1/firestore_client.ts",
+       "\.\./\.\./protos/protos.json",
+       "../../protos/v1beta1.json"
+    )
 
     # Mark v1beta1 as deprecated
     s.replace(
