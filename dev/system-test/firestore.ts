@@ -747,7 +747,7 @@ describe('DocumentReference class', () => {
       .delete({exists: true})
       .then(() => Promise.reject('Delete should have failed'))
       .catch((err: Error) => {
-        expect(err.message).to.contain('NOT_FOUND: No document to update');
+        expect(err.message).to.contain('No document to update');
       });
   });
 
