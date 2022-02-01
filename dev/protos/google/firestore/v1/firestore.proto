@@ -62,7 +62,8 @@ service Firestore {
   // Lists documents.
   rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse) {
     option (google.api.http) = {
-      get: "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}"
+      post: "/v1/{parent=projects/*/databases/*/documents:listDocuments"
+      body: "*"
     };
   }
 

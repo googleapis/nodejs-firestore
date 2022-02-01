@@ -371,7 +371,7 @@ describe('CollectionReference class', () => {
       });
   });
 
-  it('lists missing documents', async () => {
+  it.only('lists missing documents', async () => {
     const batch = firestore.batch();
 
     batch.set(randomCol.doc('a'), {});

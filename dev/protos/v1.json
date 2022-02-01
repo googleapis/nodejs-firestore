@@ -1120,12 +1120,14 @@
                       "requestType": "ListDocumentsRequest",
                       "responseType": "ListDocumentsResponse",
                       "options": {
-                        "(google.api.http).get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}"
+                        "(google.api.http).post": "/v1/{parent=projects/*/databases/*/documents:listDocuments",
+                        "(google.api.http).body": "*"
                       },
                       "parsedOptions": [
                         {
                           "(google.api.http)": {
-                            "get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}"
+                            "post": "/v1/{parent=projects/*/databases/*/documents:listDocuments",
+                            "body": "*"
                           }
                         }
                       ]

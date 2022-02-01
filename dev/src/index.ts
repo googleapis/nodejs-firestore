@@ -534,7 +534,7 @@ export class Firestore implements firestore.Firestore {
       maxIdleChannels,
       /* clientFactory= */ () => {
         let client: GapicClient;
-
+        this._settings.fallback = 'rest'
         if (this._settings.ssl === false) {
           const grpcModule = this._settings.grpc ?? require('google-gax').grpc;
           const sslCreds = grpcModule.credentials.createInsecure();
