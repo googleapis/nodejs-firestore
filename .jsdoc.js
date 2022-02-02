@@ -43,7 +43,7 @@ module.exports = {
     copyright: 'Copyright 2022 Google LLC',
     includeDate: false,
     sourceFiles: false,
-    systemName: '@google-cloud/firestore',
+    systemName: '@google-cloud/firestore-admin',
     theme: 'lumen',
     default: {
       outputSourceFiles: false

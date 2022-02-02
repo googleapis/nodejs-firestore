@@ -36,6 +36,7 @@ import * as protos from '../protos/firestore_v1beta1_proto_api';
  *  building truly serverless apps.
  * @class
  * @deprecated Use v1/firestore_client instead.
+ * @deprecated Use v1/firestore_client instead.
  * @memberof v1beta1
  */
 export declare class FirestoreClient {

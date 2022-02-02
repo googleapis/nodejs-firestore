@@ -22,7 +22,7 @@ Applications that use Google&#x27;s Server SDKs should not be used in end-user e
 
 
 A comprehensive list of changes in each version may be found in
-[the CHANGELOG](https://github.com/googleapis/nodejs-firestore/blob/main/CHANGELOG.md).
+[the CHANGELOG](https://github.com/googleapis/nodejs-firestore/blob/master/CHANGELOG.md).
 
 * [Cloud Firestore Node.js Client API Reference][client-docs]
 * [Cloud Firestore Documentation][product-docs]
@@ -102,13 +102,13 @@ quickstart();
 
 ## Samples
 
-Samples are in the [`samples/`](https://github.com/googleapis/nodejs-firestore/tree/main/samples) directory. Each sample's `README.md` has instructions for running its sample.
+Samples are in the [`samples/`](https://github.com/googleapis/nodejs-firestore/tree/master/samples) directory. Each sample's `README.md` has instructions for running its sample.
 
 | Sample                      | Source Code                       | Try it |
 | --------------------------- | --------------------------------- | ------ |
-| Limit-to-last-query | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/limit-to-last-query.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/limit-to-last-query.js,samples/README.md) |
-| Quickstart | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/quickstart.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/quickstart.js,samples/README.md) |
-| Solution-counters | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/solution-counters.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/solution-counters.js,samples/README.md) |
+| Limit-to-last-query | [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/limit-to-last-query.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/limit-to-last-query.js,samples/README.md) |
+| Quickstart | [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/quickstart.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/quickstart.js,samples/README.md) |
+| Solution-counters | [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/solution-counters.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/solution-counters.js,samples/README.md) |
 
 
 
@@ -158,7 +158,7 @@ More Information: [Google Cloud Platform Launch Stages][launch_stages]
 
 ## Contributing
 
-Contributions welcome! See the [Contributing Guide](https://github.com/googleapis/nodejs-firestore/blob/main/CONTRIBUTING.md).
+Contributions welcome! See the [Contributing Guide](https://github.com/googleapis/nodejs-firestore/blob/master/CONTRIBUTING.md).
 
 Please note that this `README.md`, the `samples/README.md`,
 and a variety of configuration files in this repository (including `.nycrc` and `tsconfig.json`)
@@ -170,7 +170,7 @@ to its templates in
 
 Apache Version 2.0
 
-See [LICENSE](https://github.com/googleapis/nodejs-firestore/blob/main/LICENSE)
+See [LICENSE](https://github.com/googleapis/nodejs-firestore/blob/master/LICENSE)
 
 [client-docs]: https://cloud.google.com/nodejs/docs/reference/firestore/latest
 [product-docs]: https://cloud.google.com/firestore
