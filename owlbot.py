@@ -170,6 +170,7 @@ if staging.is_dir():
     os.chdir("protos")
     os.unlink('protos.js')
     os.unlink('protos.d.ts')
+    os.unlink('protos.json')
     subprocess.run('./update.sh', shell=True)
     os.chdir("../../")
 
