@@ -2,145 +2,159 @@
   "schema": "1.0",
   "comment": "This file maps proto services/RPCs to the corresponding library clients/methods",
   "language": "typescript",
-  "protoPackage": "google.firestore.admin.v1",
-  "libraryPackage": "@google-cloud/firestore-admin",
+  "protoPackage": "google.firestore.v1",
+  "libraryPackage": "@google-cloud/firestore",
   "services": {
-    "FirestoreAdmin": {
+    "Firestore": {
       "clients": {
         "grpc": {
-          "libraryClient": "FirestoreAdminClient",
+          "libraryClient": "FirestoreClient",
           "rpcs": {
-            "GetIndex": {
+            "GetDocument": {
               "methods": [
-                "getIndex"
+                "getDocument"
               ]
             },
-            "DeleteIndex": {
+            "UpdateDocument": {
               "methods": [
-                "deleteIndex"
+                "updateDocument"
               ]
             },
-            "GetField": {
+            "DeleteDocument": {
               "methods": [
-                "getField"
+                "deleteDocument"
               ]
             },
-            "GetDatabase": {
+            "BeginTransaction": {
               "methods": [
-                "getDatabase"
+                "beginTransaction"
               ]
             },
-            "ListDatabases": {
+            "Commit": {
               "methods": [
-                "listDatabases"
+                "commit"
               ]
             },
-            "CreateIndex": {
+            "Rollback": {
               "methods": [
-                "createIndex"
+                "rollback"
               ]
             },
-            "UpdateField": {
+            "BatchWrite": {
               "methods": [
-                "updateField"
+                "batchWrite"
               ]
             },
-            "ExportDocuments": {
+            "CreateDocument": {
               "methods": [
-                "exportDocuments"
+                "createDocument"
               ]
             },
-            "ImportDocuments": {
+            "BatchGetDocuments": {
               "methods": [
-                "importDocuments"
+                "batchGetDocuments"
               ]
             },
-            "UpdateDatabase": {
+            "RunQuery": {
               "methods": [
-                "updateDatabase"
+                "runQuery"
               ]
             },
-            "ListIndexes": {
+            "Write": {
               "methods": [
-                "listIndexes",
-                "listIndexesStream",
-                "listIndexesAsync"
+                "write"
               ]
             },
-            "ListFields": {
+            "Listen": {
               "methods": [
-                "listFields",
-                "listFieldsStream",
-                "listFieldsAsync"
+                "listen"
+              ]
+            },
+            "ListDocuments": {
+              "methods": [
+                "listDocuments",
+                "listDocumentsStream",
+                "listDocumentsAsync"
+              ]
+            },
+            "PartitionQuery": {
+              "methods": [
+                "partitionQuery",
+                "partitionQueryStream",
+                "partitionQueryAsync"
+              ]
+            },
+            "ListCollectionIds": {
+              "methods": [
+                "listCollectionIds",
+                "listCollectionIdsStream",
+                "listCollectionIdsAsync"
               ]
             }
           }
         },
         "grpc-fallback": {
-          "libraryClient": "FirestoreAdminClient",
+          "libraryClient": "FirestoreClient",
           "rpcs": {
-            "GetIndex": {
+            "GetDocument": {
               "methods": [
-                "getIndex"
+                "getDocument"
               ]
             },
-            "DeleteIndex": {
+            "UpdateDocument": {
               "methods": [
-                "deleteIndex"
+                "updateDocument"
               ]
             },
-            "GetField": {
+            "DeleteDocument": {
               "methods": [
-                "getField"
+                "deleteDocument"
               ]
             },
-            "GetDatabase": {
+            "BeginTransaction": {
               "methods": [
-                "getDatabase"
+                "beginTransaction"
               ]
             },
-            "ListDatabases": {
+            "Commit": {
               "methods": [
-                "listDatabases"
+                "commit"
               ]
             },
-            "CreateIndex": {
+            "Rollback": {
               "methods": [
-                "createIndex"
+                "rollback"
               ]
             },
-            "UpdateField": {
+            "BatchWrite": {
               "methods": [
-                "updateField"
+                "batchWrite"
               ]
             },
-            "ExportDocuments": {
+            "CreateDocument": {
               "methods": [
-                "exportDocuments"
+                "createDocument"
               ]
             },
-            "ImportDocuments": {
+            "ListDocuments": {
               "methods": [
-                "importDocuments"
+                "listDocuments",
+                "listDocumentsStream",
+                "listDocumentsAsync"
               ]
             },
-            "UpdateDatabase": {
+            "PartitionQuery": {
               "methods": [
-                "updateDatabase"
+                "partitionQuery",
+                "partitionQueryStream",
+                "partitionQueryAsync"
               ]
             },
-            "ListIndexes": {
+            "ListCollectionIds": {
               "methods": [
-                "listIndexes",
-                "listIndexesStream",
-                "listIndexesAsync"
-              ]
-            },
-            "ListFields": {
-              "methods": [
-                "listFields",
-                "listFieldsStream",
-                "listFieldsAsync"
+                "listCollectionIds",
+                "listCollectionIdsStream",
+                "listCollectionIdsAsync"
               ]
             }
           }
