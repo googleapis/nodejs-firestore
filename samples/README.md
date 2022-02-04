@@ -41,7 +41,7 @@ Before running the samples, make sure you've followed the steps outlined in
 
 ### Limit-to-last-query
 
-View the [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/limit-to-last-query.js).
+View the [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/limit-to-last-query.js).
 
 [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/limit-to-last-query.js,samples/README.md)
 
@@ -58,7 +58,7 @@ __Usage:__
 
 ### Quickstart
 
-View the [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/quickstart.js).
+View the [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/quickstart.js).
 
 [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/quickstart.js,samples/README.md)
 
@@ -75,7 +75,7 @@ __Usage:__
 
 ### Solution-counters
 
-View the [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/solution-counters.js).
+View the [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/solution-counters.js).
 
 [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/solution-counters.js,samples/README.md)
 
