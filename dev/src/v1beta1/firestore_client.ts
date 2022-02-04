@@ -40,10 +40,6 @@ import * as gapicConfig from './firestore_client_config.json';
 
 // tslint:disable deprecation
 
-// tslint:disable deprecation
-
-// tslint:disable deprecation
-
 const version = require('../../../package.json').version;
 
 /**
@@ -56,8 +52,6 @@ const version = require('../../../package.json').version;
  *  integrations with Firebase and Google Cloud Platform (GCP) accelerate
  *  building truly serverless apps.
  * @class
- * @deprecated Use v1/firestore_client instead.
- * @deprecated Use v1/firestore_client instead.
  * @deprecated Use v1/firestore_client instead.
  * @memberof v1beta1
  */
