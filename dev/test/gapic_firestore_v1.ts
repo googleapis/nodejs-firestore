@@ -1321,9 +1321,7 @@ describe('v1.FirestoreClient', () => {
       const response = await promise;
       assert.deepStrictEqual(response, expectedResponse);
       assert(
-        (client.innerApiCalls.write as SinonStub)
-          .getCall(0)
-          .calledWithExactly({}, undefined)
+        (client.innerApiCalls.write as SinonStub).getCall(0).calledWith(null)
       );
       assert.deepStrictEqual(
         ((stream as unknown as PassThrough)._transform as SinonStub).getCall(0)
@@ -1364,9 +1362,7 @@ describe('v1.FirestoreClient', () => {
       });
       await assert.rejects(promise, expectedError);
       assert(
-        (client.innerApiCalls.write as SinonStub)
-          .getCall(0)
-          .calledWithExactly({}, undefined)
+        (client.innerApiCalls.write as SinonStub).getCall(0).calledWith(null)
       );
       assert.deepStrictEqual(
         ((stream as unknown as PassThrough)._transform as SinonStub).getCall(0)
@@ -1407,9 +1403,7 @@ describe('v1.FirestoreClient', () => {
       const response = await promise;
       assert.deepStrictEqual(response, expectedResponse);
       assert(
-        (client.innerApiCalls.listen as SinonStub)
-          .getCall(0)
-          .calledWithExactly({}, undefined)
+        (client.innerApiCalls.listen as SinonStub).getCall(0).calledWith(null)
       );
       assert.deepStrictEqual(
         ((stream as unknown as PassThrough)._transform as SinonStub).getCall(0)
@@ -1450,9 +1444,7 @@ describe('v1.FirestoreClient', () => {
       });
       await assert.rejects(promise, expectedError);
       assert(
-        (client.innerApiCalls.listen as SinonStub)
-          .getCall(0)
-          .calledWithExactly({}, undefined)
+        (client.innerApiCalls.listen as SinonStub).getCall(0).calledWith(null)
       );
       assert.deepStrictEqual(
         ((stream as unknown as PassThrough)._transform as SinonStub).getCall(0)
