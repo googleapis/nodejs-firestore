@@ -371,7 +371,7 @@ describe('CollectionReference class', () => {
       });
   });
 
-  it('lists missing documents', async () => {
+  it.only('lists missing documents', async () => {
     const batch = firestore.batch();
 
     batch.set(randomCol.doc('a'), {});
@@ -388,6 +388,25 @@ describe('CollectionReference class', () => {
     expect(existingDocs.map(doc => doc.id)).to.have.members(['a', 'c']);
     expect(missingDocs.map(doc => doc.id)).to.have.members(['b']);
   });
+
+  it.only('lists missing documents in subcollection', async () => {
+    const col = randomCol.doc("a").collection("b");
+    const batch = firestore.batch();
+
+    batch.set(col.doc('a'), {});
+    batch.set(col.doc('b/b/b'), {});
+    batch.set(col.doc('c'), {});
+    await batch.commit();
+
+    const documentRefs = await col.listDocuments();
+    const documents = await firestore.getAll(...documentRefs);
+    const existingDocs = documents.filter(doc => doc.exists);
+    const missingDocs = documents.filter(doc => !doc.exists);
+
+    expect(existingDocs.map(doc => doc.id)).to.have.members(['a', 'c']);
+    expect(missingDocs.map(doc => doc.id)).to.have.members(['b']);
+  });
+
 
   it('supports withConverter()', async () => {
     const ref = await firestore
