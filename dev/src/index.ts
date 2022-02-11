@@ -725,7 +725,9 @@ export class Firestore implements firestore.Firestore {
    * });
    * ```
    */
-  collection(collectionPath: string): CollectionReference {
+  collection<T extends firestore.DocumentData>(
+    collectionPath: string
+  ): CollectionReference<T> {
     validateResourcePath('collectionPath', collectionPath);
 
     const path = ResourcePath.EMPTY.append(collectionPath);

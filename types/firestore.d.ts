@@ -336,7 +336,9 @@ declare namespace FirebaseFirestore {
      * @param collectionPath A slash-separated path to a collection.
      * @return The `CollectionReference` instance.
      */
-    collection(collectionPath: string): CollectionReference<DocumentData>;
+    collection<T extends DocumentData>(
+      collectionPath: string
+    ): CollectionReference<T>;
 
     /**
      * Gets a `DocumentReference` instance that refers to the document at the
