@@ -390,7 +390,7 @@ describe('CollectionReference class', () => {
   });
 
   it.only('lists missing documents in subcollection', async () => {
-    const col = randomCol.doc("a").collection("b");
+    const col = randomCol.doc('a').collection('b');
     const batch = firestore.batch();
 
     batch.set(col.doc('a'), {});
@@ -406,7 +406,6 @@ describe('CollectionReference class', () => {
     expect(existingDocs.map(doc => doc.id)).to.have.members(['a', 'c']);
     expect(missingDocs.map(doc => doc.id)).to.have.members(['b']);
   });
-
 
   it('supports withConverter()', async () => {
     const ref = await firestore
