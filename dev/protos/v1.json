@@ -1120,15 +1120,15 @@
                       "requestType": "ListDocumentsRequest",
                       "responseType": "ListDocumentsResponse",
                       "options": {
-                        "(google.api.http).get": "/v1/{parent=projects/*/databases/*/documents}/{collection_id}",
-                        "(google.api.http).additional_bindings.get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}"
+                        "(google.api.http).get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}",
+                        "(google.api.http).additional_bindings.get": "/v1/{parent=projects/*/databases/*/documents}/{collection_id}"
                       },
                       "parsedOptions": [
                         {
                           "(google.api.http)": {
-                            "get": "/v1/{parent=projects/*/databases/*/documents}/{collection_id}",
+                            "get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}",
                             "additional_bindings": {
-                              "get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}"
+                              "get": "/v1/{parent=projects/*/databases/*/documents}/{collection_id}"
                             }
                           }
                         }
