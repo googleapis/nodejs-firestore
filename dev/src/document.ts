@@ -108,7 +108,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
   private _updateTime: Timestamp | undefined;
 
   /**
-   * @hideconstructor
+   * @private
    *
    * @param ref The reference to the document.
    * @param _fieldsProto The fields of the Firestore `Document` Protobuf backing
@@ -122,6 +122,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    */
   constructor(
     ref: DocumentReference<T>,
+    /** @private */
     readonly _fieldsProto?: ApiMapValue,
     readTime?: Timestamp,
     createTime?: Timestamp,
@@ -649,7 +650,7 @@ export class DocumentMask {
   /**
    * @private
    * @internal
-   * @hideconstructor
+   * @private
    *
    * @param fieldPaths The field paths in this mask.
    */
@@ -928,7 +929,7 @@ export class DocumentTransform<T = firestore.DocumentData> {
   /**
    * @private
    * @internal
-   * @hideconstructor
+   * @private
    *
    * @param ref The DocumentReference for this transform.
    * @param transforms A Map of FieldPaths to FieldTransforms.
@@ -1067,7 +1068,7 @@ export class Precondition {
   /**
    * @private
    * @internal
-   * @hideconstructor
+   * @private
    *
    * @param options.exists - Whether the referenced document should exist in
    * Firestore,

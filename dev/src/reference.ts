@@ -128,15 +128,18 @@ export class DocumentReference<T = firestore.DocumentData>
   implements Serializable, firestore.DocumentReference<T>
 {
   /**
-   * @hideconstructor
+   * @private
    *
+   * @private
    * @param _firestore The Firestore Database client.
    * @param _path The Path of this reference.
    * @param _converter The converter to use when serializing data.
    */
   constructor(
     private readonly _firestore: Firestore,
+    /** @private */
     readonly _path: ResourcePath,
+    /** @private */
     readonly _converter = defaultConverter<T>()
   ) {}
 
@@ -805,7 +808,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
   private _changes: (() => Array<DocumentChange<T>>) | null = null;
 
   /**
-   * @hideconstructor
+   * @private
    *
    * @param _query The originating query.
    * @param _readTime The time when this query snapshot was obtained.
@@ -1248,16 +1251,19 @@ export class QueryOptions<T> {
  */
 export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   private readonly _serializer: Serializer;
+  /** @private */
   protected readonly _allowUndefined: boolean;
 
   /**
-   * @hideconstructor
+   * @private
    *
    * @param _firestore The Firestore Database client.
    * @param _queryOptions Options that define the query.
    */
   constructor(
+    /** @private */
     readonly _firestore: Firestore,
+    /** @private */
     protected readonly _queryOptions: QueryOptions<T>
   ) {
     this._serializer = new Serializer(_firestore);
@@ -2513,7 +2519,7 @@ export class CollectionReference<T = firestore.DocumentData>
   implements firestore.CollectionReference<T>
 {
   /**
-   * @hideconstructor
+   * @private
    *
    * @param firestore The Firestore Database client.
    * @param path The Path of this collection.

@@ -66,7 +66,7 @@ export class Transaction implements firestore.Transaction {
   private _transactionId?: Uint8Array;
 
   /**
-   * @hideconstructor
+   * @private
    *
    * @param firestore The Firestore Database client.
    * @param requestTag A unique client-assigned identifier for the scope of
