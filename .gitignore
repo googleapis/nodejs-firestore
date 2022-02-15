@@ -12,3 +12,7 @@ system-test/*key.json
 .DS_Store
 package-lock.json
 __pycache__
+.idea/modules.xml
+.idea/nodejs-firestore.iml
+.idea/vcs.xml
+.idea/workspace.xml

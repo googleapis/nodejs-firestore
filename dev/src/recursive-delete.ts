@@ -275,7 +275,7 @@ export class RecursiveDelete {
     );
 
     // Query for names only to fetch empty snapshots.
-    query = query.select(FieldPath.documentId()).limit(this.maxPendingOps);
+    query = query.limit(this.maxPendingOps);
     if(!this._successFn) query.select(FieldPath.documentId())
 
     if (ref instanceof CollectionReference) {
