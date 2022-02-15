@@ -142,15 +142,24 @@ export class RecursiveDelete {
   private pendingOpsCount = 0;
 
   private errorStack = '';
+  
+  
 
   /**
-   * The user-provided callback to be run every time a document is successfully deleted
+   * The user-provided callback to be run every time a child document is successfully deleted
    * @private
    * @internal
    */
   private _successFn?: (
       docSnapshot: firestore.DocumentSnapshot
   ) => void;
+
+
+  /**
+   * Selectors used to mask field values of queried child documents
+   * @private
+   */
+  private _selectors: (string | FieldPath)[]
 
   /**
    *
@@ -168,10 +177,13 @@ export class RecursiveDelete {
       | firestore.CollectionReference<unknown>
       | firestore.DocumentReference<unknown>,
     private readonly maxLimit: number,
-    private readonly minLimit: number
+    private readonly minLimit: number,
+    private readonly selectors: (string | firestore.FieldPath)[] = [FieldPath.documentId()]
   ) {
     this.maxPendingOps = maxLimit;
     this.minPendingOps = minLimit;
+    // TODO why do we need those conversions?
+    this._selectors = selectors.map((sel) => FieldPath.fromArgument(sel));
   }
 
   /**
@@ -191,12 +203,13 @@ export class RecursiveDelete {
   }
 
   /**
-   * Attaches a listener that is run every time a document is successfully deleted
+   * Attaches a listener that is run every time a child document is successfully deleted
    *
    * @param {BulkWriter~_successFn} successCallback A callback to be
-   * called every time a document is successfully deleted.
+   *    called every time a document is successfully deleted.
+   * @param selectors field values that shall be passed into successCallback
    */
-  onDelete(
+  onDeleteChild(
       successCallback: (
           docSnapshot: firestore.DocumentSnapshot
       ) => void
@@ -275,8 +288,8 @@ export class RecursiveDelete {
     );
 
     // Query for names only to fetch empty snapshots.
-    query = query.limit(this.maxPendingOps);
-    if(!this._successFn) query.select(FieldPath.documentId())
+
+    query = query.select(...this._selectors).limit(this.maxPendingOps);
 
     if (ref instanceof CollectionReference) {
       // To find all descendants of a collection reference, we need to use a

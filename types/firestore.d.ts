@@ -394,7 +394,8 @@ declare namespace FirebaseFirestore {
      * @param ref The reference of a document or collection to delete.
      * @param options
      *    bulkWriter: A custom BulkWriter instance used to perform the deletes.
-     *    onDelete: Called on successful deletion of a document.
+     *    onDeleteChild: Called on successful deletion of a child document.
+     *    selectors: Selectors used to mask field values of queried child documents
      * @return A promise that resolves when all deletes have been performed.
      * The promise is rejected if any of the deletes fail.
      *
@@ -418,7 +419,8 @@ declare namespace FirebaseFirestore {
       ref: CollectionReference<unknown> | DocumentReference<unknown>,
       options?: Partial<{
         bulkWriter: BulkWriter,
-        onDelete: (docSnapshot: DocumentSnapshot) => void
+        onDeleteChild: (docSnapshot: DocumentSnapshot) => void,
+        selectors: (string | FieldPath)[]
       }>
     ): Promise<void>;
 

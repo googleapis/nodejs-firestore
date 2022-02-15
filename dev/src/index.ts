@@ -1250,7 +1250,8 @@ export class Firestore implements firestore.Firestore {
    * @param ref The reference of a document or collection to delete.
    * @param options
    *    bulkWriter: A custom BulkWriter instance used to perform the deletes.
-   *    onDelete: Called on successful deletion of a document.
+   *    onDeleteChild: Called on successful deletion of a child document.
+   *    selectors: Selectors used to mask field values of queried child documents
    * @return A promise that resolves when all deletes have been performed.
    * The promise is rejected if any of the deletes fail.
    *
@@ -1278,7 +1279,8 @@ export class Firestore implements firestore.Firestore {
       | firestore.DocumentReference<unknown>,
     options?: Partial<{
       bulkWriter: BulkWriter,
-      onDelete: (docSnapshot: firestore.DocumentSnapshot) => void,
+      onDeleteChild: (docSnapshot: firestore.DocumentSnapshot) => void,
+      selectors: (string | firestore.FieldPath)[]
     }>
   ): Promise<void> {
     return this._recursiveDelete(
@@ -1305,7 +1307,8 @@ export class Firestore implements firestore.Firestore {
     minPendingOps: number,
     options?: Partial<{
       bulkWriter: BulkWriter,
-      onDelete: (docSnapshot: firestore.DocumentSnapshot) => void,
+      onDeleteChild: (docSnapshot: firestore.DocumentSnapshot) => void,
+      selectors: (string | firestore.FieldPath)[]
     }>
   ): Promise<void> {
     const writer = options?.bulkWriter ?? this.getBulkWriter();
@@ -1314,9 +1317,10 @@ export class Firestore implements firestore.Firestore {
       writer,
       ref,
       maxPendingOps,
-      minPendingOps
+      minPendingOps,
+      options?.selectors
     );
-    if(options?.onDelete) deleter.onDelete(options.onDelete)
+    if(options?.onDeleteChild) deleter.onDeleteChild(options.onDeleteChild)
     return deleter.run();
   }
 
