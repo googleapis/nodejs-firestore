@@ -148,9 +148,9 @@ export class RecursiveDelete {
    * @private
    * @internal
    */
-  private _successFn: (
+  private _successFn?: (
       docSnapshot: firestore.DocumentSnapshot
-  ) => void = () => {};
+  ) => void;
 
   /**
    *
@@ -225,7 +225,6 @@ export class RecursiveDelete {
         this.onQueryEnd();
       })
       .on('data', (snap: firestore.QueryDocumentSnapshot) => {
-        // TODO
         streamedDocsCount++;
         this.lastDocumentSnap = snap;
         this.deleteDocument(snap);
@@ -277,6 +276,7 @@ export class RecursiveDelete {
 
     // Query for names only to fetch empty snapshots.
     query = query.select(FieldPath.documentId()).limit(this.maxPendingOps);
+    if(!this._successFn) query.select(FieldPath.documentId())
 
     if (ref instanceof CollectionReference) {
       // To find all descendants of a collection reference, we need to use a
@@ -350,7 +350,7 @@ export class RecursiveDelete {
       })
       .then(() => {
         this.pendingOpsCount--;
-        this._successFn(docSnap)
+        if(this._successFn) this._successFn(docSnap)
 
         // We wait until the previous stream has ended in order to sure the
         // startAfter document is correct. Starting the next stream while
