@@ -131,7 +131,7 @@ export class RecursiveDelete {
    * @private
    * @internal
    */
-  private lastDocumentSnap: QueryDocumentSnapshot | undefined;
+  private lastDocumentSnap: firestore.QueryDocumentSnapshot | undefined;
 
   /**
    * The number of pending BulkWriter operations. Used to determine when the
@@ -142,6 +142,15 @@ export class RecursiveDelete {
   private pendingOpsCount = 0;
 
   private errorStack = '';
+
+  /**
+   * The user-provided callback to be run every time a document is successfully deleted
+   * @private
+   * @internal
+   */
+  private _successFn: (
+      docSnapshot: firestore.DocumentSnapshot
+  ) => void = () => {};
 
   /**
    *
@@ -182,6 +191,20 @@ export class RecursiveDelete {
   }
 
   /**
+   * Attaches a listener that is run every time a document is successfully deleted
+   *
+   * @param {BulkWriter~_successFn} successCallback A callback to be
+   * called every time a document is successfully deleted.
+   */
+  onDelete(
+      successCallback: (
+          docSnapshot: firestore.DocumentSnapshot
+      ) => void
+  ): void {
+    this._successFn = successCallback;
+  }
+
+  /**
    * Creates a query stream and attaches event handlers to it.
    * @private
    * @internal
@@ -201,10 +224,11 @@ export class RecursiveDelete {
         this.lastError = err;
         this.onQueryEnd();
       })
-      .on('data', (snap: QueryDocumentSnapshot) => {
+      .on('data', (snap: firestore.QueryDocumentSnapshot) => {
+        // TODO
         streamedDocsCount++;
         this.lastDocumentSnap = snap;
-        this.deleteRef(snap.ref);
+        this.deleteDocument(snap);
       })
       .on('end', () => {
         this.streamInProgress = false;
@@ -284,7 +308,7 @@ export class RecursiveDelete {
    */
   private onQueryEnd(): void {
     this.documentsPending = false;
-    if (this.ref instanceof DocumentReference) {
+    if (this.ref instanceof firestore.DocumentReference) {
       this.writer.delete(this.ref).catch(err => this.incrementErrorCount(err));
     }
     this.writer.flush().then(async () => {
@@ -317,15 +341,16 @@ export class RecursiveDelete {
    * @private
    * @internal
    */
-  private deleteRef(docRef: DocumentReference): void {
+  private deleteDocument(docSnap: firestore.DocumentSnapshot): void {
     this.pendingOpsCount++;
     this.writer
-      .delete(docRef)
+      .delete(docSnap.ref)
       .catch(err => {
         this.incrementErrorCount(err);
       })
       .then(() => {
         this.pendingOpsCount--;
+        this._successFn(docSnap)
 
         // We wait until the previous stream has ended in order to sure the
         // startAfter document is correct. Starting the next stream while

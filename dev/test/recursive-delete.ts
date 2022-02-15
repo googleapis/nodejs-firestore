@@ -351,7 +351,7 @@ describe('recursiveDelete() method:', () => {
         firestore.collection('root'),
         maxPendingOps,
         minPendingOps,
-        bulkWriter
+          {bulkWriter}
       );
       expect(called).to.deep.equal([1, 2]);
     });
@@ -413,7 +413,7 @@ describe('recursiveDelete() method:', () => {
       try {
         await firestore.recursiveDelete(
           firestore.collection('collectionId').doc('bob'),
-          bulkWriter
+          {bulkWriter}
         );
         fail('recursiveDelete() should have failed');
       } catch (err) {
@@ -442,7 +442,7 @@ describe('recursiveDelete() method:', () => {
 
       await firestore.recursiveDelete(
         firestore.collection('collectionId').doc('bob'),
-        bulkWriter
+          {bulkWriter}
       );
       expect(results).to.deep.equal([1, 2, 3]);
       expect(refs).to.deep.equal([
@@ -474,7 +474,7 @@ describe('recursiveDelete() method:', () => {
       try {
         await firestore.recursiveDelete(
           firestore.collection('collectionId').doc('bob'),
-          bulkWriter
+            {bulkWriter}
         );
         fail('recursiveDelete() should have failed');
       } catch (err) {
@@ -617,7 +617,7 @@ describe('recursiveDelete() method:', () => {
       bulkWriter.onWriteResult(() => {
         callbackCount++;
       });
-      await firestore.recursiveDelete(firestore.collection('foo'), bulkWriter);
+      await firestore.recursiveDelete(firestore.collection('foo'), {bulkWriter});
       expect(callbackCount).to.equal(3);
     });
 
@@ -643,7 +643,7 @@ describe('recursiveDelete() method:', () => {
       await bulkWriter.close();
       await expect(
         () => () =>
-          firestore.recursiveDelete(firestore.collection('foo'), bulkWriter)
+          firestore.recursiveDelete(firestore.collection('foo'), {bulkWriter})
       ).to.throw;
     });
   });

@@ -1248,8 +1248,9 @@ export class Firestore implements firestore.Firestore {
    * callbacks, pass in a custom BulkWriter instance.
    *
    * @param ref The reference of a document or collection to delete.
-   * @param bulkWriter A custom BulkWriter instance used to perform the
-   * deletes.
+   * @param options
+   *    bulkWriter: A custom BulkWriter instance used to perform the deletes.
+   *    onDelete: Called on successful deletion of a document.
    * @return A promise that resolves when all deletes have been performed.
    * The promise is rejected if any of the deletes fail.
    *
@@ -1268,20 +1269,23 @@ export class Firestore implements firestore.Firestore {
    *       return false;
    *     }
    *   });
-   * await firestore.recursiveDelete(docRef, bulkWriter);
+   * await firestore.recursiveDelete(docRef, {bulkWriter});
    * ```
    */
   recursiveDelete(
     ref:
       | firestore.CollectionReference<unknown>
       | firestore.DocumentReference<unknown>,
-    bulkWriter?: BulkWriter
+    options?: Partial<{
+      bulkWriter: BulkWriter,
+      onDelete: (docSnapshot: firestore.DocumentSnapshot) => void,
+    }>
   ): Promise<void> {
     return this._recursiveDelete(
       ref,
       RECURSIVE_DELETE_MAX_PENDING_OPS,
       RECURSIVE_DELETE_MIN_PENDING_OPS,
-      bulkWriter
+      options
     );
   }
 
@@ -1299,9 +1303,12 @@ export class Firestore implements firestore.Firestore {
       | firestore.DocumentReference<unknown>,
     maxPendingOps: number,
     minPendingOps: number,
-    bulkWriter?: BulkWriter
+    options?: Partial<{
+      bulkWriter: BulkWriter,
+      onDelete: (docSnapshot: firestore.DocumentSnapshot) => void,
+    }>
   ): Promise<void> {
-    const writer = bulkWriter ?? this.getBulkWriter();
+    const writer = options?.bulkWriter ?? this.getBulkWriter();
     const deleter = new RecursiveDelete(
       this,
       writer,
@@ -1309,6 +1316,7 @@ export class Firestore implements firestore.Firestore {
       maxPendingOps,
       minPendingOps
     );
+    if(options?.onDelete) deleter.onDelete(options.onDelete)
     return deleter.run();
   }
 

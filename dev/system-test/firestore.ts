@@ -2816,7 +2816,7 @@ describe('BulkWriter class', () => {
       bulkWriter.onWriteResult(() => {
         callbackCount++;
       });
-      await firestore.recursiveDelete(randomCol, bulkWriter);
+      await firestore.recursiveDelete(randomCol, {bulkWriter});
       expect(callbackCount).to.equal(6);
     });
   });

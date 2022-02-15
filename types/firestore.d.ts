@@ -392,8 +392,9 @@ declare namespace FirebaseFirestore {
      * callbacks, pass in a custom BulkWriter instance.
      *
      * @param ref The reference of a document or collection to delete.
-     * @param bulkWriter A custom BulkWriter instance used to perform the
-     * deletes.
+     * @param options
+     *    bulkWriter: A custom BulkWriter instance used to perform the deletes.
+     *    onDelete: Called on successful deletion of a document.
      * @return A promise that resolves when all deletes have been performed.
      * The promise is rejected if any of the deletes fail.
      *
@@ -415,7 +416,10 @@ declare namespace FirebaseFirestore {
      */
     recursiveDelete(
       ref: CollectionReference<unknown> | DocumentReference<unknown>,
-      bulkWriter?: BulkWriter
+      options?: Partial<{
+        bulkWriter: BulkWriter,
+        onDelete: (docSnapshot: DocumentSnapshot) => void
+      }>
     ): Promise<void>;
 
     /**
