@@ -156,10 +156,10 @@ export class RecursiveDelete {
 
 
   /**
-   * Selectors used to mask field values of queried child documents
+   * Selectors used to mask field values of queried child documents if success function is defined
    * @private
    */
-  private _selectors: (string | FieldPath)[]
+  private _selectors?: (string | FieldPath)[]
 
   /**
    *
@@ -178,12 +178,12 @@ export class RecursiveDelete {
       | firestore.DocumentReference<unknown>,
     private readonly maxLimit: number,
     private readonly minLimit: number,
-    private readonly selectors: (string | firestore.FieldPath)[] = [FieldPath.documentId()]
+    private readonly selectors?: (string | firestore.FieldPath)[]
   ) {
     this.maxPendingOps = maxLimit;
     this.minPendingOps = minLimit;
     // TODO why do we need those conversions?
-    this._selectors = selectors.map((sel) => FieldPath.fromArgument(sel));
+    this._selectors = selectors?.map((sel) => FieldPath.fromArgument(sel));
   }
 
   /**
@@ -288,8 +288,9 @@ export class RecursiveDelete {
     );
 
     // Query for names only to fetch empty snapshots.
-
-    query = query.select(...this._selectors).limit(this.maxPendingOps);
+    query = query.limit(this.maxPendingOps);
+    if(!this._successFn) query.select(FieldPath.documentId())
+    else if (this._selectors) query.select(...this._selectors)
 
     if (ref instanceof CollectionReference) {
       // To find all descendants of a collection reference, we need to use a
