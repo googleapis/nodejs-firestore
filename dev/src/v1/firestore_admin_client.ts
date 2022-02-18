@@ -2289,9 +2289,8 @@ export class FirestoreAdminClient {
    * @returns {Promise} A promise that resolves when the client is closed.
    */
   close(): Promise<void> {
-    this.initialize();
-    if (!this._terminated) {
-      return this.firestoreAdminStub!.then(stub => {
+    if (this.firestoreAdminStub && !this._terminated) {
+      return this.firestoreAdminStub.then(stub => {
         this._terminated = true;
         stub.close();
         this.operationsClient.close();

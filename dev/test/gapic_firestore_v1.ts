@@ -186,12 +186,27 @@ describe('v1.FirestoreClient', () => {
     assert(client.firestoreStub);
   });
 
-  it('has close method', () => {
+  it('has close method for the initialized client', done => {
     const client = new firestoreModule.FirestoreClient({
       credentials: {client_email: 'bogus', private_key: 'bogus'},
       projectId: 'bogus',
     });
-    client.close();
+    client.initialize();
+    assert(client.firestoreStub);
+    client.close().then(() => {
+      done();
+    });
+  });
+
+  it('has close method for the non-initialized client', done => {
+    const client = new firestoreModule.FirestoreClient({
+      credentials: {client_email: 'bogus', private_key: 'bogus'},
+      projectId: 'bogus',
+    });
+    assert.strictEqual(client.firestoreStub, undefined);
+    client.close().then(() => {
+      done();
+    });
   });
 
   it('has getProjectId method', async () => {
@@ -337,6 +352,22 @@ describe('v1.FirestoreClient', () => {
           .calledWith(request, expectedOptions, undefined)
       );
     });
+
+    it('invokes getDocument with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.GetDocumentRequest()
+      );
+      request.name = '';
+      const expectedHeaderRequestParams = 'name=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.getDocument(request), expectedError);
+    });
   });
 
   describe('updateDocument', () => {
@@ -451,6 +482,23 @@ describe('v1.FirestoreClient', () => {
           .calledWith(request, expectedOptions, undefined)
       );
     });
+
+    it('invokes updateDocument with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.UpdateDocumentRequest()
+      );
+      request.document = {};
+      request.document.name = '';
+      const expectedHeaderRequestParams = 'document.name=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.updateDocument(request), expectedError);
+    });
   });
 
   describe('deleteDocument', () => {
@@ -561,6 +609,22 @@ describe('v1.FirestoreClient', () => {
           .getCall(0)
           .calledWith(request, expectedOptions, undefined)
       );
+    });
+
+    it('invokes deleteDocument with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.DeleteDocumentRequest()
+      );
+      request.name = '';
+      const expectedHeaderRequestParams = 'name=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.deleteDocument(request), expectedError);
     });
   });
 
@@ -673,6 +737,22 @@ describe('v1.FirestoreClient', () => {
           .calledWith(request, expectedOptions, undefined)
       );
     });
+
+    it('invokes beginTransaction with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.BeginTransactionRequest()
+      );
+      request.database = '';
+      const expectedHeaderRequestParams = 'database=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.beginTransaction(request), expectedError);
+    });
   });
 
   describe('commit', () => {
@@ -781,6 +861,22 @@ describe('v1.FirestoreClient', () => {
           .calledWith(request, expectedOptions, undefined)
       );
     });
+
+    it('invokes commit with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.CommitRequest()
+      );
+      request.database = '';
+      const expectedHeaderRequestParams = 'database=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.commit(request), expectedError);
+    });
   });
 
   describe('rollback', () => {
@@ -888,6 +984,22 @@ describe('v1.FirestoreClient', () => {
           .getCall(0)
           .calledWith(request, expectedOptions, undefined)
       );
+    });
+
+    it('invokes rollback with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.RollbackRequest()
+      );
+      request.database = '';
+      const expectedHeaderRequestParams = 'database=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.rollback(request), expectedError);
     });
   });
 
@@ -1000,6 +1112,22 @@ describe('v1.FirestoreClient', () => {
           .calledWith(request, expectedOptions, undefined)
       );
     });
+
+    it('invokes batchWrite with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.BatchWriteRequest()
+      );
+      request.database = '';
+      const expectedHeaderRequestParams = 'database=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.batchWrite(request), expectedError);
+    });
   });
 
   describe('createDocument', () => {
@@ -1111,6 +1239,22 @@ describe('v1.FirestoreClient', () => {
           .calledWith(request, expectedOptions, undefined)
       );
     });
+
+    it('invokes createDocument with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.CreateDocumentRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.createDocument(request), expectedError);
+    });
   });
 
   describe('batchGetDocuments', () => {
@@ -1200,6 +1344,32 @@ describe('v1.FirestoreClient', () => {
           .calledWith(request, expectedOptions)
       );
     });
+
+    it('invokes batchGetDocuments with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.BatchGetDocumentsRequest()
+      );
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      const stream = client.batchGetDocuments(request);
+      const promise = new Promise((resolve, reject) => {
+        stream.on(
+          'data',
+          (response: protos.google.firestore.v1.BatchGetDocumentsResponse) => {
+            resolve(response);
+          }
+        );
+        stream.on('error', (err: Error) => {
+          reject(err);
+        });
+      });
+      await assert.rejects(promise, expectedError);
+    });
   });
 
   describe('runQuery', () => {
@@ -1288,6 +1458,32 @@ describe('v1.FirestoreClient', () => {
           .calledWith(request, expectedOptions)
       );
     });
+
+    it('invokes runQuery with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.RunQueryRequest()
+      );
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      const stream = client.runQuery(request);
+      const promise = new Promise((resolve, reject) => {
+        stream.on(
+          'data',
+          (response: protos.google.firestore.v1.RunQueryResponse) => {
+            resolve(response);
+          }
+        );
+        stream.on('error', (err: Error) => {
+          reject(err);
+        });
+      });
+      await assert.rejects(promise, expectedError);
+    });
   });
 
   describe('write', () => {
@@ -1339,8 +1535,6 @@ describe('v1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1.WriteRequest()
       );
-      request.database = '';
-      const expectedHeaderRequestParams = 'database=';
       const expectedError = new Error('expected');
       client.innerApiCalls.write = stubBidiStreamingCall(
         undefined,
@@ -1421,8 +1615,6 @@ describe('v1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1.ListenRequest()
       );
-      request.database = '';
-      const expectedHeaderRequestParams = 'database=';
       const expectedError = new Error('expected');
       client.innerApiCalls.listen = stubBidiStreamingCall(
         undefined,
