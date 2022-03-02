@@ -183,12 +183,27 @@ describe('v1.FirestoreAdminClient', () => {
     assert(client.firestoreAdminStub);
   });
 
-  it('has close method', () => {
+  it('has close method for the initialized client', done => {
     const client = new firestoreadminModule.FirestoreAdminClient({
       credentials: {client_email: 'bogus', private_key: 'bogus'},
       projectId: 'bogus',
     });
-    client.close();
+    client.initialize();
+    assert(client.firestoreAdminStub);
+    client.close().then(() => {
+      done();
+    });
+  });
+
+  it('has close method for the non-initialized client', done => {
+    const client = new firestoreadminModule.FirestoreAdminClient({
+      credentials: {client_email: 'bogus', private_key: 'bogus'},
+      projectId: 'bogus',
+    });
+    assert.strictEqual(client.firestoreAdminStub, undefined);
+    client.close().then(() => {
+      done();
+    });
   });
 
   it('has getProjectId method', async () => {
@@ -331,6 +346,22 @@ describe('v1.FirestoreAdminClient', () => {
           .calledWith(request, expectedOptions, undefined)
       );
     });
+
+    it('invokes getIndex with closed client', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.admin.v1.GetIndexRequest()
+      );
+      request.name = '';
+      const expectedHeaderRequestParams = 'name=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.getIndex(request), expectedError);
+    });
   });
 
   describe('deleteIndex', () => {
@@ -442,6 +473,22 @@ describe('v1.FirestoreAdminClient', () => {
           .calledWith(request, expectedOptions, undefined)
       );
     });
+
+    it('invokes deleteIndex with closed client', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.admin.v1.DeleteIndexRequest()
+      );
+      request.name = '';
+      const expectedHeaderRequestParams = 'name=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.deleteIndex(request), expectedError);
+    });
   });
 
   describe('getField', () => {
@@ -549,6 +596,22 @@ describe('v1.FirestoreAdminClient', () => {
           .getCall(0)
           .calledWith(request, expectedOptions, undefined)
       );
+    });
+
+    it('invokes getField with closed client', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.admin.v1.GetFieldRequest()
+      );
+      request.name = '';
+      const expectedHeaderRequestParams = 'name=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.getField(request), expectedError);
     });
   });
 
@@ -661,6 +724,22 @@ describe('v1.FirestoreAdminClient', () => {
           .calledWith(request, expectedOptions, undefined)
       );
     });
+
+    it('invokes getDatabase with closed client', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.admin.v1.GetDatabaseRequest()
+      );
+      request.name = '';
+      const expectedHeaderRequestParams = 'name=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.getDatabase(request), expectedError);
+    });
   });
 
   describe('listDatabases', () => {
@@ -771,6 +850,22 @@ describe('v1.FirestoreAdminClient', () => {
           .getCall(0)
           .calledWith(request, expectedOptions, undefined)
       );
+    });
+
+    it('invokes listDatabases with closed client', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.admin.v1.ListDatabasesRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      await assert.rejects(client.listDatabases(request), expectedError);
     });
   });
 
