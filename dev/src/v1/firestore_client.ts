@@ -1186,7 +1186,9 @@ export class FirestoreClient {
    * @param {google.firestore.v1.StructuredQuery} request.structuredQuery
    *   A structured query.
    * @param {Buffer} request.transaction
-   *   Reads documents in a transaction.
+   *   Run the query within an already active transaction.
+   *
+   *   The value here is the opaque transaction ID to execute the query in.
    * @param {google.firestore.v1.TransactionOptions} request.newTransaction
    *   Starts a new transaction and reads the documents.
    *   Defaults to a read-only transaction.
