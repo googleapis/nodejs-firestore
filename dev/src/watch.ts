@@ -212,7 +212,6 @@ abstract class Watch<T = firestore.DocumentData> {
   /**
    * @private
    * @internal
-   * @hideconstructor
    *
    * @param firestore The Firestore Database client.
    */

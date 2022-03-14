@@ -132,13 +132,15 @@ setLibVersion(libVersion);
  */
 const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 
-/*!
+/**
  * The maximum number of times to retry idempotent requests.
+ * @private
  */
 export const MAX_REQUEST_RETRIES = 5;
 
-/*!
+/**
  * The maximum number of times to attempt a transaction before failing.
+ * @private
  */
 export const DEFAULT_MAX_TRANSACTION_ATTEMPTS = 5;
 
@@ -330,8 +332,8 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *
  * @property {GrpcStatus} code The status code of the error.
  * @property {string} message The error message of the error.
- * @property {DocumentReference} documentRef The document reference the operation was
- * performed on.
+ * @property {DocumentReference} documentRef The document reference the
+ * operation was performed on.
  * @property {'create' | 'set' | 'update' | 'delete'} operationType The type
  * of operation performed.
  * @property {number} failedAttempts How many times this operation has been
@@ -861,21 +863,25 @@ export class Firestore implements firestore.Firestore {
     readTime?: google.protobuf.ITimestamp,
     encoding?: 'protobufJS'
   ): DocumentSnapshot;
+  /** @private */
   snapshot_(
     documentName: string,
     readTime: string,
     encoding: 'json'
   ): DocumentSnapshot;
+  /** @private */
   snapshot_(
     document: api.IDocument,
     readTime: google.protobuf.ITimestamp,
     encoding?: 'protobufJS'
   ): QueryDocumentSnapshot;
+  /** @private */
   snapshot_(
     document: {[k: string]: unknown},
     readTime: string,
     encoding: 'json'
   ): QueryDocumentSnapshot;
+  /** @private */
   snapshot_(
     documentOrName: api.IDocument | {[k: string]: unknown} | string,
     readTime?: google.protobuf.ITimestamp | string,
@@ -975,24 +981,22 @@ export class Firestore implements firestore.Firestore {
    * Options object for {@link Firestore#runTransaction} to configure a
    * read-only transaction.
    *
-   * @callback Firestore~ReadOnlyTransactionOptions
-   * @template T
    * @param {true} readOnly Set to true to indicate a read-only transaction.
    * @param {Timestamp=} readTime If specified, documents are read at the given
    * time. This may not be more than 60 seconds in the past from when the
    * request is processed by the server.
+   * @typedef {Object} Firestore~ReadOnlyTransactionOptions
    */
 
   /**
    * Options object for {@link Firestore#runTransaction} to configure a
    * read-write transaction.
    *
-   * @callback Firestore~ReadWriteTransactionOptions
-   * @template T
    * @param {false=} readOnly Set to false or omit to indicate a read-write
    * transaction.
    * @param {number=} maxAttempts The maximum number of attempts for this
-   * transaction. Defaults to five.
+   * transaction. Defaults to 5.
+   * @typedef {Object} Firestore~ReadWriteTransactionOptions
    */
 
   /**

@@ -327,7 +327,7 @@ class BufferedOperation {
  * @class BulkWriterError
  */
 export class BulkWriterError extends Error {
-  /** @hideconstructor */
+  /** @private */
   constructor(
     /** The status code of the error. */
     readonly code: GrpcStatus,
@@ -495,7 +495,7 @@ export class BulkWriter {
     );
   };
 
-  /** @hideconstructor */
+  /** @private */
   constructor(
     private readonly firestore: Firestore,
     options?: firestore.BulkWriterOptions

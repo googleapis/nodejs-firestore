@@ -299,7 +299,7 @@ declare namespace FirebaseFirestore {
     /** Set to false or omit to indicate a read-write transaction. */
     readOnly?: false;
     /**
-     * The maximum number of attempts for this transaction. Defaults to five.
+     * The maximum number of attempts for this transaction. Defaults to 5.
      */
     maxAttempts?: number;
   }

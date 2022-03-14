@@ -35,7 +35,7 @@ export class DocumentChange<T = firestore.DocumentData>
   private readonly _newIndex: number;
 
   /**
-   * @hideconstructor
+   * @private
    *
    * @param {string} type 'added' | 'removed' | 'modified'.
    * @param {QueryDocumentSnapshot} document The document.

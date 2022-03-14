@@ -39,7 +39,7 @@ export class QueryPartition<T = firestore.DocumentData>
   private _memoizedStartAt: unknown[] | undefined;
   private _memoizedEndBefore: unknown[] | undefined;
 
-  /** @hideconstructor */
+  /** @private */
   constructor(
     private readonly _firestore: Firestore,
     private readonly _collectionId: string,
