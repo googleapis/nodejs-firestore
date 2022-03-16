@@ -363,7 +363,6 @@ describe('v1.FirestoreClient', () => {
         new protos.google.firestore.v1.GetDocumentRequest()
       );
       request.name = '';
-      const expectedHeaderRequestParams = 'name=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.getDocument(request), expectedError);
@@ -494,7 +493,6 @@ describe('v1.FirestoreClient', () => {
       );
       request.document = {};
       request.document.name = '';
-      const expectedHeaderRequestParams = 'document.name=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.updateDocument(request), expectedError);
@@ -621,7 +619,6 @@ describe('v1.FirestoreClient', () => {
         new protos.google.firestore.v1.DeleteDocumentRequest()
       );
       request.name = '';
-      const expectedHeaderRequestParams = 'name=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.deleteDocument(request), expectedError);
@@ -748,7 +745,6 @@ describe('v1.FirestoreClient', () => {
         new protos.google.firestore.v1.BeginTransactionRequest()
       );
       request.database = '';
-      const expectedHeaderRequestParams = 'database=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.beginTransaction(request), expectedError);
@@ -872,7 +868,6 @@ describe('v1.FirestoreClient', () => {
         new protos.google.firestore.v1.CommitRequest()
       );
       request.database = '';
-      const expectedHeaderRequestParams = 'database=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.commit(request), expectedError);
@@ -996,7 +991,6 @@ describe('v1.FirestoreClient', () => {
         new protos.google.firestore.v1.RollbackRequest()
       );
       request.database = '';
-      const expectedHeaderRequestParams = 'database=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.rollback(request), expectedError);
@@ -1123,7 +1117,6 @@ describe('v1.FirestoreClient', () => {
         new protos.google.firestore.v1.BatchWriteRequest()
       );
       request.database = '';
-      const expectedHeaderRequestParams = 'database=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.batchWrite(request), expectedError);
@@ -1250,7 +1243,6 @@ describe('v1.FirestoreClient', () => {
         new protos.google.firestore.v1.CreateDocumentRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.createDocument(request), expectedError);
@@ -1354,6 +1346,7 @@ describe('v1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1.BatchGetDocumentsRequest()
       );
+      request.database = '';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       const stream = client.batchGetDocuments(request);
@@ -1468,6 +1461,7 @@ describe('v1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1.RunQueryRequest()
       );
+      request.parent = '';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       const stream = client.runQuery(request);
