@@ -357,7 +357,6 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.GetIndexRequest()
       );
       request.name = '';
-      const expectedHeaderRequestParams = 'name=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.getIndex(request), expectedError);
@@ -484,7 +483,6 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.DeleteIndexRequest()
       );
       request.name = '';
-      const expectedHeaderRequestParams = 'name=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.deleteIndex(request), expectedError);
@@ -608,7 +606,6 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.GetFieldRequest()
       );
       request.name = '';
-      const expectedHeaderRequestParams = 'name=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.getField(request), expectedError);
@@ -735,7 +732,6 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.GetDatabaseRequest()
       );
       request.name = '';
-      const expectedHeaderRequestParams = 'name=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.getDatabase(request), expectedError);
@@ -862,7 +858,6 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.ListDatabasesRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.listDatabases(request), expectedError);
