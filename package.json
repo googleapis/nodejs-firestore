@@ -30,7 +30,9 @@
   "scripts": {
     "predocs": "npm run compile",
     "docs": "jsdoc -c .jsdoc.js",
-    "system-test": "mocha build/system-test --timeout 600000",
+    "system-test:rest": "USE_REST_FALLBACK=YES mocha build/system-test --timeout 600000",
+    "system-test:grpc": "mocha build/system-test --timeout 600000",
+    "system-test": "npm run system-test:grpc && npm run system-test:rest",
     "presystem-test": "npm run compile",
     "samples-test": "npm link && cd samples/ && npm link ../ && npm test && cd ../",
     "conformance": "mocha build/conformance",

@@ -2300,6 +2300,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
           streamActive = new Deferred<boolean>();
           const backendStream = await this._firestore.requestStream(
             'runQuery',
+            /* bidirectional= */ false,
             request,
             tag
           );

@@ -16,6 +16,69 @@
                 }
               }
             },
+            "Struct": {
+              "fields": {
+                "fields": {
+                  "keyType": "string",
+                  "type": "Value",
+                  "id": 1
+                }
+              }
+            },
+            "Value": {
+              "oneofs": {
+                "kind": {
+                  "oneof": [
+                    "nullValue",
+                    "numberValue",
+                    "stringValue",
+                    "boolValue",
+                    "structValue",
+                    "listValue"
+                  ]
+                }
+              },
+              "fields": {
+                "nullValue": {
+                  "type": "NullValue",
+                  "id": 1
+                },
+                "numberValue": {
+                  "type": "double",
+                  "id": 2
+                },
+                "stringValue": {
+                  "type": "string",
+                  "id": 3
+                },
+                "boolValue": {
+                  "type": "bool",
+                  "id": 4
+                },
+                "structValue": {
+                  "type": "Struct",
+                  "id": 5
+                },
+                "listValue": {
+                  "type": "ListValue",
+                  "id": 6
+                }
+              }
+            },
+            "NullValue": {
+              "values": {
+                "NULL_VALUE": 0
+              }
+            },
+            "ListValue": {
+              "fields": {
+                "values": {
+                  "rule": "repeated",
+                  "type": "Value",
+                  "id": 1
+                }
+              }
+            },
             "FileDescriptorSet": {
               "fields": {
                 "file": {
@@ -743,69 +806,6 @@
                 }
               }
             },
-            "Struct": {
-              "fields": {
-                "fields": {
-                  "keyType": "string",
-                  "type": "Value",
-                  "id": 1
-                }
-              }
-            },
-            "Value": {
-              "oneofs": {
-                "kind": {
-                  "oneof": [
-                    "nullValue",
-                    "numberValue",
-                    "stringValue",
-                    "boolValue",
-                    "structValue",
-                    "listValue"
-                  ]
-                }
-              },
-              "fields": {
-                "nullValue": {
-                  "type": "NullValue",
-                  "id": 1
-                },
-                "numberValue": {
-                  "type": "double",
-                  "id": 2
-                },
-                "stringValue": {
-                  "type": "string",
-                  "id": 3
-                },
-                "boolValue": {
-                  "type": "bool",
-                  "id": 4
-                },
-                "structValue": {
-                  "type": "Struct",
-                  "id": 5
-                },
-                "listValue": {
-                  "type": "ListValue",
-                  "id": 6
-                }
-              }
-            },
-            "NullValue": {
-              "values": {
-                "NULL_VALUE": 0
-              }
-            },
-            "ListValue": {
-              "fields": {
-                "values": {
-                  "rule": "repeated",
-                  "type": "Value",
-                  "id": 1
-                }
-              }
-            },
             "Empty": {
               "fields": {}
             },
@@ -1120,12 +1120,16 @@
                       "requestType": "ListDocumentsRequest",
                       "responseType": "ListDocumentsResponse",
                       "options": {
-                        "(google.api.http).get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}"
+                        "(google.api.http).get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}",
+                        "(google.api.http).additional_bindings.get": "/v1/{parent=projects/*/databases/*/documents}/{collection_id}"
                       },
                       "parsedOptions": [
                         {
                           "(google.api.http)": {
-                            "get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}"
+                            "get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}",
+                            "additional_bindings": {
+                              "get": "/v1/{parent=projects/*/databases/*/documents}/{collection_id}"
+                            }
                           }
                         }
                       ]
@@ -2269,6 +2273,13 @@
                         }
                       }
                     },
+                    "Direction": {
+                      "values": {
+                        "DIRECTION_UNSPECIFIED": 0,
+                        "ASCENDING": 1,
+                        "DESCENDING": 2
+                      }
+                    },
                     "FieldReference": {
                       "fields": {
                         "fieldPath": {
@@ -2284,13 +2295,6 @@
                           "type": "FieldReference",
                           "id": 2
                         }
-                      }
-                    },
-                    "Direction": {
-                      "values": {
-                        "DIRECTION_UNSPECIFIED": 0,
-                        "ASCENDING": 1,
-                        "DESCENDING": 2
                       }
                     }
                   }

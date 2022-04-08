@@ -18,6 +18,7 @@ import {
   WithFieldValue,
   PartialWithFieldValue,
   SetOptions,
+  Settings,
 } from '@google-cloud/firestore';
 
 import {describe, it, before, beforeEach, afterEach} from 'mocha';
@@ -80,7 +81,11 @@ if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
 }
 
-function getTestRoot(firestore: Firestore) {
+function getTestRoot(settings: Settings = {}) {
+  const firestore = new Firestore({
+    ...settings,
+    preferRest: !!process.env.USE_REST_FALLBACK,
+  });
   return firestore.collection(`node_${version}_${autoId()}`);
 }
 
@@ -89,8 +94,8 @@ describe('Firestore class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore();
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -213,8 +218,8 @@ describe('CollectionGroup class', () => {
   let collectionGroup: CollectionGroup;
 
   before(async () => {
-    firestore = new Firestore({});
-    randomColl = getTestRoot(firestore);
+    randomColl = getTestRoot();
+    firestore = randomColl.firestore;
     collectionGroup = firestore.collectionGroup(randomColl.id);
 
     const batch = firestore.batch();
@@ -327,8 +332,8 @@ describe('CollectionReference class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -406,8 +411,8 @@ describe('DocumentReference class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore();
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -508,8 +513,7 @@ describe('DocumentReference class', () => {
   it('round-trips BigInts', () => {
     const bigIntValue = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
 
-    const firestore = new Firestore({useBigInt: true});
-    const randomCol = getTestRoot(firestore);
+    const randomCol = getTestRoot({useBigInt: true});
     const ref = randomCol.doc('doc');
     return ref
       .set({bigIntValue})
@@ -1321,8 +1325,8 @@ describe('Query class', () => {
   }
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2141,8 +2145,8 @@ describe('Transaction class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2434,8 +2438,8 @@ describe('WriteBatch class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2578,9 +2582,9 @@ describe('QuerySnapshot class', () => {
   let querySnapshot: Promise<QuerySnapshot>;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    const randomCol = getTestRoot();
+    firestore = randomCol.firestore;
 
-    const randomCol = getTestRoot(firestore);
     const ref1 = randomCol.doc('doc1');
     const ref2 = randomCol.doc('doc2');
 
@@ -2649,9 +2653,9 @@ describe('BulkWriter class', () => {
   let writer: BulkWriter;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
     writer = firestore.bulkWriter();
-    randomCol = getTestRoot(firestore);
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2926,8 +2930,7 @@ describe('Client initialization', () => {
 
   for (const [description, op] of ops) {
     it(`succeeds for ${description}`, () => {
-      const firestore = new Firestore();
-      const randomCol = getTestRoot(firestore);
+      const randomCol = getTestRoot();
       return op(randomCol);
     });
   }
@@ -2938,8 +2941,9 @@ describe('Bundle building', () => {
   let testCol: CollectionReference;
 
   beforeEach(async () => {
-    firestore = new Firestore({});
-    testCol = getTestRoot(firestore);
+    testCol = getTestRoot();
+    firestore = testCol.firestore;
+
     const ref1 = testCol.doc('doc1');
     const ref2 = testCol.doc('doc2');
     const ref3 = testCol.doc('doc3');
@@ -3133,8 +3137,8 @@ describe('Types test', () => {
   };
 
   beforeEach(async () => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
     doc = randomCol.doc();
 
     await doc.set(initialData);

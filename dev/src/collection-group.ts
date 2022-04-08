@@ -96,6 +96,7 @@ export class CollectionGroup<T = firestore.DocumentData>
 
       const stream = await this.firestore.requestStream(
         'partitionQueryStream',
+        /* bidirectional= */ false,
         request,
         tag
       );

@@ -350,7 +350,9 @@ export class WriteBatch implements firestore.WriteBatch {
     let documentMask: DocumentMask;
 
     if (mergePaths) {
-      documentMask = DocumentMask.fromFieldMask(options!.mergeFields!);
+      documentMask = DocumentMask.fromFieldMask(
+        (options as {mergeFields: Array<string | FieldPath>}).mergeFields
+      );
       firestoreData = documentMask.applyTo(firestoreData);
     }
 
