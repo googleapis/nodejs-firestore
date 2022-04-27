@@ -4,6 +4,20 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [5.1.0](https://github.com/googleapis/nodejs-firestore/compare/v5.0.2...v5.1.0) (2022-04-27)
+
+
+### Features
+
+* Enable RunQueryResponse.done ([#1712](https://github.com/googleapis/nodejs-firestore/issues/1712)) ([0cc549c](https://github.com/googleapis/nodejs-firestore/commit/0cc549c69ccc59e25f8347d6b236f8b9b04dc105))
+* update client libraries to support Database operations ([#1676](https://github.com/googleapis/nodejs-firestore/issues/1676)) ([533aade](https://github.com/googleapis/nodejs-firestore/commit/533aade3272f07b39bbad2c32a5d9669fde6de53))
+
+
+### Bug Fixes
+
+* change REST binding for ListDocuments to support root collection ([#1695](https://github.com/googleapis/nodejs-firestore/issues/1695)) ([6185f13](https://github.com/googleapis/nodejs-firestore/commit/6185f13070ff9dda91d7128e3b8a1db7f09914a8))
+* split v1 and v1beta1 protos to improve startup time ([#1664](https://github.com/googleapis/nodejs-firestore/issues/1664)) ([f3729cf](https://github.com/googleapis/nodejs-firestore/commit/f3729cf49818b9b929a556e7a8e8a5588b5f2726))
+
 ### [5.0.2](https://www.github.com/googleapis/nodejs-firestore/compare/v5.0.1...v5.0.2) (2022-01-07)
 
 
