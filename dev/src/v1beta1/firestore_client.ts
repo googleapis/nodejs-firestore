@@ -196,16 +196,20 @@ export class FirestoreClient {
     // Provide descriptors for these.
     this.descriptors.stream = {
       batchGetDocuments: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.SERVER_STREAMING
+        gax.StreamType.SERVER_STREAMING,
+        opts.fallback === 'rest'
       ),
       runQuery: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.SERVER_STREAMING
+        gax.StreamType.SERVER_STREAMING,
+        opts.fallback === 'rest'
       ),
       write: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.BIDI_STREAMING
+        gax.StreamType.BIDI_STREAMING,
+        opts.fallback === 'rest'
       ),
       listen: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.BIDI_STREAMING
+        gax.StreamType.BIDI_STREAMING,
+        opts.fallback === 'rest'
       ),
     };
 
@@ -1126,6 +1130,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     this.initialize();
     return this.innerApiCalls.createDocument(request, options, callback);
@@ -1394,6 +1399,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     this.initialize();
     return this.innerApiCalls.listDocuments(request, options, callback);
@@ -1460,6 +1466,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1535,6 +1542,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
