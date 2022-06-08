@@ -1584,6 +1584,9 @@ export class FirestoreClient {
    *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
    *   if more results exist. A second call to PartitionQuery will return up to
    *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1709,6 +1712,9 @@ export class FirestoreClient {
    *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
    *   if more results exist. A second call to PartitionQuery will return up to
    *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1790,6 +1796,9 @@ export class FirestoreClient {
    *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
    *   if more results exist. A second call to PartitionQuery will return up to
    *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
@@ -1839,6 +1848,9 @@ export class FirestoreClient {
    * @param {string} request.pageToken
    *   A page token. Must be a value from
    *   {@link google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1935,6 +1947,9 @@ export class FirestoreClient {
    * @param {string} request.pageToken
    *   A page token. Must be a value from
    *   {@link google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1985,6 +2000,9 @@ export class FirestoreClient {
    * @param {string} request.pageToken
    *   A page token. Must be a value from
    *   {@link google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
