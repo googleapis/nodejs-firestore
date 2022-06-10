@@ -73,7 +73,7 @@
     "extend": "^3.0.2",
     "gts": "^3.1.0",
     "jsdoc": "^3.6.2",
-    "jsdoc-fresh": "^1.0.2",
+    "jsdoc-fresh": "^2.0.0",
     "jsdoc-region-tag": "^1.0.2",
     "length-prefixed-json-stream": "^1.0.1",
     "linkinator": "^2.0.0",
