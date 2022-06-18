@@ -2012,6 +2012,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
+      let hasResolve = false;
 
       this._stream(transactionId)
         .on('error', err => {
@@ -2024,6 +2025,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
           }
         })
         .on('end', () => {
+          if (hasResolve) return;
+          hasResolve = true;
+
           if (this._queryOptions.limitType === LimitType.Last) {
             // The results for limitToLast queries need to be flipped since
             // we reversed the ordering constraints before sending the query
@@ -2281,6 +2285,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
           finalDoc.updateTime = document.updateTime;
           lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<T>;
           callback(undefined, {document: lastReceivedDocument, readTime});
+          if (proto.done) {
+            logger('Query._stream', tag, 'Trigger Logical Termination.');
+            stream.emit('end');
+          }
         } else {
           callback(undefined, {readTime});
         }
