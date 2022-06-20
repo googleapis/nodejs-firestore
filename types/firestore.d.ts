@@ -584,6 +584,15 @@ declare namespace FirebaseFirestore {
     get<T>(documentRef: DocumentReference<T>): Promise<DocumentSnapshot<T>>;
 
     /**
+     * Retrieves an aggregate query result. Holds a pessimistic lock on all
+     * documents that were matched by the underlying query.
+     *
+     * @param aggregateQuery An aggregate query to execute.
+     * @return An AggregateQuerySnapshot for the retrieved data.
+     */
+    get<T>(aggregateQuery: AggregateQuery): Promise<AggregateQuerySnapshot<T>>;
+
+    /**
      * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
      * all returned documents.
      *
@@ -1692,6 +1701,8 @@ declare namespace FirebaseFirestore {
       onError?: (error: Error) => void
     ): () => void;
 
+    count(): AggregateQuery;
+
     /**
      * Returns true if this `Query` is equal to the provided one.
      *
@@ -2010,6 +2021,28 @@ declare namespace FirebaseFirestore {
      * Query#endBefore} cursor.
      */
     toQuery(): Query<T>;
+  }
+
+  export class AggregateQuerySnapshot {
+    private constructor();
+
+    readonly query: AggregateQuery;
+
+    readonly readTime: Timestamp;
+
+    getCount(): number;
+
+    isEqual(other: AggregateQuerySnapshot): boolean;
+  }
+
+  export class AggregateQuery {
+    private constructor();
+
+    readonly query: Query<DocumentData>;
+
+    get(): Promise<AggregateQuerySnapshot>;
+
+    isEqual(other: AggregateQuery): boolean;
   }
 
   /**
