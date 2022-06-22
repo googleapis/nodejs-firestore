@@ -154,7 +154,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
 
   if (detectedValues.length !== 1) {
     throw new Error(
-      `Unable to infer type value fom '${JSON.stringify(proto)}'.`
+      `Unable to infer type value from '${JSON.stringify(proto)}'.`
     );
   }
 
