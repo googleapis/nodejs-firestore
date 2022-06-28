@@ -2261,7 +2261,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
     let lastReceivedDocument: QueryDocumentSnapshot<T> | null = null;
 
-    let backendStream : Duplex;
+    let backendStream: Duplex;
     const stream = new Transform({
       objectMode: true,
       transform: (proto, enc, callback) => {
