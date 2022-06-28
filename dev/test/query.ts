@@ -764,7 +764,7 @@ describe('query interface', () => {
       },
     };
 
-    let counter = 0;
+    let endCounter = 0;
     createInstance(overrides).then(firestore => {
       const query = firestore.collection('collectionId');
       let received = 0;
@@ -777,8 +777,11 @@ describe('query interface', () => {
         })
         .on('end', () => {
           expect(received).to.equal(2);
-          expect(++counter).to.equal(1);
-          callback();
+          ++endCounter;
+          setImmediate(() => {
+            expect(endCounter).to.equal(1);
+            callback();
+          });
         });
     });
   });
