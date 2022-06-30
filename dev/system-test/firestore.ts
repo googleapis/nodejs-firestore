@@ -1313,6 +1313,54 @@ describe('DocumentReference class', () => {
   });
 });
 
+describe('large query', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+
+  beforeEach(() => {
+    firestore = new Firestore({});
+    randomCol = getTestRoot(firestore);
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('large query get()', () => {
+    const promises: Array<Promise<DocumentReference<DocumentData>>> = [];
+    for (let i = 0; i < 1000; i++) {
+      promises.push(randomCol.add({foo: 'a'}));
+    }
+
+    return Promise.all(promises)
+      .then(() => {
+        return randomCol.get();
+      })
+      .then(res => {
+        expect(res.size).to.equal(1000);
+      });
+  });
+
+  it('large query stream()', done => {
+    let received = 0;
+    const promises: Array<Promise<DocumentReference<DocumentData>>> = [];
+    for (let i = 0; i < 1000; i++) {
+      promises.push(randomCol.add({foo: 'a'}));
+    }
+
+    Promise.all(promises).then(() => {
+      return randomCol
+        .stream()
+        .on('data', d => {
+          expect(d).to.be.an.instanceOf(DocumentSnapshot);
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(1000);
+          done();
+        });
+    });
+  });
+});
+
 describe('Query class', () => {
   interface PaginatedResults {
     pages: number;
@@ -1647,10 +1695,71 @@ describe('Query class', () => {
       });
   });
 
+  it('query no result', async () => {
+    const res = await randomCol.get();
+    expect(res.empty);
+  });
+
+  it('query no result on stream()', done => {
+    let received = 0;
+    Promise.all([]).then(() => {
+      return randomCol
+        .stream()
+        .on('data', () => {
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(0);
+          done();
+        });
+    });
+  });
+
   it('has limit() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').limit(1).get();
     expectDocs(res, {foo: 'a'});
+  });
+
+  it('has limit() method on stream()', done => {
+    let received = 0;
+    Promise.all([addDocs({foo: 'a'}, {foo: 'b'})]).then(() => {
+      return randomCol
+        .orderBy('foo')
+        .limit(1)
+        .stream()
+        .on('data', doc => {
+          expect(doc.data()).to.deep.equal({foo: 'a'});
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(1);
+          done();
+        });
+    });
+  });
+
+  it('has larger limit() method', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol.orderBy('foo').limit(3).get();
+    expectDocs(res, {foo: 'a'}, {foo: 'b'});
+  });
+
+  it('has larger limit() method on stream()', done => {
+    let received = 0;
+    Promise.all([addDocs({foo: 'a'}, {foo: 'b'})]).then(() => {
+      return randomCol
+        .orderBy('foo')
+        .limit(3)
+        .stream()
+        .on('data', () => {
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(2);
+          done();
+        });
+    });
   });
 
   it('has limitToLast() method', async () => {
@@ -1674,6 +1783,47 @@ describe('Query class', () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').offset(1).get();
     expectDocs(res, {foo: 'b'});
+  });
+
+  it('has offset() method on stream()', done => {
+    let received = 0;
+    Promise.all([addDocs({foo: 'a'}, {foo: 'b'})]).then(() => {
+      return randomCol
+        .orderBy('foo')
+        .offset(1)
+        .stream()
+        .on('data', doc => {
+          expect(doc.data()).to.deep.equal({foo: 'b'});
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(1);
+          done();
+        });
+    });
+  });
+
+  it('has larger offset() method', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol.orderBy('foo').offset(3).get();
+    expect(res.empty);
+  });
+
+  it('has larger offset() method on stream()', done => {
+    let received = 0;
+    Promise.all([addDocs({foo: 'a'}, {foo: 'b'})]).then(() => {
+      return randomCol
+        .orderBy('foo')
+        .offset(3)
+        .stream()
+        .on('data', () => {
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(0);
+          done();
+        });
+    });
   });
 
   it('supports Unicode in document names', async () => {
