@@ -652,6 +652,7 @@ export class Firestore implements firestore.Firestore {
     }
 
     this._settings = settings;
+    this._settings.toJson = function(){ return undefined; }
     this._serializer = new Serializer(this);
   }
 
