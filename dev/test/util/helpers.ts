@@ -325,6 +325,22 @@ export function stream<T>(...elements: Array<T | Error>): Duplex {
   return stream;
 }
 
+export function streamWithoutEnd<T>(...elements: Array<T | Error>): Duplex {
+  const stream = through2.obj();
+
+  setImmediate(() => {
+    for (const el of elements) {
+      if (el instanceof Error) {
+        stream.destroy(el);
+        return;
+      }
+      stream.push(el);
+    }
+  });
+
+  return stream;
+}
+
 /** Creates a response as formatted by the GAPIC request methods.  */
 export function response<T>(result: T): Promise<[T, unknown, unknown]> {
   return Promise.resolve([result, undefined, undefined]);

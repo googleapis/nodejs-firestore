@@ -15,7 +15,7 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
-import {Transform} from 'stream';
+import {Duplex, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 
 import * as protos from '../protos/firestore_v1_proto_api';
@@ -2261,6 +2261,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
     let lastReceivedDocument: QueryDocumentSnapshot<T> | null = null;
 
+    let backendStream: Duplex;
     const stream = new Transform({
       objectMode: true,
       transform: (proto, enc, callback) => {
@@ -2281,6 +2282,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
           finalDoc.updateTime = document.updateTime;
           lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<T>;
           callback(undefined, {document: lastReceivedDocument, readTime});
+          if (proto.done) {
+            logger('Query._stream', tag, 'Trigger Logical Termination.');
+            backendStream.unpipe(stream);
+            stream.emit('end');
+          }
         } else {
           callback(undefined, {readTime});
         }
@@ -2298,7 +2304,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
         let streamActive: Deferred<boolean>;
         do {
           streamActive = new Deferred<boolean>();
-          const backendStream = await this._firestore.requestStream(
+          backendStream = await this._firestore.requestStream(
             'runQuery',
             request,
             tag
