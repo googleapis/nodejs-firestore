@@ -53,7 +53,7 @@
     "fast-deep-equal": "^3.1.1",
     "functional-red-black-tree": "^1.0.1",
     "google-gax": "^3.0.1",
-    "protobufjs": "^6.8.6"
+    "protobufjs": "^7.0.0"
   },
   "devDependencies": {
     "@types/assert": "^1.4.0",
