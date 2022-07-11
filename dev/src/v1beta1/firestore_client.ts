@@ -81,7 +81,7 @@ export class FirestoreClient {
    *
    * @param {object} [options] - The configuration object.
    * The options accepted by the constructor are described in detail
-   * in [this document](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#creating-the-client-instance).
+   * in [this document](https://github.com/googleapis/gax-nodejs/blob/main/client-libraries.md#creating-the-client-instance).
    * The common options are:
    * @param {object} [options.credentials] - Credentials object.
    * @param {string} [options.credentials.client_email]
@@ -104,11 +104,10 @@ export class FirestoreClient {
    *     API remote host.
    * @param {gax.ClientConfig} [options.clientConfig] - Client configuration override.
    *     Follows the structure of {@link gapicConfig}.
-   * @param {boolean} [options.fallback] - Use HTTP fallback mode.
-   *     In fallback mode, a special browser-compatible transport implementation is used
-   *     instead of gRPC transport. In browser context (if the `window` object is defined)
-   *     the fallback mode is enabled automatically; set `options.fallback` to `false`
-   *     if you need to override this behavior.
+   * @param {boolean | "rest"} [options.fallback] - Use HTTP fallback mode.
+   *     Pass "rest" to use HTTP/1.1 REST API instead of gRPC.
+   *     For more information, please check the
+   *     {@link https://github.com/googleapis/gax-nodejs/blob/main/client-libraries.md#http11-rest-api-mode documentation}.
    */
   constructor(opts?: ClientOptions) {
     // Ensure that options include all the required fields.
@@ -196,16 +195,20 @@ export class FirestoreClient {
     // Provide descriptors for these.
     this.descriptors.stream = {
       batchGetDocuments: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.SERVER_STREAMING
+        gax.StreamType.SERVER_STREAMING,
+        opts.fallback === 'rest'
       ),
       runQuery: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.SERVER_STREAMING
+        gax.StreamType.SERVER_STREAMING,
+        opts.fallback === 'rest'
       ),
       write: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.BIDI_STREAMING
+        gax.StreamType.BIDI_STREAMING,
+        opts.fallback === 'rest'
       ),
       listen: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.BIDI_STREAMING
+        gax.StreamType.BIDI_STREAMING,
+        opts.fallback === 'rest'
       ),
     };
 
@@ -1126,6 +1129,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     this.initialize();
     return this.innerApiCalls.createDocument(request, options, callback);
@@ -1394,6 +1398,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     this.initialize();
     return this.innerApiCalls.listDocuments(request, options, callback);
@@ -1460,6 +1465,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1535,6 +1541,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);

@@ -44,6 +44,7 @@ import {
   response,
   set,
   stream,
+  streamWithoutEnd,
   verifyInstance,
   writeResult,
 } from './util/helpers';
@@ -374,8 +375,19 @@ function bundledQueryEquals(
   expect(actual).to.deep.eq(query);
 }
 
-export function result(documentId: string): api.IRunQueryResponse {
-  return {document: document(documentId), readTime: {seconds: 5, nanos: 6}};
+export function result(
+  documentId: string,
+  setDone?: boolean
+): api.IRunQueryResponse {
+  if (setDone) {
+    return {
+      document: document(documentId),
+      readTime: {seconds: 5, nanos: 6},
+      done: setDone,
+    };
+  } else {
+    return {document: document(documentId), readTime: {seconds: 5, nanos: 6}};
+  }
 }
 
 describe('query interface', () => {
@@ -612,6 +624,30 @@ describe('query interface', () => {
     });
   });
 
+  // Test Logical Termination on get()
+  it('successful return without ending the stream on get()', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(request);
+        return streamWithoutEnd(result('first'), result('second', true));
+      },
+    };
+
+    let counter = 0;
+    return createInstance(overrides).then(firestore => {
+      const query = firestore.collection('collectionId');
+      return query.get().then(results => {
+        expect(++counter).to.equal(1);
+        expect(results.size).to.equal(2);
+        expect(results.empty).to.be.false;
+        expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
+        expect(results.docs[0].id).to.equal('first');
+        expect(results.docs[1].id).to.equal('second');
+        expect(results.docChanges()).to.have.length(2);
+      });
+    });
+  });
+
   it('handles stream exception at initialization', () => {
     const query = firestore.collection('collectionId');
 
@@ -715,6 +751,37 @@ describe('query interface', () => {
         .on('end', () => {
           expect(received).to.equal(2);
           callback();
+        });
+    });
+  });
+
+  // Test Logical Termination on stream()
+  it('successful return without ending the stream on stream()', callback => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(request);
+        return streamWithoutEnd(result('first'), result('second', true));
+      },
+    };
+
+    let endCounter = 0;
+    createInstance(overrides).then(firestore => {
+      const query = firestore.collection('collectionId');
+      let received = 0;
+
+      query
+        .stream()
+        .on('data', doc => {
+          expect(doc).to.be.an.instanceOf(DocumentSnapshot);
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(2);
+          ++endCounter;
+          setImmediate(() => {
+            expect(endCounter).to.equal(1);
+            callback();
+          });
         });
     });
   });

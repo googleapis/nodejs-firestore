@@ -42,6 +42,12 @@ export namespace google {
                     /** Database concurrencyMode */
                     concurrencyMode?: (google.firestore.admin.v1.Database.ConcurrencyMode|null);
 
+                    /** Database appEngineIntegrationMode */
+                    appEngineIntegrationMode?: (google.firestore.admin.v1.Database.AppEngineIntegrationMode|null);
+
+                    /** Database keyPrefix */
+                    keyPrefix?: (string|null);
+
                     /** Database etag */
                     etag?: (string|null);
                 }
@@ -66,6 +72,12 @@ export namespace google {
 
                     /** Database concurrencyMode. */
                     public concurrencyMode: google.firestore.admin.v1.Database.ConcurrencyMode;
+
+                    /** Database appEngineIntegrationMode. */
+                    public appEngineIntegrationMode: google.firestore.admin.v1.Database.AppEngineIntegrationMode;
+
+                    /** Database keyPrefix. */
+                    public keyPrefix: string;
 
                     /** Database etag. */
                     public etag: string;
@@ -101,6 +113,10 @@ export namespace google {
                     /** ConcurrencyMode enum. */
                     type ConcurrencyMode =
                         "CONCURRENCY_MODE_UNSPECIFIED"| "OPTIMISTIC"| "PESSIMISTIC"| "OPTIMISTIC_WITH_ENTITY_GROUPS";
+
+                    /** AppEngineIntegrationMode enum. */
+                    type AppEngineIntegrationMode =
+                        "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED"| "ENABLED"| "DISABLED";
                 }
 
                 /** Properties of a Field. */
@@ -111,6 +127,9 @@ export namespace google {
 
                     /** Field indexConfig */
                     indexConfig?: (google.firestore.admin.v1.Field.IIndexConfig|null);
+
+                    /** Field ttlConfig */
+                    ttlConfig?: (google.firestore.admin.v1.Field.ITtlConfig|null);
                 }
 
                 /** Represents a Field. */
@@ -127,6 +146,9 @@ export namespace google {
 
                     /** Field indexConfig. */
                     public indexConfig?: (google.firestore.admin.v1.Field.IIndexConfig|null);
+
+                    /** Field ttlConfig. */
+                    public ttlConfig?: (google.firestore.admin.v1.Field.ITtlConfig|null);
 
                     /**
                      * Creates a Field message from a plain object. Also converts values to their respective internal types.
@@ -209,6 +231,54 @@ export namespace google {
                          * @returns JSON object
                          */
                         public toJSON(): { [k: string]: any };
+                    }
+
+                    /** Properties of a TtlConfig. */
+                    interface ITtlConfig {
+
+                        /** TtlConfig state */
+                        state?: (google.firestore.admin.v1.Field.TtlConfig.State|null);
+                    }
+
+                    /** Represents a TtlConfig. */
+                    class TtlConfig implements ITtlConfig {
+
+                        /**
+                         * Constructs a new TtlConfig.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.Field.ITtlConfig);
+
+                        /** TtlConfig state. */
+                        public state: google.firestore.admin.v1.Field.TtlConfig.State;
+
+                        /**
+                         * Creates a TtlConfig message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns TtlConfig
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Field.TtlConfig;
+
+                        /**
+                         * Creates a plain object from a TtlConfig message. Also converts values to other types if specified.
+                         * @param message TtlConfig
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.admin.v1.Field.TtlConfig, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this TtlConfig to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+                    }
+
+                    namespace TtlConfig {
+
+                        /** State enum. */
+                        type State =
+                            "STATE_UNSPECIFIED"| "CREATING"| "ACTIVE"| "NEEDS_REPAIR";
                     }
                 }
 
@@ -1280,6 +1350,10 @@ export namespace google {
 
                 namespace Index {
 
+                    /** QueryScope enum. */
+                    type QueryScope =
+                        "QUERY_SCOPE_UNSPECIFIED"| "COLLECTION"| "COLLECTION_GROUP";
+
                     /** Properties of an IndexField. */
                     interface IIndexField {
 
@@ -1346,10 +1420,6 @@ export namespace google {
                         type ArrayConfig =
                             "ARRAY_CONFIG_UNSPECIFIED"| "CONTAINS";
                     }
-
-                    /** QueryScope enum. */
-                    type QueryScope =
-                        "QUERY_SCOPE_UNSPECIFIED"| "COLLECTION"| "COLLECTION_GROUP";
 
                     /** State enum. */
                     type State =
@@ -1485,6 +1555,9 @@ export namespace google {
 
                     /** FieldOperationMetadata progressBytes */
                     progressBytes?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** FieldOperationMetadata ttlConfigDelta */
+                    ttlConfigDelta?: (google.firestore.admin.v1.FieldOperationMetadata.ITtlConfigDelta|null);
                 }
 
                 /** Represents a FieldOperationMetadata. */
@@ -1516,6 +1589,9 @@ export namespace google {
 
                     /** FieldOperationMetadata progressBytes. */
                     public progressBytes?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** FieldOperationMetadata ttlConfigDelta. */
+                    public ttlConfigDelta?: (google.firestore.admin.v1.FieldOperationMetadata.ITtlConfigDelta|null);
 
                     /**
                      * Creates a FieldOperationMetadata message from a plain object. Also converts values to their respective internal types.
@@ -1589,6 +1665,54 @@ export namespace google {
                     }
 
                     namespace IndexConfigDelta {
+
+                        /** ChangeType enum. */
+                        type ChangeType =
+                            "CHANGE_TYPE_UNSPECIFIED"| "ADD"| "REMOVE";
+                    }
+
+                    /** Properties of a TtlConfigDelta. */
+                    interface ITtlConfigDelta {
+
+                        /** TtlConfigDelta changeType */
+                        changeType?: (google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType|null);
+                    }
+
+                    /** Represents a TtlConfigDelta. */
+                    class TtlConfigDelta implements ITtlConfigDelta {
+
+                        /**
+                         * Constructs a new TtlConfigDelta.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.FieldOperationMetadata.ITtlConfigDelta);
+
+                        /** TtlConfigDelta changeType. */
+                        public changeType: google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType;
+
+                        /**
+                         * Creates a TtlConfigDelta message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns TtlConfigDelta
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta;
+
+                        /**
+                         * Creates a plain object from a TtlConfigDelta message. Also converts values to other types if specified.
+                         * @param message TtlConfigDelta
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this TtlConfigDelta to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+                    }
+
+                    namespace TtlConfigDelta {
 
                         /** ChangeType enum. */
                         type ChangeType =

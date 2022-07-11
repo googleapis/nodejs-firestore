@@ -43,6 +43,17 @@
                           "type": "ConcurrencyMode",
                           "id": 15
                         },
+                        "appEngineIntegrationMode": {
+                          "type": "AppEngineIntegrationMode",
+                          "id": 19
+                        },
+                        "keyPrefix": {
+                          "type": "string",
+                          "id": 20,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
                         "etag": {
                           "type": "string",
                           "id": 99
@@ -63,6 +74,13 @@
                             "PESSIMISTIC": 2,
                             "OPTIMISTIC_WITH_ENTITY_GROUPS": 3
                           }
+                        },
+                        "AppEngineIntegrationMode": {
+                          "values": {
+                            "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED": 0,
+                            "ENABLED": 1,
+                            "DISABLED": 2
+                          }
                         }
                       }
                     },
@@ -82,6 +100,10 @@
                         "indexConfig": {
                           "type": "IndexConfig",
                           "id": 2
+                        },
+                        "ttlConfig": {
+                          "type": "TtlConfig",
+                          "id": 3
                         }
                       },
                       "nested": {
@@ -103,6 +125,27 @@
                             "reverting": {
                               "type": "bool",
                               "id": 4
+                            }
+                          }
+                        },
+                        "TtlConfig": {
+                          "fields": {
+                            "state": {
+                              "type": "State",
+                              "id": 1,
+                              "options": {
+                                "(google.api.field_behavior)": "OUTPUT_ONLY"
+                              }
+                            }
+                          },
+                          "nested": {
+                            "State": {
+                              "values": {
+                                "STATE_UNSPECIFIED": 0,
+                                "CREATING": 1,
+                                "ACTIVE": 2,
+                                "NEEDS_REPAIR": 3
+                              }
                             }
                           }
                         }
@@ -644,6 +687,13 @@
                         }
                       },
                       "nested": {
+                        "QueryScope": {
+                          "values": {
+                            "QUERY_SCOPE_UNSPECIFIED": 0,
+                            "COLLECTION": 1,
+                            "COLLECTION_GROUP": 2
+                          }
+                        },
                         "IndexField": {
                           "oneofs": {
                             "valueMode": {
@@ -681,13 +731,6 @@
                                 "CONTAINS": 1
                               }
                             }
-                          }
-                        },
-                        "QueryScope": {
-                          "values": {
-                            "QUERY_SCOPE_UNSPECIFIED": 0,
-                            "COLLECTION": 1,
-                            "COLLECTION_GROUP": 2
                           }
                         },
                         "State": {
@@ -761,6 +804,10 @@
                         "progressBytes": {
                           "type": "Progress",
                           "id": 7
+                        },
+                        "ttlConfigDelta": {
+                          "type": "TtlConfigDelta",
+                          "id": 8
                         }
                       },
                       "nested": {
@@ -773,6 +820,23 @@
                             "index": {
                               "type": "Index",
                               "id": 2
+                            }
+                          },
+                          "nested": {
+                            "ChangeType": {
+                              "values": {
+                                "CHANGE_TYPE_UNSPECIFIED": 0,
+                                "ADD": 1,
+                                "REMOVE": 2
+                              }
+                            }
+                          }
+                        },
+                        "TtlConfigDelta": {
+                          "fields": {
+                            "changeType": {
+                              "type": "ChangeType",
+                              "id": 1
                             }
                           },
                           "nested": {

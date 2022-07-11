@@ -1134,7 +1134,8 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.CreateDocumentRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
+      request.collectionId = '';
+      const expectedHeaderRequestParams = 'parent=&collection_id=';
       const expectedOptions = {
         otherArgs: {
           headers: {
@@ -1165,7 +1166,8 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.CreateDocumentRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
+      request.collectionId = '';
+      const expectedHeaderRequestParams = 'parent=&collection_id=';
       const expectedOptions = {
         otherArgs: {
           headers: {
@@ -1212,7 +1214,8 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.CreateDocumentRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
+      request.collectionId = '';
+      const expectedHeaderRequestParams = 'parent=&collection_id=';
       const expectedOptions = {
         otherArgs: {
           headers: {
@@ -1243,6 +1246,7 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.CreateDocumentRequest()
       );
       request.parent = '';
+      request.collectionId = '';
       const expectedError = new Error('The client has already been closed.');
       client.close();
       await assert.rejects(client.createDocument(request), expectedError);
@@ -1657,7 +1661,8 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
+      request.collectionId = '';
+      const expectedHeaderRequestParams = 'parent=&collection_id=';
       const expectedOptions = {
         otherArgs: {
           headers: {
@@ -1690,7 +1695,8 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
+      request.collectionId = '';
+      const expectedHeaderRequestParams = 'parent=&collection_id=';
       const expectedOptions = {
         otherArgs: {
           headers: {
@@ -1739,7 +1745,8 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
+      request.collectionId = '';
+      const expectedHeaderRequestParams = 'parent=&collection_id=';
       const expectedOptions = {
         otherArgs: {
           headers: {
@@ -1770,7 +1777,8 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
+      request.collectionId = '';
+      const expectedHeaderRequestParams = 'parent=&collection_id=';
       const expectedResponse = [
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
@@ -1819,7 +1827,8 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
+      request.collectionId = '';
+      const expectedHeaderRequestParams = 'parent=&collection_id=';
       const expectedError = new Error('expected');
       client.descriptors.page.listDocuments.createStream =
         stubPageStreamingCall(undefined, expectedError);
@@ -1863,7 +1872,8 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
+      request.collectionId = '';
+      const expectedHeaderRequestParams = 'parent=&collection_id=';
       const expectedResponse = [
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
@@ -1901,7 +1911,8 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
       request.parent = '';
-      const expectedHeaderRequestParams = 'parent=';
+      request.collectionId = '';
+      const expectedHeaderRequestParams = 'parent=&collection_id=';
       const expectedError = new Error('expected');
       client.descriptors.page.listDocuments.asyncIterate =
         stubAsyncIterationCall(undefined, expectedError);
