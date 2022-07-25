@@ -4321,6 +4321,9 @@ export namespace google {
 
                 /** RunQueryResponse skippedResults */
                 skippedResults?: (number|null);
+
+                /** RunQueryResponse done */
+                done?: (boolean|null);
             }
 
             /** Represents a RunQueryResponse. */
@@ -4343,6 +4346,12 @@ export namespace google {
 
                 /** RunQueryResponse skippedResults. */
                 public skippedResults: number;
+
+                /** RunQueryResponse done. */
+                public done?: (boolean|null);
+
+                /** RunQueryResponse continuationSelector. */
+                public continuationSelector?: "done";
 
                 /**
                  * Creates a RunQueryResponse message from a plain object. Also converts values to their respective internal types.
@@ -4383,6 +4392,9 @@ export namespace google {
 
                 /** PartitionQueryRequest pageSize */
                 pageSize?: (number|null);
+
+                /** PartitionQueryRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
             }
 
             /** Represents a PartitionQueryRequest. */
@@ -4409,8 +4421,14 @@ export namespace google {
                 /** PartitionQueryRequest pageSize. */
                 public pageSize: number;
 
+                /** PartitionQueryRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
                 /** PartitionQueryRequest queryType. */
                 public queryType?: "structuredQuery";
+
+                /** PartitionQueryRequest consistencySelector. */
+                public consistencySelector?: "readTime";
 
                 /**
                  * Creates a PartitionQueryRequest message from a plain object. Also converts values to their respective internal types.
@@ -4989,6 +5007,9 @@ export namespace google {
 
                 /** ListCollectionIdsRequest pageToken */
                 pageToken?: (string|null);
+
+                /** ListCollectionIdsRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
             }
 
             /** Represents a ListCollectionIdsRequest. */
@@ -5008,6 +5029,12 @@ export namespace google {
 
                 /** ListCollectionIdsRequest pageToken. */
                 public pageToken: string;
+
+                /** ListCollectionIdsRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** ListCollectionIdsRequest consistencySelector. */
+                public consistencySelector?: "readTime";
 
                 /**
                  * Creates a ListCollectionIdsRequest message from a plain object. Also converts values to their respective internal types.

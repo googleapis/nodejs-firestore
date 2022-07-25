@@ -10286,6 +10286,7 @@
                      * @property {google.firestore.v1.IDocument|null} [document] RunQueryResponse document
                      * @property {google.protobuf.ITimestamp|null} [readTime] RunQueryResponse readTime
                      * @property {number|null} [skippedResults] RunQueryResponse skippedResults
+                     * @property {boolean|null} [done] RunQueryResponse done
                      */
     
                     /**
@@ -10336,6 +10337,28 @@
                     RunQueryResponse.prototype.skippedResults = 0;
     
                     /**
+                     * RunQueryResponse done.
+                     * @member {boolean|null|undefined} done
+                     * @memberof google.firestore.v1.RunQueryResponse
+                     * @instance
+                     */
+                    RunQueryResponse.prototype.done = null;
+    
+                    // OneOf field names bound to virtual getters and setters
+                    var $oneOfFields;
+    
+                    /**
+                     * RunQueryResponse continuationSelector.
+                     * @member {"done"|undefined} continuationSelector
+                     * @memberof google.firestore.v1.RunQueryResponse
+                     * @instance
+                     */
+                    Object.defineProperty(RunQueryResponse.prototype, "continuationSelector", {
+                        get: $util.oneOfGetter($oneOfFields = ["done"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
                      * Creates a RunQueryResponse message from a plain object. Also converts values to their respective internal types.
                      * @function fromObject
                      * @memberof google.firestore.v1.RunQueryResponse
@@ -10364,6 +10387,8 @@
                         }
                         if (object.skippedResults != null)
                             message.skippedResults = object.skippedResults | 0;
+                        if (object.done != null)
+                            message.done = Boolean(object.done);
                         return message;
                     };
     
@@ -10400,6 +10425,11 @@
                             object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
                         if (message.skippedResults != null && message.hasOwnProperty("skippedResults"))
                             object.skippedResults = message.skippedResults;
+                        if (message.done != null && message.hasOwnProperty("done")) {
+                            object.done = message.done;
+                            if (options.oneofs)
+                                object.continuationSelector = "done";
+                        }
                         return object;
                     };
     
@@ -10428,6 +10458,7 @@
                      * @property {number|string|null} [partitionCount] PartitionQueryRequest partitionCount
                      * @property {string|null} [pageToken] PartitionQueryRequest pageToken
                      * @property {number|null} [pageSize] PartitionQueryRequest pageSize
+                     * @property {google.protobuf.ITimestamp|null} [readTime] PartitionQueryRequest readTime
                      */
     
                     /**
@@ -10485,6 +10516,14 @@
                      */
                     PartitionQueryRequest.prototype.pageSize = 0;
     
+                    /**
+                     * PartitionQueryRequest readTime.
+                     * @member {google.protobuf.ITimestamp|null|undefined} readTime
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @instance
+                     */
+                    PartitionQueryRequest.prototype.readTime = null;
+    
                     // OneOf field names bound to virtual getters and setters
                     var $oneOfFields;
     
@@ -10496,6 +10535,17 @@
                      */
                     Object.defineProperty(PartitionQueryRequest.prototype, "queryType", {
                         get: $util.oneOfGetter($oneOfFields = ["structuredQuery"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
+                     * PartitionQueryRequest consistencySelector.
+                     * @member {"readTime"|undefined} consistencySelector
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @instance
+                     */
+                    Object.defineProperty(PartitionQueryRequest.prototype, "consistencySelector", {
+                        get: $util.oneOfGetter($oneOfFields = ["readTime"]),
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
@@ -10531,6 +10581,11 @@
                             message.pageToken = String(object.pageToken);
                         if (object.pageSize != null)
                             message.pageSize = object.pageSize | 0;
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.PartitionQueryRequest.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
                         return message;
                     };
     
@@ -10573,6 +10628,11 @@
                             object.pageToken = message.pageToken;
                         if (message.pageSize != null && message.hasOwnProperty("pageSize"))
                             object.pageSize = message.pageSize;
+                        if (message.readTime != null && message.hasOwnProperty("readTime")) {
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "readTime";
+                        }
                         return object;
                     };
     
@@ -11979,6 +12039,7 @@
                      * @property {string|null} [parent] ListCollectionIdsRequest parent
                      * @property {number|null} [pageSize] ListCollectionIdsRequest pageSize
                      * @property {string|null} [pageToken] ListCollectionIdsRequest pageToken
+                     * @property {google.protobuf.ITimestamp|null} [readTime] ListCollectionIdsRequest readTime
                      */
     
                     /**
@@ -12021,6 +12082,28 @@
                     ListCollectionIdsRequest.prototype.pageToken = "";
     
                     /**
+                     * ListCollectionIdsRequest readTime.
+                     * @member {google.protobuf.ITimestamp|null|undefined} readTime
+                     * @memberof google.firestore.v1.ListCollectionIdsRequest
+                     * @instance
+                     */
+                    ListCollectionIdsRequest.prototype.readTime = null;
+    
+                    // OneOf field names bound to virtual getters and setters
+                    var $oneOfFields;
+    
+                    /**
+                     * ListCollectionIdsRequest consistencySelector.
+                     * @member {"readTime"|undefined} consistencySelector
+                     * @memberof google.firestore.v1.ListCollectionIdsRequest
+                     * @instance
+                     */
+                    Object.defineProperty(ListCollectionIdsRequest.prototype, "consistencySelector", {
+                        get: $util.oneOfGetter($oneOfFields = ["readTime"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
                      * Creates a ListCollectionIdsRequest message from a plain object. Also converts values to their respective internal types.
                      * @function fromObject
                      * @memberof google.firestore.v1.ListCollectionIdsRequest
@@ -12038,6 +12121,11 @@
                             message.pageSize = object.pageSize | 0;
                         if (object.pageToken != null)
                             message.pageToken = String(object.pageToken);
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.ListCollectionIdsRequest.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
                         return message;
                     };
     
@@ -12065,6 +12153,11 @@
                             object.pageSize = message.pageSize;
                         if (message.pageToken != null && message.hasOwnProperty("pageToken"))
                             object.pageToken = message.pageToken;
+                        if (message.readTime != null && message.hasOwnProperty("readTime")) {
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "readTime";
+                        }
                         return object;
                     };
     

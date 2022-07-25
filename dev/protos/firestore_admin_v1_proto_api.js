@@ -78,6 +78,8 @@
                          * @property {string|null} [locationId] Database locationId
                          * @property {google.firestore.admin.v1.Database.DatabaseType|null} [type] Database type
                          * @property {google.firestore.admin.v1.Database.ConcurrencyMode|null} [concurrencyMode] Database concurrencyMode
+                         * @property {google.firestore.admin.v1.Database.AppEngineIntegrationMode|null} [appEngineIntegrationMode] Database appEngineIntegrationMode
+                         * @property {string|null} [keyPrefix] Database keyPrefix
                          * @property {string|null} [etag] Database etag
                          */
     
@@ -127,6 +129,22 @@
                          * @instance
                          */
                         Database.prototype.concurrencyMode = 0;
+    
+                        /**
+                         * Database appEngineIntegrationMode.
+                         * @member {google.firestore.admin.v1.Database.AppEngineIntegrationMode} appEngineIntegrationMode
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.appEngineIntegrationMode = 0;
+    
+                        /**
+                         * Database keyPrefix.
+                         * @member {string} keyPrefix
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.keyPrefix = "";
     
                         /**
                          * Database etag.
@@ -184,6 +202,22 @@
                                 message.concurrencyMode = 3;
                                 break;
                             }
+                            switch (object.appEngineIntegrationMode) {
+                            case "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED":
+                            case 0:
+                                message.appEngineIntegrationMode = 0;
+                                break;
+                            case "ENABLED":
+                            case 1:
+                                message.appEngineIntegrationMode = 1;
+                                break;
+                            case "DISABLED":
+                            case 2:
+                                message.appEngineIntegrationMode = 2;
+                                break;
+                            }
+                            if (object.keyPrefix != null)
+                                message.keyPrefix = String(object.keyPrefix);
                             if (object.etag != null)
                                 message.etag = String(object.etag);
                             return message;
@@ -207,6 +241,8 @@
                                 object.locationId = "";
                                 object.type = options.enums === String ? "DATABASE_TYPE_UNSPECIFIED" : 0;
                                 object.concurrencyMode = options.enums === String ? "CONCURRENCY_MODE_UNSPECIFIED" : 0;
+                                object.appEngineIntegrationMode = options.enums === String ? "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED" : 0;
+                                object.keyPrefix = "";
                                 object.etag = "";
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
@@ -217,6 +253,10 @@
                                 object.type = options.enums === String ? $root.google.firestore.admin.v1.Database.DatabaseType[message.type] : message.type;
                             if (message.concurrencyMode != null && message.hasOwnProperty("concurrencyMode"))
                                 object.concurrencyMode = options.enums === String ? $root.google.firestore.admin.v1.Database.ConcurrencyMode[message.concurrencyMode] : message.concurrencyMode;
+                            if (message.appEngineIntegrationMode != null && message.hasOwnProperty("appEngineIntegrationMode"))
+                                object.appEngineIntegrationMode = options.enums === String ? $root.google.firestore.admin.v1.Database.AppEngineIntegrationMode[message.appEngineIntegrationMode] : message.appEngineIntegrationMode;
+                            if (message.keyPrefix != null && message.hasOwnProperty("keyPrefix"))
+                                object.keyPrefix = message.keyPrefix;
                             if (message.etag != null && message.hasOwnProperty("etag"))
                                 object.etag = message.etag;
                             return object;
@@ -267,6 +307,22 @@
                             return values;
                         })();
     
+                        /**
+                         * AppEngineIntegrationMode enum.
+                         * @name google.firestore.admin.v1.Database.AppEngineIntegrationMode
+                         * @enum {string}
+                         * @property {string} APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED=APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED value
+                         * @property {string} ENABLED=ENABLED ENABLED value
+                         * @property {string} DISABLED=DISABLED DISABLED value
+                         */
+                        Database.AppEngineIntegrationMode = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED"] = "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED";
+                            values[valuesById[1] = "ENABLED"] = "ENABLED";
+                            values[valuesById[2] = "DISABLED"] = "DISABLED";
+                            return values;
+                        })();
+    
                         return Database;
                     })();
     
@@ -278,6 +334,7 @@
                          * @interface IField
                          * @property {string|null} [name] Field name
                          * @property {google.firestore.admin.v1.Field.IIndexConfig|null} [indexConfig] Field indexConfig
+                         * @property {google.firestore.admin.v1.Field.ITtlConfig|null} [ttlConfig] Field ttlConfig
                          */
     
                         /**
@@ -312,6 +369,14 @@
                         Field.prototype.indexConfig = null;
     
                         /**
+                         * Field ttlConfig.
+                         * @member {google.firestore.admin.v1.Field.ITtlConfig|null|undefined} ttlConfig
+                         * @memberof google.firestore.admin.v1.Field
+                         * @instance
+                         */
+                        Field.prototype.ttlConfig = null;
+    
+                        /**
                          * Creates a Field message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.Field
@@ -329,6 +394,11 @@
                                 if (typeof object.indexConfig !== "object")
                                     throw TypeError(".google.firestore.admin.v1.Field.indexConfig: object expected");
                                 message.indexConfig = $root.google.firestore.admin.v1.Field.IndexConfig.fromObject(object.indexConfig);
+                            }
+                            if (object.ttlConfig != null) {
+                                if (typeof object.ttlConfig !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Field.ttlConfig: object expected");
+                                message.ttlConfig = $root.google.firestore.admin.v1.Field.TtlConfig.fromObject(object.ttlConfig);
                             }
                             return message;
                         };
@@ -349,11 +419,14 @@
                             if (options.defaults) {
                                 object.name = "";
                                 object.indexConfig = null;
+                                object.ttlConfig = null;
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
                             if (message.indexConfig != null && message.hasOwnProperty("indexConfig"))
                                 object.indexConfig = $root.google.firestore.admin.v1.Field.IndexConfig.toObject(message.indexConfig, options);
+                            if (message.ttlConfig != null && message.hasOwnProperty("ttlConfig"))
+                                object.ttlConfig = $root.google.firestore.admin.v1.Field.TtlConfig.toObject(message.ttlConfig, options);
                             return object;
                         };
     
@@ -505,6 +578,123 @@
                             };
     
                             return IndexConfig;
+                        })();
+    
+                        Field.TtlConfig = (function() {
+    
+                            /**
+                             * Properties of a TtlConfig.
+                             * @memberof google.firestore.admin.v1.Field
+                             * @interface ITtlConfig
+                             * @property {google.firestore.admin.v1.Field.TtlConfig.State|null} [state] TtlConfig state
+                             */
+    
+                            /**
+                             * Constructs a new TtlConfig.
+                             * @memberof google.firestore.admin.v1.Field
+                             * @classdesc Represents a TtlConfig.
+                             * @implements ITtlConfig
+                             * @constructor
+                             * @param {google.firestore.admin.v1.Field.ITtlConfig=} [properties] Properties to set
+                             */
+                            function TtlConfig(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * TtlConfig state.
+                             * @member {google.firestore.admin.v1.Field.TtlConfig.State} state
+                             * @memberof google.firestore.admin.v1.Field.TtlConfig
+                             * @instance
+                             */
+                            TtlConfig.prototype.state = 0;
+    
+                            /**
+                             * Creates a TtlConfig message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.Field.TtlConfig
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.Field.TtlConfig} TtlConfig
+                             */
+                            TtlConfig.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.Field.TtlConfig)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.Field.TtlConfig();
+                                switch (object.state) {
+                                case "STATE_UNSPECIFIED":
+                                case 0:
+                                    message.state = 0;
+                                    break;
+                                case "CREATING":
+                                case 1:
+                                    message.state = 1;
+                                    break;
+                                case "ACTIVE":
+                                case 2:
+                                    message.state = 2;
+                                    break;
+                                case "NEEDS_REPAIR":
+                                case 3:
+                                    message.state = 3;
+                                    break;
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a TtlConfig message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.Field.TtlConfig
+                             * @static
+                             * @param {google.firestore.admin.v1.Field.TtlConfig} message TtlConfig
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            TtlConfig.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.state = options.enums === String ? "STATE_UNSPECIFIED" : 0;
+                                if (message.state != null && message.hasOwnProperty("state"))
+                                    object.state = options.enums === String ? $root.google.firestore.admin.v1.Field.TtlConfig.State[message.state] : message.state;
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this TtlConfig to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.Field.TtlConfig
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            TtlConfig.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * State enum.
+                             * @name google.firestore.admin.v1.Field.TtlConfig.State
+                             * @enum {string}
+                             * @property {string} STATE_UNSPECIFIED=STATE_UNSPECIFIED STATE_UNSPECIFIED value
+                             * @property {string} CREATING=CREATING CREATING value
+                             * @property {string} ACTIVE=ACTIVE ACTIVE value
+                             * @property {string} NEEDS_REPAIR=NEEDS_REPAIR NEEDS_REPAIR value
+                             */
+                            TtlConfig.State = (function() {
+                                var valuesById = {}, values = Object.create(valuesById);
+                                values[valuesById[0] = "STATE_UNSPECIFIED"] = "STATE_UNSPECIFIED";
+                                values[valuesById[1] = "CREATING"] = "CREATING";
+                                values[valuesById[2] = "ACTIVE"] = "ACTIVE";
+                                values[valuesById[3] = "NEEDS_REPAIR"] = "NEEDS_REPAIR";
+                                return values;
+                            })();
+    
+                            return TtlConfig;
                         })();
     
                         return Field;
@@ -2690,6 +2880,22 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
+                        /**
+                         * QueryScope enum.
+                         * @name google.firestore.admin.v1.Index.QueryScope
+                         * @enum {string}
+                         * @property {string} QUERY_SCOPE_UNSPECIFIED=QUERY_SCOPE_UNSPECIFIED QUERY_SCOPE_UNSPECIFIED value
+                         * @property {string} COLLECTION=COLLECTION COLLECTION value
+                         * @property {string} COLLECTION_GROUP=COLLECTION_GROUP COLLECTION_GROUP value
+                         */
+                        Index.QueryScope = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "QUERY_SCOPE_UNSPECIFIED"] = "QUERY_SCOPE_UNSPECIFIED";
+                            values[valuesById[1] = "COLLECTION"] = "COLLECTION";
+                            values[valuesById[2] = "COLLECTION_GROUP"] = "COLLECTION_GROUP";
+                            return values;
+                        })();
+    
                         Index.IndexField = (function() {
     
                             /**
@@ -2867,22 +3073,6 @@
                             })();
     
                             return IndexField;
-                        })();
-    
-                        /**
-                         * QueryScope enum.
-                         * @name google.firestore.admin.v1.Index.QueryScope
-                         * @enum {string}
-                         * @property {string} QUERY_SCOPE_UNSPECIFIED=QUERY_SCOPE_UNSPECIFIED QUERY_SCOPE_UNSPECIFIED value
-                         * @property {string} COLLECTION=COLLECTION COLLECTION value
-                         * @property {string} COLLECTION_GROUP=COLLECTION_GROUP COLLECTION_GROUP value
-                         */
-                        Index.QueryScope = (function() {
-                            var valuesById = {}, values = Object.create(valuesById);
-                            values[valuesById[0] = "QUERY_SCOPE_UNSPECIFIED"] = "QUERY_SCOPE_UNSPECIFIED";
-                            values[valuesById[1] = "COLLECTION"] = "COLLECTION";
-                            values[valuesById[2] = "COLLECTION_GROUP"] = "COLLECTION_GROUP";
-                            return values;
                         })();
     
                         /**
@@ -3181,6 +3371,7 @@
                          * @property {google.firestore.admin.v1.OperationState|null} [state] FieldOperationMetadata state
                          * @property {google.firestore.admin.v1.IProgress|null} [progressDocuments] FieldOperationMetadata progressDocuments
                          * @property {google.firestore.admin.v1.IProgress|null} [progressBytes] FieldOperationMetadata progressBytes
+                         * @property {google.firestore.admin.v1.FieldOperationMetadata.ITtlConfigDelta|null} [ttlConfigDelta] FieldOperationMetadata ttlConfigDelta
                          */
     
                         /**
@@ -3254,6 +3445,14 @@
                          * @instance
                          */
                         FieldOperationMetadata.prototype.progressBytes = null;
+    
+                        /**
+                         * FieldOperationMetadata ttlConfigDelta.
+                         * @member {google.firestore.admin.v1.FieldOperationMetadata.ITtlConfigDelta|null|undefined} ttlConfigDelta
+                         * @memberof google.firestore.admin.v1.FieldOperationMetadata
+                         * @instance
+                         */
+                        FieldOperationMetadata.prototype.ttlConfigDelta = null;
     
                         /**
                          * Creates a FieldOperationMetadata message from a plain object. Also converts values to their respective internal types.
@@ -3333,6 +3532,11 @@
                                     throw TypeError(".google.firestore.admin.v1.FieldOperationMetadata.progressBytes: object expected");
                                 message.progressBytes = $root.google.firestore.admin.v1.Progress.fromObject(object.progressBytes);
                             }
+                            if (object.ttlConfigDelta != null) {
+                                if (typeof object.ttlConfigDelta !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.FieldOperationMetadata.ttlConfigDelta: object expected");
+                                message.ttlConfigDelta = $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.fromObject(object.ttlConfigDelta);
+                            }
                             return message;
                         };
     
@@ -3358,6 +3562,7 @@
                                 object.state = options.enums === String ? "OPERATION_STATE_UNSPECIFIED" : 0;
                                 object.progressDocuments = null;
                                 object.progressBytes = null;
+                                object.ttlConfigDelta = null;
                             }
                             if (message.startTime != null && message.hasOwnProperty("startTime"))
                                 object.startTime = $root.google.protobuf.Timestamp.toObject(message.startTime, options);
@@ -3376,6 +3581,8 @@
                                 object.progressDocuments = $root.google.firestore.admin.v1.Progress.toObject(message.progressDocuments, options);
                             if (message.progressBytes != null && message.hasOwnProperty("progressBytes"))
                                 object.progressBytes = $root.google.firestore.admin.v1.Progress.toObject(message.progressBytes, options);
+                            if (message.ttlConfigDelta != null && message.hasOwnProperty("ttlConfigDelta"))
+                                object.ttlConfigDelta = $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.toObject(message.ttlConfigDelta, options);
                             return object;
                         };
     
@@ -3517,6 +3724,117 @@
                             })();
     
                             return IndexConfigDelta;
+                        })();
+    
+                        FieldOperationMetadata.TtlConfigDelta = (function() {
+    
+                            /**
+                             * Properties of a TtlConfigDelta.
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata
+                             * @interface ITtlConfigDelta
+                             * @property {google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType|null} [changeType] TtlConfigDelta changeType
+                             */
+    
+                            /**
+                             * Constructs a new TtlConfigDelta.
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata
+                             * @classdesc Represents a TtlConfigDelta.
+                             * @implements ITtlConfigDelta
+                             * @constructor
+                             * @param {google.firestore.admin.v1.FieldOperationMetadata.ITtlConfigDelta=} [properties] Properties to set
+                             */
+                            function TtlConfigDelta(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * TtlConfigDelta changeType.
+                             * @member {google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType} changeType
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta
+                             * @instance
+                             */
+                            TtlConfigDelta.prototype.changeType = 0;
+    
+                            /**
+                             * Creates a TtlConfigDelta message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta} TtlConfigDelta
+                             */
+                            TtlConfigDelta.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta();
+                                switch (object.changeType) {
+                                case "CHANGE_TYPE_UNSPECIFIED":
+                                case 0:
+                                    message.changeType = 0;
+                                    break;
+                                case "ADD":
+                                case 1:
+                                    message.changeType = 1;
+                                    break;
+                                case "REMOVE":
+                                case 2:
+                                    message.changeType = 2;
+                                    break;
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a TtlConfigDelta message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta
+                             * @static
+                             * @param {google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta} message TtlConfigDelta
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            TtlConfigDelta.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.changeType = options.enums === String ? "CHANGE_TYPE_UNSPECIFIED" : 0;
+                                if (message.changeType != null && message.hasOwnProperty("changeType"))
+                                    object.changeType = options.enums === String ? $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType[message.changeType] : message.changeType;
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this TtlConfigDelta to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            TtlConfigDelta.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * ChangeType enum.
+                             * @name google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType
+                             * @enum {string}
+                             * @property {string} CHANGE_TYPE_UNSPECIFIED=CHANGE_TYPE_UNSPECIFIED CHANGE_TYPE_UNSPECIFIED value
+                             * @property {string} ADD=ADD ADD value
+                             * @property {string} REMOVE=REMOVE REMOVE value
+                             */
+                            TtlConfigDelta.ChangeType = (function() {
+                                var valuesById = {}, values = Object.create(valuesById);
+                                values[valuesById[0] = "CHANGE_TYPE_UNSPECIFIED"] = "CHANGE_TYPE_UNSPECIFIED";
+                                values[valuesById[1] = "ADD"] = "ADD";
+                                values[valuesById[2] = "REMOVE"] = "REMOVE";
+                                return values;
+                            })();
+    
+                            return TtlConfigDelta;
                         })();
     
                         return FieldOperationMetadata;

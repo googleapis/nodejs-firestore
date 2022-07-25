@@ -78,7 +78,7 @@ export class FirestoreClient {
    *
    * @param {object} [options] - The configuration object.
    * The options accepted by the constructor are described in detail
-   * in [this document](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#creating-the-client-instance).
+   * in [this document](https://github.com/googleapis/gax-nodejs/blob/main/client-libraries.md#creating-the-client-instance).
    * The common options are:
    * @param {object} [options.credentials] - Credentials object.
    * @param {string} [options.credentials.client_email]
@@ -101,11 +101,10 @@ export class FirestoreClient {
    *     API remote host.
    * @param {gax.ClientConfig} [options.clientConfig] - Client configuration override.
    *     Follows the structure of {@link gapicConfig}.
-   * @param {boolean} [options.fallback] - Use HTTP fallback mode.
-   *     In fallback mode, a special browser-compatible transport implementation is used
-   *     instead of gRPC transport. In browser context (if the `window` object is defined)
-   *     the fallback mode is enabled automatically; set `options.fallback` to `false`
-   *     if you need to override this behavior.
+   * @param {boolean | "rest"} [options.fallback] - Use HTTP fallback mode.
+   *     Pass "rest" to use HTTP/1.1 REST API instead of gRPC.
+   *     For more information, please check the
+   *     {@link https://github.com/googleapis/gax-nodejs/blob/main/client-libraries.md#http11-rest-api-mode documentation}.
    */
   constructor(opts?: ClientOptions) {
     // Ensure that options include all the required fields.
@@ -193,16 +192,20 @@ export class FirestoreClient {
     // Provide descriptors for these.
     this.descriptors.stream = {
       batchGetDocuments: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.SERVER_STREAMING
+        gax.StreamType.SERVER_STREAMING,
+        opts.fallback === 'rest'
       ),
       runQuery: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.SERVER_STREAMING
+        gax.StreamType.SERVER_STREAMING,
+        opts.fallback === 'rest'
       ),
       write: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.BIDI_STREAMING
+        gax.StreamType.BIDI_STREAMING,
+        opts.fallback === 'rest'
       ),
       listen: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.BIDI_STREAMING
+        gax.StreamType.BIDI_STREAMING,
+        opts.fallback === 'rest'
       ),
     };
 
@@ -1109,6 +1112,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     this.initialize();
     return this.innerApiCalls.createDocument(request, options, callback);
@@ -1377,6 +1381,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     this.initialize();
     return this.innerApiCalls.listDocuments(request, options, callback);
@@ -1443,6 +1448,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1518,6 +1524,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       gax.routingHeader.fromParams({
         parent: request.parent || '',
+        collection_id: request.collectionId || '',
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1576,6 +1583,9 @@ export class FirestoreClient {
    *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
    *   if more results exist. A second call to PartitionQuery will return up to
    *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1701,6 +1711,9 @@ export class FirestoreClient {
    *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
    *   if more results exist. A second call to PartitionQuery will return up to
    *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1782,6 +1795,9 @@ export class FirestoreClient {
    *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
    *   if more results exist. A second call to PartitionQuery will return up to
    *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
@@ -1831,6 +1847,9 @@ export class FirestoreClient {
    * @param {string} request.pageToken
    *   A page token. Must be a value from
    *   {@link google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1927,6 +1946,9 @@ export class FirestoreClient {
    * @param {string} request.pageToken
    *   A page token. Must be a value from
    *   {@link google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1977,6 +1999,9 @@ export class FirestoreClient {
    * @param {string} request.pageToken
    *   A page token. Must be a value from
    *   {@link google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
