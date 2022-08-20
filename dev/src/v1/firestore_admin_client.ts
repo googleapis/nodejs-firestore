@@ -32,7 +32,6 @@ import {
 } from 'google-gax';
 
 import {Transform} from 'stream';
-import {RequestType} from 'google-gax/build/src/apitypes';
 import * as protos from '../../protos/firestore_admin_v1_proto_api';
 import jsonProtos = require('../../protos/admin_v1.json');
 /**
@@ -407,7 +406,8 @@ export class FirestoreAdminClient {
       const apiCall = this._gaxModule.createApiCall(
         callPromise,
         this._defaults[methodName],
-        descriptor
+        descriptor,
+        this._opts.fallback
       );
 
       this.innerApiCalls[methodName] = apiCall;
@@ -1034,7 +1034,7 @@ export class FirestoreAdminClient {
     const decodeOperation = new gax.Operation(
       operation,
       this.descriptors.longrunning.createIndex,
-      gax.createDefaultBackoffSettings()
+      this._gaxModule.createDefaultBackoffSettings()
     );
     return decodeOperation as LROperation<
       protos.google.firestore.admin.v1.Index,
@@ -1186,7 +1186,7 @@ export class FirestoreAdminClient {
     const decodeOperation = new gax.Operation(
       operation,
       this.descriptors.longrunning.updateField,
-      gax.createDefaultBackoffSettings()
+      this._gaxModule.createDefaultBackoffSettings()
     );
     return decodeOperation as LROperation<
       protos.google.firestore.admin.v1.Field,
@@ -1345,7 +1345,7 @@ export class FirestoreAdminClient {
     const decodeOperation = new gax.Operation(
       operation,
       this.descriptors.longrunning.exportDocuments,
-      gax.createDefaultBackoffSettings()
+      this._gaxModule.createDefaultBackoffSettings()
     );
     return decodeOperation as LROperation<
       protos.google.firestore.admin.v1.ExportDocumentsResponse,
@@ -1496,7 +1496,7 @@ export class FirestoreAdminClient {
     const decodeOperation = new gax.Operation(
       operation,
       this.descriptors.longrunning.importDocuments,
-      gax.createDefaultBackoffSettings()
+      this._gaxModule.createDefaultBackoffSettings()
     );
     return decodeOperation as LROperation<
       protos.google.protobuf.Empty,
@@ -1635,7 +1635,7 @@ export class FirestoreAdminClient {
     const decodeOperation = new gax.Operation(
       operation,
       this.descriptors.longrunning.updateDatabase,
-      gax.createDefaultBackoffSettings()
+      this._gaxModule.createDefaultBackoffSettings()
     );
     return decodeOperation as LROperation<
       protos.google.firestore.admin.v1.Database,
@@ -1783,7 +1783,7 @@ export class FirestoreAdminClient {
     const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listIndexes.createStream(
-      this.innerApiCalls.listIndexes as gax.GaxCall,
+      this.innerApiCalls.listIndexes as GaxCall,
       request,
       callSettings
     );
@@ -1836,7 +1836,7 @@ export class FirestoreAdminClient {
     this.initialize();
     return this.descriptors.page.listIndexes.asyncIterate(
       this.innerApiCalls['listIndexes'] as GaxCall,
-      request as unknown as RequestType,
+      request as {},
       callSettings
     ) as AsyncIterable<protos.google.firestore.admin.v1.IIndex>;
   }
@@ -1994,7 +1994,7 @@ export class FirestoreAdminClient {
     const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listFields.createStream(
-      this.innerApiCalls.listFields as gax.GaxCall,
+      this.innerApiCalls.listFields as GaxCall,
       request,
       callSettings
     );
@@ -2051,7 +2051,7 @@ export class FirestoreAdminClient {
     this.initialize();
     return this.descriptors.page.listFields.asyncIterate(
       this.innerApiCalls['listFields'] as GaxCall,
-      request as unknown as RequestType,
+      request as {},
       callSettings
     ) as AsyncIterable<protos.google.firestore.admin.v1.IField>;
   }

@@ -29,7 +29,6 @@ import {
 } from 'google-gax';
 
 import {Transform} from 'stream';
-import {RequestType} from 'google-gax/build/src/apitypes';
 import {PassThrough} from 'stream';
 import * as protos from '../../protos/firestore_v1_proto_api';
 import jsonProtos = require('../../protos/v1.json');
@@ -307,7 +306,8 @@ export class FirestoreClient {
       const apiCall = this._gaxModule.createApiCall(
         callPromise,
         this._defaults[methodName],
-        descriptor
+        descriptor,
+        this._opts.fallback
       );
 
       this.innerApiCalls[methodName] = apiCall;
@@ -1454,7 +1454,7 @@ export class FirestoreClient {
     const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listDocuments.createStream(
-      this.innerApiCalls.listDocuments as gax.GaxCall,
+      this.innerApiCalls.listDocuments as GaxCall,
       request,
       callSettings
     );
@@ -1531,7 +1531,7 @@ export class FirestoreClient {
     this.initialize();
     return this.descriptors.page.listDocuments.asyncIterate(
       this.innerApiCalls['listDocuments'] as GaxCall,
-      request as unknown as RequestType,
+      request as {},
       callSettings
     ) as AsyncIterable<protos.google.firestore.v1.IDocument>;
   }
@@ -1742,7 +1742,7 @@ export class FirestoreClient {
     const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.partitionQuery.createStream(
-      this.innerApiCalls.partitionQuery as gax.GaxCall,
+      this.innerApiCalls.partitionQuery as GaxCall,
       request,
       callSettings
     );
@@ -1828,7 +1828,7 @@ export class FirestoreClient {
     this.initialize();
     return this.descriptors.page.partitionQuery.asyncIterate(
       this.innerApiCalls['partitionQuery'] as GaxCall,
-      request as unknown as RequestType,
+      request as {},
       callSettings
     ) as AsyncIterable<protos.google.firestore.v1.ICursor>;
   }
@@ -1977,7 +1977,7 @@ export class FirestoreClient {
     const callSettings = defaultCallSettings.merge(options);
     this.initialize();
     return this.descriptors.page.listCollectionIds.createStream(
-      this.innerApiCalls.listCollectionIds as gax.GaxCall,
+      this.innerApiCalls.listCollectionIds as GaxCall,
       request,
       callSettings
     );
@@ -2032,7 +2032,7 @@ export class FirestoreClient {
     this.initialize();
     return this.descriptors.page.listCollectionIds.asyncIterate(
       this.innerApiCalls['listCollectionIds'] as GaxCall,
-      request as unknown as RequestType,
+      request as {},
       callSettings
     ) as AsyncIterable<string>;
   }
