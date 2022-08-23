@@ -4,6 +4,32 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.0.0](https://github.com/googleapis/nodejs-firestore/compare/v5.0.2...v6.0.0) (2022-07-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* update library to use Node 12 (#1725)
+
+### Features
+
+* Enable RunQueryResponse.done ([#1712](https://github.com/googleapis/nodejs-firestore/issues/1712)) ([0cc549c](https://github.com/googleapis/nodejs-firestore/commit/0cc549c69ccc59e25f8347d6b236f8b9b04dc105))
+* Support Logical Termination on RunQueryResponse ([#1741](https://github.com/googleapis/nodejs-firestore/issues/1741)) ([07de28a](https://github.com/googleapis/nodejs-firestore/commit/07de28a04cdea27c5f859091aaf30d16bd8a8c3c))
+* support regapic LRO ([#1729](https://github.com/googleapis/nodejs-firestore/issues/1729)) ([b9d8fef](https://github.com/googleapis/nodejs-firestore/commit/b9d8fefc5f927d1f064a79ec0990d256803360cd))
+* update client libraries to support Database operations ([#1676](https://github.com/googleapis/nodejs-firestore/issues/1676)) ([533aade](https://github.com/googleapis/nodejs-firestore/commit/533aade3272f07b39bbad2c32a5d9669fde6de53))
+
+
+### Bug Fixes
+
+* change REST binding for ListDocuments to support root collection ([#1695](https://github.com/googleapis/nodejs-firestore/issues/1695)) ([6185f13](https://github.com/googleapis/nodejs-firestore/commit/6185f13070ff9dda91d7128e3b8a1db7f09914a8))
+* **deps:** update dependency protobufjs to v7 ([#1747](https://github.com/googleapis/nodejs-firestore/issues/1747)) ([4e8d33c](https://github.com/googleapis/nodejs-firestore/commit/4e8d33cce418dfb004725ce2271121fd1fdbd9b2))
+* split v1 and v1beta1 protos to improve startup time ([#1664](https://github.com/googleapis/nodejs-firestore/issues/1664)) ([f3729cf](https://github.com/googleapis/nodejs-firestore/commit/f3729cf49818b9b929a556e7a8e8a5588b5f2726))
+
+
+### Build System
+
+* update library to use Node 12 ([#1725](https://github.com/googleapis/nodejs-firestore/issues/1725)) ([0abbd21](https://github.com/googleapis/nodejs-firestore/commit/0abbd215d4574f238b40630361d0836432ead3af))
+
 ### [5.0.2](https://www.github.com/googleapis/nodejs-firestore/compare/v5.0.1...v5.0.2) (2022-01-07)
 
 
