@@ -433,6 +433,14 @@ export class Firestore implements firestore.Firestore {
   private _projectId: string | undefined = undefined;
 
   /**
+   * The database ID provided via `.settings()`.
+   *
+   * @private
+   * @internal
+   */
+  private _databaseId: string | undefined = undefined;
+
+  /**
    * Count of listeners that have been registered on the client.
    *
    * The client can only be terminated when there are no pending writes or
@@ -571,6 +579,9 @@ export class Firestore implements firestore.Firestore {
   settings(settings: firestore.Settings): void {
     validateObject('settings', settings);
     validateString('settings.projectId', settings.projectId, {optional: true});
+    validateString('settings.databaseId', settings.databaseId, {
+      optional: true,
+    });
 
     if (this._settingsFrozen) {
       throw new Error(
@@ -589,6 +600,11 @@ export class Firestore implements firestore.Firestore {
     if (settings.projectId !== undefined) {
       validateString('settings.projectId', settings.projectId);
       this._projectId = settings.projectId;
+    }
+
+    if (settings.databaseId !== undefined) {
+      validateString('settings.databaseId', settings.databaseId);
+      this._databaseId = settings.databaseId;
     }
 
     let url: URL | null = null;
@@ -679,6 +695,16 @@ export class Firestore implements firestore.Firestore {
   }
 
   /**
+   * Returns the Database ID for this Firestore instance.
+   *
+   * @private
+   * @internal
+   */
+  get databaseId(): string {
+    return this._databaseId || DEFAULT_DATABASE_ID;
+  }
+
+  /**
    * Returns the root path of the database. Validates that
    * `initializeIfNeeded()` was called before.
    *
@@ -686,7 +712,7 @@ export class Firestore implements firestore.Firestore {
    * @internal
    */
   get formattedName(): string {
-    return `projects/${this.projectId}/databases/${DEFAULT_DATABASE_ID}`;
+    return `projects/${this.projectId}/databases/${this.databaseId}`;
   }
 
   /**
