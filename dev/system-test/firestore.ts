@@ -51,7 +51,7 @@ import {
   verifyInstance,
 } from '../test/util/helpers';
 import {BulkWriter} from '../src/bulk-writer';
-import {Status} from 'google-gax';
+import {Status} from 'google-gax/build/src/status';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
 

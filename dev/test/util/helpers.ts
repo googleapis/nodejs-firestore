@@ -21,12 +21,11 @@ import {
 
 import {expect} from 'chai';
 import * as extend from 'extend';
-import {grpc} from 'google-gax';
 import {JSONStreamIterator} from 'length-prefixed-json-stream';
 import {Duplex, PassThrough} from 'stream';
 import * as through2 from 'through2';
 import {firestore, google} from '../../protos/firestore_v1_proto_api';
-
+import type {grpc} from 'google-gax';
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
 import {Firestore, QueryDocumentSnapshot} from '../../src';
@@ -35,7 +34,11 @@ import {GapicClient} from '../../src/types';
 
 import api = proto.google.firestore.v1;
 
-const SSL_CREDENTIALS = grpc.credentials.createInsecure();
+let SSL_CREDENTIALS: grpc.ChannelCredentials | null = null;
+if (!process.env.USE_REST_FALLBACK) {
+  const grpc = require('google-gax').grpc;
+  SSL_CREDENTIALS = grpc.credentials.createInsecure();
+}
 
 export const PROJECT_ID = 'test-project';
 export const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -62,7 +65,7 @@ export function createInstance(
   firestoreSettings?: Settings
 ): Promise<Firestore> {
   const initializationOptions = {
-    ...{projectId: PROJECT_ID, sslCreds: SSL_CREDENTIALS},
+    ...{projectId: PROJECT_ID, sslCreds: SSL_CREDENTIALS!},
     ...firestoreSettings,
   };
 

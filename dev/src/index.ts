@@ -16,7 +16,9 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions} from 'google-gax';
+import type {CallOptions} from 'google-gax';
+import type * as googleGax from 'google-gax';
+import type * as googleGaxFallback from 'google-gax/build/src/fallback';
 import {Duplex, PassThrough, Transform} from 'stream';
 
 import {URL} from 'url';
@@ -394,6 +396,16 @@ export class Firestore implements firestore.Firestore {
   private _clientPool: ClientPool<GapicClient>;
 
   /**
+   * Preloaded instance of google-gax (full module, with gRPC support).
+   */
+  private _gax?: typeof googleGax;
+
+  /**
+   * Preloaded instance of google-gax HTTP fallback implementation (no gRPC).
+   */
+  private _gaxFallback?: typeof googleGaxFallback;
+
+  /**
    * The configuration options for the GAPIC client.
    * @private
    * @internal
@@ -541,20 +553,41 @@ export class Firestore implements firestore.Firestore {
         const useFallback =
           !this._settings.preferRest || requiresGrpc ? false : 'rest';
 
+        let gax: typeof googleGax | typeof googleGaxFallback;
+        if (useFallback) {
+          if (!this._gaxFallback) {
+            gax = this._gaxFallback = require('google-gax/build/src/fallback');
+          } else {
+            gax = this._gaxFallback;
+          }
+        } else {
+          if (!this._gax) {
+            gax = this._gax = require('google-gax');
+          } else {
+            gax = this._gax;
+          }
+        }
+
         if (this._settings.ssl === false) {
           const grpcModule = this._settings.grpc ?? require('google-gax').grpc;
           const sslCreds = grpcModule.credentials.createInsecure();
 
-          client = new module.exports.v1({
-            sslCreds,
-            ...this._settings,
-            fallback: useFallback,
-          });
+          client = new module.exports.v1(
+            {
+              sslCreds,
+              ...this._settings,
+              fallback: useFallback,
+            },
+            gax
+          );
         } else {
-          client = new module.exports.v1({
-            ...this._settings,
-            fallback: useFallback,
-          });
+          client = new module.exports.v1(
+            {
+              ...this._settings,
+              fallback: useFallback,
+            },
+            gax
+          );
         }
 
         logger('Firestore', null, 'Initialized Firestore GAPIC Client');
@@ -1431,10 +1464,11 @@ export class Firestore implements firestore.Firestore {
 
     if (retryCodes) {
       const retryParams = getRetryParams(methodName);
-      callOptions.retry = new (require('google-gax').RetryOptions)(
-        retryCodes,
-        retryParams
-      );
+      callOptions.retry =
+        new (require('google-gax/build/src/fallback').RetryOptions)(
+          retryCodes,
+          retryParams
+        );
     }
 
     return callOptions;
