@@ -2404,6 +2404,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     }, onError || console.error);
   }
 
+  count(): AggregateQuery {
+    //TODO(tomandersen)
+    return null as any;
+  }
+
   /**
    * Returns a function that can be used to sort QueryDocumentSnapshots
    * according to the sort criteria of this query.
@@ -2829,6 +2834,45 @@ export class CollectionReference<T = firestore.DocumentData>
       this._resourcePath,
       converter ?? defaultConverter()
     );
+  }
+}
+
+export class AggregateQuery implements firestore.AggregateQuery {
+  get query(): Query<firestore.DocumentData> {
+    //TODO(tomandersen)
+    return null as any;
+  }
+
+  get(): Promise<FirebaseFirestore.AggregateQuerySnapshot> {
+    //TODO(tomandersen)
+    return null as any;
+  }
+
+  isEqual(other: FirebaseFirestore.AggregateQuery): boolean {
+    //TODO(tomandersen)
+    return null as any;
+  }
+}
+
+export class AggregateQuerySnapshot implements firestore.AggregateQuerySnapshot {
+  get query(): firestore.AggregateQuery {
+    //TODO(tomandersen)
+    return null as any;
+  }
+
+  get readTime(): firestore.Timestamp {
+    //TODO(tomandersen)
+    return null as any;
+  }
+
+  getCount(): number {
+    //TODO(tomandersen)
+    return null as any;
+  }
+
+  isEqual(other: FirebaseFirestore.AggregateQuerySnapshot): boolean {
+    //TODO(tomandersen)
+    return null as any;
   }
 }
 

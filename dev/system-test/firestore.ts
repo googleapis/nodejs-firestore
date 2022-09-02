@@ -17,6 +17,7 @@ import {
   DocumentData,
   WithFieldValue,
   PartialWithFieldValue,
+  AggregateQuery,
   SetOptions,
   Settings,
 } from '@google-cloud/firestore';
@@ -2139,6 +2140,37 @@ describe('Query class', () => {
     });
   });
 });
+
+describe.only('Transaction class (with Emulator)', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+
+  beforeEach(() => {
+    console.log("AAAAAAAAAAAAAAAA");
+    firestore = new Firestore({
+      host: 'localhost',
+      port: 8080,
+      projectId: 'my-cool-project'
+    });
+    console.log("BBBBBBBBBBBBB");
+    randomCol = getTestRoot(firestore);
+    console.log("CCCCCCCCCCCCCCCCC");
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('count', async () => {
+    console.log("AAAAAAAAAAAAAAAA");
+    const ref = randomCol.doc('doc');
+    console.log("AAAAAAAAAAAAAAAA");
+    const count = randomCol.where('foo', '==', 'bar').count();
+    console.log("AAAAAAAAAAAAAAAA");
+    await ref.set({foo: 'bar'});
+    console.log("AAAAAAAAAAAAAAAA");
+    //const res = await firestore.runTransaction(f => f.get(count));
+    //expect(res.getCount()).to.equal(1);
+  });
+})
 
 describe('Transaction class', () => {
   let firestore: Firestore;

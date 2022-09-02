@@ -590,7 +590,7 @@ declare namespace FirebaseFirestore {
      * @param aggregateQuery An aggregate query to execute.
      * @return An AggregateQuerySnapshot for the retrieved data.
      */
-    get<T>(aggregateQuery: AggregateQuery): Promise<AggregateQuerySnapshot<T>>;
+    get(aggregateQuery: AggregateQuery): Promise<AggregateQuerySnapshot>;
 
     /**
      * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
