@@ -4,6 +4,22 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.1.0](https://github.com/googleapis/nodejs-firestore/compare/v6.0.0...v6.1.0) (2022-09-07)
+
+
+### Features
+
+* Accept google-gax instance as a parameter ([#1757](https://github.com/googleapis/nodejs-firestore/issues/1757)) ([ef59a22](https://github.com/googleapis/nodejs-firestore/commit/ef59a22a8abd894d4d3e8b05f075f510de26019f))
+
+
+### Bug Fixes
+
+* Better support for fallback mode ([#1756](https://github.com/googleapis/nodejs-firestore/issues/1756)) ([a029a6e](https://github.com/googleapis/nodejs-firestore/commit/a029a6e602ef5ed6553ecc7022623fcd81763c7e))
+* Don't allow serialization of firestore settings ([#1742](https://github.com/googleapis/nodejs-firestore/issues/1742)) ([fa0ad66](https://github.com/googleapis/nodejs-firestore/commit/fa0ad66bc7e4a0c46f1ae5ca10b2a6f3a528ab6f))
+* Pin Typescript to prevent new type checking. ([#1764](https://github.com/googleapis/nodejs-firestore/issues/1764)) ([dd01b27](https://github.com/googleapis/nodejs-firestore/commit/dd01b27022e35ddf6793d71451d0b86f549288fe))
+* Update GAX ([#1758](https://github.com/googleapis/nodejs-firestore/issues/1758)) ([1931415](https://github.com/googleapis/nodejs-firestore/commit/19314159a9907dfea8301b41d8050b0d2e783dd8))
+* Version 7 of protobufjs broke the update.sh script. Added path to built in protobuf. ([#1766](https://github.com/googleapis/nodejs-firestore/issues/1766)) ([40f1db3](https://github.com/googleapis/nodejs-firestore/commit/40f1db379ba01174471bbb91cdddc88f929c9b46))
+
 ## [6.0.0](https://github.com/googleapis/nodejs-firestore/compare/v5.0.2...v6.0.0) (2022-07-22)
 
 
