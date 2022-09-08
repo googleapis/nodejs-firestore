@@ -38,7 +38,7 @@ PBTS="$(npm bin)/pbts"
 pushd "$WORK_DIR"
 
 # Clone necessary git repos.
-git clone --depth 1 https://github.com/googleapis/googleapis.git
+git clone -b preview --depth 1 https://github.com/googleapis/googleapis.git
 git clone --depth 1 https://github.com/google/protobuf.git
 
 # Copy necessary protos.
