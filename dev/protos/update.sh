@@ -71,7 +71,7 @@ cp googleapis/google/type/latlng.proto \
    "${PROTOS_DIR}/google/type/"
 
 mkdir -p "${PROTOS_DIR}/google/protobuf"
-cp protobuf/src/google/protobuf/{any,empty,field_mask,struct,timestamp,wrappers}.proto \
+cp protobuf/src/google/protobuf/{any,descriptor,empty,field_mask,struct,timestamp,wrappers}.proto \
    "${PROTOS_DIR}/google/protobuf/"
 
 popd
@@ -80,7 +80,6 @@ popd
 PBJS_ARGS=( --proto_path=. \
   --js_out=import_style=commonjs,binary:library \
   --target=static-module \
-  --path="$(npm root)/protobufjs" \
   --no-create \
   --no-encode \
   --no-decode \
@@ -118,14 +117,12 @@ perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
 
 "${PBJS}" --proto_path=. --target=json -o v1.json \
   -r firestore_v1 \
-  --path="$(npm root)/protobufjs" \
   "${PROTOS_DIR}/google/firestore/v1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
 
 "${PBJS}" --proto_path=. --target=json -o v1_admin.json \
   -r firestore_admin_v1 \
-  --path="$(npm root)/protobufjs" \
   "${PROTOS_DIR}/google/firestore/admin/v1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
@@ -133,7 +130,6 @@ perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
 
 "${PBJS}" --proto_path=. --target=json -o v1beta1.json \
   -r firestore_v1beta1 \
-  --path="$(npm root)/protobufjs" \
   "${PROTOS_DIR}/google/firestore/v1beta1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
