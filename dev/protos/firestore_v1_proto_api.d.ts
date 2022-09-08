@@ -3221,6 +3221,54 @@ export namespace google {
         /** Namespace v1. */
         namespace v1 {
 
+            /** Properties of an AggregationResult. */
+            interface IAggregationResult {
+
+                /** AggregationResult aggregateFields */
+                aggregateFields?: ({ [k: string]: google.firestore.v1.IValue }|null);
+            }
+
+            /** Represents an AggregationResult. */
+            class AggregationResult implements IAggregationResult {
+
+                /**
+                 * Constructs a new AggregationResult.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IAggregationResult);
+
+                /** AggregationResult aggregateFields. */
+                public aggregateFields: { [k: string]: google.firestore.v1.IValue };
+
+                /**
+                 * Creates an AggregationResult message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns AggregationResult
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.AggregationResult;
+
+                /**
+                 * Creates a plain object from an AggregationResult message. Also converts values to other types if specified.
+                 * @param message AggregationResult
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.AggregationResult, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this AggregationResult to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for AggregationResult
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
             /** Properties of a DocumentMask. */
             interface IDocumentMask {
 
@@ -3896,6 +3944,20 @@ export namespace google {
                 public runQuery(request: google.firestore.v1.IRunQueryRequest): Promise<google.firestore.v1.RunQueryResponse>;
 
                 /**
+                 * Calls RunAggregationQuery.
+                 * @param request RunAggregationQueryRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and RunAggregationQueryResponse
+                 */
+                public runAggregationQuery(request: google.firestore.v1.IRunAggregationQueryRequest, callback: google.firestore.v1.Firestore.RunAggregationQueryCallback): void;
+
+                /**
+                 * Calls RunAggregationQuery.
+                 * @param request RunAggregationQueryRequest message or plain object
+                 * @returns Promise
+                 */
+                public runAggregationQuery(request: google.firestore.v1.IRunAggregationQueryRequest): Promise<google.firestore.v1.RunAggregationQueryResponse>;
+
+                /**
                  * Calls PartitionQuery.
                  * @param request PartitionQueryRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and PartitionQueryResponse
@@ -4044,6 +4106,13 @@ export namespace google {
                  * @param [response] RunQueryResponse
                  */
                 type RunQueryCallback = (error: (Error|null), response?: google.firestore.v1.RunQueryResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1.Firestore#runAggregationQuery}.
+                 * @param error Error, if any
+                 * @param [response] RunAggregationQueryResponse
+                 */
+                type RunAggregationQueryCallback = (error: (Error|null), response?: google.firestore.v1.RunAggregationQueryResponse) => void;
 
                 /**
                  * Callback as used by {@link google.firestore.v1.Firestore#partitionQuery}.
@@ -5069,6 +5138,144 @@ export namespace google {
 
                 /**
                  * Gets the default type url for RunQueryResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a RunAggregationQueryRequest. */
+            interface IRunAggregationQueryRequest {
+
+                /** RunAggregationQueryRequest parent */
+                parent?: (string|null);
+
+                /** RunAggregationQueryRequest structuredAggregationQuery */
+                structuredAggregationQuery?: (google.firestore.v1.IStructuredAggregationQuery|null);
+
+                /** RunAggregationQueryRequest transaction */
+                transaction?: (Uint8Array|null);
+
+                /** RunAggregationQueryRequest newTransaction */
+                newTransaction?: (google.firestore.v1.ITransactionOptions|null);
+
+                /** RunAggregationQueryRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a RunAggregationQueryRequest. */
+            class RunAggregationQueryRequest implements IRunAggregationQueryRequest {
+
+                /**
+                 * Constructs a new RunAggregationQueryRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IRunAggregationQueryRequest);
+
+                /** RunAggregationQueryRequest parent. */
+                public parent: string;
+
+                /** RunAggregationQueryRequest structuredAggregationQuery. */
+                public structuredAggregationQuery?: (google.firestore.v1.IStructuredAggregationQuery|null);
+
+                /** RunAggregationQueryRequest transaction. */
+                public transaction?: (Uint8Array|null);
+
+                /** RunAggregationQueryRequest newTransaction. */
+                public newTransaction?: (google.firestore.v1.ITransactionOptions|null);
+
+                /** RunAggregationQueryRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunAggregationQueryRequest queryType. */
+                public queryType?: "structuredAggregationQuery";
+
+                /** RunAggregationQueryRequest consistencySelector. */
+                public consistencySelector?: ("transaction"|"newTransaction"|"readTime");
+
+                /**
+                 * Creates a RunAggregationQueryRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns RunAggregationQueryRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.RunAggregationQueryRequest;
+
+                /**
+                 * Creates a plain object from a RunAggregationQueryRequest message. Also converts values to other types if specified.
+                 * @param message RunAggregationQueryRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.RunAggregationQueryRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this RunAggregationQueryRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for RunAggregationQueryRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a RunAggregationQueryResponse. */
+            interface IRunAggregationQueryResponse {
+
+                /** RunAggregationQueryResponse result */
+                result?: (google.firestore.v1.IAggregationResult|null);
+
+                /** RunAggregationQueryResponse transaction */
+                transaction?: (Uint8Array|null);
+
+                /** RunAggregationQueryResponse readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a RunAggregationQueryResponse. */
+            class RunAggregationQueryResponse implements IRunAggregationQueryResponse {
+
+                /**
+                 * Constructs a new RunAggregationQueryResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IRunAggregationQueryResponse);
+
+                /** RunAggregationQueryResponse result. */
+                public result?: (google.firestore.v1.IAggregationResult|null);
+
+                /** RunAggregationQueryResponse transaction. */
+                public transaction: Uint8Array;
+
+                /** RunAggregationQueryResponse readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /**
+                 * Creates a RunAggregationQueryResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns RunAggregationQueryResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.RunAggregationQueryResponse;
+
+                /**
+                 * Creates a plain object from a RunAggregationQueryResponse message. Also converts values to other types if specified.
+                 * @param message RunAggregationQueryResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.RunAggregationQueryResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this RunAggregationQueryResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for RunAggregationQueryResponse
                  * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                  * @returns The default type url
                  */
@@ -6270,7 +6477,7 @@ export namespace google {
 
                     /** Operator enum. */
                     type Operator =
-                        "OPERATOR_UNSPECIFIED"| "AND";
+                        "OPERATOR_UNSPECIFIED"| "AND"| "OR";
                 }
 
                 /** Properties of a FieldFilter. */
@@ -6556,6 +6763,174 @@ export namespace google {
                      * @returns The default type url
                      */
                     public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+            }
+
+            /** Properties of a StructuredAggregationQuery. */
+            interface IStructuredAggregationQuery {
+
+                /** StructuredAggregationQuery structuredQuery */
+                structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
+
+                /** StructuredAggregationQuery aggregations */
+                aggregations?: (google.firestore.v1.StructuredAggregationQuery.IAggregation[]|null);
+            }
+
+            /** Represents a StructuredAggregationQuery. */
+            class StructuredAggregationQuery implements IStructuredAggregationQuery {
+
+                /**
+                 * Constructs a new StructuredAggregationQuery.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IStructuredAggregationQuery);
+
+                /** StructuredAggregationQuery structuredQuery. */
+                public structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
+
+                /** StructuredAggregationQuery aggregations. */
+                public aggregations: google.firestore.v1.StructuredAggregationQuery.IAggregation[];
+
+                /** StructuredAggregationQuery queryType. */
+                public queryType?: "structuredQuery";
+
+                /**
+                 * Creates a StructuredAggregationQuery message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns StructuredAggregationQuery
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery;
+
+                /**
+                 * Creates a plain object from a StructuredAggregationQuery message. Also converts values to other types if specified.
+                 * @param message StructuredAggregationQuery
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.StructuredAggregationQuery, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this StructuredAggregationQuery to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for StructuredAggregationQuery
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            namespace StructuredAggregationQuery {
+
+                /** Properties of an Aggregation. */
+                interface IAggregation {
+
+                    /** Aggregation count */
+                    count?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null);
+
+                    /** Aggregation alias */
+                    alias?: (string|null);
+                }
+
+                /** Represents an Aggregation. */
+                class Aggregation implements IAggregation {
+
+                    /**
+                     * Constructs a new Aggregation.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredAggregationQuery.IAggregation);
+
+                    /** Aggregation count. */
+                    public count?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null);
+
+                    /** Aggregation alias. */
+                    public alias: string;
+
+                    /** Aggregation operator. */
+                    public operator?: "count";
+
+                    /**
+                     * Creates an Aggregation message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Aggregation
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery.Aggregation;
+
+                    /**
+                     * Creates a plain object from an Aggregation message. Also converts values to other types if specified.
+                     * @param message Aggregation
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredAggregationQuery.Aggregation, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Aggregation to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for Aggregation
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                namespace Aggregation {
+
+                    /** Properties of a Count. */
+                    interface ICount {
+
+                        /** Count upTo */
+                        upTo?: (google.protobuf.IInt64Value|null);
+                    }
+
+                    /** Represents a Count. */
+                    class Count implements ICount {
+
+                        /**
+                         * Constructs a new Count.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount);
+
+                        /** Count upTo. */
+                        public upTo?: (google.protobuf.IInt64Value|null);
+
+                        /**
+                         * Creates a Count message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns Count
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery.Aggregation.Count;
+
+                        /**
+                         * Creates a plain object from a Count message. Also converts values to other types if specified.
+                         * @param message Count
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.v1.StructuredAggregationQuery.Aggregation.Count, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this Count to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for Count
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
                 }
             }
 

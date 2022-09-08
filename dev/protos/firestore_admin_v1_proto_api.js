@@ -8143,6 +8143,39 @@
                          */
     
                         /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createDatabase}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef CreateDatabaseCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.longrunning.Operation} [response] Operation
+                         */
+    
+                        /**
+                         * Calls CreateDatabase.
+                         * @function createDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICreateDatabaseRequest} request CreateDatabaseRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.CreateDatabaseCallback} callback Node-style callback called with the error, if any, and Operation
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.createDatabase = function createDatabase(request, callback) {
+                            return this.rpcCall(createDatabase, $root.google.firestore.admin.v1.CreateDatabaseRequest, $root.google.longrunning.Operation, request, callback);
+                        }, "name", { value: "CreateDatabase" });
+    
+                        /**
+                         * Calls CreateDatabase.
+                         * @function createDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICreateDatabaseRequest} request CreateDatabaseRequest message or plain object
+                         * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
                          * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getDatabase}.
                          * @memberof google.firestore.admin.v1.FirestoreAdmin
                          * @typedef GetDatabaseCallback
@@ -8340,6 +8373,136 @@
                         };
     
                         return ListDatabasesRequest;
+                    })();
+    
+                    v1.CreateDatabaseRequest = (function() {
+    
+                        /**
+                         * Properties of a CreateDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface ICreateDatabaseRequest
+                         * @property {string|null} [parent] CreateDatabaseRequest parent
+                         * @property {google.firestore.admin.v1.IDatabase|null} [database] CreateDatabaseRequest database
+                         * @property {string|null} [databaseId] CreateDatabaseRequest databaseId
+                         */
+    
+                        /**
+                         * Constructs a new CreateDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a CreateDatabaseRequest.
+                         * @implements ICreateDatabaseRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.ICreateDatabaseRequest=} [properties] Properties to set
+                         */
+                        function CreateDatabaseRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * CreateDatabaseRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @instance
+                         */
+                        CreateDatabaseRequest.prototype.parent = "";
+    
+                        /**
+                         * CreateDatabaseRequest database.
+                         * @member {google.firestore.admin.v1.IDatabase|null|undefined} database
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @instance
+                         */
+                        CreateDatabaseRequest.prototype.database = null;
+    
+                        /**
+                         * CreateDatabaseRequest databaseId.
+                         * @member {string} databaseId
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @instance
+                         */
+                        CreateDatabaseRequest.prototype.databaseId = "";
+    
+                        /**
+                         * Creates a CreateDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.CreateDatabaseRequest} CreateDatabaseRequest
+                         */
+                        CreateDatabaseRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.CreateDatabaseRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.CreateDatabaseRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            if (object.database != null) {
+                                if (typeof object.database !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CreateDatabaseRequest.database: object expected");
+                                message.database = $root.google.firestore.admin.v1.Database.fromObject(object.database);
+                            }
+                            if (object.databaseId != null)
+                                message.databaseId = String(object.databaseId);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a CreateDatabaseRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.CreateDatabaseRequest} message CreateDatabaseRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        CreateDatabaseRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.parent = "";
+                                object.database = null;
+                                object.databaseId = "";
+                            }
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            if (message.database != null && message.hasOwnProperty("database"))
+                                object.database = $root.google.firestore.admin.v1.Database.toObject(message.database, options);
+                            if (message.databaseId != null && message.hasOwnProperty("databaseId"))
+                                object.databaseId = message.databaseId;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this CreateDatabaseRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        CreateDatabaseRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for CreateDatabaseRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        CreateDatabaseRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.CreateDatabaseRequest";
+                        };
+    
+                        return CreateDatabaseRequest;
                     })();
     
                     v1.ListDatabasesResponse = (function() {

@@ -1475,6 +1475,34 @@
                             }
                           ]
                         },
+                        "CreateDatabase": {
+                          "requestType": "CreateDatabaseRequest",
+                          "responseType": "google.longrunning.Operation",
+                          "options": {
+                            "(google.api.http).post": "/v1/{parent=projects/*}/databases",
+                            "(google.api.http).body": "database",
+                            "(google.api.method_signature)": "parent,database,database_id",
+                            "(google.longrunning.operation_info).response_type": "Database",
+                            "(google.longrunning.operation_info).metadata_type": "CreateDatabaseMetadata"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{parent=projects/*}/databases",
+                                "body": "database"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "parent,database,database_id"
+                            },
+                            {
+                              "(google.longrunning.operation_info)": {
+                                "response_type": "Database",
+                                "metadata_type": "CreateDatabaseMetadata"
+                              }
+                            }
+                          ]
+                        },
                         "GetDatabase": {
                           "requestType": "GetDatabaseRequest",
                           "responseType": "Database",
@@ -1549,6 +1577,32 @@
                           "options": {
                             "(google.api.field_behavior)": "REQUIRED",
                             "(google.api.resource_reference).child_type": "firestore.googleapis.com/Database"
+                          }
+                        }
+                      }
+                    },
+                    "CreateDatabaseRequest": {
+                      "fields": {
+                        "parent": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).child_type": "firestore.googleapis.com/Database"
+                          }
+                        },
+                        "database": {
+                          "type": "Database",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "databaseId": {
+                          "type": "string",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
                           }
                         }
                       }

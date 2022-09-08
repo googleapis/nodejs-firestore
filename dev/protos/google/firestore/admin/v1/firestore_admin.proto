@@ -203,6 +203,19 @@ service FirestoreAdmin {
     };
   }
 
+  // Create a database.
+  rpc CreateDatabase(CreateDatabaseRequest) returns (google.longrunning.Operation) {
+    option (google.api.http) = {
+      post: "/v1/{parent=projects/*}/databases"
+      body: "database"
+    };
+    option (google.api.method_signature) = "parent,database,database_id";
+    option (google.longrunning.operation_info) = {
+      response_type: "Database"
+      metadata_type: "CreateDatabaseMetadata"
+    };
+  }
+
   // Gets information about a database.
   rpc GetDatabase(GetDatabaseRequest) returns (Database) {
     option (google.api.http) = {
@@ -243,6 +256,31 @@ message ListDatabasesRequest {
       child_type: "firestore.googleapis.com/Database"
     }
   ];
+}
+
+// The request for [FirestoreAdmin.CreateDatabase][google.firestore.admin.v1.FirestoreAdmin.CreateDatabase].
+message CreateDatabaseRequest {
+  // Required. A parent name of the form
+  // `projects/{project_id}`
+  string parent = 1 [
+    (google.api.field_behavior) = REQUIRED,
+    (google.api.resource_reference) = {
+      child_type: "firestore.googleapis.com/Database"
+    }
+  ];
+
+  // Required. The Database to create.
+  Database database = 2 [(google.api.field_behavior) = REQUIRED];
+
+  // Required. The ID to use for the database, which will become the final component of
+  // the database's resource name.
+  //
+  // This value should be 4-63 characters. Valid characters are /[a-z][0-9]-/
+  // with first character a letter and the last a letter or a number. Must not
+  // be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+  //
+  // "(default)" database id is also valid.
+  string database_id = 3 [(google.api.field_behavior) = REQUIRED];
 }
 
 // The list of databases for a project.

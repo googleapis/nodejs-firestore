@@ -3304,6 +3304,20 @@ export namespace google {
                     public importDocuments(request: google.firestore.admin.v1.IImportDocumentsRequest): Promise<google.longrunning.Operation>;
 
                     /**
+                     * Calls CreateDatabase.
+                     * @param request CreateDatabaseRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public createDatabase(request: google.firestore.admin.v1.ICreateDatabaseRequest, callback: google.firestore.admin.v1.FirestoreAdmin.CreateDatabaseCallback): void;
+
+                    /**
+                     * Calls CreateDatabase.
+                     * @param request CreateDatabaseRequest message or plain object
+                     * @returns Promise
+                     */
+                    public createDatabase(request: google.firestore.admin.v1.ICreateDatabaseRequest): Promise<google.longrunning.Operation>;
+
+                    /**
                      * Calls GetDatabase.
                      * @param request GetDatabaseRequest message or plain object
                      * @param callback Node-style callback called with the error, if any, and Database
@@ -3412,6 +3426,13 @@ export namespace google {
                     type ImportDocumentsCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
 
                     /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createDatabase}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type CreateDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+
+                    /**
                      * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getDatabase}.
                      * @param error Error, if any
                      * @param [response] Database
@@ -3475,6 +3496,66 @@ export namespace google {
 
                     /**
                      * Gets the default type url for ListDatabasesRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a CreateDatabaseRequest. */
+                interface ICreateDatabaseRequest {
+
+                    /** CreateDatabaseRequest parent */
+                    parent?: (string|null);
+
+                    /** CreateDatabaseRequest database */
+                    database?: (google.firestore.admin.v1.IDatabase|null);
+
+                    /** CreateDatabaseRequest databaseId */
+                    databaseId?: (string|null);
+                }
+
+                /** Represents a CreateDatabaseRequest. */
+                class CreateDatabaseRequest implements ICreateDatabaseRequest {
+
+                    /**
+                     * Constructs a new CreateDatabaseRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ICreateDatabaseRequest);
+
+                    /** CreateDatabaseRequest parent. */
+                    public parent: string;
+
+                    /** CreateDatabaseRequest database. */
+                    public database?: (google.firestore.admin.v1.IDatabase|null);
+
+                    /** CreateDatabaseRequest databaseId. */
+                    public databaseId: string;
+
+                    /**
+                     * Creates a CreateDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CreateDatabaseRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.CreateDatabaseRequest;
+
+                    /**
+                     * Creates a plain object from a CreateDatabaseRequest message. Also converts values to other types if specified.
+                     * @param message CreateDatabaseRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.CreateDatabaseRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CreateDatabaseRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CreateDatabaseRequest
                      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                      * @returns The default type url
                      */

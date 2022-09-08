@@ -7920,6 +7920,117 @@
                  */
                 var v1 = {};
     
+                v1.AggregationResult = (function() {
+    
+                    /**
+                     * Properties of an AggregationResult.
+                     * @memberof google.firestore.v1
+                     * @interface IAggregationResult
+                     * @property {Object.<string,google.firestore.v1.IValue>|null} [aggregateFields] AggregationResult aggregateFields
+                     */
+    
+                    /**
+                     * Constructs a new AggregationResult.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents an AggregationResult.
+                     * @implements IAggregationResult
+                     * @constructor
+                     * @param {google.firestore.v1.IAggregationResult=} [properties] Properties to set
+                     */
+                    function AggregationResult(properties) {
+                        this.aggregateFields = {};
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * AggregationResult aggregateFields.
+                     * @member {Object.<string,google.firestore.v1.IValue>} aggregateFields
+                     * @memberof google.firestore.v1.AggregationResult
+                     * @instance
+                     */
+                    AggregationResult.prototype.aggregateFields = $util.emptyObject;
+    
+                    /**
+                     * Creates an AggregationResult message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.AggregationResult
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.AggregationResult} AggregationResult
+                     */
+                    AggregationResult.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.AggregationResult)
+                            return object;
+                        var message = new $root.google.firestore.v1.AggregationResult();
+                        if (object.aggregateFields) {
+                            if (typeof object.aggregateFields !== "object")
+                                throw TypeError(".google.firestore.v1.AggregationResult.aggregateFields: object expected");
+                            message.aggregateFields = {};
+                            for (var keys = Object.keys(object.aggregateFields), i = 0; i < keys.length; ++i) {
+                                if (typeof object.aggregateFields[keys[i]] !== "object")
+                                    throw TypeError(".google.firestore.v1.AggregationResult.aggregateFields: object expected");
+                                message.aggregateFields[keys[i]] = $root.google.firestore.v1.Value.fromObject(object.aggregateFields[keys[i]]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an AggregationResult message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.AggregationResult
+                     * @static
+                     * @param {google.firestore.v1.AggregationResult} message AggregationResult
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    AggregationResult.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.objects || options.defaults)
+                            object.aggregateFields = {};
+                        var keys2;
+                        if (message.aggregateFields && (keys2 = Object.keys(message.aggregateFields)).length) {
+                            object.aggregateFields = {};
+                            for (var j = 0; j < keys2.length; ++j)
+                                object.aggregateFields[keys2[j]] = $root.google.firestore.v1.Value.toObject(message.aggregateFields[keys2[j]], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this AggregationResult to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.AggregationResult
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    AggregationResult.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for AggregationResult
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.AggregationResult
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    AggregationResult.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.AggregationResult";
+                    };
+    
+                    return AggregationResult;
+                })();
+    
                 v1.DocumentMask = (function() {
     
                     /**
@@ -9519,6 +9630,39 @@
                      * @instance
                      * @param {google.firestore.v1.IRunQueryRequest} request RunQueryRequest message or plain object
                      * @returns {Promise<google.firestore.v1.RunQueryResponse>} Promise
+                     * @variation 2
+                     */
+    
+                    /**
+                     * Callback as used by {@link google.firestore.v1.Firestore#runAggregationQuery}.
+                     * @memberof google.firestore.v1.Firestore
+                     * @typedef RunAggregationQueryCallback
+                     * @type {function}
+                     * @param {Error|null} error Error, if any
+                     * @param {google.firestore.v1.RunAggregationQueryResponse} [response] RunAggregationQueryResponse
+                     */
+    
+                    /**
+                     * Calls RunAggregationQuery.
+                     * @function runAggregationQuery
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.IRunAggregationQueryRequest} request RunAggregationQueryRequest message or plain object
+                     * @param {google.firestore.v1.Firestore.RunAggregationQueryCallback} callback Node-style callback called with the error, if any, and RunAggregationQueryResponse
+                     * @returns {undefined}
+                     * @variation 1
+                     */
+                    Object.defineProperty(Firestore.prototype.runAggregationQuery = function runAggregationQuery(request, callback) {
+                        return this.rpcCall(runAggregationQuery, $root.google.firestore.v1.RunAggregationQueryRequest, $root.google.firestore.v1.RunAggregationQueryResponse, request, callback);
+                    }, "name", { value: "RunAggregationQuery" });
+    
+                    /**
+                     * Calls RunAggregationQuery.
+                     * @function runAggregationQuery
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.IRunAggregationQueryRequest} request RunAggregationQueryRequest message or plain object
+                     * @returns {Promise<google.firestore.v1.RunAggregationQueryResponse>} Promise
                      * @variation 2
                      */
     
@@ -12074,6 +12218,347 @@
                     };
     
                     return RunQueryResponse;
+                })();
+    
+                v1.RunAggregationQueryRequest = (function() {
+    
+                    /**
+                     * Properties of a RunAggregationQueryRequest.
+                     * @memberof google.firestore.v1
+                     * @interface IRunAggregationQueryRequest
+                     * @property {string|null} [parent] RunAggregationQueryRequest parent
+                     * @property {google.firestore.v1.IStructuredAggregationQuery|null} [structuredAggregationQuery] RunAggregationQueryRequest structuredAggregationQuery
+                     * @property {Uint8Array|null} [transaction] RunAggregationQueryRequest transaction
+                     * @property {google.firestore.v1.ITransactionOptions|null} [newTransaction] RunAggregationQueryRequest newTransaction
+                     * @property {google.protobuf.ITimestamp|null} [readTime] RunAggregationQueryRequest readTime
+                     */
+    
+                    /**
+                     * Constructs a new RunAggregationQueryRequest.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a RunAggregationQueryRequest.
+                     * @implements IRunAggregationQueryRequest
+                     * @constructor
+                     * @param {google.firestore.v1.IRunAggregationQueryRequest=} [properties] Properties to set
+                     */
+                    function RunAggregationQueryRequest(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * RunAggregationQueryRequest parent.
+                     * @member {string} parent
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @instance
+                     */
+                    RunAggregationQueryRequest.prototype.parent = "";
+    
+                    /**
+                     * RunAggregationQueryRequest structuredAggregationQuery.
+                     * @member {google.firestore.v1.IStructuredAggregationQuery|null|undefined} structuredAggregationQuery
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @instance
+                     */
+                    RunAggregationQueryRequest.prototype.structuredAggregationQuery = null;
+    
+                    /**
+                     * RunAggregationQueryRequest transaction.
+                     * @member {Uint8Array|null|undefined} transaction
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @instance
+                     */
+                    RunAggregationQueryRequest.prototype.transaction = null;
+    
+                    /**
+                     * RunAggregationQueryRequest newTransaction.
+                     * @member {google.firestore.v1.ITransactionOptions|null|undefined} newTransaction
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @instance
+                     */
+                    RunAggregationQueryRequest.prototype.newTransaction = null;
+    
+                    /**
+                     * RunAggregationQueryRequest readTime.
+                     * @member {google.protobuf.ITimestamp|null|undefined} readTime
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @instance
+                     */
+                    RunAggregationQueryRequest.prototype.readTime = null;
+    
+                    // OneOf field names bound to virtual getters and setters
+                    var $oneOfFields;
+    
+                    /**
+                     * RunAggregationQueryRequest queryType.
+                     * @member {"structuredAggregationQuery"|undefined} queryType
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @instance
+                     */
+                    Object.defineProperty(RunAggregationQueryRequest.prototype, "queryType", {
+                        get: $util.oneOfGetter($oneOfFields = ["structuredAggregationQuery"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
+                     * RunAggregationQueryRequest consistencySelector.
+                     * @member {"transaction"|"newTransaction"|"readTime"|undefined} consistencySelector
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @instance
+                     */
+                    Object.defineProperty(RunAggregationQueryRequest.prototype, "consistencySelector", {
+                        get: $util.oneOfGetter($oneOfFields = ["transaction", "newTransaction", "readTime"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
+                     * Creates a RunAggregationQueryRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.RunAggregationQueryRequest} RunAggregationQueryRequest
+                     */
+                    RunAggregationQueryRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.RunAggregationQueryRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.RunAggregationQueryRequest();
+                        if (object.parent != null)
+                            message.parent = String(object.parent);
+                        if (object.structuredAggregationQuery != null) {
+                            if (typeof object.structuredAggregationQuery !== "object")
+                                throw TypeError(".google.firestore.v1.RunAggregationQueryRequest.structuredAggregationQuery: object expected");
+                            message.structuredAggregationQuery = $root.google.firestore.v1.StructuredAggregationQuery.fromObject(object.structuredAggregationQuery);
+                        }
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length >= 0)
+                                message.transaction = object.transaction;
+                        if (object.newTransaction != null) {
+                            if (typeof object.newTransaction !== "object")
+                                throw TypeError(".google.firestore.v1.RunAggregationQueryRequest.newTransaction: object expected");
+                            message.newTransaction = $root.google.firestore.v1.TransactionOptions.fromObject(object.newTransaction);
+                        }
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.RunAggregationQueryRequest.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a RunAggregationQueryRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @static
+                     * @param {google.firestore.v1.RunAggregationQueryRequest} message RunAggregationQueryRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    RunAggregationQueryRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults)
+                            object.parent = "";
+                        if (message.parent != null && message.hasOwnProperty("parent"))
+                            object.parent = message.parent;
+                        if (message.structuredAggregationQuery != null && message.hasOwnProperty("structuredAggregationQuery")) {
+                            object.structuredAggregationQuery = $root.google.firestore.v1.StructuredAggregationQuery.toObject(message.structuredAggregationQuery, options);
+                            if (options.oneofs)
+                                object.queryType = "structuredAggregationQuery";
+                        }
+                        if (message.transaction != null && message.hasOwnProperty("transaction")) {
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                            if (options.oneofs)
+                                object.consistencySelector = "transaction";
+                        }
+                        if (message.newTransaction != null && message.hasOwnProperty("newTransaction")) {
+                            object.newTransaction = $root.google.firestore.v1.TransactionOptions.toObject(message.newTransaction, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "newTransaction";
+                        }
+                        if (message.readTime != null && message.hasOwnProperty("readTime")) {
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "readTime";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this RunAggregationQueryRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    RunAggregationQueryRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for RunAggregationQueryRequest
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    RunAggregationQueryRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.RunAggregationQueryRequest";
+                    };
+    
+                    return RunAggregationQueryRequest;
+                })();
+    
+                v1.RunAggregationQueryResponse = (function() {
+    
+                    /**
+                     * Properties of a RunAggregationQueryResponse.
+                     * @memberof google.firestore.v1
+                     * @interface IRunAggregationQueryResponse
+                     * @property {google.firestore.v1.IAggregationResult|null} [result] RunAggregationQueryResponse result
+                     * @property {Uint8Array|null} [transaction] RunAggregationQueryResponse transaction
+                     * @property {google.protobuf.ITimestamp|null} [readTime] RunAggregationQueryResponse readTime
+                     */
+    
+                    /**
+                     * Constructs a new RunAggregationQueryResponse.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a RunAggregationQueryResponse.
+                     * @implements IRunAggregationQueryResponse
+                     * @constructor
+                     * @param {google.firestore.v1.IRunAggregationQueryResponse=} [properties] Properties to set
+                     */
+                    function RunAggregationQueryResponse(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * RunAggregationQueryResponse result.
+                     * @member {google.firestore.v1.IAggregationResult|null|undefined} result
+                     * @memberof google.firestore.v1.RunAggregationQueryResponse
+                     * @instance
+                     */
+                    RunAggregationQueryResponse.prototype.result = null;
+    
+                    /**
+                     * RunAggregationQueryResponse transaction.
+                     * @member {Uint8Array} transaction
+                     * @memberof google.firestore.v1.RunAggregationQueryResponse
+                     * @instance
+                     */
+                    RunAggregationQueryResponse.prototype.transaction = $util.newBuffer([]);
+    
+                    /**
+                     * RunAggregationQueryResponse readTime.
+                     * @member {google.protobuf.ITimestamp|null|undefined} readTime
+                     * @memberof google.firestore.v1.RunAggregationQueryResponse
+                     * @instance
+                     */
+                    RunAggregationQueryResponse.prototype.readTime = null;
+    
+                    /**
+                     * Creates a RunAggregationQueryResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.RunAggregationQueryResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.RunAggregationQueryResponse} RunAggregationQueryResponse
+                     */
+                    RunAggregationQueryResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.RunAggregationQueryResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.RunAggregationQueryResponse();
+                        if (object.result != null) {
+                            if (typeof object.result !== "object")
+                                throw TypeError(".google.firestore.v1.RunAggregationQueryResponse.result: object expected");
+                            message.result = $root.google.firestore.v1.AggregationResult.fromObject(object.result);
+                        }
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length >= 0)
+                                message.transaction = object.transaction;
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.RunAggregationQueryResponse.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a RunAggregationQueryResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.RunAggregationQueryResponse
+                     * @static
+                     * @param {google.firestore.v1.RunAggregationQueryResponse} message RunAggregationQueryResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    RunAggregationQueryResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.result = null;
+                            if (options.bytes === String)
+                                object.transaction = "";
+                            else {
+                                object.transaction = [];
+                                if (options.bytes !== Array)
+                                    object.transaction = $util.newBuffer(object.transaction);
+                            }
+                            object.readTime = null;
+                        }
+                        if (message.result != null && message.hasOwnProperty("result"))
+                            object.result = $root.google.firestore.v1.AggregationResult.toObject(message.result, options);
+                        if (message.transaction != null && message.hasOwnProperty("transaction"))
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                        if (message.readTime != null && message.hasOwnProperty("readTime"))
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this RunAggregationQueryResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.RunAggregationQueryResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    RunAggregationQueryResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for RunAggregationQueryResponse
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.RunAggregationQueryResponse
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    RunAggregationQueryResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.RunAggregationQueryResponse";
+                    };
+    
+                    return RunAggregationQueryResponse;
                 })();
     
                 v1.PartitionQueryRequest = (function() {
@@ -14955,6 +15440,10 @@
                             case 1:
                                 message.op = 1;
                                 break;
+                            case "OR":
+                            case 2:
+                                message.op = 2;
+                                break;
                             }
                             if (object.filters) {
                                 if (!Array.isArray(object.filters))
@@ -15028,11 +15517,13 @@
                          * @enum {string}
                          * @property {string} OPERATOR_UNSPECIFIED=OPERATOR_UNSPECIFIED OPERATOR_UNSPECIFIED value
                          * @property {string} AND=AND AND value
+                         * @property {string} OR=OR OR value
                          */
                         CompositeFilter.Operator = (function() {
                             var valuesById = {}, values = Object.create(valuesById);
                             values[valuesById[0] = "OPERATOR_UNSPECIFIED"] = "OPERATOR_UNSPECIFIED";
                             values[valuesById[1] = "AND"] = "AND";
+                            values[valuesById[2] = "OR"] = "OR";
                             return values;
                         })();
     
@@ -15790,6 +16281,381 @@
                     })();
     
                     return StructuredQuery;
+                })();
+    
+                v1.StructuredAggregationQuery = (function() {
+    
+                    /**
+                     * Properties of a StructuredAggregationQuery.
+                     * @memberof google.firestore.v1
+                     * @interface IStructuredAggregationQuery
+                     * @property {google.firestore.v1.IStructuredQuery|null} [structuredQuery] StructuredAggregationQuery structuredQuery
+                     * @property {Array.<google.firestore.v1.StructuredAggregationQuery.IAggregation>|null} [aggregations] StructuredAggregationQuery aggregations
+                     */
+    
+                    /**
+                     * Constructs a new StructuredAggregationQuery.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a StructuredAggregationQuery.
+                     * @implements IStructuredAggregationQuery
+                     * @constructor
+                     * @param {google.firestore.v1.IStructuredAggregationQuery=} [properties] Properties to set
+                     */
+                    function StructuredAggregationQuery(properties) {
+                        this.aggregations = [];
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * StructuredAggregationQuery structuredQuery.
+                     * @member {google.firestore.v1.IStructuredQuery|null|undefined} structuredQuery
+                     * @memberof google.firestore.v1.StructuredAggregationQuery
+                     * @instance
+                     */
+                    StructuredAggregationQuery.prototype.structuredQuery = null;
+    
+                    /**
+                     * StructuredAggregationQuery aggregations.
+                     * @member {Array.<google.firestore.v1.StructuredAggregationQuery.IAggregation>} aggregations
+                     * @memberof google.firestore.v1.StructuredAggregationQuery
+                     * @instance
+                     */
+                    StructuredAggregationQuery.prototype.aggregations = $util.emptyArray;
+    
+                    // OneOf field names bound to virtual getters and setters
+                    var $oneOfFields;
+    
+                    /**
+                     * StructuredAggregationQuery queryType.
+                     * @member {"structuredQuery"|undefined} queryType
+                     * @memberof google.firestore.v1.StructuredAggregationQuery
+                     * @instance
+                     */
+                    Object.defineProperty(StructuredAggregationQuery.prototype, "queryType", {
+                        get: $util.oneOfGetter($oneOfFields = ["structuredQuery"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
+                     * Creates a StructuredAggregationQuery message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.StructuredAggregationQuery
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.StructuredAggregationQuery} StructuredAggregationQuery
+                     */
+                    StructuredAggregationQuery.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.StructuredAggregationQuery)
+                            return object;
+                        var message = new $root.google.firestore.v1.StructuredAggregationQuery();
+                        if (object.structuredQuery != null) {
+                            if (typeof object.structuredQuery !== "object")
+                                throw TypeError(".google.firestore.v1.StructuredAggregationQuery.structuredQuery: object expected");
+                            message.structuredQuery = $root.google.firestore.v1.StructuredQuery.fromObject(object.structuredQuery);
+                        }
+                        if (object.aggregations) {
+                            if (!Array.isArray(object.aggregations))
+                                throw TypeError(".google.firestore.v1.StructuredAggregationQuery.aggregations: array expected");
+                            message.aggregations = [];
+                            for (var i = 0; i < object.aggregations.length; ++i) {
+                                if (typeof object.aggregations[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredAggregationQuery.aggregations: object expected");
+                                message.aggregations[i] = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.fromObject(object.aggregations[i]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a StructuredAggregationQuery message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.StructuredAggregationQuery
+                     * @static
+                     * @param {google.firestore.v1.StructuredAggregationQuery} message StructuredAggregationQuery
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    StructuredAggregationQuery.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.aggregations = [];
+                        if (message.structuredQuery != null && message.hasOwnProperty("structuredQuery")) {
+                            object.structuredQuery = $root.google.firestore.v1.StructuredQuery.toObject(message.structuredQuery, options);
+                            if (options.oneofs)
+                                object.queryType = "structuredQuery";
+                        }
+                        if (message.aggregations && message.aggregations.length) {
+                            object.aggregations = [];
+                            for (var j = 0; j < message.aggregations.length; ++j)
+                                object.aggregations[j] = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.toObject(message.aggregations[j], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this StructuredAggregationQuery to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.StructuredAggregationQuery
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    StructuredAggregationQuery.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for StructuredAggregationQuery
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.StructuredAggregationQuery
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    StructuredAggregationQuery.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.StructuredAggregationQuery";
+                    };
+    
+                    StructuredAggregationQuery.Aggregation = (function() {
+    
+                        /**
+                         * Properties of an Aggregation.
+                         * @memberof google.firestore.v1.StructuredAggregationQuery
+                         * @interface IAggregation
+                         * @property {google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null} [count] Aggregation count
+                         * @property {string|null} [alias] Aggregation alias
+                         */
+    
+                        /**
+                         * Constructs a new Aggregation.
+                         * @memberof google.firestore.v1.StructuredAggregationQuery
+                         * @classdesc Represents an Aggregation.
+                         * @implements IAggregation
+                         * @constructor
+                         * @param {google.firestore.v1.StructuredAggregationQuery.IAggregation=} [properties] Properties to set
+                         */
+                        function Aggregation(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Aggregation count.
+                         * @member {google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null|undefined} count
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @instance
+                         */
+                        Aggregation.prototype.count = null;
+    
+                        /**
+                         * Aggregation alias.
+                         * @member {string} alias
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @instance
+                         */
+                        Aggregation.prototype.alias = "";
+    
+                        // OneOf field names bound to virtual getters and setters
+                        var $oneOfFields;
+    
+                        /**
+                         * Aggregation operator.
+                         * @member {"count"|undefined} operator
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @instance
+                         */
+                        Object.defineProperty(Aggregation.prototype, "operator", {
+                            get: $util.oneOfGetter($oneOfFields = ["count"]),
+                            set: $util.oneOfSetter($oneOfFields)
+                        });
+    
+                        /**
+                         * Creates an Aggregation message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredAggregationQuery.Aggregation} Aggregation
+                         */
+                        Aggregation.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredAggregationQuery.Aggregation)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredAggregationQuery.Aggregation();
+                            if (object.count != null) {
+                                if (typeof object.count !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.count: object expected");
+                                message.count = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Count.fromObject(object.count);
+                            }
+                            if (object.alias != null)
+                                message.alias = String(object.alias);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from an Aggregation message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @static
+                         * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation} message Aggregation
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Aggregation.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.alias = "";
+                            if (message.count != null && message.hasOwnProperty("count")) {
+                                object.count = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Count.toObject(message.count, options);
+                                if (options.oneofs)
+                                    object.operator = "count";
+                            }
+                            if (message.alias != null && message.hasOwnProperty("alias"))
+                                object.alias = message.alias;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Aggregation to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Aggregation.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for Aggregation
+                         * @function getTypeUrl
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        Aggregation.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.v1.StructuredAggregationQuery.Aggregation";
+                        };
+    
+                        Aggregation.Count = (function() {
+    
+                            /**
+                             * Properties of a Count.
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                             * @interface ICount
+                             * @property {google.protobuf.IInt64Value|null} [upTo] Count upTo
+                             */
+    
+                            /**
+                             * Constructs a new Count.
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                             * @classdesc Represents a Count.
+                             * @implements ICount
+                             * @constructor
+                             * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount=} [properties] Properties to set
+                             */
+                            function Count(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * Count upTo.
+                             * @member {google.protobuf.IInt64Value|null|undefined} upTo
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Count
+                             * @instance
+                             */
+                            Count.prototype.upTo = null;
+    
+                            /**
+                             * Creates a Count message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Count
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.v1.StructuredAggregationQuery.Aggregation.Count} Count
+                             */
+                            Count.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Count)
+                                    return object;
+                                var message = new $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Count();
+                                if (object.upTo != null) {
+                                    if (typeof object.upTo !== "object")
+                                        throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.Count.upTo: object expected");
+                                    message.upTo = $root.google.protobuf.Int64Value.fromObject(object.upTo);
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a Count message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Count
+                             * @static
+                             * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation.Count} message Count
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            Count.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.upTo = null;
+                                if (message.upTo != null && message.hasOwnProperty("upTo"))
+                                    object.upTo = $root.google.protobuf.Int64Value.toObject(message.upTo, options);
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this Count to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Count
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            Count.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for Count
+                             * @function getTypeUrl
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Count
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            Count.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.v1.StructuredAggregationQuery.Aggregation.Count";
+                            };
+    
+                            return Count;
+                        })();
+    
+                        return Aggregation;
+                    })();
+    
+                    return StructuredAggregationQuery;
                 })();
     
                 v1.Cursor = (function() {
