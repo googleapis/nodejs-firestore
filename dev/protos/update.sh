@@ -71,7 +71,7 @@ cp googleapis/google/type/latlng.proto \
    "${PROTOS_DIR}/google/type/"
 
 mkdir -p "${PROTOS_DIR}/google/protobuf"
-cp protobuf/src/google/protobuf/{any,empty,field_mask,struct,timestamp,wrappers}.proto \
+cp protobuf/src/google/protobuf/{any,descriptor,empty,field_mask,struct,timestamp,wrappers}.proto \
    "${PROTOS_DIR}/google/protobuf/"
 
 popd
