@@ -135,4 +135,3 @@ perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
 
 node  ../../scripts/license.js *.d.ts *.js ../../build/src/v1beta1/*.d.ts ../../build/src/v1/*.d.ts
-npx minifyProtoJson "$PROTOS_DIR"
