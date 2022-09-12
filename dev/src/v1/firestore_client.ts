@@ -218,6 +218,10 @@ export class FirestoreClient {
         this._gaxModule.StreamType.SERVER_STREAMING,
         opts.fallback === 'rest'
       ),
+      runAggregationQuery: new this._gaxModule.StreamDescriptor(
+        this._gaxModule.StreamType.SERVER_STREAMING,
+        opts.fallback === 'rest'
+      ),
       write: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.BIDI_STREAMING,
         opts.fallback === 'rest'
@@ -323,6 +327,7 @@ export class FirestoreClient {
       'commit',
       'rollback',
       'runQuery',
+      'runAggregationQuery',
       'partitionQuery',
       'write',
       'listen',
@@ -1283,6 +1288,72 @@ export class FirestoreClient {
       });
     this.initialize();
     return this.innerApiCalls.runQuery(request, options);
+  }
+
+  /**
+   * Runs an aggregation query.
+   *
+   * Rather than producing {@link google.firestore.v1.Document|Document} results like {@link google.firestore.v1.Firestore.RunQuery|Firestore.RunQuery},
+   * this API allows running an aggregation to produce a series of
+   * {@link google.firestore.v1.AggregationResult|AggregationResult} server-side.
+   *
+   * High-Level Example:
+   *
+   * ```
+   * -- Return the number of documents in table given a filter.
+   * SELECT COUNT(*) FROM ( SELECT * FROM k where a = true );
+   * ```
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents` or
+   *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
+   *   For example:
+   *   `projects/my-project/databases/my-database/documents` or
+   *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
+   * @param {google.firestore.v1.StructuredAggregationQuery} request.structuredAggregationQuery
+   *   An aggregation query.
+   * @param {Buffer} request.transaction
+   *   Run the aggregation within an already active transaction.
+   *
+   *   The value here is the opaque transaction ID to execute the query in.
+   * @param {google.firestore.v1.TransactionOptions} request.newTransaction
+   *   Starts a new transaction as part of the query, defaulting to read-only.
+   *
+   *   The new transaction ID will be returned as the first response in the
+   *   stream.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Executes the query at the given timestamp.
+   *
+   *   Requires:
+   *
+   *   * Cannot be more than 270 seconds in the past.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Stream}
+   *   An object stream which emits [RunAggregationQueryResponse]{@link google.firestore.v1.RunAggregationQueryResponse} on 'data' event.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#server-streaming)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore.run_aggregation_query.js</caption>
+   * region_tag:firestore_v1_generated_Firestore_RunAggregationQuery_async
+   */
+  runAggregationQuery(
+    request?: protos.google.firestore.v1.IRunAggregationQueryRequest,
+    options?: CallOptions
+  ): gax.CancellableStream {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent || '',
+      });
+    this.initialize();
+    return this.innerApiCalls.runAggregationQuery(request, options);
   }
 
   /**

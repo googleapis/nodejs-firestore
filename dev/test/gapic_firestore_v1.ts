@@ -1486,6 +1486,128 @@ describe('v1.FirestoreClient', () => {
     });
   });
 
+  describe('runAggregationQuery', () => {
+    it('invokes runAggregationQuery without error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.RunAggregationQueryRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedOptions = {
+        otherArgs: {
+          headers: {
+            'x-goog-request-params': expectedHeaderRequestParams,
+          },
+        },
+      };
+      const expectedResponse = generateSampleMessage(
+        new protos.google.firestore.v1.RunAggregationQueryResponse()
+      );
+      client.innerApiCalls.runAggregationQuery =
+        stubServerStreamingCall(expectedResponse);
+      const stream = client.runAggregationQuery(request);
+      const promise = new Promise((resolve, reject) => {
+        stream.on(
+          'data',
+          (
+            response: protos.google.firestore.v1.RunAggregationQueryResponse
+          ) => {
+            resolve(response);
+          }
+        );
+        stream.on('error', (err: Error) => {
+          reject(err);
+        });
+      });
+      const response = await promise;
+      assert.deepStrictEqual(response, expectedResponse);
+      assert(
+        (client.innerApiCalls.runAggregationQuery as SinonStub)
+          .getCall(0)
+          .calledWith(request, expectedOptions)
+      );
+    });
+
+    it('invokes runAggregationQuery with error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.RunAggregationQueryRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedOptions = {
+        otherArgs: {
+          headers: {
+            'x-goog-request-params': expectedHeaderRequestParams,
+          },
+        },
+      };
+      const expectedError = new Error('expected');
+      client.innerApiCalls.runAggregationQuery = stubServerStreamingCall(
+        undefined,
+        expectedError
+      );
+      const stream = client.runAggregationQuery(request);
+      const promise = new Promise((resolve, reject) => {
+        stream.on(
+          'data',
+          (
+            response: protos.google.firestore.v1.RunAggregationQueryResponse
+          ) => {
+            resolve(response);
+          }
+        );
+        stream.on('error', (err: Error) => {
+          reject(err);
+        });
+      });
+      await assert.rejects(promise, expectedError);
+      assert(
+        (client.innerApiCalls.runAggregationQuery as SinonStub)
+          .getCall(0)
+          .calledWith(request, expectedOptions)
+      );
+    });
+
+    it('invokes runAggregationQuery with closed client', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.RunAggregationQueryRequest()
+      );
+      request.parent = '';
+      const expectedError = new Error('The client has already been closed.');
+      client.close();
+      const stream = client.runAggregationQuery(request);
+      const promise = new Promise((resolve, reject) => {
+        stream.on(
+          'data',
+          (
+            response: protos.google.firestore.v1.RunAggregationQueryResponse
+          ) => {
+            resolve(response);
+          }
+        );
+        stream.on('error', (err: Error) => {
+          reject(err);
+        });
+      });
+      await assert.rejects(promise, expectedError);
+    });
+  });
+
   describe('write', () => {
     it('invokes write without error', async () => {
       const client = new firestoreModule.FirestoreClient({
