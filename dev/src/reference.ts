@@ -15,7 +15,7 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
-import {Duplex, Transform} from 'stream';
+import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 
 import * as protos from '../protos/firestore_v1_proto_api';
@@ -57,6 +57,8 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = protos.google.firestore.v1;
+import {google} from '../protos/firestore_v1_proto_api';
+import RunAggregationQueryResponse = google.firestore.v1.RunAggregationQueryResponse;
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2405,8 +2407,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   }
 
   count(): AggregateQuery {
-    //TODO(tomandersen)
-    return null as any;
+    return new AggregateQuery(this);
   }
 
   /**
@@ -2838,41 +2839,168 @@ export class CollectionReference<T = firestore.DocumentData>
 }
 
 export class AggregateQuery implements firestore.AggregateQuery {
-  get query(): Query<firestore.DocumentData> {
-    //TODO(tomandersen)
-    return null as any;
+  private readonly _query: Query<unknown>;
+
+  constructor(query: Query<any>) {
+    this._query = query;
   }
 
-  get(): Promise<FirebaseFirestore.AggregateQuerySnapshot> {
-    //TODO(tomandersen)
-    return null as any;
+  get query(): firestore.Query<unknown> {
+    return this._query;
   }
 
-  isEqual(other: FirebaseFirestore.AggregateQuery): boolean {
-    //TODO(tomandersen)
-    return null as any;
+  get(): Promise<AggregateQuerySnapshot> {
+    return this._get();
+  }
+
+  /**
+   * Internal get() method that accepts an optional transaction id.
+   *
+   * @private
+   * @internal
+   * @param {bytes=} transactionId A transaction ID.
+   */
+  _get(transactionId?: Uint8Array): Promise<AggregateQuerySnapshot> {
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    return new Promise((resolve, reject) => {
+      const stream = this._stream(transactionId);
+      stream.on('error', err => {
+        reject(wrapError(err, stack));
+      });
+      stream.once('data', result => {
+        stream.destroy();
+        resolve(result);
+      });
+      stream.on('end', () => {
+        reject('No AggregateQuery results');
+      });
+    });
+  }
+
+  /**
+   * Internal streaming method that accepts an optional transaction ID.
+   *
+   * @param transactionId A transaction ID.
+   * @private
+   * @internal
+   * @returns A stream of document results.
+   */
+  _stream(transactionId?: Uint8Array): Readable {
+    const tag = requestTag();
+    const firestore = this._query.firestore;
+
+    const stream: Transform = new Transform({
+      objectMode: true,
+      transform: (proto: RunAggregationQueryResponse, enc, callback) => {
+        const readTime = Timestamp.fromProto(proto.readTime!);
+        if (proto.result) {
+          const result = new AggregateQuerySnapshot(
+            this,
+            readTime,
+            Number(proto.result.aggregateFields!.count.integerValue!)
+          );
+          callback(undefined, result);
+        } else {
+          callback(Error('unexpected'));
+        }
+      },
+    });
+
+    firestore
+      .initializeIfNeeded(tag)
+      .then(async () => {
+        const request = this.toProto(transactionId);
+        const backendStream = await firestore.requestStream(
+          'runAggregationQuery',
+          request,
+          tag
+        );
+        backendStream.on('error', err => {
+          logger(
+            'AggregateQuery._stream',
+            tag,
+            'AggregateQuery failed with stream error:',
+            err
+          );
+          stream.destroy(err);
+        });
+        backendStream.resume();
+        backendStream.pipe(stream);
+      })
+      .catch(e => stream.destroy(e));
+
+    return stream;
+  }
+
+  /**
+   * Internal method for serializing a query to its RunAggregationQuery proto
+   * representation with an optional transaction id or read time.
+   *
+   * @private
+   * @internal
+   * @returns Serialized JSON for the query.
+   */
+  toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
+    const queryProto = this._query.toProto();
+    const runQueryRequest: api.IRunAggregationQueryRequest = {
+      parent: queryProto.parent,
+      structuredAggregationQuery: {
+        structuredQuery: queryProto.structuredQuery,
+        aggregations: [
+          {
+            alias: 'count',
+            count: {},
+          },
+        ],
+      },
+    };
+
+    if (transactionId instanceof Uint8Array) {
+      runQueryRequest.transaction = transactionId;
+    }
+
+    return runQueryRequest;
+  }
+
+  isEqual(other: firestore.AggregateQuery): boolean {
+    return (
+      this === other ||
+      (other instanceof AggregateQuery && this._query.isEqual(other._query))
+    );
   }
 }
 
-export class AggregateQuerySnapshot implements firestore.AggregateQuerySnapshot {
+export class AggregateQuerySnapshot
+  implements firestore.AggregateQuerySnapshot
+{
+  constructor(
+    private readonly _query: AggregateQuery,
+    private readonly _readTime: Timestamp,
+    private readonly _count: number
+  ) {}
+
   get query(): firestore.AggregateQuery {
-    //TODO(tomandersen)
-    return null as any;
+    return this._query;
   }
 
   get readTime(): firestore.Timestamp {
-    //TODO(tomandersen)
-    return null as any;
+    return this._readTime;
   }
 
   getCount(): number {
-    //TODO(tomandersen)
-    return null as any;
+    return this._count;
   }
 
-  isEqual(other: FirebaseFirestore.AggregateQuerySnapshot): boolean {
-    //TODO(tomandersen)
-    return null as any;
+  isEqual(other: firestore.AggregateQuerySnapshot): boolean {
+    return (
+      this === other ||
+      (other instanceof AggregateQuerySnapshot &&
+        this._query.isEqual(other._query) &&
+        this._count === other._count &&
+        this._readTime.isEqual(other._readTime))
+    );
   }
 }
 

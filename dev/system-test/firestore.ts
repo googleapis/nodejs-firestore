@@ -2141,36 +2141,45 @@ describe('Query class', () => {
   });
 });
 
-describe.only('Transaction class (with Emulator)', () => {
+describe.skip('Transaction class (with Emulator)', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
+  setLogFunction(console.log);
 
   beforeEach(() => {
-    console.log("AAAAAAAAAAAAAAAA");
+    // This cannot be hard coded to emulator.
     firestore = new Firestore({
       host: 'localhost',
-      port: 8080,
-      projectId: 'my-cool-project'
+      port: 8539,
+      projectId: 'my-cool-project',
+      ssl: false,
     });
-    console.log("BBBBBBBBBBBBB");
     randomCol = getTestRoot(firestore);
-    console.log("CCCCCCCCCCCCCCCCC");
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('count', async () => {
-    console.log("AAAAAAAAAAAAAAAA");
-    const ref = randomCol.doc('doc');
-    console.log("AAAAAAAAAAAAAAAA");
-    const count = randomCol.where('foo', '==', 'bar').count();
-    console.log("AAAAAAAAAAAAAAAA");
-    await ref.set({foo: 'bar'});
-    console.log("AAAAAAAAAAAAAAAA");
-    //const res = await firestore.runTransaction(f => f.get(count));
-    //expect(res.getCount()).to.equal(1);
+  it('counts 0 document', async () => {
+    const count = randomCol.where('foo', '==', 'notbar').count();
+    const res = await firestore.runTransaction(f => f.get(count));
+    expect(res.getCount()).to.equal(0);
   });
-})
+
+  it('counts 1 document', async () => {
+    await randomCol.doc('doc').set({foo: 'bar'});
+    const count = randomCol.where('foo', '==', 'bar').count();
+    const res = await firestore.runTransaction(f => f.get(count));
+    expect(res.getCount()).to.equal(1);
+  });
+
+  it('counts multiple documents', async () => {
+    await randomCol.doc('doc1').set({foo: 'bar'});
+    await randomCol.doc('doc2').set({foo: 'bar'});
+    const count = randomCol.where('foo', '==', 'bar').count();
+    const res = await firestore.runTransaction(f => f.get(count));
+    expect(res.getCount()).to.equal(2);
+  });
+});
 
 describe('Transaction class', () => {
   let firestore: Firestore;

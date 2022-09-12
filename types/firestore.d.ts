@@ -2038,7 +2038,7 @@ declare namespace FirebaseFirestore {
   export class AggregateQuery {
     private constructor();
 
-    readonly query: Query<DocumentData>;
+    readonly query: Query<unknown>;
 
     get(): Promise<AggregateQuerySnapshot>;
 

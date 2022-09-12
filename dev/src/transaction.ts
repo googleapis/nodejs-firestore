@@ -149,8 +149,7 @@ export class Transaction implements firestore.Transaction {
     }
 
     if (refOrQuery instanceof AggregateQuery) {
-      //TODO(tomandersen)
-      return Promise.reject();
+      return refOrQuery.get();
     }
 
     throw new Error(

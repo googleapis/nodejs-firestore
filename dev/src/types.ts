@@ -65,6 +65,10 @@ export interface GapicClient {
     options?: CallOptions
   ): Duplex;
   runQuery(request?: api.IRunQueryRequest, options?: CallOptions): Duplex;
+  runAggregationQuery(
+    request?: api.IRunAggregationQueryRequest,
+    options?: CallOptions
+  ): Duplex;
   listDocuments(
     request: api.IListDocumentsRequest,
     options?: CallOptions
@@ -95,6 +99,7 @@ export type FirestoreStreamingMethod =
   | 'listen'
   | 'partitionQueryStream'
   | 'runQuery'
+  | 'runAggregationQuery'
   | 'batchGetDocuments';
 
 /** Type signature for the unary methods in the GAPIC layer. */

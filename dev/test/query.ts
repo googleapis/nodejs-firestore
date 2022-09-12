@@ -410,15 +410,15 @@ describe('query interface', () => {
     const queryB = firestore.collection('collectionId');
 
     const queryEquals = (equals: Query[], notEquals: Query[]) => {
-      for (let i = 0; i < equals.length; ++i) {
-        for (const equal of equals) {
-          expect(equals[i].isEqual(equal)).to.be.true;
-          expect(equal.isEqual(equals[i])).to.be.true;
+      for (const equal1 of equals) {
+        for (const equal2 of equals) {
+          expect(equal1.isEqual(equal2)).to.be.true;
+          expect(equal2.isEqual(equal1)).to.be.true;
         }
 
         for (const notEqual of notEquals) {
-          expect(equals[i].isEqual(notEqual)).to.be.false;
-          expect(notEqual.isEqual(equals[i])).to.be.false;
+          expect(equal1.isEqual(notEqual)).to.be.false;
+          expect(notEqual.isEqual(equal1)).to.be.false;
         }
       }
     };
