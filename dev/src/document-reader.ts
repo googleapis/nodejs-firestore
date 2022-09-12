@@ -112,6 +112,7 @@ export class DocumentReader<T> {
     try {
       const stream = await this.firestore.requestStream(
         'batchGetDocuments',
+        /* bidirectional= */ false,
         request,
         requestTag
       );

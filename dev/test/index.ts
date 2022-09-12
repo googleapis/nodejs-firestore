@@ -601,7 +601,9 @@ describe('instantiation', () => {
       ssl: false,
       projectId: 'foo',
     });
-    await firestore['_clientPool'].run('tag', () => Promise.resolve());
+    await firestore['_clientPool'].run('tag', /* requiresGrpc= */ false, () =>
+      Promise.resolve()
+    );
   });
 
   it('exports all types', () => {

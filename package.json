@@ -30,7 +30,9 @@
   "scripts": {
     "predocs": "npm run compile",
     "docs": "jsdoc -c .jsdoc.js",
-    "system-test": "mocha build/system-test --timeout 600000",
+    "system-test:rest": "USE_REST_FALLBACK=YES mocha build/system-test --timeout 600000",
+    "system-test:grpc": "mocha build/system-test --timeout 600000",
+    "system-test": "npm run system-test:grpc && npm run system-test:rest",
     "presystem-test": "npm run compile",
     "samples-test": "npm link && cd samples/ && npm link ../ && npm test && cd ../",
     "conformance": "mocha build/conformance",
@@ -52,7 +54,7 @@
   "dependencies": {
     "fast-deep-equal": "^3.1.1",
     "functional-red-black-tree": "^1.0.1",
-    "google-gax": "^3.2.1",
+    "google-gax": "^3.4.0",
     "protobufjs": "^7.0.0"
   },
   "devDependencies": {
