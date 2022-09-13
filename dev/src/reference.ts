@@ -57,6 +57,11 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = protos.google.firestore.v1;
+import {
+  AggregateField,
+  AggregateQuery,
+  AggregateSpec
+} from "@google-cloud/firestore";
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1597,6 +1602,28 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
     const options = this._queryOptions.with({offset});
     return new Query(this._firestore, options);
+  }
+
+  /**
+   * Returns an `AggregateQuery` that counts the number of documents in the
+   * result set.
+   *
+   * @return an `AggregateQuery` that counts the number of documents in the
+   * result set.
+   */
+  count(): AggregateQuery<{count: AggregateField<number>}> {
+    throw new Error('not implemented');
+  }
+
+  /**
+   * Returns an `AggregateQuery` that performs the given aggregations.
+   *
+   * @param aggregates the aggregations to perform.
+   * @return an `AggregateQuery` that performs the given aggregations.
+   */
+  aggregate<T extends AggregateSpec>(aggregates: T): AggregateQuery<T> {
+    void aggregates;
+    throw new Error('not implemented');
   }
 
   /**
