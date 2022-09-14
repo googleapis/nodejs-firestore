@@ -96,14 +96,18 @@ export function verifyInstance(firestore: Firestore): Promise<void> {
     if (firestore['_clientPool'].opCount === 0) {
       resolve();
     } else {
-    setTimeout(() => {
+      setTimeout(() => {
         const opCount = firestore['_clientPool'].opCount;
         if (opCount === 0) {
-      resolve();
+          resolve();
         } else {
-          reject(new Error(`Firestore has ${opCount} unfinished operations executing.`));
+          reject(
+            new Error(
+              `Firestore has ${opCount} unfinished operations executing.`
+            )
+          );
         }
-    }, 10);
+      }, 10);
     }
   });
 }
