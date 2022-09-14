@@ -106,7 +106,9 @@ export class Transaction implements firestore.Transaction {
    * @param aggregateQuery An aggregate query to execute.
    * @return An AggregateQuerySnapshot for the retrieved data.
    */
-  get(aggregateQuery: AggregateQuery): Promise<AggregateQuerySnapshot>;
+  get<T extends AggregateSpec>(
+    aggregateQuery: AggregateQuery<T>
+  ): Promise<AggregateQuerySnapshot<T>>;
 
   /**
    * Retrieve a document or a query result from the database. Holds a
@@ -132,8 +134,15 @@ export class Transaction implements firestore.Transaction {
    * ```
    */
   get<T>(
-    refOrQuery: DocumentReference<T> | Query<T> | AggregateQuery
-  ): Promise<DocumentSnapshot<T> | QuerySnapshot<T> | AggregateQuerySnapshot> {
+    refOrQuery:
+      | DocumentReference<T>
+      | Query<T>
+      | (T extends AggregateSpec ? AggregateQuery<T> : never)
+  ): Promise<
+    | DocumentSnapshot<T>
+    | QuerySnapshot<T>
+    | (T extends AggregateSpec ? AggregateQuerySnapshot<T> : never)
+  > {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }

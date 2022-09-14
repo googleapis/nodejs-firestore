@@ -1602,6 +1602,28 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   }
 
   /**
+   * Returns an `AggregateQuery` that counts the number of documents in the
+   * result set.
+   *
+   * @return an `AggregateQuery` that counts the number of documents in the
+   * result set.
+   */
+  count(): AggregateQuery<{count: AggregateField<number>}> {
+    throw new Error('not implemented');
+  }
+
+  /**
+   * Returns an `AggregateQuery` that performs the given aggregations.
+   *
+   * @param aggregates the aggregations to perform.
+   * @return an `AggregateQuery` that performs the given aggregations.
+   */
+  aggregate<T extends AggregateSpec>(aggregates: T): AggregateQuery<T> {
+    void aggregates;
+    throw new Error('not implemented');
+  }
+
+  /**
    * Returns true if this `Query` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
@@ -2404,10 +2426,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     return watch.onSnapshot((readTime, size, docs, changes) => {
       onNext(new QuerySnapshot(this, readTime, size, docs, changes));
     }, onError || console.error);
-  }
-
-  count(): AggregateQuery {
-    return new AggregateQuery(this);
   }
 
   /**

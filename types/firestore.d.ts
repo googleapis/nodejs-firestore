@@ -21,11 +21,14 @@
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
 declare namespace FirebaseFirestore {
+  // Alias for `any` but used where a Firestore field value would be provided.
+  export type DocumentFieldValue = any;
+
   /**
    * Document data (for use with `DocumentReference.set()`) consists of fields
    * mapped to values.
    */
-  export type DocumentData = {[field: string]: any};
+  export type DocumentData = {[field: string]: DocumentFieldValue};
 
   /**
    * Similar to Typescript's `Partial<T>`, but allows nested fields to be
@@ -590,7 +593,9 @@ declare namespace FirebaseFirestore {
      * @param aggregateQuery An aggregate query to execute.
      * @return An AggregateQuerySnapshot for the retrieved data.
      */
-    get(aggregateQuery: AggregateQuery): Promise<AggregateQuerySnapshot>;
+    get<T extends AggregateSpec>(
+      aggregateQuery: AggregateQuery<T>
+    ): Promise<AggregateQuerySnapshot<T>>;
 
     /**
      * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
@@ -1701,7 +1706,9 @@ declare namespace FirebaseFirestore {
       onError?: (error: Error) => void
     ): () => void;
 
-    count(): AggregateQuery;
+    count(): AggregateQuery<{count: AggregateField<number>}>;
+
+    aggregate<T extends AggregateSpec>(aggregates: T): AggregateQuery<T>;
 
     /**
      * Returns true if this `Query` is equal to the provided one.
@@ -2023,26 +2030,48 @@ declare namespace FirebaseFirestore {
     toQuery(): Query<T>;
   }
 
-  export class AggregateQuerySnapshot {
+  export class AggregateField<T> {
     private constructor();
 
-    readonly query: AggregateQuery;
+    static count(): AggregateField<number>;
+    static min(field: string | FieldPath): AggregateField<DocumentFieldValue | undefined>;
+    static max(field: string | FieldPath): AggregateField<DocumentFieldValue | undefined>;
+    static sum(field: string | FieldPath): AggregateField<number | undefined>;
+    static average(field: string | FieldPath): AggregateField<number | undefined>;
+
+    isEqual(other: AggregateField<T>): boolean;
+  }
+
+  export type AggregateFieldType = ReturnType<typeof AggregateField.count>;
+
+  export interface AggregateSpec {
+    [field: string]: AggregateFieldType;
+  }
+
+  export type AggregateSpecData<T extends AggregateSpec> = {
+    [P in keyof T]: T[P] extends AggregateField<infer U> ? U : never;
+  };
+
+  export class AggregateQuery<T extends AggregateSpec> {
+    private constructor();
+
+    readonly query: Query<DocumentData>;
+
+    get(): Promise<AggregateQuerySnapshot<T>>;
+
+    isEqual(other: AggregateQuery<T>): boolean;
+  }
+
+  export class AggregateQuerySnapshot<T extends AggregateSpec> {
+    private constructor();
+
+    readonly query: AggregateQuery<T>;
 
     readonly readTime: Timestamp;
 
-    getCount(): number;
+    data(): AggregateSpecData<T>;
 
-    isEqual(other: AggregateQuerySnapshot): boolean;
-  }
-
-  export class AggregateQuery {
-    private constructor();
-
-    readonly query: Query<unknown>;
-
-    get(): Promise<AggregateQuerySnapshot>;
-
-    isEqual(other: AggregateQuery): boolean;
+    isEqual(other: AggregateQuerySnapshot<T>): boolean;
   }
 
   /**
