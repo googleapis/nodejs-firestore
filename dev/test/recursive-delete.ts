@@ -69,8 +69,8 @@ describe('recursiveDelete() method:', () => {
     setTimeoutHandler(setImmediate);
   });
 
-  afterEach(() => {
-    verifyInstance(firestore);
+  afterEach(async () => {
+    await verifyInstance(firestore);
     setTimeoutHandler(setTimeout);
     expect(batchWriteError, 'batchWrite should not have errored').to.be
       .undefined;

@@ -188,8 +188,8 @@ describe('BulkWriter', () => {
     });
   }
 
-  afterEach(() => {
-    verifyInstance(firestore);
+  afterEach(async () => {
+    await verifyInstance(firestore);
     setTimeoutHandler(setTimeout);
   });
 
