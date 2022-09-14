@@ -2286,10 +2286,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
           callback(undefined, {document: lastReceivedDocument, readTime});
           if (proto.done) {
             logger('Query._stream', tag, 'Trigger Logical Termination.');
-            backendStream.unpipe(stream);
-            backendStream.resume();
-            backendStream.end();
-            stream.end();
+              backendStream.unpipe(stream);
+              backendStream.resume();
+              backendStream.end();
+              stream.end();
           }
         } else {
           callback(undefined, {readTime});
@@ -2906,8 +2906,7 @@ export class AggregateQuery implements firestore.AggregateQuery {
           callback(Error('unexpected'));
         }
       },
-    });
-
+    })
     firestore
       .initializeIfNeeded(tag)
       .then(async () => {
@@ -2917,6 +2916,10 @@ export class AggregateQuery implements firestore.AggregateQuery {
           request,
           tag
         );
+        stream.on('close', () => {
+          backendStream.resume()
+          backendStream.end();
+        })
         backendStream.on('error', err => {
           logger(
             'AggregateQuery._stream',

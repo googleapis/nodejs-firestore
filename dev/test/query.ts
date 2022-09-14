@@ -630,7 +630,7 @@ describe('query interface', () => {
   });
 
   // Test Logical Termination on get()
-  it('successful return without ending the stream on get()', () => {
+  it('successful return without ending the stream on get()', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request);

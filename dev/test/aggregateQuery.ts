@@ -25,21 +25,22 @@ import {expect, use} from 'chai';
 import {google} from '../protos/firestore_v1_proto_api';
 import api = google.firestore.v1;
 import * as chaiAsPromised from 'chai-as-promised';
+import {setTimeoutHandler} from "../src/backoff";
 use(chaiAsPromised);
 
 describe('aggregate query interface', () => {
   let firestore: Firestore;
 
   beforeEach(() => {
-    //        setTimeoutHandler(setImmediate);
+    setTimeoutHandler(setImmediate);
     return createInstance().then(firestoreInstance => {
       firestore = firestoreInstance;
     });
   });
 
-  afterEach(() => {
-    verifyInstance(firestore);
-    //        setTimeoutHandler(setTimeout);
+  afterEach(async () => {
+    await verifyInstance(firestore);
+    setTimeoutHandler(setTimeout);
   });
 
   it('has isEqual() method', () => {
@@ -85,7 +86,7 @@ describe('aggregate query interface', () => {
       readTime: {seconds: 5, nanos: 6},
     };
     const overrides: ApiOverride = {
-      runAggregationQuery: request => stream(result),
+      runAggregationQuery: () => stream(result),
     };
 
     firestore = await createInstance(overrides);
