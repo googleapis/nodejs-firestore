@@ -4,6 +4,19 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.2.0](https://github.com/googleapis/nodejs-firestore/compare/v6.1.0...v6.2.0) (2022-09-13)
+
+
+### Features
+
+* Use REST ([#1698](https://github.com/googleapis/nodejs-firestore/issues/1698)) ([d85b0e9](https://github.com/googleapis/nodejs-firestore/commit/d85b0e93bcb4a5806490ee66a4443afd4a0a519a))
+
+
+### Bug Fixes
+
+* Minify proto JSON files ([#1771](https://github.com/googleapis/nodejs-firestore/issues/1771)) ([6393fe7](https://github.com/googleapis/nodejs-firestore/commit/6393fe704097a1214961fa30f01832a64dced775))
+* Remove hack in update.sh, and replace with existing pattern for protobuf dependencies. ([#1769](https://github.com/googleapis/nodejs-firestore/issues/1769)) ([6ba6751](https://github.com/googleapis/nodejs-firestore/commit/6ba67517123578a93bb3e0eeb771b610ac3ee397))
+
 ## [6.1.0](https://github.com/googleapis/nodejs-firestore/compare/v6.0.0...v6.1.0) (2022-09-07)
 
 
