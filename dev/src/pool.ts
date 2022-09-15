@@ -35,10 +35,15 @@ export const CLIENT_TERMINATED_ERROR_MSG =
  * @internal
  */
 export class ClientPool<T> {
+  private grpcEnabled = false;
+
   /**
    * Stores each active clients and how many operations it has outstanding.
    */
-  private activeClients = new Map<T, number>();
+  private activeClients = new Map<
+    T,
+    {activeRequestCount: number; grpcEnabled: boolean}
+  >();
 
   /**
    * A set of clients that have seen RST_STREAM errors (see
@@ -72,7 +77,7 @@ export class ClientPool<T> {
   constructor(
     private readonly concurrentOperationLimit: number,
     private readonly maxIdleClients: number,
-    private readonly clientFactory: () => T,
+    private readonly clientFactory: (requiresGrpc: boolean) => T,
     private readonly clientDestructor: (client: T) => Promise<void> = () =>
       Promise.resolve()
   ) {}
@@ -84,21 +89,22 @@ export class ClientPool<T> {
    * @private
    * @internal
    */
-  private acquire(requestTag: string): T {
+  private acquire(requestTag: string, requiresGrpc: boolean): T {
     let selectedClient: T | null = null;
     let selectedClientRequestCount = -1;
 
-    for (const [client, requestCount] of this.activeClients) {
+    for (const [client, metadata] of this.activeClients) {
       // Use the "most-full" client that can still accommodate the request
       // in order to maximize the number of idle clients as operations start to
       // complete.
       if (
         !this.failedClients.has(client) &&
-        requestCount > selectedClientRequestCount &&
-        requestCount < this.concurrentOperationLimit
+        metadata.activeRequestCount > selectedClientRequestCount &&
+        metadata.activeRequestCount < this.concurrentOperationLimit &&
+        (!requiresGrpc || metadata.grpcEnabled)
       ) {
         selectedClient = client;
-        selectedClientRequestCount = requestCount;
+        selectedClientRequestCount = metadata.activeRequestCount;
       }
     }
 
@@ -111,7 +117,7 @@ export class ClientPool<T> {
       );
     } else {
       logger('ClientPool.acquire', requestTag, 'Creating a new client');
-      selectedClient = this.clientFactory();
+      selectedClient = this.clientFactory(requiresGrpc);
       selectedClientRequestCount = 0;
       assert(
         !this.activeClients.has(selectedClient),
@@ -119,7 +125,10 @@ export class ClientPool<T> {
       );
     }
 
-    this.activeClients.set(selectedClient, selectedClientRequestCount + 1);
+    this.activeClients.set(selectedClient, {
+      grpcEnabled: requiresGrpc,
+      activeRequestCount: selectedClientRequestCount + 1,
+    });
 
     return selectedClient!;
   }
@@ -131,9 +140,12 @@ export class ClientPool<T> {
    * @internal
    */
   private async release(requestTag: string, client: T): Promise<void> {
-    const requestCount = this.activeClients.get(client) || 0;
-    assert(requestCount > 0, 'No active requests');
-    this.activeClients.set(client, requestCount - 1);
+    const metadata = this.activeClients.get(client);
+    assert(metadata && metadata.activeRequestCount > 0, 'No active requests');
+    this.activeClients.set(client, {
+      grpcEnabled: metadata.grpcEnabled,
+      activeRequestCount: metadata.activeRequestCount - 1,
+    });
     if (this.terminated && this.opCount === 0) {
       this.terminateDeferred.resolve();
     }
@@ -153,9 +165,16 @@ export class ClientPool<T> {
    * @internal
    */
   private shouldGarbageCollectClient(client: T): boolean {
-    // Don't garbage collect clients that have active requests.
-    if (this.activeClients.get(client) !== 0) {
+    const clientMetadata = this.activeClients.get(client)!;
+
+    if (clientMetadata.activeRequestCount !== 0) {
+      // Don't garbage collect clients that have active requests.
       return false;
+    }
+
+    if (this.grpcEnabled !== clientMetadata.grpcEnabled) {
+      // We are transitioning to GRPC. Garbage collect REST clients.
+      return true;
     }
 
     // Idle clients that have received RST_STREAM errors are always garbage
@@ -165,10 +184,11 @@ export class ClientPool<T> {
     }
 
     // Otherwise, only garbage collect if we have too much idle capacity (e.g.
-    // more than 100 idle capacity with default settings) .
+    // more than 100 idle capacity with default settings).
     let idleCapacityCount = 0;
-    for (const [, count] of this.activeClients) {
-      idleCapacityCount += this.concurrentOperationLimit - count;
+    for (const [, metadata] of this.activeClients) {
+      idleCapacityCount +=
+        this.concurrentOperationLimit - metadata.activeRequestCount;
     }
     return (
       idleCapacityCount > this.maxIdleClients * this.concurrentOperationLimit
@@ -197,7 +217,9 @@ export class ClientPool<T> {
   // Visible for testing.
   get opCount(): number {
     let activeOperationCount = 0;
-    this.activeClients.forEach(count => (activeOperationCount += count));
+    this.activeClients.forEach(
+      metadata => (activeOperationCount += metadata.activeRequestCount)
+    );
     return activeOperationCount;
   }
 
@@ -213,11 +235,15 @@ export class ClientPool<T> {
    * @private
    * @internal
    */
-  run<V>(requestTag: string, op: (client: T) => Promise<V>): Promise<V> {
+  run<V>(
+    requestTag: string,
+    requiresGrpc: boolean,
+    op: (client: T) => Promise<V>
+  ): Promise<V> {
     if (this.terminated) {
       return Promise.reject(new Error(CLIENT_TERMINATED_ERROR_MSG));
     }
-    const client = this.acquire(requestTag);
+    const client = this.acquire(requestTag, requiresGrpc);
 
     return op(client)
       .catch(async (err: GoogleError) => {
