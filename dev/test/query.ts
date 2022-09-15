@@ -400,8 +400,8 @@ describe('query interface', () => {
     });
   });
 
-  afterEach(() => {
-    verifyInstance(firestore);
+  afterEach(async () => {
+    await verifyInstance(firestore);
     setTimeoutHandler(setTimeout);
   });
 
@@ -517,7 +517,8 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo', '==', 'bar');
       query = query.orderBy('foo');
@@ -538,7 +539,8 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
       return query.get().then(results => {
         expect(results.size).to.equal(0);
@@ -557,7 +559,8 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
       return query
         .get()
@@ -578,12 +581,13 @@ describe('query interface', () => {
       },
     };
 
-    createInstance(overrides).then(firestore => {
+    createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
       query
         .stream()
         .on('data', () => {
-          throw new Error('Unexpected document');
+          callback(Error('Unexpected document'));
         })
         .on('end', () => {
           callback();
@@ -599,7 +603,8 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
       return query.get().then(results => {
         expect(results.size).to.equal(2);
@@ -634,7 +639,8 @@ describe('query interface', () => {
     };
 
     let counter = 0;
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
       return query.get().then(results => {
         expect(++counter).to.equal(1);
@@ -672,7 +678,8 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       return firestore
         .collection('collectionId')
         .get()
@@ -694,7 +701,8 @@ describe('query interface', () => {
       runQuery: () => responses.shift()!(),
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       return firestore
         .collection('collectionId')
         .get()
@@ -715,7 +723,8 @@ describe('query interface', () => {
       runQuery: () => responses.shift()!(),
     };
 
-    createInstance(overrides).then(firestore => {
+    createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       const result = firestore.collection('collectionId').stream();
 
       let resultCount = 0;
@@ -738,7 +747,8 @@ describe('query interface', () => {
       },
     };
 
-    createInstance(overrides).then(firestore => {
+    createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
       let received = 0;
 
@@ -802,7 +812,8 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(async firestore => {
+    return createInstance(overrides).then(async firestoreInstance => {
+      firestore = firestoreInstance;
       await firestore
         .collection('collectionId')
         .doc('documentId')
@@ -826,7 +837,8 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(async firestore => {
+    return createInstance(overrides).then(async firestoreInstance => {
+      firestore = firestoreInstance;
       const coll = await firestore
         .collection('collectionId')
         .withConverter(postConverter);
@@ -847,7 +859,8 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(async firestore => {
+    return createInstance(overrides).then(async firestoreInstance => {
+      firestore = firestoreInstance;
       const coll = await firestore
         .collection('collectionId')
         .withConverter(postConverter)
@@ -879,7 +892,8 @@ describe('where() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo', '==', 'bar');
       return query.get();
@@ -941,7 +955,8 @@ describe('where() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.where('fooSmaller', '<', 'barSmaller');
       query = query.where('fooSmallerOrEquals', '<=', 'barSmallerOrEquals');
@@ -976,7 +991,8 @@ describe('where() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo', '==', {foo: 'bar'});
       return query.get();
@@ -1001,7 +1017,8 @@ describe('where() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo.bar', '==', 'foobar');
       query = query.where(new FieldPath('bar', 'foo'), '==', 'foobar');
@@ -1025,7 +1042,8 @@ describe('where() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.where(FieldPath.documentId(), '==', 'foo');
       return query.get();
@@ -1055,7 +1073,8 @@ describe('where() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       const collection = firestore.collection('collectionId');
       const query = collection.where(FieldPath.documentId(), 'in', [
         'foo',
@@ -1091,7 +1110,8 @@ describe('where() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(async firestore => {
+    return createInstance(overrides).then(async firestoreInstance => {
+      firestore = firestoreInstance;
       const collection = firestore.collection('collectionId');
       const query = collection
         .where('foo', 'in', ['bar'])
@@ -1244,7 +1264,8 @@ describe('where() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo', '==', NaN);
       query = query.where('bar', '==', null);
@@ -1264,7 +1285,8 @@ describe('where() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo', '!=', NaN);
       query = query.where('bar', '!=', null);
@@ -1331,7 +1353,8 @@ describe('orderBy() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo');
       return query.get();
@@ -1347,7 +1370,8 @@ describe('orderBy() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo', 'asc');
       return query.get();
@@ -1363,7 +1387,8 @@ describe('orderBy() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo', 'desc');
       return query.get();
@@ -1391,7 +1416,8 @@ describe('orderBy() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo.bar');
       query = query.orderBy(new FieldPath('bar', 'foo'));
@@ -1463,7 +1489,8 @@ describe('orderBy() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query
         .orderBy('foo', 'asc')
@@ -1493,7 +1520,8 @@ describe('limit() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.limit(10);
       return query.get();
@@ -1515,7 +1543,8 @@ describe('limit() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.limit(1).limit(2).limit(3);
       return query.get();
@@ -1542,7 +1571,8 @@ describe('limitToLast() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').limitToLast(10);
       return query.get();
@@ -1563,7 +1593,8 @@ describe('limitToLast() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query
         .orderBy('foo')
@@ -1582,7 +1613,8 @@ describe('limitToLast() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(async firestore => {
+    return createInstance(overrides).then(async firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').limitToLast(2);
       const result = await query.get();
@@ -1621,7 +1653,8 @@ describe('limitToLast() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').limitToLast(1).limitToLast(2).limitToLast(3);
       return query.get();
@@ -1716,7 +1749,8 @@ describe('offset() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.offset(10);
       return query.get();
@@ -1738,7 +1772,8 @@ describe('offset() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.offset(1).offset(2).offset(3);
       return query.get();
@@ -1765,7 +1800,8 @@ describe('select() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       const collection = firestore.collection('collectionId');
       const query = collection.select('a', new FieldPath('b', 'c'));
 
@@ -1794,7 +1830,8 @@ describe('select() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.select('foo').select('bar');
       return query.get();
@@ -1809,7 +1846,8 @@ describe('select() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.select();
       return query.get();
@@ -1841,7 +1879,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').orderBy('bar').startAt('foo', 'bar');
       return query.get();
@@ -1865,7 +1904,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
         const query = firestore.collection('collectionId');
 
@@ -1951,7 +1991,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       return snapshot('collectionId/doc', {}).then(doc => {
         const query = firestore.collection('collectionId').startAt(doc);
         return query.get();
@@ -1976,7 +2017,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       return snapshot('collectionId/doc', {}).then(doc => {
         const query = firestore
           .collection('collectionId')
@@ -2004,7 +2046,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
         let query: Query = firestore.collection('collectionId');
         query = query.startAt(doc.ref);
@@ -2030,7 +2073,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
         let query: Query = firestore.collection('collectionId').orderBy('foo');
         query = query.startAt(doc);
@@ -2056,7 +2100,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
         let query: Query = firestore
           .collection('collectionId')
@@ -2098,7 +2143,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       return snapshot('collectionId/doc', {c: 'c'}).then(doc => {
         const query = firestore
           .collection('collectionId')
@@ -2130,7 +2176,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
         const query = firestore
           .collection('collectionId')
@@ -2183,7 +2230,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').orderBy('bar').startAt('foo');
       return query.get();
@@ -2206,7 +2254,8 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').startAt('foo').startAt('bar');
       return query.get();
@@ -2238,7 +2287,8 @@ describe('startAfter() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').orderBy('bar').startAfter('foo', 'bar');
       return query.get();
@@ -2265,7 +2315,8 @@ describe('startAfter() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').startAfter('foo').startAfter('bar');
       return query.get();
@@ -2297,7 +2348,8 @@ describe('endAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').orderBy('bar').endAt('foo', 'bar');
       return query.get();
@@ -2320,7 +2372,8 @@ describe('endAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').endAt('foo').endAt('bar');
       return query.get();
@@ -2352,7 +2405,8 @@ describe('endBefore() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').orderBy('bar').endBefore('foo', 'bar');
       return query.get();
@@ -2375,7 +2429,8 @@ describe('endBefore() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').endBefore('foo').endBefore('bar');
       return query.get();
@@ -2391,7 +2446,8 @@ describe('endBefore() interface', () => {
         return stream();
       },
     };
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
       const query = firestore.collection('collectionId').limit(10);
       const adjustedQuery = query.orderBy('foo').endBefore('foo');
 
