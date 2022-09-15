@@ -2030,10 +2030,18 @@ declare namespace FirebaseFirestore {
     toQuery(): Query<T>;
   }
 
-  export class AggregateField<T extends number | undefined | DocumentFieldValue> {
+  /**
+   * An `AggregateField`that captures input type T.
+   */
+  export class AggregateField<T> {
     private constructor();
 
+    /**
+     * Creates and returns an aggregation field that counts the documents in the result set.
+     * @returns An `AggregateField` object with number input type.
+     */
     static count(): AggregateField<number>;
+
     //TODO(tomandersen)
     static min(field: string | FieldPath): AggregateField<DocumentFieldValue | undefined>;
     static max(field: string | FieldPath): AggregateField<DocumentFieldValue | undefined>;
@@ -2043,12 +2051,26 @@ declare namespace FirebaseFirestore {
     isEqual(other: AggregateField<T>): boolean;
   }
 
+  /**
+   * The union of all `AggregateField` types that are returned from the factory
+   * functions.
+   */
   export type AggregateFieldType = ReturnType<typeof AggregateField.count>;
 
+  /**
+   * A type whose values are all `AggregateField` objects.
+   * This is used as an argument to the "getter" functions, and the snapshot will
+   * map the same names to the corresponding values.
+   */
   export interface AggregateSpec {
     [field: string]: AggregateFieldType;
   }
 
+  /**
+   * A type whose keys are taken from an `AggregateSpec` type, and whose values
+   * are the result of the aggregation performed by the corresponding
+   * `AggregateField` from the input `AggregateSpec`.
+   */
   export type AggregateSpecData<T extends AggregateSpec> = {
     [P in keyof T]: T[P] extends AggregateField<infer U> ? U : never;
   };
@@ -2063,6 +2085,10 @@ declare namespace FirebaseFirestore {
     isEqual(other: AggregateQuery<T>): boolean;
   }
 
+
+  /**
+   * An `AggregateQuerySnapshot` contains the results of running an aggregate query.
+   */
   export class AggregateQuerySnapshot<T extends AggregateSpec> {
     private constructor();
 
@@ -2070,6 +2096,14 @@ declare namespace FirebaseFirestore {
 
     readonly readTime: Timestamp;
 
+    /**
+     * The results of the requested aggregations. The keys of the returned object
+     * will be the same as those of the `AggregateSpec` object specified to the
+     * aggregation method, and the values will be the corresponding aggregation
+     * result.
+     *
+     * @returns The aggregation statistics result of running a query.
+     */
     data(): AggregateSpecData<T>;
 
     isEqual(other: AggregateQuerySnapshot<T>): boolean;
