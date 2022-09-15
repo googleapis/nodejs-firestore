@@ -25,7 +25,7 @@ import {expect, use} from 'chai';
 import {google} from '../protos/firestore_v1_proto_api';
 import api = google.firestore.v1;
 import * as chaiAsPromised from 'chai-as-promised';
-import {setTimeoutHandler} from "../src/backoff";
+import {setTimeoutHandler} from '../src/backoff';
 use(chaiAsPromised);
 
 describe('aggregate query interface', () => {
@@ -109,7 +109,7 @@ describe('aggregate query interface', () => {
       readTime: {seconds: 5, nanos: 6},
     };
     const overrides: ApiOverride = {
-      runAggregationQuery: request => streamWithoutEnd(result),
+      runAggregationQuery: () => streamWithoutEnd(result),
     };
 
     firestore = await createInstance(overrides);

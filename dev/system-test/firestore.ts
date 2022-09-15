@@ -17,7 +17,6 @@ import {
   DocumentData,
   WithFieldValue,
   PartialWithFieldValue,
-  AggregateQuery,
   SetOptions,
   Settings,
 } from '@google-cloud/firestore';

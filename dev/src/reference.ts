@@ -1619,7 +1619,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @param aggregates the aggregations to perform.
    * @return an `AggregateQuery` that performs the given aggregations.
    */
-  aggregate<T extends firestore.AggregateSpec>(aggregates: T): AggregateQuery<T> {
+  aggregate<T extends firestore.AggregateSpec>(
+      aggregates: T
+  ): AggregateQuery<T> {
     return new AggregateQuery(this, aggregates);
   }
 
@@ -2308,10 +2310,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
           callback(undefined, {document: lastReceivedDocument, readTime});
           if (proto.done) {
             logger('Query._stream', tag, 'Trigger Logical Termination.');
-              backendStream.unpipe(stream);
-              backendStream.resume();
-              backendStream.end();
-              stream.end();
+            backendStream.unpipe(stream);
+            backendStream.resume();
+            backendStream.end();
+            stream.end();
           }
         } else {
           callback(undefined, {readTime});
@@ -2868,7 +2870,9 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
   }
 }
 
-export class AggregateQuery<T extends firestore.AggregateSpec> implements firestore.AggregateQuery<T> {
+export class AggregateQuery<T extends firestore.AggregateSpec>
+    implements firestore.AggregateQuery<T> {
+
   private readonly _query: Query<unknown>;
   private readonly _aggregates: T;
 
@@ -2940,25 +2944,27 @@ export class AggregateQuery<T extends firestore.AggregateSpec> implements firest
               data[prop] = serializer.decodeValue(fields[prop]);
             }
           }
-          const result = new AggregateQuerySnapshot<T>(this, readTime, data as any); //TODO(tomandersen) remove `as any`
+          //TODO(tomandersen) remove `as any`
+          const result = new AggregateQuerySnapshot<T>(this, readTime, data as any);
           callback(undefined, result);
         } else {
           callback(Error('unexpected'));
         }
       },
-    })
+    });
+
     firestore
       .initializeIfNeeded(tag)
       .then(async () => {
         const request = this.toProto(transactionId);
         const backendStream = await firestore.requestStream(
           'runAggregationQuery',
-            /* bidirectional= */ false,
+          /* bidirectional= */ false,
           request,
           tag
         );
         stream.on('close', () => {
-          backendStream.resume()
+          backendStream.resume();
           backendStream.end();
         })
         backendStream.on('error', err => {
@@ -3009,7 +3015,6 @@ export class AggregateQuery<T extends firestore.AggregateSpec> implements firest
   }
 
   isEqual(other: firestore.AggregateQuery<T>): boolean {
-    new AggregateQuery(null as any, {2: AggregateField.count()})
     if (this === other) {
       return true;
     }

@@ -15,7 +15,7 @@
 import {expect} from 'chai';
 
 import {Firestore} from '../src';
-import {AggregateField} from "../src/reference";
+import {AggregateField} from '../src/reference';
 
 export async function Demo0_NormalQuery(db: Firestore) {
   const query = db.collection('games/halo/players');
