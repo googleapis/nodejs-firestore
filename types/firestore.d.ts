@@ -2030,10 +2030,11 @@ declare namespace FirebaseFirestore {
     toQuery(): Query<T>;
   }
 
-  export class AggregateField<T> {
+  export class AggregateField<T extends number | undefined | DocumentFieldValue> {
     private constructor();
 
     static count(): AggregateField<number>;
+    //TODO(tomandersen)
     static min(field: string | FieldPath): AggregateField<DocumentFieldValue | undefined>;
     static max(field: string | FieldPath): AggregateField<DocumentFieldValue | undefined>;
     static sum(field: string | FieldPath): AggregateField<number | undefined>;
@@ -2055,7 +2056,7 @@ declare namespace FirebaseFirestore {
   export class AggregateQuery<T extends AggregateSpec> {
     private constructor();
 
-    readonly query: Query<DocumentData>;
+    readonly query: Query<unknown>;
 
     get(): Promise<AggregateQuerySnapshot<T>>;
 

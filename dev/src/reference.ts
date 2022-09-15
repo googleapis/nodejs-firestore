@@ -1608,8 +1608,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @return an `AggregateQuery` that counts the number of documents in the
    * result set.
    */
-  count(): AggregateQuery<{count: AggregateField<number>}> {
-    throw new Error('not implemented');
+
+  count(): AggregateQuery<{count: firestore.AggregateField<number>}> {
+    return this.aggregate({count: AggregateField.count()});
   }
 
   /**
@@ -1618,9 +1619,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @param aggregates the aggregations to perform.
    * @return an `AggregateQuery` that performs the given aggregations.
    */
-  aggregate<T extends AggregateSpec>(aggregates: T): AggregateQuery<T> {
-    void aggregates;
-    throw new Error('not implemented');
+  aggregate<T extends firestore.AggregateSpec>(aggregates: T): AggregateQuery<T> {
+    return new AggregateQuery(this, aggregates);
   }
 
   /**
@@ -2856,18 +2856,36 @@ export class CollectionReference<T = firestore.DocumentData>
   }
 }
 
-export class AggregateQuery implements firestore.AggregateQuery {
-  private readonly _query: Query<unknown>;
+export class AggregateField<T> implements firestore.AggregateField<T> {
+  private constructor() {}
 
-  constructor(query: Query<any>) {
+  static count(): AggregateField<number> {
+    return new AggregateField<number>();
+  }
+
+  isEqual(other: firestore.AggregateField<T>): boolean {
+    return this === other || other instanceof AggregateField;
+  }
+}
+
+export class AggregateQuery<T extends firestore.AggregateSpec> implements firestore.AggregateQuery<T> {
+  private readonly _query: Query<unknown>;
+  private readonly _aggregates: T;
+
+  constructor(query: Query<any>, aggregates: T) {
     this._query = query;
+    this._aggregates = aggregates;
   }
 
   get query(): firestore.Query<unknown> {
     return this._query;
   }
 
-  get(): Promise<AggregateQuerySnapshot> {
+  get aggregates(): T {
+    return this._aggregates;
+  }
+
+  get(): Promise<AggregateQuerySnapshot<T>> {
     return this._get();
   }
 
@@ -2878,7 +2896,7 @@ export class AggregateQuery implements firestore.AggregateQuery {
    * @internal
    * @param {bytes=} transactionId A transaction ID.
    */
-  _get(transactionId?: Uint8Array): Promise<AggregateQuerySnapshot> {
+  _get(transactionId?: Uint8Array): Promise<AggregateQuerySnapshot<T>> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
@@ -2914,11 +2932,15 @@ export class AggregateQuery implements firestore.AggregateQuery {
       transform: (proto: RunAggregationQueryResponse, enc, callback) => {
         const readTime = Timestamp.fromProto(proto.readTime!);
         if (proto.result) {
-          const result = new AggregateQuerySnapshot(
-            this,
-            readTime,
-            Number(proto.result.aggregateFields!.count.integerValue!)
-          );
+          const data: firestore.DocumentData = {};
+          const fields = proto.result.aggregateFields;
+          if (fields) {
+            const serializer = firestore._serializer!;
+            for (const prop of Object.keys(fields)) {
+              data[prop] = serializer.decodeValue(fields[prop]);
+            }
+          }
+          const result = new AggregateQuerySnapshot<T>(this, readTime, data as any); //TODO(tomandersen) remove `as any`
           callback(undefined, result);
         } else {
           callback(Error('unexpected'));
@@ -2931,6 +2953,7 @@ export class AggregateQuery implements firestore.AggregateQuery {
         const request = this.toProto(transactionId);
         const backendStream = await firestore.requestStream(
           'runAggregationQuery',
+            /* bidirectional= */ false,
           request,
           tag
         );
@@ -2985,24 +3008,36 @@ export class AggregateQuery implements firestore.AggregateQuery {
     return runQueryRequest;
   }
 
-  isEqual(other: firestore.AggregateQuery): boolean {
-    return (
-      this === other ||
-      (other instanceof AggregateQuery && this._query.isEqual(other._query))
-    );
+  isEqual(other: firestore.AggregateQuery<T>): boolean {
+    new AggregateQuery(null as any, {2: AggregateField.count()})
+    if (this === other) {
+      return true;
+    }
+    if (other instanceof AggregateQuery) {
+      if (!this._query.isEqual(other._query)) {
+        return false;
+      }
+
+      const thisAggregates: [string, AggregateField<unknown>][] = Object.entries(this._aggregates);
+      const otherAggregates = other._aggregates;
+
+      return thisAggregates.length === Object.keys(otherAggregates).length &&
+          thisAggregates.every(([alias, field]) => field.isEqual(otherAggregates[alias]))
+    }
+    return false;
   }
 }
 
-export class AggregateQuerySnapshot
-  implements firestore.AggregateQuerySnapshot
+export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
+  implements firestore.AggregateQuerySnapshot<T>
 {
   constructor(
-    private readonly _query: AggregateQuery,
+    private readonly _query: AggregateQuery<T>,
     private readonly _readTime: Timestamp,
-    private readonly _count: number
+    private readonly _data: firestore.AggregateSpecData<T>
   ) {}
 
-  get query(): firestore.AggregateQuery {
+  get query(): firestore.AggregateQuery<T> {
     return this._query;
   }
 
@@ -3011,17 +3046,37 @@ export class AggregateQuerySnapshot
   }
 
   getCount(): number {
-    return this._count;
+    const count = this._data.count;
+    if (typeof count == 'number') {
+      return count;
+    }
+    throw new Error('Unexpected count is ' + typeof count);
   }
 
-  isEqual(other: firestore.AggregateQuerySnapshot): boolean {
-    return (
-      this === other ||
-      (other instanceof AggregateQuerySnapshot &&
-        this._query.isEqual(other._query) &&
-        this._count === other._count &&
-        this._readTime.isEqual(other._readTime))
-    );
+  isEqual(other: firestore.AggregateQuerySnapshot<T>): boolean {
+    if (this === other) {
+      return true;
+    }
+    if (other instanceof AggregateQuerySnapshot) {
+      if (!this._query.isEqual(other._query)) {
+        return false;
+      }
+
+      const thisData = this._data;
+      const thisDataKeys: string[] = Object.keys(thisData);
+
+      const otherData = other._data;
+      const otherDataKeys: string[] = Object.keys(otherData);
+
+      return thisDataKeys.length === otherDataKeys.length && thisDataKeys.every(alias =>
+          Object.prototype.hasOwnProperty.call(otherData, alias) && thisData[alias] === otherData[alias]
+      );
+    }
+    return false;
+  }
+
+  data(): firestore.AggregateSpecData<T> {
+    return this._data;
   }
 }
 

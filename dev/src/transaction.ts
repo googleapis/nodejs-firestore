@@ -106,7 +106,7 @@ export class Transaction implements firestore.Transaction {
    * @param aggregateQuery An aggregate query to execute.
    * @return An AggregateQuerySnapshot for the retrieved data.
    */
-  get<T extends AggregateSpec>(
+  get<T extends firestore.AggregateSpec>(
     aggregateQuery: AggregateQuery<T>
   ): Promise<AggregateQuerySnapshot<T>>;
 
@@ -137,11 +137,11 @@ export class Transaction implements firestore.Transaction {
     refOrQuery:
       | DocumentReference<T>
       | Query<T>
-      | (T extends AggregateSpec ? AggregateQuery<T> : never)
+      | (T extends firestore.AggregateSpec ? AggregateQuery<T> : never)
   ): Promise<
     | DocumentSnapshot<T>
     | QuerySnapshot<T>
-    | (T extends AggregateSpec ? AggregateQuerySnapshot<T> : never)
+    | (T extends firestore.AggregateSpec ? AggregateQuerySnapshot<T> : never)
   > {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
@@ -158,7 +158,10 @@ export class Transaction implements firestore.Transaction {
     }
 
     if (refOrQuery instanceof AggregateQuery) {
-      return refOrQuery.get();
+      //TODO(tomandersen)
+      const y: AggregateQuery<firestore.AggregateSpec> = refOrQuery;
+      const x: Promise<AggregateQuerySnapshot<firestore.AggregateSpec>> = y.get();
+      return x as any;
     }
 
     throw new Error(
