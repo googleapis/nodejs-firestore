@@ -133,15 +133,15 @@ export class Transaction implements firestore.Transaction {
    * });
    * ```
    */
-  get<T>(
+  get<T, U extends firestore.AggregateSpec>(
     refOrQuery:
       | DocumentReference<T>
       | Query<T>
-      | (T extends firestore.AggregateSpec ? AggregateQuery<T> : never)
+      | AggregateQuery<U>
   ): Promise<
     | DocumentSnapshot<T>
     | QuerySnapshot<T>
-    | (T extends firestore.AggregateSpec ? AggregateQuerySnapshot<T> : never)
+    | AggregateQuerySnapshot<U>
   > {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
@@ -157,15 +157,12 @@ export class Transaction implements firestore.Transaction {
       return refOrQuery._get(this._transactionId);
     }
 
-    if (refOrQuery instanceof AggregateQuery) {
-      //TODO(tomandersen)
-      const y: AggregateQuery<firestore.AggregateSpec> = refOrQuery;
-      const x: Promise<AggregateQuerySnapshot<firestore.AggregateSpec>> = y.get();
-      return x as any;
+    if (refOrQuery instanceof AggregateQuery<U>) {
+      return refOrQuery.get();
     }
 
     throw new Error(
-      'Value for argument "refOrQuery" must be a DocumentReference or a Query.'
+      'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.'
     );
   }
 

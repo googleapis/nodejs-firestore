@@ -2935,7 +2935,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
       transform: (proto: RunAggregationQueryResponse, enc, callback) => {
         const readTime = Timestamp.fromProto(proto.readTime!);
         if (proto.result) {
-          const data: firestore.DocumentData = {};
+          const data: any = {};
           const fields = proto.result.aggregateFields;
           if (fields) {
             const serializer = firestore._serializer!;
@@ -2943,8 +2943,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
               data[prop] = serializer.decodeValue(fields[prop]);
             }
           }
-          //TODO(tomandersen) remove `as any`
-          const result = new AggregateQuerySnapshot<T>(this, readTime, data as any);
+          const result = new AggregateQuerySnapshot<T>(this, readTime, data);
           callback(undefined, result);
         } else {
           callback(Error('unexpected'));
