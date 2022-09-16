@@ -2140,20 +2140,22 @@ describe('Query class', () => {
   });
 });
 
-describe.skip('Transaction class (with Emulator)', () => {
+describe.only('Transaction class (with Emulator)', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   setLogFunction(console.log);
 
   beforeEach(() => {
     // This cannot be hard coded to emulator.
-    firestore = new Firestore({
-      host: 'localhost',
-      port: 8539,
-      projectId: 'my-cool-project',
-      ssl: false,
-    });
-    randomCol = getTestRoot(firestore);
+    // firestore = new Firestore({
+    //   host: 'localhost',
+    //   port: 8539,
+    //   projectId: 'my-cool-project',
+    //   ssl: false,
+    // });
+    // randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
