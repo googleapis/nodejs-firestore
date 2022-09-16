@@ -2285,7 +2285,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
           if (proto.done) {
             logger('Query._stream', tag, 'Trigger Logical Termination.');
             backendStream.unpipe(stream);
-            stream.emit('end');
+            backendStream.resume();
+            backendStream.end();
+            stream.end();
           }
         } else {
           callback(undefined, {readTime});
