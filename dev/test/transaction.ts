@@ -738,11 +738,11 @@ describe('transaction operations', () => {
       /* transactionOptions= */ {},
       (transaction: InvalidApiUsage) => {
         expect(() => transaction.get()).to.throw(
-            'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.'
+          'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.'
         );
 
         expect(() => transaction.get('foo')).to.throw(
-            'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.'
+          'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.'
         );
 
         return Promise.resolve();

@@ -20,16 +20,32 @@ import * as deepEqual from 'fast-deep-equal';
 
 import * as protos from '../protos/firestore_v1_proto_api';
 
-import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot,} from './document';
+import {
+  DocumentSnapshot,
+  DocumentSnapshotBuilder,
+  QueryDocumentSnapshot,
+} from './document';
 import {DocumentChange} from './document-change';
 import {Firestore} from './index';
 import {logger} from './logger';
 import {compare} from './order';
-import {FieldPath, QualifiedResourcePath, ResourcePath, validateFieldPath, validateResourcePath,} from './path';
+import {
+  FieldPath,
+  QualifiedResourcePath,
+  ResourcePath,
+  validateFieldPath,
+  validateResourcePath,
+} from './path';
 import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {defaultConverter} from './types';
-import {autoId, Deferred, isPermanentRpcError, requestTag, wrapError,} from './util';
+import {
+  autoId,
+  Deferred,
+  isPermanentRpcError,
+  requestTag,
+  wrapError,
+} from './util';
 import {
   invalidArgumentMessage,
   validateEnumValue,
@@ -1600,7 +1616,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @return an `AggregateQuery` that performs the given aggregations.
    */
   aggregate<T extends firestore.AggregateSpec>(
-      aggregates: T
+    aggregates: T
   ): AggregateQuery<T> {
     return new AggregateQuery(this, aggregates);
   }
@@ -2851,8 +2867,8 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
 }
 
 export class AggregateQuery<T extends firestore.AggregateSpec>
-    implements firestore.AggregateQuery<T> {
-
+  implements firestore.AggregateQuery<T>
+{
   private readonly _query: Query<unknown>;
   private readonly _aggregates: T;
 
@@ -2917,7 +2933,10 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
         if (proto.result) {
           const readTime = Timestamp.fromProto(proto.readTime!);
           const data = this.decodeResult(proto.result);
-          callback(undefined, new AggregateQuerySnapshot<T>(this, readTime, data));
+          callback(
+            undefined,
+            new AggregateQuerySnapshot<T>(this, readTime, data)
+          );
         } else {
           callback(Error('unexpected'));
         }
@@ -2936,33 +2955,33 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
         do {
           streamActive = new Deferred<boolean>();
           const backendStream = await firestore.requestStream(
-              'runAggregationQuery',
-              /* bidirectional= */ false,
-              request,
-              tag
+            'runAggregationQuery',
+            /* bidirectional= */ false,
+            request,
+            tag
           );
           stream.on('close', () => {
             backendStream.resume();
             backendStream.end();
-          })
+          });
           backendStream.on('error', err => {
             backendStream.unpipe(stream);
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
             if (!transactionId && !isPermanentRpcError(err, 'runQuery')) {
               logger(
-                  'Query._stream',
-                  tag,
-                  'Query failed with retryable stream error:',
-                  err
+                'Query._stream',
+                tag,
+                'Query failed with retryable stream error:',
+                err
               );
               streamActive.resolve(/* active= */ true);
             } else {
               logger(
-                  'AggregateQuery._stream',
-                  tag,
-                  'AggregateQuery failed with stream error:',
-                  err
+                'AggregateQuery._stream',
+                tag,
+                'AggregateQuery failed with stream error:',
+                err
               );
               stream.destroy(err);
               streamActive.resolve(/* active= */ false);
@@ -2983,14 +3002,18 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    * @param proto
    * @private
    */
-  private decodeResult(proto: api.IAggregationResult): firestore.AggregateSpecData<T> {
+  private decodeResult(
+    proto: api.IAggregationResult
+  ): firestore.AggregateSpecData<T> {
     const data: any = {};
     const fields = proto.aggregateFields;
     if (fields) {
       const serializer = this._query.firestore._serializer!;
       for (const prop of Object.keys(fields)) {
         if (this._aggregates[prop] === undefined) {
-          throw new Error(`Unexpected alias [${prop}] in result aggregate result`);
+          throw new Error(
+            `Unexpected alias [${prop}] in result aggregate result`
+          );
         }
         data[prop] = serializer.decodeValue(fields[prop]);
       }
@@ -3038,11 +3061,16 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
         return false;
       }
 
-      const thisAggregates: [string, AggregateField<unknown>][] = Object.entries(this._aggregates);
+      const thisAggregates: [string, AggregateField<unknown>][] =
+        Object.entries(this._aggregates);
       const otherAggregates = other._aggregates;
 
-      return thisAggregates.length === Object.keys(otherAggregates).length &&
-          thisAggregates.every(([alias, field]) => field.isEqual(otherAggregates[alias]))
+      return (
+        thisAggregates.length === Object.keys(otherAggregates).length &&
+        thisAggregates.every(([alias, field]) =>
+          field.isEqual(otherAggregates[alias])
+        )
+      );
     }
     return false;
   }
@@ -3067,7 +3095,7 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
 
   getCount(): number {
     const count = this._data.count;
-    if (typeof count == 'number') {
+    if (typeof count === 'number') {
       return count;
     }
     throw new Error('Unexpected count is ' + typeof count);
@@ -3088,8 +3116,13 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
       const otherData = other._data;
       const otherDataKeys: string[] = Object.keys(otherData);
 
-      return thisDataKeys.length === otherDataKeys.length && thisDataKeys.every(alias =>
-          Object.prototype.hasOwnProperty.call(otherData, alias) && thisData[alias] === otherData[alias]
+      return (
+        thisDataKeys.length === otherDataKeys.length &&
+        thisDataKeys.every(
+          alias =>
+            Object.prototype.hasOwnProperty.call(otherData, alias) &&
+            thisData[alias] === otherData[alias]
+        )
       );
     }
     return false;
