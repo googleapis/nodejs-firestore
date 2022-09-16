@@ -1706,8 +1706,19 @@ declare namespace FirebaseFirestore {
       onError?: (error: Error) => void
     ): () => void;
 
+    /**
+     * Returns count `AggregateQuery` based on this `Query`.
+     *
+     * @return AggregateQuery that contains count aggregate.
+     */
     count(): AggregateQuery<{count: AggregateField<number>}>;
 
+    /**
+     * Returns `AggregateQuery` for given aggregates based on this `Query`.
+     *
+     * @param aggregates Specify aliases with aggregate functions.
+     * @return An AggregateQuery that contains given aggregates.
+     */
     aggregate<T extends AggregateSpec>(aggregates: T): AggregateQuery<T>;
 
     /**
@@ -2048,6 +2059,13 @@ declare namespace FirebaseFirestore {
     static sum(field: string | FieldPath): AggregateField<number | undefined>;
     static average(field: string | FieldPath): AggregateField<number | undefined>;
 
+    /**
+     * Returns true if the aggregate function in this `AggregateField` is equal to the
+     * provided one.
+     *
+     * @param other The `AggregateField` to compare against.
+     * @return true if this `AggregateField` is equal to the provided one.
+     */
     isEqual(other: AggregateField<T>): boolean;
   }
 
@@ -2080,8 +2098,17 @@ declare namespace FirebaseFirestore {
 
     readonly query: Query<unknown>;
 
+    readonly aggregates: T;
+
     get(): Promise<AggregateQuerySnapshot<T>>;
 
+    /**
+     * Returns true if the query and aggregates in this `AggregateQuery` is equal to the
+     * provided one.
+     *
+     * @param other The `AggregateQuery` to compare against.
+     * @return true if this `AggregateQuery` is equal to the provided one.
+     */
     isEqual(other: AggregateQuery<T>): boolean;
   }
 
@@ -2106,6 +2133,13 @@ declare namespace FirebaseFirestore {
      */
     data(): AggregateSpecData<T>;
 
+    /**
+     * Returns true if the query, read time, and data in this `AggregateQuerySnapshot`
+     * is equal to the provided one.
+     *
+     * @param other The `AggregateQuerySnapshot` to compare against.
+     * @return true if this `AggregateQuerySnapshot` is equal to the provided one.
+     */
     isEqual(other: AggregateQuerySnapshot<T>): boolean;
   }
 

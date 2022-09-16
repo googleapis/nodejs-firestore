@@ -1608,7 +1608,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @return an `AggregateQuery` that counts the number of documents in the
    * result set.
    */
-
   count(): AggregateQuery<{count: firestore.AggregateField<number>}> {
     return this.aggregate({count: AggregateField.count()});
   }
@@ -2994,6 +2993,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    */
   toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
+    //TODO(tomandersen) inspect _query to build request - this is just hard coded count right now.
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
       structuredAggregationQuery: {
