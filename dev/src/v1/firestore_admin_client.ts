@@ -567,7 +567,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        name: request.name || '',
+        name: request.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.getIndex(request, options, callback);
@@ -653,7 +653,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        name: request.name || '',
+        name: request.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.deleteIndex(request, options, callback);
@@ -737,7 +737,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        name: request.name || '',
+        name: request.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.getField(request, options, callback);
@@ -823,7 +823,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        name: request.name || '',
+        name: request.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.getDatabase(request, options, callback);
@@ -909,7 +909,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        parent: request.parent || '',
+        parent: request.parent ?? '',
       });
     this.initialize();
     return this.innerApiCalls.listDatabases(request, options, callback);
@@ -1018,7 +1018,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        parent: request.parent || '',
+        parent: request.parent ?? '',
       });
     this.initialize();
     return this.innerApiCalls.createIndex(request, options, callback);
@@ -1171,7 +1171,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        'field.name': request.field!.name || '',
+        'field.name': request.field!.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.updateField(request, options, callback);
@@ -1331,7 +1331,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        name: request.name || '',
+        name: request.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.exportDocuments(request, options, callback);
@@ -1483,7 +1483,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        name: request.name || '',
+        name: request.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.importDocuments(request, options, callback);
@@ -1623,7 +1623,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        'database.name': request.database!.name || '',
+        'database.name': request.database!.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.updateDatabase(request, options, callback);
@@ -1755,7 +1755,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        parent: request.parent || '',
+        parent: request.parent ?? '',
       });
     this.initialize();
     return this.innerApiCalls.listIndexes(request, options, callback);
@@ -1798,7 +1798,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        parent: request.parent || '',
+        parent: request.parent ?? '',
       });
     const defaultCallSettings = this._defaults['listIndexes'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1850,7 +1850,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        parent: request.parent || '',
+        parent: request.parent ?? '',
       });
     const defaultCallSettings = this._defaults['listIndexes'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1962,7 +1962,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        parent: request.parent || '',
+        parent: request.parent ?? '',
       });
     this.initialize();
     return this.innerApiCalls.listFields(request, options, callback);
@@ -2009,7 +2009,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        parent: request.parent || '',
+        parent: request.parent ?? '',
       });
     const defaultCallSettings = this._defaults['listFields'];
     const callSettings = defaultCallSettings.merge(options);
@@ -2065,7 +2065,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        parent: request.parent || '',
+        parent: request.parent ?? '',
       });
     const defaultCallSettings = this._defaults['listFields'];
     const callSettings = defaultCallSettings.merge(options);
