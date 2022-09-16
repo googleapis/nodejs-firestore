@@ -158,7 +158,7 @@ export class Transaction implements firestore.Transaction {
     }
 
     if (refOrQuery instanceof AggregateQuery<U>) {
-      return refOrQuery.get();
+      return refOrQuery._get(this._transactionId);
     }
 
     throw new Error(
