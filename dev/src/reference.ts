@@ -20,32 +20,16 @@ import * as deepEqual from 'fast-deep-equal';
 
 import * as protos from '../protos/firestore_v1_proto_api';
 
-import {
-  DocumentSnapshot,
-  DocumentSnapshotBuilder,
-  QueryDocumentSnapshot,
-} from './document';
+import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot,} from './document';
 import {DocumentChange} from './document-change';
 import {Firestore} from './index';
 import {logger} from './logger';
 import {compare} from './order';
-import {
-  FieldPath,
-  QualifiedResourcePath,
-  ResourcePath,
-  validateFieldPath,
-  validateResourcePath,
-} from './path';
+import {FieldPath, QualifiedResourcePath, ResourcePath, validateFieldPath, validateResourcePath,} from './path';
 import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {defaultConverter} from './types';
-import {
-  autoId,
-  Deferred,
-  isPermanentRpcError,
-  requestTag,
-  wrapError,
-} from './util';
+import {autoId, Deferred, isPermanentRpcError, requestTag, wrapError,} from './util';
 import {
   invalidArgumentMessage,
   validateEnumValue,
@@ -55,10 +39,7 @@ import {
 } from './validate';
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
-
 import api = protos.google.firestore.v1;
-import {google} from '../protos/firestore_v1_proto_api';
-import RunAggregationQueryResponse = google.firestore.v1.RunAggregationQueryResponse;
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2932,19 +2913,11 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
 
     const stream: Transform = new Transform({
       objectMode: true,
-      transform: (proto: RunAggregationQueryResponse, enc, callback) => {
-        const readTime = Timestamp.fromProto(proto.readTime!);
+      transform: (proto: api.IRunAggregationQueryResponse, enc, callback) => {
         if (proto.result) {
-          const data: any = {};
-          const fields = proto.result.aggregateFields;
-          if (fields) {
-            const serializer = firestore._serializer!;
-            for (const prop of Object.keys(fields)) {
-              data[prop] = serializer.decodeValue(fields[prop]);
-            }
-          }
-          const result = new AggregateQuerySnapshot<T>(this, readTime, data);
-          callback(undefined, result);
+          const readTime = Timestamp.fromProto(proto.readTime!);
+          const data = this.decodeResult(proto.result);
+          callback(undefined, new AggregateQuerySnapshot<T>(this, readTime, data));
         } else {
           callback(Error('unexpected'));
         }
@@ -2954,32 +2927,75 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
     firestore
       .initializeIfNeeded(tag)
       .then(async () => {
+        // `toProto()` might throw an exception. We rely on the behavior of an
+        // async function to convert this exception into the rejected Promise we
+        // catch below.
         const request = this.toProto(transactionId);
-        const backendStream = await firestore.requestStream(
-          'runAggregationQuery',
-          /* bidirectional= */ false,
-          request,
-          tag
-        );
-        stream.on('close', () => {
-          backendStream.resume();
-          backendStream.end();
-        })
-        backendStream.on('error', err => {
-          logger(
-            'AggregateQuery._stream',
-            tag,
-            'AggregateQuery failed with stream error:',
-            err
+
+        let streamActive: Deferred<boolean>;
+        do {
+          streamActive = new Deferred<boolean>();
+          const backendStream = await firestore.requestStream(
+              'runAggregationQuery',
+              /* bidirectional= */ false,
+              request,
+              tag
           );
-          stream.destroy(err);
-        });
-        backendStream.resume();
-        backendStream.pipe(stream);
+          stream.on('close', () => {
+            backendStream.resume();
+            backendStream.end();
+          })
+          backendStream.on('error', err => {
+            backendStream.unpipe(stream);
+            // If a non-transactional query failed, attempt to restart.
+            // Transactional queries are retried via the transaction runner.
+            if (!transactionId && !isPermanentRpcError(err, 'runQuery')) {
+              logger(
+                  'Query._stream',
+                  tag,
+                  'Query failed with retryable stream error:',
+                  err
+              );
+              streamActive.resolve(/* active= */ true);
+            } else {
+              logger(
+                  'AggregateQuery._stream',
+                  tag,
+                  'AggregateQuery failed with stream error:',
+                  err
+              );
+              stream.destroy(err);
+              streamActive.resolve(/* active= */ false);
+            }
+          });
+          backendStream.resume();
+          backendStream.pipe(stream);
+        } while (await streamActive.promise);
       })
       .catch(e => stream.destroy(e));
 
     return stream;
+  }
+
+  /**
+   * Internal method to decode values within result.
+   *
+   * @param proto
+   * @private
+   */
+  private decodeResult(proto: api.IAggregationResult): firestore.AggregateSpecData<T> {
+    const data: any = {};
+    const fields = proto.aggregateFields;
+    if (fields) {
+      const serializer = this._query.firestore._serializer!;
+      for (const prop of Object.keys(fields)) {
+        if (this._aggregates[prop] === undefined) {
+          throw new Error(`Unexpected alias [${prop}] in result aggregate result`);
+        }
+        data[prop] = serializer.decodeValue(fields[prop]);
+      }
+    }
+    return data;
   }
 
   /**
