@@ -134,14 +134,9 @@ export class Transaction implements firestore.Transaction {
    * ```
    */
   get<T, U extends firestore.AggregateSpec>(
-    refOrQuery:
-      | DocumentReference<T>
-      | Query<T>
-      | AggregateQuery<U>
+    refOrQuery: DocumentReference<T> | Query<T> | AggregateQuery<U>
   ): Promise<
-    | DocumentSnapshot<T>
-    | QuerySnapshot<T>
-    | AggregateQuerySnapshot<U>
+    DocumentSnapshot<T> | QuerySnapshot<T> | AggregateQuerySnapshot<U>
   > {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);

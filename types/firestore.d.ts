@@ -2106,7 +2106,6 @@ declare namespace FirebaseFirestore {
     isEqual(other: AggregateQuery<T>): boolean;
   }
 
-
   /**
    * An `AggregateQuerySnapshot` contains the results of running an aggregate query.
    */
