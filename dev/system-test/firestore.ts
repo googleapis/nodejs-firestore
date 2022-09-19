@@ -51,7 +51,7 @@ import {
   verifyInstance,
 } from '../test/util/helpers';
 import {BulkWriter} from '../src/bulk-writer';
-import {Status} from 'google-gax/build/src/status';
+import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
 
@@ -2147,13 +2147,12 @@ describe.only('Transaction class (with Emulator)', () => {
 
   beforeEach(() => {
     // This cannot be hard coded to emulator.
-    // firestore = new Firestore({
+    // randomCol = getTestRoot({
     //   host: 'localhost',
-    //   port: 8539,
+    //   port: 8080,
     //   projectId: 'my-cool-project',
     //   ssl: false,
     // });
-    // randomCol = getTestRoot(firestore);
     randomCol = getTestRoot();
     firestore = randomCol.firestore;
   });
