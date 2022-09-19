@@ -2053,12 +2053,6 @@ declare namespace FirebaseFirestore {
      */
     static count(): AggregateField<number>;
 
-    //TODO(tomandersen)
-    static min(field: string | FieldPath): AggregateField<DocumentFieldValue | undefined>;
-    static max(field: string | FieldPath): AggregateField<DocumentFieldValue | undefined>;
-    static sum(field: string | FieldPath): AggregateField<number | undefined>;
-    static average(field: string | FieldPath): AggregateField<number | undefined>;
-
     /**
      * Returns true if the aggregate function in this `AggregateField` is equal to the
      * provided one.
