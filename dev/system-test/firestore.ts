@@ -2140,7 +2140,7 @@ describe('Query class', () => {
   });
 });
 
-describe.only('Transaction class (with Emulator)', () => {
+describe('Aggregates', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   setLogFunction(console.log);
