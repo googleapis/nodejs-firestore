@@ -1714,14 +1714,6 @@ declare namespace FirebaseFirestore {
     count(): AggregateQuery<{count: AggregateField<number>}>;
 
     /**
-     * Returns `AggregateQuery` for given aggregates based on this `Query`.
-     *
-     * @param aggregates Specify aliases with aggregate functions.
-     * @return An AggregateQuery that contains given aggregates.
-     */
-    aggregate<T extends AggregateSpec>(aggregates: T): AggregateQuery<T>;
-
-    /**
      * Returns true if this `Query` is equal to the provided one.
      *
      * @param other The `Query` to compare against.
@@ -2091,8 +2083,6 @@ declare namespace FirebaseFirestore {
     private constructor();
 
     readonly query: Query<unknown>;
-
-    readonly aggregates: T;
 
     get(): Promise<AggregateQuerySnapshot<T>>;
 

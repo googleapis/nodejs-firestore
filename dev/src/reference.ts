@@ -1606,7 +1606,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * result set.
    */
   count(): AggregateQuery<{count: firestore.AggregateField<number>}> {
-    return this.aggregate({count: AggregateField.count()});
+    return this._aggregate({count: AggregateField.count()});
   }
 
   /**
@@ -1615,7 +1615,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @param aggregates the aggregations to perform.
    * @return an `AggregateQuery` that performs the given aggregations.
    */
-  aggregate<T extends firestore.AggregateSpec>(
+  _aggregate<T extends firestore.AggregateSpec>(
     aggregates: T
   ): AggregateQuery<T> {
     return new AggregateQuery(this, aggregates);
@@ -2881,10 +2881,6 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
     return this._query;
   }
 
-  get aggregates(): T {
-    return this._aggregates;
-  }
-
   get(): Promise<AggregateQuerySnapshot<T>> {
     return this._get();
   }
@@ -2938,7 +2934,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
             new AggregateQuerySnapshot<T>(this, readTime, data)
           );
         } else {
-          callback(Error('unexpected'));
+          callback(Error('RunAggregationQueryResponse is missing result'));
         }
       },
     });
@@ -2968,11 +2964,11 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
             backendStream.unpipe(stream);
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
-            if (!transactionId && !isPermanentRpcError(err, 'runQuery')) {
+            if (!transactionId && !isPermanentRpcError(err, 'runAggregationQuery')) {
               logger(
-                'Query._stream',
+                'AggregateQuery._stream',
                 tag,
-                'Query failed with retryable stream error:',
+                'AggregateQuery failed with retryable stream error:',
                 err
               );
               streamActive.resolve(/* active= */ true);
@@ -3091,14 +3087,6 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
 
   get readTime(): firestore.Timestamp {
     return this._readTime;
-  }
-
-  getCount(): number {
-    const count = this._data.count;
-    if (typeof count === 'number') {
-      return count;
-    }
-    throw new Error('Unexpected count is ' + typeof count);
   }
 
   isEqual(other: firestore.AggregateQuerySnapshot<T>): boolean {
