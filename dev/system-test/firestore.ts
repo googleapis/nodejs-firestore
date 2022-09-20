@@ -2140,19 +2140,12 @@ describe('Query class', () => {
   });
 });
 
-describe('Aggregates', () => {
+describe.only('Aggregates', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   setLogFunction(console.log);
 
   beforeEach(() => {
-    // This cannot be hard coded to emulator.
-    // randomCol = getTestRoot({
-    //   host: 'localhost',
-    //   port: 8080,
-    //   projectId: 'my-cool-project',
-    //   ssl: false,
-    // });
     randomCol = getTestRoot();
     firestore = randomCol.firestore;
   });

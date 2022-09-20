@@ -150,9 +150,4 @@ describe('aggregate query interface', () => {
         expect(err.message).to.equal('Expected error');
       });
   });
-
-  it('handles stream exception after initialization (with get())', () => {
-    //Not required without retry logic.
-    //TODO(tomandersen)
-  });
 });
