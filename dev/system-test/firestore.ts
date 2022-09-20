@@ -2152,7 +2152,14 @@ describe.only('Aggregates', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('counts 0 document', async () => {
+  it('counts 0 document from non-existent collection', async () => {
+    const count = randomCol.count();
+    const res = await firestore.runTransaction(f => f.get(count));
+    expect(res.getCount()).to.equal(0);
+  });
+
+  it('counts 0 document from filtered empty collection', async () => {
+    await randomCol.doc('doc').set({foo: 'bar'});
     const count = randomCol.where('foo', '==', 'notbar').count();
     const res = await firestore.runTransaction(f => f.get(count));
     expect(res.getCount()).to.equal(0);
@@ -2160,17 +2167,52 @@ describe.only('Aggregates', () => {
 
   it('counts 1 document', async () => {
     await randomCol.doc('doc').set({foo: 'bar'});
-    const count = randomCol.where('foo', '==', 'bar').count();
+    const count = randomCol.count();
     const res = await firestore.runTransaction(f => f.get(count));
     expect(res.getCount()).to.equal(1);
   });
 
-  it('counts multiple documents', async () => {
+  it('counts multiple documents with filter', async () => {
     await randomCol.doc('doc1').set({foo: 'bar'});
     await randomCol.doc('doc2').set({foo: 'bar'});
+    await randomCol.doc('doc3').set({foo: 'notbar'});
+    await randomCol.doc('doc3').set({notfoo: 'bar'});
     const count = randomCol.where('foo', '==', 'bar').count();
     const res = await firestore.runTransaction(f => f.get(count));
     expect(res.getCount()).to.equal(2);
+  });
+
+  it('counts up to limit', async () => {
+    await randomCol.doc('doc1').set({foo: 'bar'});
+    await randomCol.doc('doc2').set({foo: 'bar'});
+    await randomCol.doc('doc3').set({foo: 'bar'});
+    await randomCol.doc('doc4').set({foo: 'bar'});
+    await randomCol.doc('doc5').set({foo: 'bar'});
+    await randomCol.doc('doc6').set({foo: 'bar'});
+    await randomCol.doc('doc7').set({foo: 'bar'});
+    await randomCol.doc('doc8').set({foo: 'bar'});
+    const count = randomCol.limit(5).count();
+    const res = await firestore.runTransaction(f => f.get(count));
+    expect(res.getCount()).to.equal(5);
+  });
+
+  it('counts with orderBy', async () => {
+    await randomCol.doc('doc1').set({foo1: 'bar1'});
+    await randomCol.doc('doc2').set({foo1: 'bar2'});
+    await randomCol.doc('doc3').set({foo1: 'bar3'});
+    await randomCol.doc('doc4').set({foo1: 'bar4'});
+    await randomCol.doc('doc5').set({foo1: 'bar5'});
+    await randomCol.doc('doc6').set({foo2: 'bar6'});
+    await randomCol.doc('doc7').set({foo2: 'bar7'});
+    await randomCol.doc('doc8').set({foo2: 'bar8'});
+
+    const count1 = randomCol.orderBy('foo2').count();
+    const res1 = await firestore.runTransaction(f => f.get(count1));
+    expect(res1.getCount()).to.equal(3);
+
+    const count2 = randomCol.orderBy('foo3').count();
+    const res2 = await firestore.runTransaction(f => f.get(count2));
+    expect(res2.getCount()).to.equal(0);
   });
 });
 
