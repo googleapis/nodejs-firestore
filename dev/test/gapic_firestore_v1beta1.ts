@@ -270,7 +270,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.GetDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetDocumentRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.GetDocumentRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -298,7 +301,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.GetDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetDocumentRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.GetDocumentRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -342,7 +348,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.GetDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetDocumentRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.GetDocumentRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -370,7 +379,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.GetDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetDocumentRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.GetDocumentRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -389,10 +401,10 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.UpdateDocumentRequest()
       );
       request.document ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateDocumentRequest', [
-        'document',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.UpdateDocumentRequest',
+        ['document', 'name']
+      );
       request.document.name = defaultValue1;
       const expectedHeaderRequestParams = `document.name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -421,10 +433,10 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.UpdateDocumentRequest()
       );
       request.document ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateDocumentRequest', [
-        'document',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.UpdateDocumentRequest',
+        ['document', 'name']
+      );
       request.document.name = defaultValue1;
       const expectedHeaderRequestParams = `document.name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -469,10 +481,10 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.UpdateDocumentRequest()
       );
       request.document ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateDocumentRequest', [
-        'document',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.UpdateDocumentRequest',
+        ['document', 'name']
+      );
       request.document.name = defaultValue1;
       const expectedHeaderRequestParams = `document.name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -501,10 +513,10 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.UpdateDocumentRequest()
       );
       request.document ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateDocumentRequest', [
-        'document',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.UpdateDocumentRequest',
+        ['document', 'name']
+      );
       request.document.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -522,9 +534,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.DeleteDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('DeleteDocumentRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.DeleteDocumentRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -552,9 +565,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.DeleteDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('DeleteDocumentRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.DeleteDocumentRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -598,9 +612,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.DeleteDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('DeleteDocumentRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.DeleteDocumentRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -628,9 +643,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.DeleteDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('DeleteDocumentRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.DeleteDocumentRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -648,9 +664,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BeginTransactionRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BeginTransactionRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BeginTransactionRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -678,9 +695,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BeginTransactionRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BeginTransactionRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BeginTransactionRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -724,9 +742,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BeginTransactionRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BeginTransactionRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BeginTransactionRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -754,9 +773,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BeginTransactionRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BeginTransactionRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BeginTransactionRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -774,7 +794,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CommitRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CommitRequest', ['database']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CommitRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -802,7 +825,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CommitRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CommitRequest', ['database']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CommitRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -846,7 +872,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CommitRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CommitRequest', ['database']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CommitRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -871,7 +900,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CommitRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CommitRequest', ['database']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CommitRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -889,9 +921,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RollbackRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('RollbackRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.RollbackRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -919,9 +952,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RollbackRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('RollbackRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.RollbackRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -965,9 +999,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RollbackRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('RollbackRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.RollbackRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -992,9 +1027,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RollbackRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('RollbackRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.RollbackRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -1012,9 +1048,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchWriteRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BatchWriteRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BatchWriteRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1042,9 +1079,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchWriteRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BatchWriteRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BatchWriteRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1088,9 +1126,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchWriteRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BatchWriteRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BatchWriteRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1118,9 +1157,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchWriteRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BatchWriteRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BatchWriteRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -1138,13 +1178,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CreateDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CreateDocumentRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CreateDocumentRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('CreateDocumentRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CreateDocumentRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedHeaderRequestParams = `parent=${defaultValue1}&collection_id=${defaultValue2}`;
       const expectedResponse = generateSampleMessage(
@@ -1172,13 +1214,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CreateDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CreateDocumentRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CreateDocumentRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('CreateDocumentRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CreateDocumentRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedHeaderRequestParams = `parent=${defaultValue1}&collection_id=${defaultValue2}`;
       const expectedResponse = generateSampleMessage(
@@ -1222,13 +1266,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CreateDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CreateDocumentRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CreateDocumentRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('CreateDocumentRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CreateDocumentRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedHeaderRequestParams = `parent=${defaultValue1}&collection_id=${defaultValue2}`;
       const expectedError = new Error('expected');
@@ -1256,13 +1302,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CreateDocumentRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CreateDocumentRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CreateDocumentRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('CreateDocumentRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.CreateDocumentRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -1280,9 +1328,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchGetDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BatchGetDocumentsRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BatchGetDocumentsRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1325,9 +1374,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchGetDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BatchGetDocumentsRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BatchGetDocumentsRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedHeaderRequestParams = `database=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1369,9 +1419,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchGetDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('BatchGetDocumentsRequest', [
-        'database',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.BatchGetDocumentsRequest',
+        ['database']
+      );
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -1403,7 +1454,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RunQueryRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('RunQueryRequest', ['parent']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.RunQueryRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1443,7 +1497,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RunQueryRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('RunQueryRequest', ['parent']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.RunQueryRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1483,7 +1540,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RunQueryRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('RunQueryRequest', ['parent']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.RunQueryRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -1675,13 +1735,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDocumentsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('ListDocumentsRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedHeaderRequestParams = `parent=${defaultValue1}&collection_id=${defaultValue2}`;
       const expectedResponse = [
@@ -1711,13 +1773,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDocumentsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('ListDocumentsRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedHeaderRequestParams = `parent=${defaultValue1}&collection_id=${defaultValue2}`;
       const expectedResponse = [
@@ -1763,13 +1827,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDocumentsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('ListDocumentsRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedHeaderRequestParams = `parent=${defaultValue1}&collection_id=${defaultValue2}`;
       const expectedError = new Error('expected');
@@ -1797,13 +1863,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDocumentsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('ListDocumentsRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedHeaderRequestParams = `parent=${defaultValue1}&collection_id=${defaultValue2}`;
       const expectedResponse = [
@@ -1854,13 +1922,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDocumentsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('ListDocumentsRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedHeaderRequestParams = `parent=${defaultValue1}&collection_id=${defaultValue2}`;
       const expectedError = new Error('expected');
@@ -1906,13 +1976,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDocumentsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('ListDocumentsRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedHeaderRequestParams = `parent=${defaultValue1}&collection_id=${defaultValue2}`;
       const expectedResponse = [
@@ -1952,13 +2024,15 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDocumentsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
-      const defaultValue2 = getTypeDefaultValue('ListDocumentsRequest', [
-        'collectionId',
-      ]);
+      const defaultValue2 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListDocumentsRequest',
+        ['collectionId']
+      );
       request.collectionId = defaultValue2;
       const expectedHeaderRequestParams = `parent=${defaultValue1}&collection_id=${defaultValue2}`;
       const expectedError = new Error('expected');
@@ -1997,9 +2071,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('PartitionQueryRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.PartitionQueryRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -2029,9 +2104,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('PartitionQueryRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.PartitionQueryRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -2077,9 +2153,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('PartitionQueryRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.PartitionQueryRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -2107,9 +2184,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('PartitionQueryRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.PartitionQueryRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -2160,9 +2238,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('PartitionQueryRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.PartitionQueryRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -2208,9 +2287,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('PartitionQueryRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.PartitionQueryRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -2250,9 +2330,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('PartitionQueryRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.PartitionQueryRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -2291,9 +2372,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListCollectionIdsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListCollectionIdsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [new String(), new String(), new String()];
@@ -2319,9 +2401,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListCollectionIdsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListCollectionIdsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [new String(), new String(), new String()];
@@ -2360,9 +2443,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListCollectionIdsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListCollectionIdsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -2390,9 +2474,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListCollectionIdsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListCollectionIdsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [new String(), new String(), new String()];
@@ -2436,9 +2521,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListCollectionIdsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListCollectionIdsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -2481,9 +2567,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListCollectionIdsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListCollectionIdsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [new String(), new String(), new String()];
@@ -2519,9 +2606,10 @@ describe('v1beta1.FirestoreClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListCollectionIdsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1beta1.ListCollectionIdsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');

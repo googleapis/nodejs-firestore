@@ -119,8 +119,7 @@ perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
   -r firestore_v1 \
   "${PROTOS_DIR}/google/firestore/v1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
-  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
-  "${PROTOS_DIR}/google/longrunning/*.proto"
+  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
 
 "${PBJS}" --proto_path=. --target=json -o v1_admin.json \
   -r firestore_admin_v1 \
@@ -133,7 +132,6 @@ perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
   -r firestore_v1beta1 \
   "${PROTOS_DIR}/google/firestore/v1beta1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
-  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
-  "${PROTOS_DIR}/google/longrunning/*.proto"
+  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
 
 node  ../../scripts/license.js *.d.ts *.js ../../build/src/v1beta1/*.d.ts ../../build/src/v1/*.d.ts
