@@ -452,7 +452,7 @@ declare namespace FirebaseFirestore {
      *
      * You can use the transaction object passed to 'updateFunction' to read and
      * modify Firestore documents under lock. You have to perform all reads
-     * before before you perform any write.
+     * before you perform any write.
      *
      * Transactions can be performed as read-only or read-write transactions. By
      * default, transactions are executed in read-write mode.
