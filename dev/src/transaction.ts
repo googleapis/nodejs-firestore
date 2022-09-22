@@ -107,7 +107,7 @@ export class Transaction implements firestore.Transaction {
    * @return An AggregateQuerySnapshot for the retrieved data.
    */
   get<T extends firestore.AggregateSpec>(
-    aggregateQuery: AggregateQuery<T>
+    aggregateQuery: firestore.AggregateQuery<T>
   ): Promise<AggregateQuerySnapshot<T>>;
 
   /**
@@ -134,7 +134,10 @@ export class Transaction implements firestore.Transaction {
    * ```
    */
   get<T, U extends firestore.AggregateSpec>(
-    refOrQuery: DocumentReference<T> | Query<T> | AggregateQuery<U>
+    refOrQuery:
+      | firestore.DocumentReference<T>
+      | firestore.Query<T>
+      | firestore.AggregateQuery<U>
   ): Promise<
     DocumentSnapshot<T> | QuerySnapshot<T> | AggregateQuerySnapshot<U>
   > {

@@ -13,15 +13,15 @@
 // limitations under the License.
 
 import {
-  QuerySnapshot,
   DocumentData,
-  WithFieldValue,
   PartialWithFieldValue,
+  QuerySnapshot,
   SetOptions,
   Settings,
+  WithFieldValue,
 } from '@google-cloud/firestore';
 
-import {describe, it, before, beforeEach, afterEach} from 'mocha';
+import {afterEach, before, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
@@ -54,7 +54,6 @@ import {BulkWriter} from '../src/bulk-writer';
 import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
-
 import IBundleElement = firestore.IBundleElement;
 
 use(chaiAsPromised);
@@ -2140,7 +2139,7 @@ describe('Query class', () => {
   });
 });
 
-describe.only('Aggregates', () => {
+describe('Aggregates', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   setLogFunction(console.log);
@@ -2152,68 +2151,121 @@ describe.only('Aggregates', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('counts 0 document from non-existent collection', async () => {
-    const count = randomCol.count();
-    const res = await firestore.runTransaction(f => f.get(count));
-    expect(res.data().count).to.equal(0);
+  describe('Run outside Transaction', () => {
+    countTests(async (q, n) => {
+      const res = await q.get();
+      expect(res.data().count).to.equal(n);
+    });
   });
 
-  it('counts 0 document from filtered empty collection', async () => {
-    await randomCol.doc('doc').set({foo: 'bar'});
-    const count = randomCol.where('foo', '==', 'notbar').count();
-    const res = await firestore.runTransaction(f => f.get(count));
-    expect(res.data().count).to.equal(0);
+  describe('Run within Transaction', () => {
+    countTests(async (q, n) => {
+      const res = await firestore.runTransaction(f => f.get(q));
+      expect(res.data().count).to.equal(n);
+    });
   });
 
-  it('counts 1 document', async () => {
-    await randomCol.doc('doc').set({foo: 'bar'});
-    const count = randomCol.count();
-    const res = await firestore.runTransaction(f => f.get(count));
-    expect(res.data().count).to.equal(1);
-  });
+  function countTests(
+    runQueryAndExpectCount: (
+      query: FirebaseFirestore.AggregateQuery<{
+        count: FirebaseFirestore.AggregateField<number>;
+      }>,
+      expectedCount: number
+    ) => Promise<void>
+  ) {
+    it('counts 0 document from non-existent collection', async () => {
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 0);
+    });
 
-  it('counts multiple documents with filter', async () => {
-    await randomCol.doc('doc1').set({foo: 'bar'});
-    await randomCol.doc('doc2').set({foo: 'bar'});
-    await randomCol.doc('doc3').set({foo: 'notbar'});
-    await randomCol.doc('doc3').set({notfoo: 'bar'});
-    const count = randomCol.where('foo', '==', 'bar').count();
-    const res = await firestore.runTransaction(f => f.get(count));
-    expect(res.data().count).to.equal(2);
-  });
+    it('counts 0 document from filtered empty collection', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.where('foo', '==', 'notbar').count();
+      await runQueryAndExpectCount(count, 0);
+    });
 
-  it('counts up to limit', async () => {
-    await randomCol.doc('doc1').set({foo: 'bar'});
-    await randomCol.doc('doc2').set({foo: 'bar'});
-    await randomCol.doc('doc3').set({foo: 'bar'});
-    await randomCol.doc('doc4').set({foo: 'bar'});
-    await randomCol.doc('doc5').set({foo: 'bar'});
-    await randomCol.doc('doc6').set({foo: 'bar'});
-    await randomCol.doc('doc7').set({foo: 'bar'});
-    await randomCol.doc('doc8').set({foo: 'bar'});
-    const count = randomCol.limit(5).count();
-    const res = await firestore.runTransaction(f => f.get(count));
-    expect(res.data().count).to.equal(5);
-  });
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 1);
+    });
 
-  it('counts with orderBy', async () => {
-    await randomCol.doc('doc1').set({foo1: 'bar1'});
-    await randomCol.doc('doc2').set({foo1: 'bar2'});
-    await randomCol.doc('doc3').set({foo1: 'bar3'});
-    await randomCol.doc('doc4').set({foo1: 'bar4'});
-    await randomCol.doc('doc5').set({foo1: 'bar5'});
-    await randomCol.doc('doc6').set({foo2: 'bar6'});
-    await randomCol.doc('doc7').set({foo2: 'bar7'});
-    await randomCol.doc('doc8').set({foo2: 'bar8'});
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 1);
+    });
 
-    const count1 = randomCol.orderBy('foo2').count();
-    const res1 = await firestore.runTransaction(f => f.get(count1));
-    expect(res1.data().count).to.equal(3);
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 1);
+    });
 
-    const count2 = randomCol.orderBy('foo3').count();
-    const res2 = await firestore.runTransaction(f => f.get(count2));
-    expect(res2.data().count).to.equal(0);
-  });
+    it('counts multiple documents with filter', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'notbar'});
+      await randomCol.doc('doc3').set({notfoo: 'bar'});
+      const count = randomCol.where('foo', '==', 'bar').count();
+      await runQueryAndExpectCount(count, 2);
+    });
+
+    it('counts up to limit', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+      await randomCol.doc('doc8').set({foo: 'bar'});
+      const count = randomCol.limit(5).count();
+      await runQueryAndExpectCount(count, 5);
+    });
+
+    it('counts with orderBy', async () => {
+      await randomCol.doc('doc1').set({foo1: 'bar1'});
+      await randomCol.doc('doc2').set({foo1: 'bar2'});
+      await randomCol.doc('doc3').set({foo1: 'bar3'});
+      await randomCol.doc('doc4').set({foo1: 'bar4'});
+      await randomCol.doc('doc5').set({foo1: 'bar5'});
+      await randomCol.doc('doc6').set({foo2: 'bar6'});
+      await randomCol.doc('doc7').set({foo2: 'bar7'});
+      await randomCol.doc('doc8').set({foo2: 'bar8'});
+
+      const count1 = randomCol.orderBy('foo2').count();
+      await runQueryAndExpectCount(count1, 3);
+
+      const count2 = randomCol.orderBy('foo3').count();
+      await runQueryAndExpectCount(count2, 0);
+    });
+
+    it('counts with startAt, endAt and offset', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+
+      const count1 = randomCol.startAfter(randomCol.doc('doc3')).count();
+      await runQueryAndExpectCount(count1, 4);
+
+      const count2 = randomCol.startAt(randomCol.doc('doc3')).count();
+      await runQueryAndExpectCount(count2, 5);
+
+      const count3 = randomCol.endAt(randomCol.doc('doc3')).count();
+      await runQueryAndExpectCount(count3, 3);
+
+      const count4 = randomCol.endBefore(randomCol.doc('doc3')).count();
+      await runQueryAndExpectCount(count4, 2);
+
+      const count5 = randomCol.offset(6).count();
+      await runQueryAndExpectCount(count5, 1);
+    });
+  }
 });
 
 describe('Transaction class', () => {

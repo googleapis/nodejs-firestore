@@ -93,7 +93,7 @@ describe('aggregate query interface', () => {
 
     const query = firestore.collection('collectionId').count();
     return query.get().then(results => {
-      expect(results.getCount()).to.be.equal(99);
+      expect(results.data().count).to.be.equal(99);
       expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
       expect(results.query).to.be.equal(query);
     });
@@ -116,7 +116,7 @@ describe('aggregate query interface', () => {
 
     const query = firestore.collection('collectionId').count();
     return query.get().then(results => {
-      expect(results.getCount()).to.be.equal(99);
+      expect(results.data().count).to.be.equal(99);
       expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
       expect(results.query).to.be.equal(query);
     });

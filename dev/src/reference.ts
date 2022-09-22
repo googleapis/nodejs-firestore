@@ -1615,7 +1615,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @param aggregates the aggregations to perform.
    * @return an `AggregateQuery` that performs the given aggregations.
    */
-  _aggregate<T extends firestore.AggregateSpec>(
+  private _aggregate<T extends firestore.AggregateSpec>(
     aggregates: T
   ): AggregateQuery<T> {
     return new AggregateQuery(this, aggregates);
@@ -2964,7 +2964,10 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
             backendStream.unpipe(stream);
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
-            if (!transactionId && !isPermanentRpcError(err, 'runAggregationQuery')) {
+            if (
+              !transactionId &&
+              !isPermanentRpcError(err, 'runAggregationQuery')
+            ) {
               logger(
                 'AggregateQuery._stream',
                 tag,
@@ -3019,7 +3022,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
 
   /**
    * Internal method for serializing a query to its RunAggregationQuery proto
-   * representation with an optional transaction id or read time.
+   * representation with an optional transaction id.
    *
    * @private
    * @internal
