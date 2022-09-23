@@ -272,7 +272,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetIndexRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetIndexRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -300,7 +303,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetIndexRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetIndexRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -344,7 +350,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetIndexRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetIndexRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -369,7 +378,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetIndexRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetIndexRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -387,7 +399,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('DeleteIndexRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.DeleteIndexRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -415,7 +430,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('DeleteIndexRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.DeleteIndexRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -459,7 +477,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('DeleteIndexRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.DeleteIndexRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -487,7 +508,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('DeleteIndexRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.DeleteIndexRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -505,7 +529,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetFieldRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetFieldRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetFieldRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -533,7 +560,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetFieldRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetFieldRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetFieldRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -577,7 +607,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetFieldRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetFieldRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetFieldRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -602,7 +635,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetFieldRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetFieldRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetFieldRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -620,7 +656,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetDatabaseRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetDatabaseRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetDatabaseRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -648,7 +687,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetDatabaseRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetDatabaseRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetDatabaseRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -692,7 +734,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetDatabaseRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetDatabaseRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetDatabaseRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -720,7 +765,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetDatabaseRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('GetDatabaseRequest', ['name']);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.GetDatabaseRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -738,9 +786,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListDatabasesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDatabasesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListDatabasesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -768,9 +817,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListDatabasesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDatabasesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListDatabasesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -814,9 +864,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListDatabasesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDatabasesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListDatabasesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -844,9 +895,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListDatabasesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListDatabasesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListDatabasesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
@@ -864,9 +916,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CreateIndexRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.CreateIndexRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -895,9 +948,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CreateIndexRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.CreateIndexRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -948,9 +1002,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CreateIndexRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.CreateIndexRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -978,9 +1033,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateIndexRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('CreateIndexRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.CreateIndexRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1051,10 +1107,10 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.UpdateFieldRequest()
       );
       request.field ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateFieldRequest', [
-        'field',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.UpdateFieldRequest',
+        ['field', 'name']
+      );
       request.field.name = defaultValue1;
       const expectedHeaderRequestParams = `field.name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1084,10 +1140,10 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.UpdateFieldRequest()
       );
       request.field ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateFieldRequest', [
-        'field',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.UpdateFieldRequest',
+        ['field', 'name']
+      );
       request.field.name = defaultValue1;
       const expectedHeaderRequestParams = `field.name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1139,10 +1195,10 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.UpdateFieldRequest()
       );
       request.field ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateFieldRequest', [
-        'field',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.UpdateFieldRequest',
+        ['field', 'name']
+      );
       request.field.name = defaultValue1;
       const expectedHeaderRequestParams = `field.name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1171,10 +1227,10 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.UpdateFieldRequest()
       );
       request.field ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateFieldRequest', [
-        'field',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.UpdateFieldRequest',
+        ['field', 'name']
+      );
       request.field.name = defaultValue1;
       const expectedHeaderRequestParams = `field.name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1244,9 +1300,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ExportDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ExportDocumentsRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ExportDocumentsRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1276,9 +1333,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ExportDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ExportDocumentsRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ExportDocumentsRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1329,9 +1387,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ExportDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ExportDocumentsRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ExportDocumentsRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1359,9 +1418,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ExportDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ExportDocumentsRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ExportDocumentsRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1434,9 +1494,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ImportDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ImportDocumentsRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ImportDocumentsRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1466,9 +1527,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ImportDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ImportDocumentsRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ImportDocumentsRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1519,9 +1581,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ImportDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ImportDocumentsRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ImportDocumentsRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1549,9 +1612,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ImportDocumentsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ImportDocumentsRequest', [
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ImportDocumentsRequest',
+        ['name']
+      );
       request.name = defaultValue1;
       const expectedHeaderRequestParams = `name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1625,10 +1689,10 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.UpdateDatabaseRequest()
       );
       request.database ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateDatabaseRequest', [
-        'database',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.UpdateDatabaseRequest',
+        ['database', 'name']
+      );
       request.database.name = defaultValue1;
       const expectedHeaderRequestParams = `database.name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1659,10 +1723,10 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.UpdateDatabaseRequest()
       );
       request.database ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateDatabaseRequest', [
-        'database',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.UpdateDatabaseRequest',
+        ['database', 'name']
+      );
       request.database.name = defaultValue1;
       const expectedHeaderRequestParams = `database.name=${defaultValue1}`;
       const expectedResponse = generateSampleMessage(
@@ -1714,10 +1778,10 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.UpdateDatabaseRequest()
       );
       request.database ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateDatabaseRequest', [
-        'database',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.UpdateDatabaseRequest',
+        ['database', 'name']
+      );
       request.database.name = defaultValue1;
       const expectedHeaderRequestParams = `database.name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1746,10 +1810,10 @@ describe('v1.FirestoreAdminClient', () => {
         new protos.google.firestore.admin.v1.UpdateDatabaseRequest()
       );
       request.database ??= {};
-      const defaultValue1 = getTypeDefaultValue('UpdateDatabaseRequest', [
-        'database',
-        'name',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.UpdateDatabaseRequest',
+        ['database', 'name']
+      );
       request.database.name = defaultValue1;
       const expectedHeaderRequestParams = `database.name=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1822,9 +1886,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListIndexesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListIndexesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -1854,9 +1919,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListIndexesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListIndexesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -1902,9 +1968,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListIndexesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListIndexesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -1932,9 +1999,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListIndexesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListIndexesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -1985,9 +2053,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListIndexesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListIndexesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -2035,9 +2104,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListIndexesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListIndexesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -2077,9 +2147,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListIndexesRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListIndexesRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -2120,9 +2191,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListFieldsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListFieldsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -2152,9 +2224,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListFieldsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListFieldsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -2200,9 +2273,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListFieldsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListFieldsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -2230,9 +2304,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListFieldsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListFieldsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -2283,9 +2358,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListFieldsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListFieldsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
@@ -2333,9 +2409,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListFieldsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListFieldsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedResponse = [
@@ -2375,9 +2452,10 @@ describe('v1.FirestoreAdminClient', () => {
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest()
       );
-      const defaultValue1 = getTypeDefaultValue('ListFieldsRequest', [
-        'parent',
-      ]);
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.admin.v1.ListFieldsRequest',
+        ['parent']
+      );
       request.parent = defaultValue1;
       const expectedHeaderRequestParams = `parent=${defaultValue1}`;
       const expectedError = new Error('expected');
