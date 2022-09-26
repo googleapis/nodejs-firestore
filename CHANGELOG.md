@@ -4,6 +4,18 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.3.0](https://github.com/googleapis/nodejs-firestore/compare/v6.2.0...v6.3.0) (2022-09-22)
+
+
+### Features
+
+* Add aggregation query APIs ([#1765](https://github.com/googleapis/nodejs-firestore/issues/1765)) ([18be4d0](https://github.com/googleapis/nodejs-firestore/commit/18be4d0ca3a8e927a883ba6e41a43d19fb2af665))
+
+
+### Bug Fixes
+
+* Tests will now verify asynchronous termination of underlying steam, and fix related bug. ([#1772](https://github.com/googleapis/nodejs-firestore/issues/1772)) ([a1717ff](https://github.com/googleapis/nodejs-firestore/commit/a1717ff279f1ea9647e28b8e93539bcad9739af0))
+
 ## [6.2.0](https://github.com/googleapis/nodejs-firestore/compare/v6.1.0...v6.2.0) (2022-09-13)
 
 
