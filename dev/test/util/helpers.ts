@@ -92,11 +92,23 @@ export function createInstance(
 export function verifyInstance(firestore: Firestore): Promise<void> {
   // Allow the setTimeout() call in _initializeStream to run before
   // verifying that all operations have finished executing.
-  return new Promise<void>(resolve => {
-    setTimeout(() => {
-      expect(firestore['_clientPool'].opCount).to.equal(0);
+  return new Promise<void>((resolve, reject) => {
+    if (firestore['_clientPool'].opCount === 0) {
       resolve();
-    }, 10);
+    } else {
+      setTimeout(() => {
+        const opCount = firestore['_clientPool'].opCount;
+        if (opCount === 0) {
+          resolve();
+        } else {
+          reject(
+            new Error(
+              `Firestore has ${opCount} unfinished operations executing.`
+            )
+          );
+        }
+      }, 10);
+    }
   });
 }
 
