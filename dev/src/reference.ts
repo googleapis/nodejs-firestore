@@ -56,7 +56,6 @@ import {
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
-import {Primitive} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -3314,7 +3313,7 @@ function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
  * @param right Array of primitives.
  * @return True if arrays are equal.
  */
-function isPrimitiveArrayEqual<T extends Primitive>(
+function isPrimitiveArrayEqual<T>(
   left: T[],
   right: T[]
 ): boolean {
