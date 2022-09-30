@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "6.0.0",
+  "version": "6.3.0",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -30,7 +30,9 @@
   "scripts": {
     "predocs": "npm run compile",
     "docs": "jsdoc -c .jsdoc.js",
-    "system-test": "mocha build/system-test --timeout 600000",
+    "system-test:rest": "USE_REST_FALLBACK=YES mocha build/system-test --timeout 600000",
+    "system-test:grpc": "mocha build/system-test --timeout 600000",
+    "system-test": "npm run system-test:grpc && npm run system-test:rest",
     "presystem-test": "npm run compile",
     "samples-test": "npm link && cd samples/ && npm link ../ && npm test && cd ../",
     "conformance": "mocha build/conformance",
@@ -41,7 +43,7 @@
     "lint": "gts check",
     "clean": "gts clean",
     "compile": "tsc -p .",
-    "postcompile": "node scripts/init-directories.js && cp -r dev/protos build && cp dev/src/v1beta1/*.json build/src/v1beta1/ && cp dev/src/v1/*.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/conformance-tests/*.json build/conformance/conformance-tests",
+    "postcompile": "node scripts/init-directories.js && cp -r dev/protos build && cp dev/src/v1beta1/*.json build/src/v1beta1/ && cp dev/src/v1/*.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/conformance-tests/*.json build/conformance/conformance-tests && minifyProtoJson",
     "fix": "gts fix",
     "prepare": "npm run compile",
     "docs-test": "linkinator docs",
@@ -52,7 +54,7 @@
   "dependencies": {
     "fast-deep-equal": "^3.1.1",
     "functional-red-black-tree": "^1.0.1",
-    "google-gax": "^3.2.1",
+    "google-gax": "^3.5.1",
     "protobufjs": "^7.0.0"
   },
   "devDependencies": {

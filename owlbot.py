@@ -139,6 +139,21 @@ if staging.is_dir():
        "\.\./\.\./protos/protos.json",
        "../../protos/v1beta1.json"
     )
+    s.replace(
+       "dev/test/gapic_firestore_v1.ts",
+       "\.\./protos/protos.json",
+       "../protos/v1.json"
+    )
+    s.replace(
+       "dev/test/gapic_firestore_admin_v1.ts",
+       "\.\./protos/protos.json",
+       "../protos/admin_v1.json"
+    )
+    s.replace(
+       "dev/test/gapic_firestore_v1beta1.ts",
+       "\.\./protos/protos.json",
+       "../protos/v1beta1.json"
+    )
 
     # Mark v1beta1 as deprecated
     s.replace(

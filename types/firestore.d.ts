@@ -286,6 +286,16 @@ declare namespace FirebaseFirestore {
      */
     ignoreUndefinedProperties?: boolean;
 
+    /**
+     * Use HTTP for requests that can be served over HTTP and JSON. This reduces
+     * the amount of networking code that is loaded to serve requests within
+     * Firestore.
+     *
+     * This setting does not apply to `onSnapshot` APIs as they cannot be served
+     * over native HTTP.
+     */
+    preferRest?: boolean;
+
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }
 
@@ -446,7 +456,7 @@ declare namespace FirebaseFirestore {
      *
      * You can use the transaction object passed to 'updateFunction' to read and
      * modify Firestore documents under lock. You have to perform all reads
-     * before before you perform any write.
+     * before you perform any write.
      *
      * Transactions can be performed as read-only or read-write transactions. By
      * default, transactions are executed in read-write mode.

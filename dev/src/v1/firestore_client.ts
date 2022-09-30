@@ -17,19 +17,18 @@
 // ** All changes to this file may be overwritten. **
 
 /* global window */
-import * as gax from 'google-gax';
-import {
+import type * as gax from 'google-gax';
+import type {
   Callback,
   CallOptions,
   Descriptors,
   ClientOptions,
   PaginationCallback,
   GaxCall,
-  GoogleError,
+  LocationsClient,
+  LocationProtos,
 } from 'google-gax';
-
-import {Transform} from 'stream';
-import {PassThrough} from 'stream';
+import {Transform, PassThrough} from 'stream';
 import * as protos from '../../protos/firestore_v1_proto_api';
 import jsonProtos = require('../../protos/v1.json');
 /**
@@ -38,7 +37,6 @@ import jsonProtos = require('../../protos/v1.json');
  * This file defines retry strategy and timeouts for all API methods in this library.
  */
 import * as gapicConfig from './firestore_client_config.json';
-
 const version = require('../../../package.json').version;
 
 /**
@@ -70,6 +68,7 @@ export class FirestoreClient {
   };
   warn: (code: string, message: string, warnType?: string) => void;
   innerApiCalls: {[name: string]: Function};
+  locationsClient: LocationsClient;
   firestoreStub?: Promise<{[name: string]: Function}>;
 
   /**
@@ -104,8 +103,18 @@ export class FirestoreClient {
    *     Pass "rest" to use HTTP/1.1 REST API instead of gRPC.
    *     For more information, please check the
    *     {@link https://github.com/googleapis/gax-nodejs/blob/main/client-libraries.md#http11-rest-api-mode documentation}.
+   * @param {gax} [gaxInstance]: loaded instance of `google-gax`. Useful if you
+   *     need to avoid loading the default gRPC version and want to use the fallback
+   *     HTTP implementation. Load only fallback version and pass it to the constructor:
+   *     ```
+   *     const gax = require('google-gax/build/src/fallback'); // avoids loading google-gax with gRPC
+   *     const client = new FirestoreClient({fallback: 'rest'}, gax);
+   *     ```
    */
-  constructor(opts?: ClientOptions) {
+  constructor(
+    opts?: ClientOptions,
+    gaxInstance?: typeof gax | typeof gax.fallback
+  ) {
     // Ensure that options include all the required fields.
     const staticMembers = this.constructor as typeof FirestoreClient;
     const servicePath =
@@ -125,8 +134,13 @@ export class FirestoreClient {
       opts['scopes'] = staticMembers.scopes;
     }
 
+    // Load google-gax module synchronously if needed
+    if (!gaxInstance) {
+      gaxInstance = require('google-gax') as typeof gax;
+    }
+
     // Choose either gRPC or proto-over-HTTP implementation of google-gax.
-    this._gaxModule = opts.fallback ? gax.fallback : gax;
+    this._gaxModule = opts.fallback ? gaxInstance.fallback : gaxInstance;
 
     // Create a `gaxGrpc` object, with any grpc-specific options sent to the client.
     this._gaxGrpc = new this._gaxModule.GrpcClient(opts);
@@ -147,6 +161,10 @@ export class FirestoreClient {
     if (servicePath === staticMembers.servicePath) {
       this.auth.defaultScopes = staticMembers.scopes;
     }
+    this.locationsClient = new this._gaxModule.LocationsClient(
+      this._gaxGrpc,
+      opts
+    );
 
     // Determine the client header string.
     const clientHeader = [`gax/${this._gaxModule.version}`, `gapic/${version}`];
@@ -191,19 +209,23 @@ export class FirestoreClient {
     // Provide descriptors for these.
     this.descriptors.stream = {
       batchGetDocuments: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.SERVER_STREAMING,
+        this._gaxModule.StreamType.SERVER_STREAMING,
         opts.fallback === 'rest'
       ),
       runQuery: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.SERVER_STREAMING,
+        this._gaxModule.StreamType.SERVER_STREAMING,
+        opts.fallback === 'rest'
+      ),
+      runAggregationQuery: new this._gaxModule.StreamDescriptor(
+        this._gaxModule.StreamType.SERVER_STREAMING,
         opts.fallback === 'rest'
       ),
       write: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.BIDI_STREAMING,
+        this._gaxModule.StreamType.BIDI_STREAMING,
         opts.fallback === 'rest'
       ),
       listen: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.BIDI_STREAMING,
+        this._gaxModule.StreamType.BIDI_STREAMING,
         opts.fallback === 'rest'
       ),
     };
@@ -222,7 +244,7 @@ export class FirestoreClient {
     this.innerApiCalls = {};
 
     // Add a warn function to the client constructor so it can be easily tested.
-    this.warn = gax.warn;
+    this.warn = this._gaxModule.warn;
   }
 
   /**
@@ -267,6 +289,7 @@ export class FirestoreClient {
       'commit',
       'rollback',
       'runQuery',
+      'runAggregationQuery',
       'partitionQuery',
       'write',
       'listen',
@@ -284,7 +307,9 @@ export class FirestoreClient {
                 setImmediate(() => {
                   stream.emit(
                     'error',
-                    new GoogleError('The client has already been closed.')
+                    new this._gaxModule.GoogleError(
+                      'The client has already been closed.'
+                    )
                   );
                 });
                 return stream;
@@ -460,8 +485,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        name: request.name || '',
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.getDocument(request, options, callback);
@@ -560,8 +585,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        'document.name': request.document!.name || '',
+      this._gaxModule.routingHeader.fromParams({
+        'document.name': request.document!.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.updateDocument(request, options, callback);
@@ -647,8 +672,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        name: request.name || '',
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
       });
     this.initialize();
     return this.innerApiCalls.deleteDocument(request, options, callback);
@@ -736,8 +761,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        database: request.database || '',
+      this._gaxModule.routingHeader.fromParams({
+        database: request.database ?? '',
       });
     this.initialize();
     return this.innerApiCalls.beginTransaction(request, options, callback);
@@ -826,8 +851,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        database: request.database || '',
+      this._gaxModule.routingHeader.fromParams({
+        database: request.database ?? '',
       });
     this.initialize();
     return this.innerApiCalls.commit(request, options, callback);
@@ -912,8 +937,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        database: request.database || '',
+      this._gaxModule.routingHeader.fromParams({
+        database: request.database ?? '',
       });
     this.initialize();
     return this.innerApiCalls.rollback(request, options, callback);
@@ -1012,8 +1037,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        database: request.database || '',
+      this._gaxModule.routingHeader.fromParams({
+        database: request.database ?? '',
       });
     this.initialize();
     return this.innerApiCalls.batchWrite(request, options, callback);
@@ -1110,9 +1135,9 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
-        collection_id: request.collectionId || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
+        collection_id: request.collectionId ?? '',
       });
     this.initialize();
     return this.innerApiCalls.createDocument(request, options, callback);
@@ -1168,8 +1193,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        database: request.database || '',
+      this._gaxModule.routingHeader.fromParams({
+        database: request.database ?? '',
       });
     this.initialize();
     return this.innerApiCalls.batchGetDocuments(request, options);
@@ -1220,11 +1245,77 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
       });
     this.initialize();
     return this.innerApiCalls.runQuery(request, options);
+  }
+
+  /**
+   * Runs an aggregation query.
+   *
+   * Rather than producing {@link google.firestore.v1.Document|Document} results like {@link google.firestore.v1.Firestore.RunQuery|Firestore.RunQuery},
+   * this API allows running an aggregation to produce a series of
+   * {@link google.firestore.v1.AggregationResult|AggregationResult} server-side.
+   *
+   * High-Level Example:
+   *
+   * ```
+   * -- Return the number of documents in table given a filter.
+   * SELECT COUNT(*) FROM ( SELECT * FROM k where a = true );
+   * ```
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents` or
+   *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
+   *   For example:
+   *   `projects/my-project/databases/my-database/documents` or
+   *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
+   * @param {google.firestore.v1.StructuredAggregationQuery} request.structuredAggregationQuery
+   *   An aggregation query.
+   * @param {Buffer} request.transaction
+   *   Run the aggregation within an already active transaction.
+   *
+   *   The value here is the opaque transaction ID to execute the query in.
+   * @param {google.firestore.v1.TransactionOptions} request.newTransaction
+   *   Starts a new transaction as part of the query, defaulting to read-only.
+   *
+   *   The new transaction ID will be returned as the first response in the
+   *   stream.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Executes the query at the given timestamp.
+   *
+   *   Requires:
+   *
+   *   * Cannot be more than 270 seconds in the past.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Stream}
+   *   An object stream which emits [RunAggregationQueryResponse]{@link google.firestore.v1.RunAggregationQueryResponse} on 'data' event.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#server-streaming)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore.run_aggregation_query.js</caption>
+   * region_tag:firestore_v1_generated_Firestore_RunAggregationQuery_async
+   */
+  runAggregationQuery(
+    request?: protos.google.firestore.v1.IRunAggregationQueryRequest,
+    options?: CallOptions
+  ): gax.CancellableStream {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.runAggregationQuery(request, options);
   }
 
   /**
@@ -1379,9 +1470,9 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
-        collection_id: request.collectionId || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
+        collection_id: request.collectionId ?? '',
       });
     this.initialize();
     return this.innerApiCalls.listDocuments(request, options, callback);
@@ -1446,9 +1537,9 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
-        collection_id: request.collectionId || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
+        collection_id: request.collectionId ?? '',
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1522,9 +1613,9 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
-        collection_id: request.collectionId || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
+        collection_id: request.collectionId ?? '',
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1659,8 +1750,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
       });
     this.initialize();
     return this.innerApiCalls.partitionQuery(request, options, callback);
@@ -1735,8 +1826,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
       });
     const defaultCallSettings = this._defaults['partitionQuery'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1820,8 +1911,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
       });
     const defaultCallSettings = this._defaults['partitionQuery'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1925,8 +2016,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
       });
     this.initialize();
     return this.innerApiCalls.listCollectionIds(request, options, callback);
@@ -1970,8 +2061,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
       });
     const defaultCallSettings = this._defaults['listCollectionIds'];
     const callSettings = defaultCallSettings.merge(options);
@@ -2024,8 +2115,8 @@ export class FirestoreClient {
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
-      gax.routingHeader.fromParams({
-        parent: request.parent || '',
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
       });
     const defaultCallSettings = this._defaults['listCollectionIds'];
     const callSettings = defaultCallSettings.merge(options);
@@ -2035,6 +2126,85 @@ export class FirestoreClient {
       request as {},
       callSettings
     ) as AsyncIterable<string>;
+  }
+  /**
+   * Gets information about a location.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Resource name for the location.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [Location]{@link google.cloud.location.Location}.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   for more details and examples.
+   * @example
+   * ```
+   * const [response] = await client.getLocation(request);
+   * ```
+   */
+  getLocation(
+    request: LocationProtos.google.cloud.location.IGetLocationRequest,
+    options?:
+      | gax.CallOptions
+      | Callback<
+          LocationProtos.google.cloud.location.ILocation,
+          | LocationProtos.google.cloud.location.IGetLocationRequest
+          | null
+          | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      LocationProtos.google.cloud.location.ILocation,
+      | LocationProtos.google.cloud.location.IGetLocationRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): Promise<LocationProtos.google.cloud.location.ILocation> {
+    return this.locationsClient.getLocation(request, options, callback);
+  }
+
+  /**
+   * Lists information about the supported locations for this service. Returns an iterable object.
+   *
+   * `for`-`await`-`of` syntax is used with the iterable to get response elements on-demand.
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   The resource that owns the locations collection, if applicable.
+   * @param {string} request.filter
+   *   The standard list filter.
+   * @param {number} request.pageSize
+   *   The standard list page size.
+   * @param {string} request.pageToken
+   *   The standard list page token.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Object}
+   *   An iterable Object that allows [async iteration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols).
+   *   When you iterate the returned iterable, each element will be an object representing
+   *   [Location]{@link google.cloud.location.Location}. The API will be called under the hood as needed, once per the page,
+   *   so you can stop the iteration when you don't need more results.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   for more details and examples.
+   * @example
+   * ```
+   * const iterable = client.listLocationsAsync(request);
+   * for await (const response of iterable) {
+   *   // process response
+   * }
+   * ```
+   */
+  listLocationsAsync(
+    request: LocationProtos.google.cloud.location.IListLocationsRequest,
+    options?: CallOptions
+  ): AsyncIterable<LocationProtos.google.cloud.location.ILocation> {
+    return this.locationsClient.listLocationsAsync(request, options);
   }
 
   /**
@@ -2048,6 +2218,7 @@ export class FirestoreClient {
       return this.firestoreStub.then(stub => {
         this._terminated = true;
         stub.close();
+        this.locationsClient.close();
       });
     }
     return Promise.resolve();
