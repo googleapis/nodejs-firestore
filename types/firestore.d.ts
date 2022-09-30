@@ -21,7 +21,7 @@
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
 declare namespace FirebaseFirestore {
-  // Alias for `any` but used where a Firestore field value would be provided.
+  /** Alias for `any` but used where a Firestore field value would be provided. */
   export type DocumentFieldValue = any;
 
   /**
@@ -2081,7 +2081,7 @@ declare namespace FirebaseFirestore {
 
   /**
    * A query that calculates aggregations over an underlying query.
-   * */
+   */
   export class AggregateQuery<T extends AggregateSpec> {
     private constructor();
 
@@ -2091,7 +2091,7 @@ declare namespace FirebaseFirestore {
     /**
      * Executes this query.
      *
-     * @return A {promise that will be resolved with the results of the query.
+     * @return A promise that will be resolved with the results of the query.
      */
     get(): Promise<AggregateQuerySnapshot<T>>;
 
