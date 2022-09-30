@@ -2142,7 +2142,6 @@ describe('Query class', () => {
 describe('Aggregates', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
-  setLogFunction(console.log);
 
   beforeEach(() => {
     randomCol = getTestRoot();
