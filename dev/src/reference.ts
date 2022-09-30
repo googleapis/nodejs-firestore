@@ -56,7 +56,7 @@ import {
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
-import {Primitive} from "@google-cloud/firestore";
+import {Primitive} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2853,10 +2853,6 @@ export class CollectionReference<T = firestore.DocumentData>
   }
 }
 
-export class AggregateField<T> implements firestore.AggregateField<T> {
-  private constructor() {}
-}
-
 /**
  * A query that calculates aggregations over an underlying query.
  */
@@ -2867,15 +2863,22 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    * @private
    * @internal
    *
-   * @param _query The query whose aggregations will be calculated by this object.
+   * @param _query The query whose aggregations will be calculated by this
+   * object.
    * @param _aggregates The aggregations that will be performed by this query.
    */
-  constructor(_query: Query<any>, private readonly _aggregates: T) {
-    this.query = _query;
-  }
+  constructor(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private readonly _query: Query<any>,
+    private readonly _aggregates: T
+  ) {}
 
   /** The query whose aggregations will be calculated by this object. */
-  readonly query: Query<unknown>;
+
+  /** The query that was executed to produce this result. */
+  get query(): Query<unknown> {
+    return this._query;
+  }
 
   /**
    * Executes this query.
@@ -3000,9 +3003,10 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    * Internal method to decode values within result.
    * @private
    */
-  private _decodeResult(
+  private decodeResult(
     proto: api.IAggregationResult
   ): firestore.AggregateSpecData<T> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {};
     const fields = proto.aggregateFields;
     if (fields) {
@@ -3027,9 +3031,10 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    * @internal
    * @returns Serialized JSON for the query.
    */
-  _toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
+  toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
     const queryProto = this.query.toProto();
-    //TODO(tomandersen) inspect _query to build request - this is just hard coded count right now.
+    //TODO(tomandersen) inspect _query to build request - this is just hard
+    // coded count right now.
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
       structuredAggregationQuery: {
@@ -3103,19 +3108,20 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
    * query.
    */
   constructor(
-    _query: AggregateQuery<T>,
-    _readTime: Timestamp,
+    private readonly _query: AggregateQuery<T>,
+    private readonly _readTime: Timestamp,
     private readonly _data: firestore.AggregateSpecData<T>
-  ) {
-    this.query = _query;
-    this.readTime = _readTime;
-  }
+  ) {}
 
   /** The query that was executed to produce this result. */
-  readonly query: AggregateQuery<T>;
+  get query(): AggregateQuery<T> {
+    return this._query;
+  }
 
   /** The time this snapshot was read. */
-  readonly readTime: firestore.Timestamp;
+  get readTime(): Timestamp {
+    return this._readTime;
+  }
 
   /**
    * Returns the results of the aggregations performed over the underlying
@@ -3308,7 +3314,10 @@ function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
  * @param right Array of primitives.
  * @return True if arrays are equal.
  */
-function isPrimitiveArrayEqual<T extends Primitive>(left: T[], right: T[]): boolean {
+function isPrimitiveArrayEqual<T extends Primitive>(
+  left: T[],
+  right: T[]
+): boolean {
   if (left.length !== right.length) {
     return false;
   }

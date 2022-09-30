@@ -2048,6 +2048,7 @@ declare namespace FirebaseFirestore {
   /**
    * Represents an aggregation that can be performed by Firestore.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export class AggregateField<T> {
     private constructor();
   }
