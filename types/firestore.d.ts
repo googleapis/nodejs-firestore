@@ -2050,18 +2050,12 @@ declare namespace FirebaseFirestore {
    */
   export class AggregateField<T> {
     private constructor();
-
-    /**
-     * Returns an aggregation field that counts the documents in the result set
-     * of a query.
-     */
-    static count(): AggregateField<number>;
   }
 
   /**
    * The union of all `AggregateField` types that are supported by Firestore.
    */
-  export type AggregateFieldType = ReturnType<typeof AggregateField.count>;
+  export type AggregateFieldType = AggregateField<number>;
 
   /**
    * A type whose property values are all `AggregateField` objects.
@@ -2099,7 +2093,7 @@ declare namespace FirebaseFirestore {
      * Compares this object with the given object for equality.
      *
      * This object is considered "equal" to the other object if and only if
-     * `other` performs the same aggregations as this {@link AggregateQuery} and
+     * `other` performs the same aggregations as this `AggregateQuery` and
      * the underlying `Query` of `other` compares equal to that of this object.
      *
      * @param other The object to compare to this object for equality.
