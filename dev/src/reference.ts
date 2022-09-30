@@ -3061,23 +3061,28 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
     if (this === other) {
       return true;
     }
-    if (other instanceof AggregateQuery) {
-      if (!this._query.isEqual(other._query)) {
-        return false;
-      }
-
-      const thisAggregates: [string, AggregateField<unknown>][] =
-        Object.entries(this._aggregates);
-      const otherAggregates = other._aggregates;
-
-      return (
-        thisAggregates.length === Object.keys(otherAggregates).length &&
-        thisAggregates.every(([alias, field]) =>
-          field.isEqual(otherAggregates[alias])
-        )
-      );
+    if (!(other instanceof AggregateQuery)) {
+      return false;
     }
-    return false;
+    if (!this._query.isEqual(other._query)) {
+      return false;
+    }
+
+    // Verify that this object has the same aggregation keys as `other`.
+    const thisAggregateKeys = Object.keys(this._aggregates).sort();
+    const otherAggregateKeys = Object.keys(other._aggregates).sort();
+    if (thisAggregateKeys.length != otherAggregateKeys.length) {
+      return false;
+    }
+    if (thisAggregateKeys.some((key, index) => key !== otherAggregateKeys[index])) {
+      return false;
+    }
+
+    // TODO: Also compare the `AggregateField` instances from `this._aggregates`
+    // to their counterparts in `other._aggregates` once `AggregateField` gains
+    // an `isEqual()` method, which will happen once we support more than one
+    // type of `AggregateField` (currently, we only support "count").
+    return true;
   }
 }
 
