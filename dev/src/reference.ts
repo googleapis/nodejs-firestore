@@ -2922,7 +2922,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    */
   _stream(transactionId?: Uint8Array): Readable {
     const tag = requestTag();
-    const firestore = this.query.firestore;
+    const firestore = this._query.firestore;
 
     const stream: Transform = new Transform({
       objectMode: true,
@@ -3007,7 +3007,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
     const data: any = {};
     const fields = proto.aggregateFields;
     if (fields) {
-      const serializer = this.query.firestore._serializer!;
+      const serializer = this._query.firestore._serializer!;
       for (const prop of Object.keys(fields)) {
         if (this._aggregates[prop] === undefined) {
           throw new Error(
@@ -3029,7 +3029,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    * @returns Serialized JSON for the query.
    */
   toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
-    const queryProto = this.query.toProto();
+    const queryProto = this._query.toProto();
     //TODO(tomandersen) inspect _query to build request - this is just hard
     // coded count right now.
     const runQueryRequest: api.IRunAggregationQueryRequest = {
