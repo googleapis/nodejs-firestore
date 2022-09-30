@@ -2873,7 +2873,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
   ) {}
 
   /** The query whose aggregations will be calculated by this object. */
-  get query(): Query<unknown> {
+  get query(): firestore.Query<unknown> {
     return this._query;
   }
 
@@ -3100,12 +3100,12 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
   ) {}
 
   /** The query that was executed to produce this result. */
-  get query(): AggregateQuery<T> {
+  get query(): firestore.AggregateQuery<T> {
     return this._query;
   }
 
   /** The time this snapshot was read. */
-  get readTime(): Timestamp {
+  get readTime(): firestore.Timestamp {
     return this._readTime;
   }
 
