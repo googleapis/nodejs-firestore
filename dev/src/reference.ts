@@ -3139,8 +3139,8 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
    * Compares this object with the given object for equality.
    *
    * Two `AggregateQuerySnapshot` instances are considered "equal" if they
-   * have the read time, the same data, and underlying queries that compare
-   * "equal" using `AggregateQuery.isEqual()`.
+   * have the same data and their underlying queries compare "equal" using
+   * `AggregateQuery.isEqual()`.
    *
    * @param other The object to compare to this object for equality.
    * @return `true` if this object is "equal" to the given object, as
@@ -3153,9 +3153,9 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
     if (!(other instanceof AggregateQuerySnapshot)) {
       return false;
     }
-    if (!this.readTime.isEqual(other.readTime)) {
-      return false;
-    }
+    // Since the read time is different on every read, we explicitly ignore all
+    // document metadata in this comparison, just like
+    // `DocumentSnapshot.isEqual()` does.
     if (!this.query.isEqual(other.query)) {
       return false;
     }

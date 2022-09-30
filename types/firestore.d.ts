@@ -2133,8 +2133,8 @@ declare namespace FirebaseFirestore {
      * Compares this object with the given object for equality.
      *
      * Two `AggregateQuerySnapshot` instances are considered "equal" if they
-     * have the read time, the same data, and underlying queries that compare
-     * "equal" using `AggregateQuery.isEqual()`.
+     * have the same data and their underlying queries compare "equal" using
+     * `AggregateQuery.isEqual()`.
      *
      * @param other The object to compare to this object for equality.
      * @return `true` if this object is "equal" to the given object, as
