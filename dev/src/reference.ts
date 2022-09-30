@@ -3167,7 +3167,12 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
       return false;
     }
 
-    return thisAggregateKeys.every(key => this._data[key] === other._data[key]);
+    // Verify that this object has the same aggregation results as `other`.
+    if (!thisAggregateKeys.every(key => this._data[key] === other._data[key])) {
+      return false;
+    }
+
+    return true;
   }
 }
 
