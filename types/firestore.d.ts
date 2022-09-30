@@ -2095,7 +2095,8 @@ declare namespace FirebaseFirestore {
      *
      * This object is considered "equal" to the other object if and only if
      * `other` performs the same aggregations as this `AggregateQuery` and
-     * the underlying `Query` of `other` compares equal to that of this object.
+     * the underlying Query of `other` compares equal to that of this object
+     * using `Query.isEqual()`.
      *
      * @param other The object to compare to this object for equality.
      * @return `true` if this object is "equal" to the given object, as

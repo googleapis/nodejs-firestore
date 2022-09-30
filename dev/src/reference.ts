@@ -3057,7 +3057,8 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    *
    * This object is considered "equal" to the other object if and only if
    * `other` performs the same aggregations as this `AggregateQuery` and
-   * the underlying `Query` of `other` compares equal to that of this object.
+   * the underlying Query of `other` compares equal to that of this object
+   * using `Query.isEqual()`.
    *
    * @param other The object to compare to this object for equality.
    * @return `true` if this object is "equal" to the given object, as
@@ -3073,19 +3074,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
     if (!this.query.isEqual(other.query)) {
       return false;
     }
-
-    // Verify that this object has the same aggregation keys as `other`.
-    const thisAggregateKeys = Object.keys(this._aggregates).sort();
-    const otherAggregateKeys = Object.keys(other._aggregates).sort();
-    if (!isPrimitiveArrayEqual(thisAggregateKeys, otherAggregateKeys)) {
-      return false;
-    }
-
-    // TODO: Also compare the `AggregateField` instances from `this._aggregates`
-    // to their counterparts in `other._aggregates` once `AggregateField` gains
-    // an `isEqual()` method, which will happen once we support more than one
-    // type of `AggregateField` (currently, we only support "count").
-    return true;
+    return deepEqual(this._aggregates, other._aggregates);
   }
 }
 
@@ -3160,19 +3149,7 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
       return false;
     }
 
-    // Verify that this object has the same aggregation keys as `other`.
-    const thisAggregateKeys = Object.keys(this._data).sort();
-    const otherAggregateKeys = Object.keys(other._data).sort();
-    if (!isPrimitiveArrayEqual(thisAggregateKeys, otherAggregateKeys)) {
-      return false;
-    }
-
-    // Verify that this object has the same aggregation results as `other`.
-    if (!thisAggregateKeys.every(key => this._data[key] === other._data[key])) {
-      return false;
-    }
-
-    return true;
+    return deepEqual(this._data, other._data);
   }
 }
 
@@ -3300,29 +3277,6 @@ function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
 
   for (let i = 0; i < left.length; ++i) {
     if (!left[i].isEqual(right[i])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/**
- * Verifies equality for an array of primitives using the `===` operator.
- *
- * @private
- * @internal
- * @param left Array of primitives.
- * @param right Array of primitives.
- * @return True if arrays are equal.
- */
-function isPrimitiveArrayEqual<T>(left: T[], right: T[]): boolean {
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  for (let i = 0; i < left.length; ++i) {
-    if (left[i] !== right[i]) {
       return false;
     }
   }
