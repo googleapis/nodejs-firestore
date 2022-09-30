@@ -2873,8 +2873,6 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
   ) {}
 
   /** The query whose aggregations will be calculated by this object. */
-
-  /** The query that was executed to produce this result. */
   get query(): Query<unknown> {
     return this._query;
   }
@@ -3313,10 +3311,7 @@ function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
  * @param right Array of primitives.
  * @return True if arrays are equal.
  */
-function isPrimitiveArrayEqual<T>(
-  left: T[],
-  right: T[]
-): boolean {
+function isPrimitiveArrayEqual<T>(left: T[], right: T[]): boolean {
   if (left.length !== right.length) {
     return false;
   }
