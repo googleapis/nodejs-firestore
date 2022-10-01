@@ -103,11 +103,6 @@ export type UnaryMethod<Req, Resp> = (
   callOptions: CallOptions
 ) => Promise<[Resp, unknown, unknown]>;
 
-// We don't have type information for the npm package
-// `functional-red-black-tree`.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type RBTree = any;
-
 /**
  * A default converter to use when none is provided.
  *

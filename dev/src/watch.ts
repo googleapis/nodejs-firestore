@@ -17,7 +17,7 @@
 import * as firestore from '@google-cloud/firestore';
 
 import * as assert from 'assert';
-import * as rbtree from 'functional-red-black-tree';
+import {OrderedSet} from "js-sdsl";
 import {GoogleError, Status} from 'google-gax';
 import {Duplex} from 'stream';
 
@@ -29,7 +29,7 @@ import {DocumentReference, Firestore, Query} from './index';
 import {logger} from './logger';
 import {QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {defaultConverter, RBTree} from './types';
+import {defaultConverter} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
@@ -183,7 +183,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private docTree: RBTree | undefined;
+  private docTree: OrderedSet<QueryDocumentSnapshot<T>> | undefined;
 
   /**
    * We need this to track whether we've pushed an initial set of changes,
@@ -271,7 +271,7 @@ abstract class Watch<T = firestore.DocumentData> {
     );
     this.onNext = onNext;
     this.onError = onError;
-    this.docTree = rbtree(this.getComparator());
+    this.docTree = new OrderedSet([], this.getComparator(), true);
 
     this.initStream();
 
@@ -334,7 +334,7 @@ abstract class Watch<T = firestore.DocumentData> {
     this.changeMap.clear();
     this.resumeToken = undefined;
 
-    this.docTree.forEach((snapshot: QueryDocumentSnapshot) => {
+    this.docTree!.forEach((snapshot: QueryDocumentSnapshot<T>) => {
       // Mark each document as deleted. If documents are not deleted, they
       // will be send again by the server.
       this.changeMap.set(
@@ -650,14 +650,15 @@ abstract class Watch<T = firestore.DocumentData> {
         this.requestTag,
         'Sending snapshot with %d changes and %d documents',
         String(appliedChanges.length),
-        this.docTree.length
+        this.docTree!.size()
       );
       // We pass the current set of changes, even if `docTree` is modified later.
-      const currentTree = this.docTree;
+      const snapshots: QueryDocumentSnapshot<T>[] = [];
+      this.docTree!.forEach(key => snapshots.push(key));
       this.onNext(
         readTime,
-        currentTree.length,
-        () => currentTree.keys,
+        this.docTree!.size(),
+        () => snapshots,
         () => appliedChanges
       );
       this.hasPushed = true;
@@ -676,9 +677,9 @@ abstract class Watch<T = firestore.DocumentData> {
   private deleteDoc(name: string): DocumentChange<T> {
     assert(this.docMap.has(name), 'Document to delete does not exist');
     const oldDocument = this.docMap.get(name)!;
-    const existing = this.docTree.find(oldDocument);
+    const existing = this.docTree!.find(oldDocument);
     const oldIndex = existing.index;
-    this.docTree = existing.remove();
+    this.docTree!.eraseElementByIterator(existing);
     this.docMap.delete(name);
     return new DocumentChange(ChangeType.removed, oldDocument, oldIndex, -1);
   }
@@ -692,8 +693,8 @@ abstract class Watch<T = firestore.DocumentData> {
   private addDoc(newDocument: QueryDocumentSnapshot<T>): DocumentChange<T> {
     const name = newDocument.ref.path;
     assert(!this.docMap.has(name), 'Document to add already exists');
-    this.docTree = this.docTree.insert(newDocument, null);
-    const newIndex = this.docTree.find(newDocument).index;
+    this.docTree!.insert(newDocument);
+    const newIndex = this.docTree!.find(newDocument).index;
     this.docMap.set(name, newDocument);
     return new DocumentChange(ChangeType.added, newDocument, -1, newIndex);
   }
@@ -764,7 +765,7 @@ abstract class Watch<T = firestore.DocumentData> {
     });
 
     assert(
-      this.docTree.length === this.docMap.size,
+      this.docTree!.size() === this.docMap.size,
       'The update document ' +
         'tree and document map should have the same number of entries.'
     );

@@ -15,5 +15,4 @@
  */
 
 // TODO(mrschmidt): Come up with actual definitions for these modules.
-declare module 'functional-red-black-tree';
 declare module 'length-prefixed-json-stream';
