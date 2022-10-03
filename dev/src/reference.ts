@@ -1599,26 +1599,24 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   }
 
   /**
-   * Returns an `AggregateQuery` that counts the number of documents in the
-   * result set.
+   * Returns a query that counts the documents in the result set of this
+   * query.
    *
-   * @return an `AggregateQuery` that counts the number of documents in the
-   * result set.
+   * The returned query, when executed, counts the documents in the result set
+   * of this query without actually downloading the documents.
+   *
+   * Using the returned query to count the documents is efficient because only
+   * the final count, not the documents' data, is downloaded. The returned
+   * query can even count the documents if the result set would be
+   * prohibitively large to download entirely (e.g. thousands of documents).
+   *
+   * @return a query that counts the documents in the result set of this
+   * query. The count can be retrieved from `snapshot.data().count`, where
+   * `snapshot` is the `AggregateQuerySnapshot` resulting from running the
+   * returned query.
    */
   count(): AggregateQuery<{count: firestore.AggregateField<number>}> {
-    return this._aggregate({count: AggregateField.count()});
-  }
-
-  /**
-   * Returns an `AggregateQuery` that performs the given aggregations.
-   *
-   * @param aggregates the aggregations to perform.
-   * @return an `AggregateQuery` that performs the given aggregations.
-   */
-  private _aggregate<T extends firestore.AggregateSpec>(
-    aggregates: T
-  ): AggregateQuery<T> {
-    return new AggregateQuery(this, aggregates);
+    return new AggregateQuery(this, {count: {}});
   }
 
   /**
@@ -2854,33 +2852,36 @@ export class CollectionReference<T = firestore.DocumentData>
   }
 }
 
-export class AggregateField<T> implements firestore.AggregateField<T> {
-  private constructor() {}
-
-  static count(): AggregateField<number> {
-    return new AggregateField<number>();
-  }
-
-  isEqual(other: firestore.AggregateField<T>): boolean {
-    return this === other || other instanceof AggregateField;
-  }
-}
-
+/**
+ * A query that calculates aggregations over an underlying query.
+ */
 export class AggregateQuery<T extends firestore.AggregateSpec>
   implements firestore.AggregateQuery<T>
 {
-  private readonly _query: Query<unknown>;
-  private readonly _aggregates: T;
+  /**
+   * @private
+   * @internal
+   *
+   * @param _query The query whose aggregations will be calculated by this
+   * object.
+   * @param _aggregates The aggregations that will be performed by this query.
+   */
+  constructor(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private readonly _query: Query<any>,
+    private readonly _aggregates: T
+  ) {}
 
-  constructor(query: Query<any>, aggregates: T) {
-    this._query = query;
-    this._aggregates = aggregates;
-  }
-
+  /** The query whose aggregations will be calculated by this object. */
   get query(): firestore.Query<unknown> {
     return this._query;
   }
 
+  /**
+   * Executes this query.
+   *
+   * @return A promise that will be resolved with the results of the query.
+   */
   get(): Promise<AggregateQuerySnapshot<T>> {
     return this._get();
   }
@@ -2914,9 +2915,9 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
-   * @param transactionId A transaction ID.
    * @private
    * @internal
+   * @param transactionId A transaction ID.
    * @returns A stream of document results.
    */
   _stream(transactionId?: Uint8Array): Readable {
@@ -2997,13 +2998,12 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
 
   /**
    * Internal method to decode values within result.
-   *
-   * @param proto
    * @private
    */
   private decodeResult(
     proto: api.IAggregationResult
   ): firestore.AggregateSpecData<T> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {};
     const fields = proto.aggregateFields;
     if (fields) {
@@ -3030,7 +3030,8 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    */
   toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
-    //TODO(tomandersen) inspect _query to build request - this is just hard coded count right now.
+    //TODO(tomandersen) inspect _query to build request - this is just hard
+    // coded count right now.
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
       structuredAggregationQuery: {
@@ -3051,76 +3052,104 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
     return runQueryRequest;
   }
 
+  /**
+   * Compares this object with the given object for equality.
+   *
+   * This object is considered "equal" to the other object if and only if
+   * `other` performs the same aggregations as this `AggregateQuery` and
+   * the underlying Query of `other` compares equal to that of this object
+   * using `Query.isEqual()`.
+   *
+   * @param other The object to compare to this object for equality.
+   * @return `true` if this object is "equal" to the given object, as
+   * defined above, or `false` otherwise.
+   */
   isEqual(other: firestore.AggregateQuery<T>): boolean {
     if (this === other) {
       return true;
     }
-    if (other instanceof AggregateQuery) {
-      if (!this._query.isEqual(other._query)) {
-        return false;
-      }
-
-      const thisAggregates: [string, AggregateField<unknown>][] =
-        Object.entries(this._aggregates);
-      const otherAggregates = other._aggregates;
-
-      return (
-        thisAggregates.length === Object.keys(otherAggregates).length &&
-        thisAggregates.every(([alias, field]) =>
-          field.isEqual(otherAggregates[alias])
-        )
-      );
+    if (!(other instanceof AggregateQuery)) {
+      return false;
     }
-    return false;
+    if (!this.query.isEqual(other.query)) {
+      return false;
+    }
+    return deepEqual(this._aggregates, other._aggregates);
   }
 }
 
+/**
+ * The results of executing an aggregation query.
+ */
 export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
   implements firestore.AggregateQuerySnapshot<T>
 {
+  /**
+   * @private
+   * @internal
+   *
+   * @param _query The query that was executed to produce this result.
+   * @param _readTime The time this snapshot was read.
+   * @param _data The results of the aggregations performed over the underlying
+   * query.
+   */
   constructor(
     private readonly _query: AggregateQuery<T>,
     private readonly _readTime: Timestamp,
     private readonly _data: firestore.AggregateSpecData<T>
   ) {}
 
+  /** The query that was executed to produce this result. */
   get query(): firestore.AggregateQuery<T> {
     return this._query;
   }
 
+  /** The time this snapshot was read. */
   get readTime(): firestore.Timestamp {
     return this._readTime;
   }
 
+  /**
+   * Returns the results of the aggregations performed over the underlying
+   * query.
+   *
+   * The keys of the returned object will be the same as those of the
+   * `AggregateSpec` object specified to the aggregation method, and the
+   * values will be the corresponding aggregation result.
+   *
+   * @returns The results of the aggregations performed over the underlying
+   * query.
+   */
+  data(): firestore.AggregateSpecData<T> {
+    return this._data;
+  }
+
+  /**
+   * Compares this object with the given object for equality.
+   *
+   * Two `AggregateQuerySnapshot` instances are considered "equal" if they
+   * have the same data and their underlying queries compare "equal" using
+   * `AggregateQuery.isEqual()`.
+   *
+   * @param other The object to compare to this object for equality.
+   * @return `true` if this object is "equal" to the given object, as
+   * defined above, or `false` otherwise.
+   */
   isEqual(other: firestore.AggregateQuerySnapshot<T>): boolean {
     if (this === other) {
       return true;
     }
-    if (other instanceof AggregateQuerySnapshot) {
-      if (!this._query.isEqual(other._query)) {
-        return false;
-      }
-
-      const thisData = this._data;
-      const thisDataKeys: string[] = Object.keys(thisData);
-
-      const otherData = other._data;
-      const otherDataKeys: string[] = Object.keys(otherData);
-
-      return (
-        thisDataKeys.length === otherDataKeys.length &&
-        thisDataKeys.every(
-          alias =>
-            Object.prototype.hasOwnProperty.call(otherData, alias) &&
-            thisData[alias] === otherData[alias]
-        )
-      );
+    if (!(other instanceof AggregateQuerySnapshot)) {
+      return false;
     }
-    return false;
-  }
+    // Since the read time is different on every read, we explicitly ignore all
+    // document metadata in this comparison, just like
+    // `DocumentSnapshot.isEqual()` does.
+    if (!this.query.isEqual(other.query)) {
+      return false;
+    }
 
-  data(): firestore.AggregateSpecData<T> {
-    return this._data;
+    return deepEqual(this._data, other._data);
   }
 }
 

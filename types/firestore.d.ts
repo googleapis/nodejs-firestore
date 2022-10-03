@@ -21,7 +21,7 @@
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
 declare namespace FirebaseFirestore {
-  // Alias for `any` but used where a Firestore field value would be provided.
+  /** Alias for `any` but used where a Firestore field value would be provided. */
   export type DocumentFieldValue = any;
 
   /**
@@ -1707,9 +1707,21 @@ declare namespace FirebaseFirestore {
     ): () => void;
 
     /**
-     * Returns count `AggregateQuery` based on this `Query`.
+     * Returns a query that counts the documents in the result set of this
+     * query.
      *
-     * @return AggregateQuery that contains count aggregate.
+     * The returned query, when executed, counts the documents in the result set
+     * of this query without actually downloading the documents.
+     *
+     * Using the returned query to count the documents is efficient because only
+     * the final count, not the documents' data, is downloaded. The returned
+     * query can even count the documents if the result set would be
+     * prohibitively large to download entirely (e.g. thousands of documents).
+     *
+     * @return a query that counts the documents in the result set of this
+     * query. The count can be retrieved from `snapshot.data().count`, where
+     * `snapshot` is the `AggregateQuerySnapshot` resulting from running the
+     * returned query.
      */
     count(): AggregateQuery<{count: AggregateField<number>}>;
 
@@ -2034,94 +2046,100 @@ declare namespace FirebaseFirestore {
   }
 
   /**
-   * An `AggregateField`that captures input type T.
+   * Represents an aggregation that can be performed by Firestore.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export class AggregateField<T> {
     private constructor();
-
-    /**
-     * Creates and returns an aggregation field that counts the documents in the result set.
-     * @returns An `AggregateField` object with number input type.
-     */
-    static count(): AggregateField<number>;
-
-    /**
-     * Returns true if the aggregate function in this `AggregateField` is equal to the
-     * provided one.
-     *
-     * @param other The `AggregateField` to compare against.
-     * @return true if this `AggregateField` is equal to the provided one.
-     */
-    isEqual(other: AggregateField<T>): boolean;
   }
 
   /**
-   * The union of all `AggregateField` types that are returned from the factory
-   * functions.
+   * The union of all `AggregateField` types that are supported by Firestore.
    */
-  export type AggregateFieldType = ReturnType<typeof AggregateField.count>;
+  export type AggregateFieldType = AggregateField<number>;
 
   /**
-   * A type whose values are all `AggregateField` objects.
-   * This is used as an argument to the "getter" functions, and the snapshot will
-   * map the same names to the corresponding values.
+   * A type whose property values are all `AggregateField` objects.
    */
   export interface AggregateSpec {
     [field: string]: AggregateFieldType;
   }
 
   /**
-   * A type whose keys are taken from an `AggregateSpec` type, and whose values
-   * are the result of the aggregation performed by the corresponding
+   * A type whose keys are taken from an `AggregateSpec`, and whose values are
+   * the result of the aggregation performed by the corresponding
    * `AggregateField` from the input `AggregateSpec`.
    */
   export type AggregateSpecData<T extends AggregateSpec> = {
     [P in keyof T]: T[P] extends AggregateField<infer U> ? U : never;
   };
 
+  /**
+   * A query that calculates aggregations over an underlying query.
+   */
   export class AggregateQuery<T extends AggregateSpec> {
     private constructor();
 
+    /** The query whose aggregations will be calculated by this object. */
     readonly query: Query<unknown>;
 
+    /**
+     * Executes this query.
+     *
+     * @return A promise that will be resolved with the results of the query.
+     */
     get(): Promise<AggregateQuerySnapshot<T>>;
 
     /**
-     * Returns true if the query and aggregates in this `AggregateQuery` is equal to the
-     * provided one.
+     * Compares this object with the given object for equality.
      *
-     * @param other The `AggregateQuery` to compare against.
-     * @return true if this `AggregateQuery` is equal to the provided one.
+     * This object is considered "equal" to the other object if and only if
+     * `other` performs the same aggregations as this `AggregateQuery` and
+     * the underlying Query of `other` compares equal to that of this object
+     * using `Query.isEqual()`.
+     *
+     * @param other The object to compare to this object for equality.
+     * @return `true` if this object is "equal" to the given object, as
+     * defined above, or `false` otherwise.
      */
     isEqual(other: AggregateQuery<T>): boolean;
   }
 
   /**
-   * An `AggregateQuerySnapshot` contains the results of running an aggregate query.
+   * The results of executing an aggregation query.
    */
   export class AggregateQuerySnapshot<T extends AggregateSpec> {
     private constructor();
 
+    /** The query that was executed to produce this result. */
     readonly query: AggregateQuery<T>;
 
+    /** The time this snapshot was read. */
     readonly readTime: Timestamp;
 
     /**
-     * The results of the requested aggregations. The keys of the returned object
-     * will be the same as those of the `AggregateSpec` object specified to the
-     * aggregation method, and the values will be the corresponding aggregation
-     * result.
+     * Returns the results of the aggregations performed over the underlying
+     * query.
      *
-     * @returns The aggregation statistics result of running a query.
+     * The keys of the returned object will be the same as those of the
+     * `AggregateSpec` object specified to the aggregation method, and the
+     * values will be the corresponding aggregation result.
+     *
+     * @returns The results of the aggregations performed over the underlying
+     * query.
      */
     data(): AggregateSpecData<T>;
 
     /**
-     * Returns true if the query, read time, and data in this `AggregateQuerySnapshot`
-     * is equal to the provided one.
+     * Compares this object with the given object for equality.
      *
-     * @param other The `AggregateQuerySnapshot` to compare against.
-     * @return true if this `AggregateQuerySnapshot` is equal to the provided one.
+     * Two `AggregateQuerySnapshot` instances are considered "equal" if they
+     * have the same data and their underlying queries compare "equal" using
+     * `AggregateQuery.isEqual()`.
+     *
+     * @param other The object to compare to this object for equality.
+     * @return `true` if this object is "equal" to the given object, as
+     * defined above, or `false` otherwise.
      */
     isEqual(other: AggregateQuerySnapshot<T>): boolean;
   }
