@@ -27,6 +27,8 @@ import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {StatusCode} from './status-code';
 import {
+  AggregateQuery,
+  AggregateQuerySnapshot,
   DocumentReference,
   Query,
   QuerySnapshot,
@@ -98,6 +100,17 @@ export class Transaction implements firestore.Transaction {
   get<T>(documentRef: DocumentReference<T>): Promise<DocumentSnapshot<T>>;
 
   /**
+   * Retrieves an aggregate query result. Holds a pessimistic lock on all
+   * documents that were matched by the underlying query.
+   *
+   * @param aggregateQuery An aggregate query to execute.
+   * @return An AggregateQuerySnapshot for the retrieved data.
+   */
+  get<T extends firestore.AggregateSpec>(
+    aggregateQuery: firestore.AggregateQuery<T>
+  ): Promise<AggregateQuerySnapshot<T>>;
+
+  /**
    * Retrieve a document or a query result from the database. Holds a
    * pessimistic lock on all returned documents.
    *
@@ -120,9 +133,14 @@ export class Transaction implements firestore.Transaction {
    * });
    * ```
    */
-  get<T>(
-    refOrQuery: DocumentReference<T> | Query<T>
-  ): Promise<DocumentSnapshot<T> | QuerySnapshot<T>> {
+  get<T, U extends firestore.AggregateSpec>(
+    refOrQuery:
+      | firestore.DocumentReference<T>
+      | firestore.Query<T>
+      | firestore.AggregateQuery<U>
+  ): Promise<
+    DocumentSnapshot<T> | QuerySnapshot<T> | AggregateQuerySnapshot<U>
+  > {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
@@ -137,8 +155,12 @@ export class Transaction implements firestore.Transaction {
       return refOrQuery._get(this._transactionId);
     }
 
+    if (refOrQuery instanceof AggregateQuery<U>) {
+      return refOrQuery._get(this._transactionId);
+    }
+
     throw new Error(
-      'Value for argument "refOrQuery" must be a DocumentReference or a Query.'
+      'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.'
     );
   }
 
