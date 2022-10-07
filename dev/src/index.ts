@@ -922,7 +922,6 @@ export class Firestore implements firestore.Firestore {
    * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
-   * @internal
    * @param documentOrName The Firestore 'Document' proto or the resource name
    * of a missing document.
    * @param readTime A 'Timestamp' proto indicating the time this document was
