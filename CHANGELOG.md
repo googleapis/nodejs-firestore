@@ -4,6 +4,19 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.4.0](https://github.com/googleapis/nodejs-firestore/compare/v6.3.0...v6.4.0) (2022-10-07)
+
+
+### Features
+
+* Add internal multi-db support ([#1761](https://github.com/googleapis/nodejs-firestore/issues/1761)) ([5ba8df0](https://github.com/googleapis/nodejs-firestore/commit/5ba8df011264b435b53499642e68afd73859f332))
+* COUNT Queries ([#1774](https://github.com/googleapis/nodejs-firestore/issues/1774)) ([bcaecb4](https://github.com/googleapis/nodejs-firestore/commit/bcaecb45b7911073bb968542df0267ba81d4462d))
+
+
+### Bug Fixes
+
+* Remove [@internal](https://github.com/internal) annotation from snapshot_ ([#1728](https://github.com/googleapis/nodejs-firestore/issues/1728)) ([983ab89](https://github.com/googleapis/nodejs-firestore/commit/983ab89387d8c5314680d1520c3bece011ee6a64))
+
 ## [6.3.0](https://github.com/googleapis/nodejs-firestore/compare/v6.2.0...v6.3.0) (2022-09-22)
 
 
