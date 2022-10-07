@@ -817,7 +817,7 @@ describe('snapshot_() method', () => {
         '1970-01-01T00:00:05.000000006Z',
         'json'
       );
-    }).to.throw("Unable to infer type value fom '{}'.");
+    }).to.throw("Unable to infer type value from '{}'.");
 
     expect(() => {
       firestore.snapshot_(
@@ -831,7 +831,7 @@ describe('snapshot_() method', () => {
         'json'
       );
     }).to.throw(
-      'Unable to infer type value fom \'{"stringValue":"bar","integerValue":42}\'.'
+      'Unable to infer type value from \'{"stringValue":"bar","integerValue":42}\'.'
     );
 
     expect(() => {
