@@ -13,14 +13,15 @@
 // limitations under the License.
 
 import {
-  QuerySnapshot,
   DocumentData,
-  WithFieldValue,
   PartialWithFieldValue,
+  QuerySnapshot,
   SetOptions,
+  Settings,
+  WithFieldValue,
 } from '@google-cloud/firestore';
 
-import {describe, it, before, beforeEach, afterEach} from 'mocha';
+import {afterEach, before, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
@@ -53,7 +54,6 @@ import {BulkWriter} from '../src/bulk-writer';
 import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
-
 import IBundleElement = firestore.IBundleElement;
 
 use(chaiAsPromised);
@@ -80,7 +80,11 @@ if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
 }
 
-function getTestRoot(firestore: Firestore) {
+function getTestRoot(settings: Settings = {}) {
+  const firestore = new Firestore({
+    ...settings,
+    preferRest: !!process.env.USE_REST_FALLBACK,
+  });
   return firestore.collection(`node_${version}_${autoId()}`);
 }
 
@@ -89,8 +93,8 @@ describe('Firestore class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore();
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -213,8 +217,8 @@ describe('CollectionGroup class', () => {
   let collectionGroup: CollectionGroup;
 
   before(async () => {
-    firestore = new Firestore({});
-    randomColl = getTestRoot(firestore);
+    randomColl = getTestRoot();
+    firestore = randomColl.firestore;
     collectionGroup = firestore.collectionGroup(randomColl.id);
 
     const batch = firestore.batch();
@@ -327,8 +331,8 @@ describe('CollectionReference class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -406,8 +410,8 @@ describe('DocumentReference class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore();
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -508,8 +512,7 @@ describe('DocumentReference class', () => {
   it('round-trips BigInts', () => {
     const bigIntValue = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
 
-    const firestore = new Firestore({useBigInt: true});
-    const randomCol = getTestRoot(firestore);
+    const randomCol = getTestRoot({useBigInt: true});
     const ref = randomCol.doc('doc');
     return ref
       .set({bigIntValue})
@@ -1321,8 +1324,8 @@ describe('Query class', () => {
   }
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2136,13 +2139,141 @@ describe('Query class', () => {
   });
 });
 
+describe('Aggregates', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+
+  beforeEach(() => {
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  describe('Run outside Transaction', () => {
+    countTests(async (q, n) => {
+      const res = await q.get();
+      expect(res.data().count).to.equal(n);
+    });
+  });
+
+  describe('Run within Transaction', () => {
+    countTests(async (q, n) => {
+      const res = await firestore.runTransaction(f => f.get(q));
+      expect(res.data().count).to.equal(n);
+    });
+  });
+
+  function countTests(
+    runQueryAndExpectCount: (
+      query: FirebaseFirestore.AggregateQuery<{
+        count: FirebaseFirestore.AggregateField<number>;
+      }>,
+      expectedCount: number
+    ) => Promise<void>
+  ) {
+    it('counts 0 document from non-existent collection', async () => {
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 0);
+    });
+
+    it('counts 0 document from filtered empty collection', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.where('foo', '==', 'notbar').count();
+      await runQueryAndExpectCount(count, 0);
+    });
+
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 1);
+    });
+
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 1);
+    });
+
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 1);
+    });
+
+    it('counts multiple documents with filter', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'notbar'});
+      await randomCol.doc('doc3').set({notfoo: 'bar'});
+      const count = randomCol.where('foo', '==', 'bar').count();
+      await runQueryAndExpectCount(count, 2);
+    });
+
+    it('counts up to limit', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+      await randomCol.doc('doc8').set({foo: 'bar'});
+      const count = randomCol.limit(5).count();
+      await runQueryAndExpectCount(count, 5);
+    });
+
+    it('counts with orderBy', async () => {
+      await randomCol.doc('doc1').set({foo1: 'bar1'});
+      await randomCol.doc('doc2').set({foo1: 'bar2'});
+      await randomCol.doc('doc3').set({foo1: 'bar3'});
+      await randomCol.doc('doc4').set({foo1: 'bar4'});
+      await randomCol.doc('doc5').set({foo1: 'bar5'});
+      await randomCol.doc('doc6').set({foo2: 'bar6'});
+      await randomCol.doc('doc7').set({foo2: 'bar7'});
+      await randomCol.doc('doc8').set({foo2: 'bar8'});
+
+      const count1 = randomCol.orderBy('foo2').count();
+      await runQueryAndExpectCount(count1, 3);
+
+      const count2 = randomCol.orderBy('foo3').count();
+      await runQueryAndExpectCount(count2, 0);
+    });
+
+    it('counts with startAt, endAt and offset', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+
+      const count1 = randomCol.startAfter(randomCol.doc('doc3')).count();
+      await runQueryAndExpectCount(count1, 4);
+
+      const count2 = randomCol.startAt(randomCol.doc('doc3')).count();
+      await runQueryAndExpectCount(count2, 5);
+
+      const count3 = randomCol.endAt(randomCol.doc('doc3')).count();
+      await runQueryAndExpectCount(count3, 3);
+
+      const count4 = randomCol.endBefore(randomCol.doc('doc3')).count();
+      await runQueryAndExpectCount(count4, 2);
+
+      const count5 = randomCol.offset(6).count();
+      await runQueryAndExpectCount(count5, 1);
+    });
+  }
+});
+
 describe('Transaction class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2434,8 +2565,8 @@ describe('WriteBatch class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2578,9 +2709,9 @@ describe('QuerySnapshot class', () => {
   let querySnapshot: Promise<QuerySnapshot>;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    const randomCol = getTestRoot();
+    firestore = randomCol.firestore;
 
-    const randomCol = getTestRoot(firestore);
     const ref1 = randomCol.doc('doc1');
     const ref2 = randomCol.doc('doc2');
 
@@ -2649,9 +2780,9 @@ describe('BulkWriter class', () => {
   let writer: BulkWriter;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
     writer = firestore.bulkWriter();
-    randomCol = getTestRoot(firestore);
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2926,8 +3057,7 @@ describe('Client initialization', () => {
 
   for (const [description, op] of ops) {
     it(`succeeds for ${description}`, () => {
-      const firestore = new Firestore();
-      const randomCol = getTestRoot(firestore);
+      const randomCol = getTestRoot();
       return op(randomCol);
     });
   }
@@ -2938,8 +3068,9 @@ describe('Bundle building', () => {
   let testCol: CollectionReference;
 
   beforeEach(async () => {
-    firestore = new Firestore({});
-    testCol = getTestRoot(firestore);
+    testCol = getTestRoot();
+    firestore = testCol.firestore;
+
     const ref1 = testCol.doc('doc1');
     const ref2 = testCol.doc('doc2');
     const ref3 = testCol.doc('doc3');
@@ -3133,8 +3264,8 @@ describe('Types test', () => {
   };
 
   beforeEach(async () => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
     doc = randomCol.doc();
 
     await doc.set(initialData);
