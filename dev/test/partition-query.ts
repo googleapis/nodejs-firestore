@@ -86,8 +86,8 @@ describe('Partition Query', () => {
     });
   });
 
-  afterEach(() => {
-    verifyInstance(firestore);
+  afterEach(async () => {
+    await verifyInstance(firestore);
     setTimeoutHandler(setTimeout);
   });
 

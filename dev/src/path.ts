@@ -77,7 +77,7 @@ abstract class Path<T> {
    *
    * @private
    * @internal
-   * @hideconstructor
+   * @private
    * @param segments Sequence of parts of a path.
    */
   constructor(protected readonly segments: string[]) {}

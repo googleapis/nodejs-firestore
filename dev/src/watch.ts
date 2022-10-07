@@ -212,7 +212,6 @@ abstract class Watch<T = firestore.DocumentData> {
   /**
    * @private
    * @internal
-   * @hideconstructor
    *
    * @param firestore The Firestore Database client.
    */
@@ -453,7 +452,12 @@ abstract class Watch<T = firestore.DocumentData> {
         // Note that we need to call the internal _listen API to pass additional
         // header values in readWriteStream.
         return this.firestore
-          .requestStream('listen', request, this.requestTag)
+          .requestStream(
+            'listen',
+            /* bidirectional= */ true,
+            request,
+            this.requestTag
+          )
           .then(backendStream => {
             if (!this.isActive) {
               logger(

@@ -60,6 +60,11 @@
                 "runQuery"
               ]
             },
+            "RunAggregationQuery": {
+              "methods": [
+                "runAggregationQuery"
+              ]
+            },
             "Write": {
               "methods": [
                 "write"

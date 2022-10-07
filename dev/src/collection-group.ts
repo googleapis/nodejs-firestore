@@ -39,7 +39,7 @@ export class CollectionGroup<T = firestore.DocumentData>
   extends Query<T>
   implements firestore.CollectionGroup<T>
 {
-  /** @hideconstructor */
+  /** @private */
   constructor(
     firestore: Firestore,
     collectionId: string,
@@ -96,6 +96,7 @@ export class CollectionGroup<T = firestore.DocumentData>
 
       const stream = await this.firestore.requestStream(
         'partitionQueryStream',
+        /* bidirectional= */ false,
         request,
         tag
       );

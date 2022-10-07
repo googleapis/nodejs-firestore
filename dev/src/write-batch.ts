@@ -57,7 +57,7 @@ import api = google.firestore.v1;
  */
 export class WriteResult implements firestore.WriteResult {
   /**
-   * @hideconstructor
+   * @private
    *
    * @param _writeTime The time of the corresponding document write.
    */
@@ -131,14 +131,13 @@ export class WriteBatch implements firestore.WriteBatch {
 
   /**
    * The number of writes in this batch.
+   * @private
    */
   get _opCount(): number {
     return this._ops.length;
   }
 
-  /**
-   * @hideconstructor
-   */
+  /** @private */
   constructor(firestore: Firestore) {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
@@ -351,7 +350,9 @@ export class WriteBatch implements firestore.WriteBatch {
     let documentMask: DocumentMask;
 
     if (mergePaths) {
-      documentMask = DocumentMask.fromFieldMask(options!.mergeFields!);
+      documentMask = DocumentMask.fromFieldMask(
+        (options as {mergeFields: Array<string | FieldPath>}).mergeFields
+      );
       firestoreData = documentMask.applyTo(firestoreData);
     }
 

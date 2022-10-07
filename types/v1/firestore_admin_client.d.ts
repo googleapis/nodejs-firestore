@@ -1,5 +1,5 @@
 /*!
- * Copyright 2021 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,32 @@ import {
 import {Transform} from 'stream';
 import * as protos from '../protos/firestore_admin_v1_proto_api';
 /**
+ *  The Cloud Firestore Admin API.
+ *
+ *  This API provides several administrative services for Cloud Firestore.
+ *
+ *  Project, Database, Namespace, Collection, Collection Group, and Document are
+ *  used as defined in the Google Cloud Firestore API.
+ *
+ *  Operation: An Operation represents work being performed in the background.
+ *
+ *  The index service manages Cloud Firestore indexes.
+ *
+ *  Index creation is performed asynchronously.
+ *  An Operation resource is created for each such asynchronous operation.
+ *  The state of the operation (including any errors encountered)
+ *  may be queried via the Operation resource.
+ *
+ *  The Operations collection provides a record of actions performed for the
+ *  specified Project (including any Operations in progress). Operations are not
+ *  created directly but through calls on other collections or resources.
+ *
+ *  An Operation that is done may be deleted so that it is no longer listed as
+ *  part of the Operation collection. Operations are garbage collected after
+ *  30 days. By default, ListOperations will only return in progress and failed
+ *  operations. To list completed operation, issue a ListOperations request with
+ *  the filter `done: true`.
+ *
  *  Operations are created by service `FirestoreAdmin`, but are accessed via
  *  service `google.longrunning.Operations`.
  * @class
@@ -126,6 +152,24 @@ export declare class FirestoreAdminClient {
   static get scopes(): string[];
   getProjectId(): Promise<string>;
   getProjectId(callback: Callback<string, undefined, undefined>): void;
+  /**
+   * Gets a composite index.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. A name of the form
+   *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}`
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [Index]{@link google.firestore.admin.v1.Index}.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.get_index.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_GetIndex_async
+   */
   getIndex(
     request?: protos.google.firestore.admin.v1.IGetIndexRequest,
     options?: CallOptions
@@ -153,6 +197,24 @@ export declare class FirestoreAdminClient {
       {} | null | undefined
     >
   ): void;
+  /**
+   * Deletes a composite index.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. A name of the form
+   *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}`
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [Empty]{@link google.protobuf.Empty}.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.delete_index.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_DeleteIndex_async
+   */
   deleteIndex(
     request?: protos.google.firestore.admin.v1.IDeleteIndexRequest,
     options?: CallOptions
@@ -180,6 +242,24 @@ export declare class FirestoreAdminClient {
       {} | null | undefined
     >
   ): void;
+  /**
+   * Gets the metadata and configuration for a Field.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. A name of the form
+   *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/fields/{field_id}`
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [Field]{@link google.firestore.admin.v1.Field}.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.get_field.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_GetField_async
+   */
   getField(
     request?: protos.google.firestore.admin.v1.IGetFieldRequest,
     options?: CallOptions
@@ -207,6 +287,120 @@ export declare class FirestoreAdminClient {
       {} | null | undefined
     >
   ): void;
+  /**
+   * Gets information about a database.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. A name of the form
+   *   `projects/{project_id}/databases/{database_id}`
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [Database]{@link google.firestore.admin.v1.Database}.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.get_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_GetDatabase_async
+   */
+  getDatabase(
+    request?: protos.google.firestore.admin.v1.IGetDatabaseRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IDatabase,
+      protos.google.firestore.admin.v1.IGetDatabaseRequest | undefined,
+      {} | undefined
+    ]
+  >;
+  getDatabase(
+    request: protos.google.firestore.admin.v1.IGetDatabaseRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IDatabase,
+      protos.google.firestore.admin.v1.IGetDatabaseRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  getDatabase(
+    request: protos.google.firestore.admin.v1.IGetDatabaseRequest,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IDatabase,
+      protos.google.firestore.admin.v1.IGetDatabaseRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  /**
+   * List all the databases in the project.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. A parent name of the form
+   *   `projects/{project_id}`
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [ListDatabasesResponse]{@link google.firestore.admin.v1.ListDatabasesResponse}.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.list_databases.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_ListDatabases_async
+   */
+  listDatabases(
+    request?: protos.google.firestore.admin.v1.IListDatabasesRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IListDatabasesResponse,
+      protos.google.firestore.admin.v1.IListDatabasesRequest | undefined,
+      {} | undefined
+    ]
+  >;
+  listDatabases(
+    request: protos.google.firestore.admin.v1.IListDatabasesRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IListDatabasesResponse,
+      protos.google.firestore.admin.v1.IListDatabasesRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  listDatabases(
+    request: protos.google.firestore.admin.v1.IListDatabasesRequest,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IListDatabasesResponse,
+      protos.google.firestore.admin.v1.IListDatabasesRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  /**
+   * Creates a composite index. This returns a {@link google.longrunning.Operation|google.longrunning.Operation}
+   * which may be used to track the status of the creation. The metadata for
+   * the operation will be the type {@link google.firestore.admin.v1.IndexOperationMetadata|IndexOperationMetadata}.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. A parent name of the form
+   *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
+   * @param {google.firestore.admin.v1.Index} request.index
+   *   Required. The composite index to create.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing
+   *   a long running operation. Its `promise()` method returns a promise
+   *   you can `await` for.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.create_index.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_CreateIndex_async
+   */
   createIndex(
     request?: protos.google.firestore.admin.v1.ICreateIndexRequest,
     options?: CallOptions
@@ -252,11 +446,8 @@ export declare class FirestoreAdminClient {
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
-   * @example
-   * const decodedOperation = await checkCreateIndexProgress(name);
-   * console.log(decodedOperation.result);
-   * console.log(decodedOperation.done);
-   * console.log(decodedOperation.metadata);
+   * @example <caption>include:samples/generated/v1/firestore_admin.create_index.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_CreateIndex_async
    */
   checkCreateIndexProgress(
     name: string
@@ -266,6 +457,40 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IndexOperationMetadata
     >
   >;
+  /**
+   * Updates a field configuration. Currently, field updates apply only to
+   * single field index configuration. However, calls to
+   * {@link google.firestore.admin.v1.FirestoreAdmin.UpdateField|FirestoreAdmin.UpdateField} should provide a field mask to avoid
+   * changing any configuration that the caller isn't aware of. The field mask
+   * should be specified as: `{ paths: "index_config" }`.
+   *
+   * This call returns a {@link google.longrunning.Operation|google.longrunning.Operation} which may be used to
+   * track the status of the field update. The metadata for
+   * the operation will be the type {@link google.firestore.admin.v1.FieldOperationMetadata|FieldOperationMetadata}.
+   *
+   * To configure the default field settings for the database, use
+   * the special `Field` with resource name:
+   * `projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*`.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {google.firestore.admin.v1.Field} request.field
+   *   Required. The field to be updated.
+   * @param {google.protobuf.FieldMask} request.updateMask
+   *   A mask, relative to the field. If specified, only configuration specified
+   *   by this field_mask will be updated in the field.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing
+   *   a long running operation. Its `promise()` method returns a promise
+   *   you can `await` for.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.update_field.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateField_async
+   */
   updateField(
     request?: protos.google.firestore.admin.v1.IUpdateFieldRequest,
     options?: CallOptions
@@ -311,11 +536,8 @@ export declare class FirestoreAdminClient {
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
-   * @example
-   * const decodedOperation = await checkUpdateFieldProgress(name);
-   * console.log(decodedOperation.result);
-   * console.log(decodedOperation.done);
-   * console.log(decodedOperation.metadata);
+   * @example <caption>include:samples/generated/v1/firestore_admin.update_field.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateField_async
    */
   checkUpdateFieldProgress(
     name: string
@@ -325,6 +547,47 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.FieldOperationMetadata
     >
   >;
+  /**
+   * Exports a copy of all or a subset of documents from Google Cloud Firestore
+   * to another storage system, such as Google Cloud Storage. Recent updates to
+   * documents may not be reflected in the export. The export occurs in the
+   * background and its progress can be monitored and managed via the
+   * Operation resource that is created. The output of an export may only be
+   * used once the associated operation is done. If an export operation is
+   * cancelled before completion it may leave partial data behind in Google
+   * Cloud Storage.
+   *
+   * For more details on export behavior and output format, refer to:
+   * https://cloud.google.com/firestore/docs/manage-data/export-import
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. Database to export. Should be of the form:
+   *   `projects/{project_id}/databases/{database_id}`.
+   * @param {string[]} request.collectionIds
+   *   Which collection ids to export. Unspecified means all collections.
+   * @param {string} request.outputUriPrefix
+   *   The output URI. Currently only supports Google Cloud Storage URIs of the
+   *   form: `gs://BUCKET_NAME[/NAMESPACE_PATH]`, where `BUCKET_NAME` is the name
+   *   of the Google Cloud Storage bucket and `NAMESPACE_PATH` is an optional
+   *   Google Cloud Storage namespace path. When
+   *   choosing a name, be sure to consider Google Cloud Storage naming
+   *   guidelines: https://cloud.google.com/storage/docs/naming.
+   *   If the URI is a bucket (without a namespace path), a prefix will be
+   *   generated based on the start time.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing
+   *   a long running operation. Its `promise()` method returns a promise
+   *   you can `await` for.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.export_documents.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_ExportDocuments_async
+   */
   exportDocuments(
     request?: protos.google.firestore.admin.v1.IExportDocumentsRequest,
     options?: CallOptions
@@ -370,11 +633,8 @@ export declare class FirestoreAdminClient {
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
-   * @example
-   * const decodedOperation = await checkExportDocumentsProgress(name);
-   * console.log(decodedOperation.result);
-   * console.log(decodedOperation.done);
-   * console.log(decodedOperation.metadata);
+   * @example <caption>include:samples/generated/v1/firestore_admin.export_documents.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_ExportDocuments_async
    */
   checkExportDocumentsProgress(
     name: string
@@ -384,6 +644,39 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.ExportDocumentsMetadata
     >
   >;
+  /**
+   * Imports documents into Google Cloud Firestore. Existing documents with the
+   * same name are overwritten. The import occurs in the background and its
+   * progress can be monitored and managed via the Operation resource that is
+   * created. If an ImportDocuments operation is cancelled, it is possible
+   * that a subset of the data has already been imported to Cloud Firestore.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. Database to import into. Should be of the form:
+   *   `projects/{project_id}/databases/{database_id}`.
+   * @param {string[]} request.collectionIds
+   *   Which collection ids to import. Unspecified means all collections included
+   *   in the import.
+   * @param {string} request.inputUriPrefix
+   *   Location of the exported files.
+   *   This must match the output_uri_prefix of an ExportDocumentsResponse from
+   *   an export that has completed successfully.
+   *   See:
+   *   {@link google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix|google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix}.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing
+   *   a long running operation. Its `promise()` method returns a promise
+   *   you can `await` for.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.import_documents.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_ImportDocuments_async
+   */
   importDocuments(
     request?: protos.google.firestore.admin.v1.IImportDocumentsRequest,
     options?: CallOptions
@@ -429,11 +722,8 @@ export declare class FirestoreAdminClient {
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
    *   for more details and examples.
-   * @example
-   * const decodedOperation = await checkImportDocumentsProgress(name);
-   * console.log(decodedOperation.result);
-   * console.log(decodedOperation.done);
-   * console.log(decodedOperation.metadata);
+   * @example <caption>include:samples/generated/v1/firestore_admin.import_documents.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_ImportDocuments_async
    */
   checkImportDocumentsProgress(
     name: string
@@ -443,6 +733,112 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.ImportDocumentsMetadata
     >
   >;
+  /**
+   * Updates a database.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {google.firestore.admin.v1.Database} request.database
+   *   Required. The database to update.
+   * @param {google.protobuf.FieldMask} request.updateMask
+   *   The list of fields to be updated.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing
+   *   a long running operation. Its `promise()` method returns a promise
+   *   you can `await` for.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.update_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateDatabase_async
+   */
+  updateDatabase(
+    request?: protos.google.firestore.admin.v1.IUpdateDatabaseRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IUpdateDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | undefined,
+      {} | undefined
+    ]
+  >;
+  updateDatabase(
+    request: protos.google.firestore.admin.v1.IUpdateDatabaseRequest,
+    options: CallOptions,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IUpdateDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  updateDatabase(
+    request: protos.google.firestore.admin.v1.IUpdateDatabaseRequest,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IUpdateDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  /**
+   * Check the status of the long running operation returned by `updateDatabase()`.
+   * @param {String} name
+   *   The operation name that will be passed.
+   * @returns {Promise} - The promise which resolves to an object.
+   *   The decoded operation object has result and metadata field to get information from.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.update_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateDatabase_async
+   */
+  checkUpdateDatabaseProgress(
+    name: string
+  ): Promise<
+    LROperation<
+      protos.google.firestore.admin.v1.Database,
+      protos.google.firestore.admin.v1.UpdateDatabaseMetadata
+    >
+  >;
+  /**
+   * Lists composite indexes.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. A parent name of the form
+   *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
+   * @param {string} request.filter
+   *   The filter to apply to list results.
+   * @param {number} request.pageSize
+   *   The number of results to return.
+   * @param {string} request.pageToken
+   *   A page token, returned from a previous call to
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes}, that may be used to get the next
+   *   page of results.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is Array of [Index]{@link google.firestore.admin.v1.Index}.
+   *   The client library will perform auto-pagination by default: it will call the API as many
+   *   times as needed and will merge results from all the pages into this array.
+   *   Note that it can affect your quota.
+   *   We recommend using `listIndexesAsync()`
+   *   method described below for async iteration which you can stop as needed.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   for more details and examples.
+   */
   listIndexes(
     request?: protos.google.firestore.admin.v1.IListIndexesRequest,
     options?: CallOptions
@@ -528,16 +924,51 @@ export declare class FirestoreAdminClient {
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
    *   for more details and examples.
-   * @example
-   * const iterable = client.listIndexesAsync(request);
-   * for await (const response of iterable) {
-   *   // process response
-   * }
+   * @example <caption>include:samples/generated/v1/firestore_admin.list_indexes.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_ListIndexes_async
    */
   listIndexesAsync(
     request?: protos.google.firestore.admin.v1.IListIndexesRequest,
     options?: CallOptions
   ): AsyncIterable<protos.google.firestore.admin.v1.IIndex>;
+  /**
+   * Lists the field configuration and metadata for this database.
+   *
+   * Currently, {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
+   * that have been explicitly overridden. To issue this query, call
+   * {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with the filter set to
+   * `indexConfig.usesAncestorConfig:false` .
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. A parent name of the form
+   *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
+   * @param {string} request.filter
+   *   The filter to apply to list results. Currently,
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
+   *   that have been explicitly overridden. To issue this query, call
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with a filter that includes
+   *   `indexConfig.usesAncestorConfig:false` .
+   * @param {number} request.pageSize
+   *   The number of results to return.
+   * @param {string} request.pageToken
+   *   A page token, returned from a previous call to
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}, that may be used to get the next
+   *   page of results.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is Array of [Field]{@link google.firestore.admin.v1.Field}.
+   *   The client library will perform auto-pagination by default: it will call the API as many
+   *   times as needed and will merge results from all the pages into this array.
+   *   Note that it can affect your quota.
+   *   We recommend using `listFieldsAsync()`
+   *   method described below for async iteration which you can stop as needed.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   for more details and examples.
+   */
   listFields(
     request?: protos.google.firestore.admin.v1.IListFieldsRequest,
     options?: CallOptions
@@ -576,8 +1007,8 @@ export declare class FirestoreAdminClient {
    *   The filter to apply to list results. Currently,
    *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
    *   that have been explicitly overridden. To issue this query, call
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with the filter set to
-   *   `indexConfig.usesAncestorConfig:false`.
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with a filter that includes
+   *   `indexConfig.usesAncestorConfig:false` .
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
@@ -613,8 +1044,8 @@ export declare class FirestoreAdminClient {
    *   The filter to apply to list results. Currently,
    *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
    *   that have been explicitly overridden. To issue this query, call
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with the filter set to
-   *   `indexConfig.usesAncestorConfig:false`.
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with a filter that includes
+   *   `indexConfig.usesAncestorConfig:false` .
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
@@ -631,11 +1062,8 @@ export declare class FirestoreAdminClient {
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
    *   for more details and examples.
-   * @example
-   * const iterable = client.listFieldsAsync(request);
-   * for await (const response of iterable) {
-   *   // process response
-   * }
+   * @example <caption>include:samples/generated/v1/firestore_admin.list_fields.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_ListFields_async
    */
   listFieldsAsync(
     request?: protos.google.firestore.admin.v1.IListFieldsRequest,
@@ -802,6 +1230,21 @@ export declare class FirestoreAdminClient {
    * @returns {string} A string representing the index.
    */
   matchIndexFromIndexName(indexName: string): string | number;
+  /**
+   * Return a fully-qualified project resource name string.
+   *
+   * @param {string} project
+   * @returns {string} Resource name string.
+   */
+  projectPath(project: string): string;
+  /**
+   * Parse the project from Project resource.
+   *
+   * @param {string} projectName
+   *   A fully-qualified path representing Project resource.
+   * @returns {string} A string representing the project.
+   */
+  matchProjectFromProjectName(projectName: string): string | number;
   /**
    * Terminate the gRPC channel and close the client.
    *

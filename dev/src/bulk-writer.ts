@@ -16,7 +16,7 @@
 import * as firestore from '@google-cloud/firestore';
 
 import * as assert from 'assert';
-import {GoogleError} from 'google-gax';
+import type {GoogleError} from 'google-gax';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath, Firestore} from '.';
@@ -285,9 +285,10 @@ class BulkCommitBatch extends WriteBatch {
         );
         this.pendingOps[i].onSuccess(new WriteResult(updateTime));
       } else {
-        const error = new (require('google-gax').GoogleError)(
-          status.message || undefined
-        );
+        const error =
+          new (require('google-gax/build/src/fallback').GoogleError)(
+            status.message || undefined
+          );
         error.code = status.code as number;
         this.pendingOps[i].onError(wrapError(error, stack));
       }
@@ -327,7 +328,7 @@ class BufferedOperation {
  * @class BulkWriterError
  */
 export class BulkWriterError extends Error {
-  /** @hideconstructor */
+  /** @private */
   constructor(
     /** The status code of the error. */
     readonly code: GrpcStatus,
@@ -495,7 +496,7 @@ export class BulkWriter {
     );
   };
 
-  /** @hideconstructor */
+  /** @private */
   constructor(
     private readonly firestore: Firestore,
     options?: firestore.BulkWriterOptions

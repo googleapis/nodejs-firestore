@@ -1,5 +1,5 @@
 /*!
- * Copyright 2021 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,82 @@ export namespace google {
 
             /** Namespace v1. */
             namespace v1 {
+
+                /** Properties of a Database. */
+                interface IDatabase {
+
+                    /** Database name */
+                    name?: (string|null);
+
+                    /** Database locationId */
+                    locationId?: (string|null);
+
+                    /** Database type */
+                    type?: (google.firestore.admin.v1.Database.DatabaseType|null);
+
+                    /** Database concurrencyMode */
+                    concurrencyMode?: (google.firestore.admin.v1.Database.ConcurrencyMode|null);
+
+                    /** Database etag */
+                    etag?: (string|null);
+                }
+
+                /** Represents a Database. */
+                class Database implements IDatabase {
+
+                    /**
+                     * Constructs a new Database.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDatabase);
+
+                    /** Database name. */
+                    public name: string;
+
+                    /** Database locationId. */
+                    public locationId: string;
+
+                    /** Database type. */
+                    public type: google.firestore.admin.v1.Database.DatabaseType;
+
+                    /** Database concurrencyMode. */
+                    public concurrencyMode: google.firestore.admin.v1.Database.ConcurrencyMode;
+
+                    /** Database etag. */
+                    public etag: string;
+
+                    /**
+                     * Creates a Database message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Database
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Database;
+
+                    /**
+                     * Creates a plain object from a Database message. Also converts values to other types if specified.
+                     * @param message Database
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.Database, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Database to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+
+                namespace Database {
+
+                    /** DatabaseType enum. */
+                    type DatabaseType =
+                        "DATABASE_TYPE_UNSPECIFIED"| "FIRESTORE_NATIVE"| "DATASTORE_MODE";
+
+                    /** ConcurrencyMode enum. */
+                    type ConcurrencyMode =
+                        "CONCURRENCY_MODE_UNSPECIFIED"| "OPTIMISTIC"| "PESSIMISTIC"| "OPTIMISTIC_WITH_ENTITY_GROUPS";
+                }
 
                 /** Properties of a Field. */
                 interface IField {
@@ -272,6 +348,48 @@ export namespace google {
                      * @returns Promise
                      */
                     public importDocuments(request: google.firestore.admin.v1.IImportDocumentsRequest): Promise<google.longrunning.Operation>;
+
+                    /**
+                     * Calls GetDatabase.
+                     * @param request GetDatabaseRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Database
+                     */
+                    public getDatabase(request: google.firestore.admin.v1.IGetDatabaseRequest, callback: google.firestore.admin.v1.FirestoreAdmin.GetDatabaseCallback): void;
+
+                    /**
+                     * Calls GetDatabase.
+                     * @param request GetDatabaseRequest message or plain object
+                     * @returns Promise
+                     */
+                    public getDatabase(request: google.firestore.admin.v1.IGetDatabaseRequest): Promise<google.firestore.admin.v1.Database>;
+
+                    /**
+                     * Calls ListDatabases.
+                     * @param request ListDatabasesRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and ListDatabasesResponse
+                     */
+                    public listDatabases(request: google.firestore.admin.v1.IListDatabasesRequest, callback: google.firestore.admin.v1.FirestoreAdmin.ListDatabasesCallback): void;
+
+                    /**
+                     * Calls ListDatabases.
+                     * @param request ListDatabasesRequest message or plain object
+                     * @returns Promise
+                     */
+                    public listDatabases(request: google.firestore.admin.v1.IListDatabasesRequest): Promise<google.firestore.admin.v1.ListDatabasesResponse>;
+
+                    /**
+                     * Calls UpdateDatabase.
+                     * @param request UpdateDatabaseRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public updateDatabase(request: google.firestore.admin.v1.IUpdateDatabaseRequest, callback: google.firestore.admin.v1.FirestoreAdmin.UpdateDatabaseCallback): void;
+
+                    /**
+                     * Calls UpdateDatabase.
+                     * @param request UpdateDatabaseRequest message or plain object
+                     * @returns Promise
+                     */
+                    public updateDatabase(request: google.firestore.admin.v1.IUpdateDatabaseRequest): Promise<google.longrunning.Operation>;
                 }
 
                 namespace FirestoreAdmin {
@@ -338,6 +456,232 @@ export namespace google {
                      * @param [response] Operation
                      */
                     type ImportDocumentsCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getDatabase}.
+                     * @param error Error, if any
+                     * @param [response] Database
+                     */
+                    type GetDatabaseCallback = (error: (Error|null), response?: google.firestore.admin.v1.Database) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listDatabases}.
+                     * @param error Error, if any
+                     * @param [response] ListDatabasesResponse
+                     */
+                    type ListDatabasesCallback = (error: (Error|null), response?: google.firestore.admin.v1.ListDatabasesResponse) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#updateDatabase}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type UpdateDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+                }
+
+                /** Properties of a ListDatabasesRequest. */
+                interface IListDatabasesRequest {
+
+                    /** ListDatabasesRequest parent */
+                    parent?: (string|null);
+                }
+
+                /** Represents a ListDatabasesRequest. */
+                class ListDatabasesRequest implements IListDatabasesRequest {
+
+                    /**
+                     * Constructs a new ListDatabasesRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListDatabasesRequest);
+
+                    /** ListDatabasesRequest parent. */
+                    public parent: string;
+
+                    /**
+                     * Creates a ListDatabasesRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ListDatabasesRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.ListDatabasesRequest;
+
+                    /**
+                     * Creates a plain object from a ListDatabasesRequest message. Also converts values to other types if specified.
+                     * @param message ListDatabasesRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.ListDatabasesRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ListDatabasesRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+
+                /** Properties of a ListDatabasesResponse. */
+                interface IListDatabasesResponse {
+
+                    /** ListDatabasesResponse databases */
+                    databases?: (google.firestore.admin.v1.IDatabase[]|null);
+                }
+
+                /** Represents a ListDatabasesResponse. */
+                class ListDatabasesResponse implements IListDatabasesResponse {
+
+                    /**
+                     * Constructs a new ListDatabasesResponse.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListDatabasesResponse);
+
+                    /** ListDatabasesResponse databases. */
+                    public databases: google.firestore.admin.v1.IDatabase[];
+
+                    /**
+                     * Creates a ListDatabasesResponse message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ListDatabasesResponse
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.ListDatabasesResponse;
+
+                    /**
+                     * Creates a plain object from a ListDatabasesResponse message. Also converts values to other types if specified.
+                     * @param message ListDatabasesResponse
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.ListDatabasesResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ListDatabasesResponse to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+
+                /** Properties of a GetDatabaseRequest. */
+                interface IGetDatabaseRequest {
+
+                    /** GetDatabaseRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a GetDatabaseRequest. */
+                class GetDatabaseRequest implements IGetDatabaseRequest {
+
+                    /**
+                     * Constructs a new GetDatabaseRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IGetDatabaseRequest);
+
+                    /** GetDatabaseRequest name. */
+                    public name: string;
+
+                    /**
+                     * Creates a GetDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns GetDatabaseRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.GetDatabaseRequest;
+
+                    /**
+                     * Creates a plain object from a GetDatabaseRequest message. Also converts values to other types if specified.
+                     * @param message GetDatabaseRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.GetDatabaseRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this GetDatabaseRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+
+                /** Properties of an UpdateDatabaseRequest. */
+                interface IUpdateDatabaseRequest {
+
+                    /** UpdateDatabaseRequest database */
+                    database?: (google.firestore.admin.v1.IDatabase|null);
+
+                    /** UpdateDatabaseRequest updateMask */
+                    updateMask?: (google.protobuf.IFieldMask|null);
+                }
+
+                /** Represents an UpdateDatabaseRequest. */
+                class UpdateDatabaseRequest implements IUpdateDatabaseRequest {
+
+                    /**
+                     * Constructs a new UpdateDatabaseRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IUpdateDatabaseRequest);
+
+                    /** UpdateDatabaseRequest database. */
+                    public database?: (google.firestore.admin.v1.IDatabase|null);
+
+                    /** UpdateDatabaseRequest updateMask. */
+                    public updateMask?: (google.protobuf.IFieldMask|null);
+
+                    /**
+                     * Creates an UpdateDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns UpdateDatabaseRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.UpdateDatabaseRequest;
+
+                    /**
+                     * Creates a plain object from an UpdateDatabaseRequest message. Also converts values to other types if specified.
+                     * @param message UpdateDatabaseRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.UpdateDatabaseRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this UpdateDatabaseRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+
+                /** Properties of an UpdateDatabaseMetadata. */
+                interface IUpdateDatabaseMetadata {
+                }
+
+                /** Represents an UpdateDatabaseMetadata. */
+                class UpdateDatabaseMetadata implements IUpdateDatabaseMetadata {
+
+                    /**
+                     * Constructs a new UpdateDatabaseMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IUpdateDatabaseMetadata);
+
+                    /**
+                     * Creates an UpdateDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns UpdateDatabaseMetadata
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.UpdateDatabaseMetadata;
+
+                    /**
+                     * Creates a plain object from an UpdateDatabaseMetadata message. Also converts values to other types if specified.
+                     * @param message UpdateDatabaseMetadata
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.UpdateDatabaseMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this UpdateDatabaseMetadata to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 /** Properties of a CreateIndexRequest. */
@@ -1447,6 +1791,10 @@ export namespace google {
                     public toJSON(): { [k: string]: any };
                 }
 
+                /** OperationState enum. */
+                type OperationState =
+                    "OPERATION_STATE_UNSPECIFIED"| "INITIALIZING"| "PROCESSING"| "CANCELLING"| "FINALIZING"| "SUCCESSFUL"| "FAILED"| "CANCELLED";
+
                 /** Properties of a Progress. */
                 interface IProgress {
 
@@ -1493,10 +1841,6 @@ export namespace google {
                      */
                     public toJSON(): { [k: string]: any };
                 }
-
-                /** OperationState enum. */
-                type OperationState =
-                    "OPERATION_STATE_UNSPECIFIED"| "INITIALIZING"| "PROCESSING"| "CANCELLING"| "FINALIZING"| "SUCCESSFUL"| "FAILED"| "CANCELLED";
             }
         }
     }

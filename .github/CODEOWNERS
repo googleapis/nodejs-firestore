@@ -7,3 +7,4 @@
 
 # The yoshi-nodejs team is the default owner for nodejs repositories.
 *     @googleapis/yoshi-nodejs @googleapis/firestore-dpe @googleapis/api-firestore
+.github/auto-approve.yml @googleapis/github-automation/

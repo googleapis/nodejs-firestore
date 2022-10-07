@@ -124,6 +124,36 @@ if staging.is_dir():
       "firestoreModule\.v1beta1",
       "firestoreModule"
     )
+    s.replace(
+       "dev/src/v1/firestore_client.ts",
+       "\.\./\.\./protos/protos.json",
+       "../../protos/v1.json"
+    )
+    s.replace(
+       "dev/src/v1/firestore_admin_client.ts",
+       "\.\./\.\./protos/protos.json",
+       "../../protos/admin_v1.json"
+    )
+    s.replace(
+       "dev/src/v1beta1/firestore_client.ts",
+       "\.\./\.\./protos/protos.json",
+       "../../protos/v1beta1.json"
+    )
+    s.replace(
+       "dev/test/gapic_firestore_v1.ts",
+       "\.\./protos/protos.json",
+       "../protos/v1.json"
+    )
+    s.replace(
+       "dev/test/gapic_firestore_admin_v1.ts",
+       "\.\./protos/protos.json",
+       "../protos/admin_v1.json"
+    )
+    s.replace(
+       "dev/test/gapic_firestore_v1beta1.ts",
+       "\.\./protos/protos.json",
+       "../protos/v1beta1.json"
+    )
 
     # Mark v1beta1 as deprecated
     s.replace(
@@ -155,6 +185,7 @@ if staging.is_dir():
     os.chdir("protos")
     os.unlink('protos.js')
     os.unlink('protos.d.ts')
+    os.unlink('protos.json')
     subprocess.run('./update.sh', shell=True)
     os.chdir("../../")
 

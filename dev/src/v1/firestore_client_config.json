@@ -80,6 +80,11 @@
           "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
           "retry_params_name": "default"
         },
+        "RunAggregationQuery": {
+          "timeout_millis": 300000,
+          "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",
+          "retry_params_name": "default"
+        },
         "PartitionQuery": {
           "timeout_millis": 300000,
           "retry_codes_name": "deadline_exceeded_resource_exhausted_internal_unavailable",

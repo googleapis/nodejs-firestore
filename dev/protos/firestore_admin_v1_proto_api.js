@@ -1,5 +1,5 @@
 /*!
- * Copyright 2021 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7049 @@
          */
         var google = {};
     
+        google.protobuf = (function() {
+    
+            /**
+             * Namespace protobuf.
+             * @memberof google
+             * @namespace
+             */
+            var protobuf = {};
+    
+            protobuf.Empty = (function() {
+    
+                /**
+                 * Properties of an Empty.
+                 * @memberof google.protobuf
+                 * @interface IEmpty
+                 */
+    
+                /**
+                 * Constructs a new Empty.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an Empty.
+                 * @implements IEmpty
+                 * @constructor
+                 * @param {google.protobuf.IEmpty=} [properties] Properties to set
+                 */
+                function Empty(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Creates an Empty message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Empty
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Empty} Empty
+                 */
+                Empty.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Empty)
+                        return object;
+                    return new $root.google.protobuf.Empty();
+                };
+    
+                /**
+                 * Creates a plain object from an Empty message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Empty
+                 * @static
+                 * @param {google.protobuf.Empty} message Empty
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Empty.toObject = function toObject() {
+                    return {};
+                };
+    
+                /**
+                 * Converts this Empty to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Empty
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Empty.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Empty
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Empty
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Empty.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Empty";
+                };
+    
+                return Empty;
+            })();
+    
+            protobuf.FieldMask = (function() {
+    
+                /**
+                 * Properties of a FieldMask.
+                 * @memberof google.protobuf
+                 * @interface IFieldMask
+                 * @property {Array.<string>|null} [paths] FieldMask paths
+                 */
+    
+                /**
+                 * Constructs a new FieldMask.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a FieldMask.
+                 * @implements IFieldMask
+                 * @constructor
+                 * @param {google.protobuf.IFieldMask=} [properties] Properties to set
+                 */
+                function FieldMask(properties) {
+                    this.paths = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * FieldMask paths.
+                 * @member {Array.<string>} paths
+                 * @memberof google.protobuf.FieldMask
+                 * @instance
+                 */
+                FieldMask.prototype.paths = $util.emptyArray;
+    
+                /**
+                 * Creates a FieldMask message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FieldMask
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FieldMask} FieldMask
+                 */
+                FieldMask.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FieldMask)
+                        return object;
+                    var message = new $root.google.protobuf.FieldMask();
+                    if (object.paths) {
+                        if (!Array.isArray(object.paths))
+                            throw TypeError(".google.protobuf.FieldMask.paths: array expected");
+                        message.paths = [];
+                        for (var i = 0; i < object.paths.length; ++i)
+                            message.paths[i] = String(object.paths[i]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FieldMask message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FieldMask
+                 * @static
+                 * @param {google.protobuf.FieldMask} message FieldMask
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FieldMask.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.paths = [];
+                    if (message.paths && message.paths.length) {
+                        object.paths = [];
+                        for (var j = 0; j < message.paths.length; ++j)
+                            object.paths[j] = message.paths[j];
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this FieldMask to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FieldMask
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FieldMask.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for FieldMask
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.FieldMask
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                FieldMask.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.FieldMask";
+                };
+    
+                return FieldMask;
+            })();
+    
+            protobuf.Timestamp = (function() {
+    
+                /**
+                 * Properties of a Timestamp.
+                 * @memberof google.protobuf
+                 * @interface ITimestamp
+                 * @property {number|string|null} [seconds] Timestamp seconds
+                 * @property {number|null} [nanos] Timestamp nanos
+                 */
+    
+                /**
+                 * Constructs a new Timestamp.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a Timestamp.
+                 * @implements ITimestamp
+                 * @constructor
+                 * @param {google.protobuf.ITimestamp=} [properties] Properties to set
+                 */
+                function Timestamp(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Timestamp seconds.
+                 * @member {number|string} seconds
+                 * @memberof google.protobuf.Timestamp
+                 * @instance
+                 */
+                Timestamp.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+                /**
+                 * Timestamp nanos.
+                 * @member {number} nanos
+                 * @memberof google.protobuf.Timestamp
+                 * @instance
+                 */
+                Timestamp.prototype.nanos = 0;
+    
+                /**
+                 * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Timestamp
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Timestamp} Timestamp
+                 */
+                Timestamp.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Timestamp)
+                        return object;
+                    var message = new $root.google.protobuf.Timestamp();
+                    if (object.seconds != null)
+                        if ($util.Long)
+                            (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
+                        else if (typeof object.seconds === "string")
+                            message.seconds = parseInt(object.seconds, 10);
+                        else if (typeof object.seconds === "number")
+                            message.seconds = object.seconds;
+                        else if (typeof object.seconds === "object")
+                            message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
+                    if (object.nanos != null)
+                        message.nanos = object.nanos | 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Timestamp
+                 * @static
+                 * @param {google.protobuf.Timestamp} message Timestamp
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Timestamp.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, false);
+                            object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.seconds = options.longs === String ? "0" : 0;
+                        object.nanos = 0;
+                    }
+                    if (message.seconds != null && message.hasOwnProperty("seconds"))
+                        if (typeof message.seconds === "number")
+                            object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
+                        else
+                            object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
+                    if (message.nanos != null && message.hasOwnProperty("nanos"))
+                        object.nanos = message.nanos;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Timestamp to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Timestamp
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Timestamp.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Timestamp
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Timestamp
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Timestamp.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Timestamp";
+                };
+    
+                return Timestamp;
+            })();
+    
+            protobuf.Any = (function() {
+    
+                /**
+                 * Properties of an Any.
+                 * @memberof google.protobuf
+                 * @interface IAny
+                 * @property {string|null} [type_url] Any type_url
+                 * @property {Uint8Array|null} [value] Any value
+                 */
+    
+                /**
+                 * Constructs a new Any.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an Any.
+                 * @implements IAny
+                 * @constructor
+                 * @param {google.protobuf.IAny=} [properties] Properties to set
+                 */
+                function Any(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Any type_url.
+                 * @member {string} type_url
+                 * @memberof google.protobuf.Any
+                 * @instance
+                 */
+                Any.prototype.type_url = "";
+    
+                /**
+                 * Any value.
+                 * @member {Uint8Array} value
+                 * @memberof google.protobuf.Any
+                 * @instance
+                 */
+                Any.prototype.value = $util.newBuffer([]);
+    
+                /**
+                 * Creates an Any message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Any
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Any} Any
+                 */
+                Any.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Any)
+                        return object;
+                    var message = new $root.google.protobuf.Any();
+                    if (object.type_url != null)
+                        message.type_url = String(object.type_url);
+                    if (object.value != null)
+                        if (typeof object.value === "string")
+                            $util.base64.decode(object.value, message.value = $util.newBuffer($util.base64.length(object.value)), 0);
+                        else if (object.value.length >= 0)
+                            message.value = object.value;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an Any message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Any
+                 * @static
+                 * @param {google.protobuf.Any} message Any
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Any.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.type_url = "";
+                        if (options.bytes === String)
+                            object.value = "";
+                        else {
+                            object.value = [];
+                            if (options.bytes !== Array)
+                                object.value = $util.newBuffer(object.value);
+                        }
+                    }
+                    if (message.type_url != null && message.hasOwnProperty("type_url"))
+                        object.type_url = message.type_url;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = options.bytes === String ? $util.base64.encode(message.value, 0, message.value.length) : options.bytes === Array ? Array.prototype.slice.call(message.value) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Any to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Any
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Any.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Any
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Any
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Any.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Any";
+                };
+    
+                return Any;
+            })();
+    
+            protobuf.FileDescriptorSet = (function() {
+    
+                /**
+                 * Properties of a FileDescriptorSet.
+                 * @memberof google.protobuf
+                 * @interface IFileDescriptorSet
+                 * @property {Array.<google.protobuf.IFileDescriptorProto>|null} [file] FileDescriptorSet file
+                 */
+    
+                /**
+                 * Constructs a new FileDescriptorSet.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a FileDescriptorSet.
+                 * @implements IFileDescriptorSet
+                 * @constructor
+                 * @param {google.protobuf.IFileDescriptorSet=} [properties] Properties to set
+                 */
+                function FileDescriptorSet(properties) {
+                    this.file = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * FileDescriptorSet file.
+                 * @member {Array.<google.protobuf.IFileDescriptorProto>} file
+                 * @memberof google.protobuf.FileDescriptorSet
+                 * @instance
+                 */
+                FileDescriptorSet.prototype.file = $util.emptyArray;
+    
+                /**
+                 * Creates a FileDescriptorSet message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FileDescriptorSet
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FileDescriptorSet} FileDescriptorSet
+                 */
+                FileDescriptorSet.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FileDescriptorSet)
+                        return object;
+                    var message = new $root.google.protobuf.FileDescriptorSet();
+                    if (object.file) {
+                        if (!Array.isArray(object.file))
+                            throw TypeError(".google.protobuf.FileDescriptorSet.file: array expected");
+                        message.file = [];
+                        for (var i = 0; i < object.file.length; ++i) {
+                            if (typeof object.file[i] !== "object")
+                                throw TypeError(".google.protobuf.FileDescriptorSet.file: object expected");
+                            message.file[i] = $root.google.protobuf.FileDescriptorProto.fromObject(object.file[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FileDescriptorSet message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FileDescriptorSet
+                 * @static
+                 * @param {google.protobuf.FileDescriptorSet} message FileDescriptorSet
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FileDescriptorSet.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.file = [];
+                    if (message.file && message.file.length) {
+                        object.file = [];
+                        for (var j = 0; j < message.file.length; ++j)
+                            object.file[j] = $root.google.protobuf.FileDescriptorProto.toObject(message.file[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this FileDescriptorSet to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FileDescriptorSet
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FileDescriptorSet.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for FileDescriptorSet
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.FileDescriptorSet
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                FileDescriptorSet.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.FileDescriptorSet";
+                };
+    
+                return FileDescriptorSet;
+            })();
+    
+            protobuf.FileDescriptorProto = (function() {
+    
+                /**
+                 * Properties of a FileDescriptorProto.
+                 * @memberof google.protobuf
+                 * @interface IFileDescriptorProto
+                 * @property {string|null} [name] FileDescriptorProto name
+                 * @property {string|null} ["package"] FileDescriptorProto package
+                 * @property {Array.<string>|null} [dependency] FileDescriptorProto dependency
+                 * @property {Array.<number>|null} [publicDependency] FileDescriptorProto publicDependency
+                 * @property {Array.<number>|null} [weakDependency] FileDescriptorProto weakDependency
+                 * @property {Array.<google.protobuf.IDescriptorProto>|null} [messageType] FileDescriptorProto messageType
+                 * @property {Array.<google.protobuf.IEnumDescriptorProto>|null} [enumType] FileDescriptorProto enumType
+                 * @property {Array.<google.protobuf.IServiceDescriptorProto>|null} [service] FileDescriptorProto service
+                 * @property {Array.<google.protobuf.IFieldDescriptorProto>|null} [extension] FileDescriptorProto extension
+                 * @property {google.protobuf.IFileOptions|null} [options] FileDescriptorProto options
+                 * @property {google.protobuf.ISourceCodeInfo|null} [sourceCodeInfo] FileDescriptorProto sourceCodeInfo
+                 * @property {string|null} [syntax] FileDescriptorProto syntax
+                 * @property {string|null} [edition] FileDescriptorProto edition
+                 */
+    
+                /**
+                 * Constructs a new FileDescriptorProto.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a FileDescriptorProto.
+                 * @implements IFileDescriptorProto
+                 * @constructor
+                 * @param {google.protobuf.IFileDescriptorProto=} [properties] Properties to set
+                 */
+                function FileDescriptorProto(properties) {
+                    this.dependency = [];
+                    this.publicDependency = [];
+                    this.weakDependency = [];
+                    this.messageType = [];
+                    this.enumType = [];
+                    this.service = [];
+                    this.extension = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * FileDescriptorProto name.
+                 * @member {string} name
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.name = "";
+    
+                /**
+                 * FileDescriptorProto package.
+                 * @member {string} package
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype["package"] = "";
+    
+                /**
+                 * FileDescriptorProto dependency.
+                 * @member {Array.<string>} dependency
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.dependency = $util.emptyArray;
+    
+                /**
+                 * FileDescriptorProto publicDependency.
+                 * @member {Array.<number>} publicDependency
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.publicDependency = $util.emptyArray;
+    
+                /**
+                 * FileDescriptorProto weakDependency.
+                 * @member {Array.<number>} weakDependency
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.weakDependency = $util.emptyArray;
+    
+                /**
+                 * FileDescriptorProto messageType.
+                 * @member {Array.<google.protobuf.IDescriptorProto>} messageType
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.messageType = $util.emptyArray;
+    
+                /**
+                 * FileDescriptorProto enumType.
+                 * @member {Array.<google.protobuf.IEnumDescriptorProto>} enumType
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.enumType = $util.emptyArray;
+    
+                /**
+                 * FileDescriptorProto service.
+                 * @member {Array.<google.protobuf.IServiceDescriptorProto>} service
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.service = $util.emptyArray;
+    
+                /**
+                 * FileDescriptorProto extension.
+                 * @member {Array.<google.protobuf.IFieldDescriptorProto>} extension
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.extension = $util.emptyArray;
+    
+                /**
+                 * FileDescriptorProto options.
+                 * @member {google.protobuf.IFileOptions|null|undefined} options
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.options = null;
+    
+                /**
+                 * FileDescriptorProto sourceCodeInfo.
+                 * @member {google.protobuf.ISourceCodeInfo|null|undefined} sourceCodeInfo
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.sourceCodeInfo = null;
+    
+                /**
+                 * FileDescriptorProto syntax.
+                 * @member {string} syntax
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.syntax = "";
+    
+                /**
+                 * FileDescriptorProto edition.
+                 * @member {string} edition
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.edition = "";
+    
+                /**
+                 * Creates a FileDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FileDescriptorProto} FileDescriptorProto
+                 */
+                FileDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FileDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.FileDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object["package"] != null)
+                        message["package"] = String(object["package"]);
+                    if (object.dependency) {
+                        if (!Array.isArray(object.dependency))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.dependency: array expected");
+                        message.dependency = [];
+                        for (var i = 0; i < object.dependency.length; ++i)
+                            message.dependency[i] = String(object.dependency[i]);
+                    }
+                    if (object.publicDependency) {
+                        if (!Array.isArray(object.publicDependency))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.publicDependency: array expected");
+                        message.publicDependency = [];
+                        for (var i = 0; i < object.publicDependency.length; ++i)
+                            message.publicDependency[i] = object.publicDependency[i] | 0;
+                    }
+                    if (object.weakDependency) {
+                        if (!Array.isArray(object.weakDependency))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.weakDependency: array expected");
+                        message.weakDependency = [];
+                        for (var i = 0; i < object.weakDependency.length; ++i)
+                            message.weakDependency[i] = object.weakDependency[i] | 0;
+                    }
+                    if (object.messageType) {
+                        if (!Array.isArray(object.messageType))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.messageType: array expected");
+                        message.messageType = [];
+                        for (var i = 0; i < object.messageType.length; ++i) {
+                            if (typeof object.messageType[i] !== "object")
+                                throw TypeError(".google.protobuf.FileDescriptorProto.messageType: object expected");
+                            message.messageType[i] = $root.google.protobuf.DescriptorProto.fromObject(object.messageType[i]);
+                        }
+                    }
+                    if (object.enumType) {
+                        if (!Array.isArray(object.enumType))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.enumType: array expected");
+                        message.enumType = [];
+                        for (var i = 0; i < object.enumType.length; ++i) {
+                            if (typeof object.enumType[i] !== "object")
+                                throw TypeError(".google.protobuf.FileDescriptorProto.enumType: object expected");
+                            message.enumType[i] = $root.google.protobuf.EnumDescriptorProto.fromObject(object.enumType[i]);
+                        }
+                    }
+                    if (object.service) {
+                        if (!Array.isArray(object.service))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.service: array expected");
+                        message.service = [];
+                        for (var i = 0; i < object.service.length; ++i) {
+                            if (typeof object.service[i] !== "object")
+                                throw TypeError(".google.protobuf.FileDescriptorProto.service: object expected");
+                            message.service[i] = $root.google.protobuf.ServiceDescriptorProto.fromObject(object.service[i]);
+                        }
+                    }
+                    if (object.extension) {
+                        if (!Array.isArray(object.extension))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.extension: array expected");
+                        message.extension = [];
+                        for (var i = 0; i < object.extension.length; ++i) {
+                            if (typeof object.extension[i] !== "object")
+                                throw TypeError(".google.protobuf.FileDescriptorProto.extension: object expected");
+                            message.extension[i] = $root.google.protobuf.FieldDescriptorProto.fromObject(object.extension[i]);
+                        }
+                    }
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.FileDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.FileOptions.fromObject(object.options);
+                    }
+                    if (object.sourceCodeInfo != null) {
+                        if (typeof object.sourceCodeInfo !== "object")
+                            throw TypeError(".google.protobuf.FileDescriptorProto.sourceCodeInfo: object expected");
+                        message.sourceCodeInfo = $root.google.protobuf.SourceCodeInfo.fromObject(object.sourceCodeInfo);
+                    }
+                    if (object.syntax != null)
+                        message.syntax = String(object.syntax);
+                    if (object.edition != null)
+                        message.edition = String(object.edition);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FileDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @static
+                 * @param {google.protobuf.FileDescriptorProto} message FileDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FileDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.dependency = [];
+                        object.messageType = [];
+                        object.enumType = [];
+                        object.service = [];
+                        object.extension = [];
+                        object.publicDependency = [];
+                        object.weakDependency = [];
+                    }
+                    if (options.defaults) {
+                        object.name = "";
+                        object["package"] = "";
+                        object.options = null;
+                        object.sourceCodeInfo = null;
+                        object.syntax = "";
+                        object.edition = "";
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message["package"] != null && message.hasOwnProperty("package"))
+                        object["package"] = message["package"];
+                    if (message.dependency && message.dependency.length) {
+                        object.dependency = [];
+                        for (var j = 0; j < message.dependency.length; ++j)
+                            object.dependency[j] = message.dependency[j];
+                    }
+                    if (message.messageType && message.messageType.length) {
+                        object.messageType = [];
+                        for (var j = 0; j < message.messageType.length; ++j)
+                            object.messageType[j] = $root.google.protobuf.DescriptorProto.toObject(message.messageType[j], options);
+                    }
+                    if (message.enumType && message.enumType.length) {
+                        object.enumType = [];
+                        for (var j = 0; j < message.enumType.length; ++j)
+                            object.enumType[j] = $root.google.protobuf.EnumDescriptorProto.toObject(message.enumType[j], options);
+                    }
+                    if (message.service && message.service.length) {
+                        object.service = [];
+                        for (var j = 0; j < message.service.length; ++j)
+                            object.service[j] = $root.google.protobuf.ServiceDescriptorProto.toObject(message.service[j], options);
+                    }
+                    if (message.extension && message.extension.length) {
+                        object.extension = [];
+                        for (var j = 0; j < message.extension.length; ++j)
+                            object.extension[j] = $root.google.protobuf.FieldDescriptorProto.toObject(message.extension[j], options);
+                    }
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.FileOptions.toObject(message.options, options);
+                    if (message.sourceCodeInfo != null && message.hasOwnProperty("sourceCodeInfo"))
+                        object.sourceCodeInfo = $root.google.protobuf.SourceCodeInfo.toObject(message.sourceCodeInfo, options);
+                    if (message.publicDependency && message.publicDependency.length) {
+                        object.publicDependency = [];
+                        for (var j = 0; j < message.publicDependency.length; ++j)
+                            object.publicDependency[j] = message.publicDependency[j];
+                    }
+                    if (message.weakDependency && message.weakDependency.length) {
+                        object.weakDependency = [];
+                        for (var j = 0; j < message.weakDependency.length; ++j)
+                            object.weakDependency[j] = message.weakDependency[j];
+                    }
+                    if (message.syntax != null && message.hasOwnProperty("syntax"))
+                        object.syntax = message.syntax;
+                    if (message.edition != null && message.hasOwnProperty("edition"))
+                        object.edition = message.edition;
+                    return object;
+                };
+    
+                /**
+                 * Converts this FileDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FileDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for FileDescriptorProto
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                FileDescriptorProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.FileDescriptorProto";
+                };
+    
+                return FileDescriptorProto;
+            })();
+    
+            protobuf.DescriptorProto = (function() {
+    
+                /**
+                 * Properties of a DescriptorProto.
+                 * @memberof google.protobuf
+                 * @interface IDescriptorProto
+                 * @property {string|null} [name] DescriptorProto name
+                 * @property {Array.<google.protobuf.IFieldDescriptorProto>|null} [field] DescriptorProto field
+                 * @property {Array.<google.protobuf.IFieldDescriptorProto>|null} [extension] DescriptorProto extension
+                 * @property {Array.<google.protobuf.IDescriptorProto>|null} [nestedType] DescriptorProto nestedType
+                 * @property {Array.<google.protobuf.IEnumDescriptorProto>|null} [enumType] DescriptorProto enumType
+                 * @property {Array.<google.protobuf.DescriptorProto.IExtensionRange>|null} [extensionRange] DescriptorProto extensionRange
+                 * @property {Array.<google.protobuf.IOneofDescriptorProto>|null} [oneofDecl] DescriptorProto oneofDecl
+                 * @property {google.protobuf.IMessageOptions|null} [options] DescriptorProto options
+                 * @property {Array.<google.protobuf.DescriptorProto.IReservedRange>|null} [reservedRange] DescriptorProto reservedRange
+                 * @property {Array.<string>|null} [reservedName] DescriptorProto reservedName
+                 */
+    
+                /**
+                 * Constructs a new DescriptorProto.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a DescriptorProto.
+                 * @implements IDescriptorProto
+                 * @constructor
+                 * @param {google.protobuf.IDescriptorProto=} [properties] Properties to set
+                 */
+                function DescriptorProto(properties) {
+                    this.field = [];
+                    this.extension = [];
+                    this.nestedType = [];
+                    this.enumType = [];
+                    this.extensionRange = [];
+                    this.oneofDecl = [];
+                    this.reservedRange = [];
+                    this.reservedName = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * DescriptorProto name.
+                 * @member {string} name
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 */
+                DescriptorProto.prototype.name = "";
+    
+                /**
+                 * DescriptorProto field.
+                 * @member {Array.<google.protobuf.IFieldDescriptorProto>} field
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 */
+                DescriptorProto.prototype.field = $util.emptyArray;
+    
+                /**
+                 * DescriptorProto extension.
+                 * @member {Array.<google.protobuf.IFieldDescriptorProto>} extension
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 */
+                DescriptorProto.prototype.extension = $util.emptyArray;
+    
+                /**
+                 * DescriptorProto nestedType.
+                 * @member {Array.<google.protobuf.IDescriptorProto>} nestedType
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 */
+                DescriptorProto.prototype.nestedType = $util.emptyArray;
+    
+                /**
+                 * DescriptorProto enumType.
+                 * @member {Array.<google.protobuf.IEnumDescriptorProto>} enumType
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 */
+                DescriptorProto.prototype.enumType = $util.emptyArray;
+    
+                /**
+                 * DescriptorProto extensionRange.
+                 * @member {Array.<google.protobuf.DescriptorProto.IExtensionRange>} extensionRange
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 */
+                DescriptorProto.prototype.extensionRange = $util.emptyArray;
+    
+                /**
+                 * DescriptorProto oneofDecl.
+                 * @member {Array.<google.protobuf.IOneofDescriptorProto>} oneofDecl
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 */
+                DescriptorProto.prototype.oneofDecl = $util.emptyArray;
+    
+                /**
+                 * DescriptorProto options.
+                 * @member {google.protobuf.IMessageOptions|null|undefined} options
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 */
+                DescriptorProto.prototype.options = null;
+    
+                /**
+                 * DescriptorProto reservedRange.
+                 * @member {Array.<google.protobuf.DescriptorProto.IReservedRange>} reservedRange
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 */
+                DescriptorProto.prototype.reservedRange = $util.emptyArray;
+    
+                /**
+                 * DescriptorProto reservedName.
+                 * @member {Array.<string>} reservedName
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 */
+                DescriptorProto.prototype.reservedName = $util.emptyArray;
+    
+                /**
+                 * Creates a DescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.DescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.DescriptorProto} DescriptorProto
+                 */
+                DescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.DescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.DescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.field) {
+                        if (!Array.isArray(object.field))
+                            throw TypeError(".google.protobuf.DescriptorProto.field: array expected");
+                        message.field = [];
+                        for (var i = 0; i < object.field.length; ++i) {
+                            if (typeof object.field[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.field: object expected");
+                            message.field[i] = $root.google.protobuf.FieldDescriptorProto.fromObject(object.field[i]);
+                        }
+                    }
+                    if (object.extension) {
+                        if (!Array.isArray(object.extension))
+                            throw TypeError(".google.protobuf.DescriptorProto.extension: array expected");
+                        message.extension = [];
+                        for (var i = 0; i < object.extension.length; ++i) {
+                            if (typeof object.extension[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.extension: object expected");
+                            message.extension[i] = $root.google.protobuf.FieldDescriptorProto.fromObject(object.extension[i]);
+                        }
+                    }
+                    if (object.nestedType) {
+                        if (!Array.isArray(object.nestedType))
+                            throw TypeError(".google.protobuf.DescriptorProto.nestedType: array expected");
+                        message.nestedType = [];
+                        for (var i = 0; i < object.nestedType.length; ++i) {
+                            if (typeof object.nestedType[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.nestedType: object expected");
+                            message.nestedType[i] = $root.google.protobuf.DescriptorProto.fromObject(object.nestedType[i]);
+                        }
+                    }
+                    if (object.enumType) {
+                        if (!Array.isArray(object.enumType))
+                            throw TypeError(".google.protobuf.DescriptorProto.enumType: array expected");
+                        message.enumType = [];
+                        for (var i = 0; i < object.enumType.length; ++i) {
+                            if (typeof object.enumType[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.enumType: object expected");
+                            message.enumType[i] = $root.google.protobuf.EnumDescriptorProto.fromObject(object.enumType[i]);
+                        }
+                    }
+                    if (object.extensionRange) {
+                        if (!Array.isArray(object.extensionRange))
+                            throw TypeError(".google.protobuf.DescriptorProto.extensionRange: array expected");
+                        message.extensionRange = [];
+                        for (var i = 0; i < object.extensionRange.length; ++i) {
+                            if (typeof object.extensionRange[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.extensionRange: object expected");
+                            message.extensionRange[i] = $root.google.protobuf.DescriptorProto.ExtensionRange.fromObject(object.extensionRange[i]);
+                        }
+                    }
+                    if (object.oneofDecl) {
+                        if (!Array.isArray(object.oneofDecl))
+                            throw TypeError(".google.protobuf.DescriptorProto.oneofDecl: array expected");
+                        message.oneofDecl = [];
+                        for (var i = 0; i < object.oneofDecl.length; ++i) {
+                            if (typeof object.oneofDecl[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.oneofDecl: object expected");
+                            message.oneofDecl[i] = $root.google.protobuf.OneofDescriptorProto.fromObject(object.oneofDecl[i]);
+                        }
+                    }
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.DescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.MessageOptions.fromObject(object.options);
+                    }
+                    if (object.reservedRange) {
+                        if (!Array.isArray(object.reservedRange))
+                            throw TypeError(".google.protobuf.DescriptorProto.reservedRange: array expected");
+                        message.reservedRange = [];
+                        for (var i = 0; i < object.reservedRange.length; ++i) {
+                            if (typeof object.reservedRange[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.reservedRange: object expected");
+                            message.reservedRange[i] = $root.google.protobuf.DescriptorProto.ReservedRange.fromObject(object.reservedRange[i]);
+                        }
+                    }
+                    if (object.reservedName) {
+                        if (!Array.isArray(object.reservedName))
+                            throw TypeError(".google.protobuf.DescriptorProto.reservedName: array expected");
+                        message.reservedName = [];
+                        for (var i = 0; i < object.reservedName.length; ++i)
+                            message.reservedName[i] = String(object.reservedName[i]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a DescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.DescriptorProto
+                 * @static
+                 * @param {google.protobuf.DescriptorProto} message DescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                DescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.field = [];
+                        object.nestedType = [];
+                        object.enumType = [];
+                        object.extensionRange = [];
+                        object.extension = [];
+                        object.oneofDecl = [];
+                        object.reservedRange = [];
+                        object.reservedName = [];
+                    }
+                    if (options.defaults) {
+                        object.name = "";
+                        object.options = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.field && message.field.length) {
+                        object.field = [];
+                        for (var j = 0; j < message.field.length; ++j)
+                            object.field[j] = $root.google.protobuf.FieldDescriptorProto.toObject(message.field[j], options);
+                    }
+                    if (message.nestedType && message.nestedType.length) {
+                        object.nestedType = [];
+                        for (var j = 0; j < message.nestedType.length; ++j)
+                            object.nestedType[j] = $root.google.protobuf.DescriptorProto.toObject(message.nestedType[j], options);
+                    }
+                    if (message.enumType && message.enumType.length) {
+                        object.enumType = [];
+                        for (var j = 0; j < message.enumType.length; ++j)
+                            object.enumType[j] = $root.google.protobuf.EnumDescriptorProto.toObject(message.enumType[j], options);
+                    }
+                    if (message.extensionRange && message.extensionRange.length) {
+                        object.extensionRange = [];
+                        for (var j = 0; j < message.extensionRange.length; ++j)
+                            object.extensionRange[j] = $root.google.protobuf.DescriptorProto.ExtensionRange.toObject(message.extensionRange[j], options);
+                    }
+                    if (message.extension && message.extension.length) {
+                        object.extension = [];
+                        for (var j = 0; j < message.extension.length; ++j)
+                            object.extension[j] = $root.google.protobuf.FieldDescriptorProto.toObject(message.extension[j], options);
+                    }
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.MessageOptions.toObject(message.options, options);
+                    if (message.oneofDecl && message.oneofDecl.length) {
+                        object.oneofDecl = [];
+                        for (var j = 0; j < message.oneofDecl.length; ++j)
+                            object.oneofDecl[j] = $root.google.protobuf.OneofDescriptorProto.toObject(message.oneofDecl[j], options);
+                    }
+                    if (message.reservedRange && message.reservedRange.length) {
+                        object.reservedRange = [];
+                        for (var j = 0; j < message.reservedRange.length; ++j)
+                            object.reservedRange[j] = $root.google.protobuf.DescriptorProto.ReservedRange.toObject(message.reservedRange[j], options);
+                    }
+                    if (message.reservedName && message.reservedName.length) {
+                        object.reservedName = [];
+                        for (var j = 0; j < message.reservedName.length; ++j)
+                            object.reservedName[j] = message.reservedName[j];
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this DescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                DescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for DescriptorProto
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.DescriptorProto
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                DescriptorProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.DescriptorProto";
+                };
+    
+                DescriptorProto.ExtensionRange = (function() {
+    
+                    /**
+                     * Properties of an ExtensionRange.
+                     * @memberof google.protobuf.DescriptorProto
+                     * @interface IExtensionRange
+                     * @property {number|null} [start] ExtensionRange start
+                     * @property {number|null} [end] ExtensionRange end
+                     * @property {google.protobuf.IExtensionRangeOptions|null} [options] ExtensionRange options
+                     */
+    
+                    /**
+                     * Constructs a new ExtensionRange.
+                     * @memberof google.protobuf.DescriptorProto
+                     * @classdesc Represents an ExtensionRange.
+                     * @implements IExtensionRange
+                     * @constructor
+                     * @param {google.protobuf.DescriptorProto.IExtensionRange=} [properties] Properties to set
+                     */
+                    function ExtensionRange(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * ExtensionRange start.
+                     * @member {number} start
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @instance
+                     */
+                    ExtensionRange.prototype.start = 0;
+    
+                    /**
+                     * ExtensionRange end.
+                     * @member {number} end
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @instance
+                     */
+                    ExtensionRange.prototype.end = 0;
+    
+                    /**
+                     * ExtensionRange options.
+                     * @member {google.protobuf.IExtensionRangeOptions|null|undefined} options
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @instance
+                     */
+                    ExtensionRange.prototype.options = null;
+    
+                    /**
+                     * Creates an ExtensionRange message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.DescriptorProto.ExtensionRange} ExtensionRange
+                     */
+                    ExtensionRange.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.DescriptorProto.ExtensionRange)
+                            return object;
+                        var message = new $root.google.protobuf.DescriptorProto.ExtensionRange();
+                        if (object.start != null)
+                            message.start = object.start | 0;
+                        if (object.end != null)
+                            message.end = object.end | 0;
+                        if (object.options != null) {
+                            if (typeof object.options !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.ExtensionRange.options: object expected");
+                            message.options = $root.google.protobuf.ExtensionRangeOptions.fromObject(object.options);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an ExtensionRange message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @static
+                     * @param {google.protobuf.DescriptorProto.ExtensionRange} message ExtensionRange
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ExtensionRange.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.start = 0;
+                            object.end = 0;
+                            object.options = null;
+                        }
+                        if (message.start != null && message.hasOwnProperty("start"))
+                            object.start = message.start;
+                        if (message.end != null && message.hasOwnProperty("end"))
+                            object.end = message.end;
+                        if (message.options != null && message.hasOwnProperty("options"))
+                            object.options = $root.google.protobuf.ExtensionRangeOptions.toObject(message.options, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ExtensionRange to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ExtensionRange.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for ExtensionRange
+                     * @function getTypeUrl
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    ExtensionRange.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.protobuf.DescriptorProto.ExtensionRange";
+                    };
+    
+                    return ExtensionRange;
+                })();
+    
+                DescriptorProto.ReservedRange = (function() {
+    
+                    /**
+                     * Properties of a ReservedRange.
+                     * @memberof google.protobuf.DescriptorProto
+                     * @interface IReservedRange
+                     * @property {number|null} [start] ReservedRange start
+                     * @property {number|null} [end] ReservedRange end
+                     */
+    
+                    /**
+                     * Constructs a new ReservedRange.
+                     * @memberof google.protobuf.DescriptorProto
+                     * @classdesc Represents a ReservedRange.
+                     * @implements IReservedRange
+                     * @constructor
+                     * @param {google.protobuf.DescriptorProto.IReservedRange=} [properties] Properties to set
+                     */
+                    function ReservedRange(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * ReservedRange start.
+                     * @member {number} start
+                     * @memberof google.protobuf.DescriptorProto.ReservedRange
+                     * @instance
+                     */
+                    ReservedRange.prototype.start = 0;
+    
+                    /**
+                     * ReservedRange end.
+                     * @member {number} end
+                     * @memberof google.protobuf.DescriptorProto.ReservedRange
+                     * @instance
+                     */
+                    ReservedRange.prototype.end = 0;
+    
+                    /**
+                     * Creates a ReservedRange message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.DescriptorProto.ReservedRange
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.DescriptorProto.ReservedRange} ReservedRange
+                     */
+                    ReservedRange.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.DescriptorProto.ReservedRange)
+                            return object;
+                        var message = new $root.google.protobuf.DescriptorProto.ReservedRange();
+                        if (object.start != null)
+                            message.start = object.start | 0;
+                        if (object.end != null)
+                            message.end = object.end | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a ReservedRange message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.DescriptorProto.ReservedRange
+                     * @static
+                     * @param {google.protobuf.DescriptorProto.ReservedRange} message ReservedRange
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ReservedRange.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.start = 0;
+                            object.end = 0;
+                        }
+                        if (message.start != null && message.hasOwnProperty("start"))
+                            object.start = message.start;
+                        if (message.end != null && message.hasOwnProperty("end"))
+                            object.end = message.end;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ReservedRange to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.DescriptorProto.ReservedRange
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ReservedRange.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for ReservedRange
+                     * @function getTypeUrl
+                     * @memberof google.protobuf.DescriptorProto.ReservedRange
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    ReservedRange.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.protobuf.DescriptorProto.ReservedRange";
+                    };
+    
+                    return ReservedRange;
+                })();
+    
+                return DescriptorProto;
+            })();
+    
+            protobuf.ExtensionRangeOptions = (function() {
+    
+                /**
+                 * Properties of an ExtensionRangeOptions.
+                 * @memberof google.protobuf
+                 * @interface IExtensionRangeOptions
+                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] ExtensionRangeOptions uninterpretedOption
+                 */
+    
+                /**
+                 * Constructs a new ExtensionRangeOptions.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an ExtensionRangeOptions.
+                 * @implements IExtensionRangeOptions
+                 * @constructor
+                 * @param {google.protobuf.IExtensionRangeOptions=} [properties] Properties to set
+                 */
+                function ExtensionRangeOptions(properties) {
+                    this.uninterpretedOption = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * ExtensionRangeOptions uninterpretedOption.
+                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @instance
+                 */
+                ExtensionRangeOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * Creates an ExtensionRangeOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.ExtensionRangeOptions} ExtensionRangeOptions
+                 */
+                ExtensionRangeOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.ExtensionRangeOptions)
+                        return object;
+                    var message = new $root.google.protobuf.ExtensionRangeOptions();
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.ExtensionRangeOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.ExtensionRangeOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an ExtensionRangeOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @static
+                 * @param {google.protobuf.ExtensionRangeOptions} message ExtensionRangeOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ExtensionRangeOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this ExtensionRangeOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ExtensionRangeOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for ExtensionRangeOptions
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ExtensionRangeOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.ExtensionRangeOptions";
+                };
+    
+                return ExtensionRangeOptions;
+            })();
+    
+            protobuf.FieldDescriptorProto = (function() {
+    
+                /**
+                 * Properties of a FieldDescriptorProto.
+                 * @memberof google.protobuf
+                 * @interface IFieldDescriptorProto
+                 * @property {string|null} [name] FieldDescriptorProto name
+                 * @property {number|null} [number] FieldDescriptorProto number
+                 * @property {google.protobuf.FieldDescriptorProto.Label|null} [label] FieldDescriptorProto label
+                 * @property {google.protobuf.FieldDescriptorProto.Type|null} [type] FieldDescriptorProto type
+                 * @property {string|null} [typeName] FieldDescriptorProto typeName
+                 * @property {string|null} [extendee] FieldDescriptorProto extendee
+                 * @property {string|null} [defaultValue] FieldDescriptorProto defaultValue
+                 * @property {number|null} [oneofIndex] FieldDescriptorProto oneofIndex
+                 * @property {string|null} [jsonName] FieldDescriptorProto jsonName
+                 * @property {google.protobuf.IFieldOptions|null} [options] FieldDescriptorProto options
+                 * @property {boolean|null} [proto3Optional] FieldDescriptorProto proto3Optional
+                 */
+    
+                /**
+                 * Constructs a new FieldDescriptorProto.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a FieldDescriptorProto.
+                 * @implements IFieldDescriptorProto
+                 * @constructor
+                 * @param {google.protobuf.IFieldDescriptorProto=} [properties] Properties to set
+                 */
+                function FieldDescriptorProto(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * FieldDescriptorProto name.
+                 * @member {string} name
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.name = "";
+    
+                /**
+                 * FieldDescriptorProto number.
+                 * @member {number} number
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.number = 0;
+    
+                /**
+                 * FieldDescriptorProto label.
+                 * @member {google.protobuf.FieldDescriptorProto.Label} label
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.label = 1;
+    
+                /**
+                 * FieldDescriptorProto type.
+                 * @member {google.protobuf.FieldDescriptorProto.Type} type
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.type = 1;
+    
+                /**
+                 * FieldDescriptorProto typeName.
+                 * @member {string} typeName
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.typeName = "";
+    
+                /**
+                 * FieldDescriptorProto extendee.
+                 * @member {string} extendee
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.extendee = "";
+    
+                /**
+                 * FieldDescriptorProto defaultValue.
+                 * @member {string} defaultValue
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.defaultValue = "";
+    
+                /**
+                 * FieldDescriptorProto oneofIndex.
+                 * @member {number} oneofIndex
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.oneofIndex = 0;
+    
+                /**
+                 * FieldDescriptorProto jsonName.
+                 * @member {string} jsonName
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.jsonName = "";
+    
+                /**
+                 * FieldDescriptorProto options.
+                 * @member {google.protobuf.IFieldOptions|null|undefined} options
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.options = null;
+    
+                /**
+                 * FieldDescriptorProto proto3Optional.
+                 * @member {boolean} proto3Optional
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.proto3Optional = false;
+    
+                /**
+                 * Creates a FieldDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FieldDescriptorProto} FieldDescriptorProto
+                 */
+                FieldDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FieldDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.FieldDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.number != null)
+                        message.number = object.number | 0;
+                    switch (object.label) {
+                    default:
+                        if (typeof object.label === "number") {
+                            message.label = object.label;
+                            break;
+                        }
+                        break;
+                    case "LABEL_OPTIONAL":
+                    case 1:
+                        message.label = 1;
+                        break;
+                    case "LABEL_REQUIRED":
+                    case 2:
+                        message.label = 2;
+                        break;
+                    case "LABEL_REPEATED":
+                    case 3:
+                        message.label = 3;
+                        break;
+                    }
+                    switch (object.type) {
+                    default:
+                        if (typeof object.type === "number") {
+                            message.type = object.type;
+                            break;
+                        }
+                        break;
+                    case "TYPE_DOUBLE":
+                    case 1:
+                        message.type = 1;
+                        break;
+                    case "TYPE_FLOAT":
+                    case 2:
+                        message.type = 2;
+                        break;
+                    case "TYPE_INT64":
+                    case 3:
+                        message.type = 3;
+                        break;
+                    case "TYPE_UINT64":
+                    case 4:
+                        message.type = 4;
+                        break;
+                    case "TYPE_INT32":
+                    case 5:
+                        message.type = 5;
+                        break;
+                    case "TYPE_FIXED64":
+                    case 6:
+                        message.type = 6;
+                        break;
+                    case "TYPE_FIXED32":
+                    case 7:
+                        message.type = 7;
+                        break;
+                    case "TYPE_BOOL":
+                    case 8:
+                        message.type = 8;
+                        break;
+                    case "TYPE_STRING":
+                    case 9:
+                        message.type = 9;
+                        break;
+                    case "TYPE_GROUP":
+                    case 10:
+                        message.type = 10;
+                        break;
+                    case "TYPE_MESSAGE":
+                    case 11:
+                        message.type = 11;
+                        break;
+                    case "TYPE_BYTES":
+                    case 12:
+                        message.type = 12;
+                        break;
+                    case "TYPE_UINT32":
+                    case 13:
+                        message.type = 13;
+                        break;
+                    case "TYPE_ENUM":
+                    case 14:
+                        message.type = 14;
+                        break;
+                    case "TYPE_SFIXED32":
+                    case 15:
+                        message.type = 15;
+                        break;
+                    case "TYPE_SFIXED64":
+                    case 16:
+                        message.type = 16;
+                        break;
+                    case "TYPE_SINT32":
+                    case 17:
+                        message.type = 17;
+                        break;
+                    case "TYPE_SINT64":
+                    case 18:
+                        message.type = 18;
+                        break;
+                    }
+                    if (object.typeName != null)
+                        message.typeName = String(object.typeName);
+                    if (object.extendee != null)
+                        message.extendee = String(object.extendee);
+                    if (object.defaultValue != null)
+                        message.defaultValue = String(object.defaultValue);
+                    if (object.oneofIndex != null)
+                        message.oneofIndex = object.oneofIndex | 0;
+                    if (object.jsonName != null)
+                        message.jsonName = String(object.jsonName);
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.FieldDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.FieldOptions.fromObject(object.options);
+                    }
+                    if (object.proto3Optional != null)
+                        message.proto3Optional = Boolean(object.proto3Optional);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FieldDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @static
+                 * @param {google.protobuf.FieldDescriptorProto} message FieldDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FieldDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.name = "";
+                        object.extendee = "";
+                        object.number = 0;
+                        object.label = options.enums === String ? "LABEL_OPTIONAL" : 1;
+                        object.type = options.enums === String ? "TYPE_DOUBLE" : 1;
+                        object.typeName = "";
+                        object.defaultValue = "";
+                        object.options = null;
+                        object.oneofIndex = 0;
+                        object.jsonName = "";
+                        object.proto3Optional = false;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.extendee != null && message.hasOwnProperty("extendee"))
+                        object.extendee = message.extendee;
+                    if (message.number != null && message.hasOwnProperty("number"))
+                        object.number = message.number;
+                    if (message.label != null && message.hasOwnProperty("label"))
+                        object.label = options.enums === String ? $root.google.protobuf.FieldDescriptorProto.Label[message.label] === undefined ? message.label : $root.google.protobuf.FieldDescriptorProto.Label[message.label] : message.label;
+                    if (message.type != null && message.hasOwnProperty("type"))
+                        object.type = options.enums === String ? $root.google.protobuf.FieldDescriptorProto.Type[message.type] === undefined ? message.type : $root.google.protobuf.FieldDescriptorProto.Type[message.type] : message.type;
+                    if (message.typeName != null && message.hasOwnProperty("typeName"))
+                        object.typeName = message.typeName;
+                    if (message.defaultValue != null && message.hasOwnProperty("defaultValue"))
+                        object.defaultValue = message.defaultValue;
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.FieldOptions.toObject(message.options, options);
+                    if (message.oneofIndex != null && message.hasOwnProperty("oneofIndex"))
+                        object.oneofIndex = message.oneofIndex;
+                    if (message.jsonName != null && message.hasOwnProperty("jsonName"))
+                        object.jsonName = message.jsonName;
+                    if (message.proto3Optional != null && message.hasOwnProperty("proto3Optional"))
+                        object.proto3Optional = message.proto3Optional;
+                    return object;
+                };
+    
+                /**
+                 * Converts this FieldDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FieldDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for FieldDescriptorProto
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                FieldDescriptorProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.FieldDescriptorProto";
+                };
+    
+                /**
+                 * Type enum.
+                 * @name google.protobuf.FieldDescriptorProto.Type
+                 * @enum {string}
+                 * @property {string} TYPE_DOUBLE=TYPE_DOUBLE TYPE_DOUBLE value
+                 * @property {string} TYPE_FLOAT=TYPE_FLOAT TYPE_FLOAT value
+                 * @property {string} TYPE_INT64=TYPE_INT64 TYPE_INT64 value
+                 * @property {string} TYPE_UINT64=TYPE_UINT64 TYPE_UINT64 value
+                 * @property {string} TYPE_INT32=TYPE_INT32 TYPE_INT32 value
+                 * @property {string} TYPE_FIXED64=TYPE_FIXED64 TYPE_FIXED64 value
+                 * @property {string} TYPE_FIXED32=TYPE_FIXED32 TYPE_FIXED32 value
+                 * @property {string} TYPE_BOOL=TYPE_BOOL TYPE_BOOL value
+                 * @property {string} TYPE_STRING=TYPE_STRING TYPE_STRING value
+                 * @property {string} TYPE_GROUP=TYPE_GROUP TYPE_GROUP value
+                 * @property {string} TYPE_MESSAGE=TYPE_MESSAGE TYPE_MESSAGE value
+                 * @property {string} TYPE_BYTES=TYPE_BYTES TYPE_BYTES value
+                 * @property {string} TYPE_UINT32=TYPE_UINT32 TYPE_UINT32 value
+                 * @property {string} TYPE_ENUM=TYPE_ENUM TYPE_ENUM value
+                 * @property {string} TYPE_SFIXED32=TYPE_SFIXED32 TYPE_SFIXED32 value
+                 * @property {string} TYPE_SFIXED64=TYPE_SFIXED64 TYPE_SFIXED64 value
+                 * @property {string} TYPE_SINT32=TYPE_SINT32 TYPE_SINT32 value
+                 * @property {string} TYPE_SINT64=TYPE_SINT64 TYPE_SINT64 value
+                 */
+                FieldDescriptorProto.Type = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[1] = "TYPE_DOUBLE"] = "TYPE_DOUBLE";
+                    values[valuesById[2] = "TYPE_FLOAT"] = "TYPE_FLOAT";
+                    values[valuesById[3] = "TYPE_INT64"] = "TYPE_INT64";
+                    values[valuesById[4] = "TYPE_UINT64"] = "TYPE_UINT64";
+                    values[valuesById[5] = "TYPE_INT32"] = "TYPE_INT32";
+                    values[valuesById[6] = "TYPE_FIXED64"] = "TYPE_FIXED64";
+                    values[valuesById[7] = "TYPE_FIXED32"] = "TYPE_FIXED32";
+                    values[valuesById[8] = "TYPE_BOOL"] = "TYPE_BOOL";
+                    values[valuesById[9] = "TYPE_STRING"] = "TYPE_STRING";
+                    values[valuesById[10] = "TYPE_GROUP"] = "TYPE_GROUP";
+                    values[valuesById[11] = "TYPE_MESSAGE"] = "TYPE_MESSAGE";
+                    values[valuesById[12] = "TYPE_BYTES"] = "TYPE_BYTES";
+                    values[valuesById[13] = "TYPE_UINT32"] = "TYPE_UINT32";
+                    values[valuesById[14] = "TYPE_ENUM"] = "TYPE_ENUM";
+                    values[valuesById[15] = "TYPE_SFIXED32"] = "TYPE_SFIXED32";
+                    values[valuesById[16] = "TYPE_SFIXED64"] = "TYPE_SFIXED64";
+                    values[valuesById[17] = "TYPE_SINT32"] = "TYPE_SINT32";
+                    values[valuesById[18] = "TYPE_SINT64"] = "TYPE_SINT64";
+                    return values;
+                })();
+    
+                /**
+                 * Label enum.
+                 * @name google.protobuf.FieldDescriptorProto.Label
+                 * @enum {string}
+                 * @property {string} LABEL_OPTIONAL=LABEL_OPTIONAL LABEL_OPTIONAL value
+                 * @property {string} LABEL_REQUIRED=LABEL_REQUIRED LABEL_REQUIRED value
+                 * @property {string} LABEL_REPEATED=LABEL_REPEATED LABEL_REPEATED value
+                 */
+                FieldDescriptorProto.Label = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[1] = "LABEL_OPTIONAL"] = "LABEL_OPTIONAL";
+                    values[valuesById[2] = "LABEL_REQUIRED"] = "LABEL_REQUIRED";
+                    values[valuesById[3] = "LABEL_REPEATED"] = "LABEL_REPEATED";
+                    return values;
+                })();
+    
+                return FieldDescriptorProto;
+            })();
+    
+            protobuf.OneofDescriptorProto = (function() {
+    
+                /**
+                 * Properties of an OneofDescriptorProto.
+                 * @memberof google.protobuf
+                 * @interface IOneofDescriptorProto
+                 * @property {string|null} [name] OneofDescriptorProto name
+                 * @property {google.protobuf.IOneofOptions|null} [options] OneofDescriptorProto options
+                 */
+    
+                /**
+                 * Constructs a new OneofDescriptorProto.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an OneofDescriptorProto.
+                 * @implements IOneofDescriptorProto
+                 * @constructor
+                 * @param {google.protobuf.IOneofDescriptorProto=} [properties] Properties to set
+                 */
+                function OneofDescriptorProto(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * OneofDescriptorProto name.
+                 * @member {string} name
+                 * @memberof google.protobuf.OneofDescriptorProto
+                 * @instance
+                 */
+                OneofDescriptorProto.prototype.name = "";
+    
+                /**
+                 * OneofDescriptorProto options.
+                 * @member {google.protobuf.IOneofOptions|null|undefined} options
+                 * @memberof google.protobuf.OneofDescriptorProto
+                 * @instance
+                 */
+                OneofDescriptorProto.prototype.options = null;
+    
+                /**
+                 * Creates an OneofDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.OneofDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.OneofDescriptorProto} OneofDescriptorProto
+                 */
+                OneofDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.OneofDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.OneofDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.OneofDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.OneofOptions.fromObject(object.options);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an OneofDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.OneofDescriptorProto
+                 * @static
+                 * @param {google.protobuf.OneofDescriptorProto} message OneofDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                OneofDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.name = "";
+                        object.options = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.OneofOptions.toObject(message.options, options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this OneofDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.OneofDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                OneofDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for OneofDescriptorProto
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.OneofDescriptorProto
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                OneofDescriptorProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.OneofDescriptorProto";
+                };
+    
+                return OneofDescriptorProto;
+            })();
+    
+            protobuf.EnumDescriptorProto = (function() {
+    
+                /**
+                 * Properties of an EnumDescriptorProto.
+                 * @memberof google.protobuf
+                 * @interface IEnumDescriptorProto
+                 * @property {string|null} [name] EnumDescriptorProto name
+                 * @property {Array.<google.protobuf.IEnumValueDescriptorProto>|null} [value] EnumDescriptorProto value
+                 * @property {google.protobuf.IEnumOptions|null} [options] EnumDescriptorProto options
+                 * @property {Array.<google.protobuf.EnumDescriptorProto.IEnumReservedRange>|null} [reservedRange] EnumDescriptorProto reservedRange
+                 * @property {Array.<string>|null} [reservedName] EnumDescriptorProto reservedName
+                 */
+    
+                /**
+                 * Constructs a new EnumDescriptorProto.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an EnumDescriptorProto.
+                 * @implements IEnumDescriptorProto
+                 * @constructor
+                 * @param {google.protobuf.IEnumDescriptorProto=} [properties] Properties to set
+                 */
+                function EnumDescriptorProto(properties) {
+                    this.value = [];
+                    this.reservedRange = [];
+                    this.reservedName = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * EnumDescriptorProto name.
+                 * @member {string} name
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @instance
+                 */
+                EnumDescriptorProto.prototype.name = "";
+    
+                /**
+                 * EnumDescriptorProto value.
+                 * @member {Array.<google.protobuf.IEnumValueDescriptorProto>} value
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @instance
+                 */
+                EnumDescriptorProto.prototype.value = $util.emptyArray;
+    
+                /**
+                 * EnumDescriptorProto options.
+                 * @member {google.protobuf.IEnumOptions|null|undefined} options
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @instance
+                 */
+                EnumDescriptorProto.prototype.options = null;
+    
+                /**
+                 * EnumDescriptorProto reservedRange.
+                 * @member {Array.<google.protobuf.EnumDescriptorProto.IEnumReservedRange>} reservedRange
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @instance
+                 */
+                EnumDescriptorProto.prototype.reservedRange = $util.emptyArray;
+    
+                /**
+                 * EnumDescriptorProto reservedName.
+                 * @member {Array.<string>} reservedName
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @instance
+                 */
+                EnumDescriptorProto.prototype.reservedName = $util.emptyArray;
+    
+                /**
+                 * Creates an EnumDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.EnumDescriptorProto} EnumDescriptorProto
+                 */
+                EnumDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.EnumDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.EnumDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.value) {
+                        if (!Array.isArray(object.value))
+                            throw TypeError(".google.protobuf.EnumDescriptorProto.value: array expected");
+                        message.value = [];
+                        for (var i = 0; i < object.value.length; ++i) {
+                            if (typeof object.value[i] !== "object")
+                                throw TypeError(".google.protobuf.EnumDescriptorProto.value: object expected");
+                            message.value[i] = $root.google.protobuf.EnumValueDescriptorProto.fromObject(object.value[i]);
+                        }
+                    }
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.EnumDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.EnumOptions.fromObject(object.options);
+                    }
+                    if (object.reservedRange) {
+                        if (!Array.isArray(object.reservedRange))
+                            throw TypeError(".google.protobuf.EnumDescriptorProto.reservedRange: array expected");
+                        message.reservedRange = [];
+                        for (var i = 0; i < object.reservedRange.length; ++i) {
+                            if (typeof object.reservedRange[i] !== "object")
+                                throw TypeError(".google.protobuf.EnumDescriptorProto.reservedRange: object expected");
+                            message.reservedRange[i] = $root.google.protobuf.EnumDescriptorProto.EnumReservedRange.fromObject(object.reservedRange[i]);
+                        }
+                    }
+                    if (object.reservedName) {
+                        if (!Array.isArray(object.reservedName))
+                            throw TypeError(".google.protobuf.EnumDescriptorProto.reservedName: array expected");
+                        message.reservedName = [];
+                        for (var i = 0; i < object.reservedName.length; ++i)
+                            message.reservedName[i] = String(object.reservedName[i]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an EnumDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @static
+                 * @param {google.protobuf.EnumDescriptorProto} message EnumDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                EnumDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.value = [];
+                        object.reservedRange = [];
+                        object.reservedName = [];
+                    }
+                    if (options.defaults) {
+                        object.name = "";
+                        object.options = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.value && message.value.length) {
+                        object.value = [];
+                        for (var j = 0; j < message.value.length; ++j)
+                            object.value[j] = $root.google.protobuf.EnumValueDescriptorProto.toObject(message.value[j], options);
+                    }
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.EnumOptions.toObject(message.options, options);
+                    if (message.reservedRange && message.reservedRange.length) {
+                        object.reservedRange = [];
+                        for (var j = 0; j < message.reservedRange.length; ++j)
+                            object.reservedRange[j] = $root.google.protobuf.EnumDescriptorProto.EnumReservedRange.toObject(message.reservedRange[j], options);
+                    }
+                    if (message.reservedName && message.reservedName.length) {
+                        object.reservedName = [];
+                        for (var j = 0; j < message.reservedName.length; ++j)
+                            object.reservedName[j] = message.reservedName[j];
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this EnumDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                EnumDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for EnumDescriptorProto
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                EnumDescriptorProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.EnumDescriptorProto";
+                };
+    
+                EnumDescriptorProto.EnumReservedRange = (function() {
+    
+                    /**
+                     * Properties of an EnumReservedRange.
+                     * @memberof google.protobuf.EnumDescriptorProto
+                     * @interface IEnumReservedRange
+                     * @property {number|null} [start] EnumReservedRange start
+                     * @property {number|null} [end] EnumReservedRange end
+                     */
+    
+                    /**
+                     * Constructs a new EnumReservedRange.
+                     * @memberof google.protobuf.EnumDescriptorProto
+                     * @classdesc Represents an EnumReservedRange.
+                     * @implements IEnumReservedRange
+                     * @constructor
+                     * @param {google.protobuf.EnumDescriptorProto.IEnumReservedRange=} [properties] Properties to set
+                     */
+                    function EnumReservedRange(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * EnumReservedRange start.
+                     * @member {number} start
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @instance
+                     */
+                    EnumReservedRange.prototype.start = 0;
+    
+                    /**
+                     * EnumReservedRange end.
+                     * @member {number} end
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @instance
+                     */
+                    EnumReservedRange.prototype.end = 0;
+    
+                    /**
+                     * Creates an EnumReservedRange message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.EnumDescriptorProto.EnumReservedRange} EnumReservedRange
+                     */
+                    EnumReservedRange.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.EnumDescriptorProto.EnumReservedRange)
+                            return object;
+                        var message = new $root.google.protobuf.EnumDescriptorProto.EnumReservedRange();
+                        if (object.start != null)
+                            message.start = object.start | 0;
+                        if (object.end != null)
+                            message.end = object.end | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an EnumReservedRange message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @static
+                     * @param {google.protobuf.EnumDescriptorProto.EnumReservedRange} message EnumReservedRange
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    EnumReservedRange.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.start = 0;
+                            object.end = 0;
+                        }
+                        if (message.start != null && message.hasOwnProperty("start"))
+                            object.start = message.start;
+                        if (message.end != null && message.hasOwnProperty("end"))
+                            object.end = message.end;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this EnumReservedRange to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    EnumReservedRange.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for EnumReservedRange
+                     * @function getTypeUrl
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    EnumReservedRange.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.protobuf.EnumDescriptorProto.EnumReservedRange";
+                    };
+    
+                    return EnumReservedRange;
+                })();
+    
+                return EnumDescriptorProto;
+            })();
+    
+            protobuf.EnumValueDescriptorProto = (function() {
+    
+                /**
+                 * Properties of an EnumValueDescriptorProto.
+                 * @memberof google.protobuf
+                 * @interface IEnumValueDescriptorProto
+                 * @property {string|null} [name] EnumValueDescriptorProto name
+                 * @property {number|null} [number] EnumValueDescriptorProto number
+                 * @property {google.protobuf.IEnumValueOptions|null} [options] EnumValueDescriptorProto options
+                 */
+    
+                /**
+                 * Constructs a new EnumValueDescriptorProto.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an EnumValueDescriptorProto.
+                 * @implements IEnumValueDescriptorProto
+                 * @constructor
+                 * @param {google.protobuf.IEnumValueDescriptorProto=} [properties] Properties to set
+                 */
+                function EnumValueDescriptorProto(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * EnumValueDescriptorProto name.
+                 * @member {string} name
+                 * @memberof google.protobuf.EnumValueDescriptorProto
+                 * @instance
+                 */
+                EnumValueDescriptorProto.prototype.name = "";
+    
+                /**
+                 * EnumValueDescriptorProto number.
+                 * @member {number} number
+                 * @memberof google.protobuf.EnumValueDescriptorProto
+                 * @instance
+                 */
+                EnumValueDescriptorProto.prototype.number = 0;
+    
+                /**
+                 * EnumValueDescriptorProto options.
+                 * @member {google.protobuf.IEnumValueOptions|null|undefined} options
+                 * @memberof google.protobuf.EnumValueDescriptorProto
+                 * @instance
+                 */
+                EnumValueDescriptorProto.prototype.options = null;
+    
+                /**
+                 * Creates an EnumValueDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.EnumValueDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.EnumValueDescriptorProto} EnumValueDescriptorProto
+                 */
+                EnumValueDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.EnumValueDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.EnumValueDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.number != null)
+                        message.number = object.number | 0;
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.EnumValueDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.EnumValueOptions.fromObject(object.options);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an EnumValueDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.EnumValueDescriptorProto
+                 * @static
+                 * @param {google.protobuf.EnumValueDescriptorProto} message EnumValueDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                EnumValueDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.name = "";
+                        object.number = 0;
+                        object.options = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.number != null && message.hasOwnProperty("number"))
+                        object.number = message.number;
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.EnumValueOptions.toObject(message.options, options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this EnumValueDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.EnumValueDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                EnumValueDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for EnumValueDescriptorProto
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.EnumValueDescriptorProto
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                EnumValueDescriptorProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.EnumValueDescriptorProto";
+                };
+    
+                return EnumValueDescriptorProto;
+            })();
+    
+            protobuf.ServiceDescriptorProto = (function() {
+    
+                /**
+                 * Properties of a ServiceDescriptorProto.
+                 * @memberof google.protobuf
+                 * @interface IServiceDescriptorProto
+                 * @property {string|null} [name] ServiceDescriptorProto name
+                 * @property {Array.<google.protobuf.IMethodDescriptorProto>|null} [method] ServiceDescriptorProto method
+                 * @property {google.protobuf.IServiceOptions|null} [options] ServiceDescriptorProto options
+                 */
+    
+                /**
+                 * Constructs a new ServiceDescriptorProto.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a ServiceDescriptorProto.
+                 * @implements IServiceDescriptorProto
+                 * @constructor
+                 * @param {google.protobuf.IServiceDescriptorProto=} [properties] Properties to set
+                 */
+                function ServiceDescriptorProto(properties) {
+                    this.method = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * ServiceDescriptorProto name.
+                 * @member {string} name
+                 * @memberof google.protobuf.ServiceDescriptorProto
+                 * @instance
+                 */
+                ServiceDescriptorProto.prototype.name = "";
+    
+                /**
+                 * ServiceDescriptorProto method.
+                 * @member {Array.<google.protobuf.IMethodDescriptorProto>} method
+                 * @memberof google.protobuf.ServiceDescriptorProto
+                 * @instance
+                 */
+                ServiceDescriptorProto.prototype.method = $util.emptyArray;
+    
+                /**
+                 * ServiceDescriptorProto options.
+                 * @member {google.protobuf.IServiceOptions|null|undefined} options
+                 * @memberof google.protobuf.ServiceDescriptorProto
+                 * @instance
+                 */
+                ServiceDescriptorProto.prototype.options = null;
+    
+                /**
+                 * Creates a ServiceDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.ServiceDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.ServiceDescriptorProto} ServiceDescriptorProto
+                 */
+                ServiceDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.ServiceDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.ServiceDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.method) {
+                        if (!Array.isArray(object.method))
+                            throw TypeError(".google.protobuf.ServiceDescriptorProto.method: array expected");
+                        message.method = [];
+                        for (var i = 0; i < object.method.length; ++i) {
+                            if (typeof object.method[i] !== "object")
+                                throw TypeError(".google.protobuf.ServiceDescriptorProto.method: object expected");
+                            message.method[i] = $root.google.protobuf.MethodDescriptorProto.fromObject(object.method[i]);
+                        }
+                    }
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.ServiceDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.ServiceOptions.fromObject(object.options);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ServiceDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.ServiceDescriptorProto
+                 * @static
+                 * @param {google.protobuf.ServiceDescriptorProto} message ServiceDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ServiceDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.method = [];
+                    if (options.defaults) {
+                        object.name = "";
+                        object.options = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.method && message.method.length) {
+                        object.method = [];
+                        for (var j = 0; j < message.method.length; ++j)
+                            object.method[j] = $root.google.protobuf.MethodDescriptorProto.toObject(message.method[j], options);
+                    }
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.ServiceOptions.toObject(message.options, options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this ServiceDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.ServiceDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ServiceDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for ServiceDescriptorProto
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.ServiceDescriptorProto
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ServiceDescriptorProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.ServiceDescriptorProto";
+                };
+    
+                return ServiceDescriptorProto;
+            })();
+    
+            protobuf.MethodDescriptorProto = (function() {
+    
+                /**
+                 * Properties of a MethodDescriptorProto.
+                 * @memberof google.protobuf
+                 * @interface IMethodDescriptorProto
+                 * @property {string|null} [name] MethodDescriptorProto name
+                 * @property {string|null} [inputType] MethodDescriptorProto inputType
+                 * @property {string|null} [outputType] MethodDescriptorProto outputType
+                 * @property {google.protobuf.IMethodOptions|null} [options] MethodDescriptorProto options
+                 * @property {boolean|null} [clientStreaming] MethodDescriptorProto clientStreaming
+                 * @property {boolean|null} [serverStreaming] MethodDescriptorProto serverStreaming
+                 */
+    
+                /**
+                 * Constructs a new MethodDescriptorProto.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a MethodDescriptorProto.
+                 * @implements IMethodDescriptorProto
+                 * @constructor
+                 * @param {google.protobuf.IMethodDescriptorProto=} [properties] Properties to set
+                 */
+                function MethodDescriptorProto(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * MethodDescriptorProto name.
+                 * @member {string} name
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @instance
+                 */
+                MethodDescriptorProto.prototype.name = "";
+    
+                /**
+                 * MethodDescriptorProto inputType.
+                 * @member {string} inputType
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @instance
+                 */
+                MethodDescriptorProto.prototype.inputType = "";
+    
+                /**
+                 * MethodDescriptorProto outputType.
+                 * @member {string} outputType
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @instance
+                 */
+                MethodDescriptorProto.prototype.outputType = "";
+    
+                /**
+                 * MethodDescriptorProto options.
+                 * @member {google.protobuf.IMethodOptions|null|undefined} options
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @instance
+                 */
+                MethodDescriptorProto.prototype.options = null;
+    
+                /**
+                 * MethodDescriptorProto clientStreaming.
+                 * @member {boolean} clientStreaming
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @instance
+                 */
+                MethodDescriptorProto.prototype.clientStreaming = false;
+    
+                /**
+                 * MethodDescriptorProto serverStreaming.
+                 * @member {boolean} serverStreaming
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @instance
+                 */
+                MethodDescriptorProto.prototype.serverStreaming = false;
+    
+                /**
+                 * Creates a MethodDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.MethodDescriptorProto} MethodDescriptorProto
+                 */
+                MethodDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.MethodDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.MethodDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.inputType != null)
+                        message.inputType = String(object.inputType);
+                    if (object.outputType != null)
+                        message.outputType = String(object.outputType);
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.MethodDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.MethodOptions.fromObject(object.options);
+                    }
+                    if (object.clientStreaming != null)
+                        message.clientStreaming = Boolean(object.clientStreaming);
+                    if (object.serverStreaming != null)
+                        message.serverStreaming = Boolean(object.serverStreaming);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a MethodDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @static
+                 * @param {google.protobuf.MethodDescriptorProto} message MethodDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                MethodDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.name = "";
+                        object.inputType = "";
+                        object.outputType = "";
+                        object.options = null;
+                        object.clientStreaming = false;
+                        object.serverStreaming = false;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.inputType != null && message.hasOwnProperty("inputType"))
+                        object.inputType = message.inputType;
+                    if (message.outputType != null && message.hasOwnProperty("outputType"))
+                        object.outputType = message.outputType;
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.MethodOptions.toObject(message.options, options);
+                    if (message.clientStreaming != null && message.hasOwnProperty("clientStreaming"))
+                        object.clientStreaming = message.clientStreaming;
+                    if (message.serverStreaming != null && message.hasOwnProperty("serverStreaming"))
+                        object.serverStreaming = message.serverStreaming;
+                    return object;
+                };
+    
+                /**
+                 * Converts this MethodDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                MethodDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for MethodDescriptorProto
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                MethodDescriptorProto.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.MethodDescriptorProto";
+                };
+    
+                return MethodDescriptorProto;
+            })();
+    
+            protobuf.FileOptions = (function() {
+    
+                /**
+                 * Properties of a FileOptions.
+                 * @memberof google.protobuf
+                 * @interface IFileOptions
+                 * @property {string|null} [javaPackage] FileOptions javaPackage
+                 * @property {string|null} [javaOuterClassname] FileOptions javaOuterClassname
+                 * @property {boolean|null} [javaMultipleFiles] FileOptions javaMultipleFiles
+                 * @property {boolean|null} [javaGenerateEqualsAndHash] FileOptions javaGenerateEqualsAndHash
+                 * @property {boolean|null} [javaStringCheckUtf8] FileOptions javaStringCheckUtf8
+                 * @property {google.protobuf.FileOptions.OptimizeMode|null} [optimizeFor] FileOptions optimizeFor
+                 * @property {string|null} [goPackage] FileOptions goPackage
+                 * @property {boolean|null} [ccGenericServices] FileOptions ccGenericServices
+                 * @property {boolean|null} [javaGenericServices] FileOptions javaGenericServices
+                 * @property {boolean|null} [pyGenericServices] FileOptions pyGenericServices
+                 * @property {boolean|null} [phpGenericServices] FileOptions phpGenericServices
+                 * @property {boolean|null} [deprecated] FileOptions deprecated
+                 * @property {boolean|null} [ccEnableArenas] FileOptions ccEnableArenas
+                 * @property {string|null} [objcClassPrefix] FileOptions objcClassPrefix
+                 * @property {string|null} [csharpNamespace] FileOptions csharpNamespace
+                 * @property {string|null} [swiftPrefix] FileOptions swiftPrefix
+                 * @property {string|null} [phpClassPrefix] FileOptions phpClassPrefix
+                 * @property {string|null} [phpNamespace] FileOptions phpNamespace
+                 * @property {string|null} [phpMetadataNamespace] FileOptions phpMetadataNamespace
+                 * @property {string|null} [rubyPackage] FileOptions rubyPackage
+                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] FileOptions uninterpretedOption
+                 * @property {Array.<google.api.IResourceDescriptor>|null} [".google.api.resourceDefinition"] FileOptions .google.api.resourceDefinition
+                 */
+    
+                /**
+                 * Constructs a new FileOptions.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a FileOptions.
+                 * @implements IFileOptions
+                 * @constructor
+                 * @param {google.protobuf.IFileOptions=} [properties] Properties to set
+                 */
+                function FileOptions(properties) {
+                    this.uninterpretedOption = [];
+                    this[".google.api.resourceDefinition"] = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * FileOptions javaPackage.
+                 * @member {string} javaPackage
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.javaPackage = "";
+    
+                /**
+                 * FileOptions javaOuterClassname.
+                 * @member {string} javaOuterClassname
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.javaOuterClassname = "";
+    
+                /**
+                 * FileOptions javaMultipleFiles.
+                 * @member {boolean} javaMultipleFiles
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.javaMultipleFiles = false;
+    
+                /**
+                 * FileOptions javaGenerateEqualsAndHash.
+                 * @member {boolean} javaGenerateEqualsAndHash
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.javaGenerateEqualsAndHash = false;
+    
+                /**
+                 * FileOptions javaStringCheckUtf8.
+                 * @member {boolean} javaStringCheckUtf8
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.javaStringCheckUtf8 = false;
+    
+                /**
+                 * FileOptions optimizeFor.
+                 * @member {google.protobuf.FileOptions.OptimizeMode} optimizeFor
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.optimizeFor = 1;
+    
+                /**
+                 * FileOptions goPackage.
+                 * @member {string} goPackage
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.goPackage = "";
+    
+                /**
+                 * FileOptions ccGenericServices.
+                 * @member {boolean} ccGenericServices
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.ccGenericServices = false;
+    
+                /**
+                 * FileOptions javaGenericServices.
+                 * @member {boolean} javaGenericServices
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.javaGenericServices = false;
+    
+                /**
+                 * FileOptions pyGenericServices.
+                 * @member {boolean} pyGenericServices
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.pyGenericServices = false;
+    
+                /**
+                 * FileOptions phpGenericServices.
+                 * @member {boolean} phpGenericServices
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.phpGenericServices = false;
+    
+                /**
+                 * FileOptions deprecated.
+                 * @member {boolean} deprecated
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.deprecated = false;
+    
+                /**
+                 * FileOptions ccEnableArenas.
+                 * @member {boolean} ccEnableArenas
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.ccEnableArenas = true;
+    
+                /**
+                 * FileOptions objcClassPrefix.
+                 * @member {string} objcClassPrefix
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.objcClassPrefix = "";
+    
+                /**
+                 * FileOptions csharpNamespace.
+                 * @member {string} csharpNamespace
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.csharpNamespace = "";
+    
+                /**
+                 * FileOptions swiftPrefix.
+                 * @member {string} swiftPrefix
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.swiftPrefix = "";
+    
+                /**
+                 * FileOptions phpClassPrefix.
+                 * @member {string} phpClassPrefix
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.phpClassPrefix = "";
+    
+                /**
+                 * FileOptions phpNamespace.
+                 * @member {string} phpNamespace
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.phpNamespace = "";
+    
+                /**
+                 * FileOptions phpMetadataNamespace.
+                 * @member {string} phpMetadataNamespace
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.phpMetadataNamespace = "";
+    
+                /**
+                 * FileOptions rubyPackage.
+                 * @member {string} rubyPackage
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.rubyPackage = "";
+    
+                /**
+                 * FileOptions uninterpretedOption.
+                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * FileOptions .google.api.resourceDefinition.
+                 * @member {Array.<google.api.IResourceDescriptor>} .google.api.resourceDefinition
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype[".google.api.resourceDefinition"] = $util.emptyArray;
+    
+                /**
+                 * Creates a FileOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FileOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FileOptions} FileOptions
+                 */
+                FileOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FileOptions)
+                        return object;
+                    var message = new $root.google.protobuf.FileOptions();
+                    if (object.javaPackage != null)
+                        message.javaPackage = String(object.javaPackage);
+                    if (object.javaOuterClassname != null)
+                        message.javaOuterClassname = String(object.javaOuterClassname);
+                    if (object.javaMultipleFiles != null)
+                        message.javaMultipleFiles = Boolean(object.javaMultipleFiles);
+                    if (object.javaGenerateEqualsAndHash != null)
+                        message.javaGenerateEqualsAndHash = Boolean(object.javaGenerateEqualsAndHash);
+                    if (object.javaStringCheckUtf8 != null)
+                        message.javaStringCheckUtf8 = Boolean(object.javaStringCheckUtf8);
+                    switch (object.optimizeFor) {
+                    default:
+                        if (typeof object.optimizeFor === "number") {
+                            message.optimizeFor = object.optimizeFor;
+                            break;
+                        }
+                        break;
+                    case "SPEED":
+                    case 1:
+                        message.optimizeFor = 1;
+                        break;
+                    case "CODE_SIZE":
+                    case 2:
+                        message.optimizeFor = 2;
+                        break;
+                    case "LITE_RUNTIME":
+                    case 3:
+                        message.optimizeFor = 3;
+                        break;
+                    }
+                    if (object.goPackage != null)
+                        message.goPackage = String(object.goPackage);
+                    if (object.ccGenericServices != null)
+                        message.ccGenericServices = Boolean(object.ccGenericServices);
+                    if (object.javaGenericServices != null)
+                        message.javaGenericServices = Boolean(object.javaGenericServices);
+                    if (object.pyGenericServices != null)
+                        message.pyGenericServices = Boolean(object.pyGenericServices);
+                    if (object.phpGenericServices != null)
+                        message.phpGenericServices = Boolean(object.phpGenericServices);
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.ccEnableArenas != null)
+                        message.ccEnableArenas = Boolean(object.ccEnableArenas);
+                    if (object.objcClassPrefix != null)
+                        message.objcClassPrefix = String(object.objcClassPrefix);
+                    if (object.csharpNamespace != null)
+                        message.csharpNamespace = String(object.csharpNamespace);
+                    if (object.swiftPrefix != null)
+                        message.swiftPrefix = String(object.swiftPrefix);
+                    if (object.phpClassPrefix != null)
+                        message.phpClassPrefix = String(object.phpClassPrefix);
+                    if (object.phpNamespace != null)
+                        message.phpNamespace = String(object.phpNamespace);
+                    if (object.phpMetadataNamespace != null)
+                        message.phpMetadataNamespace = String(object.phpMetadataNamespace);
+                    if (object.rubyPackage != null)
+                        message.rubyPackage = String(object.rubyPackage);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.FileOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.FileOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object[".google.api.resourceDefinition"]) {
+                        if (!Array.isArray(object[".google.api.resourceDefinition"]))
+                            throw TypeError(".google.protobuf.FileOptions..google.api.resourceDefinition: array expected");
+                        message[".google.api.resourceDefinition"] = [];
+                        for (var i = 0; i < object[".google.api.resourceDefinition"].length; ++i) {
+                            if (typeof object[".google.api.resourceDefinition"][i] !== "object")
+                                throw TypeError(".google.protobuf.FileOptions..google.api.resourceDefinition: object expected");
+                            message[".google.api.resourceDefinition"][i] = $root.google.api.ResourceDescriptor.fromObject(object[".google.api.resourceDefinition"][i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FileOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FileOptions
+                 * @static
+                 * @param {google.protobuf.FileOptions} message FileOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FileOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.uninterpretedOption = [];
+                        object[".google.api.resourceDefinition"] = [];
+                    }
+                    if (options.defaults) {
+                        object.javaPackage = "";
+                        object.javaOuterClassname = "";
+                        object.optimizeFor = options.enums === String ? "SPEED" : 1;
+                        object.javaMultipleFiles = false;
+                        object.goPackage = "";
+                        object.ccGenericServices = false;
+                        object.javaGenericServices = false;
+                        object.pyGenericServices = false;
+                        object.javaGenerateEqualsAndHash = false;
+                        object.deprecated = false;
+                        object.javaStringCheckUtf8 = false;
+                        object.ccEnableArenas = true;
+                        object.objcClassPrefix = "";
+                        object.csharpNamespace = "";
+                        object.swiftPrefix = "";
+                        object.phpClassPrefix = "";
+                        object.phpNamespace = "";
+                        object.phpGenericServices = false;
+                        object.phpMetadataNamespace = "";
+                        object.rubyPackage = "";
+                    }
+                    if (message.javaPackage != null && message.hasOwnProperty("javaPackage"))
+                        object.javaPackage = message.javaPackage;
+                    if (message.javaOuterClassname != null && message.hasOwnProperty("javaOuterClassname"))
+                        object.javaOuterClassname = message.javaOuterClassname;
+                    if (message.optimizeFor != null && message.hasOwnProperty("optimizeFor"))
+                        object.optimizeFor = options.enums === String ? $root.google.protobuf.FileOptions.OptimizeMode[message.optimizeFor] === undefined ? message.optimizeFor : $root.google.protobuf.FileOptions.OptimizeMode[message.optimizeFor] : message.optimizeFor;
+                    if (message.javaMultipleFiles != null && message.hasOwnProperty("javaMultipleFiles"))
+                        object.javaMultipleFiles = message.javaMultipleFiles;
+                    if (message.goPackage != null && message.hasOwnProperty("goPackage"))
+                        object.goPackage = message.goPackage;
+                    if (message.ccGenericServices != null && message.hasOwnProperty("ccGenericServices"))
+                        object.ccGenericServices = message.ccGenericServices;
+                    if (message.javaGenericServices != null && message.hasOwnProperty("javaGenericServices"))
+                        object.javaGenericServices = message.javaGenericServices;
+                    if (message.pyGenericServices != null && message.hasOwnProperty("pyGenericServices"))
+                        object.pyGenericServices = message.pyGenericServices;
+                    if (message.javaGenerateEqualsAndHash != null && message.hasOwnProperty("javaGenerateEqualsAndHash"))
+                        object.javaGenerateEqualsAndHash = message.javaGenerateEqualsAndHash;
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.javaStringCheckUtf8 != null && message.hasOwnProperty("javaStringCheckUtf8"))
+                        object.javaStringCheckUtf8 = message.javaStringCheckUtf8;
+                    if (message.ccEnableArenas != null && message.hasOwnProperty("ccEnableArenas"))
+                        object.ccEnableArenas = message.ccEnableArenas;
+                    if (message.objcClassPrefix != null && message.hasOwnProperty("objcClassPrefix"))
+                        object.objcClassPrefix = message.objcClassPrefix;
+                    if (message.csharpNamespace != null && message.hasOwnProperty("csharpNamespace"))
+                        object.csharpNamespace = message.csharpNamespace;
+                    if (message.swiftPrefix != null && message.hasOwnProperty("swiftPrefix"))
+                        object.swiftPrefix = message.swiftPrefix;
+                    if (message.phpClassPrefix != null && message.hasOwnProperty("phpClassPrefix"))
+                        object.phpClassPrefix = message.phpClassPrefix;
+                    if (message.phpNamespace != null && message.hasOwnProperty("phpNamespace"))
+                        object.phpNamespace = message.phpNamespace;
+                    if (message.phpGenericServices != null && message.hasOwnProperty("phpGenericServices"))
+                        object.phpGenericServices = message.phpGenericServices;
+                    if (message.phpMetadataNamespace != null && message.hasOwnProperty("phpMetadataNamespace"))
+                        object.phpMetadataNamespace = message.phpMetadataNamespace;
+                    if (message.rubyPackage != null && message.hasOwnProperty("rubyPackage"))
+                        object.rubyPackage = message.rubyPackage;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    if (message[".google.api.resourceDefinition"] && message[".google.api.resourceDefinition"].length) {
+                        object[".google.api.resourceDefinition"] = [];
+                        for (var j = 0; j < message[".google.api.resourceDefinition"].length; ++j)
+                            object[".google.api.resourceDefinition"][j] = $root.google.api.ResourceDescriptor.toObject(message[".google.api.resourceDefinition"][j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this FileOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FileOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for FileOptions
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.FileOptions
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                FileOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.FileOptions";
+                };
+    
+                /**
+                 * OptimizeMode enum.
+                 * @name google.protobuf.FileOptions.OptimizeMode
+                 * @enum {string}
+                 * @property {string} SPEED=SPEED SPEED value
+                 * @property {string} CODE_SIZE=CODE_SIZE CODE_SIZE value
+                 * @property {string} LITE_RUNTIME=LITE_RUNTIME LITE_RUNTIME value
+                 */
+                FileOptions.OptimizeMode = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[1] = "SPEED"] = "SPEED";
+                    values[valuesById[2] = "CODE_SIZE"] = "CODE_SIZE";
+                    values[valuesById[3] = "LITE_RUNTIME"] = "LITE_RUNTIME";
+                    return values;
+                })();
+    
+                return FileOptions;
+            })();
+    
+            protobuf.MessageOptions = (function() {
+    
+                /**
+                 * Properties of a MessageOptions.
+                 * @memberof google.protobuf
+                 * @interface IMessageOptions
+                 * @property {boolean|null} [messageSetWireFormat] MessageOptions messageSetWireFormat
+                 * @property {boolean|null} [noStandardDescriptorAccessor] MessageOptions noStandardDescriptorAccessor
+                 * @property {boolean|null} [deprecated] MessageOptions deprecated
+                 * @property {boolean|null} [mapEntry] MessageOptions mapEntry
+                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] MessageOptions uninterpretedOption
+                 * @property {google.api.IResourceDescriptor|null} [".google.api.resource"] MessageOptions .google.api.resource
+                 */
+    
+                /**
+                 * Constructs a new MessageOptions.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a MessageOptions.
+                 * @implements IMessageOptions
+                 * @constructor
+                 * @param {google.protobuf.IMessageOptions=} [properties] Properties to set
+                 */
+                function MessageOptions(properties) {
+                    this.uninterpretedOption = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * MessageOptions messageSetWireFormat.
+                 * @member {boolean} messageSetWireFormat
+                 * @memberof google.protobuf.MessageOptions
+                 * @instance
+                 */
+                MessageOptions.prototype.messageSetWireFormat = false;
+    
+                /**
+                 * MessageOptions noStandardDescriptorAccessor.
+                 * @member {boolean} noStandardDescriptorAccessor
+                 * @memberof google.protobuf.MessageOptions
+                 * @instance
+                 */
+                MessageOptions.prototype.noStandardDescriptorAccessor = false;
+    
+                /**
+                 * MessageOptions deprecated.
+                 * @member {boolean} deprecated
+                 * @memberof google.protobuf.MessageOptions
+                 * @instance
+                 */
+                MessageOptions.prototype.deprecated = false;
+    
+                /**
+                 * MessageOptions mapEntry.
+                 * @member {boolean} mapEntry
+                 * @memberof google.protobuf.MessageOptions
+                 * @instance
+                 */
+                MessageOptions.prototype.mapEntry = false;
+    
+                /**
+                 * MessageOptions uninterpretedOption.
+                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
+                 * @memberof google.protobuf.MessageOptions
+                 * @instance
+                 */
+                MessageOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * MessageOptions .google.api.resource.
+                 * @member {google.api.IResourceDescriptor|null|undefined} .google.api.resource
+                 * @memberof google.protobuf.MessageOptions
+                 * @instance
+                 */
+                MessageOptions.prototype[".google.api.resource"] = null;
+    
+                /**
+                 * Creates a MessageOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.MessageOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.MessageOptions} MessageOptions
+                 */
+                MessageOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.MessageOptions)
+                        return object;
+                    var message = new $root.google.protobuf.MessageOptions();
+                    if (object.messageSetWireFormat != null)
+                        message.messageSetWireFormat = Boolean(object.messageSetWireFormat);
+                    if (object.noStandardDescriptorAccessor != null)
+                        message.noStandardDescriptorAccessor = Boolean(object.noStandardDescriptorAccessor);
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.mapEntry != null)
+                        message.mapEntry = Boolean(object.mapEntry);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.MessageOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.MessageOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object[".google.api.resource"] != null) {
+                        if (typeof object[".google.api.resource"] !== "object")
+                            throw TypeError(".google.protobuf.MessageOptions..google.api.resource: object expected");
+                        message[".google.api.resource"] = $root.google.api.ResourceDescriptor.fromObject(object[".google.api.resource"]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a MessageOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.MessageOptions
+                 * @static
+                 * @param {google.protobuf.MessageOptions} message MessageOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                MessageOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (options.defaults) {
+                        object.messageSetWireFormat = false;
+                        object.noStandardDescriptorAccessor = false;
+                        object.deprecated = false;
+                        object.mapEntry = false;
+                        object[".google.api.resource"] = null;
+                    }
+                    if (message.messageSetWireFormat != null && message.hasOwnProperty("messageSetWireFormat"))
+                        object.messageSetWireFormat = message.messageSetWireFormat;
+                    if (message.noStandardDescriptorAccessor != null && message.hasOwnProperty("noStandardDescriptorAccessor"))
+                        object.noStandardDescriptorAccessor = message.noStandardDescriptorAccessor;
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.mapEntry != null && message.hasOwnProperty("mapEntry"))
+                        object.mapEntry = message.mapEntry;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    if (message[".google.api.resource"] != null && message.hasOwnProperty(".google.api.resource"))
+                        object[".google.api.resource"] = $root.google.api.ResourceDescriptor.toObject(message[".google.api.resource"], options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this MessageOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.MessageOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                MessageOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for MessageOptions
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.MessageOptions
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                MessageOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.MessageOptions";
+                };
+    
+                return MessageOptions;
+            })();
+    
+            protobuf.FieldOptions = (function() {
+    
+                /**
+                 * Properties of a FieldOptions.
+                 * @memberof google.protobuf
+                 * @interface IFieldOptions
+                 * @property {google.protobuf.FieldOptions.CType|null} [ctype] FieldOptions ctype
+                 * @property {boolean|null} [packed] FieldOptions packed
+                 * @property {google.protobuf.FieldOptions.JSType|null} [jstype] FieldOptions jstype
+                 * @property {boolean|null} [lazy] FieldOptions lazy
+                 * @property {boolean|null} [unverifiedLazy] FieldOptions unverifiedLazy
+                 * @property {boolean|null} [deprecated] FieldOptions deprecated
+                 * @property {boolean|null} [weak] FieldOptions weak
+                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] FieldOptions uninterpretedOption
+                 * @property {Array.<google.api.FieldBehavior>|null} [".google.api.fieldBehavior"] FieldOptions .google.api.fieldBehavior
+                 * @property {google.api.IResourceReference|null} [".google.api.resourceReference"] FieldOptions .google.api.resourceReference
+                 */
+    
+                /**
+                 * Constructs a new FieldOptions.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a FieldOptions.
+                 * @implements IFieldOptions
+                 * @constructor
+                 * @param {google.protobuf.IFieldOptions=} [properties] Properties to set
+                 */
+                function FieldOptions(properties) {
+                    this.uninterpretedOption = [];
+                    this[".google.api.fieldBehavior"] = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * FieldOptions ctype.
+                 * @member {google.protobuf.FieldOptions.CType} ctype
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.ctype = 0;
+    
+                /**
+                 * FieldOptions packed.
+                 * @member {boolean} packed
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.packed = false;
+    
+                /**
+                 * FieldOptions jstype.
+                 * @member {google.protobuf.FieldOptions.JSType} jstype
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.jstype = 0;
+    
+                /**
+                 * FieldOptions lazy.
+                 * @member {boolean} lazy
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.lazy = false;
+    
+                /**
+                 * FieldOptions unverifiedLazy.
+                 * @member {boolean} unverifiedLazy
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.unverifiedLazy = false;
+    
+                /**
+                 * FieldOptions deprecated.
+                 * @member {boolean} deprecated
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.deprecated = false;
+    
+                /**
+                 * FieldOptions weak.
+                 * @member {boolean} weak
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.weak = false;
+    
+                /**
+                 * FieldOptions uninterpretedOption.
+                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * FieldOptions .google.api.fieldBehavior.
+                 * @member {Array.<google.api.FieldBehavior>} .google.api.fieldBehavior
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype[".google.api.fieldBehavior"] = $util.emptyArray;
+    
+                /**
+                 * FieldOptions .google.api.resourceReference.
+                 * @member {google.api.IResourceReference|null|undefined} .google.api.resourceReference
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype[".google.api.resourceReference"] = null;
+    
+                /**
+                 * Creates a FieldOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FieldOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FieldOptions} FieldOptions
+                 */
+                FieldOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FieldOptions)
+                        return object;
+                    var message = new $root.google.protobuf.FieldOptions();
+                    switch (object.ctype) {
+                    default:
+                        if (typeof object.ctype === "number") {
+                            message.ctype = object.ctype;
+                            break;
+                        }
+                        break;
+                    case "STRING":
+                    case 0:
+                        message.ctype = 0;
+                        break;
+                    case "CORD":
+                    case 1:
+                        message.ctype = 1;
+                        break;
+                    case "STRING_PIECE":
+                    case 2:
+                        message.ctype = 2;
+                        break;
+                    }
+                    if (object.packed != null)
+                        message.packed = Boolean(object.packed);
+                    switch (object.jstype) {
+                    default:
+                        if (typeof object.jstype === "number") {
+                            message.jstype = object.jstype;
+                            break;
+                        }
+                        break;
+                    case "JS_NORMAL":
+                    case 0:
+                        message.jstype = 0;
+                        break;
+                    case "JS_STRING":
+                    case 1:
+                        message.jstype = 1;
+                        break;
+                    case "JS_NUMBER":
+                    case 2:
+                        message.jstype = 2;
+                        break;
+                    }
+                    if (object.lazy != null)
+                        message.lazy = Boolean(object.lazy);
+                    if (object.unverifiedLazy != null)
+                        message.unverifiedLazy = Boolean(object.unverifiedLazy);
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.weak != null)
+                        message.weak = Boolean(object.weak);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.FieldOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.FieldOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object[".google.api.fieldBehavior"]) {
+                        if (!Array.isArray(object[".google.api.fieldBehavior"]))
+                            throw TypeError(".google.protobuf.FieldOptions..google.api.fieldBehavior: array expected");
+                        message[".google.api.fieldBehavior"] = [];
+                        for (var i = 0; i < object[".google.api.fieldBehavior"].length; ++i)
+                            switch (object[".google.api.fieldBehavior"][i]) {
+                            default:
+                                if (typeof object[".google.api.fieldBehavior"][i] === "number") {
+                                    message[".google.api.fieldBehavior"][i] = object[".google.api.fieldBehavior"][i];
+                                    break;
+                                }
+                            case "FIELD_BEHAVIOR_UNSPECIFIED":
+                            case 0:
+                                message[".google.api.fieldBehavior"][i] = 0;
+                                break;
+                            case "OPTIONAL":
+                            case 1:
+                                message[".google.api.fieldBehavior"][i] = 1;
+                                break;
+                            case "REQUIRED":
+                            case 2:
+                                message[".google.api.fieldBehavior"][i] = 2;
+                                break;
+                            case "OUTPUT_ONLY":
+                            case 3:
+                                message[".google.api.fieldBehavior"][i] = 3;
+                                break;
+                            case "INPUT_ONLY":
+                            case 4:
+                                message[".google.api.fieldBehavior"][i] = 4;
+                                break;
+                            case "IMMUTABLE":
+                            case 5:
+                                message[".google.api.fieldBehavior"][i] = 5;
+                                break;
+                            case "UNORDERED_LIST":
+                            case 6:
+                                message[".google.api.fieldBehavior"][i] = 6;
+                                break;
+                            case "NON_EMPTY_DEFAULT":
+                            case 7:
+                                message[".google.api.fieldBehavior"][i] = 7;
+                                break;
+                            }
+                    }
+                    if (object[".google.api.resourceReference"] != null) {
+                        if (typeof object[".google.api.resourceReference"] !== "object")
+                            throw TypeError(".google.protobuf.FieldOptions..google.api.resourceReference: object expected");
+                        message[".google.api.resourceReference"] = $root.google.api.ResourceReference.fromObject(object[".google.api.resourceReference"]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FieldOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FieldOptions
+                 * @static
+                 * @param {google.protobuf.FieldOptions} message FieldOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FieldOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.uninterpretedOption = [];
+                        object[".google.api.fieldBehavior"] = [];
+                    }
+                    if (options.defaults) {
+                        object.ctype = options.enums === String ? "STRING" : 0;
+                        object.packed = false;
+                        object.deprecated = false;
+                        object.lazy = false;
+                        object.jstype = options.enums === String ? "JS_NORMAL" : 0;
+                        object.weak = false;
+                        object.unverifiedLazy = false;
+                        object[".google.api.resourceReference"] = null;
+                    }
+                    if (message.ctype != null && message.hasOwnProperty("ctype"))
+                        object.ctype = options.enums === String ? $root.google.protobuf.FieldOptions.CType[message.ctype] === undefined ? message.ctype : $root.google.protobuf.FieldOptions.CType[message.ctype] : message.ctype;
+                    if (message.packed != null && message.hasOwnProperty("packed"))
+                        object.packed = message.packed;
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.lazy != null && message.hasOwnProperty("lazy"))
+                        object.lazy = message.lazy;
+                    if (message.jstype != null && message.hasOwnProperty("jstype"))
+                        object.jstype = options.enums === String ? $root.google.protobuf.FieldOptions.JSType[message.jstype] === undefined ? message.jstype : $root.google.protobuf.FieldOptions.JSType[message.jstype] : message.jstype;
+                    if (message.weak != null && message.hasOwnProperty("weak"))
+                        object.weak = message.weak;
+                    if (message.unverifiedLazy != null && message.hasOwnProperty("unverifiedLazy"))
+                        object.unverifiedLazy = message.unverifiedLazy;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    if (message[".google.api.fieldBehavior"] && message[".google.api.fieldBehavior"].length) {
+                        object[".google.api.fieldBehavior"] = [];
+                        for (var j = 0; j < message[".google.api.fieldBehavior"].length; ++j)
+                            object[".google.api.fieldBehavior"][j] = options.enums === String ? $root.google.api.FieldBehavior[message[".google.api.fieldBehavior"][j]] === undefined ? message[".google.api.fieldBehavior"][j] : $root.google.api.FieldBehavior[message[".google.api.fieldBehavior"][j]] : message[".google.api.fieldBehavior"][j];
+                    }
+                    if (message[".google.api.resourceReference"] != null && message.hasOwnProperty(".google.api.resourceReference"))
+                        object[".google.api.resourceReference"] = $root.google.api.ResourceReference.toObject(message[".google.api.resourceReference"], options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this FieldOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FieldOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for FieldOptions
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.FieldOptions
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                FieldOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.FieldOptions";
+                };
+    
+                /**
+                 * CType enum.
+                 * @name google.protobuf.FieldOptions.CType
+                 * @enum {string}
+                 * @property {string} STRING=STRING STRING value
+                 * @property {string} CORD=CORD CORD value
+                 * @property {string} STRING_PIECE=STRING_PIECE STRING_PIECE value
+                 */
+                FieldOptions.CType = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "STRING"] = "STRING";
+                    values[valuesById[1] = "CORD"] = "CORD";
+                    values[valuesById[2] = "STRING_PIECE"] = "STRING_PIECE";
+                    return values;
+                })();
+    
+                /**
+                 * JSType enum.
+                 * @name google.protobuf.FieldOptions.JSType
+                 * @enum {string}
+                 * @property {string} JS_NORMAL=JS_NORMAL JS_NORMAL value
+                 * @property {string} JS_STRING=JS_STRING JS_STRING value
+                 * @property {string} JS_NUMBER=JS_NUMBER JS_NUMBER value
+                 */
+                FieldOptions.JSType = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "JS_NORMAL"] = "JS_NORMAL";
+                    values[valuesById[1] = "JS_STRING"] = "JS_STRING";
+                    values[valuesById[2] = "JS_NUMBER"] = "JS_NUMBER";
+                    return values;
+                })();
+    
+                return FieldOptions;
+            })();
+    
+            protobuf.OneofOptions = (function() {
+    
+                /**
+                 * Properties of an OneofOptions.
+                 * @memberof google.protobuf
+                 * @interface IOneofOptions
+                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] OneofOptions uninterpretedOption
+                 */
+    
+                /**
+                 * Constructs a new OneofOptions.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an OneofOptions.
+                 * @implements IOneofOptions
+                 * @constructor
+                 * @param {google.protobuf.IOneofOptions=} [properties] Properties to set
+                 */
+                function OneofOptions(properties) {
+                    this.uninterpretedOption = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * OneofOptions uninterpretedOption.
+                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
+                 * @memberof google.protobuf.OneofOptions
+                 * @instance
+                 */
+                OneofOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * Creates an OneofOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.OneofOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.OneofOptions} OneofOptions
+                 */
+                OneofOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.OneofOptions)
+                        return object;
+                    var message = new $root.google.protobuf.OneofOptions();
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.OneofOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.OneofOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an OneofOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.OneofOptions
+                 * @static
+                 * @param {google.protobuf.OneofOptions} message OneofOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                OneofOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this OneofOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.OneofOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                OneofOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for OneofOptions
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.OneofOptions
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                OneofOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.OneofOptions";
+                };
+    
+                return OneofOptions;
+            })();
+    
+            protobuf.EnumOptions = (function() {
+    
+                /**
+                 * Properties of an EnumOptions.
+                 * @memberof google.protobuf
+                 * @interface IEnumOptions
+                 * @property {boolean|null} [allowAlias] EnumOptions allowAlias
+                 * @property {boolean|null} [deprecated] EnumOptions deprecated
+                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] EnumOptions uninterpretedOption
+                 */
+    
+                /**
+                 * Constructs a new EnumOptions.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an EnumOptions.
+                 * @implements IEnumOptions
+                 * @constructor
+                 * @param {google.protobuf.IEnumOptions=} [properties] Properties to set
+                 */
+                function EnumOptions(properties) {
+                    this.uninterpretedOption = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * EnumOptions allowAlias.
+                 * @member {boolean} allowAlias
+                 * @memberof google.protobuf.EnumOptions
+                 * @instance
+                 */
+                EnumOptions.prototype.allowAlias = false;
+    
+                /**
+                 * EnumOptions deprecated.
+                 * @member {boolean} deprecated
+                 * @memberof google.protobuf.EnumOptions
+                 * @instance
+                 */
+                EnumOptions.prototype.deprecated = false;
+    
+                /**
+                 * EnumOptions uninterpretedOption.
+                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
+                 * @memberof google.protobuf.EnumOptions
+                 * @instance
+                 */
+                EnumOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * Creates an EnumOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.EnumOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.EnumOptions} EnumOptions
+                 */
+                EnumOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.EnumOptions)
+                        return object;
+                    var message = new $root.google.protobuf.EnumOptions();
+                    if (object.allowAlias != null)
+                        message.allowAlias = Boolean(object.allowAlias);
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.EnumOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.EnumOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an EnumOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.EnumOptions
+                 * @static
+                 * @param {google.protobuf.EnumOptions} message EnumOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                EnumOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (options.defaults) {
+                        object.allowAlias = false;
+                        object.deprecated = false;
+                    }
+                    if (message.allowAlias != null && message.hasOwnProperty("allowAlias"))
+                        object.allowAlias = message.allowAlias;
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this EnumOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.EnumOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                EnumOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for EnumOptions
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.EnumOptions
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                EnumOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.EnumOptions";
+                };
+    
+                return EnumOptions;
+            })();
+    
+            protobuf.EnumValueOptions = (function() {
+    
+                /**
+                 * Properties of an EnumValueOptions.
+                 * @memberof google.protobuf
+                 * @interface IEnumValueOptions
+                 * @property {boolean|null} [deprecated] EnumValueOptions deprecated
+                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] EnumValueOptions uninterpretedOption
+                 */
+    
+                /**
+                 * Constructs a new EnumValueOptions.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an EnumValueOptions.
+                 * @implements IEnumValueOptions
+                 * @constructor
+                 * @param {google.protobuf.IEnumValueOptions=} [properties] Properties to set
+                 */
+                function EnumValueOptions(properties) {
+                    this.uninterpretedOption = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * EnumValueOptions deprecated.
+                 * @member {boolean} deprecated
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @instance
+                 */
+                EnumValueOptions.prototype.deprecated = false;
+    
+                /**
+                 * EnumValueOptions uninterpretedOption.
+                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @instance
+                 */
+                EnumValueOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * Creates an EnumValueOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.EnumValueOptions} EnumValueOptions
+                 */
+                EnumValueOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.EnumValueOptions)
+                        return object;
+                    var message = new $root.google.protobuf.EnumValueOptions();
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.EnumValueOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.EnumValueOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an EnumValueOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @static
+                 * @param {google.protobuf.EnumValueOptions} message EnumValueOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                EnumValueOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (options.defaults)
+                        object.deprecated = false;
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this EnumValueOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                EnumValueOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for EnumValueOptions
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                EnumValueOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.EnumValueOptions";
+                };
+    
+                return EnumValueOptions;
+            })();
+    
+            protobuf.ServiceOptions = (function() {
+    
+                /**
+                 * Properties of a ServiceOptions.
+                 * @memberof google.protobuf
+                 * @interface IServiceOptions
+                 * @property {boolean|null} [deprecated] ServiceOptions deprecated
+                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] ServiceOptions uninterpretedOption
+                 * @property {string|null} [".google.api.defaultHost"] ServiceOptions .google.api.defaultHost
+                 * @property {string|null} [".google.api.oauthScopes"] ServiceOptions .google.api.oauthScopes
+                 */
+    
+                /**
+                 * Constructs a new ServiceOptions.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a ServiceOptions.
+                 * @implements IServiceOptions
+                 * @constructor
+                 * @param {google.protobuf.IServiceOptions=} [properties] Properties to set
+                 */
+                function ServiceOptions(properties) {
+                    this.uninterpretedOption = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * ServiceOptions deprecated.
+                 * @member {boolean} deprecated
+                 * @memberof google.protobuf.ServiceOptions
+                 * @instance
+                 */
+                ServiceOptions.prototype.deprecated = false;
+    
+                /**
+                 * ServiceOptions uninterpretedOption.
+                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
+                 * @memberof google.protobuf.ServiceOptions
+                 * @instance
+                 */
+                ServiceOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * ServiceOptions .google.api.defaultHost.
+                 * @member {string} .google.api.defaultHost
+                 * @memberof google.protobuf.ServiceOptions
+                 * @instance
+                 */
+                ServiceOptions.prototype[".google.api.defaultHost"] = "";
+    
+                /**
+                 * ServiceOptions .google.api.oauthScopes.
+                 * @member {string} .google.api.oauthScopes
+                 * @memberof google.protobuf.ServiceOptions
+                 * @instance
+                 */
+                ServiceOptions.prototype[".google.api.oauthScopes"] = "";
+    
+                /**
+                 * Creates a ServiceOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.ServiceOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.ServiceOptions} ServiceOptions
+                 */
+                ServiceOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.ServiceOptions)
+                        return object;
+                    var message = new $root.google.protobuf.ServiceOptions();
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.ServiceOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.ServiceOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object[".google.api.defaultHost"] != null)
+                        message[".google.api.defaultHost"] = String(object[".google.api.defaultHost"]);
+                    if (object[".google.api.oauthScopes"] != null)
+                        message[".google.api.oauthScopes"] = String(object[".google.api.oauthScopes"]);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ServiceOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.ServiceOptions
+                 * @static
+                 * @param {google.protobuf.ServiceOptions} message ServiceOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ServiceOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (options.defaults) {
+                        object.deprecated = false;
+                        object[".google.api.defaultHost"] = "";
+                        object[".google.api.oauthScopes"] = "";
+                    }
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    if (message[".google.api.defaultHost"] != null && message.hasOwnProperty(".google.api.defaultHost"))
+                        object[".google.api.defaultHost"] = message[".google.api.defaultHost"];
+                    if (message[".google.api.oauthScopes"] != null && message.hasOwnProperty(".google.api.oauthScopes"))
+                        object[".google.api.oauthScopes"] = message[".google.api.oauthScopes"];
+                    return object;
+                };
+    
+                /**
+                 * Converts this ServiceOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.ServiceOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ServiceOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for ServiceOptions
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.ServiceOptions
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ServiceOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.ServiceOptions";
+                };
+    
+                return ServiceOptions;
+            })();
+    
+            protobuf.MethodOptions = (function() {
+    
+                /**
+                 * Properties of a MethodOptions.
+                 * @memberof google.protobuf
+                 * @interface IMethodOptions
+                 * @property {boolean|null} [deprecated] MethodOptions deprecated
+                 * @property {google.protobuf.MethodOptions.IdempotencyLevel|null} [idempotencyLevel] MethodOptions idempotencyLevel
+                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] MethodOptions uninterpretedOption
+                 * @property {google.api.IHttpRule|null} [".google.api.http"] MethodOptions .google.api.http
+                 * @property {Array.<string>|null} [".google.api.methodSignature"] MethodOptions .google.api.methodSignature
+                 * @property {google.longrunning.IOperationInfo|null} [".google.longrunning.operationInfo"] MethodOptions .google.longrunning.operationInfo
+                 */
+    
+                /**
+                 * Constructs a new MethodOptions.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a MethodOptions.
+                 * @implements IMethodOptions
+                 * @constructor
+                 * @param {google.protobuf.IMethodOptions=} [properties] Properties to set
+                 */
+                function MethodOptions(properties) {
+                    this.uninterpretedOption = [];
+                    this[".google.api.methodSignature"] = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * MethodOptions deprecated.
+                 * @member {boolean} deprecated
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype.deprecated = false;
+    
+                /**
+                 * MethodOptions idempotencyLevel.
+                 * @member {google.protobuf.MethodOptions.IdempotencyLevel} idempotencyLevel
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype.idempotencyLevel = 0;
+    
+                /**
+                 * MethodOptions uninterpretedOption.
+                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * MethodOptions .google.api.http.
+                 * @member {google.api.IHttpRule|null|undefined} .google.api.http
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype[".google.api.http"] = null;
+    
+                /**
+                 * MethodOptions .google.api.methodSignature.
+                 * @member {Array.<string>} .google.api.methodSignature
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype[".google.api.methodSignature"] = $util.emptyArray;
+    
+                /**
+                 * MethodOptions .google.longrunning.operationInfo.
+                 * @member {google.longrunning.IOperationInfo|null|undefined} .google.longrunning.operationInfo
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype[".google.longrunning.operationInfo"] = null;
+    
+                /**
+                 * Creates a MethodOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.MethodOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.MethodOptions} MethodOptions
+                 */
+                MethodOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.MethodOptions)
+                        return object;
+                    var message = new $root.google.protobuf.MethodOptions();
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    switch (object.idempotencyLevel) {
+                    default:
+                        if (typeof object.idempotencyLevel === "number") {
+                            message.idempotencyLevel = object.idempotencyLevel;
+                            break;
+                        }
+                        break;
+                    case "IDEMPOTENCY_UNKNOWN":
+                    case 0:
+                        message.idempotencyLevel = 0;
+                        break;
+                    case "NO_SIDE_EFFECTS":
+                    case 1:
+                        message.idempotencyLevel = 1;
+                        break;
+                    case "IDEMPOTENT":
+                    case 2:
+                        message.idempotencyLevel = 2;
+                        break;
+                    }
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.MethodOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.MethodOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object[".google.api.http"] != null) {
+                        if (typeof object[".google.api.http"] !== "object")
+                            throw TypeError(".google.protobuf.MethodOptions..google.api.http: object expected");
+                        message[".google.api.http"] = $root.google.api.HttpRule.fromObject(object[".google.api.http"]);
+                    }
+                    if (object[".google.api.methodSignature"]) {
+                        if (!Array.isArray(object[".google.api.methodSignature"]))
+                            throw TypeError(".google.protobuf.MethodOptions..google.api.methodSignature: array expected");
+                        message[".google.api.methodSignature"] = [];
+                        for (var i = 0; i < object[".google.api.methodSignature"].length; ++i)
+                            message[".google.api.methodSignature"][i] = String(object[".google.api.methodSignature"][i]);
+                    }
+                    if (object[".google.longrunning.operationInfo"] != null) {
+                        if (typeof object[".google.longrunning.operationInfo"] !== "object")
+                            throw TypeError(".google.protobuf.MethodOptions..google.longrunning.operationInfo: object expected");
+                        message[".google.longrunning.operationInfo"] = $root.google.longrunning.OperationInfo.fromObject(object[".google.longrunning.operationInfo"]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a MethodOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.MethodOptions
+                 * @static
+                 * @param {google.protobuf.MethodOptions} message MethodOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                MethodOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.uninterpretedOption = [];
+                        object[".google.api.methodSignature"] = [];
+                    }
+                    if (options.defaults) {
+                        object.deprecated = false;
+                        object.idempotencyLevel = options.enums === String ? "IDEMPOTENCY_UNKNOWN" : 0;
+                        object[".google.longrunning.operationInfo"] = null;
+                        object[".google.api.http"] = null;
+                    }
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.idempotencyLevel != null && message.hasOwnProperty("idempotencyLevel"))
+                        object.idempotencyLevel = options.enums === String ? $root.google.protobuf.MethodOptions.IdempotencyLevel[message.idempotencyLevel] === undefined ? message.idempotencyLevel : $root.google.protobuf.MethodOptions.IdempotencyLevel[message.idempotencyLevel] : message.idempotencyLevel;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    if (message[".google.longrunning.operationInfo"] != null && message.hasOwnProperty(".google.longrunning.operationInfo"))
+                        object[".google.longrunning.operationInfo"] = $root.google.longrunning.OperationInfo.toObject(message[".google.longrunning.operationInfo"], options);
+                    if (message[".google.api.methodSignature"] && message[".google.api.methodSignature"].length) {
+                        object[".google.api.methodSignature"] = [];
+                        for (var j = 0; j < message[".google.api.methodSignature"].length; ++j)
+                            object[".google.api.methodSignature"][j] = message[".google.api.methodSignature"][j];
+                    }
+                    if (message[".google.api.http"] != null && message.hasOwnProperty(".google.api.http"))
+                        object[".google.api.http"] = $root.google.api.HttpRule.toObject(message[".google.api.http"], options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this MethodOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                MethodOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for MethodOptions
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.MethodOptions
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                MethodOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.MethodOptions";
+                };
+    
+                /**
+                 * IdempotencyLevel enum.
+                 * @name google.protobuf.MethodOptions.IdempotencyLevel
+                 * @enum {string}
+                 * @property {string} IDEMPOTENCY_UNKNOWN=IDEMPOTENCY_UNKNOWN IDEMPOTENCY_UNKNOWN value
+                 * @property {string} NO_SIDE_EFFECTS=NO_SIDE_EFFECTS NO_SIDE_EFFECTS value
+                 * @property {string} IDEMPOTENT=IDEMPOTENT IDEMPOTENT value
+                 */
+                MethodOptions.IdempotencyLevel = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "IDEMPOTENCY_UNKNOWN"] = "IDEMPOTENCY_UNKNOWN";
+                    values[valuesById[1] = "NO_SIDE_EFFECTS"] = "NO_SIDE_EFFECTS";
+                    values[valuesById[2] = "IDEMPOTENT"] = "IDEMPOTENT";
+                    return values;
+                })();
+    
+                return MethodOptions;
+            })();
+    
+            protobuf.UninterpretedOption = (function() {
+    
+                /**
+                 * Properties of an UninterpretedOption.
+                 * @memberof google.protobuf
+                 * @interface IUninterpretedOption
+                 * @property {Array.<google.protobuf.UninterpretedOption.INamePart>|null} [name] UninterpretedOption name
+                 * @property {string|null} [identifierValue] UninterpretedOption identifierValue
+                 * @property {number|string|null} [positiveIntValue] UninterpretedOption positiveIntValue
+                 * @property {number|string|null} [negativeIntValue] UninterpretedOption negativeIntValue
+                 * @property {number|null} [doubleValue] UninterpretedOption doubleValue
+                 * @property {Uint8Array|null} [stringValue] UninterpretedOption stringValue
+                 * @property {string|null} [aggregateValue] UninterpretedOption aggregateValue
+                 */
+    
+                /**
+                 * Constructs a new UninterpretedOption.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an UninterpretedOption.
+                 * @implements IUninterpretedOption
+                 * @constructor
+                 * @param {google.protobuf.IUninterpretedOption=} [properties] Properties to set
+                 */
+                function UninterpretedOption(properties) {
+                    this.name = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * UninterpretedOption name.
+                 * @member {Array.<google.protobuf.UninterpretedOption.INamePart>} name
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @instance
+                 */
+                UninterpretedOption.prototype.name = $util.emptyArray;
+    
+                /**
+                 * UninterpretedOption identifierValue.
+                 * @member {string} identifierValue
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @instance
+                 */
+                UninterpretedOption.prototype.identifierValue = "";
+    
+                /**
+                 * UninterpretedOption positiveIntValue.
+                 * @member {number|string} positiveIntValue
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @instance
+                 */
+                UninterpretedOption.prototype.positiveIntValue = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+    
+                /**
+                 * UninterpretedOption negativeIntValue.
+                 * @member {number|string} negativeIntValue
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @instance
+                 */
+                UninterpretedOption.prototype.negativeIntValue = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+                /**
+                 * UninterpretedOption doubleValue.
+                 * @member {number} doubleValue
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @instance
+                 */
+                UninterpretedOption.prototype.doubleValue = 0;
+    
+                /**
+                 * UninterpretedOption stringValue.
+                 * @member {Uint8Array} stringValue
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @instance
+                 */
+                UninterpretedOption.prototype.stringValue = $util.newBuffer([]);
+    
+                /**
+                 * UninterpretedOption aggregateValue.
+                 * @member {string} aggregateValue
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @instance
+                 */
+                UninterpretedOption.prototype.aggregateValue = "";
+    
+                /**
+                 * Creates an UninterpretedOption message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.UninterpretedOption} UninterpretedOption
+                 */
+                UninterpretedOption.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.UninterpretedOption)
+                        return object;
+                    var message = new $root.google.protobuf.UninterpretedOption();
+                    if (object.name) {
+                        if (!Array.isArray(object.name))
+                            throw TypeError(".google.protobuf.UninterpretedOption.name: array expected");
+                        message.name = [];
+                        for (var i = 0; i < object.name.length; ++i) {
+                            if (typeof object.name[i] !== "object")
+                                throw TypeError(".google.protobuf.UninterpretedOption.name: object expected");
+                            message.name[i] = $root.google.protobuf.UninterpretedOption.NamePart.fromObject(object.name[i]);
+                        }
+                    }
+                    if (object.identifierValue != null)
+                        message.identifierValue = String(object.identifierValue);
+                    if (object.positiveIntValue != null)
+                        if ($util.Long)
+                            (message.positiveIntValue = $util.Long.fromValue(object.positiveIntValue)).unsigned = true;
+                        else if (typeof object.positiveIntValue === "string")
+                            message.positiveIntValue = parseInt(object.positiveIntValue, 10);
+                        else if (typeof object.positiveIntValue === "number")
+                            message.positiveIntValue = object.positiveIntValue;
+                        else if (typeof object.positiveIntValue === "object")
+                            message.positiveIntValue = new $util.LongBits(object.positiveIntValue.low >>> 0, object.positiveIntValue.high >>> 0).toNumber(true);
+                    if (object.negativeIntValue != null)
+                        if ($util.Long)
+                            (message.negativeIntValue = $util.Long.fromValue(object.negativeIntValue)).unsigned = false;
+                        else if (typeof object.negativeIntValue === "string")
+                            message.negativeIntValue = parseInt(object.negativeIntValue, 10);
+                        else if (typeof object.negativeIntValue === "number")
+                            message.negativeIntValue = object.negativeIntValue;
+                        else if (typeof object.negativeIntValue === "object")
+                            message.negativeIntValue = new $util.LongBits(object.negativeIntValue.low >>> 0, object.negativeIntValue.high >>> 0).toNumber();
+                    if (object.doubleValue != null)
+                        message.doubleValue = Number(object.doubleValue);
+                    if (object.stringValue != null)
+                        if (typeof object.stringValue === "string")
+                            $util.base64.decode(object.stringValue, message.stringValue = $util.newBuffer($util.base64.length(object.stringValue)), 0);
+                        else if (object.stringValue.length >= 0)
+                            message.stringValue = object.stringValue;
+                    if (object.aggregateValue != null)
+                        message.aggregateValue = String(object.aggregateValue);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an UninterpretedOption message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @static
+                 * @param {google.protobuf.UninterpretedOption} message UninterpretedOption
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                UninterpretedOption.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.name = [];
+                    if (options.defaults) {
+                        object.identifierValue = "";
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, true);
+                            object.positiveIntValue = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.positiveIntValue = options.longs === String ? "0" : 0;
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, false);
+                            object.negativeIntValue = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.negativeIntValue = options.longs === String ? "0" : 0;
+                        object.doubleValue = 0;
+                        if (options.bytes === String)
+                            object.stringValue = "";
+                        else {
+                            object.stringValue = [];
+                            if (options.bytes !== Array)
+                                object.stringValue = $util.newBuffer(object.stringValue);
+                        }
+                        object.aggregateValue = "";
+                    }
+                    if (message.name && message.name.length) {
+                        object.name = [];
+                        for (var j = 0; j < message.name.length; ++j)
+                            object.name[j] = $root.google.protobuf.UninterpretedOption.NamePart.toObject(message.name[j], options);
+                    }
+                    if (message.identifierValue != null && message.hasOwnProperty("identifierValue"))
+                        object.identifierValue = message.identifierValue;
+                    if (message.positiveIntValue != null && message.hasOwnProperty("positiveIntValue"))
+                        if (typeof message.positiveIntValue === "number")
+                            object.positiveIntValue = options.longs === String ? String(message.positiveIntValue) : message.positiveIntValue;
+                        else
+                            object.positiveIntValue = options.longs === String ? $util.Long.prototype.toString.call(message.positiveIntValue) : options.longs === Number ? new $util.LongBits(message.positiveIntValue.low >>> 0, message.positiveIntValue.high >>> 0).toNumber(true) : message.positiveIntValue;
+                    if (message.negativeIntValue != null && message.hasOwnProperty("negativeIntValue"))
+                        if (typeof message.negativeIntValue === "number")
+                            object.negativeIntValue = options.longs === String ? String(message.negativeIntValue) : message.negativeIntValue;
+                        else
+                            object.negativeIntValue = options.longs === String ? $util.Long.prototype.toString.call(message.negativeIntValue) : options.longs === Number ? new $util.LongBits(message.negativeIntValue.low >>> 0, message.negativeIntValue.high >>> 0).toNumber() : message.negativeIntValue;
+                    if (message.doubleValue != null && message.hasOwnProperty("doubleValue"))
+                        object.doubleValue = options.json && !isFinite(message.doubleValue) ? String(message.doubleValue) : message.doubleValue;
+                    if (message.stringValue != null && message.hasOwnProperty("stringValue"))
+                        object.stringValue = options.bytes === String ? $util.base64.encode(message.stringValue, 0, message.stringValue.length) : options.bytes === Array ? Array.prototype.slice.call(message.stringValue) : message.stringValue;
+                    if (message.aggregateValue != null && message.hasOwnProperty("aggregateValue"))
+                        object.aggregateValue = message.aggregateValue;
+                    return object;
+                };
+    
+                /**
+                 * Converts this UninterpretedOption to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                UninterpretedOption.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for UninterpretedOption
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                UninterpretedOption.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.UninterpretedOption";
+                };
+    
+                UninterpretedOption.NamePart = (function() {
+    
+                    /**
+                     * Properties of a NamePart.
+                     * @memberof google.protobuf.UninterpretedOption
+                     * @interface INamePart
+                     * @property {string} namePart NamePart namePart
+                     * @property {boolean} isExtension NamePart isExtension
+                     */
+    
+                    /**
+                     * Constructs a new NamePart.
+                     * @memberof google.protobuf.UninterpretedOption
+                     * @classdesc Represents a NamePart.
+                     * @implements INamePart
+                     * @constructor
+                     * @param {google.protobuf.UninterpretedOption.INamePart=} [properties] Properties to set
+                     */
+                    function NamePart(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * NamePart namePart.
+                     * @member {string} namePart
+                     * @memberof google.protobuf.UninterpretedOption.NamePart
+                     * @instance
+                     */
+                    NamePart.prototype.namePart = "";
+    
+                    /**
+                     * NamePart isExtension.
+                     * @member {boolean} isExtension
+                     * @memberof google.protobuf.UninterpretedOption.NamePart
+                     * @instance
+                     */
+                    NamePart.prototype.isExtension = false;
+    
+                    /**
+                     * Creates a NamePart message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.UninterpretedOption.NamePart
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.UninterpretedOption.NamePart} NamePart
+                     */
+                    NamePart.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.UninterpretedOption.NamePart)
+                            return object;
+                        var message = new $root.google.protobuf.UninterpretedOption.NamePart();
+                        if (object.namePart != null)
+                            message.namePart = String(object.namePart);
+                        if (object.isExtension != null)
+                            message.isExtension = Boolean(object.isExtension);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a NamePart message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.UninterpretedOption.NamePart
+                     * @static
+                     * @param {google.protobuf.UninterpretedOption.NamePart} message NamePart
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    NamePart.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.namePart = "";
+                            object.isExtension = false;
+                        }
+                        if (message.namePart != null && message.hasOwnProperty("namePart"))
+                            object.namePart = message.namePart;
+                        if (message.isExtension != null && message.hasOwnProperty("isExtension"))
+                            object.isExtension = message.isExtension;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this NamePart to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.UninterpretedOption.NamePart
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    NamePart.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for NamePart
+                     * @function getTypeUrl
+                     * @memberof google.protobuf.UninterpretedOption.NamePart
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    NamePart.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.protobuf.UninterpretedOption.NamePart";
+                    };
+    
+                    return NamePart;
+                })();
+    
+                return UninterpretedOption;
+            })();
+    
+            protobuf.SourceCodeInfo = (function() {
+    
+                /**
+                 * Properties of a SourceCodeInfo.
+                 * @memberof google.protobuf
+                 * @interface ISourceCodeInfo
+                 * @property {Array.<google.protobuf.SourceCodeInfo.ILocation>|null} [location] SourceCodeInfo location
+                 */
+    
+                /**
+                 * Constructs a new SourceCodeInfo.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a SourceCodeInfo.
+                 * @implements ISourceCodeInfo
+                 * @constructor
+                 * @param {google.protobuf.ISourceCodeInfo=} [properties] Properties to set
+                 */
+                function SourceCodeInfo(properties) {
+                    this.location = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * SourceCodeInfo location.
+                 * @member {Array.<google.protobuf.SourceCodeInfo.ILocation>} location
+                 * @memberof google.protobuf.SourceCodeInfo
+                 * @instance
+                 */
+                SourceCodeInfo.prototype.location = $util.emptyArray;
+    
+                /**
+                 * Creates a SourceCodeInfo message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.SourceCodeInfo
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.SourceCodeInfo} SourceCodeInfo
+                 */
+                SourceCodeInfo.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.SourceCodeInfo)
+                        return object;
+                    var message = new $root.google.protobuf.SourceCodeInfo();
+                    if (object.location) {
+                        if (!Array.isArray(object.location))
+                            throw TypeError(".google.protobuf.SourceCodeInfo.location: array expected");
+                        message.location = [];
+                        for (var i = 0; i < object.location.length; ++i) {
+                            if (typeof object.location[i] !== "object")
+                                throw TypeError(".google.protobuf.SourceCodeInfo.location: object expected");
+                            message.location[i] = $root.google.protobuf.SourceCodeInfo.Location.fromObject(object.location[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a SourceCodeInfo message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.SourceCodeInfo
+                 * @static
+                 * @param {google.protobuf.SourceCodeInfo} message SourceCodeInfo
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                SourceCodeInfo.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.location = [];
+                    if (message.location && message.location.length) {
+                        object.location = [];
+                        for (var j = 0; j < message.location.length; ++j)
+                            object.location[j] = $root.google.protobuf.SourceCodeInfo.Location.toObject(message.location[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this SourceCodeInfo to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.SourceCodeInfo
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                SourceCodeInfo.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for SourceCodeInfo
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.SourceCodeInfo
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                SourceCodeInfo.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.SourceCodeInfo";
+                };
+    
+                SourceCodeInfo.Location = (function() {
+    
+                    /**
+                     * Properties of a Location.
+                     * @memberof google.protobuf.SourceCodeInfo
+                     * @interface ILocation
+                     * @property {Array.<number>|null} [path] Location path
+                     * @property {Array.<number>|null} [span] Location span
+                     * @property {string|null} [leadingComments] Location leadingComments
+                     * @property {string|null} [trailingComments] Location trailingComments
+                     * @property {Array.<string>|null} [leadingDetachedComments] Location leadingDetachedComments
+                     */
+    
+                    /**
+                     * Constructs a new Location.
+                     * @memberof google.protobuf.SourceCodeInfo
+                     * @classdesc Represents a Location.
+                     * @implements ILocation
+                     * @constructor
+                     * @param {google.protobuf.SourceCodeInfo.ILocation=} [properties] Properties to set
+                     */
+                    function Location(properties) {
+                        this.path = [];
+                        this.span = [];
+                        this.leadingDetachedComments = [];
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * Location path.
+                     * @member {Array.<number>} path
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @instance
+                     */
+                    Location.prototype.path = $util.emptyArray;
+    
+                    /**
+                     * Location span.
+                     * @member {Array.<number>} span
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @instance
+                     */
+                    Location.prototype.span = $util.emptyArray;
+    
+                    /**
+                     * Location leadingComments.
+                     * @member {string} leadingComments
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @instance
+                     */
+                    Location.prototype.leadingComments = "";
+    
+                    /**
+                     * Location trailingComments.
+                     * @member {string} trailingComments
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @instance
+                     */
+                    Location.prototype.trailingComments = "";
+    
+                    /**
+                     * Location leadingDetachedComments.
+                     * @member {Array.<string>} leadingDetachedComments
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @instance
+                     */
+                    Location.prototype.leadingDetachedComments = $util.emptyArray;
+    
+                    /**
+                     * Creates a Location message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.SourceCodeInfo.Location} Location
+                     */
+                    Location.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.SourceCodeInfo.Location)
+                            return object;
+                        var message = new $root.google.protobuf.SourceCodeInfo.Location();
+                        if (object.path) {
+                            if (!Array.isArray(object.path))
+                                throw TypeError(".google.protobuf.SourceCodeInfo.Location.path: array expected");
+                            message.path = [];
+                            for (var i = 0; i < object.path.length; ++i)
+                                message.path[i] = object.path[i] | 0;
+                        }
+                        if (object.span) {
+                            if (!Array.isArray(object.span))
+                                throw TypeError(".google.protobuf.SourceCodeInfo.Location.span: array expected");
+                            message.span = [];
+                            for (var i = 0; i < object.span.length; ++i)
+                                message.span[i] = object.span[i] | 0;
+                        }
+                        if (object.leadingComments != null)
+                            message.leadingComments = String(object.leadingComments);
+                        if (object.trailingComments != null)
+                            message.trailingComments = String(object.trailingComments);
+                        if (object.leadingDetachedComments) {
+                            if (!Array.isArray(object.leadingDetachedComments))
+                                throw TypeError(".google.protobuf.SourceCodeInfo.Location.leadingDetachedComments: array expected");
+                            message.leadingDetachedComments = [];
+                            for (var i = 0; i < object.leadingDetachedComments.length; ++i)
+                                message.leadingDetachedComments[i] = String(object.leadingDetachedComments[i]);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Location message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @static
+                     * @param {google.protobuf.SourceCodeInfo.Location} message Location
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Location.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults) {
+                            object.path = [];
+                            object.span = [];
+                            object.leadingDetachedComments = [];
+                        }
+                        if (options.defaults) {
+                            object.leadingComments = "";
+                            object.trailingComments = "";
+                        }
+                        if (message.path && message.path.length) {
+                            object.path = [];
+                            for (var j = 0; j < message.path.length; ++j)
+                                object.path[j] = message.path[j];
+                        }
+                        if (message.span && message.span.length) {
+                            object.span = [];
+                            for (var j = 0; j < message.span.length; ++j)
+                                object.span[j] = message.span[j];
+                        }
+                        if (message.leadingComments != null && message.hasOwnProperty("leadingComments"))
+                            object.leadingComments = message.leadingComments;
+                        if (message.trailingComments != null && message.hasOwnProperty("trailingComments"))
+                            object.trailingComments = message.trailingComments;
+                        if (message.leadingDetachedComments && message.leadingDetachedComments.length) {
+                            object.leadingDetachedComments = [];
+                            for (var j = 0; j < message.leadingDetachedComments.length; ++j)
+                                object.leadingDetachedComments[j] = message.leadingDetachedComments[j];
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Location to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Location.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for Location
+                     * @function getTypeUrl
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    Location.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.protobuf.SourceCodeInfo.Location";
+                    };
+    
+                    return Location;
+                })();
+    
+                return SourceCodeInfo;
+            })();
+    
+            protobuf.GeneratedCodeInfo = (function() {
+    
+                /**
+                 * Properties of a GeneratedCodeInfo.
+                 * @memberof google.protobuf
+                 * @interface IGeneratedCodeInfo
+                 * @property {Array.<google.protobuf.GeneratedCodeInfo.IAnnotation>|null} [annotation] GeneratedCodeInfo annotation
+                 */
+    
+                /**
+                 * Constructs a new GeneratedCodeInfo.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a GeneratedCodeInfo.
+                 * @implements IGeneratedCodeInfo
+                 * @constructor
+                 * @param {google.protobuf.IGeneratedCodeInfo=} [properties] Properties to set
+                 */
+                function GeneratedCodeInfo(properties) {
+                    this.annotation = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * GeneratedCodeInfo annotation.
+                 * @member {Array.<google.protobuf.GeneratedCodeInfo.IAnnotation>} annotation
+                 * @memberof google.protobuf.GeneratedCodeInfo
+                 * @instance
+                 */
+                GeneratedCodeInfo.prototype.annotation = $util.emptyArray;
+    
+                /**
+                 * Creates a GeneratedCodeInfo message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.GeneratedCodeInfo
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.GeneratedCodeInfo} GeneratedCodeInfo
+                 */
+                GeneratedCodeInfo.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.GeneratedCodeInfo)
+                        return object;
+                    var message = new $root.google.protobuf.GeneratedCodeInfo();
+                    if (object.annotation) {
+                        if (!Array.isArray(object.annotation))
+                            throw TypeError(".google.protobuf.GeneratedCodeInfo.annotation: array expected");
+                        message.annotation = [];
+                        for (var i = 0; i < object.annotation.length; ++i) {
+                            if (typeof object.annotation[i] !== "object")
+                                throw TypeError(".google.protobuf.GeneratedCodeInfo.annotation: object expected");
+                            message.annotation[i] = $root.google.protobuf.GeneratedCodeInfo.Annotation.fromObject(object.annotation[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a GeneratedCodeInfo message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.GeneratedCodeInfo
+                 * @static
+                 * @param {google.protobuf.GeneratedCodeInfo} message GeneratedCodeInfo
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                GeneratedCodeInfo.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.annotation = [];
+                    if (message.annotation && message.annotation.length) {
+                        object.annotation = [];
+                        for (var j = 0; j < message.annotation.length; ++j)
+                            object.annotation[j] = $root.google.protobuf.GeneratedCodeInfo.Annotation.toObject(message.annotation[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this GeneratedCodeInfo to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.GeneratedCodeInfo
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                GeneratedCodeInfo.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for GeneratedCodeInfo
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.GeneratedCodeInfo
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                GeneratedCodeInfo.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.GeneratedCodeInfo";
+                };
+    
+                GeneratedCodeInfo.Annotation = (function() {
+    
+                    /**
+                     * Properties of an Annotation.
+                     * @memberof google.protobuf.GeneratedCodeInfo
+                     * @interface IAnnotation
+                     * @property {Array.<number>|null} [path] Annotation path
+                     * @property {string|null} [sourceFile] Annotation sourceFile
+                     * @property {number|null} [begin] Annotation begin
+                     * @property {number|null} [end] Annotation end
+                     * @property {google.protobuf.GeneratedCodeInfo.Annotation.Semantic|null} [semantic] Annotation semantic
+                     */
+    
+                    /**
+                     * Constructs a new Annotation.
+                     * @memberof google.protobuf.GeneratedCodeInfo
+                     * @classdesc Represents an Annotation.
+                     * @implements IAnnotation
+                     * @constructor
+                     * @param {google.protobuf.GeneratedCodeInfo.IAnnotation=} [properties] Properties to set
+                     */
+                    function Annotation(properties) {
+                        this.path = [];
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * Annotation path.
+                     * @member {Array.<number>} path
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @instance
+                     */
+                    Annotation.prototype.path = $util.emptyArray;
+    
+                    /**
+                     * Annotation sourceFile.
+                     * @member {string} sourceFile
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @instance
+                     */
+                    Annotation.prototype.sourceFile = "";
+    
+                    /**
+                     * Annotation begin.
+                     * @member {number} begin
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @instance
+                     */
+                    Annotation.prototype.begin = 0;
+    
+                    /**
+                     * Annotation end.
+                     * @member {number} end
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @instance
+                     */
+                    Annotation.prototype.end = 0;
+    
+                    /**
+                     * Annotation semantic.
+                     * @member {google.protobuf.GeneratedCodeInfo.Annotation.Semantic} semantic
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @instance
+                     */
+                    Annotation.prototype.semantic = 0;
+    
+                    /**
+                     * Creates an Annotation message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.GeneratedCodeInfo.Annotation} Annotation
+                     */
+                    Annotation.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.GeneratedCodeInfo.Annotation)
+                            return object;
+                        var message = new $root.google.protobuf.GeneratedCodeInfo.Annotation();
+                        if (object.path) {
+                            if (!Array.isArray(object.path))
+                                throw TypeError(".google.protobuf.GeneratedCodeInfo.Annotation.path: array expected");
+                            message.path = [];
+                            for (var i = 0; i < object.path.length; ++i)
+                                message.path[i] = object.path[i] | 0;
+                        }
+                        if (object.sourceFile != null)
+                            message.sourceFile = String(object.sourceFile);
+                        if (object.begin != null)
+                            message.begin = object.begin | 0;
+                        if (object.end != null)
+                            message.end = object.end | 0;
+                        switch (object.semantic) {
+                        default:
+                            if (typeof object.semantic === "number") {
+                                message.semantic = object.semantic;
+                                break;
+                            }
+                            break;
+                        case "NONE":
+                        case 0:
+                            message.semantic = 0;
+                            break;
+                        case "SET":
+                        case 1:
+                            message.semantic = 1;
+                            break;
+                        case "ALIAS":
+                        case 2:
+                            message.semantic = 2;
+                            break;
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an Annotation message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @static
+                     * @param {google.protobuf.GeneratedCodeInfo.Annotation} message Annotation
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Annotation.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.path = [];
+                        if (options.defaults) {
+                            object.sourceFile = "";
+                            object.begin = 0;
+                            object.end = 0;
+                            object.semantic = options.enums === String ? "NONE" : 0;
+                        }
+                        if (message.path && message.path.length) {
+                            object.path = [];
+                            for (var j = 0; j < message.path.length; ++j)
+                                object.path[j] = message.path[j];
+                        }
+                        if (message.sourceFile != null && message.hasOwnProperty("sourceFile"))
+                            object.sourceFile = message.sourceFile;
+                        if (message.begin != null && message.hasOwnProperty("begin"))
+                            object.begin = message.begin;
+                        if (message.end != null && message.hasOwnProperty("end"))
+                            object.end = message.end;
+                        if (message.semantic != null && message.hasOwnProperty("semantic"))
+                            object.semantic = options.enums === String ? $root.google.protobuf.GeneratedCodeInfo.Annotation.Semantic[message.semantic] === undefined ? message.semantic : $root.google.protobuf.GeneratedCodeInfo.Annotation.Semantic[message.semantic] : message.semantic;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Annotation to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Annotation.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for Annotation
+                     * @function getTypeUrl
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    Annotation.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.protobuf.GeneratedCodeInfo.Annotation";
+                    };
+    
+                    /**
+                     * Semantic enum.
+                     * @name google.protobuf.GeneratedCodeInfo.Annotation.Semantic
+                     * @enum {string}
+                     * @property {string} NONE=NONE NONE value
+                     * @property {string} SET=SET SET value
+                     * @property {string} ALIAS=ALIAS ALIAS value
+                     */
+                    Annotation.Semantic = (function() {
+                        var valuesById = {}, values = Object.create(valuesById);
+                        values[valuesById[0] = "NONE"] = "NONE";
+                        values[valuesById[1] = "SET"] = "SET";
+                        values[valuesById[2] = "ALIAS"] = "ALIAS";
+                        return values;
+                    })();
+    
+                    return Annotation;
+                })();
+    
+                return GeneratedCodeInfo;
+            })();
+    
+            protobuf.Struct = (function() {
+    
+                /**
+                 * Properties of a Struct.
+                 * @memberof google.protobuf
+                 * @interface IStruct
+                 * @property {Object.<string,google.protobuf.IValue>|null} [fields] Struct fields
+                 */
+    
+                /**
+                 * Constructs a new Struct.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a Struct.
+                 * @implements IStruct
+                 * @constructor
+                 * @param {google.protobuf.IStruct=} [properties] Properties to set
+                 */
+                function Struct(properties) {
+                    this.fields = {};
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Struct fields.
+                 * @member {Object.<string,google.protobuf.IValue>} fields
+                 * @memberof google.protobuf.Struct
+                 * @instance
+                 */
+                Struct.prototype.fields = $util.emptyObject;
+    
+                /**
+                 * Creates a Struct message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Struct
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Struct} Struct
+                 */
+                Struct.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Struct)
+                        return object;
+                    var message = new $root.google.protobuf.Struct();
+                    if (object.fields) {
+                        if (typeof object.fields !== "object")
+                            throw TypeError(".google.protobuf.Struct.fields: object expected");
+                        message.fields = {};
+                        for (var keys = Object.keys(object.fields), i = 0; i < keys.length; ++i) {
+                            if (typeof object.fields[keys[i]] !== "object")
+                                throw TypeError(".google.protobuf.Struct.fields: object expected");
+                            message.fields[keys[i]] = $root.google.protobuf.Value.fromObject(object.fields[keys[i]]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Struct message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Struct
+                 * @static
+                 * @param {google.protobuf.Struct} message Struct
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Struct.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.objects || options.defaults)
+                        object.fields = {};
+                    var keys2;
+                    if (message.fields && (keys2 = Object.keys(message.fields)).length) {
+                        object.fields = {};
+                        for (var j = 0; j < keys2.length; ++j)
+                            object.fields[keys2[j]] = $root.google.protobuf.Value.toObject(message.fields[keys2[j]], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this Struct to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Struct
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Struct.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Struct
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Struct
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Struct.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Struct";
+                };
+    
+                return Struct;
+            })();
+    
+            protobuf.Value = (function() {
+    
+                /**
+                 * Properties of a Value.
+                 * @memberof google.protobuf
+                 * @interface IValue
+                 * @property {google.protobuf.NullValue|null} [nullValue] Value nullValue
+                 * @property {number|null} [numberValue] Value numberValue
+                 * @property {string|null} [stringValue] Value stringValue
+                 * @property {boolean|null} [boolValue] Value boolValue
+                 * @property {google.protobuf.IStruct|null} [structValue] Value structValue
+                 * @property {google.protobuf.IListValue|null} [listValue] Value listValue
+                 */
+    
+                /**
+                 * Constructs a new Value.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a Value.
+                 * @implements IValue
+                 * @constructor
+                 * @param {google.protobuf.IValue=} [properties] Properties to set
+                 */
+                function Value(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Value nullValue.
+                 * @member {google.protobuf.NullValue|null|undefined} nullValue
+                 * @memberof google.protobuf.Value
+                 * @instance
+                 */
+                Value.prototype.nullValue = null;
+    
+                /**
+                 * Value numberValue.
+                 * @member {number|null|undefined} numberValue
+                 * @memberof google.protobuf.Value
+                 * @instance
+                 */
+                Value.prototype.numberValue = null;
+    
+                /**
+                 * Value stringValue.
+                 * @member {string|null|undefined} stringValue
+                 * @memberof google.protobuf.Value
+                 * @instance
+                 */
+                Value.prototype.stringValue = null;
+    
+                /**
+                 * Value boolValue.
+                 * @member {boolean|null|undefined} boolValue
+                 * @memberof google.protobuf.Value
+                 * @instance
+                 */
+                Value.prototype.boolValue = null;
+    
+                /**
+                 * Value structValue.
+                 * @member {google.protobuf.IStruct|null|undefined} structValue
+                 * @memberof google.protobuf.Value
+                 * @instance
+                 */
+                Value.prototype.structValue = null;
+    
+                /**
+                 * Value listValue.
+                 * @member {google.protobuf.IListValue|null|undefined} listValue
+                 * @memberof google.protobuf.Value
+                 * @instance
+                 */
+                Value.prototype.listValue = null;
+    
+                // OneOf field names bound to virtual getters and setters
+                var $oneOfFields;
+    
+                /**
+                 * Value kind.
+                 * @member {"nullValue"|"numberValue"|"stringValue"|"boolValue"|"structValue"|"listValue"|undefined} kind
+                 * @memberof google.protobuf.Value
+                 * @instance
+                 */
+                Object.defineProperty(Value.prototype, "kind", {
+                    get: $util.oneOfGetter($oneOfFields = ["nullValue", "numberValue", "stringValue", "boolValue", "structValue", "listValue"]),
+                    set: $util.oneOfSetter($oneOfFields)
+                });
+    
+                /**
+                 * Creates a Value message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Value
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Value} Value
+                 */
+                Value.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Value)
+                        return object;
+                    var message = new $root.google.protobuf.Value();
+                    switch (object.nullValue) {
+                    default:
+                        if (typeof object.nullValue === "number") {
+                            message.nullValue = object.nullValue;
+                            break;
+                        }
+                        break;
+                    case "NULL_VALUE":
+                    case 0:
+                        message.nullValue = 0;
+                        break;
+                    }
+                    if (object.numberValue != null)
+                        message.numberValue = Number(object.numberValue);
+                    if (object.stringValue != null)
+                        message.stringValue = String(object.stringValue);
+                    if (object.boolValue != null)
+                        message.boolValue = Boolean(object.boolValue);
+                    if (object.structValue != null) {
+                        if (typeof object.structValue !== "object")
+                            throw TypeError(".google.protobuf.Value.structValue: object expected");
+                        message.structValue = $root.google.protobuf.Struct.fromObject(object.structValue);
+                    }
+                    if (object.listValue != null) {
+                        if (typeof object.listValue !== "object")
+                            throw TypeError(".google.protobuf.Value.listValue: object expected");
+                        message.listValue = $root.google.protobuf.ListValue.fromObject(object.listValue);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Value message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Value
+                 * @static
+                 * @param {google.protobuf.Value} message Value
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Value.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (message.nullValue != null && message.hasOwnProperty("nullValue")) {
+                        object.nullValue = options.enums === String ? $root.google.protobuf.NullValue[message.nullValue] === undefined ? message.nullValue : $root.google.protobuf.NullValue[message.nullValue] : message.nullValue;
+                        if (options.oneofs)
+                            object.kind = "nullValue";
+                    }
+                    if (message.numberValue != null && message.hasOwnProperty("numberValue")) {
+                        object.numberValue = options.json && !isFinite(message.numberValue) ? String(message.numberValue) : message.numberValue;
+                        if (options.oneofs)
+                            object.kind = "numberValue";
+                    }
+                    if (message.stringValue != null && message.hasOwnProperty("stringValue")) {
+                        object.stringValue = message.stringValue;
+                        if (options.oneofs)
+                            object.kind = "stringValue";
+                    }
+                    if (message.boolValue != null && message.hasOwnProperty("boolValue")) {
+                        object.boolValue = message.boolValue;
+                        if (options.oneofs)
+                            object.kind = "boolValue";
+                    }
+                    if (message.structValue != null && message.hasOwnProperty("structValue")) {
+                        object.structValue = $root.google.protobuf.Struct.toObject(message.structValue, options);
+                        if (options.oneofs)
+                            object.kind = "structValue";
+                    }
+                    if (message.listValue != null && message.hasOwnProperty("listValue")) {
+                        object.listValue = $root.google.protobuf.ListValue.toObject(message.listValue, options);
+                        if (options.oneofs)
+                            object.kind = "listValue";
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this Value to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Value
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Value.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Value
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Value
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Value.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Value";
+                };
+    
+                return Value;
+            })();
+    
+            /**
+             * NullValue enum.
+             * @name google.protobuf.NullValue
+             * @enum {string}
+             * @property {string} NULL_VALUE=NULL_VALUE NULL_VALUE value
+             */
+            protobuf.NullValue = (function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "NULL_VALUE"] = "NULL_VALUE";
+                return values;
+            })();
+    
+            protobuf.ListValue = (function() {
+    
+                /**
+                 * Properties of a ListValue.
+                 * @memberof google.protobuf
+                 * @interface IListValue
+                 * @property {Array.<google.protobuf.IValue>|null} [values] ListValue values
+                 */
+    
+                /**
+                 * Constructs a new ListValue.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a ListValue.
+                 * @implements IListValue
+                 * @constructor
+                 * @param {google.protobuf.IListValue=} [properties] Properties to set
+                 */
+                function ListValue(properties) {
+                    this.values = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * ListValue values.
+                 * @member {Array.<google.protobuf.IValue>} values
+                 * @memberof google.protobuf.ListValue
+                 * @instance
+                 */
+                ListValue.prototype.values = $util.emptyArray;
+    
+                /**
+                 * Creates a ListValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.ListValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.ListValue} ListValue
+                 */
+                ListValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.ListValue)
+                        return object;
+                    var message = new $root.google.protobuf.ListValue();
+                    if (object.values) {
+                        if (!Array.isArray(object.values))
+                            throw TypeError(".google.protobuf.ListValue.values: array expected");
+                        message.values = [];
+                        for (var i = 0; i < object.values.length; ++i) {
+                            if (typeof object.values[i] !== "object")
+                                throw TypeError(".google.protobuf.ListValue.values: object expected");
+                            message.values[i] = $root.google.protobuf.Value.fromObject(object.values[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ListValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.ListValue
+                 * @static
+                 * @param {google.protobuf.ListValue} message ListValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ListValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.values = [];
+                    if (message.values && message.values.length) {
+                        object.values = [];
+                        for (var j = 0; j < message.values.length; ++j)
+                            object.values[j] = $root.google.protobuf.Value.toObject(message.values[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this ListValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.ListValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ListValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for ListValue
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.ListValue
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ListValue.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.ListValue";
+                };
+    
+                return ListValue;
+            })();
+    
+            protobuf.DoubleValue = (function() {
+    
+                /**
+                 * Properties of a DoubleValue.
+                 * @memberof google.protobuf
+                 * @interface IDoubleValue
+                 * @property {number|null} [value] DoubleValue value
+                 */
+    
+                /**
+                 * Constructs a new DoubleValue.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a DoubleValue.
+                 * @implements IDoubleValue
+                 * @constructor
+                 * @param {google.protobuf.IDoubleValue=} [properties] Properties to set
+                 */
+                function DoubleValue(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * DoubleValue value.
+                 * @member {number} value
+                 * @memberof google.protobuf.DoubleValue
+                 * @instance
+                 */
+                DoubleValue.prototype.value = 0;
+    
+                /**
+                 * Creates a DoubleValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.DoubleValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.DoubleValue} DoubleValue
+                 */
+                DoubleValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.DoubleValue)
+                        return object;
+                    var message = new $root.google.protobuf.DoubleValue();
+                    if (object.value != null)
+                        message.value = Number(object.value);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a DoubleValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.DoubleValue
+                 * @static
+                 * @param {google.protobuf.DoubleValue} message DoubleValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                DoubleValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = options.json && !isFinite(message.value) ? String(message.value) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this DoubleValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.DoubleValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                DoubleValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for DoubleValue
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.DoubleValue
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                DoubleValue.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.DoubleValue";
+                };
+    
+                return DoubleValue;
+            })();
+    
+            protobuf.FloatValue = (function() {
+    
+                /**
+                 * Properties of a FloatValue.
+                 * @memberof google.protobuf
+                 * @interface IFloatValue
+                 * @property {number|null} [value] FloatValue value
+                 */
+    
+                /**
+                 * Constructs a new FloatValue.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a FloatValue.
+                 * @implements IFloatValue
+                 * @constructor
+                 * @param {google.protobuf.IFloatValue=} [properties] Properties to set
+                 */
+                function FloatValue(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * FloatValue value.
+                 * @member {number} value
+                 * @memberof google.protobuf.FloatValue
+                 * @instance
+                 */
+                FloatValue.prototype.value = 0;
+    
+                /**
+                 * Creates a FloatValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FloatValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FloatValue} FloatValue
+                 */
+                FloatValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FloatValue)
+                        return object;
+                    var message = new $root.google.protobuf.FloatValue();
+                    if (object.value != null)
+                        message.value = Number(object.value);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FloatValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FloatValue
+                 * @static
+                 * @param {google.protobuf.FloatValue} message FloatValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FloatValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = options.json && !isFinite(message.value) ? String(message.value) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this FloatValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FloatValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FloatValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for FloatValue
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.FloatValue
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                FloatValue.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.FloatValue";
+                };
+    
+                return FloatValue;
+            })();
+    
+            protobuf.Int64Value = (function() {
+    
+                /**
+                 * Properties of an Int64Value.
+                 * @memberof google.protobuf
+                 * @interface IInt64Value
+                 * @property {number|string|null} [value] Int64Value value
+                 */
+    
+                /**
+                 * Constructs a new Int64Value.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an Int64Value.
+                 * @implements IInt64Value
+                 * @constructor
+                 * @param {google.protobuf.IInt64Value=} [properties] Properties to set
+                 */
+                function Int64Value(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Int64Value value.
+                 * @member {number|string} value
+                 * @memberof google.protobuf.Int64Value
+                 * @instance
+                 */
+                Int64Value.prototype.value = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+                /**
+                 * Creates an Int64Value message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Int64Value
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Int64Value} Int64Value
+                 */
+                Int64Value.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Int64Value)
+                        return object;
+                    var message = new $root.google.protobuf.Int64Value();
+                    if (object.value != null)
+                        if ($util.Long)
+                            (message.value = $util.Long.fromValue(object.value)).unsigned = false;
+                        else if (typeof object.value === "string")
+                            message.value = parseInt(object.value, 10);
+                        else if (typeof object.value === "number")
+                            message.value = object.value;
+                        else if (typeof object.value === "object")
+                            message.value = new $util.LongBits(object.value.low >>> 0, object.value.high >>> 0).toNumber();
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an Int64Value message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Int64Value
+                 * @static
+                 * @param {google.protobuf.Int64Value} message Int64Value
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Int64Value.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, false);
+                            object.value = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.value = options.longs === String ? "0" : 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        if (typeof message.value === "number")
+                            object.value = options.longs === String ? String(message.value) : message.value;
+                        else
+                            object.value = options.longs === String ? $util.Long.prototype.toString.call(message.value) : options.longs === Number ? new $util.LongBits(message.value.low >>> 0, message.value.high >>> 0).toNumber() : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Int64Value to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Int64Value
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Int64Value.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Int64Value
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Int64Value
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Int64Value.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Int64Value";
+                };
+    
+                return Int64Value;
+            })();
+    
+            protobuf.UInt64Value = (function() {
+    
+                /**
+                 * Properties of a UInt64Value.
+                 * @memberof google.protobuf
+                 * @interface IUInt64Value
+                 * @property {number|string|null} [value] UInt64Value value
+                 */
+    
+                /**
+                 * Constructs a new UInt64Value.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a UInt64Value.
+                 * @implements IUInt64Value
+                 * @constructor
+                 * @param {google.protobuf.IUInt64Value=} [properties] Properties to set
+                 */
+                function UInt64Value(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * UInt64Value value.
+                 * @member {number|string} value
+                 * @memberof google.protobuf.UInt64Value
+                 * @instance
+                 */
+                UInt64Value.prototype.value = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+    
+                /**
+                 * Creates a UInt64Value message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.UInt64Value
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.UInt64Value} UInt64Value
+                 */
+                UInt64Value.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.UInt64Value)
+                        return object;
+                    var message = new $root.google.protobuf.UInt64Value();
+                    if (object.value != null)
+                        if ($util.Long)
+                            (message.value = $util.Long.fromValue(object.value)).unsigned = true;
+                        else if (typeof object.value === "string")
+                            message.value = parseInt(object.value, 10);
+                        else if (typeof object.value === "number")
+                            message.value = object.value;
+                        else if (typeof object.value === "object")
+                            message.value = new $util.LongBits(object.value.low >>> 0, object.value.high >>> 0).toNumber(true);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a UInt64Value message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.UInt64Value
+                 * @static
+                 * @param {google.protobuf.UInt64Value} message UInt64Value
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                UInt64Value.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, true);
+                            object.value = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.value = options.longs === String ? "0" : 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        if (typeof message.value === "number")
+                            object.value = options.longs === String ? String(message.value) : message.value;
+                        else
+                            object.value = options.longs === String ? $util.Long.prototype.toString.call(message.value) : options.longs === Number ? new $util.LongBits(message.value.low >>> 0, message.value.high >>> 0).toNumber(true) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this UInt64Value to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.UInt64Value
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                UInt64Value.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for UInt64Value
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.UInt64Value
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                UInt64Value.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.UInt64Value";
+                };
+    
+                return UInt64Value;
+            })();
+    
+            protobuf.Int32Value = (function() {
+    
+                /**
+                 * Properties of an Int32Value.
+                 * @memberof google.protobuf
+                 * @interface IInt32Value
+                 * @property {number|null} [value] Int32Value value
+                 */
+    
+                /**
+                 * Constructs a new Int32Value.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an Int32Value.
+                 * @implements IInt32Value
+                 * @constructor
+                 * @param {google.protobuf.IInt32Value=} [properties] Properties to set
+                 */
+                function Int32Value(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Int32Value value.
+                 * @member {number} value
+                 * @memberof google.protobuf.Int32Value
+                 * @instance
+                 */
+                Int32Value.prototype.value = 0;
+    
+                /**
+                 * Creates an Int32Value message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Int32Value
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Int32Value} Int32Value
+                 */
+                Int32Value.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Int32Value)
+                        return object;
+                    var message = new $root.google.protobuf.Int32Value();
+                    if (object.value != null)
+                        message.value = object.value | 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an Int32Value message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Int32Value
+                 * @static
+                 * @param {google.protobuf.Int32Value} message Int32Value
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Int32Value.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Int32Value to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Int32Value
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Int32Value.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Int32Value
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Int32Value
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Int32Value.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Int32Value";
+                };
+    
+                return Int32Value;
+            })();
+    
+            protobuf.UInt32Value = (function() {
+    
+                /**
+                 * Properties of a UInt32Value.
+                 * @memberof google.protobuf
+                 * @interface IUInt32Value
+                 * @property {number|null} [value] UInt32Value value
+                 */
+    
+                /**
+                 * Constructs a new UInt32Value.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a UInt32Value.
+                 * @implements IUInt32Value
+                 * @constructor
+                 * @param {google.protobuf.IUInt32Value=} [properties] Properties to set
+                 */
+                function UInt32Value(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * UInt32Value value.
+                 * @member {number} value
+                 * @memberof google.protobuf.UInt32Value
+                 * @instance
+                 */
+                UInt32Value.prototype.value = 0;
+    
+                /**
+                 * Creates a UInt32Value message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.UInt32Value
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.UInt32Value} UInt32Value
+                 */
+                UInt32Value.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.UInt32Value)
+                        return object;
+                    var message = new $root.google.protobuf.UInt32Value();
+                    if (object.value != null)
+                        message.value = object.value >>> 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a UInt32Value message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.UInt32Value
+                 * @static
+                 * @param {google.protobuf.UInt32Value} message UInt32Value
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                UInt32Value.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this UInt32Value to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.UInt32Value
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                UInt32Value.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for UInt32Value
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.UInt32Value
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                UInt32Value.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.UInt32Value";
+                };
+    
+                return UInt32Value;
+            })();
+    
+            protobuf.BoolValue = (function() {
+    
+                /**
+                 * Properties of a BoolValue.
+                 * @memberof google.protobuf
+                 * @interface IBoolValue
+                 * @property {boolean|null} [value] BoolValue value
+                 */
+    
+                /**
+                 * Constructs a new BoolValue.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a BoolValue.
+                 * @implements IBoolValue
+                 * @constructor
+                 * @param {google.protobuf.IBoolValue=} [properties] Properties to set
+                 */
+                function BoolValue(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * BoolValue value.
+                 * @member {boolean} value
+                 * @memberof google.protobuf.BoolValue
+                 * @instance
+                 */
+                BoolValue.prototype.value = false;
+    
+                /**
+                 * Creates a BoolValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.BoolValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.BoolValue} BoolValue
+                 */
+                BoolValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.BoolValue)
+                        return object;
+                    var message = new $root.google.protobuf.BoolValue();
+                    if (object.value != null)
+                        message.value = Boolean(object.value);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a BoolValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.BoolValue
+                 * @static
+                 * @param {google.protobuf.BoolValue} message BoolValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                BoolValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = false;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this BoolValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.BoolValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                BoolValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for BoolValue
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.BoolValue
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                BoolValue.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.BoolValue";
+                };
+    
+                return BoolValue;
+            })();
+    
+            protobuf.StringValue = (function() {
+    
+                /**
+                 * Properties of a StringValue.
+                 * @memberof google.protobuf
+                 * @interface IStringValue
+                 * @property {string|null} [value] StringValue value
+                 */
+    
+                /**
+                 * Constructs a new StringValue.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a StringValue.
+                 * @implements IStringValue
+                 * @constructor
+                 * @param {google.protobuf.IStringValue=} [properties] Properties to set
+                 */
+                function StringValue(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * StringValue value.
+                 * @member {string} value
+                 * @memberof google.protobuf.StringValue
+                 * @instance
+                 */
+                StringValue.prototype.value = "";
+    
+                /**
+                 * Creates a StringValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.StringValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.StringValue} StringValue
+                 */
+                StringValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.StringValue)
+                        return object;
+                    var message = new $root.google.protobuf.StringValue();
+                    if (object.value != null)
+                        message.value = String(object.value);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a StringValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.StringValue
+                 * @static
+                 * @param {google.protobuf.StringValue} message StringValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                StringValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = "";
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this StringValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.StringValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                StringValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for StringValue
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.StringValue
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                StringValue.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.StringValue";
+                };
+    
+                return StringValue;
+            })();
+    
+            protobuf.BytesValue = (function() {
+    
+                /**
+                 * Properties of a BytesValue.
+                 * @memberof google.protobuf
+                 * @interface IBytesValue
+                 * @property {Uint8Array|null} [value] BytesValue value
+                 */
+    
+                /**
+                 * Constructs a new BytesValue.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a BytesValue.
+                 * @implements IBytesValue
+                 * @constructor
+                 * @param {google.protobuf.IBytesValue=} [properties] Properties to set
+                 */
+                function BytesValue(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * BytesValue value.
+                 * @member {Uint8Array} value
+                 * @memberof google.protobuf.BytesValue
+                 * @instance
+                 */
+                BytesValue.prototype.value = $util.newBuffer([]);
+    
+                /**
+                 * Creates a BytesValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.BytesValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.BytesValue} BytesValue
+                 */
+                BytesValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.BytesValue)
+                        return object;
+                    var message = new $root.google.protobuf.BytesValue();
+                    if (object.value != null)
+                        if (typeof object.value === "string")
+                            $util.base64.decode(object.value, message.value = $util.newBuffer($util.base64.length(object.value)), 0);
+                        else if (object.value.length >= 0)
+                            message.value = object.value;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a BytesValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.BytesValue
+                 * @static
+                 * @param {google.protobuf.BytesValue} message BytesValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                BytesValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        if (options.bytes === String)
+                            object.value = "";
+                        else {
+                            object.value = [];
+                            if (options.bytes !== Array)
+                                object.value = $util.newBuffer(object.value);
+                        }
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = options.bytes === String ? $util.base64.encode(message.value, 0, message.value.length) : options.bytes === Array ? Array.prototype.slice.call(message.value) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this BytesValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.BytesValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                BytesValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for BytesValue
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.BytesValue
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                BytesValue.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.BytesValue";
+                };
+    
+                return BytesValue;
+            })();
+    
+            protobuf.Duration = (function() {
+    
+                /**
+                 * Properties of a Duration.
+                 * @memberof google.protobuf
+                 * @interface IDuration
+                 * @property {number|string|null} [seconds] Duration seconds
+                 * @property {number|null} [nanos] Duration nanos
+                 */
+    
+                /**
+                 * Constructs a new Duration.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a Duration.
+                 * @implements IDuration
+                 * @constructor
+                 * @param {google.protobuf.IDuration=} [properties] Properties to set
+                 */
+                function Duration(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Duration seconds.
+                 * @member {number|string} seconds
+                 * @memberof google.protobuf.Duration
+                 * @instance
+                 */
+                Duration.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+                /**
+                 * Duration nanos.
+                 * @member {number} nanos
+                 * @memberof google.protobuf.Duration
+                 * @instance
+                 */
+                Duration.prototype.nanos = 0;
+    
+                /**
+                 * Creates a Duration message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Duration
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Duration} Duration
+                 */
+                Duration.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Duration)
+                        return object;
+                    var message = new $root.google.protobuf.Duration();
+                    if (object.seconds != null)
+                        if ($util.Long)
+                            (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
+                        else if (typeof object.seconds === "string")
+                            message.seconds = parseInt(object.seconds, 10);
+                        else if (typeof object.seconds === "number")
+                            message.seconds = object.seconds;
+                        else if (typeof object.seconds === "object")
+                            message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
+                    if (object.nanos != null)
+                        message.nanos = object.nanos | 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Duration message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Duration
+                 * @static
+                 * @param {google.protobuf.Duration} message Duration
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Duration.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, false);
+                            object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.seconds = options.longs === String ? "0" : 0;
+                        object.nanos = 0;
+                    }
+                    if (message.seconds != null && message.hasOwnProperty("seconds"))
+                        if (typeof message.seconds === "number")
+                            object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
+                        else
+                            object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
+                    if (message.nanos != null && message.hasOwnProperty("nanos"))
+                        object.nanos = message.nanos;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Duration to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Duration
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Duration.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Duration
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Duration
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Duration.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Duration";
+                };
+    
+                return Duration;
+            })();
+    
+            return protobuf;
+        })();
+    
         google.firestore = (function() {
     
             /**
@@ -68,6 +7111,297 @@
                      */
                     var v1 = {};
     
+                    v1.Database = (function() {
+    
+                        /**
+                         * Properties of a Database.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDatabase
+                         * @property {string|null} [name] Database name
+                         * @property {string|null} [locationId] Database locationId
+                         * @property {google.firestore.admin.v1.Database.DatabaseType|null} [type] Database type
+                         * @property {google.firestore.admin.v1.Database.ConcurrencyMode|null} [concurrencyMode] Database concurrencyMode
+                         * @property {google.firestore.admin.v1.Database.AppEngineIntegrationMode|null} [appEngineIntegrationMode] Database appEngineIntegrationMode
+                         * @property {string|null} [keyPrefix] Database keyPrefix
+                         * @property {string|null} [etag] Database etag
+                         */
+    
+                        /**
+                         * Constructs a new Database.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a Database.
+                         * @implements IDatabase
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDatabase=} [properties] Properties to set
+                         */
+                        function Database(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Database name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.name = "";
+    
+                        /**
+                         * Database locationId.
+                         * @member {string} locationId
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.locationId = "";
+    
+                        /**
+                         * Database type.
+                         * @member {google.firestore.admin.v1.Database.DatabaseType} type
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.type = 0;
+    
+                        /**
+                         * Database concurrencyMode.
+                         * @member {google.firestore.admin.v1.Database.ConcurrencyMode} concurrencyMode
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.concurrencyMode = 0;
+    
+                        /**
+                         * Database appEngineIntegrationMode.
+                         * @member {google.firestore.admin.v1.Database.AppEngineIntegrationMode} appEngineIntegrationMode
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.appEngineIntegrationMode = 0;
+    
+                        /**
+                         * Database keyPrefix.
+                         * @member {string} keyPrefix
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.keyPrefix = "";
+    
+                        /**
+                         * Database etag.
+                         * @member {string} etag
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.etag = "";
+    
+                        /**
+                         * Creates a Database message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.Database
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.Database} Database
+                         */
+                        Database.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.Database)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.Database();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            if (object.locationId != null)
+                                message.locationId = String(object.locationId);
+                            switch (object.type) {
+                            default:
+                                if (typeof object.type === "number") {
+                                    message.type = object.type;
+                                    break;
+                                }
+                                break;
+                            case "DATABASE_TYPE_UNSPECIFIED":
+                            case 0:
+                                message.type = 0;
+                                break;
+                            case "FIRESTORE_NATIVE":
+                            case 1:
+                                message.type = 1;
+                                break;
+                            case "DATASTORE_MODE":
+                            case 2:
+                                message.type = 2;
+                                break;
+                            }
+                            switch (object.concurrencyMode) {
+                            default:
+                                if (typeof object.concurrencyMode === "number") {
+                                    message.concurrencyMode = object.concurrencyMode;
+                                    break;
+                                }
+                                break;
+                            case "CONCURRENCY_MODE_UNSPECIFIED":
+                            case 0:
+                                message.concurrencyMode = 0;
+                                break;
+                            case "OPTIMISTIC":
+                            case 1:
+                                message.concurrencyMode = 1;
+                                break;
+                            case "PESSIMISTIC":
+                            case 2:
+                                message.concurrencyMode = 2;
+                                break;
+                            case "OPTIMISTIC_WITH_ENTITY_GROUPS":
+                            case 3:
+                                message.concurrencyMode = 3;
+                                break;
+                            }
+                            switch (object.appEngineIntegrationMode) {
+                            default:
+                                if (typeof object.appEngineIntegrationMode === "number") {
+                                    message.appEngineIntegrationMode = object.appEngineIntegrationMode;
+                                    break;
+                                }
+                                break;
+                            case "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED":
+                            case 0:
+                                message.appEngineIntegrationMode = 0;
+                                break;
+                            case "ENABLED":
+                            case 1:
+                                message.appEngineIntegrationMode = 1;
+                                break;
+                            case "DISABLED":
+                            case 2:
+                                message.appEngineIntegrationMode = 2;
+                                break;
+                            }
+                            if (object.keyPrefix != null)
+                                message.keyPrefix = String(object.keyPrefix);
+                            if (object.etag != null)
+                                message.etag = String(object.etag);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a Database message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.Database
+                         * @static
+                         * @param {google.firestore.admin.v1.Database} message Database
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Database.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.name = "";
+                                object.locationId = "";
+                                object.type = options.enums === String ? "DATABASE_TYPE_UNSPECIFIED" : 0;
+                                object.concurrencyMode = options.enums === String ? "CONCURRENCY_MODE_UNSPECIFIED" : 0;
+                                object.appEngineIntegrationMode = options.enums === String ? "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED" : 0;
+                                object.keyPrefix = "";
+                                object.etag = "";
+                            }
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.locationId != null && message.hasOwnProperty("locationId"))
+                                object.locationId = message.locationId;
+                            if (message.type != null && message.hasOwnProperty("type"))
+                                object.type = options.enums === String ? $root.google.firestore.admin.v1.Database.DatabaseType[message.type] === undefined ? message.type : $root.google.firestore.admin.v1.Database.DatabaseType[message.type] : message.type;
+                            if (message.concurrencyMode != null && message.hasOwnProperty("concurrencyMode"))
+                                object.concurrencyMode = options.enums === String ? $root.google.firestore.admin.v1.Database.ConcurrencyMode[message.concurrencyMode] === undefined ? message.concurrencyMode : $root.google.firestore.admin.v1.Database.ConcurrencyMode[message.concurrencyMode] : message.concurrencyMode;
+                            if (message.appEngineIntegrationMode != null && message.hasOwnProperty("appEngineIntegrationMode"))
+                                object.appEngineIntegrationMode = options.enums === String ? $root.google.firestore.admin.v1.Database.AppEngineIntegrationMode[message.appEngineIntegrationMode] === undefined ? message.appEngineIntegrationMode : $root.google.firestore.admin.v1.Database.AppEngineIntegrationMode[message.appEngineIntegrationMode] : message.appEngineIntegrationMode;
+                            if (message.keyPrefix != null && message.hasOwnProperty("keyPrefix"))
+                                object.keyPrefix = message.keyPrefix;
+                            if (message.etag != null && message.hasOwnProperty("etag"))
+                                object.etag = message.etag;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Database to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Database.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for Database
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.Database
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        Database.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.Database";
+                        };
+    
+                        /**
+                         * DatabaseType enum.
+                         * @name google.firestore.admin.v1.Database.DatabaseType
+                         * @enum {string}
+                         * @property {string} DATABASE_TYPE_UNSPECIFIED=DATABASE_TYPE_UNSPECIFIED DATABASE_TYPE_UNSPECIFIED value
+                         * @property {string} FIRESTORE_NATIVE=FIRESTORE_NATIVE FIRESTORE_NATIVE value
+                         * @property {string} DATASTORE_MODE=DATASTORE_MODE DATASTORE_MODE value
+                         */
+                        Database.DatabaseType = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "DATABASE_TYPE_UNSPECIFIED"] = "DATABASE_TYPE_UNSPECIFIED";
+                            values[valuesById[1] = "FIRESTORE_NATIVE"] = "FIRESTORE_NATIVE";
+                            values[valuesById[2] = "DATASTORE_MODE"] = "DATASTORE_MODE";
+                            return values;
+                        })();
+    
+                        /**
+                         * ConcurrencyMode enum.
+                         * @name google.firestore.admin.v1.Database.ConcurrencyMode
+                         * @enum {string}
+                         * @property {string} CONCURRENCY_MODE_UNSPECIFIED=CONCURRENCY_MODE_UNSPECIFIED CONCURRENCY_MODE_UNSPECIFIED value
+                         * @property {string} OPTIMISTIC=OPTIMISTIC OPTIMISTIC value
+                         * @property {string} PESSIMISTIC=PESSIMISTIC PESSIMISTIC value
+                         * @property {string} OPTIMISTIC_WITH_ENTITY_GROUPS=OPTIMISTIC_WITH_ENTITY_GROUPS OPTIMISTIC_WITH_ENTITY_GROUPS value
+                         */
+                        Database.ConcurrencyMode = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "CONCURRENCY_MODE_UNSPECIFIED"] = "CONCURRENCY_MODE_UNSPECIFIED";
+                            values[valuesById[1] = "OPTIMISTIC"] = "OPTIMISTIC";
+                            values[valuesById[2] = "PESSIMISTIC"] = "PESSIMISTIC";
+                            values[valuesById[3] = "OPTIMISTIC_WITH_ENTITY_GROUPS"] = "OPTIMISTIC_WITH_ENTITY_GROUPS";
+                            return values;
+                        })();
+    
+                        /**
+                         * AppEngineIntegrationMode enum.
+                         * @name google.firestore.admin.v1.Database.AppEngineIntegrationMode
+                         * @enum {string}
+                         * @property {string} APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED=APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED value
+                         * @property {string} ENABLED=ENABLED ENABLED value
+                         * @property {string} DISABLED=DISABLED DISABLED value
+                         */
+                        Database.AppEngineIntegrationMode = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED"] = "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED";
+                            values[valuesById[1] = "ENABLED"] = "ENABLED";
+                            values[valuesById[2] = "DISABLED"] = "DISABLED";
+                            return values;
+                        })();
+    
+                        return Database;
+                    })();
+    
                     v1.Field = (function() {
     
                         /**
@@ -76,6 +7410,7 @@
                          * @interface IField
                          * @property {string|null} [name] Field name
                          * @property {google.firestore.admin.v1.Field.IIndexConfig|null} [indexConfig] Field indexConfig
+                         * @property {google.firestore.admin.v1.Field.ITtlConfig|null} [ttlConfig] Field ttlConfig
                          */
     
                         /**
@@ -110,6 +7445,14 @@
                         Field.prototype.indexConfig = null;
     
                         /**
+                         * Field ttlConfig.
+                         * @member {google.firestore.admin.v1.Field.ITtlConfig|null|undefined} ttlConfig
+                         * @memberof google.firestore.admin.v1.Field
+                         * @instance
+                         */
+                        Field.prototype.ttlConfig = null;
+    
+                        /**
                          * Creates a Field message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.Field
@@ -127,6 +7470,11 @@
                                 if (typeof object.indexConfig !== "object")
                                     throw TypeError(".google.firestore.admin.v1.Field.indexConfig: object expected");
                                 message.indexConfig = $root.google.firestore.admin.v1.Field.IndexConfig.fromObject(object.indexConfig);
+                            }
+                            if (object.ttlConfig != null) {
+                                if (typeof object.ttlConfig !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Field.ttlConfig: object expected");
+                                message.ttlConfig = $root.google.firestore.admin.v1.Field.TtlConfig.fromObject(object.ttlConfig);
                             }
                             return message;
                         };
@@ -147,11 +7495,14 @@
                             if (options.defaults) {
                                 object.name = "";
                                 object.indexConfig = null;
+                                object.ttlConfig = null;
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
                             if (message.indexConfig != null && message.hasOwnProperty("indexConfig"))
                                 object.indexConfig = $root.google.firestore.admin.v1.Field.IndexConfig.toObject(message.indexConfig, options);
+                            if (message.ttlConfig != null && message.hasOwnProperty("ttlConfig"))
+                                object.ttlConfig = $root.google.firestore.admin.v1.Field.TtlConfig.toObject(message.ttlConfig, options);
                             return object;
                         };
     
@@ -164,6 +7515,21 @@
                          */
                         Field.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for Field
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.Field
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        Field.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.Field";
                         };
     
                         Field.IndexConfig = (function() {
@@ -302,7 +7668,160 @@
                                 return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                             };
     
+                            /**
+                             * Gets the default type url for IndexConfig
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Field.IndexConfig
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            IndexConfig.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Field.IndexConfig";
+                            };
+    
                             return IndexConfig;
+                        })();
+    
+                        Field.TtlConfig = (function() {
+    
+                            /**
+                             * Properties of a TtlConfig.
+                             * @memberof google.firestore.admin.v1.Field
+                             * @interface ITtlConfig
+                             * @property {google.firestore.admin.v1.Field.TtlConfig.State|null} [state] TtlConfig state
+                             */
+    
+                            /**
+                             * Constructs a new TtlConfig.
+                             * @memberof google.firestore.admin.v1.Field
+                             * @classdesc Represents a TtlConfig.
+                             * @implements ITtlConfig
+                             * @constructor
+                             * @param {google.firestore.admin.v1.Field.ITtlConfig=} [properties] Properties to set
+                             */
+                            function TtlConfig(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * TtlConfig state.
+                             * @member {google.firestore.admin.v1.Field.TtlConfig.State} state
+                             * @memberof google.firestore.admin.v1.Field.TtlConfig
+                             * @instance
+                             */
+                            TtlConfig.prototype.state = 0;
+    
+                            /**
+                             * Creates a TtlConfig message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.Field.TtlConfig
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.Field.TtlConfig} TtlConfig
+                             */
+                            TtlConfig.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.Field.TtlConfig)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.Field.TtlConfig();
+                                switch (object.state) {
+                                default:
+                                    if (typeof object.state === "number") {
+                                        message.state = object.state;
+                                        break;
+                                    }
+                                    break;
+                                case "STATE_UNSPECIFIED":
+                                case 0:
+                                    message.state = 0;
+                                    break;
+                                case "CREATING":
+                                case 1:
+                                    message.state = 1;
+                                    break;
+                                case "ACTIVE":
+                                case 2:
+                                    message.state = 2;
+                                    break;
+                                case "NEEDS_REPAIR":
+                                case 3:
+                                    message.state = 3;
+                                    break;
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a TtlConfig message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.Field.TtlConfig
+                             * @static
+                             * @param {google.firestore.admin.v1.Field.TtlConfig} message TtlConfig
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            TtlConfig.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.state = options.enums === String ? "STATE_UNSPECIFIED" : 0;
+                                if (message.state != null && message.hasOwnProperty("state"))
+                                    object.state = options.enums === String ? $root.google.firestore.admin.v1.Field.TtlConfig.State[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.Field.TtlConfig.State[message.state] : message.state;
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this TtlConfig to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.Field.TtlConfig
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            TtlConfig.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for TtlConfig
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Field.TtlConfig
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            TtlConfig.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Field.TtlConfig";
+                            };
+    
+                            /**
+                             * State enum.
+                             * @name google.firestore.admin.v1.Field.TtlConfig.State
+                             * @enum {string}
+                             * @property {string} STATE_UNSPECIFIED=STATE_UNSPECIFIED STATE_UNSPECIFIED value
+                             * @property {string} CREATING=CREATING CREATING value
+                             * @property {string} ACTIVE=ACTIVE ACTIVE value
+                             * @property {string} NEEDS_REPAIR=NEEDS_REPAIR NEEDS_REPAIR value
+                             */
+                            TtlConfig.State = (function() {
+                                var valuesById = {}, values = Object.create(valuesById);
+                                values[valuesById[0] = "STATE_UNSPECIFIED"] = "STATE_UNSPECIFIED";
+                                values[valuesById[1] = "CREATING"] = "CREATING";
+                                values[valuesById[2] = "ACTIVE"] = "ACTIVE";
+                                values[valuesById[3] = "NEEDS_REPAIR"] = "NEEDS_REPAIR";
+                                return values;
+                            })();
+    
+                            return TtlConfig;
                         })();
     
                         return Field;
@@ -623,7 +8142,610 @@
                          * @variation 2
                          */
     
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getDatabase}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef GetDatabaseCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.Database} [response] Database
+                         */
+    
+                        /**
+                         * Calls GetDatabase.
+                         * @function getDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetDatabaseRequest} request GetDatabaseRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.GetDatabaseCallback} callback Node-style callback called with the error, if any, and Database
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.getDatabase = function getDatabase(request, callback) {
+                            return this.rpcCall(getDatabase, $root.google.firestore.admin.v1.GetDatabaseRequest, $root.google.firestore.admin.v1.Database, request, callback);
+                        }, "name", { value: "GetDatabase" });
+    
+                        /**
+                         * Calls GetDatabase.
+                         * @function getDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetDatabaseRequest} request GetDatabaseRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.Database>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listDatabases}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef ListDatabasesCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.ListDatabasesResponse} [response] ListDatabasesResponse
+                         */
+    
+                        /**
+                         * Calls ListDatabases.
+                         * @function listDatabases
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListDatabasesRequest} request ListDatabasesRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.ListDatabasesCallback} callback Node-style callback called with the error, if any, and ListDatabasesResponse
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.listDatabases = function listDatabases(request, callback) {
+                            return this.rpcCall(listDatabases, $root.google.firestore.admin.v1.ListDatabasesRequest, $root.google.firestore.admin.v1.ListDatabasesResponse, request, callback);
+                        }, "name", { value: "ListDatabases" });
+    
+                        /**
+                         * Calls ListDatabases.
+                         * @function listDatabases
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListDatabasesRequest} request ListDatabasesRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.ListDatabasesResponse>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#updateDatabase}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef UpdateDatabaseCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.longrunning.Operation} [response] Operation
+                         */
+    
+                        /**
+                         * Calls UpdateDatabase.
+                         * @function updateDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IUpdateDatabaseRequest} request UpdateDatabaseRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.UpdateDatabaseCallback} callback Node-style callback called with the error, if any, and Operation
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.updateDatabase = function updateDatabase(request, callback) {
+                            return this.rpcCall(updateDatabase, $root.google.firestore.admin.v1.UpdateDatabaseRequest, $root.google.longrunning.Operation, request, callback);
+                        }, "name", { value: "UpdateDatabase" });
+    
+                        /**
+                         * Calls UpdateDatabase.
+                         * @function updateDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IUpdateDatabaseRequest} request UpdateDatabaseRequest message or plain object
+                         * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
                         return FirestoreAdmin;
+                    })();
+    
+                    v1.ListDatabasesRequest = (function() {
+    
+                        /**
+                         * Properties of a ListDatabasesRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListDatabasesRequest
+                         * @property {string|null} [parent] ListDatabasesRequest parent
+                         */
+    
+                        /**
+                         * Constructs a new ListDatabasesRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListDatabasesRequest.
+                         * @implements IListDatabasesRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListDatabasesRequest=} [properties] Properties to set
+                         */
+                        function ListDatabasesRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListDatabasesRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @instance
+                         */
+                        ListDatabasesRequest.prototype.parent = "";
+    
+                        /**
+                         * Creates a ListDatabasesRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListDatabasesRequest} ListDatabasesRequest
+                         */
+                        ListDatabasesRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListDatabasesRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListDatabasesRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListDatabasesRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ListDatabasesRequest} message ListDatabasesRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListDatabasesRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.parent = "";
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListDatabasesRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListDatabasesRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListDatabasesRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListDatabasesRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListDatabasesRequest";
+                        };
+    
+                        return ListDatabasesRequest;
+                    })();
+    
+                    v1.ListDatabasesResponse = (function() {
+    
+                        /**
+                         * Properties of a ListDatabasesResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListDatabasesResponse
+                         * @property {Array.<google.firestore.admin.v1.IDatabase>|null} [databases] ListDatabasesResponse databases
+                         */
+    
+                        /**
+                         * Constructs a new ListDatabasesResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListDatabasesResponse.
+                         * @implements IListDatabasesResponse
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListDatabasesResponse=} [properties] Properties to set
+                         */
+                        function ListDatabasesResponse(properties) {
+                            this.databases = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListDatabasesResponse databases.
+                         * @member {Array.<google.firestore.admin.v1.IDatabase>} databases
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @instance
+                         */
+                        ListDatabasesResponse.prototype.databases = $util.emptyArray;
+    
+                        /**
+                         * Creates a ListDatabasesResponse message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListDatabasesResponse} ListDatabasesResponse
+                         */
+                        ListDatabasesResponse.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListDatabasesResponse)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListDatabasesResponse();
+                            if (object.databases) {
+                                if (!Array.isArray(object.databases))
+                                    throw TypeError(".google.firestore.admin.v1.ListDatabasesResponse.databases: array expected");
+                                message.databases = [];
+                                for (var i = 0; i < object.databases.length; ++i) {
+                                    if (typeof object.databases[i] !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.ListDatabasesResponse.databases: object expected");
+                                    message.databases[i] = $root.google.firestore.admin.v1.Database.fromObject(object.databases[i]);
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListDatabasesResponse message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @static
+                         * @param {google.firestore.admin.v1.ListDatabasesResponse} message ListDatabasesResponse
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListDatabasesResponse.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.databases = [];
+                            if (message.databases && message.databases.length) {
+                                object.databases = [];
+                                for (var j = 0; j < message.databases.length; ++j)
+                                    object.databases[j] = $root.google.firestore.admin.v1.Database.toObject(message.databases[j], options);
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListDatabasesResponse to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListDatabasesResponse.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListDatabasesResponse
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListDatabasesResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListDatabasesResponse";
+                        };
+    
+                        return ListDatabasesResponse;
+                    })();
+    
+                    v1.GetDatabaseRequest = (function() {
+    
+                        /**
+                         * Properties of a GetDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IGetDatabaseRequest
+                         * @property {string|null} [name] GetDatabaseRequest name
+                         */
+    
+                        /**
+                         * Constructs a new GetDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a GetDatabaseRequest.
+                         * @implements IGetDatabaseRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IGetDatabaseRequest=} [properties] Properties to set
+                         */
+                        function GetDatabaseRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * GetDatabaseRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.GetDatabaseRequest
+                         * @instance
+                         */
+                        GetDatabaseRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a GetDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.GetDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.GetDatabaseRequest} GetDatabaseRequest
+                         */
+                        GetDatabaseRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.GetDatabaseRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.GetDatabaseRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a GetDatabaseRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.GetDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.GetDatabaseRequest} message GetDatabaseRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        GetDatabaseRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this GetDatabaseRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.GetDatabaseRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        GetDatabaseRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for GetDatabaseRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.GetDatabaseRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        GetDatabaseRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.GetDatabaseRequest";
+                        };
+    
+                        return GetDatabaseRequest;
+                    })();
+    
+                    v1.UpdateDatabaseRequest = (function() {
+    
+                        /**
+                         * Properties of an UpdateDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IUpdateDatabaseRequest
+                         * @property {google.firestore.admin.v1.IDatabase|null} [database] UpdateDatabaseRequest database
+                         * @property {google.protobuf.IFieldMask|null} [updateMask] UpdateDatabaseRequest updateMask
+                         */
+    
+                        /**
+                         * Constructs a new UpdateDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents an UpdateDatabaseRequest.
+                         * @implements IUpdateDatabaseRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IUpdateDatabaseRequest=} [properties] Properties to set
+                         */
+                        function UpdateDatabaseRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * UpdateDatabaseRequest database.
+                         * @member {google.firestore.admin.v1.IDatabase|null|undefined} database
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @instance
+                         */
+                        UpdateDatabaseRequest.prototype.database = null;
+    
+                        /**
+                         * UpdateDatabaseRequest updateMask.
+                         * @member {google.protobuf.IFieldMask|null|undefined} updateMask
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @instance
+                         */
+                        UpdateDatabaseRequest.prototype.updateMask = null;
+    
+                        /**
+                         * Creates an UpdateDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.UpdateDatabaseRequest} UpdateDatabaseRequest
+                         */
+                        UpdateDatabaseRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.UpdateDatabaseRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.UpdateDatabaseRequest();
+                            if (object.database != null) {
+                                if (typeof object.database !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UpdateDatabaseRequest.database: object expected");
+                                message.database = $root.google.firestore.admin.v1.Database.fromObject(object.database);
+                            }
+                            if (object.updateMask != null) {
+                                if (typeof object.updateMask !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UpdateDatabaseRequest.updateMask: object expected");
+                                message.updateMask = $root.google.protobuf.FieldMask.fromObject(object.updateMask);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from an UpdateDatabaseRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.UpdateDatabaseRequest} message UpdateDatabaseRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        UpdateDatabaseRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.database = null;
+                                object.updateMask = null;
+                            }
+                            if (message.database != null && message.hasOwnProperty("database"))
+                                object.database = $root.google.firestore.admin.v1.Database.toObject(message.database, options);
+                            if (message.updateMask != null && message.hasOwnProperty("updateMask"))
+                                object.updateMask = $root.google.protobuf.FieldMask.toObject(message.updateMask, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this UpdateDatabaseRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        UpdateDatabaseRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for UpdateDatabaseRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        UpdateDatabaseRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.UpdateDatabaseRequest";
+                        };
+    
+                        return UpdateDatabaseRequest;
+                    })();
+    
+                    v1.UpdateDatabaseMetadata = (function() {
+    
+                        /**
+                         * Properties of an UpdateDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IUpdateDatabaseMetadata
+                         */
+    
+                        /**
+                         * Constructs a new UpdateDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents an UpdateDatabaseMetadata.
+                         * @implements IUpdateDatabaseMetadata
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IUpdateDatabaseMetadata=} [properties] Properties to set
+                         */
+                        function UpdateDatabaseMetadata(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Creates an UpdateDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseMetadata
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.UpdateDatabaseMetadata} UpdateDatabaseMetadata
+                         */
+                        UpdateDatabaseMetadata.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.UpdateDatabaseMetadata)
+                                return object;
+                            return new $root.google.firestore.admin.v1.UpdateDatabaseMetadata();
+                        };
+    
+                        /**
+                         * Creates a plain object from an UpdateDatabaseMetadata message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.UpdateDatabaseMetadata} message UpdateDatabaseMetadata
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        UpdateDatabaseMetadata.toObject = function toObject() {
+                            return {};
+                        };
+    
+                        /**
+                         * Converts this UpdateDatabaseMetadata to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseMetadata
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        UpdateDatabaseMetadata.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for UpdateDatabaseMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.UpdateDatabaseMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        UpdateDatabaseMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.UpdateDatabaseMetadata";
+                        };
+    
+                        return UpdateDatabaseMetadata;
                     })();
     
                     v1.CreateIndexRequest = (function() {
@@ -722,6 +8844,21 @@
                          */
                         CreateIndexRequest.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for CreateIndexRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.CreateIndexRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        CreateIndexRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.CreateIndexRequest";
                         };
     
                         return CreateIndexRequest;
@@ -850,6 +8987,21 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
+                        /**
+                         * Gets the default type url for ListIndexesRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListIndexesRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListIndexesRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListIndexesRequest";
+                        };
+    
                         return ListIndexesRequest;
                     })();
     
@@ -960,6 +9112,21 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
+                        /**
+                         * Gets the default type url for ListIndexesResponse
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListIndexesResponse
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListIndexesResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListIndexesResponse";
+                        };
+    
                         return ListIndexesResponse;
                     })();
     
@@ -1043,6 +9210,21 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
+                        /**
+                         * Gets the default type url for GetIndexRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.GetIndexRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        GetIndexRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.GetIndexRequest";
+                        };
+    
                         return GetIndexRequest;
                     })();
     
@@ -1124,6 +9306,21 @@
                          */
                         DeleteIndexRequest.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DeleteIndexRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DeleteIndexRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DeleteIndexRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DeleteIndexRequest";
                         };
     
                         return DeleteIndexRequest;
@@ -1230,6 +9427,21 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
+                        /**
+                         * Gets the default type url for UpdateFieldRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.UpdateFieldRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        UpdateFieldRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.UpdateFieldRequest";
+                        };
+    
                         return UpdateFieldRequest;
                     })();
     
@@ -1311,6 +9523,21 @@
                          */
                         GetFieldRequest.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for GetFieldRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.GetFieldRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        GetFieldRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.GetFieldRequest";
                         };
     
                         return GetFieldRequest;
@@ -1439,6 +9666,21 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
+                        /**
+                         * Gets the default type url for ListFieldsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListFieldsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListFieldsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListFieldsRequest";
+                        };
+    
                         return ListFieldsRequest;
                     })();
     
@@ -1547,6 +9789,21 @@
                          */
                         ListFieldsResponse.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListFieldsResponse
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListFieldsResponse
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListFieldsResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListFieldsResponse";
                         };
     
                         return ListFieldsResponse;
@@ -1671,6 +9928,21 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
+                        /**
+                         * Gets the default type url for ExportDocumentsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ExportDocumentsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ExportDocumentsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ExportDocumentsRequest";
+                        };
+    
                         return ExportDocumentsRequest;
                     })();
     
@@ -1793,6 +10065,21 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
+                        /**
+                         * Gets the default type url for ImportDocumentsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ImportDocumentsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ImportDocumentsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ImportDocumentsRequest";
+                        };
+    
                         return ImportDocumentsRequest;
                     })();
     
@@ -1871,6 +10158,12 @@
                             if (object.name != null)
                                 message.name = String(object.name);
                             switch (object.queryScope) {
+                            default:
+                                if (typeof object.queryScope === "number") {
+                                    message.queryScope = object.queryScope;
+                                    break;
+                                }
+                                break;
                             case "QUERY_SCOPE_UNSPECIFIED":
                             case 0:
                                 message.queryScope = 0;
@@ -1895,6 +10188,12 @@
                                 }
                             }
                             switch (object.state) {
+                            default:
+                                if (typeof object.state === "number") {
+                                    message.state = object.state;
+                                    break;
+                                }
+                                break;
                             case "STATE_UNSPECIFIED":
                             case 0:
                                 message.state = 0;
@@ -1938,14 +10237,14 @@
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
                             if (message.queryScope != null && message.hasOwnProperty("queryScope"))
-                                object.queryScope = options.enums === String ? $root.google.firestore.admin.v1.Index.QueryScope[message.queryScope] : message.queryScope;
+                                object.queryScope = options.enums === String ? $root.google.firestore.admin.v1.Index.QueryScope[message.queryScope] === undefined ? message.queryScope : $root.google.firestore.admin.v1.Index.QueryScope[message.queryScope] : message.queryScope;
                             if (message.fields && message.fields.length) {
                                 object.fields = [];
                                 for (var j = 0; j < message.fields.length; ++j)
                                     object.fields[j] = $root.google.firestore.admin.v1.Index.IndexField.toObject(message.fields[j], options);
                             }
                             if (message.state != null && message.hasOwnProperty("state"))
-                                object.state = options.enums === String ? $root.google.firestore.admin.v1.Index.State[message.state] : message.state;
+                                object.state = options.enums === String ? $root.google.firestore.admin.v1.Index.State[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.Index.State[message.state] : message.state;
                             return object;
                         };
     
@@ -1959,6 +10258,37 @@
                         Index.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
+    
+                        /**
+                         * Gets the default type url for Index
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.Index
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        Index.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.Index";
+                        };
+    
+                        /**
+                         * QueryScope enum.
+                         * @name google.firestore.admin.v1.Index.QueryScope
+                         * @enum {string}
+                         * @property {string} QUERY_SCOPE_UNSPECIFIED=QUERY_SCOPE_UNSPECIFIED QUERY_SCOPE_UNSPECIFIED value
+                         * @property {string} COLLECTION=COLLECTION COLLECTION value
+                         * @property {string} COLLECTION_GROUP=COLLECTION_GROUP COLLECTION_GROUP value
+                         */
+                        Index.QueryScope = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "QUERY_SCOPE_UNSPECIFIED"] = "QUERY_SCOPE_UNSPECIFIED";
+                            values[valuesById[1] = "COLLECTION"] = "COLLECTION";
+                            values[valuesById[2] = "COLLECTION_GROUP"] = "COLLECTION_GROUP";
+                            return values;
+                        })();
     
                         Index.IndexField = (function() {
     
@@ -2039,6 +10369,12 @@
                                 if (object.fieldPath != null)
                                     message.fieldPath = String(object.fieldPath);
                                 switch (object.order) {
+                                default:
+                                    if (typeof object.order === "number") {
+                                        message.order = object.order;
+                                        break;
+                                    }
+                                    break;
                                 case "ORDER_UNSPECIFIED":
                                 case 0:
                                     message.order = 0;
@@ -2053,6 +10389,12 @@
                                     break;
                                 }
                                 switch (object.arrayConfig) {
+                                default:
+                                    if (typeof object.arrayConfig === "number") {
+                                        message.arrayConfig = object.arrayConfig;
+                                        break;
+                                    }
+                                    break;
                                 case "ARRAY_CONFIG_UNSPECIFIED":
                                 case 0:
                                     message.arrayConfig = 0;
@@ -2083,12 +10425,12 @@
                                 if (message.fieldPath != null && message.hasOwnProperty("fieldPath"))
                                     object.fieldPath = message.fieldPath;
                                 if (message.order != null && message.hasOwnProperty("order")) {
-                                    object.order = options.enums === String ? $root.google.firestore.admin.v1.Index.IndexField.Order[message.order] : message.order;
+                                    object.order = options.enums === String ? $root.google.firestore.admin.v1.Index.IndexField.Order[message.order] === undefined ? message.order : $root.google.firestore.admin.v1.Index.IndexField.Order[message.order] : message.order;
                                     if (options.oneofs)
                                         object.valueMode = "order";
                                 }
                                 if (message.arrayConfig != null && message.hasOwnProperty("arrayConfig")) {
-                                    object.arrayConfig = options.enums === String ? $root.google.firestore.admin.v1.Index.IndexField.ArrayConfig[message.arrayConfig] : message.arrayConfig;
+                                    object.arrayConfig = options.enums === String ? $root.google.firestore.admin.v1.Index.IndexField.ArrayConfig[message.arrayConfig] === undefined ? message.arrayConfig : $root.google.firestore.admin.v1.Index.IndexField.ArrayConfig[message.arrayConfig] : message.arrayConfig;
                                     if (options.oneofs)
                                         object.valueMode = "arrayConfig";
                                 }
@@ -2104,6 +10446,21 @@
                              */
                             IndexField.prototype.toJSON = function toJSON() {
                                 return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for IndexField
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            IndexField.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Index.IndexField";
                             };
     
                             /**
@@ -2137,22 +10494,6 @@
                             })();
     
                             return IndexField;
-                        })();
-    
-                        /**
-                         * QueryScope enum.
-                         * @name google.firestore.admin.v1.Index.QueryScope
-                         * @enum {string}
-                         * @property {string} QUERY_SCOPE_UNSPECIFIED=QUERY_SCOPE_UNSPECIFIED QUERY_SCOPE_UNSPECIFIED value
-                         * @property {string} COLLECTION=COLLECTION COLLECTION value
-                         * @property {string} COLLECTION_GROUP=COLLECTION_GROUP COLLECTION_GROUP value
-                         */
-                        Index.QueryScope = (function() {
-                            var valuesById = {}, values = Object.create(valuesById);
-                            values[valuesById[0] = "QUERY_SCOPE_UNSPECIFIED"] = "QUERY_SCOPE_UNSPECIFIED";
-                            values[valuesById[1] = "COLLECTION"] = "COLLECTION";
-                            values[valuesById[2] = "COLLECTION_GROUP"] = "COLLECTION_GROUP";
-                            return values;
                         })();
     
                         /**
@@ -2235,6 +10576,21 @@
                          */
                         LocationMetadata.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for LocationMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.LocationMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        LocationMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.LocationMetadata";
                         };
     
                         return LocationMetadata;
@@ -2342,6 +10698,12 @@
                             if (object.index != null)
                                 message.index = String(object.index);
                             switch (object.state) {
+                            default:
+                                if (typeof object.state === "number") {
+                                    message.state = object.state;
+                                    break;
+                                }
+                                break;
                             case "OPERATION_STATE_UNSPECIFIED":
                             case 0:
                                 message.state = 0;
@@ -2416,7 +10778,7 @@
                             if (message.index != null && message.hasOwnProperty("index"))
                                 object.index = message.index;
                             if (message.state != null && message.hasOwnProperty("state"))
-                                object.state = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.state] : message.state;
+                                object.state = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.OperationState[message.state] : message.state;
                             if (message.progressDocuments != null && message.hasOwnProperty("progressDocuments"))
                                 object.progressDocuments = $root.google.firestore.admin.v1.Progress.toObject(message.progressDocuments, options);
                             if (message.progressBytes != null && message.hasOwnProperty("progressBytes"))
@@ -2435,6 +10797,21 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
+                        /**
+                         * Gets the default type url for IndexOperationMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.IndexOperationMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        IndexOperationMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.IndexOperationMetadata";
+                        };
+    
                         return IndexOperationMetadata;
                     })();
     
@@ -2451,6 +10828,7 @@
                          * @property {google.firestore.admin.v1.OperationState|null} [state] FieldOperationMetadata state
                          * @property {google.firestore.admin.v1.IProgress|null} [progressDocuments] FieldOperationMetadata progressDocuments
                          * @property {google.firestore.admin.v1.IProgress|null} [progressBytes] FieldOperationMetadata progressBytes
+                         * @property {google.firestore.admin.v1.FieldOperationMetadata.ITtlConfigDelta|null} [ttlConfigDelta] FieldOperationMetadata ttlConfigDelta
                          */
     
                         /**
@@ -2526,6 +10904,14 @@
                         FieldOperationMetadata.prototype.progressBytes = null;
     
                         /**
+                         * FieldOperationMetadata ttlConfigDelta.
+                         * @member {google.firestore.admin.v1.FieldOperationMetadata.ITtlConfigDelta|null|undefined} ttlConfigDelta
+                         * @memberof google.firestore.admin.v1.FieldOperationMetadata
+                         * @instance
+                         */
+                        FieldOperationMetadata.prototype.ttlConfigDelta = null;
+    
+                        /**
                          * Creates a FieldOperationMetadata message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.FieldOperationMetadata
@@ -2560,6 +10946,12 @@
                                 }
                             }
                             switch (object.state) {
+                            default:
+                                if (typeof object.state === "number") {
+                                    message.state = object.state;
+                                    break;
+                                }
+                                break;
                             case "OPERATION_STATE_UNSPECIFIED":
                             case 0:
                                 message.state = 0;
@@ -2603,6 +10995,11 @@
                                     throw TypeError(".google.firestore.admin.v1.FieldOperationMetadata.progressBytes: object expected");
                                 message.progressBytes = $root.google.firestore.admin.v1.Progress.fromObject(object.progressBytes);
                             }
+                            if (object.ttlConfigDelta != null) {
+                                if (typeof object.ttlConfigDelta !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.FieldOperationMetadata.ttlConfigDelta: object expected");
+                                message.ttlConfigDelta = $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.fromObject(object.ttlConfigDelta);
+                            }
                             return message;
                         };
     
@@ -2628,6 +11025,7 @@
                                 object.state = options.enums === String ? "OPERATION_STATE_UNSPECIFIED" : 0;
                                 object.progressDocuments = null;
                                 object.progressBytes = null;
+                                object.ttlConfigDelta = null;
                             }
                             if (message.startTime != null && message.hasOwnProperty("startTime"))
                                 object.startTime = $root.google.protobuf.Timestamp.toObject(message.startTime, options);
@@ -2641,11 +11039,13 @@
                                     object.indexConfigDeltas[j] = $root.google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.toObject(message.indexConfigDeltas[j], options);
                             }
                             if (message.state != null && message.hasOwnProperty("state"))
-                                object.state = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.state] : message.state;
+                                object.state = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.OperationState[message.state] : message.state;
                             if (message.progressDocuments != null && message.hasOwnProperty("progressDocuments"))
                                 object.progressDocuments = $root.google.firestore.admin.v1.Progress.toObject(message.progressDocuments, options);
                             if (message.progressBytes != null && message.hasOwnProperty("progressBytes"))
                                 object.progressBytes = $root.google.firestore.admin.v1.Progress.toObject(message.progressBytes, options);
+                            if (message.ttlConfigDelta != null && message.hasOwnProperty("ttlConfigDelta"))
+                                object.ttlConfigDelta = $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.toObject(message.ttlConfigDelta, options);
                             return object;
                         };
     
@@ -2658,6 +11058,21 @@
                          */
                         FieldOperationMetadata.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for FieldOperationMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.FieldOperationMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        FieldOperationMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.FieldOperationMetadata";
                         };
     
                         FieldOperationMetadata.IndexConfigDelta = (function() {
@@ -2714,6 +11129,12 @@
                                     return object;
                                 var message = new $root.google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta();
                                 switch (object.changeType) {
+                                default:
+                                    if (typeof object.changeType === "number") {
+                                        message.changeType = object.changeType;
+                                        break;
+                                    }
+                                    break;
                                 case "CHANGE_TYPE_UNSPECIFIED":
                                 case 0:
                                     message.changeType = 0;
@@ -2753,7 +11174,7 @@
                                     object.index = null;
                                 }
                                 if (message.changeType != null && message.hasOwnProperty("changeType"))
-                                    object.changeType = options.enums === String ? $root.google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType[message.changeType] : message.changeType;
+                                    object.changeType = options.enums === String ? $root.google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType[message.changeType] === undefined ? message.changeType : $root.google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType[message.changeType] : message.changeType;
                                 if (message.index != null && message.hasOwnProperty("index"))
                                     object.index = $root.google.firestore.admin.v1.Index.toObject(message.index, options);
                                 return object;
@@ -2768,6 +11189,21 @@
                              */
                             IndexConfigDelta.prototype.toJSON = function toJSON() {
                                 return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for IndexConfigDelta
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            IndexConfigDelta.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta";
                             };
     
                             /**
@@ -2787,6 +11223,138 @@
                             })();
     
                             return IndexConfigDelta;
+                        })();
+    
+                        FieldOperationMetadata.TtlConfigDelta = (function() {
+    
+                            /**
+                             * Properties of a TtlConfigDelta.
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata
+                             * @interface ITtlConfigDelta
+                             * @property {google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType|null} [changeType] TtlConfigDelta changeType
+                             */
+    
+                            /**
+                             * Constructs a new TtlConfigDelta.
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata
+                             * @classdesc Represents a TtlConfigDelta.
+                             * @implements ITtlConfigDelta
+                             * @constructor
+                             * @param {google.firestore.admin.v1.FieldOperationMetadata.ITtlConfigDelta=} [properties] Properties to set
+                             */
+                            function TtlConfigDelta(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * TtlConfigDelta changeType.
+                             * @member {google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType} changeType
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta
+                             * @instance
+                             */
+                            TtlConfigDelta.prototype.changeType = 0;
+    
+                            /**
+                             * Creates a TtlConfigDelta message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta} TtlConfigDelta
+                             */
+                            TtlConfigDelta.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta();
+                                switch (object.changeType) {
+                                default:
+                                    if (typeof object.changeType === "number") {
+                                        message.changeType = object.changeType;
+                                        break;
+                                    }
+                                    break;
+                                case "CHANGE_TYPE_UNSPECIFIED":
+                                case 0:
+                                    message.changeType = 0;
+                                    break;
+                                case "ADD":
+                                case 1:
+                                    message.changeType = 1;
+                                    break;
+                                case "REMOVE":
+                                case 2:
+                                    message.changeType = 2;
+                                    break;
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a TtlConfigDelta message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta
+                             * @static
+                             * @param {google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta} message TtlConfigDelta
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            TtlConfigDelta.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.changeType = options.enums === String ? "CHANGE_TYPE_UNSPECIFIED" : 0;
+                                if (message.changeType != null && message.hasOwnProperty("changeType"))
+                                    object.changeType = options.enums === String ? $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType[message.changeType] === undefined ? message.changeType : $root.google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType[message.changeType] : message.changeType;
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this TtlConfigDelta to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            TtlConfigDelta.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for TtlConfigDelta
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            TtlConfigDelta.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta";
+                            };
+    
+                            /**
+                             * ChangeType enum.
+                             * @name google.firestore.admin.v1.FieldOperationMetadata.TtlConfigDelta.ChangeType
+                             * @enum {string}
+                             * @property {string} CHANGE_TYPE_UNSPECIFIED=CHANGE_TYPE_UNSPECIFIED CHANGE_TYPE_UNSPECIFIED value
+                             * @property {string} ADD=ADD ADD value
+                             * @property {string} REMOVE=REMOVE REMOVE value
+                             */
+                            TtlConfigDelta.ChangeType = (function() {
+                                var valuesById = {}, values = Object.create(valuesById);
+                                values[valuesById[0] = "CHANGE_TYPE_UNSPECIFIED"] = "CHANGE_TYPE_UNSPECIFIED";
+                                values[valuesById[1] = "ADD"] = "ADD";
+                                values[valuesById[2] = "REMOVE"] = "REMOVE";
+                                return values;
+                            })();
+    
+                            return TtlConfigDelta;
                         })();
     
                         return FieldOperationMetadata;
@@ -2902,6 +11470,12 @@
                                 message.endTime = $root.google.protobuf.Timestamp.fromObject(object.endTime);
                             }
                             switch (object.operationState) {
+                            default:
+                                if (typeof object.operationState === "number") {
+                                    message.operationState = object.operationState;
+                                    break;
+                                }
+                                break;
                             case "OPERATION_STATE_UNSPECIFIED":
                             case 0:
                                 message.operationState = 0;
@@ -2985,7 +11559,7 @@
                             if (message.endTime != null && message.hasOwnProperty("endTime"))
                                 object.endTime = $root.google.protobuf.Timestamp.toObject(message.endTime, options);
                             if (message.operationState != null && message.hasOwnProperty("operationState"))
-                                object.operationState = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.operationState] : message.operationState;
+                                object.operationState = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.operationState] === undefined ? message.operationState : $root.google.firestore.admin.v1.OperationState[message.operationState] : message.operationState;
                             if (message.progressDocuments != null && message.hasOwnProperty("progressDocuments"))
                                 object.progressDocuments = $root.google.firestore.admin.v1.Progress.toObject(message.progressDocuments, options);
                             if (message.progressBytes != null && message.hasOwnProperty("progressBytes"))
@@ -3009,6 +11583,21 @@
                          */
                         ExportDocumentsMetadata.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ExportDocumentsMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ExportDocumentsMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ExportDocumentsMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ExportDocumentsMetadata";
                         };
     
                         return ExportDocumentsMetadata;
@@ -3124,6 +11713,12 @@
                                 message.endTime = $root.google.protobuf.Timestamp.fromObject(object.endTime);
                             }
                             switch (object.operationState) {
+                            default:
+                                if (typeof object.operationState === "number") {
+                                    message.operationState = object.operationState;
+                                    break;
+                                }
+                                break;
                             case "OPERATION_STATE_UNSPECIFIED":
                             case 0:
                                 message.operationState = 0;
@@ -3207,7 +11802,7 @@
                             if (message.endTime != null && message.hasOwnProperty("endTime"))
                                 object.endTime = $root.google.protobuf.Timestamp.toObject(message.endTime, options);
                             if (message.operationState != null && message.hasOwnProperty("operationState"))
-                                object.operationState = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.operationState] : message.operationState;
+                                object.operationState = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.operationState] === undefined ? message.operationState : $root.google.firestore.admin.v1.OperationState[message.operationState] : message.operationState;
                             if (message.progressDocuments != null && message.hasOwnProperty("progressDocuments"))
                                 object.progressDocuments = $root.google.firestore.admin.v1.Progress.toObject(message.progressDocuments, options);
                             if (message.progressBytes != null && message.hasOwnProperty("progressBytes"))
@@ -3231,6 +11826,21 @@
                          */
                         ImportDocumentsMetadata.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ImportDocumentsMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ImportDocumentsMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ImportDocumentsMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ImportDocumentsMetadata";
                         };
     
                         return ImportDocumentsMetadata;
@@ -3316,7 +11926,48 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
+                        /**
+                         * Gets the default type url for ExportDocumentsResponse
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ExportDocumentsResponse
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ExportDocumentsResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ExportDocumentsResponse";
+                        };
+    
                         return ExportDocumentsResponse;
+                    })();
+    
+                    /**
+                     * OperationState enum.
+                     * @name google.firestore.admin.v1.OperationState
+                     * @enum {string}
+                     * @property {string} OPERATION_STATE_UNSPECIFIED=OPERATION_STATE_UNSPECIFIED OPERATION_STATE_UNSPECIFIED value
+                     * @property {string} INITIALIZING=INITIALIZING INITIALIZING value
+                     * @property {string} PROCESSING=PROCESSING PROCESSING value
+                     * @property {string} CANCELLING=CANCELLING CANCELLING value
+                     * @property {string} FINALIZING=FINALIZING FINALIZING value
+                     * @property {string} SUCCESSFUL=SUCCESSFUL SUCCESSFUL value
+                     * @property {string} FAILED=FAILED FAILED value
+                     * @property {string} CANCELLED=CANCELLED CANCELLED value
+                     */
+                    v1.OperationState = (function() {
+                        var valuesById = {}, values = Object.create(valuesById);
+                        values[valuesById[0] = "OPERATION_STATE_UNSPECIFIED"] = "OPERATION_STATE_UNSPECIFIED";
+                        values[valuesById[1] = "INITIALIZING"] = "INITIALIZING";
+                        values[valuesById[2] = "PROCESSING"] = "PROCESSING";
+                        values[valuesById[3] = "CANCELLING"] = "CANCELLING";
+                        values[valuesById[4] = "FINALIZING"] = "FINALIZING";
+                        values[valuesById[5] = "SUCCESSFUL"] = "SUCCESSFUL";
+                        values[valuesById[6] = "FAILED"] = "FAILED";
+                        values[valuesById[7] = "CANCELLED"] = "CANCELLED";
+                        return values;
                     })();
     
                     v1.Progress = (function() {
@@ -3442,33 +12093,22 @@
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
-                        return Progress;
-                    })();
+                        /**
+                         * Gets the default type url for Progress
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.Progress
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        Progress.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.Progress";
+                        };
     
-                    /**
-                     * OperationState enum.
-                     * @name google.firestore.admin.v1.OperationState
-                     * @enum {string}
-                     * @property {string} OPERATION_STATE_UNSPECIFIED=OPERATION_STATE_UNSPECIFIED OPERATION_STATE_UNSPECIFIED value
-                     * @property {string} INITIALIZING=INITIALIZING INITIALIZING value
-                     * @property {string} PROCESSING=PROCESSING PROCESSING value
-                     * @property {string} CANCELLING=CANCELLING CANCELLING value
-                     * @property {string} FINALIZING=FINALIZING FINALIZING value
-                     * @property {string} SUCCESSFUL=SUCCESSFUL SUCCESSFUL value
-                     * @property {string} FAILED=FAILED FAILED value
-                     * @property {string} CANCELLED=CANCELLED CANCELLED value
-                     */
-                    v1.OperationState = (function() {
-                        var valuesById = {}, values = Object.create(valuesById);
-                        values[valuesById[0] = "OPERATION_STATE_UNSPECIFIED"] = "OPERATION_STATE_UNSPECIFIED";
-                        values[valuesById[1] = "INITIALIZING"] = "INITIALIZING";
-                        values[valuesById[2] = "PROCESSING"] = "PROCESSING";
-                        values[valuesById[3] = "CANCELLING"] = "CANCELLING";
-                        values[valuesById[4] = "FINALIZING"] = "FINALIZING";
-                        values[valuesById[5] = "SUCCESSFUL"] = "SUCCESSFUL";
-                        values[valuesById[6] = "FAILED"] = "FAILED";
-                        values[valuesById[7] = "CANCELLED"] = "CANCELLED";
-                        return values;
+                        return Progress;
                     })();
     
                     return v1;
@@ -3478,6674 +12118,6 @@
             })();
     
             return firestore;
-        })();
-    
-        google.api = (function() {
-    
-            /**
-             * Namespace api.
-             * @memberof google
-             * @namespace
-             */
-            var api = {};
-    
-            api.Http = (function() {
-    
-                /**
-                 * Properties of a Http.
-                 * @memberof google.api
-                 * @interface IHttp
-                 * @property {Array.<google.api.IHttpRule>|null} [rules] Http rules
-                 */
-    
-                /**
-                 * Constructs a new Http.
-                 * @memberof google.api
-                 * @classdesc Represents a Http.
-                 * @implements IHttp
-                 * @constructor
-                 * @param {google.api.IHttp=} [properties] Properties to set
-                 */
-                function Http(properties) {
-                    this.rules = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Http rules.
-                 * @member {Array.<google.api.IHttpRule>} rules
-                 * @memberof google.api.Http
-                 * @instance
-                 */
-                Http.prototype.rules = $util.emptyArray;
-    
-                /**
-                 * Creates a Http message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.api.Http
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.api.Http} Http
-                 */
-                Http.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.api.Http)
-                        return object;
-                    var message = new $root.google.api.Http();
-                    if (object.rules) {
-                        if (!Array.isArray(object.rules))
-                            throw TypeError(".google.api.Http.rules: array expected");
-                        message.rules = [];
-                        for (var i = 0; i < object.rules.length; ++i) {
-                            if (typeof object.rules[i] !== "object")
-                                throw TypeError(".google.api.Http.rules: object expected");
-                            message.rules[i] = $root.google.api.HttpRule.fromObject(object.rules[i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a Http message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.api.Http
-                 * @static
-                 * @param {google.api.Http} message Http
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Http.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.rules = [];
-                    if (message.rules && message.rules.length) {
-                        object.rules = [];
-                        for (var j = 0; j < message.rules.length; ++j)
-                            object.rules[j] = $root.google.api.HttpRule.toObject(message.rules[j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this Http to JSON.
-                 * @function toJSON
-                 * @memberof google.api.Http
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Http.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return Http;
-            })();
-    
-            api.HttpRule = (function() {
-    
-                /**
-                 * Properties of a HttpRule.
-                 * @memberof google.api
-                 * @interface IHttpRule
-                 * @property {string|null} [get] HttpRule get
-                 * @property {string|null} [put] HttpRule put
-                 * @property {string|null} [post] HttpRule post
-                 * @property {string|null} ["delete"] HttpRule delete
-                 * @property {string|null} [patch] HttpRule patch
-                 * @property {google.api.ICustomHttpPattern|null} [custom] HttpRule custom
-                 * @property {string|null} [selector] HttpRule selector
-                 * @property {string|null} [body] HttpRule body
-                 * @property {Array.<google.api.IHttpRule>|null} [additionalBindings] HttpRule additionalBindings
-                 */
-    
-                /**
-                 * Constructs a new HttpRule.
-                 * @memberof google.api
-                 * @classdesc Represents a HttpRule.
-                 * @implements IHttpRule
-                 * @constructor
-                 * @param {google.api.IHttpRule=} [properties] Properties to set
-                 */
-                function HttpRule(properties) {
-                    this.additionalBindings = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * HttpRule get.
-                 * @member {string|null|undefined} get
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                HttpRule.prototype.get = null;
-    
-                /**
-                 * HttpRule put.
-                 * @member {string|null|undefined} put
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                HttpRule.prototype.put = null;
-    
-                /**
-                 * HttpRule post.
-                 * @member {string|null|undefined} post
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                HttpRule.prototype.post = null;
-    
-                /**
-                 * HttpRule delete.
-                 * @member {string|null|undefined} delete
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                HttpRule.prototype["delete"] = null;
-    
-                /**
-                 * HttpRule patch.
-                 * @member {string|null|undefined} patch
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                HttpRule.prototype.patch = null;
-    
-                /**
-                 * HttpRule custom.
-                 * @member {google.api.ICustomHttpPattern|null|undefined} custom
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                HttpRule.prototype.custom = null;
-    
-                /**
-                 * HttpRule selector.
-                 * @member {string} selector
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                HttpRule.prototype.selector = "";
-    
-                /**
-                 * HttpRule body.
-                 * @member {string} body
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                HttpRule.prototype.body = "";
-    
-                /**
-                 * HttpRule additionalBindings.
-                 * @member {Array.<google.api.IHttpRule>} additionalBindings
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                HttpRule.prototype.additionalBindings = $util.emptyArray;
-    
-                // OneOf field names bound to virtual getters and setters
-                var $oneOfFields;
-    
-                /**
-                 * HttpRule pattern.
-                 * @member {"get"|"put"|"post"|"delete"|"patch"|"custom"|undefined} pattern
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                Object.defineProperty(HttpRule.prototype, "pattern", {
-                    get: $util.oneOfGetter($oneOfFields = ["get", "put", "post", "delete", "patch", "custom"]),
-                    set: $util.oneOfSetter($oneOfFields)
-                });
-    
-                /**
-                 * Creates a HttpRule message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.api.HttpRule
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.api.HttpRule} HttpRule
-                 */
-                HttpRule.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.api.HttpRule)
-                        return object;
-                    var message = new $root.google.api.HttpRule();
-                    if (object.get != null)
-                        message.get = String(object.get);
-                    if (object.put != null)
-                        message.put = String(object.put);
-                    if (object.post != null)
-                        message.post = String(object.post);
-                    if (object["delete"] != null)
-                        message["delete"] = String(object["delete"]);
-                    if (object.patch != null)
-                        message.patch = String(object.patch);
-                    if (object.custom != null) {
-                        if (typeof object.custom !== "object")
-                            throw TypeError(".google.api.HttpRule.custom: object expected");
-                        message.custom = $root.google.api.CustomHttpPattern.fromObject(object.custom);
-                    }
-                    if (object.selector != null)
-                        message.selector = String(object.selector);
-                    if (object.body != null)
-                        message.body = String(object.body);
-                    if (object.additionalBindings) {
-                        if (!Array.isArray(object.additionalBindings))
-                            throw TypeError(".google.api.HttpRule.additionalBindings: array expected");
-                        message.additionalBindings = [];
-                        for (var i = 0; i < object.additionalBindings.length; ++i) {
-                            if (typeof object.additionalBindings[i] !== "object")
-                                throw TypeError(".google.api.HttpRule.additionalBindings: object expected");
-                            message.additionalBindings[i] = $root.google.api.HttpRule.fromObject(object.additionalBindings[i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a HttpRule message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.api.HttpRule
-                 * @static
-                 * @param {google.api.HttpRule} message HttpRule
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                HttpRule.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.additionalBindings = [];
-                    if (options.defaults) {
-                        object.selector = "";
-                        object.body = "";
-                    }
-                    if (message.selector != null && message.hasOwnProperty("selector"))
-                        object.selector = message.selector;
-                    if (message.get != null && message.hasOwnProperty("get")) {
-                        object.get = message.get;
-                        if (options.oneofs)
-                            object.pattern = "get";
-                    }
-                    if (message.put != null && message.hasOwnProperty("put")) {
-                        object.put = message.put;
-                        if (options.oneofs)
-                            object.pattern = "put";
-                    }
-                    if (message.post != null && message.hasOwnProperty("post")) {
-                        object.post = message.post;
-                        if (options.oneofs)
-                            object.pattern = "post";
-                    }
-                    if (message["delete"] != null && message.hasOwnProperty("delete")) {
-                        object["delete"] = message["delete"];
-                        if (options.oneofs)
-                            object.pattern = "delete";
-                    }
-                    if (message.patch != null && message.hasOwnProperty("patch")) {
-                        object.patch = message.patch;
-                        if (options.oneofs)
-                            object.pattern = "patch";
-                    }
-                    if (message.body != null && message.hasOwnProperty("body"))
-                        object.body = message.body;
-                    if (message.custom != null && message.hasOwnProperty("custom")) {
-                        object.custom = $root.google.api.CustomHttpPattern.toObject(message.custom, options);
-                        if (options.oneofs)
-                            object.pattern = "custom";
-                    }
-                    if (message.additionalBindings && message.additionalBindings.length) {
-                        object.additionalBindings = [];
-                        for (var j = 0; j < message.additionalBindings.length; ++j)
-                            object.additionalBindings[j] = $root.google.api.HttpRule.toObject(message.additionalBindings[j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this HttpRule to JSON.
-                 * @function toJSON
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                HttpRule.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return HttpRule;
-            })();
-    
-            api.CustomHttpPattern = (function() {
-    
-                /**
-                 * Properties of a CustomHttpPattern.
-                 * @memberof google.api
-                 * @interface ICustomHttpPattern
-                 * @property {string|null} [kind] CustomHttpPattern kind
-                 * @property {string|null} [path] CustomHttpPattern path
-                 */
-    
-                /**
-                 * Constructs a new CustomHttpPattern.
-                 * @memberof google.api
-                 * @classdesc Represents a CustomHttpPattern.
-                 * @implements ICustomHttpPattern
-                 * @constructor
-                 * @param {google.api.ICustomHttpPattern=} [properties] Properties to set
-                 */
-                function CustomHttpPattern(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * CustomHttpPattern kind.
-                 * @member {string} kind
-                 * @memberof google.api.CustomHttpPattern
-                 * @instance
-                 */
-                CustomHttpPattern.prototype.kind = "";
-    
-                /**
-                 * CustomHttpPattern path.
-                 * @member {string} path
-                 * @memberof google.api.CustomHttpPattern
-                 * @instance
-                 */
-                CustomHttpPattern.prototype.path = "";
-    
-                /**
-                 * Creates a CustomHttpPattern message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.api.CustomHttpPattern
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.api.CustomHttpPattern} CustomHttpPattern
-                 */
-                CustomHttpPattern.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.api.CustomHttpPattern)
-                        return object;
-                    var message = new $root.google.api.CustomHttpPattern();
-                    if (object.kind != null)
-                        message.kind = String(object.kind);
-                    if (object.path != null)
-                        message.path = String(object.path);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a CustomHttpPattern message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.api.CustomHttpPattern
-                 * @static
-                 * @param {google.api.CustomHttpPattern} message CustomHttpPattern
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                CustomHttpPattern.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.kind = "";
-                        object.path = "";
-                    }
-                    if (message.kind != null && message.hasOwnProperty("kind"))
-                        object.kind = message.kind;
-                    if (message.path != null && message.hasOwnProperty("path"))
-                        object.path = message.path;
-                    return object;
-                };
-    
-                /**
-                 * Converts this CustomHttpPattern to JSON.
-                 * @function toJSON
-                 * @memberof google.api.CustomHttpPattern
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                CustomHttpPattern.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return CustomHttpPattern;
-            })();
-    
-            /**
-             * FieldBehavior enum.
-             * @name google.api.FieldBehavior
-             * @enum {string}
-             * @property {string} FIELD_BEHAVIOR_UNSPECIFIED=FIELD_BEHAVIOR_UNSPECIFIED FIELD_BEHAVIOR_UNSPECIFIED value
-             * @property {string} OPTIONAL=OPTIONAL OPTIONAL value
-             * @property {string} REQUIRED=REQUIRED REQUIRED value
-             * @property {string} OUTPUT_ONLY=OUTPUT_ONLY OUTPUT_ONLY value
-             * @property {string} INPUT_ONLY=INPUT_ONLY INPUT_ONLY value
-             * @property {string} IMMUTABLE=IMMUTABLE IMMUTABLE value
-             * @property {string} UNORDERED_LIST=UNORDERED_LIST UNORDERED_LIST value
-             * @property {string} NON_EMPTY_DEFAULT=NON_EMPTY_DEFAULT NON_EMPTY_DEFAULT value
-             */
-            api.FieldBehavior = (function() {
-                var valuesById = {}, values = Object.create(valuesById);
-                values[valuesById[0] = "FIELD_BEHAVIOR_UNSPECIFIED"] = "FIELD_BEHAVIOR_UNSPECIFIED";
-                values[valuesById[1] = "OPTIONAL"] = "OPTIONAL";
-                values[valuesById[2] = "REQUIRED"] = "REQUIRED";
-                values[valuesById[3] = "OUTPUT_ONLY"] = "OUTPUT_ONLY";
-                values[valuesById[4] = "INPUT_ONLY"] = "INPUT_ONLY";
-                values[valuesById[5] = "IMMUTABLE"] = "IMMUTABLE";
-                values[valuesById[6] = "UNORDERED_LIST"] = "UNORDERED_LIST";
-                values[valuesById[7] = "NON_EMPTY_DEFAULT"] = "NON_EMPTY_DEFAULT";
-                return values;
-            })();
-    
-            api.ResourceDescriptor = (function() {
-    
-                /**
-                 * Properties of a ResourceDescriptor.
-                 * @memberof google.api
-                 * @interface IResourceDescriptor
-                 * @property {string|null} [type] ResourceDescriptor type
-                 * @property {Array.<string>|null} [pattern] ResourceDescriptor pattern
-                 * @property {string|null} [nameField] ResourceDescriptor nameField
-                 * @property {google.api.ResourceDescriptor.History|null} [history] ResourceDescriptor history
-                 * @property {string|null} [plural] ResourceDescriptor plural
-                 * @property {string|null} [singular] ResourceDescriptor singular
-                 * @property {Array.<google.api.ResourceDescriptor.Style>|null} [style] ResourceDescriptor style
-                 */
-    
-                /**
-                 * Constructs a new ResourceDescriptor.
-                 * @memberof google.api
-                 * @classdesc Represents a ResourceDescriptor.
-                 * @implements IResourceDescriptor
-                 * @constructor
-                 * @param {google.api.IResourceDescriptor=} [properties] Properties to set
-                 */
-                function ResourceDescriptor(properties) {
-                    this.pattern = [];
-                    this.style = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * ResourceDescriptor type.
-                 * @member {string} type
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.type = "";
-    
-                /**
-                 * ResourceDescriptor pattern.
-                 * @member {Array.<string>} pattern
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.pattern = $util.emptyArray;
-    
-                /**
-                 * ResourceDescriptor nameField.
-                 * @member {string} nameField
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.nameField = "";
-    
-                /**
-                 * ResourceDescriptor history.
-                 * @member {google.api.ResourceDescriptor.History} history
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.history = 0;
-    
-                /**
-                 * ResourceDescriptor plural.
-                 * @member {string} plural
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.plural = "";
-    
-                /**
-                 * ResourceDescriptor singular.
-                 * @member {string} singular
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.singular = "";
-    
-                /**
-                 * ResourceDescriptor style.
-                 * @member {Array.<google.api.ResourceDescriptor.Style>} style
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.style = $util.emptyArray;
-    
-                /**
-                 * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.api.ResourceDescriptor
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.api.ResourceDescriptor} ResourceDescriptor
-                 */
-                ResourceDescriptor.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.api.ResourceDescriptor)
-                        return object;
-                    var message = new $root.google.api.ResourceDescriptor();
-                    if (object.type != null)
-                        message.type = String(object.type);
-                    if (object.pattern) {
-                        if (!Array.isArray(object.pattern))
-                            throw TypeError(".google.api.ResourceDescriptor.pattern: array expected");
-                        message.pattern = [];
-                        for (var i = 0; i < object.pattern.length; ++i)
-                            message.pattern[i] = String(object.pattern[i]);
-                    }
-                    if (object.nameField != null)
-                        message.nameField = String(object.nameField);
-                    switch (object.history) {
-                    case "HISTORY_UNSPECIFIED":
-                    case 0:
-                        message.history = 0;
-                        break;
-                    case "ORIGINALLY_SINGLE_PATTERN":
-                    case 1:
-                        message.history = 1;
-                        break;
-                    case "FUTURE_MULTI_PATTERN":
-                    case 2:
-                        message.history = 2;
-                        break;
-                    }
-                    if (object.plural != null)
-                        message.plural = String(object.plural);
-                    if (object.singular != null)
-                        message.singular = String(object.singular);
-                    if (object.style) {
-                        if (!Array.isArray(object.style))
-                            throw TypeError(".google.api.ResourceDescriptor.style: array expected");
-                        message.style = [];
-                        for (var i = 0; i < object.style.length; ++i)
-                            switch (object.style[i]) {
-                            default:
-                            case "STYLE_UNSPECIFIED":
-                            case 0:
-                                message.style[i] = 0;
-                                break;
-                            case "DECLARATIVE_FRIENDLY":
-                            case 1:
-                                message.style[i] = 1;
-                                break;
-                            }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a ResourceDescriptor message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.api.ResourceDescriptor
-                 * @static
-                 * @param {google.api.ResourceDescriptor} message ResourceDescriptor
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                ResourceDescriptor.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults) {
-                        object.pattern = [];
-                        object.style = [];
-                    }
-                    if (options.defaults) {
-                        object.type = "";
-                        object.nameField = "";
-                        object.history = options.enums === String ? "HISTORY_UNSPECIFIED" : 0;
-                        object.plural = "";
-                        object.singular = "";
-                    }
-                    if (message.type != null && message.hasOwnProperty("type"))
-                        object.type = message.type;
-                    if (message.pattern && message.pattern.length) {
-                        object.pattern = [];
-                        for (var j = 0; j < message.pattern.length; ++j)
-                            object.pattern[j] = message.pattern[j];
-                    }
-                    if (message.nameField != null && message.hasOwnProperty("nameField"))
-                        object.nameField = message.nameField;
-                    if (message.history != null && message.hasOwnProperty("history"))
-                        object.history = options.enums === String ? $root.google.api.ResourceDescriptor.History[message.history] : message.history;
-                    if (message.plural != null && message.hasOwnProperty("plural"))
-                        object.plural = message.plural;
-                    if (message.singular != null && message.hasOwnProperty("singular"))
-                        object.singular = message.singular;
-                    if (message.style && message.style.length) {
-                        object.style = [];
-                        for (var j = 0; j < message.style.length; ++j)
-                            object.style[j] = options.enums === String ? $root.google.api.ResourceDescriptor.Style[message.style[j]] : message.style[j];
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this ResourceDescriptor to JSON.
-                 * @function toJSON
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                ResourceDescriptor.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * History enum.
-                 * @name google.api.ResourceDescriptor.History
-                 * @enum {string}
-                 * @property {string} HISTORY_UNSPECIFIED=HISTORY_UNSPECIFIED HISTORY_UNSPECIFIED value
-                 * @property {string} ORIGINALLY_SINGLE_PATTERN=ORIGINALLY_SINGLE_PATTERN ORIGINALLY_SINGLE_PATTERN value
-                 * @property {string} FUTURE_MULTI_PATTERN=FUTURE_MULTI_PATTERN FUTURE_MULTI_PATTERN value
-                 */
-                ResourceDescriptor.History = (function() {
-                    var valuesById = {}, values = Object.create(valuesById);
-                    values[valuesById[0] = "HISTORY_UNSPECIFIED"] = "HISTORY_UNSPECIFIED";
-                    values[valuesById[1] = "ORIGINALLY_SINGLE_PATTERN"] = "ORIGINALLY_SINGLE_PATTERN";
-                    values[valuesById[2] = "FUTURE_MULTI_PATTERN"] = "FUTURE_MULTI_PATTERN";
-                    return values;
-                })();
-    
-                /**
-                 * Style enum.
-                 * @name google.api.ResourceDescriptor.Style
-                 * @enum {string}
-                 * @property {string} STYLE_UNSPECIFIED=STYLE_UNSPECIFIED STYLE_UNSPECIFIED value
-                 * @property {string} DECLARATIVE_FRIENDLY=DECLARATIVE_FRIENDLY DECLARATIVE_FRIENDLY value
-                 */
-                ResourceDescriptor.Style = (function() {
-                    var valuesById = {}, values = Object.create(valuesById);
-                    values[valuesById[0] = "STYLE_UNSPECIFIED"] = "STYLE_UNSPECIFIED";
-                    values[valuesById[1] = "DECLARATIVE_FRIENDLY"] = "DECLARATIVE_FRIENDLY";
-                    return values;
-                })();
-    
-                return ResourceDescriptor;
-            })();
-    
-            api.ResourceReference = (function() {
-    
-                /**
-                 * Properties of a ResourceReference.
-                 * @memberof google.api
-                 * @interface IResourceReference
-                 * @property {string|null} [type] ResourceReference type
-                 * @property {string|null} [childType] ResourceReference childType
-                 */
-    
-                /**
-                 * Constructs a new ResourceReference.
-                 * @memberof google.api
-                 * @classdesc Represents a ResourceReference.
-                 * @implements IResourceReference
-                 * @constructor
-                 * @param {google.api.IResourceReference=} [properties] Properties to set
-                 */
-                function ResourceReference(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * ResourceReference type.
-                 * @member {string} type
-                 * @memberof google.api.ResourceReference
-                 * @instance
-                 */
-                ResourceReference.prototype.type = "";
-    
-                /**
-                 * ResourceReference childType.
-                 * @member {string} childType
-                 * @memberof google.api.ResourceReference
-                 * @instance
-                 */
-                ResourceReference.prototype.childType = "";
-    
-                /**
-                 * Creates a ResourceReference message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.api.ResourceReference
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.api.ResourceReference} ResourceReference
-                 */
-                ResourceReference.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.api.ResourceReference)
-                        return object;
-                    var message = new $root.google.api.ResourceReference();
-                    if (object.type != null)
-                        message.type = String(object.type);
-                    if (object.childType != null)
-                        message.childType = String(object.childType);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a ResourceReference message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.api.ResourceReference
-                 * @static
-                 * @param {google.api.ResourceReference} message ResourceReference
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                ResourceReference.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.type = "";
-                        object.childType = "";
-                    }
-                    if (message.type != null && message.hasOwnProperty("type"))
-                        object.type = message.type;
-                    if (message.childType != null && message.hasOwnProperty("childType"))
-                        object.childType = message.childType;
-                    return object;
-                };
-    
-                /**
-                 * Converts this ResourceReference to JSON.
-                 * @function toJSON
-                 * @memberof google.api.ResourceReference
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                ResourceReference.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return ResourceReference;
-            })();
-    
-            return api;
-        })();
-    
-        google.protobuf = (function() {
-    
-            /**
-             * Namespace protobuf.
-             * @memberof google
-             * @namespace
-             */
-            var protobuf = {};
-    
-            protobuf.FileDescriptorSet = (function() {
-    
-                /**
-                 * Properties of a FileDescriptorSet.
-                 * @memberof google.protobuf
-                 * @interface IFileDescriptorSet
-                 * @property {Array.<google.protobuf.IFileDescriptorProto>|null} [file] FileDescriptorSet file
-                 */
-    
-                /**
-                 * Constructs a new FileDescriptorSet.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a FileDescriptorSet.
-                 * @implements IFileDescriptorSet
-                 * @constructor
-                 * @param {google.protobuf.IFileDescriptorSet=} [properties] Properties to set
-                 */
-                function FileDescriptorSet(properties) {
-                    this.file = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * FileDescriptorSet file.
-                 * @member {Array.<google.protobuf.IFileDescriptorProto>} file
-                 * @memberof google.protobuf.FileDescriptorSet
-                 * @instance
-                 */
-                FileDescriptorSet.prototype.file = $util.emptyArray;
-    
-                /**
-                 * Creates a FileDescriptorSet message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.FileDescriptorSet
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.FileDescriptorSet} FileDescriptorSet
-                 */
-                FileDescriptorSet.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.FileDescriptorSet)
-                        return object;
-                    var message = new $root.google.protobuf.FileDescriptorSet();
-                    if (object.file) {
-                        if (!Array.isArray(object.file))
-                            throw TypeError(".google.protobuf.FileDescriptorSet.file: array expected");
-                        message.file = [];
-                        for (var i = 0; i < object.file.length; ++i) {
-                            if (typeof object.file[i] !== "object")
-                                throw TypeError(".google.protobuf.FileDescriptorSet.file: object expected");
-                            message.file[i] = $root.google.protobuf.FileDescriptorProto.fromObject(object.file[i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a FileDescriptorSet message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.FileDescriptorSet
-                 * @static
-                 * @param {google.protobuf.FileDescriptorSet} message FileDescriptorSet
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                FileDescriptorSet.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.file = [];
-                    if (message.file && message.file.length) {
-                        object.file = [];
-                        for (var j = 0; j < message.file.length; ++j)
-                            object.file[j] = $root.google.protobuf.FileDescriptorProto.toObject(message.file[j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this FileDescriptorSet to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.FileDescriptorSet
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                FileDescriptorSet.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return FileDescriptorSet;
-            })();
-    
-            protobuf.FileDescriptorProto = (function() {
-    
-                /**
-                 * Properties of a FileDescriptorProto.
-                 * @memberof google.protobuf
-                 * @interface IFileDescriptorProto
-                 * @property {string|null} [name] FileDescriptorProto name
-                 * @property {string|null} ["package"] FileDescriptorProto package
-                 * @property {Array.<string>|null} [dependency] FileDescriptorProto dependency
-                 * @property {Array.<number>|null} [publicDependency] FileDescriptorProto publicDependency
-                 * @property {Array.<number>|null} [weakDependency] FileDescriptorProto weakDependency
-                 * @property {Array.<google.protobuf.IDescriptorProto>|null} [messageType] FileDescriptorProto messageType
-                 * @property {Array.<google.protobuf.IEnumDescriptorProto>|null} [enumType] FileDescriptorProto enumType
-                 * @property {Array.<google.protobuf.IServiceDescriptorProto>|null} [service] FileDescriptorProto service
-                 * @property {Array.<google.protobuf.IFieldDescriptorProto>|null} [extension] FileDescriptorProto extension
-                 * @property {google.protobuf.IFileOptions|null} [options] FileDescriptorProto options
-                 * @property {google.protobuf.ISourceCodeInfo|null} [sourceCodeInfo] FileDescriptorProto sourceCodeInfo
-                 * @property {string|null} [syntax] FileDescriptorProto syntax
-                 */
-    
-                /**
-                 * Constructs a new FileDescriptorProto.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a FileDescriptorProto.
-                 * @implements IFileDescriptorProto
-                 * @constructor
-                 * @param {google.protobuf.IFileDescriptorProto=} [properties] Properties to set
-                 */
-                function FileDescriptorProto(properties) {
-                    this.dependency = [];
-                    this.publicDependency = [];
-                    this.weakDependency = [];
-                    this.messageType = [];
-                    this.enumType = [];
-                    this.service = [];
-                    this.extension = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * FileDescriptorProto name.
-                 * @member {string} name
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.name = "";
-    
-                /**
-                 * FileDescriptorProto package.
-                 * @member {string} package
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype["package"] = "";
-    
-                /**
-                 * FileDescriptorProto dependency.
-                 * @member {Array.<string>} dependency
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.dependency = $util.emptyArray;
-    
-                /**
-                 * FileDescriptorProto publicDependency.
-                 * @member {Array.<number>} publicDependency
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.publicDependency = $util.emptyArray;
-    
-                /**
-                 * FileDescriptorProto weakDependency.
-                 * @member {Array.<number>} weakDependency
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.weakDependency = $util.emptyArray;
-    
-                /**
-                 * FileDescriptorProto messageType.
-                 * @member {Array.<google.protobuf.IDescriptorProto>} messageType
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.messageType = $util.emptyArray;
-    
-                /**
-                 * FileDescriptorProto enumType.
-                 * @member {Array.<google.protobuf.IEnumDescriptorProto>} enumType
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.enumType = $util.emptyArray;
-    
-                /**
-                 * FileDescriptorProto service.
-                 * @member {Array.<google.protobuf.IServiceDescriptorProto>} service
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.service = $util.emptyArray;
-    
-                /**
-                 * FileDescriptorProto extension.
-                 * @member {Array.<google.protobuf.IFieldDescriptorProto>} extension
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.extension = $util.emptyArray;
-    
-                /**
-                 * FileDescriptorProto options.
-                 * @member {google.protobuf.IFileOptions|null|undefined} options
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.options = null;
-    
-                /**
-                 * FileDescriptorProto sourceCodeInfo.
-                 * @member {google.protobuf.ISourceCodeInfo|null|undefined} sourceCodeInfo
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.sourceCodeInfo = null;
-    
-                /**
-                 * FileDescriptorProto syntax.
-                 * @member {string} syntax
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 */
-                FileDescriptorProto.prototype.syntax = "";
-    
-                /**
-                 * Creates a FileDescriptorProto message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.FileDescriptorProto} FileDescriptorProto
-                 */
-                FileDescriptorProto.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.FileDescriptorProto)
-                        return object;
-                    var message = new $root.google.protobuf.FileDescriptorProto();
-                    if (object.name != null)
-                        message.name = String(object.name);
-                    if (object["package"] != null)
-                        message["package"] = String(object["package"]);
-                    if (object.dependency) {
-                        if (!Array.isArray(object.dependency))
-                            throw TypeError(".google.protobuf.FileDescriptorProto.dependency: array expected");
-                        message.dependency = [];
-                        for (var i = 0; i < object.dependency.length; ++i)
-                            message.dependency[i] = String(object.dependency[i]);
-                    }
-                    if (object.publicDependency) {
-                        if (!Array.isArray(object.publicDependency))
-                            throw TypeError(".google.protobuf.FileDescriptorProto.publicDependency: array expected");
-                        message.publicDependency = [];
-                        for (var i = 0; i < object.publicDependency.length; ++i)
-                            message.publicDependency[i] = object.publicDependency[i] | 0;
-                    }
-                    if (object.weakDependency) {
-                        if (!Array.isArray(object.weakDependency))
-                            throw TypeError(".google.protobuf.FileDescriptorProto.weakDependency: array expected");
-                        message.weakDependency = [];
-                        for (var i = 0; i < object.weakDependency.length; ++i)
-                            message.weakDependency[i] = object.weakDependency[i] | 0;
-                    }
-                    if (object.messageType) {
-                        if (!Array.isArray(object.messageType))
-                            throw TypeError(".google.protobuf.FileDescriptorProto.messageType: array expected");
-                        message.messageType = [];
-                        for (var i = 0; i < object.messageType.length; ++i) {
-                            if (typeof object.messageType[i] !== "object")
-                                throw TypeError(".google.protobuf.FileDescriptorProto.messageType: object expected");
-                            message.messageType[i] = $root.google.protobuf.DescriptorProto.fromObject(object.messageType[i]);
-                        }
-                    }
-                    if (object.enumType) {
-                        if (!Array.isArray(object.enumType))
-                            throw TypeError(".google.protobuf.FileDescriptorProto.enumType: array expected");
-                        message.enumType = [];
-                        for (var i = 0; i < object.enumType.length; ++i) {
-                            if (typeof object.enumType[i] !== "object")
-                                throw TypeError(".google.protobuf.FileDescriptorProto.enumType: object expected");
-                            message.enumType[i] = $root.google.protobuf.EnumDescriptorProto.fromObject(object.enumType[i]);
-                        }
-                    }
-                    if (object.service) {
-                        if (!Array.isArray(object.service))
-                            throw TypeError(".google.protobuf.FileDescriptorProto.service: array expected");
-                        message.service = [];
-                        for (var i = 0; i < object.service.length; ++i) {
-                            if (typeof object.service[i] !== "object")
-                                throw TypeError(".google.protobuf.FileDescriptorProto.service: object expected");
-                            message.service[i] = $root.google.protobuf.ServiceDescriptorProto.fromObject(object.service[i]);
-                        }
-                    }
-                    if (object.extension) {
-                        if (!Array.isArray(object.extension))
-                            throw TypeError(".google.protobuf.FileDescriptorProto.extension: array expected");
-                        message.extension = [];
-                        for (var i = 0; i < object.extension.length; ++i) {
-                            if (typeof object.extension[i] !== "object")
-                                throw TypeError(".google.protobuf.FileDescriptorProto.extension: object expected");
-                            message.extension[i] = $root.google.protobuf.FieldDescriptorProto.fromObject(object.extension[i]);
-                        }
-                    }
-                    if (object.options != null) {
-                        if (typeof object.options !== "object")
-                            throw TypeError(".google.protobuf.FileDescriptorProto.options: object expected");
-                        message.options = $root.google.protobuf.FileOptions.fromObject(object.options);
-                    }
-                    if (object.sourceCodeInfo != null) {
-                        if (typeof object.sourceCodeInfo !== "object")
-                            throw TypeError(".google.protobuf.FileDescriptorProto.sourceCodeInfo: object expected");
-                        message.sourceCodeInfo = $root.google.protobuf.SourceCodeInfo.fromObject(object.sourceCodeInfo);
-                    }
-                    if (object.syntax != null)
-                        message.syntax = String(object.syntax);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a FileDescriptorProto message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @static
-                 * @param {google.protobuf.FileDescriptorProto} message FileDescriptorProto
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                FileDescriptorProto.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults) {
-                        object.dependency = [];
-                        object.messageType = [];
-                        object.enumType = [];
-                        object.service = [];
-                        object.extension = [];
-                        object.publicDependency = [];
-                        object.weakDependency = [];
-                    }
-                    if (options.defaults) {
-                        object.name = "";
-                        object["package"] = "";
-                        object.options = null;
-                        object.sourceCodeInfo = null;
-                        object.syntax = "";
-                    }
-                    if (message.name != null && message.hasOwnProperty("name"))
-                        object.name = message.name;
-                    if (message["package"] != null && message.hasOwnProperty("package"))
-                        object["package"] = message["package"];
-                    if (message.dependency && message.dependency.length) {
-                        object.dependency = [];
-                        for (var j = 0; j < message.dependency.length; ++j)
-                            object.dependency[j] = message.dependency[j];
-                    }
-                    if (message.messageType && message.messageType.length) {
-                        object.messageType = [];
-                        for (var j = 0; j < message.messageType.length; ++j)
-                            object.messageType[j] = $root.google.protobuf.DescriptorProto.toObject(message.messageType[j], options);
-                    }
-                    if (message.enumType && message.enumType.length) {
-                        object.enumType = [];
-                        for (var j = 0; j < message.enumType.length; ++j)
-                            object.enumType[j] = $root.google.protobuf.EnumDescriptorProto.toObject(message.enumType[j], options);
-                    }
-                    if (message.service && message.service.length) {
-                        object.service = [];
-                        for (var j = 0; j < message.service.length; ++j)
-                            object.service[j] = $root.google.protobuf.ServiceDescriptorProto.toObject(message.service[j], options);
-                    }
-                    if (message.extension && message.extension.length) {
-                        object.extension = [];
-                        for (var j = 0; j < message.extension.length; ++j)
-                            object.extension[j] = $root.google.protobuf.FieldDescriptorProto.toObject(message.extension[j], options);
-                    }
-                    if (message.options != null && message.hasOwnProperty("options"))
-                        object.options = $root.google.protobuf.FileOptions.toObject(message.options, options);
-                    if (message.sourceCodeInfo != null && message.hasOwnProperty("sourceCodeInfo"))
-                        object.sourceCodeInfo = $root.google.protobuf.SourceCodeInfo.toObject(message.sourceCodeInfo, options);
-                    if (message.publicDependency && message.publicDependency.length) {
-                        object.publicDependency = [];
-                        for (var j = 0; j < message.publicDependency.length; ++j)
-                            object.publicDependency[j] = message.publicDependency[j];
-                    }
-                    if (message.weakDependency && message.weakDependency.length) {
-                        object.weakDependency = [];
-                        for (var j = 0; j < message.weakDependency.length; ++j)
-                            object.weakDependency[j] = message.weakDependency[j];
-                    }
-                    if (message.syntax != null && message.hasOwnProperty("syntax"))
-                        object.syntax = message.syntax;
-                    return object;
-                };
-    
-                /**
-                 * Converts this FileDescriptorProto to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.FileDescriptorProto
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                FileDescriptorProto.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return FileDescriptorProto;
-            })();
-    
-            protobuf.DescriptorProto = (function() {
-    
-                /**
-                 * Properties of a DescriptorProto.
-                 * @memberof google.protobuf
-                 * @interface IDescriptorProto
-                 * @property {string|null} [name] DescriptorProto name
-                 * @property {Array.<google.protobuf.IFieldDescriptorProto>|null} [field] DescriptorProto field
-                 * @property {Array.<google.protobuf.IFieldDescriptorProto>|null} [extension] DescriptorProto extension
-                 * @property {Array.<google.protobuf.IDescriptorProto>|null} [nestedType] DescriptorProto nestedType
-                 * @property {Array.<google.protobuf.IEnumDescriptorProto>|null} [enumType] DescriptorProto enumType
-                 * @property {Array.<google.protobuf.DescriptorProto.IExtensionRange>|null} [extensionRange] DescriptorProto extensionRange
-                 * @property {Array.<google.protobuf.IOneofDescriptorProto>|null} [oneofDecl] DescriptorProto oneofDecl
-                 * @property {google.protobuf.IMessageOptions|null} [options] DescriptorProto options
-                 * @property {Array.<google.protobuf.DescriptorProto.IReservedRange>|null} [reservedRange] DescriptorProto reservedRange
-                 * @property {Array.<string>|null} [reservedName] DescriptorProto reservedName
-                 */
-    
-                /**
-                 * Constructs a new DescriptorProto.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a DescriptorProto.
-                 * @implements IDescriptorProto
-                 * @constructor
-                 * @param {google.protobuf.IDescriptorProto=} [properties] Properties to set
-                 */
-                function DescriptorProto(properties) {
-                    this.field = [];
-                    this.extension = [];
-                    this.nestedType = [];
-                    this.enumType = [];
-                    this.extensionRange = [];
-                    this.oneofDecl = [];
-                    this.reservedRange = [];
-                    this.reservedName = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * DescriptorProto name.
-                 * @member {string} name
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 */
-                DescriptorProto.prototype.name = "";
-    
-                /**
-                 * DescriptorProto field.
-                 * @member {Array.<google.protobuf.IFieldDescriptorProto>} field
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 */
-                DescriptorProto.prototype.field = $util.emptyArray;
-    
-                /**
-                 * DescriptorProto extension.
-                 * @member {Array.<google.protobuf.IFieldDescriptorProto>} extension
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 */
-                DescriptorProto.prototype.extension = $util.emptyArray;
-    
-                /**
-                 * DescriptorProto nestedType.
-                 * @member {Array.<google.protobuf.IDescriptorProto>} nestedType
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 */
-                DescriptorProto.prototype.nestedType = $util.emptyArray;
-    
-                /**
-                 * DescriptorProto enumType.
-                 * @member {Array.<google.protobuf.IEnumDescriptorProto>} enumType
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 */
-                DescriptorProto.prototype.enumType = $util.emptyArray;
-    
-                /**
-                 * DescriptorProto extensionRange.
-                 * @member {Array.<google.protobuf.DescriptorProto.IExtensionRange>} extensionRange
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 */
-                DescriptorProto.prototype.extensionRange = $util.emptyArray;
-    
-                /**
-                 * DescriptorProto oneofDecl.
-                 * @member {Array.<google.protobuf.IOneofDescriptorProto>} oneofDecl
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 */
-                DescriptorProto.prototype.oneofDecl = $util.emptyArray;
-    
-                /**
-                 * DescriptorProto options.
-                 * @member {google.protobuf.IMessageOptions|null|undefined} options
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 */
-                DescriptorProto.prototype.options = null;
-    
-                /**
-                 * DescriptorProto reservedRange.
-                 * @member {Array.<google.protobuf.DescriptorProto.IReservedRange>} reservedRange
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 */
-                DescriptorProto.prototype.reservedRange = $util.emptyArray;
-    
-                /**
-                 * DescriptorProto reservedName.
-                 * @member {Array.<string>} reservedName
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 */
-                DescriptorProto.prototype.reservedName = $util.emptyArray;
-    
-                /**
-                 * Creates a DescriptorProto message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.DescriptorProto
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.DescriptorProto} DescriptorProto
-                 */
-                DescriptorProto.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.DescriptorProto)
-                        return object;
-                    var message = new $root.google.protobuf.DescriptorProto();
-                    if (object.name != null)
-                        message.name = String(object.name);
-                    if (object.field) {
-                        if (!Array.isArray(object.field))
-                            throw TypeError(".google.protobuf.DescriptorProto.field: array expected");
-                        message.field = [];
-                        for (var i = 0; i < object.field.length; ++i) {
-                            if (typeof object.field[i] !== "object")
-                                throw TypeError(".google.protobuf.DescriptorProto.field: object expected");
-                            message.field[i] = $root.google.protobuf.FieldDescriptorProto.fromObject(object.field[i]);
-                        }
-                    }
-                    if (object.extension) {
-                        if (!Array.isArray(object.extension))
-                            throw TypeError(".google.protobuf.DescriptorProto.extension: array expected");
-                        message.extension = [];
-                        for (var i = 0; i < object.extension.length; ++i) {
-                            if (typeof object.extension[i] !== "object")
-                                throw TypeError(".google.protobuf.DescriptorProto.extension: object expected");
-                            message.extension[i] = $root.google.protobuf.FieldDescriptorProto.fromObject(object.extension[i]);
-                        }
-                    }
-                    if (object.nestedType) {
-                        if (!Array.isArray(object.nestedType))
-                            throw TypeError(".google.protobuf.DescriptorProto.nestedType: array expected");
-                        message.nestedType = [];
-                        for (var i = 0; i < object.nestedType.length; ++i) {
-                            if (typeof object.nestedType[i] !== "object")
-                                throw TypeError(".google.protobuf.DescriptorProto.nestedType: object expected");
-                            message.nestedType[i] = $root.google.protobuf.DescriptorProto.fromObject(object.nestedType[i]);
-                        }
-                    }
-                    if (object.enumType) {
-                        if (!Array.isArray(object.enumType))
-                            throw TypeError(".google.protobuf.DescriptorProto.enumType: array expected");
-                        message.enumType = [];
-                        for (var i = 0; i < object.enumType.length; ++i) {
-                            if (typeof object.enumType[i] !== "object")
-                                throw TypeError(".google.protobuf.DescriptorProto.enumType: object expected");
-                            message.enumType[i] = $root.google.protobuf.EnumDescriptorProto.fromObject(object.enumType[i]);
-                        }
-                    }
-                    if (object.extensionRange) {
-                        if (!Array.isArray(object.extensionRange))
-                            throw TypeError(".google.protobuf.DescriptorProto.extensionRange: array expected");
-                        message.extensionRange = [];
-                        for (var i = 0; i < object.extensionRange.length; ++i) {
-                            if (typeof object.extensionRange[i] !== "object")
-                                throw TypeError(".google.protobuf.DescriptorProto.extensionRange: object expected");
-                            message.extensionRange[i] = $root.google.protobuf.DescriptorProto.ExtensionRange.fromObject(object.extensionRange[i]);
-                        }
-                    }
-                    if (object.oneofDecl) {
-                        if (!Array.isArray(object.oneofDecl))
-                            throw TypeError(".google.protobuf.DescriptorProto.oneofDecl: array expected");
-                        message.oneofDecl = [];
-                        for (var i = 0; i < object.oneofDecl.length; ++i) {
-                            if (typeof object.oneofDecl[i] !== "object")
-                                throw TypeError(".google.protobuf.DescriptorProto.oneofDecl: object expected");
-                            message.oneofDecl[i] = $root.google.protobuf.OneofDescriptorProto.fromObject(object.oneofDecl[i]);
-                        }
-                    }
-                    if (object.options != null) {
-                        if (typeof object.options !== "object")
-                            throw TypeError(".google.protobuf.DescriptorProto.options: object expected");
-                        message.options = $root.google.protobuf.MessageOptions.fromObject(object.options);
-                    }
-                    if (object.reservedRange) {
-                        if (!Array.isArray(object.reservedRange))
-                            throw TypeError(".google.protobuf.DescriptorProto.reservedRange: array expected");
-                        message.reservedRange = [];
-                        for (var i = 0; i < object.reservedRange.length; ++i) {
-                            if (typeof object.reservedRange[i] !== "object")
-                                throw TypeError(".google.protobuf.DescriptorProto.reservedRange: object expected");
-                            message.reservedRange[i] = $root.google.protobuf.DescriptorProto.ReservedRange.fromObject(object.reservedRange[i]);
-                        }
-                    }
-                    if (object.reservedName) {
-                        if (!Array.isArray(object.reservedName))
-                            throw TypeError(".google.protobuf.DescriptorProto.reservedName: array expected");
-                        message.reservedName = [];
-                        for (var i = 0; i < object.reservedName.length; ++i)
-                            message.reservedName[i] = String(object.reservedName[i]);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a DescriptorProto message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.DescriptorProto
-                 * @static
-                 * @param {google.protobuf.DescriptorProto} message DescriptorProto
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                DescriptorProto.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults) {
-                        object.field = [];
-                        object.nestedType = [];
-                        object.enumType = [];
-                        object.extensionRange = [];
-                        object.extension = [];
-                        object.oneofDecl = [];
-                        object.reservedRange = [];
-                        object.reservedName = [];
-                    }
-                    if (options.defaults) {
-                        object.name = "";
-                        object.options = null;
-                    }
-                    if (message.name != null && message.hasOwnProperty("name"))
-                        object.name = message.name;
-                    if (message.field && message.field.length) {
-                        object.field = [];
-                        for (var j = 0; j < message.field.length; ++j)
-                            object.field[j] = $root.google.protobuf.FieldDescriptorProto.toObject(message.field[j], options);
-                    }
-                    if (message.nestedType && message.nestedType.length) {
-                        object.nestedType = [];
-                        for (var j = 0; j < message.nestedType.length; ++j)
-                            object.nestedType[j] = $root.google.protobuf.DescriptorProto.toObject(message.nestedType[j], options);
-                    }
-                    if (message.enumType && message.enumType.length) {
-                        object.enumType = [];
-                        for (var j = 0; j < message.enumType.length; ++j)
-                            object.enumType[j] = $root.google.protobuf.EnumDescriptorProto.toObject(message.enumType[j], options);
-                    }
-                    if (message.extensionRange && message.extensionRange.length) {
-                        object.extensionRange = [];
-                        for (var j = 0; j < message.extensionRange.length; ++j)
-                            object.extensionRange[j] = $root.google.protobuf.DescriptorProto.ExtensionRange.toObject(message.extensionRange[j], options);
-                    }
-                    if (message.extension && message.extension.length) {
-                        object.extension = [];
-                        for (var j = 0; j < message.extension.length; ++j)
-                            object.extension[j] = $root.google.protobuf.FieldDescriptorProto.toObject(message.extension[j], options);
-                    }
-                    if (message.options != null && message.hasOwnProperty("options"))
-                        object.options = $root.google.protobuf.MessageOptions.toObject(message.options, options);
-                    if (message.oneofDecl && message.oneofDecl.length) {
-                        object.oneofDecl = [];
-                        for (var j = 0; j < message.oneofDecl.length; ++j)
-                            object.oneofDecl[j] = $root.google.protobuf.OneofDescriptorProto.toObject(message.oneofDecl[j], options);
-                    }
-                    if (message.reservedRange && message.reservedRange.length) {
-                        object.reservedRange = [];
-                        for (var j = 0; j < message.reservedRange.length; ++j)
-                            object.reservedRange[j] = $root.google.protobuf.DescriptorProto.ReservedRange.toObject(message.reservedRange[j], options);
-                    }
-                    if (message.reservedName && message.reservedName.length) {
-                        object.reservedName = [];
-                        for (var j = 0; j < message.reservedName.length; ++j)
-                            object.reservedName[j] = message.reservedName[j];
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this DescriptorProto to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.DescriptorProto
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                DescriptorProto.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                DescriptorProto.ExtensionRange = (function() {
-    
-                    /**
-                     * Properties of an ExtensionRange.
-                     * @memberof google.protobuf.DescriptorProto
-                     * @interface IExtensionRange
-                     * @property {number|null} [start] ExtensionRange start
-                     * @property {number|null} [end] ExtensionRange end
-                     */
-    
-                    /**
-                     * Constructs a new ExtensionRange.
-                     * @memberof google.protobuf.DescriptorProto
-                     * @classdesc Represents an ExtensionRange.
-                     * @implements IExtensionRange
-                     * @constructor
-                     * @param {google.protobuf.DescriptorProto.IExtensionRange=} [properties] Properties to set
-                     */
-                    function ExtensionRange(properties) {
-                        if (properties)
-                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                if (properties[keys[i]] != null)
-                                    this[keys[i]] = properties[keys[i]];
-                    }
-    
-                    /**
-                     * ExtensionRange start.
-                     * @member {number} start
-                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
-                     * @instance
-                     */
-                    ExtensionRange.prototype.start = 0;
-    
-                    /**
-                     * ExtensionRange end.
-                     * @member {number} end
-                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
-                     * @instance
-                     */
-                    ExtensionRange.prototype.end = 0;
-    
-                    /**
-                     * Creates an ExtensionRange message from a plain object. Also converts values to their respective internal types.
-                     * @function fromObject
-                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
-                     * @static
-                     * @param {Object.<string,*>} object Plain object
-                     * @returns {google.protobuf.DescriptorProto.ExtensionRange} ExtensionRange
-                     */
-                    ExtensionRange.fromObject = function fromObject(object) {
-                        if (object instanceof $root.google.protobuf.DescriptorProto.ExtensionRange)
-                            return object;
-                        var message = new $root.google.protobuf.DescriptorProto.ExtensionRange();
-                        if (object.start != null)
-                            message.start = object.start | 0;
-                        if (object.end != null)
-                            message.end = object.end | 0;
-                        return message;
-                    };
-    
-                    /**
-                     * Creates a plain object from an ExtensionRange message. Also converts values to other types if specified.
-                     * @function toObject
-                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
-                     * @static
-                     * @param {google.protobuf.DescriptorProto.ExtensionRange} message ExtensionRange
-                     * @param {$protobuf.IConversionOptions} [options] Conversion options
-                     * @returns {Object.<string,*>} Plain object
-                     */
-                    ExtensionRange.toObject = function toObject(message, options) {
-                        if (!options)
-                            options = {};
-                        var object = {};
-                        if (options.defaults) {
-                            object.start = 0;
-                            object.end = 0;
-                        }
-                        if (message.start != null && message.hasOwnProperty("start"))
-                            object.start = message.start;
-                        if (message.end != null && message.hasOwnProperty("end"))
-                            object.end = message.end;
-                        return object;
-                    };
-    
-                    /**
-                     * Converts this ExtensionRange to JSON.
-                     * @function toJSON
-                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
-                     * @instance
-                     * @returns {Object.<string,*>} JSON object
-                     */
-                    ExtensionRange.prototype.toJSON = function toJSON() {
-                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                    };
-    
-                    return ExtensionRange;
-                })();
-    
-                DescriptorProto.ReservedRange = (function() {
-    
-                    /**
-                     * Properties of a ReservedRange.
-                     * @memberof google.protobuf.DescriptorProto
-                     * @interface IReservedRange
-                     * @property {number|null} [start] ReservedRange start
-                     * @property {number|null} [end] ReservedRange end
-                     */
-    
-                    /**
-                     * Constructs a new ReservedRange.
-                     * @memberof google.protobuf.DescriptorProto
-                     * @classdesc Represents a ReservedRange.
-                     * @implements IReservedRange
-                     * @constructor
-                     * @param {google.protobuf.DescriptorProto.IReservedRange=} [properties] Properties to set
-                     */
-                    function ReservedRange(properties) {
-                        if (properties)
-                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                if (properties[keys[i]] != null)
-                                    this[keys[i]] = properties[keys[i]];
-                    }
-    
-                    /**
-                     * ReservedRange start.
-                     * @member {number} start
-                     * @memberof google.protobuf.DescriptorProto.ReservedRange
-                     * @instance
-                     */
-                    ReservedRange.prototype.start = 0;
-    
-                    /**
-                     * ReservedRange end.
-                     * @member {number} end
-                     * @memberof google.protobuf.DescriptorProto.ReservedRange
-                     * @instance
-                     */
-                    ReservedRange.prototype.end = 0;
-    
-                    /**
-                     * Creates a ReservedRange message from a plain object. Also converts values to their respective internal types.
-                     * @function fromObject
-                     * @memberof google.protobuf.DescriptorProto.ReservedRange
-                     * @static
-                     * @param {Object.<string,*>} object Plain object
-                     * @returns {google.protobuf.DescriptorProto.ReservedRange} ReservedRange
-                     */
-                    ReservedRange.fromObject = function fromObject(object) {
-                        if (object instanceof $root.google.protobuf.DescriptorProto.ReservedRange)
-                            return object;
-                        var message = new $root.google.protobuf.DescriptorProto.ReservedRange();
-                        if (object.start != null)
-                            message.start = object.start | 0;
-                        if (object.end != null)
-                            message.end = object.end | 0;
-                        return message;
-                    };
-    
-                    /**
-                     * Creates a plain object from a ReservedRange message. Also converts values to other types if specified.
-                     * @function toObject
-                     * @memberof google.protobuf.DescriptorProto.ReservedRange
-                     * @static
-                     * @param {google.protobuf.DescriptorProto.ReservedRange} message ReservedRange
-                     * @param {$protobuf.IConversionOptions} [options] Conversion options
-                     * @returns {Object.<string,*>} Plain object
-                     */
-                    ReservedRange.toObject = function toObject(message, options) {
-                        if (!options)
-                            options = {};
-                        var object = {};
-                        if (options.defaults) {
-                            object.start = 0;
-                            object.end = 0;
-                        }
-                        if (message.start != null && message.hasOwnProperty("start"))
-                            object.start = message.start;
-                        if (message.end != null && message.hasOwnProperty("end"))
-                            object.end = message.end;
-                        return object;
-                    };
-    
-                    /**
-                     * Converts this ReservedRange to JSON.
-                     * @function toJSON
-                     * @memberof google.protobuf.DescriptorProto.ReservedRange
-                     * @instance
-                     * @returns {Object.<string,*>} JSON object
-                     */
-                    ReservedRange.prototype.toJSON = function toJSON() {
-                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                    };
-    
-                    return ReservedRange;
-                })();
-    
-                return DescriptorProto;
-            })();
-    
-            protobuf.FieldDescriptorProto = (function() {
-    
-                /**
-                 * Properties of a FieldDescriptorProto.
-                 * @memberof google.protobuf
-                 * @interface IFieldDescriptorProto
-                 * @property {string|null} [name] FieldDescriptorProto name
-                 * @property {number|null} [number] FieldDescriptorProto number
-                 * @property {google.protobuf.FieldDescriptorProto.Label|null} [label] FieldDescriptorProto label
-                 * @property {google.protobuf.FieldDescriptorProto.Type|null} [type] FieldDescriptorProto type
-                 * @property {string|null} [typeName] FieldDescriptorProto typeName
-                 * @property {string|null} [extendee] FieldDescriptorProto extendee
-                 * @property {string|null} [defaultValue] FieldDescriptorProto defaultValue
-                 * @property {number|null} [oneofIndex] FieldDescriptorProto oneofIndex
-                 * @property {string|null} [jsonName] FieldDescriptorProto jsonName
-                 * @property {google.protobuf.IFieldOptions|null} [options] FieldDescriptorProto options
-                 */
-    
-                /**
-                 * Constructs a new FieldDescriptorProto.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a FieldDescriptorProto.
-                 * @implements IFieldDescriptorProto
-                 * @constructor
-                 * @param {google.protobuf.IFieldDescriptorProto=} [properties] Properties to set
-                 */
-                function FieldDescriptorProto(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * FieldDescriptorProto name.
-                 * @member {string} name
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 */
-                FieldDescriptorProto.prototype.name = "";
-    
-                /**
-                 * FieldDescriptorProto number.
-                 * @member {number} number
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 */
-                FieldDescriptorProto.prototype.number = 0;
-    
-                /**
-                 * FieldDescriptorProto label.
-                 * @member {google.protobuf.FieldDescriptorProto.Label} label
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 */
-                FieldDescriptorProto.prototype.label = 1;
-    
-                /**
-                 * FieldDescriptorProto type.
-                 * @member {google.protobuf.FieldDescriptorProto.Type} type
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 */
-                FieldDescriptorProto.prototype.type = 1;
-    
-                /**
-                 * FieldDescriptorProto typeName.
-                 * @member {string} typeName
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 */
-                FieldDescriptorProto.prototype.typeName = "";
-    
-                /**
-                 * FieldDescriptorProto extendee.
-                 * @member {string} extendee
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 */
-                FieldDescriptorProto.prototype.extendee = "";
-    
-                /**
-                 * FieldDescriptorProto defaultValue.
-                 * @member {string} defaultValue
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 */
-                FieldDescriptorProto.prototype.defaultValue = "";
-    
-                /**
-                 * FieldDescriptorProto oneofIndex.
-                 * @member {number} oneofIndex
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 */
-                FieldDescriptorProto.prototype.oneofIndex = 0;
-    
-                /**
-                 * FieldDescriptorProto jsonName.
-                 * @member {string} jsonName
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 */
-                FieldDescriptorProto.prototype.jsonName = "";
-    
-                /**
-                 * FieldDescriptorProto options.
-                 * @member {google.protobuf.IFieldOptions|null|undefined} options
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 */
-                FieldDescriptorProto.prototype.options = null;
-    
-                /**
-                 * Creates a FieldDescriptorProto message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.FieldDescriptorProto} FieldDescriptorProto
-                 */
-                FieldDescriptorProto.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.FieldDescriptorProto)
-                        return object;
-                    var message = new $root.google.protobuf.FieldDescriptorProto();
-                    if (object.name != null)
-                        message.name = String(object.name);
-                    if (object.number != null)
-                        message.number = object.number | 0;
-                    switch (object.label) {
-                    case "LABEL_OPTIONAL":
-                    case 1:
-                        message.label = 1;
-                        break;
-                    case "LABEL_REQUIRED":
-                    case 2:
-                        message.label = 2;
-                        break;
-                    case "LABEL_REPEATED":
-                    case 3:
-                        message.label = 3;
-                        break;
-                    }
-                    switch (object.type) {
-                    case "TYPE_DOUBLE":
-                    case 1:
-                        message.type = 1;
-                        break;
-                    case "TYPE_FLOAT":
-                    case 2:
-                        message.type = 2;
-                        break;
-                    case "TYPE_INT64":
-                    case 3:
-                        message.type = 3;
-                        break;
-                    case "TYPE_UINT64":
-                    case 4:
-                        message.type = 4;
-                        break;
-                    case "TYPE_INT32":
-                    case 5:
-                        message.type = 5;
-                        break;
-                    case "TYPE_FIXED64":
-                    case 6:
-                        message.type = 6;
-                        break;
-                    case "TYPE_FIXED32":
-                    case 7:
-                        message.type = 7;
-                        break;
-                    case "TYPE_BOOL":
-                    case 8:
-                        message.type = 8;
-                        break;
-                    case "TYPE_STRING":
-                    case 9:
-                        message.type = 9;
-                        break;
-                    case "TYPE_GROUP":
-                    case 10:
-                        message.type = 10;
-                        break;
-                    case "TYPE_MESSAGE":
-                    case 11:
-                        message.type = 11;
-                        break;
-                    case "TYPE_BYTES":
-                    case 12:
-                        message.type = 12;
-                        break;
-                    case "TYPE_UINT32":
-                    case 13:
-                        message.type = 13;
-                        break;
-                    case "TYPE_ENUM":
-                    case 14:
-                        message.type = 14;
-                        break;
-                    case "TYPE_SFIXED32":
-                    case 15:
-                        message.type = 15;
-                        break;
-                    case "TYPE_SFIXED64":
-                    case 16:
-                        message.type = 16;
-                        break;
-                    case "TYPE_SINT32":
-                    case 17:
-                        message.type = 17;
-                        break;
-                    case "TYPE_SINT64":
-                    case 18:
-                        message.type = 18;
-                        break;
-                    }
-                    if (object.typeName != null)
-                        message.typeName = String(object.typeName);
-                    if (object.extendee != null)
-                        message.extendee = String(object.extendee);
-                    if (object.defaultValue != null)
-                        message.defaultValue = String(object.defaultValue);
-                    if (object.oneofIndex != null)
-                        message.oneofIndex = object.oneofIndex | 0;
-                    if (object.jsonName != null)
-                        message.jsonName = String(object.jsonName);
-                    if (object.options != null) {
-                        if (typeof object.options !== "object")
-                            throw TypeError(".google.protobuf.FieldDescriptorProto.options: object expected");
-                        message.options = $root.google.protobuf.FieldOptions.fromObject(object.options);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a FieldDescriptorProto message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @static
-                 * @param {google.protobuf.FieldDescriptorProto} message FieldDescriptorProto
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                FieldDescriptorProto.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.name = "";
-                        object.extendee = "";
-                        object.number = 0;
-                        object.label = options.enums === String ? "LABEL_OPTIONAL" : 1;
-                        object.type = options.enums === String ? "TYPE_DOUBLE" : 1;
-                        object.typeName = "";
-                        object.defaultValue = "";
-                        object.options = null;
-                        object.oneofIndex = 0;
-                        object.jsonName = "";
-                    }
-                    if (message.name != null && message.hasOwnProperty("name"))
-                        object.name = message.name;
-                    if (message.extendee != null && message.hasOwnProperty("extendee"))
-                        object.extendee = message.extendee;
-                    if (message.number != null && message.hasOwnProperty("number"))
-                        object.number = message.number;
-                    if (message.label != null && message.hasOwnProperty("label"))
-                        object.label = options.enums === String ? $root.google.protobuf.FieldDescriptorProto.Label[message.label] : message.label;
-                    if (message.type != null && message.hasOwnProperty("type"))
-                        object.type = options.enums === String ? $root.google.protobuf.FieldDescriptorProto.Type[message.type] : message.type;
-                    if (message.typeName != null && message.hasOwnProperty("typeName"))
-                        object.typeName = message.typeName;
-                    if (message.defaultValue != null && message.hasOwnProperty("defaultValue"))
-                        object.defaultValue = message.defaultValue;
-                    if (message.options != null && message.hasOwnProperty("options"))
-                        object.options = $root.google.protobuf.FieldOptions.toObject(message.options, options);
-                    if (message.oneofIndex != null && message.hasOwnProperty("oneofIndex"))
-                        object.oneofIndex = message.oneofIndex;
-                    if (message.jsonName != null && message.hasOwnProperty("jsonName"))
-                        object.jsonName = message.jsonName;
-                    return object;
-                };
-    
-                /**
-                 * Converts this FieldDescriptorProto to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.FieldDescriptorProto
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                FieldDescriptorProto.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * Type enum.
-                 * @name google.protobuf.FieldDescriptorProto.Type
-                 * @enum {string}
-                 * @property {string} TYPE_DOUBLE=TYPE_DOUBLE TYPE_DOUBLE value
-                 * @property {string} TYPE_FLOAT=TYPE_FLOAT TYPE_FLOAT value
-                 * @property {string} TYPE_INT64=TYPE_INT64 TYPE_INT64 value
-                 * @property {string} TYPE_UINT64=TYPE_UINT64 TYPE_UINT64 value
-                 * @property {string} TYPE_INT32=TYPE_INT32 TYPE_INT32 value
-                 * @property {string} TYPE_FIXED64=TYPE_FIXED64 TYPE_FIXED64 value
-                 * @property {string} TYPE_FIXED32=TYPE_FIXED32 TYPE_FIXED32 value
-                 * @property {string} TYPE_BOOL=TYPE_BOOL TYPE_BOOL value
-                 * @property {string} TYPE_STRING=TYPE_STRING TYPE_STRING value
-                 * @property {string} TYPE_GROUP=TYPE_GROUP TYPE_GROUP value
-                 * @property {string} TYPE_MESSAGE=TYPE_MESSAGE TYPE_MESSAGE value
-                 * @property {string} TYPE_BYTES=TYPE_BYTES TYPE_BYTES value
-                 * @property {string} TYPE_UINT32=TYPE_UINT32 TYPE_UINT32 value
-                 * @property {string} TYPE_ENUM=TYPE_ENUM TYPE_ENUM value
-                 * @property {string} TYPE_SFIXED32=TYPE_SFIXED32 TYPE_SFIXED32 value
-                 * @property {string} TYPE_SFIXED64=TYPE_SFIXED64 TYPE_SFIXED64 value
-                 * @property {string} TYPE_SINT32=TYPE_SINT32 TYPE_SINT32 value
-                 * @property {string} TYPE_SINT64=TYPE_SINT64 TYPE_SINT64 value
-                 */
-                FieldDescriptorProto.Type = (function() {
-                    var valuesById = {}, values = Object.create(valuesById);
-                    values[valuesById[1] = "TYPE_DOUBLE"] = "TYPE_DOUBLE";
-                    values[valuesById[2] = "TYPE_FLOAT"] = "TYPE_FLOAT";
-                    values[valuesById[3] = "TYPE_INT64"] = "TYPE_INT64";
-                    values[valuesById[4] = "TYPE_UINT64"] = "TYPE_UINT64";
-                    values[valuesById[5] = "TYPE_INT32"] = "TYPE_INT32";
-                    values[valuesById[6] = "TYPE_FIXED64"] = "TYPE_FIXED64";
-                    values[valuesById[7] = "TYPE_FIXED32"] = "TYPE_FIXED32";
-                    values[valuesById[8] = "TYPE_BOOL"] = "TYPE_BOOL";
-                    values[valuesById[9] = "TYPE_STRING"] = "TYPE_STRING";
-                    values[valuesById[10] = "TYPE_GROUP"] = "TYPE_GROUP";
-                    values[valuesById[11] = "TYPE_MESSAGE"] = "TYPE_MESSAGE";
-                    values[valuesById[12] = "TYPE_BYTES"] = "TYPE_BYTES";
-                    values[valuesById[13] = "TYPE_UINT32"] = "TYPE_UINT32";
-                    values[valuesById[14] = "TYPE_ENUM"] = "TYPE_ENUM";
-                    values[valuesById[15] = "TYPE_SFIXED32"] = "TYPE_SFIXED32";
-                    values[valuesById[16] = "TYPE_SFIXED64"] = "TYPE_SFIXED64";
-                    values[valuesById[17] = "TYPE_SINT32"] = "TYPE_SINT32";
-                    values[valuesById[18] = "TYPE_SINT64"] = "TYPE_SINT64";
-                    return values;
-                })();
-    
-                /**
-                 * Label enum.
-                 * @name google.protobuf.FieldDescriptorProto.Label
-                 * @enum {string}
-                 * @property {string} LABEL_OPTIONAL=LABEL_OPTIONAL LABEL_OPTIONAL value
-                 * @property {string} LABEL_REQUIRED=LABEL_REQUIRED LABEL_REQUIRED value
-                 * @property {string} LABEL_REPEATED=LABEL_REPEATED LABEL_REPEATED value
-                 */
-                FieldDescriptorProto.Label = (function() {
-                    var valuesById = {}, values = Object.create(valuesById);
-                    values[valuesById[1] = "LABEL_OPTIONAL"] = "LABEL_OPTIONAL";
-                    values[valuesById[2] = "LABEL_REQUIRED"] = "LABEL_REQUIRED";
-                    values[valuesById[3] = "LABEL_REPEATED"] = "LABEL_REPEATED";
-                    return values;
-                })();
-    
-                return FieldDescriptorProto;
-            })();
-    
-            protobuf.OneofDescriptorProto = (function() {
-    
-                /**
-                 * Properties of an OneofDescriptorProto.
-                 * @memberof google.protobuf
-                 * @interface IOneofDescriptorProto
-                 * @property {string|null} [name] OneofDescriptorProto name
-                 * @property {google.protobuf.IOneofOptions|null} [options] OneofDescriptorProto options
-                 */
-    
-                /**
-                 * Constructs a new OneofDescriptorProto.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an OneofDescriptorProto.
-                 * @implements IOneofDescriptorProto
-                 * @constructor
-                 * @param {google.protobuf.IOneofDescriptorProto=} [properties] Properties to set
-                 */
-                function OneofDescriptorProto(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * OneofDescriptorProto name.
-                 * @member {string} name
-                 * @memberof google.protobuf.OneofDescriptorProto
-                 * @instance
-                 */
-                OneofDescriptorProto.prototype.name = "";
-    
-                /**
-                 * OneofDescriptorProto options.
-                 * @member {google.protobuf.IOneofOptions|null|undefined} options
-                 * @memberof google.protobuf.OneofDescriptorProto
-                 * @instance
-                 */
-                OneofDescriptorProto.prototype.options = null;
-    
-                /**
-                 * Creates an OneofDescriptorProto message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.OneofDescriptorProto
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.OneofDescriptorProto} OneofDescriptorProto
-                 */
-                OneofDescriptorProto.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.OneofDescriptorProto)
-                        return object;
-                    var message = new $root.google.protobuf.OneofDescriptorProto();
-                    if (object.name != null)
-                        message.name = String(object.name);
-                    if (object.options != null) {
-                        if (typeof object.options !== "object")
-                            throw TypeError(".google.protobuf.OneofDescriptorProto.options: object expected");
-                        message.options = $root.google.protobuf.OneofOptions.fromObject(object.options);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an OneofDescriptorProto message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.OneofDescriptorProto
-                 * @static
-                 * @param {google.protobuf.OneofDescriptorProto} message OneofDescriptorProto
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                OneofDescriptorProto.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.name = "";
-                        object.options = null;
-                    }
-                    if (message.name != null && message.hasOwnProperty("name"))
-                        object.name = message.name;
-                    if (message.options != null && message.hasOwnProperty("options"))
-                        object.options = $root.google.protobuf.OneofOptions.toObject(message.options, options);
-                    return object;
-                };
-    
-                /**
-                 * Converts this OneofDescriptorProto to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.OneofDescriptorProto
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                OneofDescriptorProto.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return OneofDescriptorProto;
-            })();
-    
-            protobuf.EnumDescriptorProto = (function() {
-    
-                /**
-                 * Properties of an EnumDescriptorProto.
-                 * @memberof google.protobuf
-                 * @interface IEnumDescriptorProto
-                 * @property {string|null} [name] EnumDescriptorProto name
-                 * @property {Array.<google.protobuf.IEnumValueDescriptorProto>|null} [value] EnumDescriptorProto value
-                 * @property {google.protobuf.IEnumOptions|null} [options] EnumDescriptorProto options
-                 */
-    
-                /**
-                 * Constructs a new EnumDescriptorProto.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an EnumDescriptorProto.
-                 * @implements IEnumDescriptorProto
-                 * @constructor
-                 * @param {google.protobuf.IEnumDescriptorProto=} [properties] Properties to set
-                 */
-                function EnumDescriptorProto(properties) {
-                    this.value = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * EnumDescriptorProto name.
-                 * @member {string} name
-                 * @memberof google.protobuf.EnumDescriptorProto
-                 * @instance
-                 */
-                EnumDescriptorProto.prototype.name = "";
-    
-                /**
-                 * EnumDescriptorProto value.
-                 * @member {Array.<google.protobuf.IEnumValueDescriptorProto>} value
-                 * @memberof google.protobuf.EnumDescriptorProto
-                 * @instance
-                 */
-                EnumDescriptorProto.prototype.value = $util.emptyArray;
-    
-                /**
-                 * EnumDescriptorProto options.
-                 * @member {google.protobuf.IEnumOptions|null|undefined} options
-                 * @memberof google.protobuf.EnumDescriptorProto
-                 * @instance
-                 */
-                EnumDescriptorProto.prototype.options = null;
-    
-                /**
-                 * Creates an EnumDescriptorProto message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.EnumDescriptorProto
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.EnumDescriptorProto} EnumDescriptorProto
-                 */
-                EnumDescriptorProto.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.EnumDescriptorProto)
-                        return object;
-                    var message = new $root.google.protobuf.EnumDescriptorProto();
-                    if (object.name != null)
-                        message.name = String(object.name);
-                    if (object.value) {
-                        if (!Array.isArray(object.value))
-                            throw TypeError(".google.protobuf.EnumDescriptorProto.value: array expected");
-                        message.value = [];
-                        for (var i = 0; i < object.value.length; ++i) {
-                            if (typeof object.value[i] !== "object")
-                                throw TypeError(".google.protobuf.EnumDescriptorProto.value: object expected");
-                            message.value[i] = $root.google.protobuf.EnumValueDescriptorProto.fromObject(object.value[i]);
-                        }
-                    }
-                    if (object.options != null) {
-                        if (typeof object.options !== "object")
-                            throw TypeError(".google.protobuf.EnumDescriptorProto.options: object expected");
-                        message.options = $root.google.protobuf.EnumOptions.fromObject(object.options);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an EnumDescriptorProto message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.EnumDescriptorProto
-                 * @static
-                 * @param {google.protobuf.EnumDescriptorProto} message EnumDescriptorProto
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                EnumDescriptorProto.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.value = [];
-                    if (options.defaults) {
-                        object.name = "";
-                        object.options = null;
-                    }
-                    if (message.name != null && message.hasOwnProperty("name"))
-                        object.name = message.name;
-                    if (message.value && message.value.length) {
-                        object.value = [];
-                        for (var j = 0; j < message.value.length; ++j)
-                            object.value[j] = $root.google.protobuf.EnumValueDescriptorProto.toObject(message.value[j], options);
-                    }
-                    if (message.options != null && message.hasOwnProperty("options"))
-                        object.options = $root.google.protobuf.EnumOptions.toObject(message.options, options);
-                    return object;
-                };
-    
-                /**
-                 * Converts this EnumDescriptorProto to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.EnumDescriptorProto
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                EnumDescriptorProto.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return EnumDescriptorProto;
-            })();
-    
-            protobuf.EnumValueDescriptorProto = (function() {
-    
-                /**
-                 * Properties of an EnumValueDescriptorProto.
-                 * @memberof google.protobuf
-                 * @interface IEnumValueDescriptorProto
-                 * @property {string|null} [name] EnumValueDescriptorProto name
-                 * @property {number|null} [number] EnumValueDescriptorProto number
-                 * @property {google.protobuf.IEnumValueOptions|null} [options] EnumValueDescriptorProto options
-                 */
-    
-                /**
-                 * Constructs a new EnumValueDescriptorProto.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an EnumValueDescriptorProto.
-                 * @implements IEnumValueDescriptorProto
-                 * @constructor
-                 * @param {google.protobuf.IEnumValueDescriptorProto=} [properties] Properties to set
-                 */
-                function EnumValueDescriptorProto(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * EnumValueDescriptorProto name.
-                 * @member {string} name
-                 * @memberof google.protobuf.EnumValueDescriptorProto
-                 * @instance
-                 */
-                EnumValueDescriptorProto.prototype.name = "";
-    
-                /**
-                 * EnumValueDescriptorProto number.
-                 * @member {number} number
-                 * @memberof google.protobuf.EnumValueDescriptorProto
-                 * @instance
-                 */
-                EnumValueDescriptorProto.prototype.number = 0;
-    
-                /**
-                 * EnumValueDescriptorProto options.
-                 * @member {google.protobuf.IEnumValueOptions|null|undefined} options
-                 * @memberof google.protobuf.EnumValueDescriptorProto
-                 * @instance
-                 */
-                EnumValueDescriptorProto.prototype.options = null;
-    
-                /**
-                 * Creates an EnumValueDescriptorProto message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.EnumValueDescriptorProto
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.EnumValueDescriptorProto} EnumValueDescriptorProto
-                 */
-                EnumValueDescriptorProto.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.EnumValueDescriptorProto)
-                        return object;
-                    var message = new $root.google.protobuf.EnumValueDescriptorProto();
-                    if (object.name != null)
-                        message.name = String(object.name);
-                    if (object.number != null)
-                        message.number = object.number | 0;
-                    if (object.options != null) {
-                        if (typeof object.options !== "object")
-                            throw TypeError(".google.protobuf.EnumValueDescriptorProto.options: object expected");
-                        message.options = $root.google.protobuf.EnumValueOptions.fromObject(object.options);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an EnumValueDescriptorProto message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.EnumValueDescriptorProto
-                 * @static
-                 * @param {google.protobuf.EnumValueDescriptorProto} message EnumValueDescriptorProto
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                EnumValueDescriptorProto.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.name = "";
-                        object.number = 0;
-                        object.options = null;
-                    }
-                    if (message.name != null && message.hasOwnProperty("name"))
-                        object.name = message.name;
-                    if (message.number != null && message.hasOwnProperty("number"))
-                        object.number = message.number;
-                    if (message.options != null && message.hasOwnProperty("options"))
-                        object.options = $root.google.protobuf.EnumValueOptions.toObject(message.options, options);
-                    return object;
-                };
-    
-                /**
-                 * Converts this EnumValueDescriptorProto to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.EnumValueDescriptorProto
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                EnumValueDescriptorProto.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return EnumValueDescriptorProto;
-            })();
-    
-            protobuf.ServiceDescriptorProto = (function() {
-    
-                /**
-                 * Properties of a ServiceDescriptorProto.
-                 * @memberof google.protobuf
-                 * @interface IServiceDescriptorProto
-                 * @property {string|null} [name] ServiceDescriptorProto name
-                 * @property {Array.<google.protobuf.IMethodDescriptorProto>|null} [method] ServiceDescriptorProto method
-                 * @property {google.protobuf.IServiceOptions|null} [options] ServiceDescriptorProto options
-                 */
-    
-                /**
-                 * Constructs a new ServiceDescriptorProto.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a ServiceDescriptorProto.
-                 * @implements IServiceDescriptorProto
-                 * @constructor
-                 * @param {google.protobuf.IServiceDescriptorProto=} [properties] Properties to set
-                 */
-                function ServiceDescriptorProto(properties) {
-                    this.method = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * ServiceDescriptorProto name.
-                 * @member {string} name
-                 * @memberof google.protobuf.ServiceDescriptorProto
-                 * @instance
-                 */
-                ServiceDescriptorProto.prototype.name = "";
-    
-                /**
-                 * ServiceDescriptorProto method.
-                 * @member {Array.<google.protobuf.IMethodDescriptorProto>} method
-                 * @memberof google.protobuf.ServiceDescriptorProto
-                 * @instance
-                 */
-                ServiceDescriptorProto.prototype.method = $util.emptyArray;
-    
-                /**
-                 * ServiceDescriptorProto options.
-                 * @member {google.protobuf.IServiceOptions|null|undefined} options
-                 * @memberof google.protobuf.ServiceDescriptorProto
-                 * @instance
-                 */
-                ServiceDescriptorProto.prototype.options = null;
-    
-                /**
-                 * Creates a ServiceDescriptorProto message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.ServiceDescriptorProto
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.ServiceDescriptorProto} ServiceDescriptorProto
-                 */
-                ServiceDescriptorProto.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.ServiceDescriptorProto)
-                        return object;
-                    var message = new $root.google.protobuf.ServiceDescriptorProto();
-                    if (object.name != null)
-                        message.name = String(object.name);
-                    if (object.method) {
-                        if (!Array.isArray(object.method))
-                            throw TypeError(".google.protobuf.ServiceDescriptorProto.method: array expected");
-                        message.method = [];
-                        for (var i = 0; i < object.method.length; ++i) {
-                            if (typeof object.method[i] !== "object")
-                                throw TypeError(".google.protobuf.ServiceDescriptorProto.method: object expected");
-                            message.method[i] = $root.google.protobuf.MethodDescriptorProto.fromObject(object.method[i]);
-                        }
-                    }
-                    if (object.options != null) {
-                        if (typeof object.options !== "object")
-                            throw TypeError(".google.protobuf.ServiceDescriptorProto.options: object expected");
-                        message.options = $root.google.protobuf.ServiceOptions.fromObject(object.options);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a ServiceDescriptorProto message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.ServiceDescriptorProto
-                 * @static
-                 * @param {google.protobuf.ServiceDescriptorProto} message ServiceDescriptorProto
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                ServiceDescriptorProto.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.method = [];
-                    if (options.defaults) {
-                        object.name = "";
-                        object.options = null;
-                    }
-                    if (message.name != null && message.hasOwnProperty("name"))
-                        object.name = message.name;
-                    if (message.method && message.method.length) {
-                        object.method = [];
-                        for (var j = 0; j < message.method.length; ++j)
-                            object.method[j] = $root.google.protobuf.MethodDescriptorProto.toObject(message.method[j], options);
-                    }
-                    if (message.options != null && message.hasOwnProperty("options"))
-                        object.options = $root.google.protobuf.ServiceOptions.toObject(message.options, options);
-                    return object;
-                };
-    
-                /**
-                 * Converts this ServiceDescriptorProto to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.ServiceDescriptorProto
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                ServiceDescriptorProto.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return ServiceDescriptorProto;
-            })();
-    
-            protobuf.MethodDescriptorProto = (function() {
-    
-                /**
-                 * Properties of a MethodDescriptorProto.
-                 * @memberof google.protobuf
-                 * @interface IMethodDescriptorProto
-                 * @property {string|null} [name] MethodDescriptorProto name
-                 * @property {string|null} [inputType] MethodDescriptorProto inputType
-                 * @property {string|null} [outputType] MethodDescriptorProto outputType
-                 * @property {google.protobuf.IMethodOptions|null} [options] MethodDescriptorProto options
-                 * @property {boolean|null} [clientStreaming] MethodDescriptorProto clientStreaming
-                 * @property {boolean|null} [serverStreaming] MethodDescriptorProto serverStreaming
-                 */
-    
-                /**
-                 * Constructs a new MethodDescriptorProto.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a MethodDescriptorProto.
-                 * @implements IMethodDescriptorProto
-                 * @constructor
-                 * @param {google.protobuf.IMethodDescriptorProto=} [properties] Properties to set
-                 */
-                function MethodDescriptorProto(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * MethodDescriptorProto name.
-                 * @member {string} name
-                 * @memberof google.protobuf.MethodDescriptorProto
-                 * @instance
-                 */
-                MethodDescriptorProto.prototype.name = "";
-    
-                /**
-                 * MethodDescriptorProto inputType.
-                 * @member {string} inputType
-                 * @memberof google.protobuf.MethodDescriptorProto
-                 * @instance
-                 */
-                MethodDescriptorProto.prototype.inputType = "";
-    
-                /**
-                 * MethodDescriptorProto outputType.
-                 * @member {string} outputType
-                 * @memberof google.protobuf.MethodDescriptorProto
-                 * @instance
-                 */
-                MethodDescriptorProto.prototype.outputType = "";
-    
-                /**
-                 * MethodDescriptorProto options.
-                 * @member {google.protobuf.IMethodOptions|null|undefined} options
-                 * @memberof google.protobuf.MethodDescriptorProto
-                 * @instance
-                 */
-                MethodDescriptorProto.prototype.options = null;
-    
-                /**
-                 * MethodDescriptorProto clientStreaming.
-                 * @member {boolean} clientStreaming
-                 * @memberof google.protobuf.MethodDescriptorProto
-                 * @instance
-                 */
-                MethodDescriptorProto.prototype.clientStreaming = false;
-    
-                /**
-                 * MethodDescriptorProto serverStreaming.
-                 * @member {boolean} serverStreaming
-                 * @memberof google.protobuf.MethodDescriptorProto
-                 * @instance
-                 */
-                MethodDescriptorProto.prototype.serverStreaming = false;
-    
-                /**
-                 * Creates a MethodDescriptorProto message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.MethodDescriptorProto
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.MethodDescriptorProto} MethodDescriptorProto
-                 */
-                MethodDescriptorProto.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.MethodDescriptorProto)
-                        return object;
-                    var message = new $root.google.protobuf.MethodDescriptorProto();
-                    if (object.name != null)
-                        message.name = String(object.name);
-                    if (object.inputType != null)
-                        message.inputType = String(object.inputType);
-                    if (object.outputType != null)
-                        message.outputType = String(object.outputType);
-                    if (object.options != null) {
-                        if (typeof object.options !== "object")
-                            throw TypeError(".google.protobuf.MethodDescriptorProto.options: object expected");
-                        message.options = $root.google.protobuf.MethodOptions.fromObject(object.options);
-                    }
-                    if (object.clientStreaming != null)
-                        message.clientStreaming = Boolean(object.clientStreaming);
-                    if (object.serverStreaming != null)
-                        message.serverStreaming = Boolean(object.serverStreaming);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a MethodDescriptorProto message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.MethodDescriptorProto
-                 * @static
-                 * @param {google.protobuf.MethodDescriptorProto} message MethodDescriptorProto
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                MethodDescriptorProto.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.name = "";
-                        object.inputType = "";
-                        object.outputType = "";
-                        object.options = null;
-                        object.clientStreaming = false;
-                        object.serverStreaming = false;
-                    }
-                    if (message.name != null && message.hasOwnProperty("name"))
-                        object.name = message.name;
-                    if (message.inputType != null && message.hasOwnProperty("inputType"))
-                        object.inputType = message.inputType;
-                    if (message.outputType != null && message.hasOwnProperty("outputType"))
-                        object.outputType = message.outputType;
-                    if (message.options != null && message.hasOwnProperty("options"))
-                        object.options = $root.google.protobuf.MethodOptions.toObject(message.options, options);
-                    if (message.clientStreaming != null && message.hasOwnProperty("clientStreaming"))
-                        object.clientStreaming = message.clientStreaming;
-                    if (message.serverStreaming != null && message.hasOwnProperty("serverStreaming"))
-                        object.serverStreaming = message.serverStreaming;
-                    return object;
-                };
-    
-                /**
-                 * Converts this MethodDescriptorProto to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.MethodDescriptorProto
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                MethodDescriptorProto.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return MethodDescriptorProto;
-            })();
-    
-            protobuf.FileOptions = (function() {
-    
-                /**
-                 * Properties of a FileOptions.
-                 * @memberof google.protobuf
-                 * @interface IFileOptions
-                 * @property {string|null} [javaPackage] FileOptions javaPackage
-                 * @property {string|null} [javaOuterClassname] FileOptions javaOuterClassname
-                 * @property {boolean|null} [javaMultipleFiles] FileOptions javaMultipleFiles
-                 * @property {boolean|null} [javaGenerateEqualsAndHash] FileOptions javaGenerateEqualsAndHash
-                 * @property {boolean|null} [javaStringCheckUtf8] FileOptions javaStringCheckUtf8
-                 * @property {google.protobuf.FileOptions.OptimizeMode|null} [optimizeFor] FileOptions optimizeFor
-                 * @property {string|null} [goPackage] FileOptions goPackage
-                 * @property {boolean|null} [ccGenericServices] FileOptions ccGenericServices
-                 * @property {boolean|null} [javaGenericServices] FileOptions javaGenericServices
-                 * @property {boolean|null} [pyGenericServices] FileOptions pyGenericServices
-                 * @property {boolean|null} [deprecated] FileOptions deprecated
-                 * @property {boolean|null} [ccEnableArenas] FileOptions ccEnableArenas
-                 * @property {string|null} [objcClassPrefix] FileOptions objcClassPrefix
-                 * @property {string|null} [csharpNamespace] FileOptions csharpNamespace
-                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] FileOptions uninterpretedOption
-                 * @property {Array.<google.api.IResourceDescriptor>|null} [".google.api.resourceDefinition"] FileOptions .google.api.resourceDefinition
-                 */
-    
-                /**
-                 * Constructs a new FileOptions.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a FileOptions.
-                 * @implements IFileOptions
-                 * @constructor
-                 * @param {google.protobuf.IFileOptions=} [properties] Properties to set
-                 */
-                function FileOptions(properties) {
-                    this.uninterpretedOption = [];
-                    this[".google.api.resourceDefinition"] = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * FileOptions javaPackage.
-                 * @member {string} javaPackage
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.javaPackage = "";
-    
-                /**
-                 * FileOptions javaOuterClassname.
-                 * @member {string} javaOuterClassname
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.javaOuterClassname = "";
-    
-                /**
-                 * FileOptions javaMultipleFiles.
-                 * @member {boolean} javaMultipleFiles
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.javaMultipleFiles = false;
-    
-                /**
-                 * FileOptions javaGenerateEqualsAndHash.
-                 * @member {boolean} javaGenerateEqualsAndHash
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.javaGenerateEqualsAndHash = false;
-    
-                /**
-                 * FileOptions javaStringCheckUtf8.
-                 * @member {boolean} javaStringCheckUtf8
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.javaStringCheckUtf8 = false;
-    
-                /**
-                 * FileOptions optimizeFor.
-                 * @member {google.protobuf.FileOptions.OptimizeMode} optimizeFor
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.optimizeFor = 1;
-    
-                /**
-                 * FileOptions goPackage.
-                 * @member {string} goPackage
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.goPackage = "";
-    
-                /**
-                 * FileOptions ccGenericServices.
-                 * @member {boolean} ccGenericServices
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.ccGenericServices = false;
-    
-                /**
-                 * FileOptions javaGenericServices.
-                 * @member {boolean} javaGenericServices
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.javaGenericServices = false;
-    
-                /**
-                 * FileOptions pyGenericServices.
-                 * @member {boolean} pyGenericServices
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.pyGenericServices = false;
-    
-                /**
-                 * FileOptions deprecated.
-                 * @member {boolean} deprecated
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.deprecated = false;
-    
-                /**
-                 * FileOptions ccEnableArenas.
-                 * @member {boolean} ccEnableArenas
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.ccEnableArenas = false;
-    
-                /**
-                 * FileOptions objcClassPrefix.
-                 * @member {string} objcClassPrefix
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.objcClassPrefix = "";
-    
-                /**
-                 * FileOptions csharpNamespace.
-                 * @member {string} csharpNamespace
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.csharpNamespace = "";
-    
-                /**
-                 * FileOptions uninterpretedOption.
-                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype.uninterpretedOption = $util.emptyArray;
-    
-                /**
-                 * FileOptions .google.api.resourceDefinition.
-                 * @member {Array.<google.api.IResourceDescriptor>} .google.api.resourceDefinition
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 */
-                FileOptions.prototype[".google.api.resourceDefinition"] = $util.emptyArray;
-    
-                /**
-                 * Creates a FileOptions message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.FileOptions
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.FileOptions} FileOptions
-                 */
-                FileOptions.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.FileOptions)
-                        return object;
-                    var message = new $root.google.protobuf.FileOptions();
-                    if (object.javaPackage != null)
-                        message.javaPackage = String(object.javaPackage);
-                    if (object.javaOuterClassname != null)
-                        message.javaOuterClassname = String(object.javaOuterClassname);
-                    if (object.javaMultipleFiles != null)
-                        message.javaMultipleFiles = Boolean(object.javaMultipleFiles);
-                    if (object.javaGenerateEqualsAndHash != null)
-                        message.javaGenerateEqualsAndHash = Boolean(object.javaGenerateEqualsAndHash);
-                    if (object.javaStringCheckUtf8 != null)
-                        message.javaStringCheckUtf8 = Boolean(object.javaStringCheckUtf8);
-                    switch (object.optimizeFor) {
-                    case "SPEED":
-                    case 1:
-                        message.optimizeFor = 1;
-                        break;
-                    case "CODE_SIZE":
-                    case 2:
-                        message.optimizeFor = 2;
-                        break;
-                    case "LITE_RUNTIME":
-                    case 3:
-                        message.optimizeFor = 3;
-                        break;
-                    }
-                    if (object.goPackage != null)
-                        message.goPackage = String(object.goPackage);
-                    if (object.ccGenericServices != null)
-                        message.ccGenericServices = Boolean(object.ccGenericServices);
-                    if (object.javaGenericServices != null)
-                        message.javaGenericServices = Boolean(object.javaGenericServices);
-                    if (object.pyGenericServices != null)
-                        message.pyGenericServices = Boolean(object.pyGenericServices);
-                    if (object.deprecated != null)
-                        message.deprecated = Boolean(object.deprecated);
-                    if (object.ccEnableArenas != null)
-                        message.ccEnableArenas = Boolean(object.ccEnableArenas);
-                    if (object.objcClassPrefix != null)
-                        message.objcClassPrefix = String(object.objcClassPrefix);
-                    if (object.csharpNamespace != null)
-                        message.csharpNamespace = String(object.csharpNamespace);
-                    if (object.uninterpretedOption) {
-                        if (!Array.isArray(object.uninterpretedOption))
-                            throw TypeError(".google.protobuf.FileOptions.uninterpretedOption: array expected");
-                        message.uninterpretedOption = [];
-                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
-                            if (typeof object.uninterpretedOption[i] !== "object")
-                                throw TypeError(".google.protobuf.FileOptions.uninterpretedOption: object expected");
-                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
-                        }
-                    }
-                    if (object[".google.api.resourceDefinition"]) {
-                        if (!Array.isArray(object[".google.api.resourceDefinition"]))
-                            throw TypeError(".google.protobuf.FileOptions..google.api.resourceDefinition: array expected");
-                        message[".google.api.resourceDefinition"] = [];
-                        for (var i = 0; i < object[".google.api.resourceDefinition"].length; ++i) {
-                            if (typeof object[".google.api.resourceDefinition"][i] !== "object")
-                                throw TypeError(".google.protobuf.FileOptions..google.api.resourceDefinition: object expected");
-                            message[".google.api.resourceDefinition"][i] = $root.google.api.ResourceDescriptor.fromObject(object[".google.api.resourceDefinition"][i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a FileOptions message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.FileOptions
-                 * @static
-                 * @param {google.protobuf.FileOptions} message FileOptions
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                FileOptions.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults) {
-                        object.uninterpretedOption = [];
-                        object[".google.api.resourceDefinition"] = [];
-                    }
-                    if (options.defaults) {
-                        object.javaPackage = "";
-                        object.javaOuterClassname = "";
-                        object.optimizeFor = options.enums === String ? "SPEED" : 1;
-                        object.javaMultipleFiles = false;
-                        object.goPackage = "";
-                        object.ccGenericServices = false;
-                        object.javaGenericServices = false;
-                        object.pyGenericServices = false;
-                        object.javaGenerateEqualsAndHash = false;
-                        object.deprecated = false;
-                        object.javaStringCheckUtf8 = false;
-                        object.ccEnableArenas = false;
-                        object.objcClassPrefix = "";
-                        object.csharpNamespace = "";
-                    }
-                    if (message.javaPackage != null && message.hasOwnProperty("javaPackage"))
-                        object.javaPackage = message.javaPackage;
-                    if (message.javaOuterClassname != null && message.hasOwnProperty("javaOuterClassname"))
-                        object.javaOuterClassname = message.javaOuterClassname;
-                    if (message.optimizeFor != null && message.hasOwnProperty("optimizeFor"))
-                        object.optimizeFor = options.enums === String ? $root.google.protobuf.FileOptions.OptimizeMode[message.optimizeFor] : message.optimizeFor;
-                    if (message.javaMultipleFiles != null && message.hasOwnProperty("javaMultipleFiles"))
-                        object.javaMultipleFiles = message.javaMultipleFiles;
-                    if (message.goPackage != null && message.hasOwnProperty("goPackage"))
-                        object.goPackage = message.goPackage;
-                    if (message.ccGenericServices != null && message.hasOwnProperty("ccGenericServices"))
-                        object.ccGenericServices = message.ccGenericServices;
-                    if (message.javaGenericServices != null && message.hasOwnProperty("javaGenericServices"))
-                        object.javaGenericServices = message.javaGenericServices;
-                    if (message.pyGenericServices != null && message.hasOwnProperty("pyGenericServices"))
-                        object.pyGenericServices = message.pyGenericServices;
-                    if (message.javaGenerateEqualsAndHash != null && message.hasOwnProperty("javaGenerateEqualsAndHash"))
-                        object.javaGenerateEqualsAndHash = message.javaGenerateEqualsAndHash;
-                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
-                        object.deprecated = message.deprecated;
-                    if (message.javaStringCheckUtf8 != null && message.hasOwnProperty("javaStringCheckUtf8"))
-                        object.javaStringCheckUtf8 = message.javaStringCheckUtf8;
-                    if (message.ccEnableArenas != null && message.hasOwnProperty("ccEnableArenas"))
-                        object.ccEnableArenas = message.ccEnableArenas;
-                    if (message.objcClassPrefix != null && message.hasOwnProperty("objcClassPrefix"))
-                        object.objcClassPrefix = message.objcClassPrefix;
-                    if (message.csharpNamespace != null && message.hasOwnProperty("csharpNamespace"))
-                        object.csharpNamespace = message.csharpNamespace;
-                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
-                        object.uninterpretedOption = [];
-                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
-                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
-                    }
-                    if (message[".google.api.resourceDefinition"] && message[".google.api.resourceDefinition"].length) {
-                        object[".google.api.resourceDefinition"] = [];
-                        for (var j = 0; j < message[".google.api.resourceDefinition"].length; ++j)
-                            object[".google.api.resourceDefinition"][j] = $root.google.api.ResourceDescriptor.toObject(message[".google.api.resourceDefinition"][j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this FileOptions to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.FileOptions
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                FileOptions.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * OptimizeMode enum.
-                 * @name google.protobuf.FileOptions.OptimizeMode
-                 * @enum {string}
-                 * @property {string} SPEED=SPEED SPEED value
-                 * @property {string} CODE_SIZE=CODE_SIZE CODE_SIZE value
-                 * @property {string} LITE_RUNTIME=LITE_RUNTIME LITE_RUNTIME value
-                 */
-                FileOptions.OptimizeMode = (function() {
-                    var valuesById = {}, values = Object.create(valuesById);
-                    values[valuesById[1] = "SPEED"] = "SPEED";
-                    values[valuesById[2] = "CODE_SIZE"] = "CODE_SIZE";
-                    values[valuesById[3] = "LITE_RUNTIME"] = "LITE_RUNTIME";
-                    return values;
-                })();
-    
-                return FileOptions;
-            })();
-    
-            protobuf.MessageOptions = (function() {
-    
-                /**
-                 * Properties of a MessageOptions.
-                 * @memberof google.protobuf
-                 * @interface IMessageOptions
-                 * @property {boolean|null} [messageSetWireFormat] MessageOptions messageSetWireFormat
-                 * @property {boolean|null} [noStandardDescriptorAccessor] MessageOptions noStandardDescriptorAccessor
-                 * @property {boolean|null} [deprecated] MessageOptions deprecated
-                 * @property {boolean|null} [mapEntry] MessageOptions mapEntry
-                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] MessageOptions uninterpretedOption
-                 * @property {google.api.IResourceDescriptor|null} [".google.api.resource"] MessageOptions .google.api.resource
-                 */
-    
-                /**
-                 * Constructs a new MessageOptions.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a MessageOptions.
-                 * @implements IMessageOptions
-                 * @constructor
-                 * @param {google.protobuf.IMessageOptions=} [properties] Properties to set
-                 */
-                function MessageOptions(properties) {
-                    this.uninterpretedOption = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * MessageOptions messageSetWireFormat.
-                 * @member {boolean} messageSetWireFormat
-                 * @memberof google.protobuf.MessageOptions
-                 * @instance
-                 */
-                MessageOptions.prototype.messageSetWireFormat = false;
-    
-                /**
-                 * MessageOptions noStandardDescriptorAccessor.
-                 * @member {boolean} noStandardDescriptorAccessor
-                 * @memberof google.protobuf.MessageOptions
-                 * @instance
-                 */
-                MessageOptions.prototype.noStandardDescriptorAccessor = false;
-    
-                /**
-                 * MessageOptions deprecated.
-                 * @member {boolean} deprecated
-                 * @memberof google.protobuf.MessageOptions
-                 * @instance
-                 */
-                MessageOptions.prototype.deprecated = false;
-    
-                /**
-                 * MessageOptions mapEntry.
-                 * @member {boolean} mapEntry
-                 * @memberof google.protobuf.MessageOptions
-                 * @instance
-                 */
-                MessageOptions.prototype.mapEntry = false;
-    
-                /**
-                 * MessageOptions uninterpretedOption.
-                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
-                 * @memberof google.protobuf.MessageOptions
-                 * @instance
-                 */
-                MessageOptions.prototype.uninterpretedOption = $util.emptyArray;
-    
-                /**
-                 * MessageOptions .google.api.resource.
-                 * @member {google.api.IResourceDescriptor|null|undefined} .google.api.resource
-                 * @memberof google.protobuf.MessageOptions
-                 * @instance
-                 */
-                MessageOptions.prototype[".google.api.resource"] = null;
-    
-                /**
-                 * Creates a MessageOptions message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.MessageOptions
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.MessageOptions} MessageOptions
-                 */
-                MessageOptions.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.MessageOptions)
-                        return object;
-                    var message = new $root.google.protobuf.MessageOptions();
-                    if (object.messageSetWireFormat != null)
-                        message.messageSetWireFormat = Boolean(object.messageSetWireFormat);
-                    if (object.noStandardDescriptorAccessor != null)
-                        message.noStandardDescriptorAccessor = Boolean(object.noStandardDescriptorAccessor);
-                    if (object.deprecated != null)
-                        message.deprecated = Boolean(object.deprecated);
-                    if (object.mapEntry != null)
-                        message.mapEntry = Boolean(object.mapEntry);
-                    if (object.uninterpretedOption) {
-                        if (!Array.isArray(object.uninterpretedOption))
-                            throw TypeError(".google.protobuf.MessageOptions.uninterpretedOption: array expected");
-                        message.uninterpretedOption = [];
-                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
-                            if (typeof object.uninterpretedOption[i] !== "object")
-                                throw TypeError(".google.protobuf.MessageOptions.uninterpretedOption: object expected");
-                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
-                        }
-                    }
-                    if (object[".google.api.resource"] != null) {
-                        if (typeof object[".google.api.resource"] !== "object")
-                            throw TypeError(".google.protobuf.MessageOptions..google.api.resource: object expected");
-                        message[".google.api.resource"] = $root.google.api.ResourceDescriptor.fromObject(object[".google.api.resource"]);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a MessageOptions message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.MessageOptions
-                 * @static
-                 * @param {google.protobuf.MessageOptions} message MessageOptions
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                MessageOptions.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.uninterpretedOption = [];
-                    if (options.defaults) {
-                        object.messageSetWireFormat = false;
-                        object.noStandardDescriptorAccessor = false;
-                        object.deprecated = false;
-                        object.mapEntry = false;
-                        object[".google.api.resource"] = null;
-                    }
-                    if (message.messageSetWireFormat != null && message.hasOwnProperty("messageSetWireFormat"))
-                        object.messageSetWireFormat = message.messageSetWireFormat;
-                    if (message.noStandardDescriptorAccessor != null && message.hasOwnProperty("noStandardDescriptorAccessor"))
-                        object.noStandardDescriptorAccessor = message.noStandardDescriptorAccessor;
-                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
-                        object.deprecated = message.deprecated;
-                    if (message.mapEntry != null && message.hasOwnProperty("mapEntry"))
-                        object.mapEntry = message.mapEntry;
-                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
-                        object.uninterpretedOption = [];
-                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
-                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
-                    }
-                    if (message[".google.api.resource"] != null && message.hasOwnProperty(".google.api.resource"))
-                        object[".google.api.resource"] = $root.google.api.ResourceDescriptor.toObject(message[".google.api.resource"], options);
-                    return object;
-                };
-    
-                /**
-                 * Converts this MessageOptions to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.MessageOptions
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                MessageOptions.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return MessageOptions;
-            })();
-    
-            protobuf.FieldOptions = (function() {
-    
-                /**
-                 * Properties of a FieldOptions.
-                 * @memberof google.protobuf
-                 * @interface IFieldOptions
-                 * @property {google.protobuf.FieldOptions.CType|null} [ctype] FieldOptions ctype
-                 * @property {boolean|null} [packed] FieldOptions packed
-                 * @property {google.protobuf.FieldOptions.JSType|null} [jstype] FieldOptions jstype
-                 * @property {boolean|null} [lazy] FieldOptions lazy
-                 * @property {boolean|null} [deprecated] FieldOptions deprecated
-                 * @property {boolean|null} [weak] FieldOptions weak
-                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] FieldOptions uninterpretedOption
-                 * @property {Array.<google.api.FieldBehavior>|null} [".google.api.fieldBehavior"] FieldOptions .google.api.fieldBehavior
-                 * @property {google.api.IResourceReference|null} [".google.api.resourceReference"] FieldOptions .google.api.resourceReference
-                 */
-    
-                /**
-                 * Constructs a new FieldOptions.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a FieldOptions.
-                 * @implements IFieldOptions
-                 * @constructor
-                 * @param {google.protobuf.IFieldOptions=} [properties] Properties to set
-                 */
-                function FieldOptions(properties) {
-                    this.uninterpretedOption = [];
-                    this[".google.api.fieldBehavior"] = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * FieldOptions ctype.
-                 * @member {google.protobuf.FieldOptions.CType} ctype
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 */
-                FieldOptions.prototype.ctype = 0;
-    
-                /**
-                 * FieldOptions packed.
-                 * @member {boolean} packed
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 */
-                FieldOptions.prototype.packed = false;
-    
-                /**
-                 * FieldOptions jstype.
-                 * @member {google.protobuf.FieldOptions.JSType} jstype
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 */
-                FieldOptions.prototype.jstype = 0;
-    
-                /**
-                 * FieldOptions lazy.
-                 * @member {boolean} lazy
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 */
-                FieldOptions.prototype.lazy = false;
-    
-                /**
-                 * FieldOptions deprecated.
-                 * @member {boolean} deprecated
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 */
-                FieldOptions.prototype.deprecated = false;
-    
-                /**
-                 * FieldOptions weak.
-                 * @member {boolean} weak
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 */
-                FieldOptions.prototype.weak = false;
-    
-                /**
-                 * FieldOptions uninterpretedOption.
-                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 */
-                FieldOptions.prototype.uninterpretedOption = $util.emptyArray;
-    
-                /**
-                 * FieldOptions .google.api.fieldBehavior.
-                 * @member {Array.<google.api.FieldBehavior>} .google.api.fieldBehavior
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 */
-                FieldOptions.prototype[".google.api.fieldBehavior"] = $util.emptyArray;
-    
-                /**
-                 * FieldOptions .google.api.resourceReference.
-                 * @member {google.api.IResourceReference|null|undefined} .google.api.resourceReference
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 */
-                FieldOptions.prototype[".google.api.resourceReference"] = null;
-    
-                /**
-                 * Creates a FieldOptions message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.FieldOptions
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.FieldOptions} FieldOptions
-                 */
-                FieldOptions.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.FieldOptions)
-                        return object;
-                    var message = new $root.google.protobuf.FieldOptions();
-                    switch (object.ctype) {
-                    case "STRING":
-                    case 0:
-                        message.ctype = 0;
-                        break;
-                    case "CORD":
-                    case 1:
-                        message.ctype = 1;
-                        break;
-                    case "STRING_PIECE":
-                    case 2:
-                        message.ctype = 2;
-                        break;
-                    }
-                    if (object.packed != null)
-                        message.packed = Boolean(object.packed);
-                    switch (object.jstype) {
-                    case "JS_NORMAL":
-                    case 0:
-                        message.jstype = 0;
-                        break;
-                    case "JS_STRING":
-                    case 1:
-                        message.jstype = 1;
-                        break;
-                    case "JS_NUMBER":
-                    case 2:
-                        message.jstype = 2;
-                        break;
-                    }
-                    if (object.lazy != null)
-                        message.lazy = Boolean(object.lazy);
-                    if (object.deprecated != null)
-                        message.deprecated = Boolean(object.deprecated);
-                    if (object.weak != null)
-                        message.weak = Boolean(object.weak);
-                    if (object.uninterpretedOption) {
-                        if (!Array.isArray(object.uninterpretedOption))
-                            throw TypeError(".google.protobuf.FieldOptions.uninterpretedOption: array expected");
-                        message.uninterpretedOption = [];
-                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
-                            if (typeof object.uninterpretedOption[i] !== "object")
-                                throw TypeError(".google.protobuf.FieldOptions.uninterpretedOption: object expected");
-                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
-                        }
-                    }
-                    if (object[".google.api.fieldBehavior"]) {
-                        if (!Array.isArray(object[".google.api.fieldBehavior"]))
-                            throw TypeError(".google.protobuf.FieldOptions..google.api.fieldBehavior: array expected");
-                        message[".google.api.fieldBehavior"] = [];
-                        for (var i = 0; i < object[".google.api.fieldBehavior"].length; ++i)
-                            switch (object[".google.api.fieldBehavior"][i]) {
-                            default:
-                            case "FIELD_BEHAVIOR_UNSPECIFIED":
-                            case 0:
-                                message[".google.api.fieldBehavior"][i] = 0;
-                                break;
-                            case "OPTIONAL":
-                            case 1:
-                                message[".google.api.fieldBehavior"][i] = 1;
-                                break;
-                            case "REQUIRED":
-                            case 2:
-                                message[".google.api.fieldBehavior"][i] = 2;
-                                break;
-                            case "OUTPUT_ONLY":
-                            case 3:
-                                message[".google.api.fieldBehavior"][i] = 3;
-                                break;
-                            case "INPUT_ONLY":
-                            case 4:
-                                message[".google.api.fieldBehavior"][i] = 4;
-                                break;
-                            case "IMMUTABLE":
-                            case 5:
-                                message[".google.api.fieldBehavior"][i] = 5;
-                                break;
-                            case "UNORDERED_LIST":
-                            case 6:
-                                message[".google.api.fieldBehavior"][i] = 6;
-                                break;
-                            case "NON_EMPTY_DEFAULT":
-                            case 7:
-                                message[".google.api.fieldBehavior"][i] = 7;
-                                break;
-                            }
-                    }
-                    if (object[".google.api.resourceReference"] != null) {
-                        if (typeof object[".google.api.resourceReference"] !== "object")
-                            throw TypeError(".google.protobuf.FieldOptions..google.api.resourceReference: object expected");
-                        message[".google.api.resourceReference"] = $root.google.api.ResourceReference.fromObject(object[".google.api.resourceReference"]);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a FieldOptions message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.FieldOptions
-                 * @static
-                 * @param {google.protobuf.FieldOptions} message FieldOptions
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                FieldOptions.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults) {
-                        object.uninterpretedOption = [];
-                        object[".google.api.fieldBehavior"] = [];
-                    }
-                    if (options.defaults) {
-                        object.ctype = options.enums === String ? "STRING" : 0;
-                        object.packed = false;
-                        object.deprecated = false;
-                        object.lazy = false;
-                        object.jstype = options.enums === String ? "JS_NORMAL" : 0;
-                        object.weak = false;
-                        object[".google.api.resourceReference"] = null;
-                    }
-                    if (message.ctype != null && message.hasOwnProperty("ctype"))
-                        object.ctype = options.enums === String ? $root.google.protobuf.FieldOptions.CType[message.ctype] : message.ctype;
-                    if (message.packed != null && message.hasOwnProperty("packed"))
-                        object.packed = message.packed;
-                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
-                        object.deprecated = message.deprecated;
-                    if (message.lazy != null && message.hasOwnProperty("lazy"))
-                        object.lazy = message.lazy;
-                    if (message.jstype != null && message.hasOwnProperty("jstype"))
-                        object.jstype = options.enums === String ? $root.google.protobuf.FieldOptions.JSType[message.jstype] : message.jstype;
-                    if (message.weak != null && message.hasOwnProperty("weak"))
-                        object.weak = message.weak;
-                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
-                        object.uninterpretedOption = [];
-                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
-                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
-                    }
-                    if (message[".google.api.fieldBehavior"] && message[".google.api.fieldBehavior"].length) {
-                        object[".google.api.fieldBehavior"] = [];
-                        for (var j = 0; j < message[".google.api.fieldBehavior"].length; ++j)
-                            object[".google.api.fieldBehavior"][j] = options.enums === String ? $root.google.api.FieldBehavior[message[".google.api.fieldBehavior"][j]] : message[".google.api.fieldBehavior"][j];
-                    }
-                    if (message[".google.api.resourceReference"] != null && message.hasOwnProperty(".google.api.resourceReference"))
-                        object[".google.api.resourceReference"] = $root.google.api.ResourceReference.toObject(message[".google.api.resourceReference"], options);
-                    return object;
-                };
-    
-                /**
-                 * Converts this FieldOptions to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                FieldOptions.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * CType enum.
-                 * @name google.protobuf.FieldOptions.CType
-                 * @enum {string}
-                 * @property {string} STRING=STRING STRING value
-                 * @property {string} CORD=CORD CORD value
-                 * @property {string} STRING_PIECE=STRING_PIECE STRING_PIECE value
-                 */
-                FieldOptions.CType = (function() {
-                    var valuesById = {}, values = Object.create(valuesById);
-                    values[valuesById[0] = "STRING"] = "STRING";
-                    values[valuesById[1] = "CORD"] = "CORD";
-                    values[valuesById[2] = "STRING_PIECE"] = "STRING_PIECE";
-                    return values;
-                })();
-    
-                /**
-                 * JSType enum.
-                 * @name google.protobuf.FieldOptions.JSType
-                 * @enum {string}
-                 * @property {string} JS_NORMAL=JS_NORMAL JS_NORMAL value
-                 * @property {string} JS_STRING=JS_STRING JS_STRING value
-                 * @property {string} JS_NUMBER=JS_NUMBER JS_NUMBER value
-                 */
-                FieldOptions.JSType = (function() {
-                    var valuesById = {}, values = Object.create(valuesById);
-                    values[valuesById[0] = "JS_NORMAL"] = "JS_NORMAL";
-                    values[valuesById[1] = "JS_STRING"] = "JS_STRING";
-                    values[valuesById[2] = "JS_NUMBER"] = "JS_NUMBER";
-                    return values;
-                })();
-    
-                return FieldOptions;
-            })();
-    
-            protobuf.OneofOptions = (function() {
-    
-                /**
-                 * Properties of an OneofOptions.
-                 * @memberof google.protobuf
-                 * @interface IOneofOptions
-                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] OneofOptions uninterpretedOption
-                 */
-    
-                /**
-                 * Constructs a new OneofOptions.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an OneofOptions.
-                 * @implements IOneofOptions
-                 * @constructor
-                 * @param {google.protobuf.IOneofOptions=} [properties] Properties to set
-                 */
-                function OneofOptions(properties) {
-                    this.uninterpretedOption = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * OneofOptions uninterpretedOption.
-                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
-                 * @memberof google.protobuf.OneofOptions
-                 * @instance
-                 */
-                OneofOptions.prototype.uninterpretedOption = $util.emptyArray;
-    
-                /**
-                 * Creates an OneofOptions message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.OneofOptions
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.OneofOptions} OneofOptions
-                 */
-                OneofOptions.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.OneofOptions)
-                        return object;
-                    var message = new $root.google.protobuf.OneofOptions();
-                    if (object.uninterpretedOption) {
-                        if (!Array.isArray(object.uninterpretedOption))
-                            throw TypeError(".google.protobuf.OneofOptions.uninterpretedOption: array expected");
-                        message.uninterpretedOption = [];
-                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
-                            if (typeof object.uninterpretedOption[i] !== "object")
-                                throw TypeError(".google.protobuf.OneofOptions.uninterpretedOption: object expected");
-                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an OneofOptions message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.OneofOptions
-                 * @static
-                 * @param {google.protobuf.OneofOptions} message OneofOptions
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                OneofOptions.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.uninterpretedOption = [];
-                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
-                        object.uninterpretedOption = [];
-                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
-                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this OneofOptions to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.OneofOptions
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                OneofOptions.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return OneofOptions;
-            })();
-    
-            protobuf.EnumOptions = (function() {
-    
-                /**
-                 * Properties of an EnumOptions.
-                 * @memberof google.protobuf
-                 * @interface IEnumOptions
-                 * @property {boolean|null} [allowAlias] EnumOptions allowAlias
-                 * @property {boolean|null} [deprecated] EnumOptions deprecated
-                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] EnumOptions uninterpretedOption
-                 */
-    
-                /**
-                 * Constructs a new EnumOptions.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an EnumOptions.
-                 * @implements IEnumOptions
-                 * @constructor
-                 * @param {google.protobuf.IEnumOptions=} [properties] Properties to set
-                 */
-                function EnumOptions(properties) {
-                    this.uninterpretedOption = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * EnumOptions allowAlias.
-                 * @member {boolean} allowAlias
-                 * @memberof google.protobuf.EnumOptions
-                 * @instance
-                 */
-                EnumOptions.prototype.allowAlias = false;
-    
-                /**
-                 * EnumOptions deprecated.
-                 * @member {boolean} deprecated
-                 * @memberof google.protobuf.EnumOptions
-                 * @instance
-                 */
-                EnumOptions.prototype.deprecated = false;
-    
-                /**
-                 * EnumOptions uninterpretedOption.
-                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
-                 * @memberof google.protobuf.EnumOptions
-                 * @instance
-                 */
-                EnumOptions.prototype.uninterpretedOption = $util.emptyArray;
-    
-                /**
-                 * Creates an EnumOptions message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.EnumOptions
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.EnumOptions} EnumOptions
-                 */
-                EnumOptions.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.EnumOptions)
-                        return object;
-                    var message = new $root.google.protobuf.EnumOptions();
-                    if (object.allowAlias != null)
-                        message.allowAlias = Boolean(object.allowAlias);
-                    if (object.deprecated != null)
-                        message.deprecated = Boolean(object.deprecated);
-                    if (object.uninterpretedOption) {
-                        if (!Array.isArray(object.uninterpretedOption))
-                            throw TypeError(".google.protobuf.EnumOptions.uninterpretedOption: array expected");
-                        message.uninterpretedOption = [];
-                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
-                            if (typeof object.uninterpretedOption[i] !== "object")
-                                throw TypeError(".google.protobuf.EnumOptions.uninterpretedOption: object expected");
-                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an EnumOptions message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.EnumOptions
-                 * @static
-                 * @param {google.protobuf.EnumOptions} message EnumOptions
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                EnumOptions.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.uninterpretedOption = [];
-                    if (options.defaults) {
-                        object.allowAlias = false;
-                        object.deprecated = false;
-                    }
-                    if (message.allowAlias != null && message.hasOwnProperty("allowAlias"))
-                        object.allowAlias = message.allowAlias;
-                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
-                        object.deprecated = message.deprecated;
-                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
-                        object.uninterpretedOption = [];
-                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
-                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this EnumOptions to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.EnumOptions
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                EnumOptions.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return EnumOptions;
-            })();
-    
-            protobuf.EnumValueOptions = (function() {
-    
-                /**
-                 * Properties of an EnumValueOptions.
-                 * @memberof google.protobuf
-                 * @interface IEnumValueOptions
-                 * @property {boolean|null} [deprecated] EnumValueOptions deprecated
-                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] EnumValueOptions uninterpretedOption
-                 */
-    
-                /**
-                 * Constructs a new EnumValueOptions.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an EnumValueOptions.
-                 * @implements IEnumValueOptions
-                 * @constructor
-                 * @param {google.protobuf.IEnumValueOptions=} [properties] Properties to set
-                 */
-                function EnumValueOptions(properties) {
-                    this.uninterpretedOption = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * EnumValueOptions deprecated.
-                 * @member {boolean} deprecated
-                 * @memberof google.protobuf.EnumValueOptions
-                 * @instance
-                 */
-                EnumValueOptions.prototype.deprecated = false;
-    
-                /**
-                 * EnumValueOptions uninterpretedOption.
-                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
-                 * @memberof google.protobuf.EnumValueOptions
-                 * @instance
-                 */
-                EnumValueOptions.prototype.uninterpretedOption = $util.emptyArray;
-    
-                /**
-                 * Creates an EnumValueOptions message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.EnumValueOptions
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.EnumValueOptions} EnumValueOptions
-                 */
-                EnumValueOptions.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.EnumValueOptions)
-                        return object;
-                    var message = new $root.google.protobuf.EnumValueOptions();
-                    if (object.deprecated != null)
-                        message.deprecated = Boolean(object.deprecated);
-                    if (object.uninterpretedOption) {
-                        if (!Array.isArray(object.uninterpretedOption))
-                            throw TypeError(".google.protobuf.EnumValueOptions.uninterpretedOption: array expected");
-                        message.uninterpretedOption = [];
-                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
-                            if (typeof object.uninterpretedOption[i] !== "object")
-                                throw TypeError(".google.protobuf.EnumValueOptions.uninterpretedOption: object expected");
-                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an EnumValueOptions message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.EnumValueOptions
-                 * @static
-                 * @param {google.protobuf.EnumValueOptions} message EnumValueOptions
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                EnumValueOptions.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.uninterpretedOption = [];
-                    if (options.defaults)
-                        object.deprecated = false;
-                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
-                        object.deprecated = message.deprecated;
-                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
-                        object.uninterpretedOption = [];
-                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
-                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this EnumValueOptions to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.EnumValueOptions
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                EnumValueOptions.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return EnumValueOptions;
-            })();
-    
-            protobuf.ServiceOptions = (function() {
-    
-                /**
-                 * Properties of a ServiceOptions.
-                 * @memberof google.protobuf
-                 * @interface IServiceOptions
-                 * @property {boolean|null} [deprecated] ServiceOptions deprecated
-                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] ServiceOptions uninterpretedOption
-                 * @property {string|null} [".google.api.defaultHost"] ServiceOptions .google.api.defaultHost
-                 * @property {string|null} [".google.api.oauthScopes"] ServiceOptions .google.api.oauthScopes
-                 */
-    
-                /**
-                 * Constructs a new ServiceOptions.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a ServiceOptions.
-                 * @implements IServiceOptions
-                 * @constructor
-                 * @param {google.protobuf.IServiceOptions=} [properties] Properties to set
-                 */
-                function ServiceOptions(properties) {
-                    this.uninterpretedOption = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * ServiceOptions deprecated.
-                 * @member {boolean} deprecated
-                 * @memberof google.protobuf.ServiceOptions
-                 * @instance
-                 */
-                ServiceOptions.prototype.deprecated = false;
-    
-                /**
-                 * ServiceOptions uninterpretedOption.
-                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
-                 * @memberof google.protobuf.ServiceOptions
-                 * @instance
-                 */
-                ServiceOptions.prototype.uninterpretedOption = $util.emptyArray;
-    
-                /**
-                 * ServiceOptions .google.api.defaultHost.
-                 * @member {string} .google.api.defaultHost
-                 * @memberof google.protobuf.ServiceOptions
-                 * @instance
-                 */
-                ServiceOptions.prototype[".google.api.defaultHost"] = "";
-    
-                /**
-                 * ServiceOptions .google.api.oauthScopes.
-                 * @member {string} .google.api.oauthScopes
-                 * @memberof google.protobuf.ServiceOptions
-                 * @instance
-                 */
-                ServiceOptions.prototype[".google.api.oauthScopes"] = "";
-    
-                /**
-                 * Creates a ServiceOptions message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.ServiceOptions
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.ServiceOptions} ServiceOptions
-                 */
-                ServiceOptions.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.ServiceOptions)
-                        return object;
-                    var message = new $root.google.protobuf.ServiceOptions();
-                    if (object.deprecated != null)
-                        message.deprecated = Boolean(object.deprecated);
-                    if (object.uninterpretedOption) {
-                        if (!Array.isArray(object.uninterpretedOption))
-                            throw TypeError(".google.protobuf.ServiceOptions.uninterpretedOption: array expected");
-                        message.uninterpretedOption = [];
-                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
-                            if (typeof object.uninterpretedOption[i] !== "object")
-                                throw TypeError(".google.protobuf.ServiceOptions.uninterpretedOption: object expected");
-                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
-                        }
-                    }
-                    if (object[".google.api.defaultHost"] != null)
-                        message[".google.api.defaultHost"] = String(object[".google.api.defaultHost"]);
-                    if (object[".google.api.oauthScopes"] != null)
-                        message[".google.api.oauthScopes"] = String(object[".google.api.oauthScopes"]);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a ServiceOptions message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.ServiceOptions
-                 * @static
-                 * @param {google.protobuf.ServiceOptions} message ServiceOptions
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                ServiceOptions.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.uninterpretedOption = [];
-                    if (options.defaults) {
-                        object.deprecated = false;
-                        object[".google.api.defaultHost"] = "";
-                        object[".google.api.oauthScopes"] = "";
-                    }
-                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
-                        object.deprecated = message.deprecated;
-                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
-                        object.uninterpretedOption = [];
-                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
-                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
-                    }
-                    if (message[".google.api.defaultHost"] != null && message.hasOwnProperty(".google.api.defaultHost"))
-                        object[".google.api.defaultHost"] = message[".google.api.defaultHost"];
-                    if (message[".google.api.oauthScopes"] != null && message.hasOwnProperty(".google.api.oauthScopes"))
-                        object[".google.api.oauthScopes"] = message[".google.api.oauthScopes"];
-                    return object;
-                };
-    
-                /**
-                 * Converts this ServiceOptions to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.ServiceOptions
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                ServiceOptions.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return ServiceOptions;
-            })();
-    
-            protobuf.MethodOptions = (function() {
-    
-                /**
-                 * Properties of a MethodOptions.
-                 * @memberof google.protobuf
-                 * @interface IMethodOptions
-                 * @property {boolean|null} [deprecated] MethodOptions deprecated
-                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] MethodOptions uninterpretedOption
-                 * @property {google.api.IHttpRule|null} [".google.api.http"] MethodOptions .google.api.http
-                 * @property {Array.<string>|null} [".google.api.methodSignature"] MethodOptions .google.api.methodSignature
-                 * @property {google.longrunning.IOperationInfo|null} [".google.longrunning.operationInfo"] MethodOptions .google.longrunning.operationInfo
-                 */
-    
-                /**
-                 * Constructs a new MethodOptions.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a MethodOptions.
-                 * @implements IMethodOptions
-                 * @constructor
-                 * @param {google.protobuf.IMethodOptions=} [properties] Properties to set
-                 */
-                function MethodOptions(properties) {
-                    this.uninterpretedOption = [];
-                    this[".google.api.methodSignature"] = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * MethodOptions deprecated.
-                 * @member {boolean} deprecated
-                 * @memberof google.protobuf.MethodOptions
-                 * @instance
-                 */
-                MethodOptions.prototype.deprecated = false;
-    
-                /**
-                 * MethodOptions uninterpretedOption.
-                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
-                 * @memberof google.protobuf.MethodOptions
-                 * @instance
-                 */
-                MethodOptions.prototype.uninterpretedOption = $util.emptyArray;
-    
-                /**
-                 * MethodOptions .google.api.http.
-                 * @member {google.api.IHttpRule|null|undefined} .google.api.http
-                 * @memberof google.protobuf.MethodOptions
-                 * @instance
-                 */
-                MethodOptions.prototype[".google.api.http"] = null;
-    
-                /**
-                 * MethodOptions .google.api.methodSignature.
-                 * @member {Array.<string>} .google.api.methodSignature
-                 * @memberof google.protobuf.MethodOptions
-                 * @instance
-                 */
-                MethodOptions.prototype[".google.api.methodSignature"] = $util.emptyArray;
-    
-                /**
-                 * MethodOptions .google.longrunning.operationInfo.
-                 * @member {google.longrunning.IOperationInfo|null|undefined} .google.longrunning.operationInfo
-                 * @memberof google.protobuf.MethodOptions
-                 * @instance
-                 */
-                MethodOptions.prototype[".google.longrunning.operationInfo"] = null;
-    
-                /**
-                 * Creates a MethodOptions message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.MethodOptions
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.MethodOptions} MethodOptions
-                 */
-                MethodOptions.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.MethodOptions)
-                        return object;
-                    var message = new $root.google.protobuf.MethodOptions();
-                    if (object.deprecated != null)
-                        message.deprecated = Boolean(object.deprecated);
-                    if (object.uninterpretedOption) {
-                        if (!Array.isArray(object.uninterpretedOption))
-                            throw TypeError(".google.protobuf.MethodOptions.uninterpretedOption: array expected");
-                        message.uninterpretedOption = [];
-                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
-                            if (typeof object.uninterpretedOption[i] !== "object")
-                                throw TypeError(".google.protobuf.MethodOptions.uninterpretedOption: object expected");
-                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
-                        }
-                    }
-                    if (object[".google.api.http"] != null) {
-                        if (typeof object[".google.api.http"] !== "object")
-                            throw TypeError(".google.protobuf.MethodOptions..google.api.http: object expected");
-                        message[".google.api.http"] = $root.google.api.HttpRule.fromObject(object[".google.api.http"]);
-                    }
-                    if (object[".google.api.methodSignature"]) {
-                        if (!Array.isArray(object[".google.api.methodSignature"]))
-                            throw TypeError(".google.protobuf.MethodOptions..google.api.methodSignature: array expected");
-                        message[".google.api.methodSignature"] = [];
-                        for (var i = 0; i < object[".google.api.methodSignature"].length; ++i)
-                            message[".google.api.methodSignature"][i] = String(object[".google.api.methodSignature"][i]);
-                    }
-                    if (object[".google.longrunning.operationInfo"] != null) {
-                        if (typeof object[".google.longrunning.operationInfo"] !== "object")
-                            throw TypeError(".google.protobuf.MethodOptions..google.longrunning.operationInfo: object expected");
-                        message[".google.longrunning.operationInfo"] = $root.google.longrunning.OperationInfo.fromObject(object[".google.longrunning.operationInfo"]);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a MethodOptions message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.MethodOptions
-                 * @static
-                 * @param {google.protobuf.MethodOptions} message MethodOptions
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                MethodOptions.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults) {
-                        object.uninterpretedOption = [];
-                        object[".google.api.methodSignature"] = [];
-                    }
-                    if (options.defaults) {
-                        object.deprecated = false;
-                        object[".google.longrunning.operationInfo"] = null;
-                        object[".google.api.http"] = null;
-                    }
-                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
-                        object.deprecated = message.deprecated;
-                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
-                        object.uninterpretedOption = [];
-                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
-                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
-                    }
-                    if (message[".google.longrunning.operationInfo"] != null && message.hasOwnProperty(".google.longrunning.operationInfo"))
-                        object[".google.longrunning.operationInfo"] = $root.google.longrunning.OperationInfo.toObject(message[".google.longrunning.operationInfo"], options);
-                    if (message[".google.api.methodSignature"] && message[".google.api.methodSignature"].length) {
-                        object[".google.api.methodSignature"] = [];
-                        for (var j = 0; j < message[".google.api.methodSignature"].length; ++j)
-                            object[".google.api.methodSignature"][j] = message[".google.api.methodSignature"][j];
-                    }
-                    if (message[".google.api.http"] != null && message.hasOwnProperty(".google.api.http"))
-                        object[".google.api.http"] = $root.google.api.HttpRule.toObject(message[".google.api.http"], options);
-                    return object;
-                };
-    
-                /**
-                 * Converts this MethodOptions to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.MethodOptions
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                MethodOptions.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return MethodOptions;
-            })();
-    
-            protobuf.UninterpretedOption = (function() {
-    
-                /**
-                 * Properties of an UninterpretedOption.
-                 * @memberof google.protobuf
-                 * @interface IUninterpretedOption
-                 * @property {Array.<google.protobuf.UninterpretedOption.INamePart>|null} [name] UninterpretedOption name
-                 * @property {string|null} [identifierValue] UninterpretedOption identifierValue
-                 * @property {number|string|null} [positiveIntValue] UninterpretedOption positiveIntValue
-                 * @property {number|string|null} [negativeIntValue] UninterpretedOption negativeIntValue
-                 * @property {number|null} [doubleValue] UninterpretedOption doubleValue
-                 * @property {Uint8Array|null} [stringValue] UninterpretedOption stringValue
-                 * @property {string|null} [aggregateValue] UninterpretedOption aggregateValue
-                 */
-    
-                /**
-                 * Constructs a new UninterpretedOption.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an UninterpretedOption.
-                 * @implements IUninterpretedOption
-                 * @constructor
-                 * @param {google.protobuf.IUninterpretedOption=} [properties] Properties to set
-                 */
-                function UninterpretedOption(properties) {
-                    this.name = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * UninterpretedOption name.
-                 * @member {Array.<google.protobuf.UninterpretedOption.INamePart>} name
-                 * @memberof google.protobuf.UninterpretedOption
-                 * @instance
-                 */
-                UninterpretedOption.prototype.name = $util.emptyArray;
-    
-                /**
-                 * UninterpretedOption identifierValue.
-                 * @member {string} identifierValue
-                 * @memberof google.protobuf.UninterpretedOption
-                 * @instance
-                 */
-                UninterpretedOption.prototype.identifierValue = "";
-    
-                /**
-                 * UninterpretedOption positiveIntValue.
-                 * @member {number|string} positiveIntValue
-                 * @memberof google.protobuf.UninterpretedOption
-                 * @instance
-                 */
-                UninterpretedOption.prototype.positiveIntValue = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
-    
-                /**
-                 * UninterpretedOption negativeIntValue.
-                 * @member {number|string} negativeIntValue
-                 * @memberof google.protobuf.UninterpretedOption
-                 * @instance
-                 */
-                UninterpretedOption.prototype.negativeIntValue = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
-    
-                /**
-                 * UninterpretedOption doubleValue.
-                 * @member {number} doubleValue
-                 * @memberof google.protobuf.UninterpretedOption
-                 * @instance
-                 */
-                UninterpretedOption.prototype.doubleValue = 0;
-    
-                /**
-                 * UninterpretedOption stringValue.
-                 * @member {Uint8Array} stringValue
-                 * @memberof google.protobuf.UninterpretedOption
-                 * @instance
-                 */
-                UninterpretedOption.prototype.stringValue = $util.newBuffer([]);
-    
-                /**
-                 * UninterpretedOption aggregateValue.
-                 * @member {string} aggregateValue
-                 * @memberof google.protobuf.UninterpretedOption
-                 * @instance
-                 */
-                UninterpretedOption.prototype.aggregateValue = "";
-    
-                /**
-                 * Creates an UninterpretedOption message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.UninterpretedOption
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.UninterpretedOption} UninterpretedOption
-                 */
-                UninterpretedOption.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.UninterpretedOption)
-                        return object;
-                    var message = new $root.google.protobuf.UninterpretedOption();
-                    if (object.name) {
-                        if (!Array.isArray(object.name))
-                            throw TypeError(".google.protobuf.UninterpretedOption.name: array expected");
-                        message.name = [];
-                        for (var i = 0; i < object.name.length; ++i) {
-                            if (typeof object.name[i] !== "object")
-                                throw TypeError(".google.protobuf.UninterpretedOption.name: object expected");
-                            message.name[i] = $root.google.protobuf.UninterpretedOption.NamePart.fromObject(object.name[i]);
-                        }
-                    }
-                    if (object.identifierValue != null)
-                        message.identifierValue = String(object.identifierValue);
-                    if (object.positiveIntValue != null)
-                        if ($util.Long)
-                            (message.positiveIntValue = $util.Long.fromValue(object.positiveIntValue)).unsigned = true;
-                        else if (typeof object.positiveIntValue === "string")
-                            message.positiveIntValue = parseInt(object.positiveIntValue, 10);
-                        else if (typeof object.positiveIntValue === "number")
-                            message.positiveIntValue = object.positiveIntValue;
-                        else if (typeof object.positiveIntValue === "object")
-                            message.positiveIntValue = new $util.LongBits(object.positiveIntValue.low >>> 0, object.positiveIntValue.high >>> 0).toNumber(true);
-                    if (object.negativeIntValue != null)
-                        if ($util.Long)
-                            (message.negativeIntValue = $util.Long.fromValue(object.negativeIntValue)).unsigned = false;
-                        else if (typeof object.negativeIntValue === "string")
-                            message.negativeIntValue = parseInt(object.negativeIntValue, 10);
-                        else if (typeof object.negativeIntValue === "number")
-                            message.negativeIntValue = object.negativeIntValue;
-                        else if (typeof object.negativeIntValue === "object")
-                            message.negativeIntValue = new $util.LongBits(object.negativeIntValue.low >>> 0, object.negativeIntValue.high >>> 0).toNumber();
-                    if (object.doubleValue != null)
-                        message.doubleValue = Number(object.doubleValue);
-                    if (object.stringValue != null)
-                        if (typeof object.stringValue === "string")
-                            $util.base64.decode(object.stringValue, message.stringValue = $util.newBuffer($util.base64.length(object.stringValue)), 0);
-                        else if (object.stringValue.length)
-                            message.stringValue = object.stringValue;
-                    if (object.aggregateValue != null)
-                        message.aggregateValue = String(object.aggregateValue);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an UninterpretedOption message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.UninterpretedOption
-                 * @static
-                 * @param {google.protobuf.UninterpretedOption} message UninterpretedOption
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                UninterpretedOption.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.name = [];
-                    if (options.defaults) {
-                        object.identifierValue = "";
-                        if ($util.Long) {
-                            var long = new $util.Long(0, 0, true);
-                            object.positiveIntValue = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                        } else
-                            object.positiveIntValue = options.longs === String ? "0" : 0;
-                        if ($util.Long) {
-                            var long = new $util.Long(0, 0, false);
-                            object.negativeIntValue = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                        } else
-                            object.negativeIntValue = options.longs === String ? "0" : 0;
-                        object.doubleValue = 0;
-                        if (options.bytes === String)
-                            object.stringValue = "";
-                        else {
-                            object.stringValue = [];
-                            if (options.bytes !== Array)
-                                object.stringValue = $util.newBuffer(object.stringValue);
-                        }
-                        object.aggregateValue = "";
-                    }
-                    if (message.name && message.name.length) {
-                        object.name = [];
-                        for (var j = 0; j < message.name.length; ++j)
-                            object.name[j] = $root.google.protobuf.UninterpretedOption.NamePart.toObject(message.name[j], options);
-                    }
-                    if (message.identifierValue != null && message.hasOwnProperty("identifierValue"))
-                        object.identifierValue = message.identifierValue;
-                    if (message.positiveIntValue != null && message.hasOwnProperty("positiveIntValue"))
-                        if (typeof message.positiveIntValue === "number")
-                            object.positiveIntValue = options.longs === String ? String(message.positiveIntValue) : message.positiveIntValue;
-                        else
-                            object.positiveIntValue = options.longs === String ? $util.Long.prototype.toString.call(message.positiveIntValue) : options.longs === Number ? new $util.LongBits(message.positiveIntValue.low >>> 0, message.positiveIntValue.high >>> 0).toNumber(true) : message.positiveIntValue;
-                    if (message.negativeIntValue != null && message.hasOwnProperty("negativeIntValue"))
-                        if (typeof message.negativeIntValue === "number")
-                            object.negativeIntValue = options.longs === String ? String(message.negativeIntValue) : message.negativeIntValue;
-                        else
-                            object.negativeIntValue = options.longs === String ? $util.Long.prototype.toString.call(message.negativeIntValue) : options.longs === Number ? new $util.LongBits(message.negativeIntValue.low >>> 0, message.negativeIntValue.high >>> 0).toNumber() : message.negativeIntValue;
-                    if (message.doubleValue != null && message.hasOwnProperty("doubleValue"))
-                        object.doubleValue = options.json && !isFinite(message.doubleValue) ? String(message.doubleValue) : message.doubleValue;
-                    if (message.stringValue != null && message.hasOwnProperty("stringValue"))
-                        object.stringValue = options.bytes === String ? $util.base64.encode(message.stringValue, 0, message.stringValue.length) : options.bytes === Array ? Array.prototype.slice.call(message.stringValue) : message.stringValue;
-                    if (message.aggregateValue != null && message.hasOwnProperty("aggregateValue"))
-                        object.aggregateValue = message.aggregateValue;
-                    return object;
-                };
-    
-                /**
-                 * Converts this UninterpretedOption to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.UninterpretedOption
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                UninterpretedOption.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                UninterpretedOption.NamePart = (function() {
-    
-                    /**
-                     * Properties of a NamePart.
-                     * @memberof google.protobuf.UninterpretedOption
-                     * @interface INamePart
-                     * @property {string} namePart NamePart namePart
-                     * @property {boolean} isExtension NamePart isExtension
-                     */
-    
-                    /**
-                     * Constructs a new NamePart.
-                     * @memberof google.protobuf.UninterpretedOption
-                     * @classdesc Represents a NamePart.
-                     * @implements INamePart
-                     * @constructor
-                     * @param {google.protobuf.UninterpretedOption.INamePart=} [properties] Properties to set
-                     */
-                    function NamePart(properties) {
-                        if (properties)
-                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                if (properties[keys[i]] != null)
-                                    this[keys[i]] = properties[keys[i]];
-                    }
-    
-                    /**
-                     * NamePart namePart.
-                     * @member {string} namePart
-                     * @memberof google.protobuf.UninterpretedOption.NamePart
-                     * @instance
-                     */
-                    NamePart.prototype.namePart = "";
-    
-                    /**
-                     * NamePart isExtension.
-                     * @member {boolean} isExtension
-                     * @memberof google.protobuf.UninterpretedOption.NamePart
-                     * @instance
-                     */
-                    NamePart.prototype.isExtension = false;
-    
-                    /**
-                     * Creates a NamePart message from a plain object. Also converts values to their respective internal types.
-                     * @function fromObject
-                     * @memberof google.protobuf.UninterpretedOption.NamePart
-                     * @static
-                     * @param {Object.<string,*>} object Plain object
-                     * @returns {google.protobuf.UninterpretedOption.NamePart} NamePart
-                     */
-                    NamePart.fromObject = function fromObject(object) {
-                        if (object instanceof $root.google.protobuf.UninterpretedOption.NamePart)
-                            return object;
-                        var message = new $root.google.protobuf.UninterpretedOption.NamePart();
-                        if (object.namePart != null)
-                            message.namePart = String(object.namePart);
-                        if (object.isExtension != null)
-                            message.isExtension = Boolean(object.isExtension);
-                        return message;
-                    };
-    
-                    /**
-                     * Creates a plain object from a NamePart message. Also converts values to other types if specified.
-                     * @function toObject
-                     * @memberof google.protobuf.UninterpretedOption.NamePart
-                     * @static
-                     * @param {google.protobuf.UninterpretedOption.NamePart} message NamePart
-                     * @param {$protobuf.IConversionOptions} [options] Conversion options
-                     * @returns {Object.<string,*>} Plain object
-                     */
-                    NamePart.toObject = function toObject(message, options) {
-                        if (!options)
-                            options = {};
-                        var object = {};
-                        if (options.defaults) {
-                            object.namePart = "";
-                            object.isExtension = false;
-                        }
-                        if (message.namePart != null && message.hasOwnProperty("namePart"))
-                            object.namePart = message.namePart;
-                        if (message.isExtension != null && message.hasOwnProperty("isExtension"))
-                            object.isExtension = message.isExtension;
-                        return object;
-                    };
-    
-                    /**
-                     * Converts this NamePart to JSON.
-                     * @function toJSON
-                     * @memberof google.protobuf.UninterpretedOption.NamePart
-                     * @instance
-                     * @returns {Object.<string,*>} JSON object
-                     */
-                    NamePart.prototype.toJSON = function toJSON() {
-                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                    };
-    
-                    return NamePart;
-                })();
-    
-                return UninterpretedOption;
-            })();
-    
-            protobuf.SourceCodeInfo = (function() {
-    
-                /**
-                 * Properties of a SourceCodeInfo.
-                 * @memberof google.protobuf
-                 * @interface ISourceCodeInfo
-                 * @property {Array.<google.protobuf.SourceCodeInfo.ILocation>|null} [location] SourceCodeInfo location
-                 */
-    
-                /**
-                 * Constructs a new SourceCodeInfo.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a SourceCodeInfo.
-                 * @implements ISourceCodeInfo
-                 * @constructor
-                 * @param {google.protobuf.ISourceCodeInfo=} [properties] Properties to set
-                 */
-                function SourceCodeInfo(properties) {
-                    this.location = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * SourceCodeInfo location.
-                 * @member {Array.<google.protobuf.SourceCodeInfo.ILocation>} location
-                 * @memberof google.protobuf.SourceCodeInfo
-                 * @instance
-                 */
-                SourceCodeInfo.prototype.location = $util.emptyArray;
-    
-                /**
-                 * Creates a SourceCodeInfo message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.SourceCodeInfo
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.SourceCodeInfo} SourceCodeInfo
-                 */
-                SourceCodeInfo.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.SourceCodeInfo)
-                        return object;
-                    var message = new $root.google.protobuf.SourceCodeInfo();
-                    if (object.location) {
-                        if (!Array.isArray(object.location))
-                            throw TypeError(".google.protobuf.SourceCodeInfo.location: array expected");
-                        message.location = [];
-                        for (var i = 0; i < object.location.length; ++i) {
-                            if (typeof object.location[i] !== "object")
-                                throw TypeError(".google.protobuf.SourceCodeInfo.location: object expected");
-                            message.location[i] = $root.google.protobuf.SourceCodeInfo.Location.fromObject(object.location[i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a SourceCodeInfo message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.SourceCodeInfo
-                 * @static
-                 * @param {google.protobuf.SourceCodeInfo} message SourceCodeInfo
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                SourceCodeInfo.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.location = [];
-                    if (message.location && message.location.length) {
-                        object.location = [];
-                        for (var j = 0; j < message.location.length; ++j)
-                            object.location[j] = $root.google.protobuf.SourceCodeInfo.Location.toObject(message.location[j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this SourceCodeInfo to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.SourceCodeInfo
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                SourceCodeInfo.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                SourceCodeInfo.Location = (function() {
-    
-                    /**
-                     * Properties of a Location.
-                     * @memberof google.protobuf.SourceCodeInfo
-                     * @interface ILocation
-                     * @property {Array.<number>|null} [path] Location path
-                     * @property {Array.<number>|null} [span] Location span
-                     * @property {string|null} [leadingComments] Location leadingComments
-                     * @property {string|null} [trailingComments] Location trailingComments
-                     * @property {Array.<string>|null} [leadingDetachedComments] Location leadingDetachedComments
-                     */
-    
-                    /**
-                     * Constructs a new Location.
-                     * @memberof google.protobuf.SourceCodeInfo
-                     * @classdesc Represents a Location.
-                     * @implements ILocation
-                     * @constructor
-                     * @param {google.protobuf.SourceCodeInfo.ILocation=} [properties] Properties to set
-                     */
-                    function Location(properties) {
-                        this.path = [];
-                        this.span = [];
-                        this.leadingDetachedComments = [];
-                        if (properties)
-                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                if (properties[keys[i]] != null)
-                                    this[keys[i]] = properties[keys[i]];
-                    }
-    
-                    /**
-                     * Location path.
-                     * @member {Array.<number>} path
-                     * @memberof google.protobuf.SourceCodeInfo.Location
-                     * @instance
-                     */
-                    Location.prototype.path = $util.emptyArray;
-    
-                    /**
-                     * Location span.
-                     * @member {Array.<number>} span
-                     * @memberof google.protobuf.SourceCodeInfo.Location
-                     * @instance
-                     */
-                    Location.prototype.span = $util.emptyArray;
-    
-                    /**
-                     * Location leadingComments.
-                     * @member {string} leadingComments
-                     * @memberof google.protobuf.SourceCodeInfo.Location
-                     * @instance
-                     */
-                    Location.prototype.leadingComments = "";
-    
-                    /**
-                     * Location trailingComments.
-                     * @member {string} trailingComments
-                     * @memberof google.protobuf.SourceCodeInfo.Location
-                     * @instance
-                     */
-                    Location.prototype.trailingComments = "";
-    
-                    /**
-                     * Location leadingDetachedComments.
-                     * @member {Array.<string>} leadingDetachedComments
-                     * @memberof google.protobuf.SourceCodeInfo.Location
-                     * @instance
-                     */
-                    Location.prototype.leadingDetachedComments = $util.emptyArray;
-    
-                    /**
-                     * Creates a Location message from a plain object. Also converts values to their respective internal types.
-                     * @function fromObject
-                     * @memberof google.protobuf.SourceCodeInfo.Location
-                     * @static
-                     * @param {Object.<string,*>} object Plain object
-                     * @returns {google.protobuf.SourceCodeInfo.Location} Location
-                     */
-                    Location.fromObject = function fromObject(object) {
-                        if (object instanceof $root.google.protobuf.SourceCodeInfo.Location)
-                            return object;
-                        var message = new $root.google.protobuf.SourceCodeInfo.Location();
-                        if (object.path) {
-                            if (!Array.isArray(object.path))
-                                throw TypeError(".google.protobuf.SourceCodeInfo.Location.path: array expected");
-                            message.path = [];
-                            for (var i = 0; i < object.path.length; ++i)
-                                message.path[i] = object.path[i] | 0;
-                        }
-                        if (object.span) {
-                            if (!Array.isArray(object.span))
-                                throw TypeError(".google.protobuf.SourceCodeInfo.Location.span: array expected");
-                            message.span = [];
-                            for (var i = 0; i < object.span.length; ++i)
-                                message.span[i] = object.span[i] | 0;
-                        }
-                        if (object.leadingComments != null)
-                            message.leadingComments = String(object.leadingComments);
-                        if (object.trailingComments != null)
-                            message.trailingComments = String(object.trailingComments);
-                        if (object.leadingDetachedComments) {
-                            if (!Array.isArray(object.leadingDetachedComments))
-                                throw TypeError(".google.protobuf.SourceCodeInfo.Location.leadingDetachedComments: array expected");
-                            message.leadingDetachedComments = [];
-                            for (var i = 0; i < object.leadingDetachedComments.length; ++i)
-                                message.leadingDetachedComments[i] = String(object.leadingDetachedComments[i]);
-                        }
-                        return message;
-                    };
-    
-                    /**
-                     * Creates a plain object from a Location message. Also converts values to other types if specified.
-                     * @function toObject
-                     * @memberof google.protobuf.SourceCodeInfo.Location
-                     * @static
-                     * @param {google.protobuf.SourceCodeInfo.Location} message Location
-                     * @param {$protobuf.IConversionOptions} [options] Conversion options
-                     * @returns {Object.<string,*>} Plain object
-                     */
-                    Location.toObject = function toObject(message, options) {
-                        if (!options)
-                            options = {};
-                        var object = {};
-                        if (options.arrays || options.defaults) {
-                            object.path = [];
-                            object.span = [];
-                            object.leadingDetachedComments = [];
-                        }
-                        if (options.defaults) {
-                            object.leadingComments = "";
-                            object.trailingComments = "";
-                        }
-                        if (message.path && message.path.length) {
-                            object.path = [];
-                            for (var j = 0; j < message.path.length; ++j)
-                                object.path[j] = message.path[j];
-                        }
-                        if (message.span && message.span.length) {
-                            object.span = [];
-                            for (var j = 0; j < message.span.length; ++j)
-                                object.span[j] = message.span[j];
-                        }
-                        if (message.leadingComments != null && message.hasOwnProperty("leadingComments"))
-                            object.leadingComments = message.leadingComments;
-                        if (message.trailingComments != null && message.hasOwnProperty("trailingComments"))
-                            object.trailingComments = message.trailingComments;
-                        if (message.leadingDetachedComments && message.leadingDetachedComments.length) {
-                            object.leadingDetachedComments = [];
-                            for (var j = 0; j < message.leadingDetachedComments.length; ++j)
-                                object.leadingDetachedComments[j] = message.leadingDetachedComments[j];
-                        }
-                        return object;
-                    };
-    
-                    /**
-                     * Converts this Location to JSON.
-                     * @function toJSON
-                     * @memberof google.protobuf.SourceCodeInfo.Location
-                     * @instance
-                     * @returns {Object.<string,*>} JSON object
-                     */
-                    Location.prototype.toJSON = function toJSON() {
-                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                    };
-    
-                    return Location;
-                })();
-    
-                return SourceCodeInfo;
-            })();
-    
-            protobuf.GeneratedCodeInfo = (function() {
-    
-                /**
-                 * Properties of a GeneratedCodeInfo.
-                 * @memberof google.protobuf
-                 * @interface IGeneratedCodeInfo
-                 * @property {Array.<google.protobuf.GeneratedCodeInfo.IAnnotation>|null} [annotation] GeneratedCodeInfo annotation
-                 */
-    
-                /**
-                 * Constructs a new GeneratedCodeInfo.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a GeneratedCodeInfo.
-                 * @implements IGeneratedCodeInfo
-                 * @constructor
-                 * @param {google.protobuf.IGeneratedCodeInfo=} [properties] Properties to set
-                 */
-                function GeneratedCodeInfo(properties) {
-                    this.annotation = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * GeneratedCodeInfo annotation.
-                 * @member {Array.<google.protobuf.GeneratedCodeInfo.IAnnotation>} annotation
-                 * @memberof google.protobuf.GeneratedCodeInfo
-                 * @instance
-                 */
-                GeneratedCodeInfo.prototype.annotation = $util.emptyArray;
-    
-                /**
-                 * Creates a GeneratedCodeInfo message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.GeneratedCodeInfo
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.GeneratedCodeInfo} GeneratedCodeInfo
-                 */
-                GeneratedCodeInfo.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.GeneratedCodeInfo)
-                        return object;
-                    var message = new $root.google.protobuf.GeneratedCodeInfo();
-                    if (object.annotation) {
-                        if (!Array.isArray(object.annotation))
-                            throw TypeError(".google.protobuf.GeneratedCodeInfo.annotation: array expected");
-                        message.annotation = [];
-                        for (var i = 0; i < object.annotation.length; ++i) {
-                            if (typeof object.annotation[i] !== "object")
-                                throw TypeError(".google.protobuf.GeneratedCodeInfo.annotation: object expected");
-                            message.annotation[i] = $root.google.protobuf.GeneratedCodeInfo.Annotation.fromObject(object.annotation[i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a GeneratedCodeInfo message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.GeneratedCodeInfo
-                 * @static
-                 * @param {google.protobuf.GeneratedCodeInfo} message GeneratedCodeInfo
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                GeneratedCodeInfo.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.annotation = [];
-                    if (message.annotation && message.annotation.length) {
-                        object.annotation = [];
-                        for (var j = 0; j < message.annotation.length; ++j)
-                            object.annotation[j] = $root.google.protobuf.GeneratedCodeInfo.Annotation.toObject(message.annotation[j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this GeneratedCodeInfo to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.GeneratedCodeInfo
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                GeneratedCodeInfo.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                GeneratedCodeInfo.Annotation = (function() {
-    
-                    /**
-                     * Properties of an Annotation.
-                     * @memberof google.protobuf.GeneratedCodeInfo
-                     * @interface IAnnotation
-                     * @property {Array.<number>|null} [path] Annotation path
-                     * @property {string|null} [sourceFile] Annotation sourceFile
-                     * @property {number|null} [begin] Annotation begin
-                     * @property {number|null} [end] Annotation end
-                     */
-    
-                    /**
-                     * Constructs a new Annotation.
-                     * @memberof google.protobuf.GeneratedCodeInfo
-                     * @classdesc Represents an Annotation.
-                     * @implements IAnnotation
-                     * @constructor
-                     * @param {google.protobuf.GeneratedCodeInfo.IAnnotation=} [properties] Properties to set
-                     */
-                    function Annotation(properties) {
-                        this.path = [];
-                        if (properties)
-                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                if (properties[keys[i]] != null)
-                                    this[keys[i]] = properties[keys[i]];
-                    }
-    
-                    /**
-                     * Annotation path.
-                     * @member {Array.<number>} path
-                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
-                     * @instance
-                     */
-                    Annotation.prototype.path = $util.emptyArray;
-    
-                    /**
-                     * Annotation sourceFile.
-                     * @member {string} sourceFile
-                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
-                     * @instance
-                     */
-                    Annotation.prototype.sourceFile = "";
-    
-                    /**
-                     * Annotation begin.
-                     * @member {number} begin
-                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
-                     * @instance
-                     */
-                    Annotation.prototype.begin = 0;
-    
-                    /**
-                     * Annotation end.
-                     * @member {number} end
-                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
-                     * @instance
-                     */
-                    Annotation.prototype.end = 0;
-    
-                    /**
-                     * Creates an Annotation message from a plain object. Also converts values to their respective internal types.
-                     * @function fromObject
-                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
-                     * @static
-                     * @param {Object.<string,*>} object Plain object
-                     * @returns {google.protobuf.GeneratedCodeInfo.Annotation} Annotation
-                     */
-                    Annotation.fromObject = function fromObject(object) {
-                        if (object instanceof $root.google.protobuf.GeneratedCodeInfo.Annotation)
-                            return object;
-                        var message = new $root.google.protobuf.GeneratedCodeInfo.Annotation();
-                        if (object.path) {
-                            if (!Array.isArray(object.path))
-                                throw TypeError(".google.protobuf.GeneratedCodeInfo.Annotation.path: array expected");
-                            message.path = [];
-                            for (var i = 0; i < object.path.length; ++i)
-                                message.path[i] = object.path[i] | 0;
-                        }
-                        if (object.sourceFile != null)
-                            message.sourceFile = String(object.sourceFile);
-                        if (object.begin != null)
-                            message.begin = object.begin | 0;
-                        if (object.end != null)
-                            message.end = object.end | 0;
-                        return message;
-                    };
-    
-                    /**
-                     * Creates a plain object from an Annotation message. Also converts values to other types if specified.
-                     * @function toObject
-                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
-                     * @static
-                     * @param {google.protobuf.GeneratedCodeInfo.Annotation} message Annotation
-                     * @param {$protobuf.IConversionOptions} [options] Conversion options
-                     * @returns {Object.<string,*>} Plain object
-                     */
-                    Annotation.toObject = function toObject(message, options) {
-                        if (!options)
-                            options = {};
-                        var object = {};
-                        if (options.arrays || options.defaults)
-                            object.path = [];
-                        if (options.defaults) {
-                            object.sourceFile = "";
-                            object.begin = 0;
-                            object.end = 0;
-                        }
-                        if (message.path && message.path.length) {
-                            object.path = [];
-                            for (var j = 0; j < message.path.length; ++j)
-                                object.path[j] = message.path[j];
-                        }
-                        if (message.sourceFile != null && message.hasOwnProperty("sourceFile"))
-                            object.sourceFile = message.sourceFile;
-                        if (message.begin != null && message.hasOwnProperty("begin"))
-                            object.begin = message.begin;
-                        if (message.end != null && message.hasOwnProperty("end"))
-                            object.end = message.end;
-                        return object;
-                    };
-    
-                    /**
-                     * Converts this Annotation to JSON.
-                     * @function toJSON
-                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
-                     * @instance
-                     * @returns {Object.<string,*>} JSON object
-                     */
-                    Annotation.prototype.toJSON = function toJSON() {
-                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                    };
-    
-                    return Annotation;
-                })();
-    
-                return GeneratedCodeInfo;
-            })();
-    
-            protobuf.Empty = (function() {
-    
-                /**
-                 * Properties of an Empty.
-                 * @memberof google.protobuf
-                 * @interface IEmpty
-                 */
-    
-                /**
-                 * Constructs a new Empty.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an Empty.
-                 * @implements IEmpty
-                 * @constructor
-                 * @param {google.protobuf.IEmpty=} [properties] Properties to set
-                 */
-                function Empty(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Creates an Empty message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Empty
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Empty} Empty
-                 */
-                Empty.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Empty)
-                        return object;
-                    return new $root.google.protobuf.Empty();
-                };
-    
-                /**
-                 * Creates a plain object from an Empty message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Empty
-                 * @static
-                 * @param {google.protobuf.Empty} message Empty
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Empty.toObject = function toObject() {
-                    return {};
-                };
-    
-                /**
-                 * Converts this Empty to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Empty
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Empty.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return Empty;
-            })();
-    
-            protobuf.FieldMask = (function() {
-    
-                /**
-                 * Properties of a FieldMask.
-                 * @memberof google.protobuf
-                 * @interface IFieldMask
-                 * @property {Array.<string>|null} [paths] FieldMask paths
-                 */
-    
-                /**
-                 * Constructs a new FieldMask.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a FieldMask.
-                 * @implements IFieldMask
-                 * @constructor
-                 * @param {google.protobuf.IFieldMask=} [properties] Properties to set
-                 */
-                function FieldMask(properties) {
-                    this.paths = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * FieldMask paths.
-                 * @member {Array.<string>} paths
-                 * @memberof google.protobuf.FieldMask
-                 * @instance
-                 */
-                FieldMask.prototype.paths = $util.emptyArray;
-    
-                /**
-                 * Creates a FieldMask message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.FieldMask
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.FieldMask} FieldMask
-                 */
-                FieldMask.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.FieldMask)
-                        return object;
-                    var message = new $root.google.protobuf.FieldMask();
-                    if (object.paths) {
-                        if (!Array.isArray(object.paths))
-                            throw TypeError(".google.protobuf.FieldMask.paths: array expected");
-                        message.paths = [];
-                        for (var i = 0; i < object.paths.length; ++i)
-                            message.paths[i] = String(object.paths[i]);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a FieldMask message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.FieldMask
-                 * @static
-                 * @param {google.protobuf.FieldMask} message FieldMask
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                FieldMask.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.paths = [];
-                    if (message.paths && message.paths.length) {
-                        object.paths = [];
-                        for (var j = 0; j < message.paths.length; ++j)
-                            object.paths[j] = message.paths[j];
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this FieldMask to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.FieldMask
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                FieldMask.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return FieldMask;
-            })();
-    
-            protobuf.Timestamp = (function() {
-    
-                /**
-                 * Properties of a Timestamp.
-                 * @memberof google.protobuf
-                 * @interface ITimestamp
-                 * @property {number|string|null} [seconds] Timestamp seconds
-                 * @property {number|null} [nanos] Timestamp nanos
-                 */
-    
-                /**
-                 * Constructs a new Timestamp.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a Timestamp.
-                 * @implements ITimestamp
-                 * @constructor
-                 * @param {google.protobuf.ITimestamp=} [properties] Properties to set
-                 */
-                function Timestamp(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Timestamp seconds.
-                 * @member {number|string} seconds
-                 * @memberof google.protobuf.Timestamp
-                 * @instance
-                 */
-                Timestamp.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
-    
-                /**
-                 * Timestamp nanos.
-                 * @member {number} nanos
-                 * @memberof google.protobuf.Timestamp
-                 * @instance
-                 */
-                Timestamp.prototype.nanos = 0;
-    
-                /**
-                 * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Timestamp
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Timestamp} Timestamp
-                 */
-                Timestamp.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Timestamp)
-                        return object;
-                    var message = new $root.google.protobuf.Timestamp();
-                    if (object.seconds != null)
-                        if ($util.Long)
-                            (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
-                        else if (typeof object.seconds === "string")
-                            message.seconds = parseInt(object.seconds, 10);
-                        else if (typeof object.seconds === "number")
-                            message.seconds = object.seconds;
-                        else if (typeof object.seconds === "object")
-                            message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
-                    if (object.nanos != null)
-                        message.nanos = object.nanos | 0;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Timestamp
-                 * @static
-                 * @param {google.protobuf.Timestamp} message Timestamp
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Timestamp.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        if ($util.Long) {
-                            var long = new $util.Long(0, 0, false);
-                            object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                        } else
-                            object.seconds = options.longs === String ? "0" : 0;
-                        object.nanos = 0;
-                    }
-                    if (message.seconds != null && message.hasOwnProperty("seconds"))
-                        if (typeof message.seconds === "number")
-                            object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
-                        else
-                            object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
-                    if (message.nanos != null && message.hasOwnProperty("nanos"))
-                        object.nanos = message.nanos;
-                    return object;
-                };
-    
-                /**
-                 * Converts this Timestamp to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Timestamp
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Timestamp.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return Timestamp;
-            })();
-    
-            protobuf.Any = (function() {
-    
-                /**
-                 * Properties of an Any.
-                 * @memberof google.protobuf
-                 * @interface IAny
-                 * @property {string|null} [type_url] Any type_url
-                 * @property {Uint8Array|null} [value] Any value
-                 */
-    
-                /**
-                 * Constructs a new Any.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an Any.
-                 * @implements IAny
-                 * @constructor
-                 * @param {google.protobuf.IAny=} [properties] Properties to set
-                 */
-                function Any(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Any type_url.
-                 * @member {string} type_url
-                 * @memberof google.protobuf.Any
-                 * @instance
-                 */
-                Any.prototype.type_url = "";
-    
-                /**
-                 * Any value.
-                 * @member {Uint8Array} value
-                 * @memberof google.protobuf.Any
-                 * @instance
-                 */
-                Any.prototype.value = $util.newBuffer([]);
-    
-                /**
-                 * Creates an Any message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Any
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Any} Any
-                 */
-                Any.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Any)
-                        return object;
-                    var message = new $root.google.protobuf.Any();
-                    if (object.type_url != null)
-                        message.type_url = String(object.type_url);
-                    if (object.value != null)
-                        if (typeof object.value === "string")
-                            $util.base64.decode(object.value, message.value = $util.newBuffer($util.base64.length(object.value)), 0);
-                        else if (object.value.length)
-                            message.value = object.value;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an Any message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Any
-                 * @static
-                 * @param {google.protobuf.Any} message Any
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Any.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.type_url = "";
-                        if (options.bytes === String)
-                            object.value = "";
-                        else {
-                            object.value = [];
-                            if (options.bytes !== Array)
-                                object.value = $util.newBuffer(object.value);
-                        }
-                    }
-                    if (message.type_url != null && message.hasOwnProperty("type_url"))
-                        object.type_url = message.type_url;
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        object.value = options.bytes === String ? $util.base64.encode(message.value, 0, message.value.length) : options.bytes === Array ? Array.prototype.slice.call(message.value) : message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this Any to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Any
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Any.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return Any;
-            })();
-    
-            protobuf.Struct = (function() {
-    
-                /**
-                 * Properties of a Struct.
-                 * @memberof google.protobuf
-                 * @interface IStruct
-                 * @property {Object.<string,google.protobuf.IValue>|null} [fields] Struct fields
-                 */
-    
-                /**
-                 * Constructs a new Struct.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a Struct.
-                 * @implements IStruct
-                 * @constructor
-                 * @param {google.protobuf.IStruct=} [properties] Properties to set
-                 */
-                function Struct(properties) {
-                    this.fields = {};
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Struct fields.
-                 * @member {Object.<string,google.protobuf.IValue>} fields
-                 * @memberof google.protobuf.Struct
-                 * @instance
-                 */
-                Struct.prototype.fields = $util.emptyObject;
-    
-                /**
-                 * Creates a Struct message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Struct
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Struct} Struct
-                 */
-                Struct.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Struct)
-                        return object;
-                    var message = new $root.google.protobuf.Struct();
-                    if (object.fields) {
-                        if (typeof object.fields !== "object")
-                            throw TypeError(".google.protobuf.Struct.fields: object expected");
-                        message.fields = {};
-                        for (var keys = Object.keys(object.fields), i = 0; i < keys.length; ++i) {
-                            if (typeof object.fields[keys[i]] !== "object")
-                                throw TypeError(".google.protobuf.Struct.fields: object expected");
-                            message.fields[keys[i]] = $root.google.protobuf.Value.fromObject(object.fields[keys[i]]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a Struct message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Struct
-                 * @static
-                 * @param {google.protobuf.Struct} message Struct
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Struct.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.objects || options.defaults)
-                        object.fields = {};
-                    var keys2;
-                    if (message.fields && (keys2 = Object.keys(message.fields)).length) {
-                        object.fields = {};
-                        for (var j = 0; j < keys2.length; ++j)
-                            object.fields[keys2[j]] = $root.google.protobuf.Value.toObject(message.fields[keys2[j]], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this Struct to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Struct
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Struct.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return Struct;
-            })();
-    
-            protobuf.Value = (function() {
-    
-                /**
-                 * Properties of a Value.
-                 * @memberof google.protobuf
-                 * @interface IValue
-                 * @property {google.protobuf.NullValue|null} [nullValue] Value nullValue
-                 * @property {number|null} [numberValue] Value numberValue
-                 * @property {string|null} [stringValue] Value stringValue
-                 * @property {boolean|null} [boolValue] Value boolValue
-                 * @property {google.protobuf.IStruct|null} [structValue] Value structValue
-                 * @property {google.protobuf.IListValue|null} [listValue] Value listValue
-                 */
-    
-                /**
-                 * Constructs a new Value.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a Value.
-                 * @implements IValue
-                 * @constructor
-                 * @param {google.protobuf.IValue=} [properties] Properties to set
-                 */
-                function Value(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Value nullValue.
-                 * @member {google.protobuf.NullValue|null|undefined} nullValue
-                 * @memberof google.protobuf.Value
-                 * @instance
-                 */
-                Value.prototype.nullValue = null;
-    
-                /**
-                 * Value numberValue.
-                 * @member {number|null|undefined} numberValue
-                 * @memberof google.protobuf.Value
-                 * @instance
-                 */
-                Value.prototype.numberValue = null;
-    
-                /**
-                 * Value stringValue.
-                 * @member {string|null|undefined} stringValue
-                 * @memberof google.protobuf.Value
-                 * @instance
-                 */
-                Value.prototype.stringValue = null;
-    
-                /**
-                 * Value boolValue.
-                 * @member {boolean|null|undefined} boolValue
-                 * @memberof google.protobuf.Value
-                 * @instance
-                 */
-                Value.prototype.boolValue = null;
-    
-                /**
-                 * Value structValue.
-                 * @member {google.protobuf.IStruct|null|undefined} structValue
-                 * @memberof google.protobuf.Value
-                 * @instance
-                 */
-                Value.prototype.structValue = null;
-    
-                /**
-                 * Value listValue.
-                 * @member {google.protobuf.IListValue|null|undefined} listValue
-                 * @memberof google.protobuf.Value
-                 * @instance
-                 */
-                Value.prototype.listValue = null;
-    
-                // OneOf field names bound to virtual getters and setters
-                var $oneOfFields;
-    
-                /**
-                 * Value kind.
-                 * @member {"nullValue"|"numberValue"|"stringValue"|"boolValue"|"structValue"|"listValue"|undefined} kind
-                 * @memberof google.protobuf.Value
-                 * @instance
-                 */
-                Object.defineProperty(Value.prototype, "kind", {
-                    get: $util.oneOfGetter($oneOfFields = ["nullValue", "numberValue", "stringValue", "boolValue", "structValue", "listValue"]),
-                    set: $util.oneOfSetter($oneOfFields)
-                });
-    
-                /**
-                 * Creates a Value message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Value
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Value} Value
-                 */
-                Value.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Value)
-                        return object;
-                    var message = new $root.google.protobuf.Value();
-                    switch (object.nullValue) {
-                    case "NULL_VALUE":
-                    case 0:
-                        message.nullValue = 0;
-                        break;
-                    }
-                    if (object.numberValue != null)
-                        message.numberValue = Number(object.numberValue);
-                    if (object.stringValue != null)
-                        message.stringValue = String(object.stringValue);
-                    if (object.boolValue != null)
-                        message.boolValue = Boolean(object.boolValue);
-                    if (object.structValue != null) {
-                        if (typeof object.structValue !== "object")
-                            throw TypeError(".google.protobuf.Value.structValue: object expected");
-                        message.structValue = $root.google.protobuf.Struct.fromObject(object.structValue);
-                    }
-                    if (object.listValue != null) {
-                        if (typeof object.listValue !== "object")
-                            throw TypeError(".google.protobuf.Value.listValue: object expected");
-                        message.listValue = $root.google.protobuf.ListValue.fromObject(object.listValue);
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a Value message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Value
-                 * @static
-                 * @param {google.protobuf.Value} message Value
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Value.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (message.nullValue != null && message.hasOwnProperty("nullValue")) {
-                        object.nullValue = options.enums === String ? $root.google.protobuf.NullValue[message.nullValue] : message.nullValue;
-                        if (options.oneofs)
-                            object.kind = "nullValue";
-                    }
-                    if (message.numberValue != null && message.hasOwnProperty("numberValue")) {
-                        object.numberValue = options.json && !isFinite(message.numberValue) ? String(message.numberValue) : message.numberValue;
-                        if (options.oneofs)
-                            object.kind = "numberValue";
-                    }
-                    if (message.stringValue != null && message.hasOwnProperty("stringValue")) {
-                        object.stringValue = message.stringValue;
-                        if (options.oneofs)
-                            object.kind = "stringValue";
-                    }
-                    if (message.boolValue != null && message.hasOwnProperty("boolValue")) {
-                        object.boolValue = message.boolValue;
-                        if (options.oneofs)
-                            object.kind = "boolValue";
-                    }
-                    if (message.structValue != null && message.hasOwnProperty("structValue")) {
-                        object.structValue = $root.google.protobuf.Struct.toObject(message.structValue, options);
-                        if (options.oneofs)
-                            object.kind = "structValue";
-                    }
-                    if (message.listValue != null && message.hasOwnProperty("listValue")) {
-                        object.listValue = $root.google.protobuf.ListValue.toObject(message.listValue, options);
-                        if (options.oneofs)
-                            object.kind = "listValue";
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this Value to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Value
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Value.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return Value;
-            })();
-    
-            /**
-             * NullValue enum.
-             * @name google.protobuf.NullValue
-             * @enum {string}
-             * @property {string} NULL_VALUE=NULL_VALUE NULL_VALUE value
-             */
-            protobuf.NullValue = (function() {
-                var valuesById = {}, values = Object.create(valuesById);
-                values[valuesById[0] = "NULL_VALUE"] = "NULL_VALUE";
-                return values;
-            })();
-    
-            protobuf.ListValue = (function() {
-    
-                /**
-                 * Properties of a ListValue.
-                 * @memberof google.protobuf
-                 * @interface IListValue
-                 * @property {Array.<google.protobuf.IValue>|null} [values] ListValue values
-                 */
-    
-                /**
-                 * Constructs a new ListValue.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a ListValue.
-                 * @implements IListValue
-                 * @constructor
-                 * @param {google.protobuf.IListValue=} [properties] Properties to set
-                 */
-                function ListValue(properties) {
-                    this.values = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * ListValue values.
-                 * @member {Array.<google.protobuf.IValue>} values
-                 * @memberof google.protobuf.ListValue
-                 * @instance
-                 */
-                ListValue.prototype.values = $util.emptyArray;
-    
-                /**
-                 * Creates a ListValue message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.ListValue
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.ListValue} ListValue
-                 */
-                ListValue.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.ListValue)
-                        return object;
-                    var message = new $root.google.protobuf.ListValue();
-                    if (object.values) {
-                        if (!Array.isArray(object.values))
-                            throw TypeError(".google.protobuf.ListValue.values: array expected");
-                        message.values = [];
-                        for (var i = 0; i < object.values.length; ++i) {
-                            if (typeof object.values[i] !== "object")
-                                throw TypeError(".google.protobuf.ListValue.values: object expected");
-                            message.values[i] = $root.google.protobuf.Value.fromObject(object.values[i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a ListValue message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.ListValue
-                 * @static
-                 * @param {google.protobuf.ListValue} message ListValue
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                ListValue.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.values = [];
-                    if (message.values && message.values.length) {
-                        object.values = [];
-                        for (var j = 0; j < message.values.length; ++j)
-                            object.values[j] = $root.google.protobuf.Value.toObject(message.values[j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this ListValue to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.ListValue
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                ListValue.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return ListValue;
-            })();
-    
-            protobuf.DoubleValue = (function() {
-    
-                /**
-                 * Properties of a DoubleValue.
-                 * @memberof google.protobuf
-                 * @interface IDoubleValue
-                 * @property {number|null} [value] DoubleValue value
-                 */
-    
-                /**
-                 * Constructs a new DoubleValue.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a DoubleValue.
-                 * @implements IDoubleValue
-                 * @constructor
-                 * @param {google.protobuf.IDoubleValue=} [properties] Properties to set
-                 */
-                function DoubleValue(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * DoubleValue value.
-                 * @member {number} value
-                 * @memberof google.protobuf.DoubleValue
-                 * @instance
-                 */
-                DoubleValue.prototype.value = 0;
-    
-                /**
-                 * Creates a DoubleValue message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.DoubleValue
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.DoubleValue} DoubleValue
-                 */
-                DoubleValue.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.DoubleValue)
-                        return object;
-                    var message = new $root.google.protobuf.DoubleValue();
-                    if (object.value != null)
-                        message.value = Number(object.value);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a DoubleValue message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.DoubleValue
-                 * @static
-                 * @param {google.protobuf.DoubleValue} message DoubleValue
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                DoubleValue.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        object.value = 0;
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        object.value = options.json && !isFinite(message.value) ? String(message.value) : message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this DoubleValue to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.DoubleValue
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                DoubleValue.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return DoubleValue;
-            })();
-    
-            protobuf.FloatValue = (function() {
-    
-                /**
-                 * Properties of a FloatValue.
-                 * @memberof google.protobuf
-                 * @interface IFloatValue
-                 * @property {number|null} [value] FloatValue value
-                 */
-    
-                /**
-                 * Constructs a new FloatValue.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a FloatValue.
-                 * @implements IFloatValue
-                 * @constructor
-                 * @param {google.protobuf.IFloatValue=} [properties] Properties to set
-                 */
-                function FloatValue(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * FloatValue value.
-                 * @member {number} value
-                 * @memberof google.protobuf.FloatValue
-                 * @instance
-                 */
-                FloatValue.prototype.value = 0;
-    
-                /**
-                 * Creates a FloatValue message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.FloatValue
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.FloatValue} FloatValue
-                 */
-                FloatValue.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.FloatValue)
-                        return object;
-                    var message = new $root.google.protobuf.FloatValue();
-                    if (object.value != null)
-                        message.value = Number(object.value);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a FloatValue message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.FloatValue
-                 * @static
-                 * @param {google.protobuf.FloatValue} message FloatValue
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                FloatValue.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        object.value = 0;
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        object.value = options.json && !isFinite(message.value) ? String(message.value) : message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this FloatValue to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.FloatValue
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                FloatValue.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return FloatValue;
-            })();
-    
-            protobuf.Int64Value = (function() {
-    
-                /**
-                 * Properties of an Int64Value.
-                 * @memberof google.protobuf
-                 * @interface IInt64Value
-                 * @property {number|string|null} [value] Int64Value value
-                 */
-    
-                /**
-                 * Constructs a new Int64Value.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an Int64Value.
-                 * @implements IInt64Value
-                 * @constructor
-                 * @param {google.protobuf.IInt64Value=} [properties] Properties to set
-                 */
-                function Int64Value(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Int64Value value.
-                 * @member {number|string} value
-                 * @memberof google.protobuf.Int64Value
-                 * @instance
-                 */
-                Int64Value.prototype.value = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
-    
-                /**
-                 * Creates an Int64Value message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Int64Value
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Int64Value} Int64Value
-                 */
-                Int64Value.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Int64Value)
-                        return object;
-                    var message = new $root.google.protobuf.Int64Value();
-                    if (object.value != null)
-                        if ($util.Long)
-                            (message.value = $util.Long.fromValue(object.value)).unsigned = false;
-                        else if (typeof object.value === "string")
-                            message.value = parseInt(object.value, 10);
-                        else if (typeof object.value === "number")
-                            message.value = object.value;
-                        else if (typeof object.value === "object")
-                            message.value = new $util.LongBits(object.value.low >>> 0, object.value.high >>> 0).toNumber();
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an Int64Value message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Int64Value
-                 * @static
-                 * @param {google.protobuf.Int64Value} message Int64Value
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Int64Value.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        if ($util.Long) {
-                            var long = new $util.Long(0, 0, false);
-                            object.value = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                        } else
-                            object.value = options.longs === String ? "0" : 0;
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        if (typeof message.value === "number")
-                            object.value = options.longs === String ? String(message.value) : message.value;
-                        else
-                            object.value = options.longs === String ? $util.Long.prototype.toString.call(message.value) : options.longs === Number ? new $util.LongBits(message.value.low >>> 0, message.value.high >>> 0).toNumber() : message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this Int64Value to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Int64Value
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Int64Value.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return Int64Value;
-            })();
-    
-            protobuf.UInt64Value = (function() {
-    
-                /**
-                 * Properties of a UInt64Value.
-                 * @memberof google.protobuf
-                 * @interface IUInt64Value
-                 * @property {number|string|null} [value] UInt64Value value
-                 */
-    
-                /**
-                 * Constructs a new UInt64Value.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a UInt64Value.
-                 * @implements IUInt64Value
-                 * @constructor
-                 * @param {google.protobuf.IUInt64Value=} [properties] Properties to set
-                 */
-                function UInt64Value(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * UInt64Value value.
-                 * @member {number|string} value
-                 * @memberof google.protobuf.UInt64Value
-                 * @instance
-                 */
-                UInt64Value.prototype.value = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
-    
-                /**
-                 * Creates a UInt64Value message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.UInt64Value
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.UInt64Value} UInt64Value
-                 */
-                UInt64Value.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.UInt64Value)
-                        return object;
-                    var message = new $root.google.protobuf.UInt64Value();
-                    if (object.value != null)
-                        if ($util.Long)
-                            (message.value = $util.Long.fromValue(object.value)).unsigned = true;
-                        else if (typeof object.value === "string")
-                            message.value = parseInt(object.value, 10);
-                        else if (typeof object.value === "number")
-                            message.value = object.value;
-                        else if (typeof object.value === "object")
-                            message.value = new $util.LongBits(object.value.low >>> 0, object.value.high >>> 0).toNumber(true);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a UInt64Value message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.UInt64Value
-                 * @static
-                 * @param {google.protobuf.UInt64Value} message UInt64Value
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                UInt64Value.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        if ($util.Long) {
-                            var long = new $util.Long(0, 0, true);
-                            object.value = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                        } else
-                            object.value = options.longs === String ? "0" : 0;
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        if (typeof message.value === "number")
-                            object.value = options.longs === String ? String(message.value) : message.value;
-                        else
-                            object.value = options.longs === String ? $util.Long.prototype.toString.call(message.value) : options.longs === Number ? new $util.LongBits(message.value.low >>> 0, message.value.high >>> 0).toNumber(true) : message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this UInt64Value to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.UInt64Value
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                UInt64Value.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return UInt64Value;
-            })();
-    
-            protobuf.Int32Value = (function() {
-    
-                /**
-                 * Properties of an Int32Value.
-                 * @memberof google.protobuf
-                 * @interface IInt32Value
-                 * @property {number|null} [value] Int32Value value
-                 */
-    
-                /**
-                 * Constructs a new Int32Value.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an Int32Value.
-                 * @implements IInt32Value
-                 * @constructor
-                 * @param {google.protobuf.IInt32Value=} [properties] Properties to set
-                 */
-                function Int32Value(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Int32Value value.
-                 * @member {number} value
-                 * @memberof google.protobuf.Int32Value
-                 * @instance
-                 */
-                Int32Value.prototype.value = 0;
-    
-                /**
-                 * Creates an Int32Value message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Int32Value
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Int32Value} Int32Value
-                 */
-                Int32Value.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Int32Value)
-                        return object;
-                    var message = new $root.google.protobuf.Int32Value();
-                    if (object.value != null)
-                        message.value = object.value | 0;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an Int32Value message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Int32Value
-                 * @static
-                 * @param {google.protobuf.Int32Value} message Int32Value
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Int32Value.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        object.value = 0;
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        object.value = message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this Int32Value to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Int32Value
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Int32Value.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return Int32Value;
-            })();
-    
-            protobuf.UInt32Value = (function() {
-    
-                /**
-                 * Properties of a UInt32Value.
-                 * @memberof google.protobuf
-                 * @interface IUInt32Value
-                 * @property {number|null} [value] UInt32Value value
-                 */
-    
-                /**
-                 * Constructs a new UInt32Value.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a UInt32Value.
-                 * @implements IUInt32Value
-                 * @constructor
-                 * @param {google.protobuf.IUInt32Value=} [properties] Properties to set
-                 */
-                function UInt32Value(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * UInt32Value value.
-                 * @member {number} value
-                 * @memberof google.protobuf.UInt32Value
-                 * @instance
-                 */
-                UInt32Value.prototype.value = 0;
-    
-                /**
-                 * Creates a UInt32Value message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.UInt32Value
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.UInt32Value} UInt32Value
-                 */
-                UInt32Value.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.UInt32Value)
-                        return object;
-                    var message = new $root.google.protobuf.UInt32Value();
-                    if (object.value != null)
-                        message.value = object.value >>> 0;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a UInt32Value message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.UInt32Value
-                 * @static
-                 * @param {google.protobuf.UInt32Value} message UInt32Value
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                UInt32Value.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        object.value = 0;
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        object.value = message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this UInt32Value to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.UInt32Value
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                UInt32Value.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return UInt32Value;
-            })();
-    
-            protobuf.BoolValue = (function() {
-    
-                /**
-                 * Properties of a BoolValue.
-                 * @memberof google.protobuf
-                 * @interface IBoolValue
-                 * @property {boolean|null} [value] BoolValue value
-                 */
-    
-                /**
-                 * Constructs a new BoolValue.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a BoolValue.
-                 * @implements IBoolValue
-                 * @constructor
-                 * @param {google.protobuf.IBoolValue=} [properties] Properties to set
-                 */
-                function BoolValue(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * BoolValue value.
-                 * @member {boolean} value
-                 * @memberof google.protobuf.BoolValue
-                 * @instance
-                 */
-                BoolValue.prototype.value = false;
-    
-                /**
-                 * Creates a BoolValue message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.BoolValue
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.BoolValue} BoolValue
-                 */
-                BoolValue.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.BoolValue)
-                        return object;
-                    var message = new $root.google.protobuf.BoolValue();
-                    if (object.value != null)
-                        message.value = Boolean(object.value);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a BoolValue message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.BoolValue
-                 * @static
-                 * @param {google.protobuf.BoolValue} message BoolValue
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                BoolValue.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        object.value = false;
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        object.value = message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this BoolValue to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.BoolValue
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                BoolValue.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return BoolValue;
-            })();
-    
-            protobuf.StringValue = (function() {
-    
-                /**
-                 * Properties of a StringValue.
-                 * @memberof google.protobuf
-                 * @interface IStringValue
-                 * @property {string|null} [value] StringValue value
-                 */
-    
-                /**
-                 * Constructs a new StringValue.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a StringValue.
-                 * @implements IStringValue
-                 * @constructor
-                 * @param {google.protobuf.IStringValue=} [properties] Properties to set
-                 */
-                function StringValue(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * StringValue value.
-                 * @member {string} value
-                 * @memberof google.protobuf.StringValue
-                 * @instance
-                 */
-                StringValue.prototype.value = "";
-    
-                /**
-                 * Creates a StringValue message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.StringValue
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.StringValue} StringValue
-                 */
-                StringValue.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.StringValue)
-                        return object;
-                    var message = new $root.google.protobuf.StringValue();
-                    if (object.value != null)
-                        message.value = String(object.value);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a StringValue message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.StringValue
-                 * @static
-                 * @param {google.protobuf.StringValue} message StringValue
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                StringValue.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        object.value = "";
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        object.value = message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this StringValue to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.StringValue
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                StringValue.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return StringValue;
-            })();
-    
-            protobuf.BytesValue = (function() {
-    
-                /**
-                 * Properties of a BytesValue.
-                 * @memberof google.protobuf
-                 * @interface IBytesValue
-                 * @property {Uint8Array|null} [value] BytesValue value
-                 */
-    
-                /**
-                 * Constructs a new BytesValue.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a BytesValue.
-                 * @implements IBytesValue
-                 * @constructor
-                 * @param {google.protobuf.IBytesValue=} [properties] Properties to set
-                 */
-                function BytesValue(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * BytesValue value.
-                 * @member {Uint8Array} value
-                 * @memberof google.protobuf.BytesValue
-                 * @instance
-                 */
-                BytesValue.prototype.value = $util.newBuffer([]);
-    
-                /**
-                 * Creates a BytesValue message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.BytesValue
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.BytesValue} BytesValue
-                 */
-                BytesValue.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.BytesValue)
-                        return object;
-                    var message = new $root.google.protobuf.BytesValue();
-                    if (object.value != null)
-                        if (typeof object.value === "string")
-                            $util.base64.decode(object.value, message.value = $util.newBuffer($util.base64.length(object.value)), 0);
-                        else if (object.value.length)
-                            message.value = object.value;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a BytesValue message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.BytesValue
-                 * @static
-                 * @param {google.protobuf.BytesValue} message BytesValue
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                BytesValue.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        if (options.bytes === String)
-                            object.value = "";
-                        else {
-                            object.value = [];
-                            if (options.bytes !== Array)
-                                object.value = $util.newBuffer(object.value);
-                        }
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        object.value = options.bytes === String ? $util.base64.encode(message.value, 0, message.value.length) : options.bytes === Array ? Array.prototype.slice.call(message.value) : message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this BytesValue to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.BytesValue
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                BytesValue.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return BytesValue;
-            })();
-    
-            protobuf.Duration = (function() {
-    
-                /**
-                 * Properties of a Duration.
-                 * @memberof google.protobuf
-                 * @interface IDuration
-                 * @property {number|string|null} [seconds] Duration seconds
-                 * @property {number|null} [nanos] Duration nanos
-                 */
-    
-                /**
-                 * Constructs a new Duration.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a Duration.
-                 * @implements IDuration
-                 * @constructor
-                 * @param {google.protobuf.IDuration=} [properties] Properties to set
-                 */
-                function Duration(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Duration seconds.
-                 * @member {number|string} seconds
-                 * @memberof google.protobuf.Duration
-                 * @instance
-                 */
-                Duration.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
-    
-                /**
-                 * Duration nanos.
-                 * @member {number} nanos
-                 * @memberof google.protobuf.Duration
-                 * @instance
-                 */
-                Duration.prototype.nanos = 0;
-    
-                /**
-                 * Creates a Duration message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Duration
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Duration} Duration
-                 */
-                Duration.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Duration)
-                        return object;
-                    var message = new $root.google.protobuf.Duration();
-                    if (object.seconds != null)
-                        if ($util.Long)
-                            (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
-                        else if (typeof object.seconds === "string")
-                            message.seconds = parseInt(object.seconds, 10);
-                        else if (typeof object.seconds === "number")
-                            message.seconds = object.seconds;
-                        else if (typeof object.seconds === "object")
-                            message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
-                    if (object.nanos != null)
-                        message.nanos = object.nanos | 0;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a Duration message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Duration
-                 * @static
-                 * @param {google.protobuf.Duration} message Duration
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Duration.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        if ($util.Long) {
-                            var long = new $util.Long(0, 0, false);
-                            object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                        } else
-                            object.seconds = options.longs === String ? "0" : 0;
-                        object.nanos = 0;
-                    }
-                    if (message.seconds != null && message.hasOwnProperty("seconds"))
-                        if (typeof message.seconds === "number")
-                            object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
-                        else
-                            object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
-                    if (message.nanos != null && message.hasOwnProperty("nanos"))
-                        object.nanos = message.nanos;
-                    return object;
-                };
-    
-                /**
-                 * Converts this Duration to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Duration
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Duration.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return Duration;
-            })();
-    
-            return protobuf;
         })();
     
         google.type = (function() {
@@ -10250,6 +12222,21 @@
                  */
                 LatLng.prototype.toJSON = function toJSON() {
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for LatLng
+                 * @function getTypeUrl
+                 * @memberof google.type.LatLng
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                LatLng.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.type.LatLng";
                 };
     
                 return LatLng;
@@ -10389,10 +12376,946 @@
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                 };
     
+                /**
+                 * Gets the default type url for Status
+                 * @function getTypeUrl
+                 * @memberof google.rpc.Status
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Status.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.rpc.Status";
+                };
+    
                 return Status;
             })();
     
             return rpc;
+        })();
+    
+        google.api = (function() {
+    
+            /**
+             * Namespace api.
+             * @memberof google
+             * @namespace
+             */
+            var api = {};
+    
+            /**
+             * FieldBehavior enum.
+             * @name google.api.FieldBehavior
+             * @enum {string}
+             * @property {string} FIELD_BEHAVIOR_UNSPECIFIED=FIELD_BEHAVIOR_UNSPECIFIED FIELD_BEHAVIOR_UNSPECIFIED value
+             * @property {string} OPTIONAL=OPTIONAL OPTIONAL value
+             * @property {string} REQUIRED=REQUIRED REQUIRED value
+             * @property {string} OUTPUT_ONLY=OUTPUT_ONLY OUTPUT_ONLY value
+             * @property {string} INPUT_ONLY=INPUT_ONLY INPUT_ONLY value
+             * @property {string} IMMUTABLE=IMMUTABLE IMMUTABLE value
+             * @property {string} UNORDERED_LIST=UNORDERED_LIST UNORDERED_LIST value
+             * @property {string} NON_EMPTY_DEFAULT=NON_EMPTY_DEFAULT NON_EMPTY_DEFAULT value
+             */
+            api.FieldBehavior = (function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "FIELD_BEHAVIOR_UNSPECIFIED"] = "FIELD_BEHAVIOR_UNSPECIFIED";
+                values[valuesById[1] = "OPTIONAL"] = "OPTIONAL";
+                values[valuesById[2] = "REQUIRED"] = "REQUIRED";
+                values[valuesById[3] = "OUTPUT_ONLY"] = "OUTPUT_ONLY";
+                values[valuesById[4] = "INPUT_ONLY"] = "INPUT_ONLY";
+                values[valuesById[5] = "IMMUTABLE"] = "IMMUTABLE";
+                values[valuesById[6] = "UNORDERED_LIST"] = "UNORDERED_LIST";
+                values[valuesById[7] = "NON_EMPTY_DEFAULT"] = "NON_EMPTY_DEFAULT";
+                return values;
+            })();
+    
+            api.Http = (function() {
+    
+                /**
+                 * Properties of a Http.
+                 * @memberof google.api
+                 * @interface IHttp
+                 * @property {Array.<google.api.IHttpRule>|null} [rules] Http rules
+                 * @property {boolean|null} [fullyDecodeReservedExpansion] Http fullyDecodeReservedExpansion
+                 */
+    
+                /**
+                 * Constructs a new Http.
+                 * @memberof google.api
+                 * @classdesc Represents a Http.
+                 * @implements IHttp
+                 * @constructor
+                 * @param {google.api.IHttp=} [properties] Properties to set
+                 */
+                function Http(properties) {
+                    this.rules = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Http rules.
+                 * @member {Array.<google.api.IHttpRule>} rules
+                 * @memberof google.api.Http
+                 * @instance
+                 */
+                Http.prototype.rules = $util.emptyArray;
+    
+                /**
+                 * Http fullyDecodeReservedExpansion.
+                 * @member {boolean} fullyDecodeReservedExpansion
+                 * @memberof google.api.Http
+                 * @instance
+                 */
+                Http.prototype.fullyDecodeReservedExpansion = false;
+    
+                /**
+                 * Creates a Http message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.Http
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.Http} Http
+                 */
+                Http.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.Http)
+                        return object;
+                    var message = new $root.google.api.Http();
+                    if (object.rules) {
+                        if (!Array.isArray(object.rules))
+                            throw TypeError(".google.api.Http.rules: array expected");
+                        message.rules = [];
+                        for (var i = 0; i < object.rules.length; ++i) {
+                            if (typeof object.rules[i] !== "object")
+                                throw TypeError(".google.api.Http.rules: object expected");
+                            message.rules[i] = $root.google.api.HttpRule.fromObject(object.rules[i]);
+                        }
+                    }
+                    if (object.fullyDecodeReservedExpansion != null)
+                        message.fullyDecodeReservedExpansion = Boolean(object.fullyDecodeReservedExpansion);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Http message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.Http
+                 * @static
+                 * @param {google.api.Http} message Http
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Http.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.rules = [];
+                    if (options.defaults)
+                        object.fullyDecodeReservedExpansion = false;
+                    if (message.rules && message.rules.length) {
+                        object.rules = [];
+                        for (var j = 0; j < message.rules.length; ++j)
+                            object.rules[j] = $root.google.api.HttpRule.toObject(message.rules[j], options);
+                    }
+                    if (message.fullyDecodeReservedExpansion != null && message.hasOwnProperty("fullyDecodeReservedExpansion"))
+                        object.fullyDecodeReservedExpansion = message.fullyDecodeReservedExpansion;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Http to JSON.
+                 * @function toJSON
+                 * @memberof google.api.Http
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Http.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Http
+                 * @function getTypeUrl
+                 * @memberof google.api.Http
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Http.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.Http";
+                };
+    
+                return Http;
+            })();
+    
+            api.HttpRule = (function() {
+    
+                /**
+                 * Properties of a HttpRule.
+                 * @memberof google.api
+                 * @interface IHttpRule
+                 * @property {string|null} [selector] HttpRule selector
+                 * @property {string|null} [get] HttpRule get
+                 * @property {string|null} [put] HttpRule put
+                 * @property {string|null} [post] HttpRule post
+                 * @property {string|null} ["delete"] HttpRule delete
+                 * @property {string|null} [patch] HttpRule patch
+                 * @property {google.api.ICustomHttpPattern|null} [custom] HttpRule custom
+                 * @property {string|null} [body] HttpRule body
+                 * @property {string|null} [responseBody] HttpRule responseBody
+                 * @property {Array.<google.api.IHttpRule>|null} [additionalBindings] HttpRule additionalBindings
+                 */
+    
+                /**
+                 * Constructs a new HttpRule.
+                 * @memberof google.api
+                 * @classdesc Represents a HttpRule.
+                 * @implements IHttpRule
+                 * @constructor
+                 * @param {google.api.IHttpRule=} [properties] Properties to set
+                 */
+                function HttpRule(properties) {
+                    this.additionalBindings = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * HttpRule selector.
+                 * @member {string} selector
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.selector = "";
+    
+                /**
+                 * HttpRule get.
+                 * @member {string|null|undefined} get
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.get = null;
+    
+                /**
+                 * HttpRule put.
+                 * @member {string|null|undefined} put
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.put = null;
+    
+                /**
+                 * HttpRule post.
+                 * @member {string|null|undefined} post
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.post = null;
+    
+                /**
+                 * HttpRule delete.
+                 * @member {string|null|undefined} delete
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype["delete"] = null;
+    
+                /**
+                 * HttpRule patch.
+                 * @member {string|null|undefined} patch
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.patch = null;
+    
+                /**
+                 * HttpRule custom.
+                 * @member {google.api.ICustomHttpPattern|null|undefined} custom
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.custom = null;
+    
+                /**
+                 * HttpRule body.
+                 * @member {string} body
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.body = "";
+    
+                /**
+                 * HttpRule responseBody.
+                 * @member {string} responseBody
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.responseBody = "";
+    
+                /**
+                 * HttpRule additionalBindings.
+                 * @member {Array.<google.api.IHttpRule>} additionalBindings
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.additionalBindings = $util.emptyArray;
+    
+                // OneOf field names bound to virtual getters and setters
+                var $oneOfFields;
+    
+                /**
+                 * HttpRule pattern.
+                 * @member {"get"|"put"|"post"|"delete"|"patch"|"custom"|undefined} pattern
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                Object.defineProperty(HttpRule.prototype, "pattern", {
+                    get: $util.oneOfGetter($oneOfFields = ["get", "put", "post", "delete", "patch", "custom"]),
+                    set: $util.oneOfSetter($oneOfFields)
+                });
+    
+                /**
+                 * Creates a HttpRule message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.HttpRule
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.HttpRule} HttpRule
+                 */
+                HttpRule.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.HttpRule)
+                        return object;
+                    var message = new $root.google.api.HttpRule();
+                    if (object.selector != null)
+                        message.selector = String(object.selector);
+                    if (object.get != null)
+                        message.get = String(object.get);
+                    if (object.put != null)
+                        message.put = String(object.put);
+                    if (object.post != null)
+                        message.post = String(object.post);
+                    if (object["delete"] != null)
+                        message["delete"] = String(object["delete"]);
+                    if (object.patch != null)
+                        message.patch = String(object.patch);
+                    if (object.custom != null) {
+                        if (typeof object.custom !== "object")
+                            throw TypeError(".google.api.HttpRule.custom: object expected");
+                        message.custom = $root.google.api.CustomHttpPattern.fromObject(object.custom);
+                    }
+                    if (object.body != null)
+                        message.body = String(object.body);
+                    if (object.responseBody != null)
+                        message.responseBody = String(object.responseBody);
+                    if (object.additionalBindings) {
+                        if (!Array.isArray(object.additionalBindings))
+                            throw TypeError(".google.api.HttpRule.additionalBindings: array expected");
+                        message.additionalBindings = [];
+                        for (var i = 0; i < object.additionalBindings.length; ++i) {
+                            if (typeof object.additionalBindings[i] !== "object")
+                                throw TypeError(".google.api.HttpRule.additionalBindings: object expected");
+                            message.additionalBindings[i] = $root.google.api.HttpRule.fromObject(object.additionalBindings[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a HttpRule message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.HttpRule
+                 * @static
+                 * @param {google.api.HttpRule} message HttpRule
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                HttpRule.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.additionalBindings = [];
+                    if (options.defaults) {
+                        object.selector = "";
+                        object.body = "";
+                        object.responseBody = "";
+                    }
+                    if (message.selector != null && message.hasOwnProperty("selector"))
+                        object.selector = message.selector;
+                    if (message.get != null && message.hasOwnProperty("get")) {
+                        object.get = message.get;
+                        if (options.oneofs)
+                            object.pattern = "get";
+                    }
+                    if (message.put != null && message.hasOwnProperty("put")) {
+                        object.put = message.put;
+                        if (options.oneofs)
+                            object.pattern = "put";
+                    }
+                    if (message.post != null && message.hasOwnProperty("post")) {
+                        object.post = message.post;
+                        if (options.oneofs)
+                            object.pattern = "post";
+                    }
+                    if (message["delete"] != null && message.hasOwnProperty("delete")) {
+                        object["delete"] = message["delete"];
+                        if (options.oneofs)
+                            object.pattern = "delete";
+                    }
+                    if (message.patch != null && message.hasOwnProperty("patch")) {
+                        object.patch = message.patch;
+                        if (options.oneofs)
+                            object.pattern = "patch";
+                    }
+                    if (message.body != null && message.hasOwnProperty("body"))
+                        object.body = message.body;
+                    if (message.custom != null && message.hasOwnProperty("custom")) {
+                        object.custom = $root.google.api.CustomHttpPattern.toObject(message.custom, options);
+                        if (options.oneofs)
+                            object.pattern = "custom";
+                    }
+                    if (message.additionalBindings && message.additionalBindings.length) {
+                        object.additionalBindings = [];
+                        for (var j = 0; j < message.additionalBindings.length; ++j)
+                            object.additionalBindings[j] = $root.google.api.HttpRule.toObject(message.additionalBindings[j], options);
+                    }
+                    if (message.responseBody != null && message.hasOwnProperty("responseBody"))
+                        object.responseBody = message.responseBody;
+                    return object;
+                };
+    
+                /**
+                 * Converts this HttpRule to JSON.
+                 * @function toJSON
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                HttpRule.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for HttpRule
+                 * @function getTypeUrl
+                 * @memberof google.api.HttpRule
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                HttpRule.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.HttpRule";
+                };
+    
+                return HttpRule;
+            })();
+    
+            api.CustomHttpPattern = (function() {
+    
+                /**
+                 * Properties of a CustomHttpPattern.
+                 * @memberof google.api
+                 * @interface ICustomHttpPattern
+                 * @property {string|null} [kind] CustomHttpPattern kind
+                 * @property {string|null} [path] CustomHttpPattern path
+                 */
+    
+                /**
+                 * Constructs a new CustomHttpPattern.
+                 * @memberof google.api
+                 * @classdesc Represents a CustomHttpPattern.
+                 * @implements ICustomHttpPattern
+                 * @constructor
+                 * @param {google.api.ICustomHttpPattern=} [properties] Properties to set
+                 */
+                function CustomHttpPattern(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * CustomHttpPattern kind.
+                 * @member {string} kind
+                 * @memberof google.api.CustomHttpPattern
+                 * @instance
+                 */
+                CustomHttpPattern.prototype.kind = "";
+    
+                /**
+                 * CustomHttpPattern path.
+                 * @member {string} path
+                 * @memberof google.api.CustomHttpPattern
+                 * @instance
+                 */
+                CustomHttpPattern.prototype.path = "";
+    
+                /**
+                 * Creates a CustomHttpPattern message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.CustomHttpPattern
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.CustomHttpPattern} CustomHttpPattern
+                 */
+                CustomHttpPattern.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.CustomHttpPattern)
+                        return object;
+                    var message = new $root.google.api.CustomHttpPattern();
+                    if (object.kind != null)
+                        message.kind = String(object.kind);
+                    if (object.path != null)
+                        message.path = String(object.path);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a CustomHttpPattern message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.CustomHttpPattern
+                 * @static
+                 * @param {google.api.CustomHttpPattern} message CustomHttpPattern
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                CustomHttpPattern.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.kind = "";
+                        object.path = "";
+                    }
+                    if (message.kind != null && message.hasOwnProperty("kind"))
+                        object.kind = message.kind;
+                    if (message.path != null && message.hasOwnProperty("path"))
+                        object.path = message.path;
+                    return object;
+                };
+    
+                /**
+                 * Converts this CustomHttpPattern to JSON.
+                 * @function toJSON
+                 * @memberof google.api.CustomHttpPattern
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                CustomHttpPattern.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for CustomHttpPattern
+                 * @function getTypeUrl
+                 * @memberof google.api.CustomHttpPattern
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                CustomHttpPattern.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.CustomHttpPattern";
+                };
+    
+                return CustomHttpPattern;
+            })();
+    
+            api.ResourceDescriptor = (function() {
+    
+                /**
+                 * Properties of a ResourceDescriptor.
+                 * @memberof google.api
+                 * @interface IResourceDescriptor
+                 * @property {string|null} [type] ResourceDescriptor type
+                 * @property {Array.<string>|null} [pattern] ResourceDescriptor pattern
+                 * @property {string|null} [nameField] ResourceDescriptor nameField
+                 * @property {google.api.ResourceDescriptor.History|null} [history] ResourceDescriptor history
+                 * @property {string|null} [plural] ResourceDescriptor plural
+                 * @property {string|null} [singular] ResourceDescriptor singular
+                 * @property {Array.<google.api.ResourceDescriptor.Style>|null} [style] ResourceDescriptor style
+                 */
+    
+                /**
+                 * Constructs a new ResourceDescriptor.
+                 * @memberof google.api
+                 * @classdesc Represents a ResourceDescriptor.
+                 * @implements IResourceDescriptor
+                 * @constructor
+                 * @param {google.api.IResourceDescriptor=} [properties] Properties to set
+                 */
+                function ResourceDescriptor(properties) {
+                    this.pattern = [];
+                    this.style = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * ResourceDescriptor type.
+                 * @member {string} type
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.type = "";
+    
+                /**
+                 * ResourceDescriptor pattern.
+                 * @member {Array.<string>} pattern
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.pattern = $util.emptyArray;
+    
+                /**
+                 * ResourceDescriptor nameField.
+                 * @member {string} nameField
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.nameField = "";
+    
+                /**
+                 * ResourceDescriptor history.
+                 * @member {google.api.ResourceDescriptor.History} history
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.history = 0;
+    
+                /**
+                 * ResourceDescriptor plural.
+                 * @member {string} plural
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.plural = "";
+    
+                /**
+                 * ResourceDescriptor singular.
+                 * @member {string} singular
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.singular = "";
+    
+                /**
+                 * ResourceDescriptor style.
+                 * @member {Array.<google.api.ResourceDescriptor.Style>} style
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.style = $util.emptyArray;
+    
+                /**
+                 * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.ResourceDescriptor
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.ResourceDescriptor} ResourceDescriptor
+                 */
+                ResourceDescriptor.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.ResourceDescriptor)
+                        return object;
+                    var message = new $root.google.api.ResourceDescriptor();
+                    if (object.type != null)
+                        message.type = String(object.type);
+                    if (object.pattern) {
+                        if (!Array.isArray(object.pattern))
+                            throw TypeError(".google.api.ResourceDescriptor.pattern: array expected");
+                        message.pattern = [];
+                        for (var i = 0; i < object.pattern.length; ++i)
+                            message.pattern[i] = String(object.pattern[i]);
+                    }
+                    if (object.nameField != null)
+                        message.nameField = String(object.nameField);
+                    switch (object.history) {
+                    default:
+                        if (typeof object.history === "number") {
+                            message.history = object.history;
+                            break;
+                        }
+                        break;
+                    case "HISTORY_UNSPECIFIED":
+                    case 0:
+                        message.history = 0;
+                        break;
+                    case "ORIGINALLY_SINGLE_PATTERN":
+                    case 1:
+                        message.history = 1;
+                        break;
+                    case "FUTURE_MULTI_PATTERN":
+                    case 2:
+                        message.history = 2;
+                        break;
+                    }
+                    if (object.plural != null)
+                        message.plural = String(object.plural);
+                    if (object.singular != null)
+                        message.singular = String(object.singular);
+                    if (object.style) {
+                        if (!Array.isArray(object.style))
+                            throw TypeError(".google.api.ResourceDescriptor.style: array expected");
+                        message.style = [];
+                        for (var i = 0; i < object.style.length; ++i)
+                            switch (object.style[i]) {
+                            default:
+                                if (typeof object.style[i] === "number") {
+                                    message.style[i] = object.style[i];
+                                    break;
+                                }
+                            case "STYLE_UNSPECIFIED":
+                            case 0:
+                                message.style[i] = 0;
+                                break;
+                            case "DECLARATIVE_FRIENDLY":
+                            case 1:
+                                message.style[i] = 1;
+                                break;
+                            }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ResourceDescriptor message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.ResourceDescriptor
+                 * @static
+                 * @param {google.api.ResourceDescriptor} message ResourceDescriptor
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ResourceDescriptor.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.pattern = [];
+                        object.style = [];
+                    }
+                    if (options.defaults) {
+                        object.type = "";
+                        object.nameField = "";
+                        object.history = options.enums === String ? "HISTORY_UNSPECIFIED" : 0;
+                        object.plural = "";
+                        object.singular = "";
+                    }
+                    if (message.type != null && message.hasOwnProperty("type"))
+                        object.type = message.type;
+                    if (message.pattern && message.pattern.length) {
+                        object.pattern = [];
+                        for (var j = 0; j < message.pattern.length; ++j)
+                            object.pattern[j] = message.pattern[j];
+                    }
+                    if (message.nameField != null && message.hasOwnProperty("nameField"))
+                        object.nameField = message.nameField;
+                    if (message.history != null && message.hasOwnProperty("history"))
+                        object.history = options.enums === String ? $root.google.api.ResourceDescriptor.History[message.history] === undefined ? message.history : $root.google.api.ResourceDescriptor.History[message.history] : message.history;
+                    if (message.plural != null && message.hasOwnProperty("plural"))
+                        object.plural = message.plural;
+                    if (message.singular != null && message.hasOwnProperty("singular"))
+                        object.singular = message.singular;
+                    if (message.style && message.style.length) {
+                        object.style = [];
+                        for (var j = 0; j < message.style.length; ++j)
+                            object.style[j] = options.enums === String ? $root.google.api.ResourceDescriptor.Style[message.style[j]] === undefined ? message.style[j] : $root.google.api.ResourceDescriptor.Style[message.style[j]] : message.style[j];
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this ResourceDescriptor to JSON.
+                 * @function toJSON
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ResourceDescriptor.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for ResourceDescriptor
+                 * @function getTypeUrl
+                 * @memberof google.api.ResourceDescriptor
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ResourceDescriptor.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.ResourceDescriptor";
+                };
+    
+                /**
+                 * History enum.
+                 * @name google.api.ResourceDescriptor.History
+                 * @enum {string}
+                 * @property {string} HISTORY_UNSPECIFIED=HISTORY_UNSPECIFIED HISTORY_UNSPECIFIED value
+                 * @property {string} ORIGINALLY_SINGLE_PATTERN=ORIGINALLY_SINGLE_PATTERN ORIGINALLY_SINGLE_PATTERN value
+                 * @property {string} FUTURE_MULTI_PATTERN=FUTURE_MULTI_PATTERN FUTURE_MULTI_PATTERN value
+                 */
+                ResourceDescriptor.History = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "HISTORY_UNSPECIFIED"] = "HISTORY_UNSPECIFIED";
+                    values[valuesById[1] = "ORIGINALLY_SINGLE_PATTERN"] = "ORIGINALLY_SINGLE_PATTERN";
+                    values[valuesById[2] = "FUTURE_MULTI_PATTERN"] = "FUTURE_MULTI_PATTERN";
+                    return values;
+                })();
+    
+                /**
+                 * Style enum.
+                 * @name google.api.ResourceDescriptor.Style
+                 * @enum {string}
+                 * @property {string} STYLE_UNSPECIFIED=STYLE_UNSPECIFIED STYLE_UNSPECIFIED value
+                 * @property {string} DECLARATIVE_FRIENDLY=DECLARATIVE_FRIENDLY DECLARATIVE_FRIENDLY value
+                 */
+                ResourceDescriptor.Style = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "STYLE_UNSPECIFIED"] = "STYLE_UNSPECIFIED";
+                    values[valuesById[1] = "DECLARATIVE_FRIENDLY"] = "DECLARATIVE_FRIENDLY";
+                    return values;
+                })();
+    
+                return ResourceDescriptor;
+            })();
+    
+            api.ResourceReference = (function() {
+    
+                /**
+                 * Properties of a ResourceReference.
+                 * @memberof google.api
+                 * @interface IResourceReference
+                 * @property {string|null} [type] ResourceReference type
+                 * @property {string|null} [childType] ResourceReference childType
+                 */
+    
+                /**
+                 * Constructs a new ResourceReference.
+                 * @memberof google.api
+                 * @classdesc Represents a ResourceReference.
+                 * @implements IResourceReference
+                 * @constructor
+                 * @param {google.api.IResourceReference=} [properties] Properties to set
+                 */
+                function ResourceReference(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * ResourceReference type.
+                 * @member {string} type
+                 * @memberof google.api.ResourceReference
+                 * @instance
+                 */
+                ResourceReference.prototype.type = "";
+    
+                /**
+                 * ResourceReference childType.
+                 * @member {string} childType
+                 * @memberof google.api.ResourceReference
+                 * @instance
+                 */
+                ResourceReference.prototype.childType = "";
+    
+                /**
+                 * Creates a ResourceReference message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.ResourceReference
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.ResourceReference} ResourceReference
+                 */
+                ResourceReference.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.ResourceReference)
+                        return object;
+                    var message = new $root.google.api.ResourceReference();
+                    if (object.type != null)
+                        message.type = String(object.type);
+                    if (object.childType != null)
+                        message.childType = String(object.childType);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ResourceReference message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.ResourceReference
+                 * @static
+                 * @param {google.api.ResourceReference} message ResourceReference
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ResourceReference.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.type = "";
+                        object.childType = "";
+                    }
+                    if (message.type != null && message.hasOwnProperty("type"))
+                        object.type = message.type;
+                    if (message.childType != null && message.hasOwnProperty("childType"))
+                        object.childType = message.childType;
+                    return object;
+                };
+    
+                /**
+                 * Converts this ResourceReference to JSON.
+                 * @function toJSON
+                 * @memberof google.api.ResourceReference
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ResourceReference.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for ResourceReference
+                 * @function getTypeUrl
+                 * @memberof google.api.ResourceReference
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ResourceReference.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.ResourceReference";
+                };
+    
+                return ResourceReference;
+            })();
+    
+            return api;
         })();
     
         google.longrunning = (function() {
@@ -10754,6 +13677,21 @@
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                 };
     
+                /**
+                 * Gets the default type url for Operation
+                 * @function getTypeUrl
+                 * @memberof google.longrunning.Operation
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Operation.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.longrunning.Operation";
+                };
+    
                 return Operation;
             })();
     
@@ -10835,6 +13773,21 @@
                  */
                 GetOperationRequest.prototype.toJSON = function toJSON() {
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for GetOperationRequest
+                 * @function getTypeUrl
+                 * @memberof google.longrunning.GetOperationRequest
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                GetOperationRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.longrunning.GetOperationRequest";
                 };
     
                 return GetOperationRequest;
@@ -10963,6 +13916,21 @@
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                 };
     
+                /**
+                 * Gets the default type url for ListOperationsRequest
+                 * @function getTypeUrl
+                 * @memberof google.longrunning.ListOperationsRequest
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ListOperationsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.longrunning.ListOperationsRequest";
+                };
+    
                 return ListOperationsRequest;
             })();
     
@@ -11073,6 +14041,21 @@
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                 };
     
+                /**
+                 * Gets the default type url for ListOperationsResponse
+                 * @function getTypeUrl
+                 * @memberof google.longrunning.ListOperationsResponse
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ListOperationsResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.longrunning.ListOperationsResponse";
+                };
+    
                 return ListOperationsResponse;
             })();
     
@@ -11156,6 +14139,21 @@
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                 };
     
+                /**
+                 * Gets the default type url for CancelOperationRequest
+                 * @function getTypeUrl
+                 * @memberof google.longrunning.CancelOperationRequest
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                CancelOperationRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.longrunning.CancelOperationRequest";
+                };
+    
                 return CancelOperationRequest;
             })();
     
@@ -11237,6 +14235,21 @@
                  */
                 DeleteOperationRequest.prototype.toJSON = function toJSON() {
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for DeleteOperationRequest
+                 * @function getTypeUrl
+                 * @memberof google.longrunning.DeleteOperationRequest
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                DeleteOperationRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.longrunning.DeleteOperationRequest";
                 };
     
                 return DeleteOperationRequest;
@@ -11340,6 +14353,21 @@
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                 };
     
+                /**
+                 * Gets the default type url for WaitOperationRequest
+                 * @function getTypeUrl
+                 * @memberof google.longrunning.WaitOperationRequest
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                WaitOperationRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.longrunning.WaitOperationRequest";
+                };
+    
                 return WaitOperationRequest;
             })();
     
@@ -11436,6 +14464,21 @@
                  */
                 OperationInfo.prototype.toJSON = function toJSON() {
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for OperationInfo
+                 * @function getTypeUrl
+                 * @memberof google.longrunning.OperationInfo
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                OperationInfo.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.longrunning.OperationInfo";
                 };
     
                 return OperationInfo;

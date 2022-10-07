@@ -21,11 +21,14 @@
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
 declare namespace FirebaseFirestore {
+  /** Alias for `any` but used where a Firestore field value would be provided. */
+  export type DocumentFieldValue = any;
+
   /**
    * Document data (for use with `DocumentReference.set()`) consists of fields
    * mapped to values.
    */
-  export type DocumentData = {[field: string]: any};
+  export type DocumentData = {[field: string]: DocumentFieldValue};
 
   /**
    * Similar to Typescript's `Partial<T>`, but allows nested fields to be
@@ -227,6 +230,13 @@ declare namespace FirebaseFirestore {
      */
     projectId?: string;
 
+    /**
+     * The database name. If omitted, the default database will be used.
+     *
+     * @internal
+     */
+    databaseId?: string;
+
     /** The hostname to connect to. */
     host?: string;
 
@@ -279,6 +289,16 @@ declare namespace FirebaseFirestore {
      */
     ignoreUndefinedProperties?: boolean;
 
+    /**
+     * Use HTTP for requests that can be served over HTTP and JSON. This reduces
+     * the amount of networking code that is loaded to serve requests within
+     * Firestore.
+     *
+     * This setting does not apply to `onSnapshot` APIs as they cannot be served
+     * over native HTTP.
+     */
+    preferRest?: boolean;
+
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }
 
@@ -299,7 +319,7 @@ declare namespace FirebaseFirestore {
     /** Set to false or omit to indicate a read-write transaction. */
     readOnly?: false;
     /**
-     * The maximum number of attempts for this transaction. Defaults to five.
+     * The maximum number of attempts for this transaction. Defaults to 5.
      */
     maxAttempts?: number;
   }
@@ -439,7 +459,7 @@ declare namespace FirebaseFirestore {
      *
      * You can use the transaction object passed to 'updateFunction' to read and
      * modify Firestore documents under lock. You have to perform all reads
-     * before before you perform any write.
+     * before you perform any write.
      *
      * Transactions can be performed as read-only or read-write transactions. By
      * default, transactions are executed in read-write mode.
@@ -572,6 +592,17 @@ declare namespace FirebaseFirestore {
      * @return A DocumentSnapshot for the read data.
      */
     get<T>(documentRef: DocumentReference<T>): Promise<DocumentSnapshot<T>>;
+
+    /**
+     * Retrieves an aggregate query result. Holds a pessimistic lock on all
+     * documents that were matched by the underlying query.
+     *
+     * @param aggregateQuery An aggregate query to execute.
+     * @return An AggregateQuerySnapshot for the retrieved data.
+     */
+    get<T extends AggregateSpec>(
+      aggregateQuery: AggregateQuery<T>
+    ): Promise<AggregateQuerySnapshot<T>>;
 
     /**
      * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
@@ -1683,6 +1714,25 @@ declare namespace FirebaseFirestore {
     ): () => void;
 
     /**
+     * Returns a query that counts the documents in the result set of this
+     * query.
+     *
+     * The returned query, when executed, counts the documents in the result set
+     * of this query without actually downloading the documents.
+     *
+     * Using the returned query to count the documents is efficient because only
+     * the final count, not the documents' data, is downloaded. The returned
+     * query can even count the documents if the result set would be
+     * prohibitively large to download entirely (e.g. thousands of documents).
+     *
+     * @return a query that counts the documents in the result set of this
+     * query. The count can be retrieved from `snapshot.data().count`, where
+     * `snapshot` is the `AggregateQuerySnapshot` resulting from running the
+     * returned query.
+     */
+    count(): AggregateQuery<{count: AggregateField<number>}>;
+
+    /**
      * Returns true if this `Query` is equal to the provided one.
      *
      * @param other The `Query` to compare against.
@@ -2000,6 +2050,105 @@ declare namespace FirebaseFirestore {
      * Query#endBefore} cursor.
      */
     toQuery(): Query<T>;
+  }
+
+  /**
+   * Represents an aggregation that can be performed by Firestore.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  export class AggregateField<T> {
+    private constructor();
+  }
+
+  /**
+   * The union of all `AggregateField` types that are supported by Firestore.
+   */
+  export type AggregateFieldType = AggregateField<number>;
+
+  /**
+   * A type whose property values are all `AggregateField` objects.
+   */
+  export interface AggregateSpec {
+    [field: string]: AggregateFieldType;
+  }
+
+  /**
+   * A type whose keys are taken from an `AggregateSpec`, and whose values are
+   * the result of the aggregation performed by the corresponding
+   * `AggregateField` from the input `AggregateSpec`.
+   */
+  export type AggregateSpecData<T extends AggregateSpec> = {
+    [P in keyof T]: T[P] extends AggregateField<infer U> ? U : never;
+  };
+
+  /**
+   * A query that calculates aggregations over an underlying query.
+   */
+  export class AggregateQuery<T extends AggregateSpec> {
+    private constructor();
+
+    /** The query whose aggregations will be calculated by this object. */
+    readonly query: Query<unknown>;
+
+    /**
+     * Executes this query.
+     *
+     * @return A promise that will be resolved with the results of the query.
+     */
+    get(): Promise<AggregateQuerySnapshot<T>>;
+
+    /**
+     * Compares this object with the given object for equality.
+     *
+     * This object is considered "equal" to the other object if and only if
+     * `other` performs the same aggregations as this `AggregateQuery` and
+     * the underlying Query of `other` compares equal to that of this object
+     * using `Query.isEqual()`.
+     *
+     * @param other The object to compare to this object for equality.
+     * @return `true` if this object is "equal" to the given object, as
+     * defined above, or `false` otherwise.
+     */
+    isEqual(other: AggregateQuery<T>): boolean;
+  }
+
+  /**
+   * The results of executing an aggregation query.
+   */
+  export class AggregateQuerySnapshot<T extends AggregateSpec> {
+    private constructor();
+
+    /** The query that was executed to produce this result. */
+    readonly query: AggregateQuery<T>;
+
+    /** The time this snapshot was read. */
+    readonly readTime: Timestamp;
+
+    /**
+     * Returns the results of the aggregations performed over the underlying
+     * query.
+     *
+     * The keys of the returned object will be the same as those of the
+     * `AggregateSpec` object specified to the aggregation method, and the
+     * values will be the corresponding aggregation result.
+     *
+     * @returns The results of the aggregations performed over the underlying
+     * query.
+     */
+    data(): AggregateSpecData<T>;
+
+    /**
+     * Compares this object with the given object for equality.
+     *
+     * Two `AggregateQuerySnapshot` instances are considered "equal" if they
+     * have the same data and their underlying queries compare "equal" using
+     * `AggregateQuery.isEqual()`.
+     *
+     * @param other The object to compare to this object for equality.
+     * @return `true` if this object is "equal" to the given object, as
+     * defined above, or `false` otherwise.
+     */
+    isEqual(other: AggregateQuerySnapshot<T>): boolean;
   }
 
   /**
