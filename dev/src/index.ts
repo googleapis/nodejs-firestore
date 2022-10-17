@@ -581,7 +581,7 @@ export class Firestore implements firestore.Firestore {
           const sslCreds = grpcModule.credentials.createInsecure();
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const settings: any = {
+          const settings: firestore.Settings = {
             sslCreds,
             ...this._settings,
             fallback: useFallback,
@@ -591,7 +591,7 @@ export class Firestore implements firestore.Firestore {
           // also set the `protocol` option for GAX fallback to
           // force http
           if (useFallback) {
-            settings['protocol'] = 'http';
+            settings.protocol = 'http';
           }
 
           client = new module.exports.v1(settings, gax);
