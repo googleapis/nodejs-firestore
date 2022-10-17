@@ -16,7 +16,7 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import type {CallOptions} from 'google-gax';
+import type {CallOptions, ClientOptions} from 'google-gax';
 import type * as googleGax from 'google-gax';
 import type * as googleGaxFallback from 'google-gax/build/src/fallback';
 import {Duplex, PassThrough, Transform} from 'stream';
@@ -580,14 +580,19 @@ export class Firestore implements firestore.Firestore {
           const grpcModule = this._settings.grpc ?? require('google-gax').grpc;
           const sslCreds = grpcModule.credentials.createInsecure();
 
-          client = new module.exports.v1(
-            {
-              sslCreds,
-              ...this._settings,
-              fallback: useFallback,
-            },
-            gax
-          );
+          const settings: ClientOptions = {
+            sslCreds,
+            ...this._settings,
+            fallback: useFallback,
+          };
+
+          // Since `ssl === false`, if we're using the GAX fallback then
+          // also set the `protocol` option for GAX fallback to force http
+          if (useFallback) {
+            settings.protocol = 'http';
+          }
+
+          client = new module.exports.v1(settings, gax);
         } else {
           client = new module.exports.v1(
             {
