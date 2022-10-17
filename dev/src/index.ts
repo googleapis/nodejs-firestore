@@ -580,16 +580,14 @@ export class Firestore implements firestore.Firestore {
           const grpcModule = this._settings.grpc ?? require('google-gax').grpc;
           const sslCreds = grpcModule.credentials.createInsecure();
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const settings: ClientOptions = {
             sslCreds,
             ...this._settings,
             fallback: useFallback,
           };
 
-          // If `ssl === false` and we're using the GAX fallback,
-          // also set the `protocol` option for GAX fallback to
-          // force http
+          // Since `ssl === false`, if we're using the GAX fallback then
+          // also set the `protocol` option for GAX fallback to force http
           if (useFallback) {
             settings.protocol = 'http';
           }
