@@ -16,7 +16,7 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import type {CallOptions} from 'google-gax';
+import type {CallOptions, ClientOptions} from 'google-gax';
 import type * as googleGax from 'google-gax';
 import type * as googleGaxFallback from 'google-gax/build/src/fallback';
 import {Duplex, PassThrough, Transform} from 'stream';
@@ -581,7 +581,7 @@ export class Firestore implements firestore.Firestore {
           const sslCreds = grpcModule.credentials.createInsecure();
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const settings: firestore.Settings = {
+          const settings: ClientOptions = {
             sslCreds,
             ...this._settings,
             fallback: useFallback,
