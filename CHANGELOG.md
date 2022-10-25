@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.4.1](https://github.com/googleapis/nodejs-firestore/compare/v6.4.0...v6.4.1) (2022-10-17)
+
+
+### Bug Fixes
+
+* Force use of http by the GAX module when using the GAX fallback and connecting to the emulator ([#1788](https://github.com/googleapis/nodejs-firestore/issues/1788)) ([50747ad](https://github.com/googleapis/nodejs-firestore/commit/50747ad52b19da9ed87282af98eadff660dffb75))
+
 ## [6.4.0](https://github.com/googleapis/nodejs-firestore/compare/v6.3.0...v6.4.0) (2022-10-07)
 
 
