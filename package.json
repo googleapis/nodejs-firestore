@@ -74,7 +74,7 @@
     "duplexify": "^4.0.0",
     "extend": "^3.0.2",
     "gts": "^3.1.0",
-    "jsdoc": "^3.6.2",
+    "jsdoc": "^4.0.0",
     "jsdoc-fresh": "^2.0.0",
     "jsdoc-region-tag": "^2.0.0",
     "length-prefixed-json-stream": "^1.0.1",
