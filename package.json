@@ -64,7 +64,7 @@
     "@types/duplexify": "^3.5.0",
     "@types/extend": "^3.0.0",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^16.0.0",
+    "@types/node": "^18.0.0",
     "@types/sinon": "^10.0.0",
     "@types/through2": "^2.0.34",
     "c8": "^7.0.0",
