@@ -35,15 +35,22 @@ import {compareArrays} from './order';
  *
  * @class CollectionGroup
  */
-export class CollectionGroup<T = firestore.DocumentData>
-  extends Query<T>
-  implements firestore.CollectionGroup<T>
+export class CollectionGroup<
+    ModelT = firestore.DocumentData,
+    SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
+      ? ModelT
+      : never
+  >
+  extends Query<ModelT, SerializedModelT>
+  implements firestore.CollectionGroup<ModelT, SerializedModelT>
 {
   /** @private */
   constructor(
     firestore: Firestore,
     collectionId: string,
-    converter: firestore.FirestoreDataConverter<T> | undefined
+    converter:
+      | firestore.FirestoreDataConverter<ModelT, SerializedModelT>
+      | undefined
   ) {
     super(
       firestore,
@@ -74,7 +81,7 @@ export class CollectionGroup<T = firestore.DocumentData>
    */
   async *getPartitions(
     desiredPartitionCount: number
-  ): AsyncIterable<QueryPartition<T>> {
+  ): AsyncIterable<QueryPartition<ModelT, SerializedModelT>> {
     validateInteger('desiredPartitionCount', desiredPartitionCount, {
       minValue: 1,
     });
@@ -188,14 +195,19 @@ export class CollectionGroup<T = firestore.DocumentData>
    * @return {CollectionGroup} A `CollectionGroup<U>` that uses the provided
    * converter.
    */
-  withConverter(converter: null): CollectionGroup<firestore.DocumentData>;
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U>
-  ): CollectionGroup<U>;
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U> | null
-  ): CollectionGroup<U> {
-    return new CollectionGroup<U>(
+  withConverter(
+    converter: null
+  ): CollectionGroup<firestore.DocumentData, firestore.DocumentData>;
+  withConverter<NewModelT, NewSerializedModelT extends firestore.DocumentData>(
+    converter: firestore.FirestoreDataConverter<NewModelT, NewSerializedModelT>
+  ): CollectionGroup<NewModelT, NewSerializedModelT>;
+  withConverter<NewModelT, NewSerializedModelT extends firestore.DocumentData>(
+    converter: firestore.FirestoreDataConverter<
+      NewModelT,
+      NewSerializedModelT
+    > | null
+  ): CollectionGroup<NewModelT, NewSerializedModelT> {
+    return new CollectionGroup<NewModelT, NewSerializedModelT>(
       this.firestore,
       this._queryOptions.collectionId,
       converter ?? defaultConverter()

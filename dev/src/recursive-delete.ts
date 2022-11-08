@@ -27,7 +27,7 @@ import Firestore, {
 } from '.';
 import {Deferred, wrapError} from './util';
 import type {GoogleError} from 'google-gax';
-import {BulkWriterError} from './bulk-writer';
+import {IBulkWriterError} from './bulk-writer';
 import {QueryOptions} from './reference';
 import {StatusCode} from './status-code';
 
@@ -64,7 +64,10 @@ export const RECURSIVE_DELETE_MIN_PENDING_OPS = 1000;
  * @private
  * @internal
  */
-export class RecursiveDelete {
+export class RecursiveDelete<
+  ModelT,
+  SerializedModelT extends firestore.DocumentData
+> {
   /**
    * The number of deletes that failed with a permanent error.
    * @private
@@ -78,7 +81,7 @@ export class RecursiveDelete {
    * @private
    * @internal
    */
-  private lastError: GoogleError | BulkWriterError | undefined;
+  private lastError: GoogleError | IBulkWriterError | undefined;
 
   /**
    * Whether there are still documents to delete that still need to be fetched.
@@ -131,7 +134,9 @@ export class RecursiveDelete {
    * @private
    * @internal
    */
-  private lastDocumentSnap: QueryDocumentSnapshot | undefined;
+  private lastDocumentSnap:
+    | QueryDocumentSnapshot<firestore.DocumentData, firestore.DocumentData>
+    | undefined;
 
   /**
    * The number of pending BulkWriter operations. Used to determine when the
@@ -156,8 +161,8 @@ export class RecursiveDelete {
     private readonly firestore: Firestore,
     private readonly writer: BulkWriter,
     private readonly ref:
-      | firestore.CollectionReference<unknown>
-      | firestore.DocumentReference<unknown>,
+      | firestore.CollectionReference<ModelT, SerializedModelT>
+      | firestore.DocumentReference<ModelT, SerializedModelT>,
     private readonly maxLimit: number,
     private readonly minLimit: number
   ) {
@@ -189,8 +194,8 @@ export class RecursiveDelete {
   private setupStream(): void {
     const stream = this.getAllDescendants(
       this.ref instanceof CollectionReference
-        ? (this.ref as CollectionReference<unknown>)
-        : (this.ref as DocumentReference<unknown>)
+        ? (this.ref as CollectionReference<ModelT, SerializedModelT>)
+        : (this.ref as DocumentReference<ModelT, SerializedModelT>)
     );
     this.streamInProgress = true;
     let streamedDocsCount = 0;
@@ -201,11 +206,19 @@ export class RecursiveDelete {
         this.lastError = err;
         this.onQueryEnd();
       })
-      .on('data', (snap: QueryDocumentSnapshot) => {
-        streamedDocsCount++;
-        this.lastDocumentSnap = snap;
-        this.deleteRef(snap.ref);
-      })
+      .on(
+        'data',
+        (
+          snap: QueryDocumentSnapshot<
+            firestore.DocumentData,
+            firestore.DocumentData
+          >
+        ) => {
+          streamedDocsCount++;
+          this.lastDocumentSnap = snap;
+          this.deleteRef(snap.ref);
+        }
+      )
       .on('end', () => {
         this.streamInProgress = false;
         // If there are fewer than the number of documents specified in the
@@ -226,7 +239,9 @@ export class RecursiveDelete {
    * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
    */
   private getAllDescendants(
-    ref: CollectionReference<unknown> | DocumentReference<unknown>
+    ref:
+      | CollectionReference<ModelT, SerializedModelT>
+      | DocumentReference<ModelT, SerializedModelT>
   ): NodeJS.ReadableStream {
     // The parent is the closest ancestor document to the location we're
     // deleting. If we are deleting a document, the parent is the path of that
@@ -240,9 +255,9 @@ export class RecursiveDelete {
     const collectionId =
       ref instanceof CollectionReference
         ? ref.id
-        : (ref as DocumentReference<unknown>).parent.id;
+        : (ref as DocumentReference<ModelT, SerializedModelT>).parent.id;
 
-    let query: Query = new Query(
+    const baseQuery: Query<ModelT, SerializedModelT> = new Query(
       this.firestore,
       QueryOptions.forKindlessAllDescendants(
         parentPath,
@@ -252,7 +267,9 @@ export class RecursiveDelete {
     );
 
     // Query for names only to fetch empty snapshots.
-    query = query.select(FieldPath.documentId()).limit(this.maxPendingOps);
+    let query = baseQuery
+      .select(FieldPath.documentId())
+      .limit(this.maxPendingOps);
 
     if (ref instanceof CollectionReference) {
       // To find all descendants of a collection reference, we need to use a
@@ -317,7 +334,9 @@ export class RecursiveDelete {
    * @private
    * @internal
    */
-  private deleteRef(docRef: DocumentReference): void {
+  private deleteRef(
+    docRef: DocumentReference<firestore.DocumentData, firestore.DocumentData>
+  ): void {
     this.pendingOpsCount++;
     this.writer
       .delete(docRef)

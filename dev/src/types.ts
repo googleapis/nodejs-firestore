@@ -122,22 +122,31 @@ export type RBTree = any;
  * @private
  * @internal
  */
-const defaultConverterObj: FirestoreDataConverter<DocumentData> = {
-  toFirestore(modelObject: WithFieldValue<DocumentData>): DocumentData {
-    return modelObject;
-  },
-  fromFirestore(snapshot: QueryDocumentSnapshot): DocumentData {
-    return snapshot.data()!;
-  },
-};
+const defaultConverterObj: FirestoreDataConverter<DocumentData, DocumentData> =
+  {
+    toFirestore(modelObject: WithFieldValue<DocumentData>): DocumentData {
+      return modelObject;
+    },
+    fromFirestore(
+      snapshot: QueryDocumentSnapshot<DocumentData, DocumentData>
+    ): DocumentData {
+      return snapshot.data()!;
+    },
+  };
 
 /**
  * A default converter to use when none is provided.
  * @private
  * @internal
  */
-export function defaultConverter<T>(): FirestoreDataConverter<T> {
-  return defaultConverterObj as FirestoreDataConverter<T>;
+export function defaultConverter<
+  ModelT,
+  SerializedModelT extends DocumentData
+>(): FirestoreDataConverter<ModelT, SerializedModelT> {
+  return defaultConverterObj as FirestoreDataConverter<
+    ModelT,
+    SerializedModelT
+  >;
 }
 
 /**

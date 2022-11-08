@@ -144,8 +144,8 @@ declare namespace FirebaseFirestore {
   function setLogFunction(logger: ((msg: string) => void) | null): void;
 
   /**
-   * Converter used by `withConverter()` to transform user objects of type T
-   * into Firestore data.
+   * Converter used by `withConverter()` to transform user objects of type
+   * `ModelT` into Firestore data, `SerializedModelT`.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
@@ -182,23 +182,28 @@ declare namespace FirebaseFirestore {
    *   post.someNonExistentProperty; // TS error
    * }
    */
-  export interface FirestoreDataConverter<T> {
+  export interface FirestoreDataConverter<
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > {
     /**
-     * Called by the Firestore SDK to convert a custom model object of type T
-     * into a plain Javascript object (suitable for writing directly to the
-     * Firestore database). To use set() with `merge` and `mergeFields`,
-     * toFirestore() must be defined with `Partial<T>`.
+     * Called by the Firestore SDK to convert a custom model object of type
+     * `ModelT` into a plain Javascript object (suitable for writing directly to
+     * the Firestore database), `SerializedModelT`. To use set() with `merge`
+     * and `mergeFields`, toFirestore() must be defined with `Partial<ModelT>`.
      *
      * The `WithFieldValue<T>` type extends `T` to also allow FieldValues such
      * as `FieldValue.delete()` to be used as property values.
      */
-    toFirestore(modelObject: WithFieldValue<T>): DocumentData;
+    toFirestore(modelObject: WithFieldValue<ModelT>): SerializedModelT;
 
     /**
-     * Called by the Firestore SDK to convert a custom model object of type T
-     * into a plain Javascript object (suitable for writing directly to the
-     * Firestore database). To use set() with `merge` and `mergeFields`,
-     * toFirestore() must be defined with `Partial<T>`.
+     * Called by the Firestore SDK to convert a custom model object of type
+     * `ModelT` into a plain Javascript object (suitable for writing directly to
+     * the Firestore database), `SerializedModelT`. To use set() with `merge`
+     * and `mergeFields`, toFirestore() must be defined with `Partial<ModelT>`.
      *
      * The `PartialWithFieldValue<T>` type extends `Partial<T>` to allow
      * FieldValues such as `FieldValue.delete()` to be used as property values.
@@ -206,15 +211,17 @@ declare namespace FirebaseFirestore {
      * omitted.
      */
     toFirestore(
-      modelObject: PartialWithFieldValue<T>,
+      modelObject: PartialWithFieldValue<ModelT>,
       options: SetOptions
-    ): DocumentData;
+    ): SerializedModelT;
 
     /**
      * Called by the Firestore SDK to convert Firestore data into an object of
-     * type T.
+     * type `ModelT`.
      */
-    fromFirestore(snapshot: QueryDocumentSnapshot): T;
+    fromFirestore(
+      snapshot: QueryDocumentSnapshot<DocumentData, DocumentData>
+    ): ModelT;
   }
 
   /**
@@ -356,7 +363,9 @@ declare namespace FirebaseFirestore {
      * @param collectionPath A slash-separated path to a collection.
      * @return The `CollectionReference` instance.
      */
-    collection(collectionPath: string): CollectionReference<DocumentData>;
+    collection(
+      collectionPath: string
+    ): CollectionReference<DocumentData, DocumentData>;
 
     /**
      * Gets a `DocumentReference` instance that refers to the document at the
@@ -365,7 +374,7 @@ declare namespace FirebaseFirestore {
      * @param documentPath A slash-separated path to a document.
      * @return The `DocumentReference` instance.
      */
-    doc(documentPath: string): DocumentReference<DocumentData>;
+    doc(documentPath: string): DocumentReference<DocumentData, DocumentData>;
 
     /**
      * Creates and returns a new Query that includes all documents in the
@@ -377,7 +386,9 @@ declare namespace FirebaseFirestore {
      * will be included. Cannot contain a slash.
      * @return The created `CollectionGroup`.
      */
-    collectionGroup(collectionId: string): CollectionGroup<DocumentData>;
+    collectionGroup(
+      collectionId: string
+    ): CollectionGroup<DocumentData, DocumentData>;
 
     /**
      * Retrieves multiple documents from Firestore.
@@ -392,11 +403,11 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll(
+    getAll<ModelT, SerializedModelT extends DocumentData>(
       ...documentRefsOrReadOptions: Array<
-        DocumentReference<DocumentData> | ReadOptions
+        DocumentReference<ModelT, SerializedModelT> | ReadOptions
       >
-    ): Promise<Array<DocumentSnapshot<DocumentData>>>;
+    ): Promise<Array<DocumentSnapshot<ModelT, SerializedModelT>>>;
 
     /**
      * Recursively deletes all documents and subcollections at and under the
@@ -433,8 +444,10 @@ declare namespace FirebaseFirestore {
      *   });
      * await firestore.recursiveDelete(docRef, bulkWriter);
      */
-    recursiveDelete(
-      ref: CollectionReference<unknown> | DocumentReference<unknown>,
+    recursiveDelete<ModelT, SerializedModelT extends DocumentData>(
+      ref:
+        | CollectionReference<ModelT, SerializedModelT>
+        | DocumentReference<ModelT, SerializedModelT>,
       bulkWriter?: BulkWriter
     ): Promise<void>;
 
@@ -451,7 +464,9 @@ declare namespace FirebaseFirestore {
      *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
-    listCollections(): Promise<Array<CollectionReference<DocumentData>>>;
+    listCollections(): Promise<
+      Array<CollectionReference<DocumentData, DocumentData>>
+    >;
 
     /**
      * Executes the given updateFunction and commits the changes applied within
@@ -582,7 +597,9 @@ declare namespace FirebaseFirestore {
      * @param query A query to execute.
      * @return A QuerySnapshot for the retrieved data.
      */
-    get<T>(query: Query<T>): Promise<QuerySnapshot<T>>;
+    get<ModelT, SerializedModelT extends DocumentData>(
+      query: Query<ModelT, SerializedModelT>
+    ): Promise<QuerySnapshot<ModelT, SerializedModelT>>;
 
     /**
      * Reads the document referenced by the provided `DocumentReference.`
@@ -591,7 +608,9 @@ declare namespace FirebaseFirestore {
      * @param documentRef A reference to the document to be read.
      * @return A DocumentSnapshot for the read data.
      */
-    get<T>(documentRef: DocumentReference<T>): Promise<DocumentSnapshot<T>>;
+    get<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>
+    ): Promise<DocumentSnapshot<ModelT, SerializedModelT>>;
 
     /**
      * Retrieves an aggregate query result. Holds a pessimistic lock on all
@@ -600,9 +619,15 @@ declare namespace FirebaseFirestore {
      * @param aggregateQuery An aggregate query to execute.
      * @return An AggregateQuerySnapshot for the retrieved data.
      */
-    get<T extends AggregateSpec>(
-      aggregateQuery: AggregateQuery<T>
-    ): Promise<AggregateQuerySnapshot<T>>;
+    get<
+      AggregateSpecT extends AggregateSpec,
+      ModelT,
+      SerializedModelT extends DocumentData
+    >(
+      aggregateQuery: AggregateQuery<AggregateSpecT, ModelT, SerializedModelT>
+    ): Promise<
+      AggregateQuerySnapshot<AggregateSpecT, ModelT, SerializedModelT>
+    >;
 
     /**
      * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
@@ -618,9 +643,11 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll<T>(
-      ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
-    ): Promise<Array<DocumentSnapshot<T>>>;
+    getAll<SerializedModelT extends DocumentData>(
+      ...documentRefsOrReadOptions: Array<
+        DocumentReference<SerializedModelT, SerializedModelT> | ReadOptions
+      >
+    ): Promise<Array<DocumentSnapshot<SerializedModelT, SerializedModelT>>>;
 
     /**
      * Create the document referred to by the provided `DocumentReference`.
@@ -632,9 +659,9 @@ declare namespace FirebaseFirestore {
      * @throws Error If the provided input is not a valid Firestore document.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    create<T>(
-      documentRef: DocumentReference<T>,
-      data: WithFieldValue<T>
+    create<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: WithFieldValue<ModelT>
     ): Transaction;
 
     /**
@@ -656,14 +683,14 @@ declare namespace FirebaseFirestore {
      * @throws Error If the provided input is not a valid Firestore document.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    set<T>(
-      documentRef: DocumentReference<T>,
-      data: PartialWithFieldValue<T>,
+    set<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: PartialWithFieldValue<ModelT>,
       options: SetOptions
     ): Transaction;
-    set<T>(
-      documentRef: DocumentReference<T>,
-      data: WithFieldValue<T>
+    set<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: WithFieldValue<ModelT>
     ): Transaction;
 
     /**
@@ -681,9 +708,9 @@ declare namespace FirebaseFirestore {
      * @throws Error If the provided input is not valid Firestore data.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    update<T>(
-      documentRef: DocumentReference<T>,
-      data: UpdateData<T>,
+    update<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: UpdateData<SerializedModelT>,
       precondition?: Precondition
     ): Transaction;
 
@@ -707,8 +734,8 @@ declare namespace FirebaseFirestore {
      * @throws Error If the provided input is not valid Firestore data.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    update(
-      documentRef: DocumentReference<any>,
+    update<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
       field: string | FieldPath,
       value: any,
       ...fieldsOrPrecondition: any[]
@@ -721,8 +748,8 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce for this delete.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    delete(
-      documentRef: DocumentReference<any>,
+    delete<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
       precondition?: Precondition
     ): Transaction;
   }
@@ -748,9 +775,9 @@ declare namespace FirebaseFirestore {
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
-    create<T>(
-      documentRef: DocumentReference<T>,
-      data: WithFieldValue<T>
+    create<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: WithFieldValue<ModelT>
     ): Promise<WriteResult>;
 
     /**
@@ -769,8 +796,8 @@ declare namespace FirebaseFirestore {
      * delete fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
-    delete(
-      documentRef: DocumentReference<any>,
+    delete<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
       precondition?: Precondition
     ): Promise<WriteResult>;
 
@@ -798,14 +825,14 @@ declare namespace FirebaseFirestore {
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
-    set<T>(
-      documentRef: DocumentReference<T>,
-      data: PartialWithFieldValue<T>,
+    set<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: PartialWithFieldValue<ModelT>,
       options: SetOptions
     ): Promise<WriteResult>;
-    set<T>(
-      documentRef: DocumentReference<T>,
-      data: WithFieldValue<T>
+    set<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: WithFieldValue<ModelT>
     ): Promise<WriteResult>;
 
     /**
@@ -832,9 +859,9 @@ declare namespace FirebaseFirestore {
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
-    update<T>(
-      documentRef: DocumentReference<T>,
-      data: UpdateData<T>,
+    update<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: UpdateData<SerializedModelT>,
       precondition?: Precondition
     ): Promise<WriteResult>;
 
@@ -864,8 +891,8 @@ declare namespace FirebaseFirestore {
      * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
-    update(
-      documentRef: DocumentReference<any>,
+    update<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
       field: string | FieldPath,
       value: any,
       ...fieldsOrPrecondition: any[]
@@ -879,8 +906,8 @@ declare namespace FirebaseFirestore {
      * successfully completes.
      */
     onWriteResult(
-      callback: (
-        documentRef: DocumentReference<any>,
+      callback: <ModelT, SerializedModelT extends DocumentData>(
+        documentRef: DocumentReference<ModelT, SerializedModelT>,
         result: WriteResult
       ) => void
     ): void;
@@ -898,7 +925,9 @@ declare namespace FirebaseFirestore {
      * `false` will stop the retry loop.
      */
     onWriteError(
-      shouldRetryCallback: (error: BulkWriterError) => boolean
+      shouldRetryCallback: <ModelT, SerializedModelT extends DocumentData>(
+        error: BulkWriterError<ModelT, SerializedModelT>
+      ) => boolean
     ): void;
 
     /**
@@ -965,7 +994,12 @@ declare namespace FirebaseFirestore {
   /**
    * The error thrown when a BulkWriter operation fails.
    */
-  export class BulkWriterError extends Error {
+  export class BulkWriterError<
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > extends Error {
     /** The status code of the error. */
     readonly code: GrpcStatus;
 
@@ -973,7 +1007,7 @@ declare namespace FirebaseFirestore {
     readonly message: string;
 
     /** The document reference the operation was performed on. */
-    readonly documentRef: DocumentReference<any>;
+    readonly documentRef: DocumentReference<ModelT, SerializedModelT>;
 
     /** The type of operation performed. */
     readonly operationType: 'create' | 'set' | 'update' | 'delete';
@@ -1006,9 +1040,9 @@ declare namespace FirebaseFirestore {
      * @throws Error If the provided input is not a valid Firestore document.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    create<T>(
-      documentRef: DocumentReference<T>,
-      data: WithFieldValue<T>
+    create<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: WithFieldValue<ModelT>
     ): WriteBatch;
 
     /**
@@ -1030,14 +1064,14 @@ declare namespace FirebaseFirestore {
      * @throws Error If the provided input is not a valid Firestore document.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    set<T>(
-      documentRef: DocumentReference<T>,
-      data: PartialWithFieldValue<T>,
+    set<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: PartialWithFieldValue<ModelT>,
       options: SetOptions
     ): WriteBatch;
-    set<T>(
-      documentRef: DocumentReference<T>,
-      data: WithFieldValue<T>
+    set<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: WithFieldValue<ModelT>
     ): WriteBatch;
 
     /**
@@ -1055,9 +1089,9 @@ declare namespace FirebaseFirestore {
      * @throws Error If the provided input is not valid Firestore data.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    update<T>(
-      documentRef: DocumentReference<T>,
-      data: UpdateData<T>,
+    update<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
+      data: UpdateData<SerializedModelT>,
       precondition?: Precondition
     ): WriteBatch;
 
@@ -1081,8 +1115,8 @@ declare namespace FirebaseFirestore {
      * @throws Error If the provided input is not valid Firestore data.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    update(
-      documentRef: DocumentReference<any>,
+    update<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
       field: string | FieldPath,
       value: any,
       ...fieldsOrPrecondition: any[]
@@ -1095,8 +1129,8 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce for this delete.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    delete(
-      documentRef: DocumentReference<any>,
+    delete<ModelT, SerializedModelT extends DocumentData>(
+      documentRef: DocumentReference<ModelT, SerializedModelT>,
       precondition?: Precondition
     ): WriteBatch;
 
@@ -1195,7 +1229,12 @@ declare namespace FirebaseFirestore {
    * the referenced location may or may not exist. A `DocumentReference` can
    * also be used to create a `CollectionReference` to a subcollection.
    */
-  export class DocumentReference<T = DocumentData> {
+  export class DocumentReference<
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > {
     private constructor();
 
     /** The identifier of the document within its collection. */
@@ -1210,7 +1249,7 @@ declare namespace FirebaseFirestore {
     /**
      * A reference to the Collection to which this DocumentReference belongs.
      */
-    readonly parent: CollectionReference<T>;
+    readonly parent: CollectionReference<ModelT, SerializedModelT>;
 
     /**
      * A string representing the path of the referenced document (relative
@@ -1225,14 +1264,18 @@ declare namespace FirebaseFirestore {
      * @param collectionPath A slash-separated path to a collection.
      * @return The `CollectionReference` instance.
      */
-    collection(collectionPath: string): CollectionReference<DocumentData>;
+    collection(
+      collectionPath: string
+    ): CollectionReference<DocumentData, DocumentData>;
 
     /**
      * Fetches the subcollections that are direct children of this document.
      *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
-    listCollections(): Promise<Array<CollectionReference<DocumentData>>>;
+    listCollections(): Promise<
+      Array<CollectionReference<DocumentData, DocumentData>>
+    >;
 
     /**
      * Creates a document referred to by this `DocumentReference` with the
@@ -1242,7 +1285,7 @@ declare namespace FirebaseFirestore {
      * @throws Error If the provided input is not a valid Firestore document.
      * @return A Promise resolved with the write time of this create.
      */
-    create(data: WithFieldValue<T>): Promise<WriteResult>;
+    create(data: WithFieldValue<ModelT>): Promise<WriteResult>;
 
     /**
      * Writes to the document referred to by this `DocumentReference`. If the
@@ -1263,10 +1306,10 @@ declare namespace FirebaseFirestore {
      * @return A Promise resolved with the write time of this set.
      */
     set(
-      data: PartialWithFieldValue<T>,
+      data: PartialWithFieldValue<ModelT>,
       options: SetOptions
     ): Promise<WriteResult>;
-    set(data: WithFieldValue<T>): Promise<WriteResult>;
+    set(data: WithFieldValue<ModelT>): Promise<WriteResult>;
 
     /**
      * Updates fields in the document referred to by this `DocumentReference`.
@@ -1282,7 +1325,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise resolved with the write time of this update.
      */
     update(
-      data: UpdateData<T>,
+      data: UpdateData<SerializedModelT>,
       precondition?: Precondition
     ): Promise<WriteResult>;
 
@@ -1324,7 +1367,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise resolved with a DocumentSnapshot containing the
      * current document contents.
      */
-    get(): Promise<DocumentSnapshot<T>>;
+    get(): Promise<DocumentSnapshot<ModelT, SerializedModelT>>;
 
     /**
      * Attaches a listener for DocumentSnapshot events.
@@ -1337,7 +1380,7 @@ declare namespace FirebaseFirestore {
      * the snapshot listener.
      */
     onSnapshot(
-      onNext: (snapshot: DocumentSnapshot<T>) => void,
+      onNext: (snapshot: DocumentSnapshot<ModelT, SerializedModelT>) => void,
       onError?: (error: Error) => void
     ): () => void;
 
@@ -1347,7 +1390,7 @@ declare namespace FirebaseFirestore {
      * @param other The `DocumentReference` to compare against.
      * @return true if this `DocumentReference` is equal to the provided one.
      */
-    isEqual(other: DocumentReference<T>): boolean;
+    isEqual(other: DocumentReference<ModelT, SerializedModelT>): boolean;
 
     /**
      * Applies a custom data converter to this DocumentReference, allowing you
@@ -1360,10 +1403,12 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A DocumentReference<U> that uses the provided converter.
      */
-    withConverter<U>(
-      converter: FirestoreDataConverter<U>
-    ): DocumentReference<U>;
-    withConverter(converter: null): DocumentReference<DocumentData>;
+    withConverter<NewModelT, NewSerializedModelT extends DocumentData>(
+      converter: FirestoreDataConverter<NewModelT, NewSerializedModelT>
+    ): DocumentReference<NewModelT, NewSerializedModelT>;
+    withConverter(
+      converter: null
+    ): DocumentReference<DocumentData, DocumentData>;
   }
 
   /**
@@ -1375,14 +1420,19 @@ declare namespace FirebaseFirestore {
    * access will return 'undefined'. You can use the `exists` property to
    * explicitly verify a document's existence.
    */
-  export class DocumentSnapshot<T = DocumentData> {
+  export class DocumentSnapshot<
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > {
     protected constructor();
 
     /** True if the document exists. */
     readonly exists: boolean;
 
     /** A `DocumentReference` to the document location. */
-    readonly ref: DocumentReference<T>;
+    readonly ref: DocumentReference<ModelT, SerializedModelT>;
 
     /**
      * The ID of the document for which this `DocumentSnapshot` contains data.
@@ -1412,7 +1462,7 @@ declare namespace FirebaseFirestore {
      *
      * @return An Object containing all fields in the document.
      */
-    data(): T | undefined;
+    data(): ModelT | undefined;
 
     /**
      * Retrieves the field specified by `fieldPath`.
@@ -1430,7 +1480,7 @@ declare namespace FirebaseFirestore {
      * @param other The `DocumentSnapshot` to compare against.
      * @return true if this `DocumentSnapshot` is equal to the provided one.
      */
-    isEqual(other: DocumentSnapshot<T>): boolean;
+    isEqual(other: DocumentSnapshot<ModelT, SerializedModelT>): boolean;
   }
 
   /**
@@ -1445,8 +1495,11 @@ declare namespace FirebaseFirestore {
    * 'undefined'.
    */
   export class QueryDocumentSnapshot<
-    T = DocumentData
-  > extends DocumentSnapshot<T> {
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > extends DocumentSnapshot<ModelT, SerializedModelT> {
     private constructor();
 
     /**
@@ -1466,7 +1519,7 @@ declare namespace FirebaseFirestore {
      * @override
      * @return An Object containing all fields in the document.
      */
-    data(): T;
+    data(): ModelT;
   }
 
   /**
@@ -1496,7 +1549,12 @@ declare namespace FirebaseFirestore {
    * A `Query` refers to a Query which you can read or listen to. You can also
    * construct refined `Query` objects by adding filters and ordering.
    */
-  export class Query<T = DocumentData> {
+  export class Query<
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > {
     protected constructor();
 
     /**
@@ -1522,7 +1580,7 @@ declare namespace FirebaseFirestore {
       fieldPath: string | FieldPath,
       opStr: WhereFilterOp,
       value: any
-    ): Query<T>;
+    ): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query that's additionally sorted by the
@@ -1539,7 +1597,7 @@ declare namespace FirebaseFirestore {
     orderBy(
       fieldPath: string | FieldPath,
       directionStr?: OrderByDirection
-    ): Query<T>;
+    ): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query that only returns the first matching
@@ -1551,7 +1609,7 @@ declare namespace FirebaseFirestore {
      * @param limit The maximum number of items to return.
      * @return The created Query.
      */
-    limit(limit: number): Query<T>;
+    limit(limit: number): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query that only returns the last matching
@@ -1566,7 +1624,7 @@ declare namespace FirebaseFirestore {
      * @param limit The maximum number of items to return.
      * @return The created Query.
      */
-    limitToLast(limit: number): Query<T>;
+    limitToLast(limit: number): Query<ModelT, SerializedModelT>;
 
     /**
      * Specifies the offset of the returned results.
@@ -1577,7 +1635,7 @@ declare namespace FirebaseFirestore {
      * @param offset The offset to apply to the Query results.
      * @return The created Query.
      */
-    offset(offset: number): Query<T>;
+    offset(offset: number): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query instance that applies a field mask to
@@ -1594,7 +1652,7 @@ declare namespace FirebaseFirestore {
      * @param field The field paths to return.
      * @return The created Query.
      */
-    select(...field: (string | FieldPath)[]): Query<DocumentData>;
+    select(...field: (string | FieldPath)[]): Query<DocumentData, DocumentData>;
 
     /**
      * Creates and returns a new Query that starts at the provided document
@@ -1605,7 +1663,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to start after.
      * @return The created Query.
      */
-    startAt(snapshot: DocumentSnapshot<any>): Query<T>;
+    startAt<ModelT, SerializedModelT extends DocumentData>(
+      snapshot: DocumentSnapshot<ModelT, SerializedModelT>
+    ): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query that starts at the provided fields
@@ -1616,7 +1676,7 @@ declare namespace FirebaseFirestore {
      * of the query's order by.
      * @return The created Query.
      */
-    startAt(...fieldValues: any[]): Query<T>;
+    startAt(...fieldValues: any[]): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query that starts after the provided document
@@ -1627,7 +1687,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to start after.
      * @return The created Query.
      */
-    startAfter(snapshot: DocumentSnapshot<any>): Query<T>;
+    startAfter<ModelT, SerializedModelT extends DocumentData>(
+      snapshot: DocumentSnapshot<ModelT, SerializedModelT>
+    ): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query that starts after the provided fields
@@ -1638,7 +1700,7 @@ declare namespace FirebaseFirestore {
      * of the query's order by.
      * @return The created Query.
      */
-    startAfter(...fieldValues: any[]): Query<T>;
+    startAfter(...fieldValues: any[]): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query that ends before the provided document
@@ -1649,7 +1711,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to end before.
      * @return The created Query.
      */
-    endBefore(snapshot: DocumentSnapshot<any>): Query<T>;
+    endBefore<ModelT, SerializedModelT extends DocumentData>(
+      snapshot: DocumentSnapshot<ModelT, SerializedModelT>
+    ): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query that ends before the provided fields
@@ -1660,7 +1724,7 @@ declare namespace FirebaseFirestore {
      * of the query's order by.
      * @return The created Query.
      */
-    endBefore(...fieldValues: any[]): Query<T>;
+    endBefore(...fieldValues: any[]): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query that ends at the provided document
@@ -1671,7 +1735,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to end at.
      * @return The created Query.
      */
-    endAt(snapshot: DocumentSnapshot<any>): Query<T>;
+    endAt<ModelT, SerializedModelT extends DocumentData>(
+      snapshot: DocumentSnapshot<ModelT, SerializedModelT>
+    ): Query<ModelT, SerializedModelT>;
 
     /**
      * Creates and returns a new Query that ends at the provided fields
@@ -1682,14 +1748,14 @@ declare namespace FirebaseFirestore {
      * of the query's order by.
      * @return The created Query.
      */
-    endAt(...fieldValues: any[]): Query<T>;
+    endAt(...fieldValues: any[]): Query<ModelT, SerializedModelT>;
 
     /**
      * Executes the query and returns the results as a `QuerySnapshot`.
      *
      * @return A Promise that will be resolved with the results of the Query.
      */
-    get(): Promise<QuerySnapshot<T>>;
+    get(): Promise<QuerySnapshot<ModelT, SerializedModelT>>;
 
     /*
      * Executes the query and returns the results as Node Stream.
@@ -1709,7 +1775,7 @@ declare namespace FirebaseFirestore {
      * the snapshot listener.
      */
     onSnapshot(
-      onNext: (snapshot: QuerySnapshot<T>) => void,
+      onNext: (snapshot: QuerySnapshot<ModelT, SerializedModelT>) => void,
       onError?: (error: Error) => void
     ): () => void;
 
@@ -1730,7 +1796,11 @@ declare namespace FirebaseFirestore {
      * `snapshot` is the `AggregateQuerySnapshot` resulting from running the
      * returned query.
      */
-    count(): AggregateQuery<{count: AggregateField<number>}>;
+    count(): AggregateQuery<
+      {count: AggregateField<number>},
+      ModelT,
+      SerializedModelT
+    >;
 
     /**
      * Returns true if this `Query` is equal to the provided one.
@@ -1738,7 +1808,7 @@ declare namespace FirebaseFirestore {
      * @param other The `Query` to compare against.
      * @return true if this `Query` is equal to the provided one.
      */
-    isEqual(other: Query<T>): boolean;
+    isEqual(other: Query<ModelT, SerializedModelT>): boolean;
 
     /**
      * Applies a custom data converter to this Query, allowing you to use your
@@ -1750,8 +1820,10 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A Query<U> that uses the provided converter.
      */
-    withConverter<U>(converter: FirestoreDataConverter<U>): Query<U>;
-    withConverter(converter: null): Query<DocumentData>;
+    withConverter<NewModelT, NewSerializedModelT extends DocumentData>(
+      converter: FirestoreDataConverter<NewModelT, NewSerializedModelT>
+    ): Query<NewModelT, NewSerializedModelT>;
+    withConverter(converter: null): Query<DocumentData, DocumentData>;
   }
 
   /**
@@ -1761,17 +1833,22 @@ declare namespace FirebaseFirestore {
    * number of documents can be determined via the `empty` and `size`
    * properties.
    */
-  export class QuerySnapshot<T = DocumentData> {
+  export class QuerySnapshot<
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > {
     private constructor();
 
     /**
      * The query on which you called `get` or `onSnapshot` in order to get this
      * `QuerySnapshot`.
      */
-    readonly query: Query<T>;
+    readonly query: Query<ModelT, SerializedModelT>;
 
     /** An array of all the documents in the QuerySnapshot. */
-    readonly docs: Array<QueryDocumentSnapshot<T>>;
+    readonly docs: Array<QueryDocumentSnapshot<ModelT, SerializedModelT>>;
 
     /** The number of documents in the QuerySnapshot. */
     readonly size: number;
@@ -1787,7 +1864,7 @@ declare namespace FirebaseFirestore {
      * this is the first snapshot, all documents will be in the list as added
      * changes.
      */
-    docChanges(): DocumentChange<T>[];
+    docChanges(): DocumentChange<ModelT, SerializedModelT>[];
 
     /**
      * Enumerates all of the documents in the QuerySnapshot.
@@ -1797,7 +1874,9 @@ declare namespace FirebaseFirestore {
      * @param thisArg The `this` binding for the callback.
      */
     forEach(
-      callback: (result: QueryDocumentSnapshot<T>) => void,
+      callback: (
+        result: QueryDocumentSnapshot<ModelT, SerializedModelT>
+      ) => void,
       thisArg?: any
     ): void;
 
@@ -1808,7 +1887,7 @@ declare namespace FirebaseFirestore {
      * @param other The `QuerySnapshot` to compare against.
      * @return true if this `QuerySnapshot` is equal to the provided one.
      */
-    isEqual(other: QuerySnapshot<T>): boolean;
+    isEqual(other: QuerySnapshot<ModelT, SerializedModelT>): boolean;
   }
 
   /**
@@ -1820,12 +1899,17 @@ declare namespace FirebaseFirestore {
    * A `DocumentChange` represents a change to the documents matching a query.
    * It contains the document affected and the type of change that occurred.
    */
-  export interface DocumentChange<T = DocumentData> {
+  export interface DocumentChange<
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > {
     /** The type of change ('added', 'modified', or 'removed'). */
     readonly type: DocumentChangeType;
 
     /** The document affected by this change. */
-    readonly doc: QueryDocumentSnapshot<T>;
+    readonly doc: QueryDocumentSnapshot<ModelT, SerializedModelT>;
 
     /**
      * The index of the changed document in the result set immediately prior to
@@ -1849,7 +1933,7 @@ declare namespace FirebaseFirestore {
      * @param other The `DocumentChange` to compare against.
      * @return true if this `DocumentChange` is equal to the provided one.
      */
-    isEqual(other: DocumentChange<T>): boolean;
+    isEqual(other: DocumentChange<ModelT, SerializedModelT>): boolean;
   }
 
   /**
@@ -1857,7 +1941,12 @@ declare namespace FirebaseFirestore {
    * document references, and querying for documents (using the methods
    * inherited from `Query`).
    */
-  export class CollectionReference<T = DocumentData> extends Query<T> {
+  export class CollectionReference<
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > extends Query<ModelT, SerializedModelT> {
     private constructor();
 
     /** The identifier of the collection. */
@@ -1867,7 +1956,7 @@ declare namespace FirebaseFirestore {
      * A reference to the containing Document if this is a subcollection, else
      * null.
      */
-    readonly parent: DocumentReference<DocumentData> | null;
+    readonly parent: DocumentReference<DocumentData, DocumentData> | null;
 
     /**
      * A string representing the path of the referenced collection (relative
@@ -1887,7 +1976,9 @@ declare namespace FirebaseFirestore {
      * @return {Promise<DocumentReference[]>} The list of documents in this
      * collection.
      */
-    listDocuments(): Promise<Array<DocumentReference<T>>>;
+    listDocuments(): Promise<
+      Array<DocumentReference<ModelT, SerializedModelT>>
+    >;
 
     /**
      * Get a `DocumentReference` for a randomly-named document within this
@@ -1896,7 +1987,7 @@ declare namespace FirebaseFirestore {
      *
      * @return The `DocumentReference` instance.
      */
-    doc(): DocumentReference<T>;
+    doc(): DocumentReference<ModelT, SerializedModelT>;
 
     /**
      * Get a `DocumentReference` for the document within the collection at the
@@ -1905,7 +1996,7 @@ declare namespace FirebaseFirestore {
      * @param documentPath A slash-separated path to a document.
      * @return The `DocumentReference` instance.
      */
-    doc(documentPath: string): DocumentReference<T>;
+    doc(documentPath: string): DocumentReference<ModelT, SerializedModelT>;
 
     /**
      * Add a new document to this collection with the specified data, assigning
@@ -1916,7 +2007,9 @@ declare namespace FirebaseFirestore {
      * @return A Promise resolved with a `DocumentReference` pointing to the
      * newly created document after it has been written to the backend.
      */
-    add(data: WithFieldValue<T>): Promise<DocumentReference<T>>;
+    add(
+      data: WithFieldValue<ModelT>
+    ): Promise<DocumentReference<ModelT, SerializedModelT>>;
 
     /**
      * Returns true if this `CollectionReference` is equal to the provided one.
@@ -1924,7 +2017,7 @@ declare namespace FirebaseFirestore {
      * @param other The `CollectionReference` to compare against.
      * @return true if this `CollectionReference` is equal to the provided one.
      */
-    isEqual(other: CollectionReference<T>): boolean;
+    isEqual(other: CollectionReference<ModelT, SerializedModelT>): boolean;
 
     /**
      * Applies a custom data converter to this CollectionReference, allowing you
@@ -1936,17 +2029,24 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A CollectionReference<U> that uses the provided converter.
      */
-    withConverter<U>(
-      converter: FirestoreDataConverter<U>
-    ): CollectionReference<U>;
-    withConverter(converter: null): CollectionReference<DocumentData>;
+    withConverter<NewModelT, NewSerializedModelT extends DocumentData>(
+      converter: FirestoreDataConverter<NewModelT, NewSerializedModelT>
+    ): CollectionReference<NewModelT, NewSerializedModelT>;
+    withConverter(
+      converter: null
+    ): CollectionReference<DocumentData, DocumentData>;
   }
 
   /**
    * A `CollectionGroup` refers to all documents that are contained in a
    * collection or subcollection with a specific collection ID.
    */
-  export class CollectionGroup<T = DocumentData> extends Query<T> {
+  export class CollectionGroup<
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > extends Query<ModelT, SerializedModelT> {
     private constructor();
 
     /**
@@ -1961,7 +2061,7 @@ declare namespace FirebaseFirestore {
      */
     getPartitions(
       desiredPartitionCount: number
-    ): AsyncIterable<QueryPartition<T>>;
+    ): AsyncIterable<QueryPartition<ModelT, SerializedModelT>>;
 
     /**
      * Applies a custom data converter to this `CollectionGroup`, allowing you
@@ -2008,8 +2108,10 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A `CollectionGroup<U>` that uses the provided converter.
      */
-    withConverter<U>(converter: FirestoreDataConverter<U>): CollectionGroup<U>;
-    withConverter(converter: null): CollectionGroup<DocumentData>;
+    withConverter<NewModelT, NewSerializedModelT extends DocumentData>(
+      converter: FirestoreDataConverter<NewModelT, NewSerializedModelT>
+    ): CollectionGroup<NewModelT, NewSerializedModelT>;
+    withConverter(converter: null): CollectionGroup<DocumentData, DocumentData>;
   }
 
   /**
@@ -2018,7 +2120,12 @@ declare namespace FirebaseFirestore {
    * #endBefore} can only be used in a query that matches the constraint of query
    * that produced this partition.
    */
-  export class QueryPartition<T = DocumentData> {
+  export class QueryPartition<
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > {
     private constructor();
 
     /**
@@ -2049,14 +2156,14 @@ declare namespace FirebaseFirestore {
      * @return A query partitioned by a {@link Query#startAt} and {@link
      * Query#endBefore} cursor.
      */
-    toQuery(): Query<T>;
+    toQuery(): Query<ModelT, SerializedModelT>;
   }
 
   /**
    * Represents an aggregation that can be performed by Firestore.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  export class AggregateField<T> {
+  export class AggregateField<AggregateValueT> {
     private constructor();
   }
 
@@ -2084,18 +2191,26 @@ declare namespace FirebaseFirestore {
   /**
    * A query that calculates aggregations over an underlying query.
    */
-  export class AggregateQuery<T extends AggregateSpec> {
+  export class AggregateQuery<
+    AggregateSpecT extends AggregateSpec,
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > {
     private constructor();
 
     /** The query whose aggregations will be calculated by this object. */
-    readonly query: Query<unknown>;
+    readonly query: Query<ModelT, SerializedModelT>;
 
     /**
      * Executes this query.
      *
      * @return A promise that will be resolved with the results of the query.
      */
-    get(): Promise<AggregateQuerySnapshot<T>>;
+    get(): Promise<
+      AggregateQuerySnapshot<AggregateSpecT, ModelT, SerializedModelT>
+    >;
 
     /**
      * Compares this object with the given object for equality.
@@ -2109,17 +2224,25 @@ declare namespace FirebaseFirestore {
      * @return `true` if this object is "equal" to the given object, as
      * defined above, or `false` otherwise.
      */
-    isEqual(other: AggregateQuery<T>): boolean;
+    isEqual(
+      other: AggregateQuery<AggregateSpecT, ModelT, SerializedModelT>
+    ): boolean;
   }
 
   /**
    * The results of executing an aggregation query.
    */
-  export class AggregateQuerySnapshot<T extends AggregateSpec> {
+  export class AggregateQuerySnapshot<
+    AggregateSpecT extends AggregateSpec,
+    ModelT = DocumentData,
+    SerializedModelT extends DocumentData = ModelT extends DocumentData
+      ? ModelT
+      : never
+  > {
     private constructor();
 
     /** The query that was executed to produce this result. */
-    readonly query: AggregateQuery<T>;
+    readonly query: AggregateQuery<AggregateSpecT, ModelT, SerializedModelT>;
 
     /** The time this snapshot was read. */
     readonly readTime: Timestamp;
@@ -2135,7 +2258,7 @@ declare namespace FirebaseFirestore {
      * @returns The results of the aggregations performed over the underlying
      * query.
      */
-    data(): AggregateSpecData<T>;
+    data(): AggregateSpecData<AggregateSpecT>;
 
     /**
      * Compares this object with the given object for equality.
@@ -2148,7 +2271,9 @@ declare namespace FirebaseFirestore {
      * @return `true` if this object is "equal" to the given object, as
      * defined above, or `false` otherwise.
      */
-    isEqual(other: AggregateQuerySnapshot<T>): boolean;
+    isEqual(
+      other: AggregateQuerySnapshot<AggregateSpecT, ModelT, SerializedModelT>
+    ): boolean;
   }
 
   /**
@@ -2366,7 +2491,9 @@ declare namespace FirebaseFirestore {
      * @param documentSnapshot A `DocumentSnapshot` to add.
      * @returns This instance.
      */
-    add<T>(documentSnapshot: DocumentSnapshot<T>): BundleBuilder;
+    add<ModelT, SerializedModelT extends DocumentData>(
+      documentSnapshot: DocumentSnapshot<ModelT, SerializedModelT>
+    ): BundleBuilder;
 
     /**
      * Adds a Firestore `QuerySnapshot` to the bundle. Both the documents in the query results and
@@ -2376,7 +2503,10 @@ declare namespace FirebaseFirestore {
      * @param querySnapshot A `QuerySnapshot` to add to the bundle.
      * @returns This instance.
      */
-    add<T>(queryName: string, querySnapshot: QuerySnapshot<T>): BundleBuilder;
+    add<ModelT, SerializedModelT extends DocumentData>(
+      queryName: string,
+      querySnapshot: QuerySnapshot<ModelT, SerializedModelT>
+    ): BundleBuilder;
 
     /**
      * Builds the bundle and returns the result as a `Buffer` instance.

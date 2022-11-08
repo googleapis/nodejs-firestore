@@ -189,13 +189,13 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  create<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.WithFieldValue<T>
+  create<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
+    data: firestore.WithFieldValue<ModelT>
   ): WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
     const firestoreData = ref._converter.toFirestore(
-      data as firestore.WithFieldValue<T>
+      data as firestore.WithFieldValue<ModelT>
     );
     validateDocumentData(
       'data',
@@ -253,8 +253,8 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  delete<T>(
-    documentRef: firestore.DocumentReference<T>,
+  delete<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
     precondition?: firestore.Precondition
   ): WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
@@ -277,14 +277,14 @@ export class WriteBatch implements firestore.WriteBatch {
     return this;
   }
 
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.PartialWithFieldValue<T>,
+  set<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
+    data: firestore.PartialWithFieldValue<ModelT>,
     options: firestore.SetOptions
   ): WriteBatch;
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.WithFieldValue<T>
+  set<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
+    data: firestore.WithFieldValue<ModelT>
   ): WriteBatch;
   /**
    * Write to the document referred to by the provided
@@ -320,9 +320,9 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.PartialWithFieldValue<T>,
+  set<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
+    data: firestore.PartialWithFieldValue<ModelT>,
     options?: firestore.SetOptions
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});
@@ -336,7 +336,7 @@ export class WriteBatch implements firestore.WriteBatch {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       firestoreData = (ref._converter as any).toFirestore(data, options);
     } else {
-      firestoreData = ref._converter.toFirestore(data as T);
+      firestoreData = ref._converter.toFirestore(data as ModelT);
     }
     validateDocumentData(
       'data',
@@ -422,9 +422,12 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  update<T = firestore.DocumentData>(
-    documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData<T> | string | firestore.FieldPath,
+  update<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
+    dataOrField:
+      | firestore.UpdateData<SerializedModelT>
+      | string
+      | firestore.FieldPath,
     ...preconditionOrValues: Array<
       | {lastUpdateTime?: firestore.Timestamp}
       | unknown
@@ -489,16 +492,16 @@ export class WriteBatch implements firestore.WriteBatch {
         // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
 
-        Object.entries(dataOrField as firestore.UpdateData<T>).forEach(
-          ([key, value]) => {
-            // Skip `undefined` values (can be hit if `ignoreUndefinedProperties`
-            // is set)
-            if (value !== undefined) {
-              validateFieldPath(key, key);
-              updateMap.set(FieldPath.fromArgument(key), value);
-            }
+        Object.entries(
+          dataOrField as firestore.UpdateData<SerializedModelT>
+        ).forEach(([key, value]) => {
+          // Skip `undefined` values (can be hit if `ignoreUndefinedProperties`
+          // is set)
+          if (value !== undefined) {
+            validateFieldPath(key, key);
+            updateMap.set(FieldPath.fromArgument(key), value);
           }
-        );
+        });
 
         if (preconditionOrValues.length > 0) {
           validateUpdatePrecondition(

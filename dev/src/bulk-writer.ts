@@ -103,12 +103,27 @@ const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 const DEFAULT_MAXIMUM_PENDING_OPERATIONS_COUNT = 500;
 
 /**
+ * A type-erased parent of `BulkWriterOperation`.
+ */
+interface IBulkWriterOperation {
+  readonly refPath: string;
+  readonly backoffDuration: number;
+  onError(error: GoogleError): void;
+  onSuccess(result: WriteResult): void;
+  markFlushed(): void;
+}
+
+/**
  * Represents a single write for BulkWriter, encapsulating operation dispatch
  * and error handling.
  * @private
  * @internal
  */
-class BulkWriterOperation {
+class BulkWriterOperation<
+  ModelT,
+  SerializedModelT extends firestore.DocumentData
+> implements IBulkWriterOperation
+{
   private deferred = new Deferred<WriteResult>();
   private failedAttempts = 0;
   private lastStatus?: StatusCode;
@@ -125,12 +140,16 @@ class BulkWriterOperation {
    * @param successFn The user provided global success callback.
    */
   constructor(
-    readonly ref: firestore.DocumentReference<unknown>,
+    readonly ref: firestore.DocumentReference<ModelT, SerializedModelT>,
     private readonly type: 'create' | 'set' | 'update' | 'delete',
-    private readonly sendFn: (op: BulkWriterOperation) => void,
-    private readonly errorFn: (error: BulkWriterError) => boolean,
+    private readonly sendFn: (
+      op: BulkWriterOperation<ModelT, SerializedModelT>
+    ) => void,
+    private readonly errorFn: (
+      error: BulkWriterError<ModelT, SerializedModelT>
+    ) => boolean,
     private readonly successFn: (
-      ref: firestore.DocumentReference<unknown>,
+      ref: firestore.DocumentReference<ModelT, SerializedModelT>,
       result: WriteResult
     ) => void
   ) {}
@@ -141,6 +160,10 @@ class BulkWriterOperation {
 
   get backoffDuration(): number {
     return this._backoffDuration;
+  }
+
+  get refPath(): string {
+    return this.ref.path;
   }
 
   markFlushed(): void {
@@ -218,7 +241,7 @@ class BulkCommitBatch extends WriteBatch {
 
   // An array of pending write operations. Only contains writes that have not
   // been resolved.
-  readonly pendingOps: Array<BulkWriterOperation> = [];
+  readonly pendingOps: Array<IBulkWriterOperation> = [];
 
   private _maxBatchSize: number;
 
@@ -239,7 +262,9 @@ class BulkCommitBatch extends WriteBatch {
     this._maxBatchSize = size;
   }
 
-  has(documentRef: firestore.DocumentReference<unknown>): boolean {
+  has<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>
+  ): boolean {
     return this.docPaths.has(documentRef.path);
   }
 
@@ -299,12 +324,12 @@ class BulkCommitBatch extends WriteBatch {
    * Helper to update data structures associated with the operation and returns
    * the result.
    */
-  processLastOperation(op: BulkWriterOperation): void {
+  processLastOperation(op: IBulkWriterOperation): void {
     assert(
-      !this.docPaths.has(op.ref.path),
+      !this.docPaths.has(op.refPath),
       'Batch should not contain writes to the same document'
     );
-    this.docPaths.add(op.ref.path);
+    this.docPaths.add(op.refPath);
     this.pendingOps.push(op);
   }
 }
@@ -317,9 +342,25 @@ class BulkCommitBatch extends WriteBatch {
  */
 class BufferedOperation {
   constructor(
-    readonly operation: BulkWriterOperation,
+    readonly operation: IBulkWriterOperation,
     readonly sendFn: () => void
   ) {}
+}
+
+/**
+ * A type-erased parent of `BulkWriterError`.
+ */
+export class IBulkWriterError extends Error {
+  /** @private */
+  constructor(
+    /** The status code of the error. */
+    readonly code: GrpcStatus,
+
+    /** The error message of the error. */
+    message: string
+  ) {
+    super(message);
+  }
 }
 
 /**
@@ -327,17 +368,22 @@ class BufferedOperation {
  *
  * @class BulkWriterError
  */
-export class BulkWriterError extends Error {
+export class BulkWriterError<
+  ModelT = firestore.DocumentData,
+  SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
+    ? ModelT
+    : never
+> extends IBulkWriterError {
   /** @private */
   constructor(
     /** The status code of the error. */
-    readonly code: GrpcStatus,
+    code: GrpcStatus,
 
     /** The error message of the error. */
     readonly message: string,
 
     /** The document reference the operation was performed on. */
-    readonly documentRef: firestore.DocumentReference<unknown>,
+    readonly documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
 
     /** The type of operation performed. */
     readonly operationType: 'create' | 'set' | 'update' | 'delete',
@@ -345,7 +391,7 @@ export class BulkWriterError extends Error {
     /** How many times this operation has been attempted unsuccessfully. */
     readonly failedAttempts: number
   ) {
-    super(message);
+    super(code, message);
   }
 }
 
@@ -474,8 +520,8 @@ export class BulkWriter {
    * @private
    * @internal
    */
-  private _successFn: (
-    document: firestore.DocumentReference<unknown>,
+  private _successFn: <ModelT, SerializedModelT extends firestore.DocumentData>(
+    document: firestore.DocumentReference<ModelT, SerializedModelT>,
     result: WriteResult
   ) => void = () => {};
 
@@ -485,7 +531,9 @@ export class BulkWriter {
    * @private
    * @internal
    */
-  private _errorFn: (error: BulkWriterError) => boolean = error => {
+  private _errorFn: <ModelT, SerializedModelT extends firestore.DocumentData>(
+    error: BulkWriterError<ModelT, SerializedModelT>
+  ) => boolean = error => {
     const isRetryableDeleteError =
       error.operationType === 'delete' &&
       (error.code as number) === StatusCode.INTERNAL;
@@ -576,9 +624,9 @@ export class BulkWriter {
    * });
    * ```
    */
-  create<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.WithFieldValue<T>
+  create<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
+    data: firestore.WithFieldValue<ModelT>
   ): Promise<WriteResult> {
     this._verifyNotClosed();
     return this._enqueue(documentRef, 'create', bulkCommitBatch =>
@@ -616,8 +664,8 @@ export class BulkWriter {
    * });
    * ```
    */
-  delete<T>(
-    documentRef: firestore.DocumentReference<T>,
+  delete<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this._verifyNotClosed();
@@ -626,14 +674,14 @@ export class BulkWriter {
     );
   }
 
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: Partial<T>,
+  set<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
+    data: Partial<ModelT>,
     options: firestore.SetOptions
   ): Promise<WriteResult>;
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: T
+  set<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
+    data: ModelT
   ): Promise<WriteResult>;
   /**
    * Write to the document referred to by the provided
@@ -675,9 +723,9 @@ export class BulkWriter {
    * });
    * ```
    */
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.PartialWithFieldValue<T>,
+  set<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
+    data: firestore.PartialWithFieldValue<ModelT>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this._verifyNotClosed();
@@ -687,7 +735,7 @@ export class BulkWriter {
       } else {
         return bulkCommitBatch.set(
           documentRef,
-          data as firestore.WithFieldValue<T>
+          data as firestore.WithFieldValue<ModelT>
         );
       }
     });
@@ -737,9 +785,9 @@ export class BulkWriter {
    * });
    * ```
    */
-  update<T>(
-    documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData<T> | string | FieldPath,
+  update<ModelT, SerializedModelT extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
+    dataOrField: firestore.UpdateData<SerializedModelT> | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
@@ -782,8 +830,8 @@ export class BulkWriter {
    * ```
    */
   onWriteResult(
-    successCallback: (
-      documentRef: firestore.DocumentReference<unknown>,
+    successCallback: <ModelT, SerializedModelT extends firestore.DocumentData>(
+      documentRef: firestore.DocumentReference<ModelT, SerializedModelT>,
       result: WriteResult
     ) => void
   ): void {
@@ -831,7 +879,14 @@ export class BulkWriter {
    *   });
    * ```
    */
-  onWriteError(shouldRetryCallback: (error: BulkWriterError) => boolean): void {
+  onWriteError(
+    shouldRetryCallback: <
+      ModelT,
+      SerializedModelT extends firestore.DocumentData
+    >(
+      error: BulkWriterError<ModelT, SerializedModelT>
+    ) => boolean
+  ): void {
     this._errorHandlerSet = true;
     this._errorFn = shouldRetryCallback;
   }
@@ -1006,16 +1061,16 @@ export class BulkWriter {
    * @private
    * @internal
    */
-  private _enqueue(
-    ref: firestore.DocumentReference<unknown>,
+  private _enqueue<ModelT, SerializedModelT extends firestore.DocumentData>(
+    ref: firestore.DocumentReference<ModelT, SerializedModelT>,
     type: 'create' | 'set' | 'update' | 'delete',
     enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void
   ): Promise<WriteResult> {
-    const bulkWriterOp = new BulkWriterOperation(
+    const bulkWriterOp = new BulkWriterOperation<ModelT, SerializedModelT>(
       ref,
       type,
-      this._sendFn.bind(this, enqueueOnBatchCallback),
-      this._errorFn.bind(this),
+      this._sendFn<ModelT, SerializedModelT>.bind(this, enqueueOnBatchCallback),
+      this._errorFn<ModelT, SerializedModelT>.bind(this),
       this._successFn.bind(this)
     );
 
@@ -1091,9 +1146,9 @@ export class BulkWriter {
    * @private
    * @internal
    */
-  _sendFn(
+  _sendFn<ModelT, SerializedModelT extends firestore.DocumentData>(
     enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
-    op: BulkWriterOperation
+    op: BulkWriterOperation<ModelT, SerializedModelT>
   ): void {
     // A backoff duration greater than 0 implies that this batch is a retry.
     // Retried writes are sent with a batch size of 10 in order to guarantee

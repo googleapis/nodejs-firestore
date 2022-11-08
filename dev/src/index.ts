@@ -775,7 +775,9 @@ export class Firestore implements firestore.Firestore {
    * console.log(`Path of document is ${documentRef.path}`);
    * ```
    */
-  doc(documentPath: string): DocumentReference {
+  doc(
+    documentPath: string
+  ): DocumentReference<firestore.DocumentData, firestore.DocumentData> {
     validateResourcePath('documentPath', documentPath);
 
     const path = ResourcePath.EMPTY.append(documentPath);
@@ -806,7 +808,9 @@ export class Firestore implements firestore.Firestore {
    * });
    * ```
    */
-  collection(collectionPath: string): CollectionReference {
+  collection(
+    collectionPath: string
+  ): CollectionReference<firestore.DocumentData, firestore.DocumentData> {
     validateResourcePath('collectionPath', collectionPath);
 
     const path = ResourcePath.EMPTY.append(collectionPath);
@@ -843,7 +847,9 @@ export class Firestore implements firestore.Firestore {
    * });
    * ```
    */
-  collectionGroup(collectionId: string): CollectionGroup {
+  collectionGroup(
+    collectionId: string
+  ): CollectionGroup<firestore.DocumentData, firestore.DocumentData> {
     if (collectionId.indexOf('/') !== -1) {
       throw new Error(
         `Invalid collectionId '${collectionId}'. Collection IDs must not contain '/'.`
@@ -940,31 +946,31 @@ export class Firestore implements firestore.Firestore {
     documentName: string,
     readTime?: google.protobuf.ITimestamp,
     encoding?: 'protobufJS'
-  ): DocumentSnapshot;
+  ): DocumentSnapshot<firestore.DocumentData, firestore.DocumentData>;
   /** @private */
   snapshot_(
     documentName: string,
     readTime: string,
     encoding: 'json'
-  ): DocumentSnapshot;
+  ): DocumentSnapshot<firestore.DocumentData, firestore.DocumentData>;
   /** @private */
   snapshot_(
     document: api.IDocument,
     readTime: google.protobuf.ITimestamp,
     encoding?: 'protobufJS'
-  ): QueryDocumentSnapshot;
+  ): QueryDocumentSnapshot<firestore.DocumentData, firestore.DocumentData>;
   /** @private */
   snapshot_(
     document: {[k: string]: unknown},
     readTime: string,
     encoding: 'json'
-  ): QueryDocumentSnapshot;
+  ): QueryDocumentSnapshot<firestore.DocumentData, firestore.DocumentData>;
   /** @private */
   snapshot_(
     documentOrName: api.IDocument | {[k: string]: unknown} | string,
     readTime?: google.protobuf.ITimestamp | string,
     encoding?: 'json' | 'protobufJS'
-  ): DocumentSnapshot {
+  ): DocumentSnapshot<firestore.DocumentData, firestore.DocumentData> {
     // TODO: Assert that Firestore Project ID is valid.
 
     let convertTimestamp: (
@@ -988,8 +994,11 @@ export class Firestore implements firestore.Firestore {
       );
     }
 
-    let ref: DocumentReference;
-    let document: DocumentSnapshotBuilder;
+    let ref: DocumentReference<firestore.DocumentData, firestore.DocumentData>;
+    let document: DocumentSnapshotBuilder<
+      firestore.DocumentData,
+      firestore.DocumentData
+    >;
     if (typeof documentOrName === 'string') {
       ref = new DocumentReference(
         this,
@@ -1212,7 +1221,9 @@ export class Firestore implements firestore.Firestore {
    * });
    * ```
    */
-  listCollections(): Promise<CollectionReference[]> {
+  listCollections(): Promise<
+    CollectionReference<firestore.DocumentData, firestore.DocumentData>[]
+  > {
     const rootDocument = new DocumentReference(this, ResourcePath.EMPTY);
     return rootDocument.listCollections();
   }
@@ -1240,11 +1251,12 @@ export class Firestore implements firestore.Firestore {
    * });
    * ```
    */
-  getAll<T>(
+  getAll<ModelT, SerializedModelT extends firestore.DocumentData>(
     ...documentRefsOrReadOptions: Array<
-      firestore.DocumentReference<T> | firestore.ReadOptions
+      | firestore.DocumentReference<ModelT, SerializedModelT>
+      | firestore.ReadOptions
     >
-  ): Promise<Array<DocumentSnapshot<T>>> {
+  ): Promise<Array<DocumentSnapshot<ModelT, SerializedModelT>>> {
     validateMinNumberOfArguments(
       'Firestore.getAll',
       documentRefsOrReadOptions,
@@ -1353,10 +1365,10 @@ export class Firestore implements firestore.Firestore {
    * await firestore.recursiveDelete(docRef, bulkWriter);
    * ```
    */
-  recursiveDelete(
+  recursiveDelete<ModelT, SerializedModelT extends firestore.DocumentData>(
     ref:
-      | firestore.CollectionReference<unknown>
-      | firestore.DocumentReference<unknown>,
+      | firestore.CollectionReference<ModelT, SerializedModelT>
+      | firestore.DocumentReference<ModelT, SerializedModelT>,
     bulkWriter?: BulkWriter
   ): Promise<void> {
     return this._recursiveDelete(
@@ -1375,10 +1387,10 @@ export class Firestore implements firestore.Firestore {
    * @internal
    */
   // Visible for testing
-  _recursiveDelete(
+  _recursiveDelete<ModelT, SerializedModelT extends firestore.DocumentData>(
     ref:
-      | firestore.CollectionReference<unknown>
-      | firestore.DocumentReference<unknown>,
+      | firestore.CollectionReference<ModelT, SerializedModelT>
+      | firestore.DocumentReference<ModelT, SerializedModelT>,
     maxPendingOps: number,
     minPendingOps: number,
     bulkWriter?: BulkWriter
