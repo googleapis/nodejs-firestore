@@ -130,7 +130,7 @@ setLibVersion(libVersion);
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
- * by the backend.
+ * by the backends.
  */
 const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 
