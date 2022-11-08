@@ -38,7 +38,10 @@ import api = google.firestore.v1;
  * @private
  * @internal
  */
-export class DocumentSnapshotBuilder<T = firestore.DocumentData> {
+export class DocumentSnapshotBuilder<
+  ModelT,
+  SerializedModelT extends firestore.DocumentData
+> {
   /** The fields of the Firestore `Document` Protobuf backing this document. */
   fieldsProto?: ApiMapValue;
 
@@ -53,7 +56,7 @@ export class DocumentSnapshotBuilder<T = firestore.DocumentData> {
 
   // We include the DocumentReference in the constructor in order to allow the
   // DocumentSnapshotBuilder to be typed with <T> when it is constructed.
-  constructor(readonly ref: DocumentReference<T>) {}
+  constructor(readonly ref: DocumentReference<ModelT, SerializedModelT>) {}
 
   /**
    * Builds the DocumentSnapshot.
@@ -63,7 +66,9 @@ export class DocumentSnapshotBuilder<T = firestore.DocumentData> {
    * @returns Returns either a QueryDocumentSnapshot (if `fieldsProto` was
    * provided) or a DocumentSnapshot.
    */
-  build(): QueryDocumentSnapshot<T> | DocumentSnapshot<T> {
+  build():
+    | QueryDocumentSnapshot<ModelT, SerializedModelT>
+    | DocumentSnapshot<ModelT, SerializedModelT> {
     assert(
       (this.fieldsProto !== undefined) === (this.createTime !== undefined),
       'Create time should be set iff document exists.'
@@ -98,10 +103,14 @@ export class DocumentSnapshotBuilder<T = firestore.DocumentData> {
  *
  * @class DocumentSnapshot
  */
-export class DocumentSnapshot<T = firestore.DocumentData>
-  implements firestore.DocumentSnapshot<T>
+export class DocumentSnapshot<
+  ModelT = firestore.DocumentData,
+  SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
+    ? ModelT
+    : never
+> implements firestore.DocumentSnapshot<ModelT, SerializedModelT>
 {
-  private _ref: DocumentReference<T>;
+  private _ref: DocumentReference<ModelT, SerializedModelT>;
   private _serializer: Serializer;
   private _readTime: Timestamp | undefined;
   private _createTime: Timestamp | undefined;
@@ -121,7 +130,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * if the document does not exist).
    */
   constructor(
-    ref: DocumentReference<T>,
+    ref: DocumentReference<ModelT, SerializedModelT>,
     /** @private */
     readonly _fieldsProto?: ApiMapValue,
     readTime?: Timestamp,
@@ -144,13 +153,14 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * @param obj The object to store in the DocumentSnapshot.
    * @return The created DocumentSnapshot.
    */
-  static fromObject<U>(
-    ref: firestore.DocumentReference<U>,
+  static fromObject<ModelT, SerializedModelT extends firestore.DocumentData>(
+    ref: firestore.DocumentReference<ModelT, SerializedModelT>,
     obj: firestore.DocumentData
-  ): DocumentSnapshot<U> {
-    const serializer = (ref as DocumentReference<U>).firestore._serializer!;
+  ): DocumentSnapshot<ModelT, SerializedModelT> {
+    const serializer = (ref as DocumentReference<ModelT, SerializedModelT>)
+      .firestore._serializer!;
     return new DocumentSnapshot(
-      ref as DocumentReference<U>,
+      ref as DocumentReference<ModelT, SerializedModelT>,
       serializer.encodeFields(obj)
     );
   }
@@ -166,11 +176,12 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * @param data The field/value map to expand.
    * @return The created DocumentSnapshot.
    */
-  static fromUpdateMap<U>(
-    ref: firestore.DocumentReference<U>,
+  static fromUpdateMap<ModelT, SerializedModelT extends firestore.DocumentData>(
+    ref: firestore.DocumentReference<ModelT, SerializedModelT>,
     data: UpdateMap
-  ): DocumentSnapshot<U> {
-    const serializer = (ref as DocumentReference<U>).firestore._serializer!;
+  ): DocumentSnapshot<ModelT, SerializedModelT> {
+    const serializer = (ref as DocumentReference<ModelT, SerializedModelT>)
+      .firestore._serializer!;
 
     /**
      * Merges 'value' at the field path specified by the path array into
@@ -240,7 +251,10 @@ export class DocumentSnapshot<T = firestore.DocumentData>
       merge(res, value, path, 0);
     }
 
-    return new DocumentSnapshot(ref as DocumentReference<U>, res);
+    return new DocumentSnapshot(
+      ref as DocumentReference<ModelT, SerializedModelT>,
+      res
+    );
   }
 
   /**
@@ -284,7 +298,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * });
    * ```
    */
-  get ref(): DocumentReference<T> {
+  get ref(): DocumentReference<ModelT, SerializedModelT> {
     return this._ref;
   }
 
@@ -399,7 +413,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * });
    * ```
    */
-  data(): T | undefined {
+  data(): ModelT | undefined {
     const fields = this._fieldsProto;
 
     if (fields === undefined) {
@@ -409,12 +423,15 @@ export class DocumentSnapshot<T = firestore.DocumentData>
     // We only want to use the converter and create a new QueryDocumentSnapshot
     // if a converter has been provided.
     if (this.ref._converter !== defaultConverter()) {
-      const untypedReference = new DocumentReference(
-        this.ref.firestore,
-        this.ref._path
-      );
+      const untypedReference = new DocumentReference<
+        firestore.DocumentData,
+        firestore.DocumentData
+      >(this.ref.firestore, this.ref._path);
       return this.ref._converter.fromFirestore(
-        new QueryDocumentSnapshot<firestore.DocumentData>(
+        new QueryDocumentSnapshot<
+          firestore.DocumentData,
+          firestore.DocumentData
+        >(
           untypedReference,
           this._fieldsProto!,
           this.readTime,
@@ -427,7 +444,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
       for (const prop of Object.keys(fields)) {
         obj[prop] = this._serializer.decodeValue(fields[prop]);
       }
-      return obj as T;
+      return obj as ModelT;
     }
   }
 
@@ -535,13 +552,17 @@ export class DocumentSnapshot<T = firestore.DocumentData>
    * @return {boolean} true if this `DocumentSnapshot` is equal to the provided
    * value.
    */
-  isEqual(other: firestore.DocumentSnapshot<T>): boolean {
+  isEqual(
+    other: firestore.DocumentSnapshot<ModelT, SerializedModelT>
+  ): boolean {
     // Since the read time is different on every document read, we explicitly
     // ignore all document metadata in this comparison.
     return (
       this === other ||
       (other instanceof DocumentSnapshot &&
-        this._ref.isEqual((other as DocumentSnapshot<T>)._ref) &&
+        this._ref.isEqual(
+          (other as DocumentSnapshot<ModelT, SerializedModelT>)._ref
+        ) &&
         deepEqual(this._fieldsProto, other._fieldsProto))
     );
   }
@@ -562,9 +583,14 @@ export class DocumentSnapshot<T = firestore.DocumentData>
  * @class QueryDocumentSnapshot
  * @extends DocumentSnapshot
  */
-export class QueryDocumentSnapshot<T = firestore.DocumentData>
-  extends DocumentSnapshot<T>
-  implements firestore.QueryDocumentSnapshot<T>
+export class QueryDocumentSnapshot<
+    ModelT = firestore.DocumentData,
+    SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
+      ? ModelT
+      : never
+  >
+  extends DocumentSnapshot<ModelT, SerializedModelT>
+  implements firestore.QueryDocumentSnapshot<ModelT, SerializedModelT>
 {
   /**
    * The time the document was created.
@@ -626,7 +652,7 @@ export class QueryDocumentSnapshot<T = firestore.DocumentData>
    * });
    * ```
    */
-  data(): T {
+  data(): ModelT {
     const data = super.data();
     if (!data) {
       throw new Error(
@@ -925,7 +951,10 @@ export class DocumentMask {
  * @internal
  * @class
  */
-export class DocumentTransform<T = firestore.DocumentData> {
+export class DocumentTransform<
+  ModelT,
+  SerializedModelT extends firestore.DocumentData
+> {
   /**
    * @private
    * @internal
@@ -935,7 +964,7 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * @param transforms A Map of FieldPaths to FieldTransforms.
    */
   constructor(
-    private readonly ref: DocumentReference<T>,
+    private readonly ref: DocumentReference<ModelT, SerializedModelT>,
     private readonly transforms: Map<FieldPath, FieldTransform>
   ) {}
 
@@ -948,10 +977,10 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * @param obj The object to extract the transformations from.
    * @returns The Document Transform.
    */
-  static fromObject<T>(
-    ref: firestore.DocumentReference<T>,
+  static fromObject<ModelT, SerializedModelT extends firestore.DocumentData>(
+    ref: firestore.DocumentReference<ModelT, SerializedModelT>,
     obj: firestore.DocumentData
-  ): DocumentTransform<T> {
+  ): DocumentTransform<ModelT, SerializedModelT> {
     const updateMap = new Map<FieldPath, unknown>();
 
     for (const prop of Object.keys(obj)) {
@@ -970,10 +999,10 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * @param data The update data to extract the transformations from.
    * @returns The Document Transform.
    */
-  static fromUpdateMap<T>(
-    ref: firestore.DocumentReference<T>,
+  static fromUpdateMap<ModelT, SerializedModelT extends firestore.DocumentData>(
+    ref: firestore.DocumentReference<ModelT, SerializedModelT>,
     data: UpdateMap
-  ): DocumentTransform<T> {
+  ): DocumentTransform<ModelT, SerializedModelT> {
     const transforms = new Map<FieldPath, FieldTransform>();
 
     function encode_(
@@ -1005,7 +1034,10 @@ export class DocumentTransform<T = firestore.DocumentData> {
       encode_(value, FieldPath.fromArgument(key), true);
     });
 
-    return new DocumentTransform(ref as DocumentReference<T>, transforms);
+    return new DocumentTransform(
+      ref as DocumentReference<ModelT, SerializedModelT>,
+      transforms
+    );
   }
 
   /**

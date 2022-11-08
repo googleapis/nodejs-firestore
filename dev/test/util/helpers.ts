@@ -14,9 +14,11 @@
 
 import {
   DocumentData,
+  Firestore,
   Settings,
   SetOptions,
   PartialWithFieldValue,
+  QueryDocumentSnapshot,
 } from '@google-cloud/firestore';
 
 import {expect} from 'chai';
@@ -28,9 +30,9 @@ import {firestore} from '../../protos/firestore_v1_proto_api';
 import type {grpc} from 'google-gax';
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
-import {Firestore, QueryDocumentSnapshot} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {GapicClient} from '../../src/types';
+import {Firestore as FirestoreInternal} from '../../src';
 
 import api = proto.google.firestore.v1;
 
@@ -63,13 +65,14 @@ export type ApiOverride = Partial<GapicClient>;
 export function createInstance(
   apiOverrides?: ApiOverride,
   firestoreSettings?: Settings
-): Promise<Firestore> {
+): Promise<FirestoreInternal> {
   const initializationOptions = {
     ...{projectId: PROJECT_ID, sslCreds: SSL_CREDENTIALS!},
     ...firestoreSettings,
   };
 
-  const firestore = new Firestore();
+  const firestore = new FirestoreInternal();
+
   firestore.settings(initializationOptions);
 
   firestore['_clientPool'] = new ClientPool<GapicClient>(
@@ -90,6 +93,9 @@ export function createInstance(
  * run.
  */
 export function verifyInstance(firestore: Firestore): Promise<void> {
+  if (!(firestore instanceof FirestoreInternal)) {
+    throw new Error('The given Firestore is an unexpected type');
+  }
   // Allow the setTimeout() call in _initializeStream to run before
   // verifying that all operations have finished executing.
   return new Promise<void>((resolve, reject) => {

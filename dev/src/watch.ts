@@ -53,7 +53,7 @@ export const WATCH_IDLE_TIMEOUT_MS = 120 * 1000;
 /*!
  * Sentinel value for a document remove.
  */
-const REMOVED = {} as DocumentSnapshotBuilder<unknown>;
+const REMOVED = {} as DocumentSnapshotBuilder<unknown, firestore.DocumentData>;
 
 /*!
  * The change type for document change events.
@@ -69,9 +69,12 @@ const ChangeType: {[k: string]: DocumentChangeType} = {
  * The comparator used for document watches (which should always get called with
  * the same document).
  */
-const DOCUMENT_WATCH_COMPARATOR: <T>(
-  doc1: QueryDocumentSnapshot<T>,
-  doc2: QueryDocumentSnapshot<T>
+const DOCUMENT_WATCH_COMPARATOR: <
+  ModelT,
+  SerializedModelT extends firestore.DocumentData
+>(
+  doc1: QueryDocumentSnapshot<ModelT, SerializedModelT>,
+  doc2: QueryDocumentSnapshot<ModelT, SerializedModelT>
 ) => number = (doc1, doc2) => {
   assert(doc1 === doc2, 'Document watches only support one document.');
   return 0;
@@ -109,15 +112,21 @@ const EMPTY_FUNCTION: () => void = () => {};
  * changed documents since the last snapshot delivered for this watch.
  */
 
-type DocumentComparator<T> = (
-  l: QueryDocumentSnapshot<T>,
-  r: QueryDocumentSnapshot<T>
+type DocumentComparator<
+  ModelT,
+  SerializedModelT extends firestore.DocumentData
+> = (
+  l: QueryDocumentSnapshot<ModelT, SerializedModelT>,
+  r: QueryDocumentSnapshot<ModelT, SerializedModelT>
 ) => number;
 
-interface DocumentChangeSet<T = firestore.DocumentData> {
+interface DocumentChangeSet<
+  ModelT,
+  SerializedModelT extends firestore.DocumentData
+> {
   deletes: string[];
-  adds: Array<QueryDocumentSnapshot<T>>;
-  updates: Array<QueryDocumentSnapshot<T>>;
+  adds: Array<QueryDocumentSnapshot<ModelT, SerializedModelT>>;
+  updates: Array<QueryDocumentSnapshot<ModelT, SerializedModelT>>;
 }
 
 /**
@@ -128,7 +137,7 @@ interface DocumentChangeSet<T = firestore.DocumentData> {
  * @private
  * @internal
  */
-abstract class Watch<T = firestore.DocumentData> {
+abstract class Watch<ModelT, SerializedModelT extends firestore.DocumentData> {
   protected readonly firestore: Firestore;
   private readonly backoff: ExponentialBackoff;
   private readonly requestTag: string;
@@ -160,7 +169,10 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private docMap = new Map<string, QueryDocumentSnapshot<T>>();
+  private docMap = new Map<
+    string,
+    QueryDocumentSnapshot<ModelT, SerializedModelT>
+  >();
 
   /**
    * The accumulated map of document changes (keyed by document name) for the
@@ -168,7 +180,10 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private changeMap = new Map<string, DocumentSnapshotBuilder<T>>();
+  private changeMap = new Map<
+    string,
+    DocumentSnapshotBuilder<ModelT, SerializedModelT>
+  >();
 
   /**
    * The current state of the query results. *
@@ -203,8 +218,8 @@ abstract class Watch<T = firestore.DocumentData> {
   private onNext: (
     readTime: Timestamp,
     size: number,
-    docs: () => Array<QueryDocumentSnapshot<T>>,
-    changes: () => Array<DocumentChange<T>>
+    docs: () => Array<QueryDocumentSnapshot<ModelT, SerializedModelT>>,
+    changes: () => Array<DocumentChange<ModelT, SerializedModelT>>
   ) => void;
 
   private onError: (error: Error) => void;
@@ -217,7 +232,7 @@ abstract class Watch<T = firestore.DocumentData> {
    */
   constructor(
     firestore: Firestore,
-    readonly _converter = defaultConverter<T>()
+    readonly _converter = defaultConverter<ModelT, SerializedModelT>()
   ) {
     this.firestore = firestore;
     this.backoff = new ExponentialBackoff();
@@ -233,7 +248,10 @@ abstract class Watch<T = firestore.DocumentData> {
    * Returns a comparator for QueryDocumentSnapshots that is used to order the
    * document snapshots returned by this watch.
    */
-  protected abstract getComparator(): DocumentComparator<T>;
+  protected abstract getComparator(): DocumentComparator<
+    ModelT,
+    SerializedModelT
+  >;
 
   /**
    * Starts a watch and attaches a listener for document change events.
@@ -252,8 +270,8 @@ abstract class Watch<T = firestore.DocumentData> {
     onNext: (
       readTime: Timestamp,
       size: number,
-      docs: () => Array<QueryDocumentSnapshot<T>>,
-      changes: () => Array<DocumentChange<T>>
+      docs: () => Array<QueryDocumentSnapshot<ModelT, SerializedModelT>>,
+      changes: () => Array<DocumentChange<ModelT, SerializedModelT>>
     ) => void,
     onError: (error: Error) => void
   ): () => void {
@@ -302,10 +320,12 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private extractCurrentChanges(readTime: Timestamp): DocumentChangeSet<T> {
+  private extractCurrentChanges(
+    readTime: Timestamp
+  ): DocumentChangeSet<ModelT, SerializedModelT> {
     const deletes: string[] = [];
-    const adds: Array<QueryDocumentSnapshot<T>> = [];
-    const updates: Array<QueryDocumentSnapshot<T>> = [];
+    const adds: Array<QueryDocumentSnapshot<ModelT, SerializedModelT>> = [];
+    const updates: Array<QueryDocumentSnapshot<ModelT, SerializedModelT>> = [];
 
     this.changeMap.forEach((value, name) => {
       if (value === REMOVED) {
@@ -314,10 +334,14 @@ abstract class Watch<T = firestore.DocumentData> {
         }
       } else if (this.docMap.has(name)) {
         value.readTime = readTime;
-        updates.push(value.build() as QueryDocumentSnapshot<T>);
+        updates.push(
+          value.build() as QueryDocumentSnapshot<ModelT, SerializedModelT>
+        );
       } else {
         value.readTime = readTime;
-        adds.push(value.build() as QueryDocumentSnapshot<T>);
+        adds.push(
+          value.build() as QueryDocumentSnapshot<ModelT, SerializedModelT>
+        );
       }
     });
 
@@ -334,14 +358,21 @@ abstract class Watch<T = firestore.DocumentData> {
     this.changeMap.clear();
     this.resumeToken = undefined;
 
-    this.docTree.forEach((snapshot: QueryDocumentSnapshot) => {
-      // Mark each document as deleted. If documents are not deleted, they
-      // will be send again by the server.
-      this.changeMap.set(
-        snapshot.ref.path,
-        REMOVED as DocumentSnapshotBuilder<T>
-      );
-    });
+    this.docTree.forEach(
+      (
+        snapshot: QueryDocumentSnapshot<
+          firestore.DocumentData,
+          firestore.DocumentData
+        >
+      ) => {
+        // Mark each document as deleted. If documents are not deleted, they
+        // will be send again by the server.
+        this.changeMap.set(
+          snapshot.ref.path,
+          REMOVED as DocumentSnapshotBuilder<ModelT, SerializedModelT>
+        );
+      }
+    );
 
     this.current = false;
   }
@@ -577,7 +608,7 @@ abstract class Watch<T = firestore.DocumentData> {
       if (changed) {
         logger('Watch.onData', this.requestTag, 'Received document change');
         const ref = this.firestore.doc(relativeName);
-        const snapshot = new DocumentSnapshotBuilder(
+        const snapshot = new DocumentSnapshotBuilder<ModelT, SerializedModelT>(
           ref.withConverter(this._converter)
         );
         snapshot.fieldsProto = document.fields || {};
@@ -586,14 +617,20 @@ abstract class Watch<T = firestore.DocumentData> {
         this.changeMap.set(relativeName, snapshot);
       } else if (removed) {
         logger('Watch.onData', this.requestTag, 'Received document remove');
-        this.changeMap.set(relativeName, REMOVED as DocumentSnapshotBuilder<T>);
+        this.changeMap.set(
+          relativeName,
+          REMOVED as DocumentSnapshotBuilder<ModelT, SerializedModelT>
+        );
       }
     } else if (proto.documentDelete || proto.documentRemove) {
       logger('Watch.onData', this.requestTag, 'Processing remove event');
       const name = (proto.documentDelete || proto.documentRemove)!.document!;
       const relativeName =
         QualifiedResourcePath.fromSlashSeparatedString(name).relativeName;
-      this.changeMap.set(relativeName, REMOVED as DocumentSnapshotBuilder<T>);
+      this.changeMap.set(
+        relativeName,
+        REMOVED as DocumentSnapshotBuilder<ModelT, SerializedModelT>
+      );
     } else if (proto.filter) {
       logger('Watch.onData', this.requestTag, 'Processing filter update');
       if (proto.filter.count !== this.currentSize()) {
@@ -673,7 +710,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private deleteDoc(name: string): DocumentChange<T> {
+  private deleteDoc(name: string): DocumentChange<ModelT, SerializedModelT> {
     assert(this.docMap.has(name), 'Document to delete does not exist');
     const oldDocument = this.docMap.get(name)!;
     const existing = this.docTree.find(oldDocument);
@@ -689,7 +726,9 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private addDoc(newDocument: QueryDocumentSnapshot<T>): DocumentChange<T> {
+  private addDoc(
+    newDocument: QueryDocumentSnapshot<ModelT, SerializedModelT>
+  ): DocumentChange<ModelT, SerializedModelT> {
     const name = newDocument.ref.path;
     assert(!this.docMap.has(name), 'Document to add already exists');
     this.docTree = this.docTree.insert(newDocument, null);
@@ -705,8 +744,8 @@ abstract class Watch<T = firestore.DocumentData> {
    * @internal
    */
   private modifyDoc(
-    newDocument: QueryDocumentSnapshot<T>
-  ): DocumentChange<T> | null {
+    newDocument: QueryDocumentSnapshot<ModelT, SerializedModelT>
+  ): DocumentChange<ModelT, SerializedModelT> | null {
     const name = newDocument.ref.path;
     assert(this.docMap.has(name), 'Document to modify does not exist');
     const oldDocument = this.docMap.get(name)!;
@@ -730,9 +769,11 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private computeSnapshot(readTime: Timestamp): Array<DocumentChange<T>> {
+  private computeSnapshot(
+    readTime: Timestamp
+  ): Array<DocumentChange<ModelT, SerializedModelT>> {
     const changeSet = this.extractCurrentChanges(readTime);
-    const appliedChanges: Array<DocumentChange<T>> = [];
+    const appliedChanges: Array<DocumentChange<ModelT, SerializedModelT>> = [];
 
     // Process the sorted changes in the order that is expected by our clients
     // (removals, additions, and then modifications). We also need to sort the
@@ -843,15 +884,18 @@ abstract class Watch<T = firestore.DocumentData> {
  * @private
  * @internal
  */
-export class DocumentWatch<T = firestore.DocumentData> extends Watch<T> {
+export class DocumentWatch<
+  ModelT,
+  SerializedModelT extends firestore.DocumentData
+> extends Watch<ModelT, SerializedModelT> {
   constructor(
     firestore: Firestore,
-    private readonly ref: DocumentReference<T>
+    private readonly ref: DocumentReference<ModelT, SerializedModelT>
   ) {
     super(firestore, ref._converter);
   }
 
-  getComparator(): DocumentComparator<T> {
+  getComparator(): DocumentComparator<ModelT, SerializedModelT> {
     return DOCUMENT_WATCH_COMPARATOR;
   }
 
@@ -873,19 +917,22 @@ export class DocumentWatch<T = firestore.DocumentData> extends Watch<T> {
  * @private
  * @internal
  */
-export class QueryWatch<T = firestore.DocumentData> extends Watch<T> {
-  private comparator: DocumentComparator<T>;
+export class QueryWatch<
+  ModelT,
+  SerializedModelT extends firestore.DocumentData
+> extends Watch<ModelT, SerializedModelT> {
+  private comparator: DocumentComparator<ModelT, SerializedModelT>;
 
   constructor(
     firestore: Firestore,
-    private readonly query: Query<T>,
-    converter?: firestore.FirestoreDataConverter<T>
+    private readonly query: Query<ModelT, SerializedModelT>,
+    converter?: firestore.FirestoreDataConverter<ModelT, SerializedModelT>
   ) {
     super(firestore, converter);
     this.comparator = query.comparator();
   }
 
-  getComparator(): DocumentComparator<T> {
+  getComparator(): DocumentComparator<ModelT, SerializedModelT> {
     return this.query.comparator();
   }
 

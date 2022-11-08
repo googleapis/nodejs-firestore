@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {firestore, google} from '../protos/firestore_v1_proto_api';
-
+import {DocumentData} from '@google-cloud/firestore';
 import {DocumentSnapshot} from './document';
 import {QuerySnapshot} from './reference';
 import {Timestamp} from './timestamp';
@@ -42,8 +42,13 @@ export class BundleBuilder {
 
   constructor(readonly bundleId: string) {}
 
-  add(documentSnapshot: DocumentSnapshot): BundleBuilder;
-  add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;
+  add(
+    documentSnapshot: DocumentSnapshot<DocumentData, DocumentData>
+  ): BundleBuilder;
+  add(
+    queryName: string,
+    querySnapshot: QuerySnapshot<DocumentData, DocumentData>
+  ): BundleBuilder;
   /**
    * Adds a Firestore document snapshot or query snapshot to the bundle.
    * Both the documents data and the query read time will be included in the bundle.
@@ -65,8 +70,8 @@ export class BundleBuilder {
    * ```
    */
   add(
-    documentOrName: DocumentSnapshot | string,
-    querySnapshot?: QuerySnapshot
+    documentOrName: DocumentSnapshot<DocumentData, DocumentData> | string,
+    querySnapshot?: QuerySnapshot<DocumentData, DocumentData>
   ): BundleBuilder {
     // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('BundleBuilder.add', arguments, 1);
@@ -74,7 +79,9 @@ export class BundleBuilder {
     validateMaxNumberOfArguments('BundleBuilder.add', arguments, 2);
     if (arguments.length === 1) {
       validateDocumentSnapshot('documentOrName', documentOrName);
-      this.addBundledDocument(documentOrName as DocumentSnapshot);
+      this.addBundledDocument(
+        documentOrName as DocumentSnapshot<DocumentData, DocumentData>
+      );
     } else {
       validateString('documentOrName', documentOrName);
       validateQuerySnapshot('querySnapshot', querySnapshot);
@@ -84,7 +91,10 @@ export class BundleBuilder {
     return this;
   }
 
-  private addBundledDocument(snap: DocumentSnapshot, queryName?: string): void {
+  private addBundledDocument(
+    snap: DocumentSnapshot<DocumentData, DocumentData>,
+    queryName?: string
+  ): void {
     const originalDocument = this.documents.get(snap.ref.path);
     const originalQueries = originalDocument?.metadata.queries;
 
@@ -116,7 +126,10 @@ export class BundleBuilder {
     }
   }
 
-  private addNamedQuery(name: string, querySnap: QuerySnapshot): void {
+  private addNamedQuery(
+    name: string,
+    querySnap: QuerySnapshot<DocumentData, DocumentData>
+  ): void {
     if (this.namedQueries.has(name)) {
       throw new Error(`Query name conflict: ${name} has already been added.`);
     }

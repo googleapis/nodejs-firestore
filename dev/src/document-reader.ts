@@ -31,14 +31,17 @@ import api = google.firestore.v1;
  * @private
  * @internal
  */
-export class DocumentReader<T> {
+export class DocumentReader<ModelT, SerializedModelT extends DocumentData> {
   /** An optional field mask to apply to this read. */
   fieldMask?: FieldPath[];
   /** An optional transaction ID to use for this read. */
   transactionId?: Uint8Array;
 
   private outstandingDocuments = new Set<string>();
-  private retrievedDocuments = new Map<string, DocumentSnapshot>();
+  private retrievedDocuments = new Map<
+    string,
+    DocumentSnapshot<DocumentData, DocumentData>
+  >();
 
   /**
    * Creates a new DocumentReader that fetches the provided documents (via
@@ -49,7 +52,7 @@ export class DocumentReader<T> {
    */
   constructor(
     private firestore: Firestore,
-    private allDocuments: Array<DocumentReference<T>>
+    private allDocuments: Array<DocumentReference<ModelT, SerializedModelT>>
   ) {
     for (const docRef of this.allDocuments) {
       this.outstandingDocuments.add(docRef.formattedName);
@@ -61,12 +64,15 @@ export class DocumentReader<T> {
    *
    * @param requestTag A unique client-assigned identifier for this request.
    */
-  async get(requestTag: string): Promise<Array<DocumentSnapshot<T>>> {
+  async get(
+    requestTag: string
+  ): Promise<Array<DocumentSnapshot<ModelT, SerializedModelT>>> {
     await this.fetchDocuments(requestTag);
 
     // BatchGetDocuments doesn't preserve document order. We use the request
     // order to sort the resulting documents.
-    const orderedDocuments: Array<DocumentSnapshot<T>> = [];
+    const orderedDocuments: Array<DocumentSnapshot<ModelT, SerializedModelT>> =
+      [];
 
     for (const docRef of this.allDocuments) {
       const document = this.retrievedDocuments.get(docRef.formattedName);
@@ -74,7 +80,7 @@ export class DocumentReader<T> {
         // Recreate the DocumentSnapshot with the DocumentReference
         // containing the original converter.
         const finalDoc = new DocumentSnapshotBuilder(
-          docRef as DocumentReference<T>
+          docRef as DocumentReference<ModelT, SerializedModelT>
         );
         finalDoc.fieldsProto = document._fieldsProto;
         finalDoc.readTime = document.readTime;
@@ -119,7 +125,7 @@ export class DocumentReader<T> {
       stream.resume();
 
       for await (const response of stream) {
-        let snapshot: DocumentSnapshot<DocumentData>;
+        let snapshot: DocumentSnapshot<DocumentData, DocumentData>;
 
         if (response.found) {
           logger(

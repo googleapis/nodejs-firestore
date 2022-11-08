@@ -57,7 +57,9 @@ export interface Serializable {
  */
 export class Serializer {
   private allowUndefined: boolean;
-  private createReference: (path: string) => DocumentReference;
+  private createReference: (
+    path: string
+  ) => DocumentReference<DocumentData, DocumentData>;
   private createInteger: (n: number | string) => number | BigInt;
 
   constructor(firestore: Firestore) {

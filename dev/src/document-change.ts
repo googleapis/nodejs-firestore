@@ -26,11 +26,15 @@ export type DocumentChangeType = 'added' | 'removed' | 'modified';
  *
  * @class DocumentChange
  */
-export class DocumentChange<T = firestore.DocumentData>
-  implements firestore.DocumentChange<T>
+export class DocumentChange<
+  ModelT = firestore.DocumentData,
+  SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
+    ? ModelT
+    : never
+> implements firestore.DocumentChange<ModelT, SerializedModelT>
 {
   private readonly _type: DocumentChangeType;
-  private readonly _document: QueryDocumentSnapshot<T>;
+  private readonly _document: QueryDocumentSnapshot<ModelT, SerializedModelT>;
   private readonly _oldIndex: number;
   private readonly _newIndex: number;
 
@@ -46,7 +50,7 @@ export class DocumentChange<T = firestore.DocumentData>
    */
   constructor(
     type: DocumentChangeType,
-    document: QueryDocumentSnapshot<T>,
+    document: QueryDocumentSnapshot<ModelT, SerializedModelT>,
     oldIndex: number,
     newIndex: number
   ) {
@@ -103,7 +107,7 @@ export class DocumentChange<T = firestore.DocumentData>
    * unsubscribe();
    * ```
    */
-  get doc(): QueryDocumentSnapshot<T> {
+  get doc(): QueryDocumentSnapshot<ModelT, SerializedModelT> {
     return this._document;
   }
 
@@ -181,7 +185,7 @@ export class DocumentChange<T = firestore.DocumentData>
    * @param {*} other The value to compare against.
    * @return true if this `DocumentChange` is equal to the provided value.
    */
-  isEqual(other: firestore.DocumentChange<T>): boolean {
+  isEqual(other: firestore.DocumentChange<ModelT, SerializedModelT>): boolean {
     if (this === other) {
       return true;
     }
