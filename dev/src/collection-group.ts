@@ -37,9 +37,7 @@ import {compareArrays} from './order';
  */
 export class CollectionGroup<
     ModelT = firestore.DocumentData,
-    SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends firestore.DocumentData = firestore.DocumentData
   >
   extends Query<ModelT, SerializedModelT>
   implements firestore.CollectionGroup<ModelT, SerializedModelT>

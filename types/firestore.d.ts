@@ -184,9 +184,7 @@ declare namespace FirebaseFirestore {
    */
   export interface FirestoreDataConverter<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > {
     /**
      * Called by the Firestore SDK to convert a custom model object of type
@@ -996,9 +994,7 @@ declare namespace FirebaseFirestore {
    */
   export class BulkWriterError<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > extends Error {
     /** The status code of the error. */
     readonly code: GrpcStatus;
@@ -1231,9 +1227,7 @@ declare namespace FirebaseFirestore {
    */
   export class DocumentReference<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > {
     private constructor();
 
@@ -1422,9 +1416,7 @@ declare namespace FirebaseFirestore {
    */
   export class DocumentSnapshot<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > {
     protected constructor();
 
@@ -1496,9 +1488,7 @@ declare namespace FirebaseFirestore {
    */
   export class QueryDocumentSnapshot<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > extends DocumentSnapshot<ModelT, SerializedModelT> {
     private constructor();
 
@@ -1551,9 +1541,7 @@ declare namespace FirebaseFirestore {
    */
   export class Query<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > {
     protected constructor();
 
@@ -1835,9 +1823,7 @@ declare namespace FirebaseFirestore {
    */
   export class QuerySnapshot<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > {
     private constructor();
 
@@ -1901,9 +1887,7 @@ declare namespace FirebaseFirestore {
    */
   export interface DocumentChange<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > {
     /** The type of change ('added', 'modified', or 'removed'). */
     readonly type: DocumentChangeType;
@@ -1943,9 +1927,7 @@ declare namespace FirebaseFirestore {
    */
   export class CollectionReference<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > extends Query<ModelT, SerializedModelT> {
     private constructor();
 
@@ -2043,9 +2025,7 @@ declare namespace FirebaseFirestore {
    */
   export class CollectionGroup<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > extends Query<ModelT, SerializedModelT> {
     private constructor();
 
@@ -2122,9 +2102,7 @@ declare namespace FirebaseFirestore {
    */
   export class QueryPartition<
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > {
     private constructor();
 
@@ -2194,9 +2172,7 @@ declare namespace FirebaseFirestore {
   export class AggregateQuery<
     AggregateSpecT extends AggregateSpec,
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > {
     private constructor();
 
@@ -2235,9 +2211,7 @@ declare namespace FirebaseFirestore {
   export class AggregateQuerySnapshot<
     AggregateSpecT extends AggregateSpec,
     ModelT = DocumentData,
-    SerializedModelT extends DocumentData = ModelT extends DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends DocumentData = DocumentData
   > {
     private constructor();
 

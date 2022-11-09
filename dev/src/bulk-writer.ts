@@ -370,9 +370,7 @@ export class IBulkWriterError extends Error {
  */
 export class BulkWriterError<
   ModelT = firestore.DocumentData,
-  SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
-    ? ModelT
-    : never
+  SerializedModelT extends firestore.DocumentData = firestore.DocumentData
 > extends IBulkWriterError {
   /** @private */
   constructor(

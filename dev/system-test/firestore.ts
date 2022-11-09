@@ -13,43 +13,35 @@
 // limitations under the License.
 
 import {
-  BulkWriter,
-  CollectionGroup,
-  CollectionReference,
   DocumentData,
-  DocumentReference,
-  DocumentSnapshot,
-  FieldPath,
-  FieldValue,
-  Firestore,
-  GeoPoint,
   PartialWithFieldValue,
-  Query,
-  QueryDocumentSnapshot,
-  QueryPartition,
   QuerySnapshot,
-  setLogFunction,
   SetOptions,
   Settings,
-  Timestamp,
   WithFieldValue,
-  WriteResult,
 } from '@google-cloud/firestore';
 
 import {afterEach, before, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
-import {firestore, google} from '../protos/firestore_v1_proto_api';
+import {firestore} from '../protos/firestore_v1_proto_api';
 
-import {autoId, Deferred} from '../src/util';
 import {
-  DocumentReference as DocumentReferenceInternal,
-  DocumentSnapshot as DocumentSnapshotInternal,
-  Firestore as FirestoreInternal,
-  Query as QueryInternal,
-  Timestamp as TimestampInternal,
+  CollectionReference,
+  DocumentReference,
+  DocumentSnapshot,
+  FieldPath,
+  FieldValue,
+  Firestore,
+  GeoPoint,
+  Query,
+  QueryDocumentSnapshot,
+  setLogFunction,
+  Timestamp,
+  WriteResult,
 } from '../src';
+import {autoId, Deferred} from '../src/util';
 import {TEST_BUNDLE_ID, verifyMetadata} from '../test/bundle';
 import {
   bundleToElementArray,
@@ -58,7 +50,10 @@ import {
   postConverterMerge,
   verifyInstance,
 } from '../test/util/helpers';
+import {BulkWriter} from '../src/bulk-writer';
 import {Status} from 'google-gax';
+import {QueryPartition} from '../src/query-partition';
+import {CollectionGroup} from '../src/collection-group';
 import IBundleElement = firestore.IBundleElement;
 
 use(chaiAsPromised);
@@ -91,59 +86,6 @@ function getTestRoot(settings: Settings = {}) {
     preferRest: !!process.env.USE_REST_FALLBACK,
   });
   return firestore.collection(`node_${version}_${autoId()}`);
-}
-
-function toFirestoreInternal(instance: Firestore): FirestoreInternal {
-  if (!(instance instanceof FirestoreInternal)) {
-    throw new Error('The given Firestore is not a FirestoreInternal');
-  }
-  return instance;
-}
-
-function getRelativeNameFromPathOf<ModelT, SerializedType extends DocumentData>(
-  ref: DocumentReference<ModelT, SerializedType>
-): string {
-  if (!(ref instanceof DocumentReferenceInternal)) {
-    throw new Error(
-      'The given DocumentReference is not a DocumentReferenceInternal'
-    );
-  }
-  return ref._path.relativeName;
-}
-
-function toProto(timestamp: Timestamp): google.firestore.v1.IValue;
-function toProto<ModelT, SerializedType extends DocumentData>(
-  query: Query<ModelT, SerializedType>
-): google.firestore.v1.IRunQueryRequest;
-function toProto<ModelT, SerializedType extends DocumentData>(
-  obj: Timestamp | Query<ModelT, SerializedType>
-): google.firestore.v1.IValue | google.firestore.v1.IRunQueryRequest {
-  if (obj instanceof Timestamp) {
-    if (!(obj instanceof TimestampInternal)) {
-      throw new Error('The given Timestamp is not a TimestampInternal');
-    }
-    return obj.toProto();
-  }
-
-  if (obj instanceof Query<ModelT, SerializedType>) {
-    if (!(obj instanceof QueryInternal)) {
-      throw new Error('The given Query is not a QueryInternal');
-    }
-    return obj.toProto();
-  }
-
-  throw new Error('unsupported argument type');
-}
-
-function toDocumentProto<ModelT, SerializedType extends DocumentData>(
-  doc: DocumentSnapshot<ModelT, SerializedType>
-): google.firestore.v1.IDocument {
-  if (!(doc instanceof DocumentSnapshotInternal)) {
-    throw new Error(
-      'The given DocumentSnapshot is not a DocumentSnapshotInternal'
-    );
-  }
-  return doc.toDocumentProto();
 }
 
 describe('Firestore class', () => {
@@ -1930,14 +1872,13 @@ describe('Query class', () => {
     const currentDeferred = new DeferredPromise<QuerySnapshot>();
 
     const snapshot = (id: string, data: DocumentData) => {
-      const firestoreInternal = toFirestoreInternal(randomCol.firestore);
       const ref = randomCol.doc(id);
-      const fields = firestoreInternal._serializer!.encodeFields(data);
-      return firestoreInternal.snapshot_(
+      const fields = ref.firestore._serializer!.encodeFields(data);
+      return randomCol.firestore.snapshot_(
         {
           name:
             'projects/ignored/databases/(default)/documents/' +
-            getRelativeNameFromPathOf(ref),
+            ref._path.relativeName,
           fields,
           createTime: {seconds: 0, nanos: 0},
           updateTime: {seconds: 0, nanos: 0},
@@ -3159,20 +3100,20 @@ describe('Bundle building', () => {
     const elements = await bundleToElementArray(bundle.build());
 
     const meta = (elements[0] as IBundleElement).metadata;
-    verifyMetadata(meta!, toProto(snap.readTime).timestampValue!, 0);
+    verifyMetadata(meta!, snap.readTime.toProto().timestampValue!, 0);
 
     const namedQuery = (elements[1] as IBundleElement).namedQuery;
     // Verify saved query.
     expect(namedQuery).to.deep.equal({
       name: 'query',
-      readTime: toProto(snap.readTime).timestampValue,
+      readTime: snap.readTime.toProto().timestampValue,
       // TODO(wuandy): Fix query.toProto to skip undefined fields, so we can stop using `extend` here.
       bundledQuery: extend(
         true,
         {},
         {
-          parent: toProto(query).parent,
-          structuredQuery: toProto(query).structuredQuery,
+          parent: query.toProto().parent,
+          structuredQuery: query.toProto().structuredQuery,
         }
       ),
     });
@@ -3188,12 +3129,12 @@ describe('Bundle building', () => {
     expect(elements.length).to.equal(2);
 
     const meta = (elements[0] as IBundleElement).metadata;
-    verifyMetadata(meta!, toProto(snap.readTime).timestampValue!, 1);
+    verifyMetadata(meta!, snap.readTime.toProto().timestampValue!, 1);
 
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
     expect(docMeta).to.deep.equal({
-      name: toDocumentProto(snap).name,
-      readTime: toProto(snap.readTime).timestampValue,
+      name: snap.toDocumentProto().name,
+      readTime: snap.readTime.toProto().timestampValue,
       exists: false,
     });
   });
@@ -3211,7 +3152,11 @@ describe('Bundle building', () => {
     const elements = await bundleToElementArray(await bundle.build());
 
     const meta = (elements[0] as IBundleElement).metadata;
-    verifyMetadata(meta!, toProto(limitToLastSnap.readTime).timestampValue!, 1);
+    verifyMetadata(
+      meta!,
+      limitToLastSnap.readTime.toProto().timestampValue!,
+      1
+    );
 
     let namedQuery1 = (elements[1] as IBundleElement).namedQuery;
     let namedQuery2 = (elements[2] as IBundleElement).namedQuery;
@@ -3225,13 +3170,13 @@ describe('Bundle building', () => {
     // Verify saved limit query.
     expect(namedQuery1).to.deep.equal({
       name: 'limitQuery',
-      readTime: toProto(limitSnap.readTime).timestampValue,
+      readTime: limitSnap.readTime.toProto().timestampValue,
       bundledQuery: extend(
         true,
         {},
         {
-          parent: toProto(limitQuery).parent,
-          structuredQuery: toProto(limitQuery).structuredQuery,
+          parent: limitQuery.toProto().parent,
+          structuredQuery: limitQuery.toProto().structuredQuery,
           limitType: 'FIRST',
         }
       ),
@@ -3243,13 +3188,13 @@ describe('Bundle building', () => {
     // Verify saved limitToLast query.
     expect(namedQuery2).to.deep.equal({
       name: 'limitToLastQuery',
-      readTime: toProto(limitToLastSnap.readTime).timestampValue,
+      readTime: limitToLastSnap.readTime.toProto().timestampValue,
       bundledQuery: extend(
         true,
         {},
         {
-          parent: toProto(q).parent,
-          structuredQuery: toProto(q).structuredQuery,
+          parent: q.toProto().parent,
+          structuredQuery: q.toProto().structuredQuery,
           limitType: 'LAST',
         }
       ),
@@ -3258,15 +3203,15 @@ describe('Bundle building', () => {
     // Verify bundled document
     const docMeta = (elements[3] as IBundleElement).documentMetadata;
     expect(docMeta).to.deep.equal({
-      name: toDocumentProto(limitToLastSnap.docs[0]).name,
-      readTime: toProto(limitToLastSnap.readTime).timestampValue,
+      name: limitToLastSnap.docs[0].toDocumentProto().name,
+      readTime: limitToLastSnap.readTime.toProto().timestampValue,
       exists: true,
       queries: ['limitQuery', 'limitToLastQuery'],
     });
 
     const bundledDoc = (elements[4] as IBundleElement).document;
     // The `valueType` is auxiliary and does not exist in proto.
-    const expected = toDocumentProto(limitToLastSnap.docs[0]);
+    const expected = limitToLastSnap.docs[0].toDocumentProto();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (expected.fields!.name as any).valueType;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -125,9 +125,7 @@ const comparisonOperators: {
  */
 export class DocumentReference<
   ModelT = firestore.DocumentData,
-  SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
-    ? ModelT
-    : never
+  SerializedModelT extends firestore.DocumentData = firestore.DocumentData
 > implements
     Serializable,
     firestore.DocumentReference<ModelT, SerializedModelT>
@@ -823,9 +821,7 @@ class FieldFilter {
  */
 export class QuerySnapshot<
   ModelT = firestore.DocumentData,
-  SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
-    ? ModelT
-    : never
+  SerializedModelT extends firestore.DocumentData = firestore.DocumentData
 > implements firestore.QuerySnapshot<ModelT, SerializedModelT>
 {
   private _materializedDocs: Array<
@@ -1304,9 +1300,7 @@ export class QueryOptions<
  */
 export class Query<
   ModelT = firestore.DocumentData,
-  SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
-    ? ModelT
-    : never
+  SerializedModelT extends firestore.DocumentData = firestore.DocumentData
 > implements firestore.Query<ModelT, SerializedModelT>
 {
   private readonly _serializer: Serializer;
@@ -2641,9 +2635,7 @@ export class Query<
  */
 export class CollectionReference<
     ModelT = firestore.DocumentData,
-    SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends firestore.DocumentData = firestore.DocumentData
   >
   extends Query<ModelT, SerializedModelT>
   implements firestore.CollectionReference<ModelT, SerializedModelT>
@@ -2971,9 +2963,7 @@ export class CollectionReference<
 export class AggregateQuery<
   AggregateSpecT extends firestore.AggregateSpec,
   ModelT = firestore.DocumentData,
-  SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
-    ? ModelT
-    : never
+  SerializedModelT extends firestore.DocumentData = firestore.DocumentData
 > implements firestore.AggregateQuery<AggregateSpecT, ModelT, SerializedModelT>
 {
   /**
@@ -3212,9 +3202,7 @@ export class AggregateQuery<
 export class AggregateQuerySnapshot<
   AggregateSpecT extends firestore.AggregateSpec,
   ModelT = firestore.DocumentData,
-  SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
-    ? ModelT
-    : never
+  SerializedModelT extends firestore.DocumentData = firestore.DocumentData
 > implements
     firestore.AggregateQuerySnapshot<AggregateSpecT, ModelT, SerializedModelT>
 {

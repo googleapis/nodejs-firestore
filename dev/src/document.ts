@@ -105,9 +105,7 @@ export class DocumentSnapshotBuilder<
  */
 export class DocumentSnapshot<
   ModelT = firestore.DocumentData,
-  SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
-    ? ModelT
-    : never
+  SerializedModelT extends firestore.DocumentData = firestore.DocumentData
 > implements firestore.DocumentSnapshot<ModelT, SerializedModelT>
 {
   private _ref: DocumentReference<ModelT, SerializedModelT>;
@@ -585,9 +583,7 @@ export class DocumentSnapshot<
  */
 export class QueryDocumentSnapshot<
     ModelT = firestore.DocumentData,
-    SerializedModelT extends firestore.DocumentData = ModelT extends firestore.DocumentData
-      ? ModelT
-      : never
+    SerializedModelT extends firestore.DocumentData = firestore.DocumentData
   >
   extends DocumentSnapshot<ModelT, SerializedModelT>
   implements firestore.QueryDocumentSnapshot<ModelT, SerializedModelT>
