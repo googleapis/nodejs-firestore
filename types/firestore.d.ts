@@ -183,7 +183,7 @@ declare namespace FirebaseFirestore {
    * }
    */
   export interface FirestoreDataConverter<
-    ModelT = DocumentData,
+    ModelT,
     SerializedModelT extends DocumentData = DocumentData
   > {
     /**
