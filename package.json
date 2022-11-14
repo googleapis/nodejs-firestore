@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "6.2.0",
+  "version": "6.4.1",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -64,7 +64,7 @@
     "@types/duplexify": "^3.5.0",
     "@types/extend": "^3.0.0",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^16.0.0",
+    "@types/node": "^18.0.0",
     "@types/sinon": "^10.0.0",
     "@types/through2": "^2.0.34",
     "c8": "^7.0.0",
@@ -74,7 +74,7 @@
     "duplexify": "^4.0.0",
     "extend": "^3.0.2",
     "gts": "^3.1.0",
-    "jsdoc": "^3.6.2",
+    "jsdoc": "^4.0.0",
     "jsdoc-fresh": "^2.0.0",
     "jsdoc-region-tag": "^2.0.0",
     "length-prefixed-json-stream": "^1.0.1",

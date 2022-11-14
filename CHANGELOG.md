@@ -4,6 +4,38 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.4.1](https://github.com/googleapis/nodejs-firestore/compare/v6.4.0...v6.4.1) (2022-10-17)
+
+
+### Bug Fixes
+
+* Force use of http by the GAX module when using the GAX fallback and connecting to the emulator ([#1788](https://github.com/googleapis/nodejs-firestore/issues/1788)) ([50747ad](https://github.com/googleapis/nodejs-firestore/commit/50747ad52b19da9ed87282af98eadff660dffb75))
+
+## [6.4.0](https://github.com/googleapis/nodejs-firestore/compare/v6.3.0...v6.4.0) (2022-10-07)
+
+
+### Features
+
+* Add internal multi-db support ([#1761](https://github.com/googleapis/nodejs-firestore/issues/1761)) ([5ba8df0](https://github.com/googleapis/nodejs-firestore/commit/5ba8df011264b435b53499642e68afd73859f332))
+* COUNT Queries ([#1774](https://github.com/googleapis/nodejs-firestore/issues/1774)) ([bcaecb4](https://github.com/googleapis/nodejs-firestore/commit/bcaecb45b7911073bb968542df0267ba81d4462d))
+
+
+### Bug Fixes
+
+* Remove [@internal](https://github.com/internal) annotation from snapshot_ ([#1728](https://github.com/googleapis/nodejs-firestore/issues/1728)) ([983ab89](https://github.com/googleapis/nodejs-firestore/commit/983ab89387d8c5314680d1520c3bece011ee6a64))
+
+## [6.3.0](https://github.com/googleapis/nodejs-firestore/compare/v6.2.0...v6.3.0) (2022-09-22)
+
+
+### Features
+
+* Add aggregation query APIs ([#1765](https://github.com/googleapis/nodejs-firestore/issues/1765)) ([18be4d0](https://github.com/googleapis/nodejs-firestore/commit/18be4d0ca3a8e927a883ba6e41a43d19fb2af665))
+
+
+### Bug Fixes
+
+* Tests will now verify asynchronous termination of underlying steam, and fix related bug. ([#1772](https://github.com/googleapis/nodejs-firestore/issues/1772)) ([a1717ff](https://github.com/googleapis/nodejs-firestore/commit/a1717ff279f1ea9647e28b8e93539bcad9739af0))
+
 ## [6.2.0](https://github.com/googleapis/nodejs-firestore/compare/v6.1.0...v6.2.0) (2022-09-13)
 
 

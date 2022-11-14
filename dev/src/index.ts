@@ -16,7 +16,7 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import type {CallOptions} from 'google-gax';
+import type {CallOptions, ClientOptions} from 'google-gax';
 import type * as googleGax from 'google-gax';
 import type * as googleGaxFallback from 'google-gax/build/src/fallback';
 import {Duplex, PassThrough, Transform} from 'stream';
@@ -445,6 +445,14 @@ export class Firestore implements firestore.Firestore {
   private _projectId: string | undefined = undefined;
 
   /**
+   * The database ID provided via `.settings()`.
+   *
+   * @private
+   * @internal
+   */
+  private _databaseId: string | undefined = undefined;
+
+  /**
    * Count of listeners that have been registered on the client.
    *
    * The client can only be terminated when there are no pending writes or
@@ -572,14 +580,19 @@ export class Firestore implements firestore.Firestore {
           const grpcModule = this._settings.grpc ?? require('google-gax').grpc;
           const sslCreds = grpcModule.credentials.createInsecure();
 
-          client = new module.exports.v1(
-            {
-              sslCreds,
-              ...this._settings,
-              fallback: useFallback,
-            },
-            gax
-          );
+          const settings: ClientOptions = {
+            sslCreds,
+            ...this._settings,
+            fallback: useFallback,
+          };
+
+          // Since `ssl === false`, if we're using the GAX fallback then
+          // also set the `protocol` option for GAX fallback to force http
+          if (useFallback) {
+            settings.protocol = 'http';
+          }
+
+          client = new module.exports.v1(settings, gax);
         } else {
           client = new module.exports.v1(
             {
@@ -612,6 +625,9 @@ export class Firestore implements firestore.Firestore {
   settings(settings: firestore.Settings): void {
     validateObject('settings', settings);
     validateString('settings.projectId', settings.projectId, {optional: true});
+    validateString('settings.databaseId', settings.databaseId, {
+      optional: true,
+    });
 
     if (this._settingsFrozen) {
       throw new Error(
@@ -630,6 +646,11 @@ export class Firestore implements firestore.Firestore {
     if (settings.projectId !== undefined) {
       validateString('settings.projectId', settings.projectId);
       this._projectId = settings.projectId;
+    }
+
+    if (settings.databaseId !== undefined) {
+      validateString('settings.databaseId', settings.databaseId);
+      this._databaseId = settings.databaseId;
     }
 
     let url: URL | null = null;
@@ -720,6 +741,16 @@ export class Firestore implements firestore.Firestore {
   }
 
   /**
+   * Returns the Database ID for this Firestore instance.
+   *
+   * @private
+   * @internal
+   */
+  get databaseId(): string {
+    return this._databaseId || DEFAULT_DATABASE_ID;
+  }
+
+  /**
    * Returns the root path of the database. Validates that
    * `initializeIfNeeded()` was called before.
    *
@@ -727,7 +758,7 @@ export class Firestore implements firestore.Firestore {
    * @internal
    */
   get formattedName(): string {
-    return `projects/${this.projectId}/databases/${DEFAULT_DATABASE_ID}`;
+    return `projects/${this.projectId}/databases/${this.databaseId}`;
   }
 
   /**
@@ -896,7 +927,6 @@ export class Firestore implements firestore.Firestore {
    * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
-   * @internal
    * @param documentOrName The Firestore 'Document' proto or the resource name
    * of a missing document.
    * @param readTime A 'Timestamp' proto indicating the time this document was
