@@ -55,6 +55,7 @@ import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
 import IBundleElement = firestore.IBundleElement;
+import { Filter } from '../src/filter';
 
 use(chaiAsPromised);
 
@@ -1304,7 +1305,7 @@ describe('Query class', () => {
   };
 
   async function addDocs(
-    ...docs: DocumentData[]
+      ...docs: DocumentData[]
   ): Promise<DocumentReference[]> {
     let id = 0; // Guarantees consistent ordering for the first documents
     const refs: DocumentReference[] = [];
@@ -1316,11 +1317,33 @@ describe('Query class', () => {
     return refs;
   }
 
-  function expectDocs(result: QuerySnapshot, ...data: DocumentData[]) {
+  async function testCollectionWithDocs(
+      docs: {[id: string]: DocumentData}
+  ): Promise<CollectionReference<DocumentData>> {
+    for (const id in docs) {
+      const ref = randomCol.doc(id);
+      await ref.set(docs[id]);
+    }
+    return randomCol;
+  }
+
+  function expectDocs(result: QuerySnapshot, ...docs: string[]) : void;
+  function expectDocs(result: QuerySnapshot, ...data: DocumentData[]) : void;
+
+  function expectDocs(result: QuerySnapshot, ...data: DocumentData[] | string[]) : void {
     expect(result.size).to.equal(data.length);
-    result.forEach(doc => {
-      expect(doc.data()).to.deep.equal(data.shift());
-    });
+
+    if (data.length > 0) {
+      if (typeof data[0] === "string") {
+        const actualIds = result.docs.map(docSnapshot => docSnapshot.id);
+        expect(actualIds).to.equal(data);
+      }
+      else {
+        result.forEach(doc => {
+          expect(doc.data()).to.deep.equal(data.shift());
+        });
+      }
+    }
   }
 
   beforeEach(() => {
@@ -1861,6 +1884,19 @@ describe('Query class', () => {
 
     const snapshot = await randomCol.get();
     expect(snapshot.size).to.equal(100);
+  });
+
+  it.only('supports OR queries', async () => {
+    const collection = await testCollectionWithDocs({
+        "doc1": {a: 1, b: 0},
+        "doc2": {a: 2, b: 1},
+        "doc3": {a: 3, b: 2},
+        "doc4": {a: 1, b: 3},
+        "doc5": {a: 1, b: 1}
+    });
+
+    const res = await collection.where(Filter.or(Filter.where("a", "==", 1), Filter.where("b", "==", 1))).get();
+    expectDocs(res, "doc1", "doc2", "doc4", "doc5");
   });
 
   describe('watch', () => {
@@ -3681,6 +3717,7 @@ describe('Types test', () => {
           id: string;
           foo: number;
         }
+
         const foo = new ObjectWrapper<Foo>();
         foo.withFieldValueT({id: '', foo: FieldValue.increment(1)});
         foo.withPartialFieldValueT({foo: FieldValue.increment(1)});

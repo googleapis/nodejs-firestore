@@ -14,7 +14,7 @@
 
 import {describe, it} from 'mocha';
 import {expect} from 'chai';
-import {fieldFilters, orderBy, queryEquals, startAt} from './query';
+import {fieldFiltersQuery, orderBy, queryEquals, startAt} from './query';
 import {
   ApiOverride,
   create,
@@ -168,7 +168,7 @@ describe('ignores undefined values', () => {
   it('in query filters', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
-        queryEquals(request, fieldFilters('foo', 'EQUAL', FOO_MAP));
+        queryEquals(request, fieldFiltersQuery('foo', 'EQUAL', FOO_MAP));
         return stream();
       },
     };

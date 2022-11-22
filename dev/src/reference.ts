@@ -56,6 +56,7 @@ import {
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
+import {CompositeFilter, Filter, UnaryFilter} from './filter';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -697,6 +698,94 @@ export class FieldOrder {
   }
 }
 
+abstract class FilterInternal {
+  /** Returns a list of all field filters that are contained within this filter */
+  abstract getFlattenedFilters(): FieldFilterInternal[];
+
+  /** Returns a list of all filters that are contained within this filter */
+  abstract getFilters(): FilterInternal[];
+
+  /** Returns the field of the first filter that's an inequality, or null if none. */
+  abstract getFirstInequalityField(): FieldPath | null;
+
+  /** Returns the proto representation of this filter */
+  abstract toProto(): Filter;
+
+  abstract isEqual(other: FilterInternal): boolean;
+}
+
+class CompositeFilterInternal extends FilterInternal {
+  constructor(
+    private filters: FilterInternal[],
+    private operator: api.StructuredQuery.CompositeFilter.Operator
+  ) {
+    super();
+  }
+
+  // Memoized list of all field filters that can be found by traversing the tree of filters
+  // contained in this composite filter.
+  private memoizedFlattenedFilters: FieldFilterInternal[] | null = null;
+
+  public getFilters(): FilterInternal[] {
+    return this.filters;
+  }
+
+  public getFirstInequalityField(): FieldPath | null {
+    return (
+      this.getFlattenedFilters().find(filter => filter.isInequalityFilter())
+        ?.field ?? null
+    );
+  }
+
+  public isConjunction(): boolean {
+    return this.operator === 'AND';
+  }
+
+  public getFlattenedFilters(): FieldFilterInternal[] {
+    if (this.memoizedFlattenedFilters !== null) {
+      return this.memoizedFlattenedFilters;
+    }
+
+    this.memoizedFlattenedFilters = this.filters.reduce(
+      (allFilters: FieldFilterInternal[], subfilter: FilterInternal) =>
+        allFilters.concat(subfilter.getFlattenedFilters()),
+      []
+    );
+
+    return this.memoizedFlattenedFilters;
+  }
+
+  public toProto(): api.StructuredQuery.IFilter {
+    if (this.filters.length === 1) {
+      return this.filters[0].toProto();
+    }
+
+    const proto: api.StructuredQuery.IFilter = {
+      compositeFilter: {
+        op: this.operator,
+        filters: this.filters.map(filter => filter.toProto()),
+      },
+    };
+
+    return proto;
+  }
+
+  isEqual(other: FilterInternal): boolean {
+    if (other instanceof CompositeFilterInternal) {
+      const otherFilters = other.getFilters();
+      return (
+        this.operator === other.operator &&
+        this.getFilters().length === other.getFilters().length &&
+        this.getFilters().every((filter, index) =>
+          filter.isEqual(otherFilters[index])
+        )
+      );
+    } else {
+      return false;
+    }
+  }
+}
+
 /**
  * A field constraint for a Query where clause.
  *
@@ -704,7 +793,23 @@ export class FieldOrder {
  * @internal
  * @class
  */
-class FieldFilter {
+class FieldFilterInternal extends FilterInternal {
+  public getFlattenedFilters(): FieldFilterInternal[] {
+    return [this];
+  }
+
+  public getFilters(): FilterInternal[] {
+    return [this];
+  }
+
+  getFirstInequalityField(): FieldPath | null {
+    if (this.isInequalityFilter()) {
+      return this.field;
+    } else {
+      return null;
+    }
+  }
+
   /**
    * @param serializer The Firestore serializer
    * @param field The path of the property value to compare.
@@ -717,7 +822,9 @@ class FieldFilter {
     readonly field: FieldPath,
     private readonly op: api.StructuredQuery.FieldFilter.Operator,
     private readonly value: unknown
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * Returns whether this FieldFilter uses an equals comparison.
@@ -777,12 +884,16 @@ class FieldFilter {
     };
   }
 
-  isEqual(other: FieldFilter): boolean {
-    return (
-      this.field.isEqual(other.field) &&
-      this.op === other.op &&
-      deepEqual(this.value, other.value)
-    );
+  isEqual(other: FilterInternal): boolean {
+    if (other instanceof FieldFilterInternal) {
+      return (
+        this.field.isEqual(other.field) &&
+        this.op === other.op &&
+        deepEqual(this.value, other.value)
+      );
+    } else {
+      return false;
+    }
   }
 }
 
@@ -1075,7 +1186,7 @@ export class QueryOptions<T> {
     readonly collectionId: string,
     readonly converter: firestore.FirestoreDataConverter<T>,
     readonly allDescendants: boolean,
-    readonly fieldFilters: FieldFilter[],
+    readonly filters: FilterInternal[],
     readonly fieldOrders: FieldOrder[],
     readonly startAt?: QueryCursor,
     readonly endAt?: QueryCursor,
@@ -1169,7 +1280,7 @@ export class QueryOptions<T> {
       coalesce(settings.collectionId, this.collectionId)!,
       this.converter,
       coalesce(settings.allDescendants, this.allDescendants)!,
-      coalesce(settings.fieldFilters, this.fieldFilters)!,
+      coalesce(settings.filters, this.filters)!,
       coalesce(settings.fieldOrders, this.fieldOrders)!,
       coalesce(settings.startAt, this.startAt),
       coalesce(settings.endAt, this.endAt),
@@ -1190,7 +1301,7 @@ export class QueryOptions<T> {
       this.collectionId,
       converter,
       this.allDescendants,
-      this.fieldFilters,
+      this.filters,
       this.fieldOrders,
       this.startAt,
       this.endAt,
@@ -1213,7 +1324,7 @@ export class QueryOptions<T> {
     return (
       other instanceof QueryOptions &&
       this.parentPath.isEqual(other.parentPath) &&
-      this.fieldFiltersEqual(other.fieldFilters) &&
+      this.filtersEqual(other.filters) &&
       this.collectionId === other.collectionId &&
       this.converter === other.converter &&
       this.allDescendants === other.allDescendants &&
@@ -1228,13 +1339,13 @@ export class QueryOptions<T> {
     );
   }
 
-  private fieldFiltersEqual(other: FieldFilter[]): boolean {
-    if (this.fieldFilters.length !== other.length) {
+  private filtersEqual(other: FilterInternal[]): boolean {
+    if (this.filters.length !== other.length) {
       return false;
     }
 
     for (let i = 0; i < other.length; i++) {
-      if (!this.fieldFilters[i].isEqual(other[i])) {
+      if (!this.filters[i].isEqual(other[i])) {
         return false;
       }
     }
@@ -1362,11 +1473,48 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     fieldPath: string | firestore.FieldPath,
     opStr: firestore.WhereFilterOp,
     value: unknown
-  ): Query<T> {
-    validateFieldPath('fieldPath', fieldPath);
-    opStr = validateQueryOperator('opStr', opStr, value);
-    validateQueryValue('value', value, this._allowUndefined);
+  ): Query<T>;
 
+  /**
+   * Creates and returns a new [Query]{@link Query} with the additional filter
+   * that documents should satisfy the relation constraint provided. Documents
+   * must contain the field specified in the filter.
+   *
+   * Returns a new Query that constrains the value of a Document property.
+   *
+   * This function returns a new (immutable) instance of the Query (rather than
+   * modify the existing instance) to impose the filter.
+   *
+   * @param {Filter} filter A unary or composite filter to apply to the Query.
+   * @returns {Query} The created Query.
+   *
+   * @example
+   * ```
+   * let collectionRef = firestore.collection('col');
+   *
+   * collectionRef.where(Filter.and(Filter.where('foo', '==', 'bar'), Filter.where('foo', '!=', 'baz'))).get()
+   *   .then(querySnapshot => {
+   *     querySnapshot.forEach(documentSnapshot => {
+   *       console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *     });
+   * });
+   * ```
+   */
+  where(filter: Filter): Query<T>;
+
+  where(
+    fieldPathOrFilter: string | firestore.FieldPath | Filter,
+    opStr?: firestore.WhereFilterOp,
+    value?: unknown
+  ): Query<T> {
+    if (fieldPathOrFilter instanceof Filter) {
+      return this._where(fieldPathOrFilter);
+    } else {
+      return this.where(Filter.where(fieldPathOrFilter, opStr!, value));
+    }
+  }
+
+  _where(filter: Filter): Query<T> {
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
       throw new Error(
         'Cannot specify a where() filter after calling startAt(), ' +
@@ -1374,20 +1522,48 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       );
     }
 
+    const parsedFilter = this.parseFilter(filter);
+
+    if (parsedFilter.getFilters().length === 0) {
+      // Return the existing query if not adding any more filters (e.g. an empty composite filter).
+      return this;
+    }
+
+    const options = this._queryOptions.with({
+      filters: this._queryOptions.filters.concat(parsedFilter),
+    });
+    return new Query(this._firestore, options);
+  }
+
+  parseFilter(filter: Filter): FilterInternal {
+    if (filter instanceof UnaryFilter) {
+      return this.parseFieldFilter(filter);
+    }
+    return this.parseCompositeFilter(filter as CompositeFilter);
+  }
+
+  parseFieldFilter(fieldFilterData: UnaryFilter): FieldFilterInternal {
+    let value = fieldFilterData.getValue();
+    let operator = fieldFilterData.getOperator();
+    const fieldPath = fieldFilterData.getField();
+
+    validateFieldPath('fieldPath', fieldPath);
+
+    operator = validateQueryOperator('opStr', operator, value);
+    validateQueryValue('value', value, this._allowUndefined);
+
     const path = FieldPath.fromArgument(fieldPath);
 
     if (FieldPath.documentId().isEqual(path)) {
-      if (opStr === 'array-contains' || opStr === 'array-contains-any') {
+      if (operator === 'array-contains' || operator === 'array-contains-any') {
         throw new Error(
-          `Invalid Query. You can't perform '${opStr}' ` +
+          `Invalid Query. You can't perform '${operator}' ` +
             'queries on FieldPath.documentId().'
         );
-      }
-
-      if (opStr === 'in' || opStr === 'not-in') {
+      } else if (operator === 'in' || operator === 'not-in') {
         if (!Array.isArray(value) || value.length === 0) {
           throw new Error(
-            `Invalid Query. A non-empty array is required for '${opStr}' filters.`
+            `Invalid Query. A non-empty array is required for '${operator}' filters.`
           );
         }
         value = value.map(el => this.validateReference(el));
@@ -1396,17 +1572,32 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       }
     }
 
-    const fieldFilter = new FieldFilter(
+    return new FieldFilterInternal(
       this._serializer,
       path,
-      comparisonOperators[opStr],
+      comparisonOperators[operator],
       value
     );
+  }
 
-    const options = this._queryOptions.with({
-      fieldFilters: this._queryOptions.fieldFilters.concat(fieldFilter),
-    });
-    return new Query(this._firestore, options);
+  parseCompositeFilter(compositeFilterData: CompositeFilter): FilterInternal {
+    const parsedFilters = compositeFilterData
+      .getFilters()
+      .map(filter => this.parseFilter(filter))
+      .filter(parsedFilter => parsedFilter.getFilters().length > 0);
+
+    // For composite filters containing 1 filter, return the only filter.
+    // For example: AND(FieldFilter1) == FieldFilter1
+    if (parsedFilters.length === 1) {
+      return parsedFilters[0];
+    }
+    return new CompositeFilterInternal(
+      parsedFilters,
+      // TODO(orquery) update this line after OR is added to the proto
+      compositeFilterData.getOperator() === 'AND'
+        ? 'AND'
+        : 'OPERATOR_UNSPECIFIED'
+    );
   }
 
   /**
@@ -1664,9 +1855,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     // If no explicit ordering is specified, use the first inequality to
     // define an implicit order.
     if (fieldOrders.length === 0) {
-      for (const fieldFilter of this._queryOptions.fieldFilters) {
-        if (fieldFilter.isInequalityFilter()) {
-          fieldOrders.push(new FieldOrder(fieldFilter.field));
+      for (const filter of this._queryOptions.filters) {
+        const fieldReference = filter.getFirstInequalityField();
+        if (fieldReference !== null) {
+          fieldOrders.push(new FieldOrder(fieldReference));
           break;
         }
       }
@@ -2234,11 +2426,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       structuredQuery.from![0].collectionId = this._queryOptions.collectionId;
     }
 
-    if (this._queryOptions.fieldFilters.length === 1) {
-      structuredQuery.where = this._queryOptions.fieldFilters[0].toProto();
-    } else if (this._queryOptions.fieldFilters.length > 1) {
+    if (this._queryOptions.filters.length === 1) {
+      structuredQuery.where = this._queryOptions.filters[0].toProto();
+    } else if (this._queryOptions.filters.length > 1) {
       const filters: api.StructuredQuery.IFilter[] = [];
-      for (const fieldFilter of this._queryOptions.fieldFilters) {
+      for (const fieldFilter of this._queryOptions.filters) {
         filters.push(fieldFilter.toProto());
       }
       structuredQuery.where = {
