@@ -1593,10 +1593,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     }
     return new CompositeFilterInternal(
       parsedFilters,
-      // TODO(orquery) update this line after OR is added to the proto
-      compositeFilterData.getOperator() === 'AND'
-        ? 'AND'
-        : 'OPERATOR_UNSPECIFIED'
+      compositeFilterData.getOperator() === 'AND' ? 'AND' : 'OR'
     );
   }
 
