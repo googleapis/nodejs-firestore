@@ -22,10 +22,6 @@ import * as firestore from '@google-cloud/firestore';
  * `Filters`s are created by invoking {@link Filter#where}, {@link Filter#or},
  * or {@link Filter#and} and can then be passed to {@link Query#where}
  * to create a new {@link Query} instance that also contains this `Filter`.
- *
- *
- * @private TODO remove private and internal when OR query support is public
- * @internal
  */
 export abstract class Filter {
   /**
@@ -54,9 +50,6 @@ export abstract class Filter {
    *   });
    * });
    * ```
-   *
-   * @private TODO remove private and internal when OR query support is public
-   * @internal
    */
   public static where(
     fieldPath: string | firestore.FieldPath,
@@ -91,9 +84,6 @@ export abstract class Filter {
    *   });
    * });
    * ```
-   *
-   * @private TODO remove private and internal when OR query support is public
-   * @internal
    */
   public static or(...filters: Filter[]): Filter {
     return new CompositeFilter(filters, 'OR');
@@ -124,9 +114,6 @@ export abstract class Filter {
    *   });
    * });
    * ```
-   *
-   * @private TODO remove private and internal when OR query support is public
-   * @internal
    */
   public static and(...filters: Filter[]): Filter {
     return new CompositeFilter(filters, 'AND');
@@ -139,10 +126,6 @@ export abstract class Filter {
  * `UnaryFilter`s are created by invoking {@link Filter#where} and can then
  * be passed to {@link Query#where} to create a new {@link Query} instance
  * that also contains this `UnaryFilter`.
- *
- *
- * @private TODO remove private and internal when OR query support is public
- * @internal
  */
 export class UnaryFilter extends Filter {
   /**
@@ -188,10 +171,6 @@ export class UnaryFilter extends Filter {
  * {@link Filters}s. `CompositeFilters`s are created by invoking {@link Filter#or}
  * or {@link Filter#and} and can then be passed to {@link Query#where}
  * to create a new query instance that also contains the `CompositeFilter`.
- *
- *
- * @private TODO remove private and internal when OR query support is public
- * @internal
  */
 export class CompositeFilter extends Filter {
   /**

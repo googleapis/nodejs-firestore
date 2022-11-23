@@ -1499,9 +1499,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     });
    * });
    * ```
-   *
-   * @private TODO remove private and internal when OR query support is public
-   * @internal
    */
   where(filter: Filter): Query<T>;
 
