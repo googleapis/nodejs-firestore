@@ -1499,6 +1499,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     });
    * });
    * ```
+   *
+   * @private TODO remove private and internal when OR query support is public
+   * @internal
    */
   where(filter: Filter): Query<T>;
 
@@ -1507,14 +1510,14 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     opStr?: firestore.WhereFilterOp,
     value?: unknown
   ): Query<T> {
-    if (fieldPathOrFilter instanceof Filter) {
-      return this._where(fieldPathOrFilter);
-    } else {
-      return this.where(Filter.where(fieldPathOrFilter, opStr!, value));
-    }
-  }
+    let filter: Filter;
 
-  _where(filter: Filter): Query<T> {
+    if (fieldPathOrFilter instanceof Filter) {
+      filter = fieldPathOrFilter;
+    } else {
+      filter = Filter.where(fieldPathOrFilter, opStr!, value);
+    }
+
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
       throw new Error(
         'Cannot specify a where() filter after calling startAt(), ' +
@@ -1522,7 +1525,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       );
     }
 
-    const parsedFilter = this.parseFilter(filter);
+    const parsedFilter = this._parseFilter(filter);
 
     if (parsedFilter.getFilters().length === 0) {
       // Return the existing query if not adding any more filters (e.g. an empty composite filter).
@@ -1535,17 +1538,17 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     return new Query(this._firestore, options);
   }
 
-  parseFilter(filter: Filter): FilterInternal {
+  _parseFilter(filter: Filter): FilterInternal {
     if (filter instanceof UnaryFilter) {
-      return this.parseFieldFilter(filter);
+      return this._parseFieldFilter(filter);
     }
-    return this.parseCompositeFilter(filter as CompositeFilter);
+    return this._parseCompositeFilter(filter as CompositeFilter);
   }
 
-  parseFieldFilter(fieldFilterData: UnaryFilter): FieldFilterInternal {
-    let value = fieldFilterData.getValue();
-    let operator = fieldFilterData.getOperator();
-    const fieldPath = fieldFilterData.getField();
+  _parseFieldFilter(fieldFilterData: UnaryFilter): FieldFilterInternal {
+    let value = fieldFilterData._getValue();
+    let operator = fieldFilterData._getOperator();
+    const fieldPath = fieldFilterData._getField();
 
     validateFieldPath('fieldPath', fieldPath);
 
@@ -1580,10 +1583,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     );
   }
 
-  parseCompositeFilter(compositeFilterData: CompositeFilter): FilterInternal {
+  _parseCompositeFilter(compositeFilterData: CompositeFilter): FilterInternal {
     const parsedFilters = compositeFilterData
-      .getFilters()
-      .map(filter => this.parseFilter(filter))
+      ._getFilters()
+      .map(filter => this._parseFilter(filter))
       .filter(parsedFilter => parsedFilter.getFilters().length > 0);
 
     // For composite filters containing 1 filter, return the only filter.
@@ -1594,7 +1597,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     return new CompositeFilterInternal(
       parsedFilters,
       // TODO(orquery) update this line after OR is added to the proto
-      compositeFilterData.getOperator() === 'AND'
+      compositeFilterData._getOperator() === 'AND'
         ? 'AND'
         : 'OPERATOR_UNSPECIFIED'
     );

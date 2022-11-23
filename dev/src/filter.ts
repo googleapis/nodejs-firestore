@@ -16,7 +16,48 @@
 
 import * as firestore from '@google-cloud/firestore';
 
+/**
+ * A `Filter` is used to narrow the set of documents returned by
+ * a Firestore query by filtering on one or more document fields.
+ * `Filters`s are created by invoking {@link Filter#where}, {@link Filter#or},
+ * or {@link Filter#and} and can then be passed to {@link Query#where}
+ * to create a new {@link Query} instance that also contains this `Filter`.
+ *
+ *
+ * @private TODO remove private and internal when OR query support is public
+ * @internal
+ */
 export abstract class Filter {
+  /**
+   * Creates and returns a new [UnaryFilter]{@link UnaryFilter}, which can be
+   * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
+   * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
+   * it requires that documents must contain the specified field and that its value should
+   * satisfy the relation constraint provided.
+   *
+   * Returns a new Filter that can be used to constrain the value of a Document property.
+   *
+   * @param {string|FieldPath} fieldPath The name of a property value to compare.
+   * @param {string} opStr A comparison operation in the form of a string
+   * (e.g., "<").
+   * @param {*} value The value to which to compare the field for inclusion in
+   * a query.
+   * @returns {Filter} The created Filter.
+   *
+   * @example
+   * ```
+   * let collectionRef = firestore.collection('col');
+   *
+   * collectionRef.where(Filter.where('foo', '==', 'bar')).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   *
+   * @private TODO remove private and internal when OR query support is public
+   * @internal
+   */
   public static where(
     fieldPath: string | firestore.FieldPath,
     opStr: firestore.WhereFilterOp,
@@ -25,16 +66,89 @@ export abstract class Filter {
     return new UnaryFilter(fieldPath, opStr, value);
   }
 
+  /**
+   * Creates and returns a new [CompositeFilter]{@link CompositeFilter} that performs
+   * a logical OR of all the provided {@link Filter}s. The returned Filter can be
+   * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
+   * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
+   * it requires that documents must satisfy one of the provided {@link Filter}s.
+   *
+   * @param {...Filter} filters  Optional. The {@link Filter}s
+   * for OR operation. These must be created with calls to {@link Filter#where},
+   * {@link Filter#or}, or {@link Filter#and}.
+   * @returns {Filter} The created {@link Filter}.
+   *
+   * @example
+   * ```
+   * let collectionRef = firestore.collection('col');
+   *
+   * // doc.foo == 'bar' || doc.baz > 0
+   * let orFilter = Filter.or(Filter.where('foo', '==', 'bar'), Filter.where('baz', '>', 0));
+   *
+   * collectionRef.where(orFilter).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   *
+   * @private TODO remove private and internal when OR query support is public
+   * @internal
+   */
   public static or(...filters: Filter[]): Filter {
     return new CompositeFilter(filters, 'OR');
   }
 
+  /**
+   * Creates and returns a new [CompositeFilter]{@link CompositeFilter} that performs
+   * a logical AND of all the provided {@link Filter}s. The returned Filter can be
+   * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
+   * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
+   * it requires that documents must satisfy all of the provided {@link Filter}s.
+   *
+   * @param {...Filter} filters  Optional. The {@link Filter}s
+   * for OR operation. These must be created with calls to {@link Filter#where},
+   * {@link Filter#or}, or {@link Filter#and}.
+   * @returns {Filter} The created {@link Filter}.
+   *
+   * @example
+   * ```
+   * let collectionRef = firestore.collection('col');
+   *
+   * // doc.foo == 'bar' && doc.baz > 0
+   * let orFilter = Filter.and(Filter.where('foo', '==', 'bar'), Filter.where('baz', '>', 0));
+   *
+   * collectionRef.where(orFilter).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   *
+   * @private TODO remove private and internal when OR query support is public
+   * @internal
+   */
   public static and(...filters: Filter[]): Filter {
     return new CompositeFilter(filters, 'AND');
   }
 }
 
+/**
+ * A `UnaryFilter` is used to narrow the set of documents returned by
+ * a Firestore query by filtering on one or more document fields.
+ * `UnaryFilter`s are created by invoking {@link Filter#where} and can then
+ * be passed to {@link Query#where} to create a new {@link Query} instance
+ * that also contains this `UnaryFilter`.
+ *
+ *
+ * @private TODO remove private and internal when OR query support is public
+ * @internal
+ */
 export class UnaryFilter extends Filter {
+  /**
+   @private
+   @internal
+   */
   public constructor(
     private field: string | firestore.FieldPath,
     private operator: firestore.WhereFilterOp,
@@ -43,20 +157,47 @@ export class UnaryFilter extends Filter {
     super();
   }
 
-  public getField(): string | firestore.FieldPath {
+  /**
+   @private
+   @internal
+   */
+  public _getField(): string | firestore.FieldPath {
     return this.field;
   }
 
-  public getOperator(): firestore.WhereFilterOp {
+  /**
+   @private
+   @internal
+   */
+  public _getOperator(): firestore.WhereFilterOp {
     return this.operator;
   }
 
-  public getValue(): unknown {
+  /**
+   @private
+   @internal
+   */
+  public _getValue(): unknown {
     return this.value;
   }
 }
 
+/**
+ * A `CompositeFilter` is used to narrow the set of documents returned
+ * by a Firestore query by performing the logical OR or AND of multiple
+ * {@link Filters}s. `CompositeFilters`s are created by invoking {@link Filter#or}
+ * or {@link Filter#and} and can then be passed to {@link Query#where}
+ * to create a new query instance that also contains the `CompositeFilter`.
+ *
+ *
+ * @private TODO remove private and internal when OR query support is public
+ * @internal
+ */
 export class CompositeFilter extends Filter {
+  /**
+   @private
+   @internal
+   */
   public constructor(
     private filters: Filter[],
     private operator: CompositeOperator
@@ -64,14 +205,28 @@ export class CompositeFilter extends Filter {
     super();
   }
 
-  public getFilters(): Filter[] {
+  /**
+   @private
+   @internal
+   */
+  public _getFilters(): Filter[] {
     return this.filters;
   }
 
-  public getOperator(): CompositeOperator {
+  /**
+   @private
+   @internal
+   */
+  public _getOperator(): CompositeOperator {
     return this.operator;
   }
 }
 
-// TODO use operator exported from Protos
+/**
+ * Composition operator of a `CompositeFilter`. This operator specifies the
+ * behavior of the `CompositeFilter`.
+ *
+ * @private
+ * @internal
+ */
 export type CompositeOperator = 'AND' | 'OR';
