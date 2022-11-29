@@ -135,6 +135,7 @@ class BulkWriterOperation<
   /**
    * @param ref The document reference being written to.
    * @param type The type of operation that created this write.
+   * @param enqueueOnBatchCallback xxx.
    * @param sendFn A callback to invoke when the operation should be sent.
    * @param errorFn The user provided global error callback.
    * @param successFn The user provided global success callback.
@@ -142,7 +143,9 @@ class BulkWriterOperation<
   constructor(
     readonly ref: firestore.DocumentReference<ModelT, SerializedModelT>,
     private readonly type: 'create' | 'set' | 'update' | 'delete',
+    private readonly enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
     private readonly sendFn: (
+      enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
       op: BulkWriterOperation<ModelT, SerializedModelT>
     ) => void,
     private readonly errorFn: (
@@ -200,7 +203,7 @@ class BulkWriterOperation<
       if (shouldRetry) {
         this.lastStatus = error.code as number;
         this.updateBackoffDuration();
-        this.sendFn(this);
+        this.sendFn(this.enqueueOnBatchCallback, this);
       } else {
         this.deferred.reject(bulkWriterError);
       }
@@ -1069,8 +1072,9 @@ export class BulkWriter {
     const bulkWriterOp = new BulkWriterOperation<ModelT, SerializedModelT>(
       ref,
       type,
-      this._sendFn<ModelT, SerializedModelT>.bind(this, enqueueOnBatchCallback),
-      this._errorFn<ModelT, SerializedModelT>.bind(this),
+      enqueueOnBatchCallback,
+      this._sendFn.bind(this),
+      this._errorFn.bind(this),
       this._successFn.bind(this)
     );
 
