@@ -88,6 +88,26 @@ function getTestRoot(settings: Settings = {}) {
   return firestore.collection(`node_${version}_${autoId()}`);
 }
 
+describe.only('repro', () => {
+  it('zzyzx', async () => {
+    const collectionRef = getTestRoot();
+    const db = collectionRef.firestore;
+
+    let docCount = 0;
+    for (let i = 0; i < 10; i++) {
+      const firstDocId = docCount;
+      const writeBatch = db.batch();
+      for (let j=0; j<500; j++) {
+        docCount++;
+        const documentRef = collectionRef.doc(`doc_${docCount}`);
+        writeBatch.set(documentRef, { foo: docCount});
+      }
+      console.log(`Creating documents ${firstDocId} to ${docCount}`);
+      await writeBatch.commit();
+    }
+  });
+});
+
 describe('Firestore class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;

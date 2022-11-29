@@ -7,11 +7,13 @@
     <pass-parent-env>true</pass-parent-env>
     <envs>
       <env name="TS_NODE_FILES" value="true" />
+      <env name="GOOGLE_APPLICATION_CREDENTIALS" value="$USER_HOME$/Downloads/dconeybe-testing-228e2306479e.json" />
     </envs>
     <ui>bdd</ui>
     <extra-mocha-options>--require ts-node/register/type-check --no-cache --timeout 60000</extra-mocha-options>
-    <test-kind>TEST_FILE</test-kind>
-    <test-file>$PROJECT_DIR$/dev/system-test/firestore.ts</test-file>
+    <test-kind>DIRECTORY</test-kind>
+    <test-directory>build/system-test</test-directory>
+    <recursive>false</recursive>
     <method v="2" />
   </configuration>
 </component>
