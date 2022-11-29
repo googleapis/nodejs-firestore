@@ -90,22 +90,37 @@ function getTestRoot(settings: Settings = {}) {
 
 describe.only('repro', () => {
   it('zzyzx', async () => {
-    const collectionRef = getTestRoot();
-    const db = collectionRef.firestore;
+    const db = getTestRoot().firestore;
+    const collectionRef = db.collection('ResumeQueryDupDocBugFix4');
 
-    let docCount = 0;
-    for (let i = 0; i < 10; i++) {
-      const firstDocId = docCount;
-      const writeBatch = db.batch();
-      for (let j=0; j<500; j++) {
-        docCount++;
-        const documentRef = collectionRef.doc(`doc_${docCount}`);
-        writeBatch.set(documentRef, { foo: docCount});
+    if (collectionRef === db.collection('IDoNotMatch')) {
+      const writeBatchCommits: Array<Promise<WriteResult[]>> = []
+      let docCount = 0;
+      for (let i = 0; i < 400; i++) {
+        const firstDocId = docCount;
+        const writeBatch = db.batch();
+        for (let j=0; j<500; j++) {
+          docCount++;
+          const documentRef = collectionRef.doc(`doc_${docCount}`);
+          writeBatch.set(documentRef, { foo: docCount});
+        }
+        writeBatchCommits.push(writeBatch.commit());
       }
-      console.log(`Creating documents ${firstDocId} to ${docCount}`);
-      await writeBatch.commit();
+      console.log(`Creating ${docCount} documents in ${collectionRef.path}`);
+      await Promise.all(writeBatchCommits);
     }
-  });
+
+    const nums: Array<number> = [];
+    for await (const snapshot of collectionRef.orderBy('foo').stream()) {
+      nums.push((snapshot as unknown as QueryDocumentSnapshot).data().foo);
+      const until = Date.now() + 2;
+      while (until > Date.now()) {
+        // appear busy
+      }
+      await new Promise(resolve => setTimeout(resolve));
+    }
+    console.log(`nums.length=${nums.length}`);
+  }).timeout(0);
 });
 
 describe('Firestore class', () => {
