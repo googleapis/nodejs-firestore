@@ -11,9 +11,8 @@
     </envs>
     <ui>bdd</ui>
     <extra-mocha-options>--require ts-node/register/type-check --no-cache --timeout 60000</extra-mocha-options>
-    <test-kind>DIRECTORY</test-kind>
-    <test-directory>build/system-test</test-directory>
-    <recursive>false</recursive>
+    <test-kind>TEST_FILE</test-kind>
+    <test-file>$PROJECT_DIR$/dev/system-test/firestore.ts</test-file>
     <method v="2" />
   </configuration>
 </component>
