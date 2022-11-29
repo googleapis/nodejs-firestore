@@ -885,15 +885,12 @@ class FieldFilterInternal extends FilterInternal {
   }
 
   isEqual(other: FilterInternal): boolean {
-    if (other instanceof FieldFilterInternal) {
-      return (
-        this.field.isEqual(other.field) &&
-        this.op === other.op &&
-        deepEqual(this.value, other.value)
-      );
-    } else {
-      return false;
-    }
+    return (
+      other instanceof FieldFilterInternal &&
+      this.field.isEqual(other.field) &&
+      this.op === other.op &&
+      deepEqual(this.value, other.value)
+    );
   }
 }
 
@@ -1446,14 +1443,13 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * that documents must contain the specified field and that its value should
    * satisfy the relation constraint provided.
    *
-   * Returns a new Query that constrains the value of a Document property.
-   *
    * This function returns a new (immutable) instance of the Query (rather than
    * modify the existing instance) to impose the filter.
    *
    * @param {string|FieldPath} fieldPath The name of a property value to compare.
-   * @param {string} opStr A comparison operation in the form of a string
-   * (e.g., "<").
+   * @param {string} opStr A comparison operation in the form of a string.
+   * Acceptable operator strings are "<", "<=", "==", "!=", ">=", ">", "array-contains",
+   * "in", "not-in", and "array-contains-any".
    * @param {*} value The value to which to compare the field for inclusion in
    * a query.
    * @returns {Query} The created Query.
@@ -1477,10 +1473,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
   /**
    * Creates and returns a new [Query]{@link Query} with the additional filter
-   * that documents should satisfy the relation constraint provided. Documents
-   * must contain the field specified in the filter.
-   *
-   * Returns a new Query that constrains the value of a Document property.
+   * that documents should satisfy the relation constraint(s) provided.
    *
    * This function returns a new (immutable) instance of the Query (rather than
    * modify the existing instance) to impose the filter.
@@ -2429,19 +2422,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       structuredQuery.from![0].collectionId = this._queryOptions.collectionId;
     }
 
-    if (this._queryOptions.filters.length === 1) {
-      structuredQuery.where = this._queryOptions.filters[0].toProto();
-    } else if (this._queryOptions.filters.length > 1) {
-      const filters: api.StructuredQuery.IFilter[] = [];
-      for (const fieldFilter of this._queryOptions.filters) {
-        filters.push(fieldFilter.toProto());
-      }
-      structuredQuery.where = {
-        compositeFilter: {
-          op: 'AND',
-          filters,
-        },
-      };
+    if (this._queryOptions.filters.length >= 1) {
+      structuredQuery.where = new CompositeFilterInternal(
+        this._queryOptions.filters,
+        'AND'
+      ).toProto();
     }
 
     if (this._queryOptions.hasFieldOrders()) {

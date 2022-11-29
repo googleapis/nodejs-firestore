@@ -1339,7 +1339,7 @@ describe('Query class', () => {
     if (data.length > 0) {
       if (typeof data[0] === 'string') {
         const actualIds = result.docs.map(docSnapshot => docSnapshot.id);
-        expect(actualIds).to.equal(data);
+        expect(actualIds).to.deep.equal(data);
       } else {
         result.forEach(doc => {
           expect(doc.data()).to.deep.equal(data.shift());

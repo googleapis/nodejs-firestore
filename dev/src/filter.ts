@@ -29,17 +29,16 @@ import * as firestore from '@google-cloud/firestore';
  */
 export abstract class Filter {
   /**
-   * Creates and returns a new [UnaryFilter]{@link UnaryFilter}, which can be
+   * Creates and returns a new [Filter]{@link Filter}, which can be
    * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
    * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
    * it requires that documents must contain the specified field and that its value should
    * satisfy the relation constraint provided.
    *
-   * Returns a new Filter that can be used to constrain the value of a Document property.
-   *
    * @param {string|FieldPath} fieldPath The name of a property value to compare.
-   * @param {string} opStr A comparison operation in the form of a string
-   * (e.g., "<").
+   * @param {string} opStr A comparison operation in the form of a string.
+   * Acceptable operator strings are "<", "<=", "==", "!=", ">=", ">", "array-contains",
+   * "in", "not-in", and "array-contains-any".
    * @param {*} value The value to which to compare the field for inclusion in
    * a query.
    * @returns {Filter} The created Filter.
@@ -67,7 +66,7 @@ export abstract class Filter {
   }
 
   /**
-   * Creates and returns a new [CompositeFilter]{@link CompositeFilter} that performs
+   * Creates and returns a new [Filter]{@link Filter} that performs
    * a logical OR of all the provided {@link Filter}s. The returned Filter can be
    * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
    * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
@@ -100,14 +99,14 @@ export abstract class Filter {
   }
 
   /**
-   * Creates and returns a new [CompositeFilter]{@link CompositeFilter} that performs
+   * Creates and returns a new [Filter]{@link Filter} that performs
    * a logical AND of all the provided {@link Filter}s. The returned Filter can be
    * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
    * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
    * it requires that documents must satisfy all of the provided {@link Filter}s.
    *
    * @param {...Filter} filters  Optional. The {@link Filter}s
-   * for OR operation. These must be created with calls to {@link Filter#where},
+   * for AND operation. These must be created with calls to {@link Filter#where},
    * {@link Filter#or}, or {@link Filter#and}.
    * @returns {Filter} The created {@link Filter}.
    *
@@ -116,9 +115,9 @@ export abstract class Filter {
    * let collectionRef = firestore.collection('col');
    *
    * // doc.foo == 'bar' && doc.baz > 0
-   * let orFilter = Filter.and(Filter.where('foo', '==', 'bar'), Filter.where('baz', '>', 0));
+   * let andFilter = Filter.and(Filter.where('foo', '==', 'bar'), Filter.where('baz', '>', 0));
    *
-   * collectionRef.where(orFilter).get().then(querySnapshot => {
+   * collectionRef.where(andFilter).get().then(querySnapshot => {
    *   querySnapshot.forEach(documentSnapshot => {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
@@ -135,13 +134,13 @@ export abstract class Filter {
 
 /**
  * A `UnaryFilter` is used to narrow the set of documents returned by
- * a Firestore query by filtering on one or more document fields.
+ * a Firestore query by filtering on a document field.
  * `UnaryFilter`s are created by invoking {@link Filter#where} and can then
  * be passed to {@link Query#where} to create a new {@link Query} instance
  * that also contains this `UnaryFilter`.
  *
  *
- * @private TODO remove private and internal when OR query support is public
+ * @private
  * @internal
  */
 export class UnaryFilter extends Filter {
@@ -190,7 +189,7 @@ export class UnaryFilter extends Filter {
  * to create a new query instance that also contains the `CompositeFilter`.
  *
  *
- * @private TODO remove private and internal when OR query support is public
+ * @private
  * @internal
  */
 export class CompositeFilter extends Filter {
