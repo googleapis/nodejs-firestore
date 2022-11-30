@@ -2332,7 +2332,25 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
             request,
             tag
           );
-          backendStream.on('error', err => {
+          backendStream.on('error', async (err) => {
+            logger(
+              'Query._stream',
+              tag,
+              'Query failed with retryable stream error:',
+              err
+            );
+
+            // Flush any buffered documents in the stream.
+            {
+              logger('Query._stream', tag, 'zzyzx Flush started');
+              const flushComplete = new Deferred();
+              backendStream.resume().on('end', () => {
+                flushComplete.resolve(true);
+              });
+              await flushComplete.promise;
+              logger('Query._stream', tag, 'zzyzx Flush completed');
+            }
+
             backendStream.unpipe(stream);
 
             // If a non-transactional query failed, attempt to restart.

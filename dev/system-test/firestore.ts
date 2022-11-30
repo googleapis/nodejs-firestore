@@ -112,6 +112,9 @@ describe.only('repro', () => {
 
     const nums: Array<number> = [];
     for await (const snapshot of collectionRef.orderBy('foo').stream()) {
+      if (nums.length % 10000 === 0) {
+        console.log(`nums.length: ${nums.length}`);
+      }
       nums.push((snapshot as unknown as QueryDocumentSnapshot).data().foo);
       const until = Date.now() + 2;
       while (until > Date.now()) {
