@@ -2507,3 +2507,44 @@ describe('collectionGroup queries', () => {
     });
   });
 });
+
+describe.only('query resumption', () => {
+  let firestore: Firestore;
+
+  beforeEach(() => {
+    setTimeoutHandler(setImmediate);
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
+  });
+
+  afterEach(async () => {
+    await verifyInstance(firestore);
+    setTimeoutHandler(setTimeout);
+  });
+
+  it('buffered results should not be double produced', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(request);
+        return stream(result('first'), result('second'));
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      const query: Query = firestore.collection('collectionId');
+      const iterator = query.stream()[Symbol.asyncIterator]();
+      const p1 = iterator.next().then(snap => {
+        expect(snap.done).is.false;
+        expect((snap.value as QueryDocumentSnapshot).id).to.equal('first');
+      });
+      const p2 = iterator.next().then(snap => {
+        expect(snap.done).is.false;
+        expect((snap.value as QueryDocumentSnapshot).id).to.equal('second');
+      });
+      return Promise.all([p1, p2]);
+    });
+  });
+
+})
