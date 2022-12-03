@@ -53,6 +53,7 @@ import {
 import {GoogleError, Status} from "google-gax";
 import api = google.firestore.v1;
 import protobuf = google.protobuf;
+import {Deferred} from "../src/util";
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -303,10 +304,27 @@ export function readTime(
   return {seconds: String(seconds), nanos: nanos};
 }
 
+type IRunQueryRequestCustomization = Omit<api.IRunQueryRequest, 'parent' | 'structuredQuery'>;
+type QueryEqualsCustomization = api.IStructuredQuery | IRunQueryRequestCustomization
+
+function isQueryEqualsCustomizationAnIRunQueryRequest(customization: QueryEqualsCustomization): customization is IRunQueryRequestCustomization {
+  const IRunQueryRequestKeys = [
+    'transaction',
+    'newTransaction',
+    'readTime',
+  ];
+  for (const key of IRunQueryRequestKeys) {
+    if (key in customization) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function queryEqualsWithParent(
   actual: api.IRunQueryRequest | undefined,
   parent: string,
-  ...protoComponents: api.IStructuredQuery[]
+  ...customizations: QueryEqualsCustomization[]
 ): void {
   expect(actual).to.not.be.undefined;
 
@@ -319,8 +337,12 @@ export function queryEqualsWithParent(
     structuredQuery: {},
   };
 
-  for (const protoComponent of protoComponents) {
-    extend(true, query.structuredQuery, protoComponent);
+  for (const customization of customizations) {
+    if (isQueryEqualsCustomizationAnIRunQueryRequest(customization)) {
+      extend(true, query, customization);
+    } else {
+      extend(true, query.structuredQuery, customization);
+    }
   }
 
   // We add the `from` selector here in order to avoid setting collectionId on
@@ -342,9 +364,9 @@ export function queryEqualsWithParent(
 
 export function queryEquals(
   actual: api.IRunQueryRequest | undefined,
-  ...protoComponents: api.IStructuredQuery[]
+  ...customizations: QueryEqualsCustomization[]
 ): void {
-  queryEqualsWithParent(actual, /* parent= */ '', ...protoComponents);
+  queryEqualsWithParent(actual, /* parent= */ '', ...customizations);
 }
 
 function bundledQueryEquals(
@@ -2532,16 +2554,17 @@ describe.only('query resumption', () => {
     error.code = retryableErrorCode;
 
     const responses1: Array<api.IRunQueryResponse | Error> = [];
-    for (let i=0; i<20; i++) {
+    for (let i=0; i<200; i++) {
       responses1.push(result(`doc${i}`));
     }
     responses1.push(error);
 
     const responses2: Array<api.IRunQueryResponse> = [];
-    for (let i=20; i<40; i++) {
+    for (let i=200; i<240; i++) {
       responses2.push(result(`doc${i}`));
     }
 
+    const request2Received = new Deferred();
     let requestNum = 0;
     const overrides: ApiOverride = {
       runQuery: request => {
@@ -2550,7 +2573,8 @@ describe.only('query resumption', () => {
           queryEquals(request);
           return stream(...responses1);
         } else if (requestNum == 2) {
-          queryEquals(request);
+          queryEquals(request, {readTime: {seconds: "5", nanos: 6}}, orderBy('__name__', 'ASCENDING'), startAt(false, {referenceValue: 'projects/test-project/databases/(default)/documents/collectionId/doc199'}));
+          request2Received.resolve(true);
           return stream(...responses2);
         } else {
           const error = new GoogleError(`invalid requestNum: ${requestNum}`);
@@ -2564,8 +2588,10 @@ describe.only('query resumption', () => {
       firestore = firestoreInstance;
       const query: Query = firestore.collection('collectionId');
       const iterator = query.stream()[Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
-      return collect(iterator).then(snapshots => {
-        expect(snapshots).to.have.length(40);
+      return request2Received.promise.then(() => {
+        return collect(iterator);
+      }).then(snapshots => {
+        expect(snapshots).to.have.length(240);
       });
     });
   });
