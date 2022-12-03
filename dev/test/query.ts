@@ -2550,36 +2550,30 @@ describe.only('query resumption', () => {
   it('buffered results should not be double produced', () => {
     const retryableErrorCode = Status.UNAVAILABLE;
     const nonRetryableErrorCode = Status.DATA_LOSS;
-    const error = new GoogleError('forced error');
-    error.code = retryableErrorCode;
-
-    const responses1: Array<api.IRunQueryResponse | Error> = [];
-    for (let i=0; i<200; i++) {
-      responses1.push(result(`doc${i}`));
-    }
-    responses1.push(error);
-
-    const responses2: Array<api.IRunQueryResponse> = [];
-    for (let i=200; i<240; i++) {
-      responses2.push(result(`doc${i}`));
-    }
 
     const request2Received = new Deferred();
-    let requestNum = 0;
+    const requests: Array<api.IRunQueryRequest | undefined> = [];
     const overrides: ApiOverride = {
       runQuery: request => {
-        requestNum++;
-        if (requestNum == 1) {
-          queryEquals(request);
-          return stream(...responses1);
-        } else if (requestNum == 2) {
-          queryEquals(request, {readTime: {seconds: "5", nanos: 6}}, orderBy('__name__', 'ASCENDING'), startAt(false, {referenceValue: 'projects/test-project/databases/(default)/documents/collectionId/doc199'}));
+        requests.push(request);
+        if (requests.length == 1) {
+          const responses: Array<api.IRunQueryResponse | Error> = [];
+          for (let i=0; i<200; i++) {
+            responses.push(result(`doc${i}`));
+          }
+          const error = new GoogleError('forced error');
+          error.code = retryableErrorCode;
+          responses.push(error);
+          return stream(...responses);
+        } else if (requests.length == 2) {
           request2Received.resolve(true);
-          return stream(...responses2);
+          const responses: Array<api.IRunQueryResponse> = [];
+          for (let i=200; i<300; i++) {
+            responses.push(result(`doc${i}`));
+          }
+          return stream(...responses);
         } else {
-          const error = new GoogleError(`invalid requestNum: ${requestNum}`);
-          error.code = nonRetryableErrorCode;
-          throw error;
+          return stream();
         }
       },
     };
@@ -2589,10 +2583,14 @@ describe.only('query resumption', () => {
       const query: Query = firestore.collection('collectionId');
       const iterator = query.stream()[Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
       return request2Received.promise.then(() => {
+        expect(requests).to.have.length.at.least(2);
+        queryEquals(requests[0]);
+        queryEquals(requests[1], {readTime: {seconds: "5", nanos: 6}}, orderBy('__name__', 'ASCENDING'), startAt(false, {referenceValue: 'projects/test-project/databases/(default)/documents/collectionId/doc199'}));
+        expect(requests).to.have.length(2);
         return collect(iterator);
       }).then(snapshots => {
         expect(snapshots).to.have.length(240);
-      });
+      })
     });
   });
 
