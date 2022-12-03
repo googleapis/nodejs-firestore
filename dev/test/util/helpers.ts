@@ -413,3 +413,33 @@ export async function bundleToElementArray(
   }
   return result;
 }
+
+/**
+ * Reads the elements of an AsyncIterator.
+ *
+ * Example:
+ *
+ * const query = firestore.collection('collectionId');
+ * const iterator = query.stream()[Symbol.asyncIterator]()
+ *   as AsyncIterator<QueryDocumentSnapshot>;
+ * return collect(iterator).then(snapshots => {
+ *   expect(snapshots).to.have.length(2);
+ * });
+ *
+ * @param iterator the iterator whose elements over which to iterate.
+ * @return a Promise that is fulfilled with the elements that were produced, or
+ * is rejected with the cause of the first failed iteration.
+ */
+export function collect<T, TReturn, TNext>(iterator: AsyncIterator<T, TReturn, TNext>): Promise<Array<T>> {
+  return new Promise((resolve, reject) => {
+    const values: Array<T> = [];
+    iterator.next().then(function onfulfilled(iterationResult: IteratorResult<T, TReturn>) {
+      if (iterationResult.done) {
+        resolve(values);
+      } else {
+        values.push(iterationResult.value);
+        iterator.next().then(onfulfilled).catch(reject);
+      }
+    }).catch(reject);
+  });
+}
