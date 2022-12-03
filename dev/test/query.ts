@@ -2583,15 +2583,21 @@ describe.only('query resumption', () => {
       const query: Query = firestore.collection('collectionId');
       const iterator = query.stream()[Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
       return request2Received.promise.then(() => {
-        expect(requests).to.have.length.at.least(2);
-        queryEquals(requests[0]);
-        queryEquals(requests[1], {readTime: {seconds: "5", nanos: 6}}, orderBy('__name__', 'ASCENDING'), startAt(false, {referenceValue: 'projects/test-project/databases/(default)/documents/collectionId/doc199'}));
-        expect(requests).to.have.length(2);
         return collect(iterator);
-      }).then(snapshots => {
-        expect(snapshots).to.have.length(240);
-      })
-    });
+      });
+    }).then(snapshots => {
+      const actualDocIds = snapshots.map(snapshot => snapshot.id);
+      const expectedDocIds: Array<string> = [];
+      for (let i=0; i<300; i++) {
+        expectedDocIds.push(`doc${i}`);
+      }
+      expect(actualDocIds).to.eql(expectedDocIds);
+
+      expect(requests).to.have.length(2);
+      expect(requests[1]?.structuredQuery?.startAt?.values).to.eql([{
+        "referenceValue": "projects/test-project/databases/(default)/documents/collectionId/doc199"
+      }]);
+    })
   });
 
 })
