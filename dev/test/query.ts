@@ -35,6 +35,7 @@ import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {QualifiedResourcePath} from '../src/path';
 import {
   ApiOverride,
+  collect,
   createInstance,
   document,
   InvalidApiUsage,
@@ -49,6 +50,7 @@ import {
   writeResult,
 } from './util/helpers';
 
+import {GoogleError, Status} from "google-gax";
 import api = google.firestore.v1;
 import protobuf = google.protobuf;
 
@@ -2524,26 +2526,47 @@ describe.only('query resumption', () => {
   });
 
   it('buffered results should not be double produced', () => {
+    const retryableErrorCode = Status.UNAVAILABLE;
+    const nonRetryableErrorCode = Status.DATA_LOSS;
+    const error = new GoogleError('forced error');
+    error.code = retryableErrorCode;
+
+    const responses1: Array<api.IRunQueryResponse | Error> = [];
+    for (let i=0; i<20; i++) {
+      responses1.push(result(`doc${i}`));
+    }
+    responses1.push(error);
+
+    const responses2: Array<api.IRunQueryResponse> = [];
+    for (let i=20; i<40; i++) {
+      responses2.push(result(`doc${i}`));
+    }
+
+    let requestNum = 0;
     const overrides: ApiOverride = {
       runQuery: request => {
-        queryEquals(request);
-        return stream(result('first'), result('second'));
+        requestNum++;
+        if (requestNum == 1) {
+          queryEquals(request);
+          return stream(...responses1);
+        } else if (requestNum == 2) {
+          queryEquals(request);
+          return stream(...responses2);
+        } else {
+          const error = new GoogleError(`invalid requestNum: ${requestNum}`);
+          error.code = nonRetryableErrorCode;
+          throw error;
+        }
       },
     };
 
     return createInstance(overrides).then(firestoreInstance => {
       firestore = firestoreInstance;
       const query: Query = firestore.collection('collectionId');
-      const iterator = query.stream()[Symbol.asyncIterator]();
-      const p1 = iterator.next().then(snap => {
-        expect(snap.done).is.false;
-        expect((snap.value as QueryDocumentSnapshot).id).to.equal('first');
+      const iterator = query.stream()[Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
+      return collect(iterator).then(snapshots => {
+        expect(snapshots).to.have.length(40);
       });
-      const p2 = iterator.next().then(snap => {
-        expect(snap.done).is.false;
-        expect((snap.value as QueryDocumentSnapshot).id).to.equal('second');
-      });
-      return Promise.all([p1, p2]);
     });
   });
 
