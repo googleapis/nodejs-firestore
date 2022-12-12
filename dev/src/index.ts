@@ -527,6 +527,13 @@ export class Firestore implements firestore.Firestore {
    * to `true`, these properties are skipped and not written to Firestore. If
    * set `false` or omitted, the SDK throws an exception when it encounters
    * properties of type `undefined`.
+   * @param {boolean=} settings.preferRest Whether to force the use of HTTP/1.1 REST
+   * transport until a method that requires gRPC is called. When a method requires gRPC,
+   * this Firestore client will load dependent gRPC libraries and then use gRPC transport
+   * for communication from that point forward. Currently the only operation
+   * that requires gRPC is creating a snapshot listener with the method
+   * `DocumentReference<T>.onSnapshot()`, `CollectionReference<T>.onSnapshot()`, or
+   * `Query<T>.onSnapshot()`.
    */
   constructor(settings?: firestore.Settings) {
     const libraryHeader = {
