@@ -63,6 +63,20 @@ setLogFunction(null);
 
 use(chaiAsPromised);
 
+class RetryableGoogleError extends GoogleError {
+  constructor(message: string) {
+    super(message);
+    this.code = Status.UNAVAILABLE;
+  }
+}
+
+class NonRetryableGoogleError extends GoogleError {
+  constructor(message: string) {
+    super(message);
+    this.code = Status.DATA_LOSS;
+  }
+}
+
 function snapshot(
   relativePath: string,
   data: DocumentData
@@ -2548,36 +2562,68 @@ describe.only('query resumption', () => {
   });
 
   it('buffered results should not be double produced', () => {
-    const retryableErrorCode = Status.UNAVAILABLE;
-    const nonRetryableErrorCode = Status.DATA_LOSS;
+    // Finds the document number of the "startAt" of the given request.
+    // For example, if the "startAt" refers to the document with name "doc42"
+    // then this function will return 42. If the document number cannot be
+    // found, then null is returned.
+    function getStartAtDocNumberFrom(request: api.IRunQueryRequest): number | null {
+      const startAtValue = request.structuredQuery?.startAt?.values?.[0]?.referenceValue;
+      if (typeof startAtValue !== 'string') {
+        return null;
+      }
 
+      const docId = startAtValue.split('/').pop()!;
+      const docIdRegex = /^\w+(\d+)$/;
+      const matches = docIdRegex.exec(docId);
+      if (matches === null || matches.length != 2) {
+        return null;
+      }
+
+      return Number(matches[1]);
+    }
+
+    // Return 200 documents from the 1st request, followed by a retryable error.
+    function* getRequest1Responses(): Generator<api.IRunQueryResponse | Error> {
+      for (let i=0; i<200; i++) {
+        yield result(`doc${i}`);
+      }
+      yield new RetryableGoogleError('simulated retryable error');
+    }
+
+    // Return the remaining documents from the 2nd request.
+    function* getRequest2Responses(request: api.IRunQueryRequest): Generator<api.IRunQueryResponse> {
+      const startAtDocNumber = getStartAtDocNumberFrom(request);
+      if (startAtDocNumber === null) {
+        throw new NonRetryableGoogleError('request #2 should specify a valid startAt');
+      }
+      for (let i=startAtDocNumber; i<300; i++) {
+        yield result(`doc${i}`);
+      }
+    }
+
+    // Set up the mocked responses from Watch.
     const request2Received = new Deferred();
-    const requests: Array<api.IRunQueryRequest | undefined> = [];
+    let requestNum = 0;
     const overrides: ApiOverride = {
       runQuery: request => {
-        requests.push(request);
-        if (requests.length == 1) {
-          const responses: Array<api.IRunQueryResponse | Error> = [];
-          for (let i=0; i<200; i++) {
-            responses.push(result(`doc${i}`));
-          }
-          const error = new GoogleError('forced error');
-          error.code = retryableErrorCode;
-          responses.push(error);
-          return stream(...responses);
-        } else if (requests.length == 2) {
+        requestNum++;
+        if (requestNum == 1) {
+          return stream(...getRequest1Responses());
+        } else if (requestNum == 2) {
           request2Received.resolve(true);
-          const responses: Array<api.IRunQueryResponse> = [];
-          for (let i=200; i<300; i++) {
-            responses.push(result(`doc${i}`));
-          }
-          return stream(...responses);
+          return stream(...getRequest2Responses(request!));
         } else {
-          return stream();
+          throw new NonRetryableGoogleError(`should never get here (requestNum=${requestNum})`);
         }
       },
     };
 
+    // Create an async iterator to get the result set but DO NOT iterate over
+    // it immediately, to allow the responses to queue up and get buffered.
+    // Wait for the 2nd request, which resumes the first request that failed
+    // with a retryable error, and only then, collect the results from the
+    // async iterator. Verify that the async iterator returned the correct
+    // documents and, especially, does not have duplicate results.
     return createInstance(overrides).then(firestoreInstance => {
       firestore = firestoreInstance;
       const query: Query = firestore.collection('collectionId');
@@ -2592,11 +2638,6 @@ describe.only('query resumption', () => {
         expectedDocIds.push(`doc${i}`);
       }
       expect(actualDocIds).to.eql(expectedDocIds);
-
-      expect(requests).to.have.length(2);
-      expect(requests[1]?.structuredQuery?.startAt?.values).to.eql([{
-        "referenceValue": "projects/test-project/databases/(default)/documents/collectionId/doc199"
-      }]);
     })
   });
 
