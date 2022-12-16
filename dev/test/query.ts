@@ -2578,19 +2578,22 @@ describe.only('query resumption', () => {
     // then this function will return 42. If the document number cannot be
     // found, then null is returned.
     function getStartAtDocNumberFrom(request: api.IRunQueryRequest): number | null {
-      const startAtValue = request.structuredQuery?.startAt?.values?.[0]?.referenceValue;
+      const startAt = request.structuredQuery?.startAt;
+      const startAtValue = startAt?.values?.[0]?.referenceValue;
+      const startAtBefore = startAt?.before;
       if (typeof startAtValue !== 'string') {
         return null;
       }
 
       const docId = startAtValue.split('/').pop()!;
-      const docIdRegex = /^\w+(\d+)$/;
+      const docIdRegex = /^\D+(\d+)$/;
       const matches = docIdRegex.exec(docId);
       if (matches === null || matches.length != 2) {
         return null;
       }
 
-      return Number(matches[1]);
+      const startAtDocNumber = Number(matches[1]);
+      return startAtBefore ? startAtDocNumber : (startAtDocNumber + 1);
     }
 
     // Return 200 documents from the 1st request, followed by a retryable error.
