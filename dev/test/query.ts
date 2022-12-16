@@ -2561,6 +2561,8 @@ describe.only('query resumption', () => {
     setTimeoutHandler(setTimeout);
   });
 
+  // Prevent regression of
+  // https://github.com/googleapis/nodejs-firestore/issues/1790.
   it('buffered results should not be double produced', () => {
     // Finds the document number of the "startAt" of the given request.
     // For example, if the "startAt" refers to the document with name "doc42"
