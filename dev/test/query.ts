@@ -64,17 +64,11 @@ setLogFunction(null);
 use(chaiAsPromised);
 
 class RetryableGoogleError extends GoogleError {
-  constructor(message: string) {
-    super(message);
-    this.code = Status.UNAVAILABLE;
-  }
+  readonly code = Status.UNAVAILABLE;
 }
 
 class NonRetryableGoogleError extends GoogleError {
-  constructor(message: string) {
-    super(message);
-    this.code = Status.DATA_LOSS;
-  }
+  readonly code = Status.DATA_LOSS;
 }
 
 function snapshot(
@@ -2562,8 +2556,23 @@ describe.only('query resumption', () => {
   });
 
   // Prevent regression of
-  // https://github.com/googleapis/nodejs-firestore/issues/1790.
-  it('buffered results should not be double produced', () => {
+  // https://github.com/googleapis/nodejs-firestore/issues/1790
+  it('buffered results should not be double produced', async () => {
+    // A mocked replacement for Query._isPermanentRpcError which (a) resolves
+    // a promise once invoked and (b) returns true or false depending on the
+    // runtime type of the given error.
+    function mockIsPermanentRpcError(err: GoogleError): boolean {
+      mockIsPermanentRpcError.invoked.resolve(true);
+      if (err instanceof RetryableGoogleError) {
+        return false;
+      } else if (err instanceof NonRetryableGoogleError) {
+        return true;
+      } else {
+        throw new NonRetryableGoogleError(`unknown error: ${err}`);
+      }
+    }
+    mockIsPermanentRpcError.invoked = new Deferred();
+
     // Finds the document number of the "startAt" of the given request.
     // For example, if the "startAt" refers to the document with name "doc42"
     // then this function will return 42. If the document number cannot be
@@ -2598,49 +2607,47 @@ describe.only('query resumption', () => {
       if (startAtDocNumber === null) {
         throw new NonRetryableGoogleError('request #2 should specify a valid startAt');
       }
-      for (let i=startAtDocNumber; i<300; i++) {
+      for (let i=startAtDocNumber; i<400; i++) {
         yield result(`doc${i}`);
       }
     }
 
     // Set up the mocked responses from Watch.
-    const request2Received = new Deferred();
     let requestNum = 0;
     const overrides: ApiOverride = {
       runQuery: request => {
         requestNum++;
-        if (requestNum == 1) {
-          return stream(...getRequest1Responses());
-        } else if (requestNum == 2) {
-          request2Received.resolve(true);
-          return stream(...getRequest2Responses(request!));
-        } else {
-          throw new NonRetryableGoogleError(`should never get here (requestNum=${requestNum})`);
+        switch (requestNum) {
+          case 1:
+            return stream(...getRequest1Responses());
+          case 2:
+            return stream(...getRequest2Responses(request!));
+          default:
+            throw new NonRetryableGoogleError(`should never get here (requestNum=${requestNum})`);
         }
       },
     };
 
     // Create an async iterator to get the result set but DO NOT iterate over
-    // it immediately, to allow the responses to queue up and get buffered.
-    // Wait for the 2nd request, which resumes the first request that failed
-    // with a retryable error, and only then, collect the results from the
-    // async iterator. Verify that the async iterator returned the correct
-    // documents and, especially, does not have duplicate results.
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const query: Query = firestore.collection('collectionId');
-      const iterator = query.stream()[Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
-      return request2Received.promise.then(() => {
-        return collect(iterator);
-      });
-    }).then(snapshots => {
-      const actualDocIds = snapshots.map(snapshot => snapshot.id);
-      const expectedDocIds: Array<string> = [];
-      for (let i=0; i<300; i++) {
-        expectedDocIds.push(`doc${i}`);
-      }
-      expect(actualDocIds).to.eql(expectedDocIds);
-    })
+    // it immediately. This allows the responses to queue up and get buffered.
+    // Wait for isPermanentError() to be invoked, which indicates that the first
+    // request has failed and  is about to retry. Only then, collect the results
+    // from the async iterator.
+    firestore = await createInstance(overrides);
+    const query: Query = firestore.collection('collectionId');
+    query._isPermanentRpcError = mockIsPermanentRpcError;
+    const iterator = query.stream()[Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
+    await mockIsPermanentRpcError.invoked.promise;
+    const snapshots = await collect(iterator);
+
+    // Verify that the async iterator returned the correct documents and,
+    // especially, does not have duplicate results.
+    const expectedDocIds: Array<string> = [];
+    for (let i=0; i<400; i++) {
+      expectedDocIds.push(`doc${i}`);
+    }
+    const actualDocIds = snapshots.map(snapshot => snapshot.id);
+    expect(actualDocIds).to.eql(expectedDocIds);
   });
 
 })

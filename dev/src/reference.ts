@@ -17,6 +17,7 @@
 import * as firestore from '@google-cloud/firestore';
 import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
+import {GoogleError} from "google-gax";
 
 import * as protos from '../protos/firestore_v1_proto_api';
 
@@ -2268,6 +2269,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     return structuredQuery;
   }
 
+  // This method exists solely to enable unit tests to mock it.
+  _isPermanentRpcError(err: GoogleError, methodName: string): boolean {
+    return isPermanentRpcError(err, methodName);
+  }
+
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
@@ -2280,6 +2286,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     const tag = requestTag();
 
     let lastReceivedDocument: QueryDocumentSnapshot<T> | null = null;
+    const _isPermanentRpcError = this._isPermanentRpcError;
 
     let backendStream: Duplex;
     const stream = new Transform({
@@ -2337,7 +2344,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
-            if (!transactionId && !isPermanentRpcError(err, 'runQuery')) {
+            if (!transactionId && !_isPermanentRpcError(err, 'runQuery')) {
               logger(
                 'Query._stream',
                 tag,
