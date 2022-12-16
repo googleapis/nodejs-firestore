@@ -2558,6 +2558,11 @@ describe.only('query resumption', () => {
   // Prevent regression of
   // https://github.com/googleapis/nodejs-firestore/issues/1790
   it('buffered results should not be double produced', async () => {
+    const documentIds: Array<string> = [];
+    for (let i=0; i<500; i++) {
+      documentIds.push(`doc${i}`);
+    }
+
     // A mocked replacement for Query._isPermanentRpcError which (a) resolves
     // a promise once invoked and (b) returns true or false depending on the
     // runtime type of the given error.
@@ -2573,45 +2578,40 @@ describe.only('query resumption', () => {
     }
     mockIsPermanentRpcError.invoked = new Deferred();
 
-    // Finds the document number of the "startAt" of the given request.
-    // For example, if the "startAt" refers to the document with name "doc42"
-    // then this function will return 42. If the document number cannot be
-    // found, then null is returned.
-    function getStartAtDocNumberFrom(request: api.IRunQueryRequest): number | null {
+    // Finds the index in `documents` of the document referred to in the
+    // "startAt" of the given request.
+    function getStartAtDocumentIndex(request: api.IRunQueryRequest): number | null {
       const startAt = request.structuredQuery?.startAt;
       const startAtValue = startAt?.values?.[0]?.referenceValue;
       const startAtBefore = startAt?.before;
       if (typeof startAtValue !== 'string') {
         return null;
       }
-
       const docId = startAtValue.split('/').pop()!;
-      const docIdRegex = /^\D+(\d+)$/;
-      const matches = docIdRegex.exec(docId);
-      if (matches === null || matches.length != 2) {
+      const docIdIndex = documentIds.indexOf(docId);
+      if (docIdIndex < 0) {
         return null;
       }
-
-      const startAtDocNumber = Number(matches[1]);
-      return startAtBefore ? startAtDocNumber : (startAtDocNumber + 1);
+      return startAtBefore ? docIdIndex : (docIdIndex + 1);
     }
 
     // Return 200 documents from the 1st request, followed by a retryable error.
     function* getRequest1Responses(): Generator<api.IRunQueryResponse | Error> {
-      for (let i=0; i<200; i++) {
-        yield result(`doc${i}`);
+      const numDocumentsToYield = Math.floor(documentIds.length / 2);
+      for (let i=0; i<numDocumentsToYield; i++) {
+        yield result(documentIds[i]);
       }
       yield new RetryableGoogleError('simulated retryable error');
     }
 
     // Return the remaining documents from the 2nd request.
     function* getRequest2Responses(request: api.IRunQueryRequest): Generator<api.IRunQueryResponse> {
-      const startAtDocNumber = getStartAtDocNumberFrom(request);
-      if (startAtDocNumber === null) {
+      const startAtDocumentIndex = getStartAtDocumentIndex(request);
+      if (startAtDocumentIndex === null) {
         throw new NonRetryableGoogleError('request #2 should specify a valid startAt');
       }
-      for (let i=startAtDocNumber; i<400; i++) {
-        yield result(`doc${i}`);
+      for (let i=startAtDocumentIndex; i<documentIds.length; i++) {
+        yield result(documentIds[i]);
       }
     }
 
@@ -2645,12 +2645,8 @@ describe.only('query resumption', () => {
 
     // Verify that the async iterator returned the correct documents and,
     // especially, does not have duplicate results.
-    const expectedDocIds: Array<string> = [];
-    for (let i=0; i<400; i++) {
-      expectedDocIds.push(`doc${i}`);
-    }
-    const actualDocIds = snapshots.map(snapshot => snapshot.id);
-    expect(actualDocIds).to.eql(expectedDocIds);
+    const actualDocumentIds = snapshots.map(snapshot => snapshot.id);
+    expect(actualDocumentIds).to.eql(documentIds);
   });
 
 })
