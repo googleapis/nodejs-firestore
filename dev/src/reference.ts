@@ -2292,6 +2292,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     const stream = new Transform({
       objectMode: true,
       transform: (proto, enc, callback) => {
+        if ("noop" in proto) {
+          callback(undefined);
+          return;
+        }
         const readTime = Timestamp.fromProto(proto.readTime);
         if (proto.document) {
           const document = this.firestore.snapshot_(
@@ -2351,20 +2355,22 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
                 'Query failed with retryable stream error:',
                 err
               );
-              if (lastReceivedDocument) {
-                // Restart the query but use the last document we received as the
-                // query cursor. Note that we do not use backoff here. The call to
-                // `requestStream()` will backoff should the restart fail before
-                // delivering any results.
-                if (this._queryOptions.requireConsistency) {
-                  request = this.startAfter(lastReceivedDocument).toProto(
-                    lastReceivedDocument.readTime
-                  );
-                } else {
-                  request = this.startAfter(lastReceivedDocument).toProto();
+              stream.write({ noop: true }, 'utf8', () => {
+                if (lastReceivedDocument) {
+                  // Restart the query but use the last document we received as the
+                  // query cursor. Note that we do not use backoff here. The call to
+                  // `requestStream()` will backoff should the restart fail before
+                  // delivering any results.
+                  if (this._queryOptions.requireConsistency) {
+                    request = this.startAfter(lastReceivedDocument).toProto(
+                        lastReceivedDocument.readTime
+                    );
+                  } else {
+                    request = this.startAfter(lastReceivedDocument).toProto();
+                  }
                 }
-              }
-              streamActive.resolve(/* active= */ true);
+                streamActive.resolve(/* active= */ true);
+              });
             } else {
               logger(
                 'Query._stream',
