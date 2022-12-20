@@ -2562,7 +2562,7 @@ describe('query resumption', () => {
     // Generate the IDs of the documents that will match the query.
     const documentIds = Array.from(new Array(500), (_, index) => `doc${index}`);
 
-    // Finds the index in `documents` of the document referred to in the
+    // Finds the index in `documentIds` of the document referred to in the
     // "startAt" of the given request.
     function getStartAtDocumentIndex(
       request: api.IRunQueryRequest
