@@ -304,36 +304,10 @@ export function readTime(
   return {seconds: String(seconds), nanos: nanos};
 }
 
-// The keys in an IRunQueryRequest that are allowed to be customized.
-// Namely, all keys except 'parent' and 'structuredQuery' are allowed to be
-// customized.
-type IRunQueryRequestCustomization = Omit<
-  api.IRunQueryRequest,
-  'parent' | 'structuredQuery'
->;
-
-// The type for the `customizations` argument of queryEqualsWithParent().
-// It matches customizations for the IRunQueryRequest and customizations for the
-// IStructuredQuery.
-type QueryEqualsCustomization =
-  | api.IStructuredQuery
-  | IRunQueryRequestCustomization;
-
-// Determines whether a given `QueryEqualsCustomization` is for the
-// IRunQueryRequest or the IStructuredQuery, returning true or false,
-// respectively.
-function isQueryEqualsCustomizationAnIRunQueryRequest(
-  customization: QueryEqualsCustomization
-): customization is IRunQueryRequestCustomization {
-  return ['transaction', 'newTransaction', 'readTime'].some(
-    key => key in customization
-  );
-}
-
 export function queryEqualsWithParent(
   actual: api.IRunQueryRequest | undefined,
   parent: string,
-  ...customizations: QueryEqualsCustomization[]
+  ...protoComponents: api.IStructuredQuery[]
 ): void {
   expect(actual).to.not.be.undefined;
 
@@ -346,12 +320,8 @@ export function queryEqualsWithParent(
     structuredQuery: {},
   };
 
-  for (const customization of customizations) {
-    if (isQueryEqualsCustomizationAnIRunQueryRequest(customization)) {
-      extend(true, query, customization);
-    } else {
-      extend(true, query.structuredQuery, customization);
-    }
+  for (const protoComponent of protoComponents) {
+    extend(true, query.structuredQuery, protoComponent);
   }
 
   // We add the `from` selector here in order to avoid setting collectionId on
@@ -373,9 +343,9 @@ export function queryEqualsWithParent(
 
 export function queryEquals(
   actual: api.IRunQueryRequest | undefined,
-  ...customizations: QueryEqualsCustomization[]
+  ...protoComponents: api.IStructuredQuery[]
 ): void {
-  queryEqualsWithParent(actual, /* parent= */ '', ...customizations);
+  queryEqualsWithParent(actual, /* parent= */ '', ...protoComponents);
 }
 
 function bundledQueryEquals(
