@@ -430,16 +430,17 @@ export async function bundleToElementArray(
  * @return a Promise that is fulfilled with the elements that were produced, or
  * is rejected with the cause of the first failed iteration.
  */
-export function collect<T, TReturn, TNext>(iterator: AsyncIterator<T, TReturn, TNext>): Promise<Array<T>> {
-  return new Promise((resolve, reject) => {
-    const values: Array<T> = [];
-    iterator.next().then(function onfulfilled(iterationResult: IteratorResult<T, TReturn>) {
-      if (iterationResult.done) {
-        resolve(values);
-      } else {
-        values.push(iterationResult.value);
-        iterator.next().then(onfulfilled).catch(reject);
-      }
-    }).catch(reject);
-  });
+export async function collect<T, TReturn, TNext>(
+  iterator: AsyncIterator<T, TReturn, TNext>
+): Promise<Array<T>> {
+  const values: Array<T> = [];
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const {done, value} = await iterator.next();
+    if (done) {
+      break;
+    }
+    values.push(value);
+  }
+  return values;
 }

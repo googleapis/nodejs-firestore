@@ -17,7 +17,7 @@
 import * as firestore from '@google-cloud/firestore';
 import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
-import {GoogleError} from "google-gax";
+import {GoogleError} from 'google-gax';
 
 import * as protos from '../protos/firestore_v1_proto_api';
 
@@ -92,6 +92,8 @@ const comparisonOperators: {
   'not-in': 'NOT_IN',
   'array-contains-any': 'ARRAY_CONTAINS_ANY',
 };
+
+const NOOP_MESSAGE = Symbol('a noop message');
 
 /**
  * onSnapshot() callback that receives a QuerySnapshot.
@@ -2286,13 +2288,12 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     const tag = requestTag();
 
     let lastReceivedDocument: QueryDocumentSnapshot<T> | null = null;
-    const _isPermanentRpcError = this._isPermanentRpcError;
 
     let backendStream: Duplex;
     const stream = new Transform({
       objectMode: true,
       transform: (proto, enc, callback) => {
-        if ("noop" in proto) {
+        if (proto === NOOP_MESSAGE) {
           callback(undefined);
           return;
         }
@@ -2348,22 +2349,26 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
-            if (!transactionId && !_isPermanentRpcError(err, 'runQuery')) {
+            if (!transactionId && !this._isPermanentRpcError(err, 'runQuery')) {
               logger(
                 'Query._stream',
                 tag,
                 'Query failed with retryable stream error:',
                 err
               );
-              stream.write({ noop: true }, 'utf8', () => {
+              // Enqueue a "no-op" write into the stream and resume the query
+              // once it is processed. This allows any enqueued results to be
+              // consumed before resuming the query so that the query resumption
+              // can start at the correct document.
+              stream.write(NOOP_MESSAGE, () => {
                 if (lastReceivedDocument) {
-                  // Restart the query but use the last document we received as the
-                  // query cursor. Note that we do not use backoff here. The call to
-                  // `requestStream()` will backoff should the restart fail before
-                  // delivering any results.
+                  // Restart the query but use the last document we received as
+                  // the query cursor. Note that we do not use backoff here. The
+                  // call to `requestStream()` will backoff should the restart
+                  // fail before delivering any results.
                   if (this._queryOptions.requireConsistency) {
                     request = this.startAfter(lastReceivedDocument).toProto(
-                        lastReceivedDocument.readTime
+                      lastReceivedDocument.readTime
                     );
                   } else {
                     request = this.startAfter(lastReceivedDocument).toProto();

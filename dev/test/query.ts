@@ -50,10 +50,10 @@ import {
   writeResult,
 } from './util/helpers';
 
-import {GoogleError, Status} from "google-gax";
+import {GoogleError} from 'google-gax';
 import api = google.firestore.v1;
 import protobuf = google.protobuf;
-import {Deferred} from "../src/util";
+import {Deferred} from '../src/util';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -62,14 +62,6 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 setLogFunction(null);
 
 use(chaiAsPromised);
-
-class RetryableGoogleError extends GoogleError {
-  readonly code = Status.UNAVAILABLE;
-}
-
-class NonRetryableGoogleError extends GoogleError {
-  readonly code = Status.DATA_LOSS;
-}
 
 function snapshot(
   relativePath: string,
@@ -312,21 +304,30 @@ export function readTime(
   return {seconds: String(seconds), nanos: nanos};
 }
 
-type IRunQueryRequestCustomization = Omit<api.IRunQueryRequest, 'parent' | 'structuredQuery'>;
-type QueryEqualsCustomization = api.IStructuredQuery | IRunQueryRequestCustomization
+// The keys in an IRunQueryRequest that are allowed to be customized.
+// Namely, all keys except 'parent' and 'structuredQuery' are allowed to be
+// customized.
+type IRunQueryRequestCustomization = Omit<
+  api.IRunQueryRequest,
+  'parent' | 'structuredQuery'
+>;
 
-function isQueryEqualsCustomizationAnIRunQueryRequest(customization: QueryEqualsCustomization): customization is IRunQueryRequestCustomization {
-  const IRunQueryRequestKeys = [
-    'transaction',
-    'newTransaction',
-    'readTime',
-  ];
-  for (const key of IRunQueryRequestKeys) {
-    if (key in customization) {
-      return true;
-    }
-  }
-  return false;
+// The type for the `customizations` argument of queryEqualsWithParent().
+// It matches customizations for the IRunQueryRequest and customizations for the
+// IStructuredQuery.
+type QueryEqualsCustomization =
+  | api.IStructuredQuery
+  | IRunQueryRequestCustomization;
+
+// Determines whether a given `QueryEqualsCustomization` is for the
+// IRunQueryRequest or the IStructuredQuery, returning true or false,
+// respectively.
+function isQueryEqualsCustomizationAnIRunQueryRequest(
+  customization: QueryEqualsCustomization
+): customization is IRunQueryRequestCustomization {
+  return ['transaction', 'newTransaction', 'readTime'].some(
+    key => key in customization
+  );
 }
 
 export function queryEqualsWithParent(
@@ -2540,7 +2541,7 @@ describe('collectionGroup queries', () => {
   });
 });
 
-describe.only('query resumption', () => {
+describe('query resumption', () => {
   let firestore: Firestore;
 
   beforeEach(() => {
@@ -2557,30 +2558,15 @@ describe.only('query resumption', () => {
 
   // Prevent regression of
   // https://github.com/googleapis/nodejs-firestore/issues/1790
-  it('buffered results should not be double produced', async () => {
-    const documentIds: Array<string> = [];
-    for (let i=0; i<500; i++) {
-      documentIds.push(`doc${i}`);
-    }
-
-    // A mocked replacement for Query._isPermanentRpcError which (a) resolves
-    // a promise once invoked and (b) returns true or false depending on the
-    // runtime type of the given error.
-    function mockIsPermanentRpcError(err: GoogleError): boolean {
-      mockIsPermanentRpcError.invoked.resolve(true);
-      if (err instanceof RetryableGoogleError) {
-        return false;
-      } else if (err instanceof NonRetryableGoogleError) {
-        return true;
-      } else {
-        throw new NonRetryableGoogleError(`unknown error: ${err}`);
-      }
-    }
-    mockIsPermanentRpcError.invoked = new Deferred();
+  it('results should not be double produced on retryable error with back pressure', async () => {
+    // Generate the IDs of the documents that will match the query.
+    const documentIds = Array.from(new Array(500), (_, index) => `doc${index}`);
 
     // Finds the index in `documents` of the document referred to in the
     // "startAt" of the given request.
-    function getStartAtDocumentIndex(request: api.IRunQueryRequest): number | null {
+    function getStartAtDocumentIndex(
+      request: api.IRunQueryRequest
+    ): number | null {
       const startAt = request.structuredQuery?.startAt;
       const startAtValue = startAt?.values?.[0]?.referenceValue;
       const startAtBefore = startAt?.before;
@@ -2592,26 +2578,46 @@ describe.only('query resumption', () => {
       if (docIdIndex < 0) {
         return null;
       }
-      return startAtBefore ? docIdIndex : (docIdIndex + 1);
+      return startAtBefore ? docIdIndex : docIdIndex + 1;
     }
 
-    // Return 200 documents from the 1st request, followed by a retryable error.
+    const RETRYABLE_ERROR_DOMAIN = 'RETRYABLE_ERROR_DOMAIN';
+
+    // A mock replacement for Query._isPermanentRpcError which (a) resolves
+    // a promise once invoked and (b) treats a specific error "domain" as
+    // non-retryable.
+    function mockIsPermanentRpcError(err: GoogleError): boolean {
+      mockIsPermanentRpcError.invoked.resolve(true);
+      return err?.domain !== RETRYABLE_ERROR_DOMAIN;
+    }
+    mockIsPermanentRpcError.invoked = new Deferred();
+
+    // Return the first half of the documents, followed by a retryable error.
     function* getRequest1Responses(): Generator<api.IRunQueryResponse | Error> {
-      const numDocumentsToYield = Math.floor(documentIds.length / 2);
-      for (let i=0; i<numDocumentsToYield; i++) {
-        yield result(documentIds[i]);
+      const runQueryResponses = documentIds
+        .slice(0, documentIds.length / 2)
+        .map(documentId => result(documentId));
+      for (const runQueryResponse of runQueryResponses) {
+        yield runQueryResponse;
       }
-      yield new RetryableGoogleError('simulated retryable error');
+      const retryableError = new GoogleError('simulated retryable error');
+      retryableError.domain = RETRYABLE_ERROR_DOMAIN;
+      yield retryableError;
     }
 
-    // Return the remaining documents from the 2nd request.
-    function* getRequest2Responses(request: api.IRunQueryRequest): Generator<api.IRunQueryResponse> {
+    // Return the remaining documents.
+    function* getRequest2Responses(
+      request: api.IRunQueryRequest
+    ): Generator<api.IRunQueryResponse> {
       const startAtDocumentIndex = getStartAtDocumentIndex(request);
       if (startAtDocumentIndex === null) {
-        throw new NonRetryableGoogleError('request #2 should specify a valid startAt');
+        throw new Error('request #2 should specify a valid startAt');
       }
-      for (let i=startAtDocumentIndex; i<documentIds.length; i++) {
-        yield result(documentIds[i]);
+      const runQueryResponses = documentIds
+        .slice(startAtDocumentIndex)
+        .map(documentId => result(documentId));
+      for (const runQueryResponse of runQueryResponses) {
+        yield runQueryResponse;
       }
     }
 
@@ -2626,20 +2632,22 @@ describe.only('query resumption', () => {
           case 2:
             return stream(...getRequest2Responses(request!));
           default:
-            throw new NonRetryableGoogleError(`should never get here (requestNum=${requestNum})`);
+            throw new Error(`should never get here (requestNum=${requestNum})`);
         }
       },
     };
 
     // Create an async iterator to get the result set but DO NOT iterate over
-    // it immediately. This allows the responses to queue up and get buffered.
-    // Wait for isPermanentError() to be invoked, which indicates that the first
-    // request has failed and  is about to retry. Only then, collect the results
-    // from the async iterator.
+    // it immediately. Instead, allow the responses to pile up and fill the
+    // buffers. Once isPermanentError() is invoked, indicating that the first
+    // request has failed and is about to be retried, collect the results from
+    // the async iterator into an array.
     firestore = await createInstance(overrides);
-    const query: Query = firestore.collection('collectionId');
+    const query = firestore.collection('collectionId');
     query._isPermanentRpcError = mockIsPermanentRpcError;
-    const iterator = query.stream()[Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
+    const iterator = query
+      .stream()
+      [Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
     await mockIsPermanentRpcError.invoked.promise;
     const snapshots = await collect(iterator);
 
@@ -2648,5 +2656,4 @@ describe.only('query resumption', () => {
     const actualDocumentIds = snapshots.map(snapshot => snapshot.id);
     expect(actualDocumentIds).to.eql(documentIds);
   });
-
-})
+});
