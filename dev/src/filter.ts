@@ -31,11 +31,10 @@ export abstract class Filter {
    * it requires that documents must contain the specified field and that its value should
    * satisfy the relation constraint provided.
    *
-   * Returns a new Filter that can be used to constrain the value of a Document property.
-   *
    * @param {string|FieldPath} fieldPath The name of a property value to compare.
-   * @param {string} opStr A comparison operation in the form of a string
-   * (e.g., "<").
+   * @param {string} opStr A comparison operation in the form of a string.
+   * Acceptable operator strings are "<", "<=", "==", "!=", ">=", ">", "array-contains",
+   * "in", "not-in", and "array-contains-any".
    * @param {*} value The value to which to compare the field for inclusion in
    * a query.
    * @returns {Filter} The created Filter.
@@ -103,7 +102,7 @@ export abstract class Filter {
    * one of the provided {@link Filter}s.
    *
    * @param {...Filter} filters  Optional. The {@link Filter}s
-   * for OR operation. These must be created with calls to {@link Filter#where},
+   * for AND operation. These must be created with calls to {@link Filter#where},
    * {@link Filter#or}, or {@link Filter#and}.
    * @returns {Filter} The created {@link Filter}.
    *
@@ -112,9 +111,9 @@ export abstract class Filter {
    * let collectionRef = firestore.collection('col');
    *
    * // doc.foo == 'bar' && doc.baz > 0
-   * let orFilter = Filter.and(Filter.where('foo', '==', 'bar'), Filter.where('baz', '>', 0));
+   * let andFilter = Filter.and(Filter.where('foo', '==', 'bar'), Filter.where('baz', '>', 0));
    *
-   * collectionRef.where(orFilter).get().then(querySnapshot => {
+   * collectionRef.where(andFilter).get().then(querySnapshot => {
    *   querySnapshot.forEach(documentSnapshot => {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });

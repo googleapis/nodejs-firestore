@@ -1425,7 +1425,53 @@ describe('where() interface', () => {
     );
   });
 
-  it('supports composite filters', () => {
+  it('supports composite filters - outer OR', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          where(
+            compositeFilter(
+              'OPERATOR_UNSPECIFIED',
+              fieldFilter('a', 'EQUAL', {integerValue: 10}),
+              compositeFilter(
+                'AND',
+                fieldFilter('b', 'EQUAL', {integerValue: 20}),
+                fieldFilter('c', 'EQUAL', {integerValue: 30}),
+                compositeFilter(
+                  'OPERATOR_UNSPECIFIED',
+                  fieldFilter('d', 'EQUAL', {integerValue: 40}),
+                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50})
+                ),
+                unaryFilters('f', 'IS_NAN')
+              )
+            )
+          )
+        );
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      let query: Query = firestore.collection('collectionId');
+      query = query.where(
+        Filter.or(
+          Filter.where('a', '==', 10),
+          Filter.and(
+            Filter.where('b', '==', 20),
+            Filter.where('c', '==', 30),
+            Filter.or(Filter.where('d', '==', 40), Filter.where('e', '>', 50)),
+            Filter.or(Filter.where('f', '==', NaN)),
+            Filter.and(Filter.or())
+          )
+        )
+      );
+      return query.get();
+    });
+  });
+
+  it('supports composite filters - outer AND', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
