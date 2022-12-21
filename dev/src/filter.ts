@@ -25,7 +25,7 @@ import * as firestore from '@google-cloud/firestore';
  */
 export abstract class Filter {
   /**
-   * Creates and returns a new [UnaryFilter]{@link UnaryFilter}, which can be
+   * Creates and returns a new [Filter]{@link Filter}, which can be
    * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
    * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
    * it requires that documents must contain the specified field and that its value should
@@ -60,7 +60,7 @@ export abstract class Filter {
   }
 
   /**
-   * Creates and returns a new [CompositeFilter]{@link CompositeFilter} that is a
+   * Creates and returns a new [Filter]{@link Filter} that is a
    * disjunction of the given {@link Filter}s. A disjunction filter includes
    * a document if it satisfies any of the given {@link Filter}s.
    *
@@ -93,7 +93,7 @@ export abstract class Filter {
   }
 
   /**
-   * Creates and returns a new [CompositeFilter]{@link CompositeFilter} that is a
+   * Creates and returns a new [Filter]{@link Filter} that is a
    * conjunction of the given {@link Filter}s. A conjunction filter includes
    * a document if it satisfies any of the given {@link Filter}s.
    *
@@ -132,6 +132,9 @@ export abstract class Filter {
  * `UnaryFilter`s are created by invoking {@link Filter#where} and can then
  * be passed to {@link Query#where} to create a new {@link Query} instance
  * that also contains this `UnaryFilter`.
+ *
+ * @private
+ * @internal
  */
 export class UnaryFilter extends Filter {
   /**
@@ -177,6 +180,9 @@ export class UnaryFilter extends Filter {
  * {@link Filters}s. `CompositeFilters`s are created by invoking {@link Filter#or}
  * or {@link Filter#and} and can then be passed to {@link Query#where}
  * to create a new query instance that also contains the `CompositeFilter`.
+ *
+ * @private
+ * @internal
  */
 export class CompositeFilter extends Filter {
   /**

@@ -1532,7 +1532,7 @@ declare namespace FirebaseFirestore {
      * This function returns a new (immutable) instance of the Query (rather than
      * modify the existing instance) to impose the filter.
      *
-     * @param {Filter} filter A unary or composite filter to apply to the Query.
+     * @param {Filter} filter A filter to apply to the Query.
      * @returns {Query} The created Query.
      */
     where(filter: Filter): Query<T>;
@@ -2447,7 +2447,7 @@ declare namespace FirebaseFirestore {
    */
   export abstract class Filter {
     /**
-     * Creates and returns a new [UnaryFilter]{@link UnaryFilter}, which can be
+     * Creates and returns a new [Filter]{@link Filter}, which can be
      * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
      * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
      * it requires that documents must contain the specified field and that its value should
@@ -2480,7 +2480,7 @@ declare namespace FirebaseFirestore {
     ): Filter;
 
     /**
-     * Creates and returns a new [CompositeFilter]{@link CompositeFilter} that is a
+     * Creates and returns a new [Filter]{@link Filter} that is a
      * disjunction of the given {@link Filter}s. A disjunction filter includes
      * a document if it satisfies any of the given {@link Filter}s.
      *
@@ -2511,7 +2511,7 @@ declare namespace FirebaseFirestore {
     static or(...filters: Filter[]): Filter;
 
     /**
-     * Creates and returns a new [CompositeFilter]{@link CompositeFilter} that is a
+     * Creates and returns a new [Filter]{@link Filter} that is a
      * conjunction of the given {@link Filter}s. A conjunction filter includes
      * a document if it satisfies any of the given {@link Filter}s.
      *
@@ -2540,28 +2540,6 @@ declare namespace FirebaseFirestore {
      * ```
      */
     static and(...filters: Filter[]): Filter;
-  }
-
-  /**
-   * A `UnaryFilter` represents a restriction on one field value and can
-   * be used to refine the results of a {@link Query}.
-   * `UnaryFilter`s are created by invoking {@link Filter#where} and can then
-   * be passed to {@link Query#where} to create a new {@link Query} instance
-   * that also contains this `UnaryFilter`.
-   */
-  export class UnaryFilter extends Filter {
-    private constructor();
-  }
-
-  /**
-   * A `CompositeFilter` is used to narrow the set of documents returned
-   * by a Firestore query by performing the logical OR or AND of multiple
-   * {@link Filters}s. `CompositeFilters`s are created by invoking {@link Filter#or}
-   * or {@link Filter#and} and can then be passed to {@link Query#where}
-   * to create a new query instance that also contains the `CompositeFilter`.
-   */
-  export class CompositeFilter extends Filter {
-    private constructor(f);
   }
 }
 
