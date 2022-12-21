@@ -1995,16 +1995,16 @@ describe('Query class', () => {
       'doc5'
     );
 
-    // Test with limits (explicit order by DESC): (a==2) || (b == 1) ORDER BY a LIMIT_TO_LAST 1
+    // Test with limits (explicit order by DESC): (a==2) || (b == 1) ORDER BY a LIMIT 1
     expectDocs(
       await collection
         .where(
           Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1))
         )
-        .limitToLast(1)
+        .limit(1)
         .orderBy('a', 'desc')
         .get(),
-      'doc5'
+      'doc2'
     );
 
     // Test with limits without orderBy (the __name__ ordering is the tie breaker).
