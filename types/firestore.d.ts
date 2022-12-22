@@ -55,6 +55,18 @@ declare namespace FirebaseFirestore {
         : never);
 
   /**
+   * Similar to Typescript's `Partial<T>`, but applies recursively to nested
+   * objects, making their properties optional as well.
+   *
+   * Note: This works because "when type parameter T [of a mapped type] is
+   * instantiated with a primitive type the mapped type evaluates to the same
+   * primitive." https://github.com/microsoft/TypeScript/issues/40012
+   */
+  export type DeepPartial<T> = {
+    [P in keyof T]?: DeepPartial<T[P]>
+  }
+
+  /**
    * Update data (for use with [update]{@link DocumentReference#update})
    * that contains paths mapped to values. Fields that contain dots reference
    * nested fields within the document. FieldValues can be passed in
@@ -211,7 +223,7 @@ declare namespace FirebaseFirestore {
     toFirestore(
       modelObject: PartialWithFieldValue<ModelT>,
       options: SetOptions
-    ): SerializedModelT;
+    ): DeepPartial<SerializedModelT>;
 
     /**
      * Called by the Firestore SDK to convert Firestore data into an object of
