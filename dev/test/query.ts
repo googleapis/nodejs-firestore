@@ -35,6 +35,7 @@ import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {QualifiedResourcePath} from '../src/path';
 import {
   ApiOverride,
+  collect,
   createInstance,
   document,
   InvalidApiUsage,
@@ -49,8 +50,10 @@ import {
   writeResult,
 } from './util/helpers';
 
+import {GoogleError} from 'google-gax';
 import api = google.firestore.v1;
 import protobuf = google.protobuf;
+import {Deferred} from '../src/util';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -2505,5 +2508,122 @@ describe('collectionGroup queries', () => {
           'number of segments.'
       );
     });
+  });
+});
+
+describe('query resumption', () => {
+  let firestore: Firestore;
+
+  beforeEach(() => {
+    setTimeoutHandler(setImmediate);
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
+  });
+
+  afterEach(async () => {
+    await verifyInstance(firestore);
+    setTimeoutHandler(setTimeout);
+  });
+
+  // Prevent regression of
+  // https://github.com/googleapis/nodejs-firestore/issues/1790
+  it('results should not be double produced on retryable error with back pressure', async () => {
+    // Generate the IDs of the documents that will match the query.
+    const documentIds = Array.from(new Array(500), (_, index) => `doc${index}`);
+
+    // Finds the index in `documentIds` of the document referred to in the
+    // "startAt" of the given request.
+    function getStartAtDocumentIndex(
+      request: api.IRunQueryRequest
+    ): number | null {
+      const startAt = request.structuredQuery?.startAt;
+      const startAtValue = startAt?.values?.[0]?.referenceValue;
+      const startAtBefore = startAt?.before;
+      if (typeof startAtValue !== 'string') {
+        return null;
+      }
+      const docId = startAtValue.split('/').pop()!;
+      const docIdIndex = documentIds.indexOf(docId);
+      if (docIdIndex < 0) {
+        return null;
+      }
+      return startAtBefore ? docIdIndex : docIdIndex + 1;
+    }
+
+    const RETRYABLE_ERROR_DOMAIN = 'RETRYABLE_ERROR_DOMAIN';
+
+    // A mock replacement for Query._isPermanentRpcError which (a) resolves
+    // a promise once invoked and (b) treats a specific error "domain" as
+    // non-retryable.
+    function mockIsPermanentRpcError(err: GoogleError): boolean {
+      mockIsPermanentRpcError.invoked.resolve(true);
+      return err?.domain !== RETRYABLE_ERROR_DOMAIN;
+    }
+    mockIsPermanentRpcError.invoked = new Deferred();
+
+    // Return the first half of the documents, followed by a retryable error.
+    function* getRequest1Responses(): Generator<api.IRunQueryResponse | Error> {
+      const runQueryResponses = documentIds
+        .slice(0, documentIds.length / 2)
+        .map(documentId => result(documentId));
+      for (const runQueryResponse of runQueryResponses) {
+        yield runQueryResponse;
+      }
+      const retryableError = new GoogleError('simulated retryable error');
+      retryableError.domain = RETRYABLE_ERROR_DOMAIN;
+      yield retryableError;
+    }
+
+    // Return the remaining documents.
+    function* getRequest2Responses(
+      request: api.IRunQueryRequest
+    ): Generator<api.IRunQueryResponse> {
+      const startAtDocumentIndex = getStartAtDocumentIndex(request);
+      if (startAtDocumentIndex === null) {
+        throw new Error('request #2 should specify a valid startAt');
+      }
+      const runQueryResponses = documentIds
+        .slice(startAtDocumentIndex)
+        .map(documentId => result(documentId));
+      for (const runQueryResponse of runQueryResponses) {
+        yield runQueryResponse;
+      }
+    }
+
+    // Set up the mocked responses from Watch.
+    let requestNum = 0;
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        requestNum++;
+        switch (requestNum) {
+          case 1:
+            return stream(...getRequest1Responses());
+          case 2:
+            return stream(...getRequest2Responses(request!));
+          default:
+            throw new Error(`should never get here (requestNum=${requestNum})`);
+        }
+      },
+    };
+
+    // Create an async iterator to get the result set but DO NOT iterate over
+    // it immediately. Instead, allow the responses to pile up and fill the
+    // buffers. Once isPermanentError() is invoked, indicating that the first
+    // request has failed and is about to be retried, collect the results from
+    // the async iterator into an array.
+    firestore = await createInstance(overrides);
+    const query = firestore.collection('collectionId');
+    query._isPermanentRpcError = mockIsPermanentRpcError;
+    const iterator = query
+      .stream()
+      [Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
+    await mockIsPermanentRpcError.invoked.promise;
+    const snapshots = await collect(iterator);
+
+    // Verify that the async iterator returned the correct documents and,
+    // especially, does not have duplicate results.
+    const actualDocumentIds = snapshots.map(snapshot => snapshot.id);
+    expect(actualDocumentIds).to.eql(documentIds);
   });
 });
