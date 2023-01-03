@@ -278,6 +278,38 @@ describe('Client pool', () => {
     restPromises.forEach(restPromise => restPromise.resolve());
   });
 
+  it('does not re-use rest instance after beginning the transition to grpc - multiple rest clients', async () => {
+    const operationLimit = 10;
+    const clientPool = new ClientPool<{}>(operationLimit, 1, () => {
+      return {};
+    });
+
+    const restPromises = deferredPromises(15);
+    const grpcPromises = deferredPromises(5);
+
+    // First 15 operations can use rest, this will fill the first
+    // client and create a new client.
+    restPromises.forEach(restPromise => {
+      void clientPool.run(REQUEST_TAG, USE_REST, () => restPromise.promise);
+    });
+    expect(clientPool.opCount).to.equal(15);
+    expect(clientPool.size).to.equal(2);
+    assertOpCount(clientPool, 0, 15);
+
+    // Next 5 operations alternate between gRPC and REST, this will create a new client using gRPC
+    let transport = USE_GRPC;
+    grpcPromises.forEach(grpcPromise => {
+      void clientPool.run(REQUEST_TAG, transport, () => grpcPromise.promise);
+      transport = !transport;
+    });
+    expect(clientPool.opCount).to.equal(20);
+    expect(clientPool.size).to.equal(3);
+    assertOpCount(clientPool, 5, 15);
+
+    grpcPromises.forEach(grpcPromise => grpcPromise.resolve());
+    restPromises.forEach(restPromise => restPromise.resolve());
+  });
+
   it('does not re-use rest instance after beginning the transition to grpc - grpc client RST_STREAM', async () => {
     const clientPool = new ClientPool<{}>(10, 1, () => {
       return {};
