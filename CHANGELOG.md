@@ -4,6 +4,15 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.4.2](https://github.com/googleapis/nodejs-firestore/compare/v6.4.1...v6.4.2) (2023-01-09)
+
+
+### Bug Fixes
+
+* **deps:** Use google-gax v3.5.2 ([#1794](https://github.com/googleapis/nodejs-firestore/issues/1794)) ([b1a0313](https://github.com/googleapis/nodejs-firestore/commit/b1a0313498b0c3569bd74ce96fce80b8f9bee1a9))
+* Ensure that the client pool consistently uses gRPC clients after transitioning from REST ([3068361](https://github.com/googleapis/nodejs-firestore/commit/306836163ae01221aa9c0076c76093e727c74a08))
+* Fix duplicates in Query.stream() with back pressure ([#1806](https://github.com/googleapis/nodejs-firestore/issues/1806)) ([a5b680d](https://github.com/googleapis/nodejs-firestore/commit/a5b680da034d600babb9e3495fb8a7bf019d1315))
+
 ## [6.4.1](https://github.com/googleapis/nodejs-firestore/compare/v6.4.0...v6.4.1) (2022-10-17)
 
 
