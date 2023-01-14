@@ -597,6 +597,23 @@ export class Firestore implements firestore.Firestore {
           // also set the `protocol` option for GAX fallback to force http
           if (useFallback) {
             settings.protocol = 'http';
+
+            // If the emulator mode is enabled, we set emulator credentials
+            // to prevent the gRPC-fallback client from trying to obtain
+            // service account credentials from the environment.
+            if (process.env.FIRESTORE_EMULATOR_HOST) {
+              const emulatorCredentials = {
+                access_token: 'owner',
+              };
+              const emulatorClient =
+                // eslint-disable-next-line node/no-extraneous-require
+                new (require('google-auth-library').OAuth2Client)();
+              emulatorClient.setCredentials(emulatorCredentials);
+              const emulatorAuth = new (require('google-gax').GoogleAuth)({
+                authClient: emulatorClient,
+              });
+              settings.auth = emulatorAuth;
+            }
           }
 
           client = new module.exports.v1(settings, gax);
