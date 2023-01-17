@@ -93,6 +93,12 @@ export class ClientPool<T> {
     let selectedClient: T | null = null;
     let selectedClientRequestCount = -1;
 
+    // Transition to grpc when we see the first operation that requires grpc.
+    this.grpcEnabled = this.grpcEnabled || requiresGrpc;
+
+    // Require a grpc client for this operation if we have transitioned to grpc.
+    requiresGrpc = requiresGrpc || this.grpcEnabled;
+
     for (const [client, metadata] of this.activeClients) {
       // Use the "most-full" client that can still accommodate the request
       // in order to maximize the number of idle clients as operations start to
@@ -101,7 +107,7 @@ export class ClientPool<T> {
         !this.failedClients.has(client) &&
         metadata.activeRequestCount > selectedClientRequestCount &&
         metadata.activeRequestCount < this.concurrentOperationLimit &&
-        (!requiresGrpc || metadata.grpcEnabled)
+        (metadata.grpcEnabled || !requiresGrpc)
       ) {
         selectedClient = client;
         selectedClientRequestCount = metadata.activeRequestCount;
@@ -221,6 +227,21 @@ export class ClientPool<T> {
       metadata => (activeOperationCount += metadata.activeRequestCount)
     );
     return activeOperationCount;
+  }
+
+  /**
+   * The currently active clients.
+   *
+   * @return The currently active clients.
+   * @private
+   * @internal
+   */
+  // Visible for testing.
+  get _activeClients(): Map<
+    T,
+    {activeRequestCount: number; grpcEnabled: boolean}
+  > {
+    return this.activeClients;
   }
 
   /**
