@@ -208,123 +208,127 @@ describe('Firestore class', () => {
   });
 });
 
-describe('CollectionGroup class', () => {
-  const desiredPartitionCount = 3;
-  const documentCount = 2 * 128 + 127; // Minimum partition size is 128.
-
-  let firestore: Firestore;
-  let randomColl: CollectionReference;
-  let collectionGroup: CollectionGroup;
-
-  before(async () => {
-    randomColl = getTestRoot();
-    firestore = randomColl.firestore;
-    collectionGroup = firestore.collectionGroup(randomColl.id);
-
-    const batch = firestore.batch();
-    for (let i = 0; i < documentCount; ++i) {
-      batch.create(randomColl.doc(), {title: 'post', author: 'author'});
-    }
-    await batch.commit();
-  });
-
-  async function getPartitions<T>(
-    collectionGroup: CollectionGroup<T>,
-    desiredPartitionsCount: number
-  ): Promise<QueryPartition<T>[]> {
-    const partitions: QueryPartition<T>[] = [];
-    for await (const partition of collectionGroup.getPartitions(
-      desiredPartitionsCount
-    )) {
-      partitions.push(partition);
-    }
-    return partitions;
-  }
-
-  async function verifyPartitions<T>(
-    partitions: QueryPartition<T>[]
-  ): Promise<QueryDocumentSnapshot<T>[]> {
-    expect(partitions.length).to.not.be.greaterThan(desiredPartitionCount);
-
-    expect(partitions[0].startAt).to.be.undefined;
-    for (let i = 0; i < partitions.length - 1; ++i) {
-      // The cursor value is a single DocumentReference
-      expect(
-        (partitions[i].endBefore![0] as DocumentReference<T>).isEqual(
-          partitions[i + 1].startAt![0] as DocumentReference<T>
-        )
-      ).to.be.true;
-    }
-    expect(partitions[partitions.length - 1].endBefore).to.be.undefined;
-
-    // Validate that we can use the partitions to read the original documents.
-    const documents: QueryDocumentSnapshot<T>[] = [];
-    for (const partition of partitions) {
-      documents.push(...(await partition.toQuery().get()).docs);
-    }
-    expect(documents.length).to.equal(documentCount);
-
-    return documents;
-  }
-
-  it('partition query', async () => {
-    const partitions = await getPartitions(
-      collectionGroup,
-      desiredPartitionCount
-    );
-    await verifyPartitions(partitions);
-  });
-
-  it('partition query with manual cursors', async () => {
-    const partitions = await getPartitions(
-      collectionGroup,
-      desiredPartitionCount
-    );
-
-    const documents: QueryDocumentSnapshot<DocumentData>[] = [];
-    for (const partition of partitions) {
-      let partitionedQuery: Query = collectionGroup;
-      if (partition.startAt) {
-        partitionedQuery = partitionedQuery.startAt(...partition.startAt);
-      }
-      if (partition.endBefore) {
-        partitionedQuery = partitionedQuery.endBefore(...partition.endBefore);
-      }
-      documents.push(...(await partitionedQuery.get()).docs);
-    }
-
-    expect(documents.length).to.equal(documentCount);
-  });
-
-  it('partition query with converter', async () => {
-    const collectionGroupWithConverter =
-      collectionGroup.withConverter(postConverter);
-    const partitions = await getPartitions(
-      collectionGroupWithConverter,
-      desiredPartitionCount
-    );
-    const documents = await verifyPartitions(partitions);
-
-    for (const document of documents) {
-      expect(document.data()).to.be.an.instanceOf(Post);
-    }
-  });
-
-  it('empty partition query', async () => {
+// Skip partition query tests when running against the emulator
+(!process.env.FIRESTORE_EMULATOR_HOST ? describe : describe.skip)(
+  'CollectionGroup class',
+  () => {
     const desiredPartitionCount = 3;
+    const documentCount = 2 * 128 + 127; // Minimum partition size is 128.
 
-    const collectionGroupId = randomColl.doc().id;
-    const collectionGroup = firestore.collectionGroup(collectionGroupId);
-    const partitions = await getPartitions(
-      collectionGroup,
-      desiredPartitionCount
-    );
+    let firestore: Firestore;
+    let randomColl: CollectionReference;
+    let collectionGroup: CollectionGroup;
 
-    expect(partitions.length).to.equal(1);
-    expect(partitions[0].startAt).to.be.undefined;
-    expect(partitions[0].endBefore).to.be.undefined;
-  });
-});
+    before(async () => {
+      randomColl = getTestRoot();
+      firestore = randomColl.firestore;
+      collectionGroup = firestore.collectionGroup(randomColl.id);
+
+      const batch = firestore.batch();
+      for (let i = 0; i < documentCount; ++i) {
+        batch.create(randomColl.doc(), {title: 'post', author: 'author'});
+      }
+      await batch.commit();
+    });
+
+    async function getPartitions<T>(
+      collectionGroup: CollectionGroup<T>,
+      desiredPartitionsCount: number
+    ): Promise<QueryPartition<T>[]> {
+      const partitions: QueryPartition<T>[] = [];
+      for await (const partition of collectionGroup.getPartitions(
+        desiredPartitionsCount
+      )) {
+        partitions.push(partition);
+      }
+      return partitions;
+    }
+
+    async function verifyPartitions<T>(
+      partitions: QueryPartition<T>[]
+    ): Promise<QueryDocumentSnapshot<T>[]> {
+      expect(partitions.length).to.not.be.greaterThan(desiredPartitionCount);
+
+      expect(partitions[0].startAt).to.be.undefined;
+      for (let i = 0; i < partitions.length - 1; ++i) {
+        // The cursor value is a single DocumentReference
+        expect(
+          (partitions[i].endBefore![0] as DocumentReference<T>).isEqual(
+            partitions[i + 1].startAt![0] as DocumentReference<T>
+          )
+        ).to.be.true;
+      }
+      expect(partitions[partitions.length - 1].endBefore).to.be.undefined;
+
+      // Validate that we can use the partitions to read the original documents.
+      const documents: QueryDocumentSnapshot<T>[] = [];
+      for (const partition of partitions) {
+        documents.push(...(await partition.toQuery().get()).docs);
+      }
+      expect(documents.length).to.equal(documentCount);
+
+      return documents;
+    }
+
+    it('partition query', async () => {
+      const partitions = await getPartitions(
+        collectionGroup,
+        desiredPartitionCount
+      );
+      await verifyPartitions(partitions);
+    });
+
+    it('partition query with manual cursors', async () => {
+      const partitions = await getPartitions(
+        collectionGroup,
+        desiredPartitionCount
+      );
+
+      const documents: QueryDocumentSnapshot<DocumentData>[] = [];
+      for (const partition of partitions) {
+        let partitionedQuery: Query = collectionGroup;
+        if (partition.startAt) {
+          partitionedQuery = partitionedQuery.startAt(...partition.startAt);
+        }
+        if (partition.endBefore) {
+          partitionedQuery = partitionedQuery.endBefore(...partition.endBefore);
+        }
+        documents.push(...(await partitionedQuery.get()).docs);
+      }
+
+      expect(documents.length).to.equal(documentCount);
+    });
+
+    it('partition query with converter', async () => {
+      const collectionGroupWithConverter =
+        collectionGroup.withConverter(postConverter);
+      const partitions = await getPartitions(
+        collectionGroupWithConverter,
+        desiredPartitionCount
+      );
+      const documents = await verifyPartitions(partitions);
+
+      for (const document of documents) {
+        expect(document.data()).to.be.an.instanceOf(Post);
+      }
+    });
+
+    it('empty partition query', async () => {
+      const desiredPartitionCount = 3;
+
+      const collectionGroupId = randomColl.doc().id;
+      const collectionGroup = firestore.collectionGroup(collectionGroupId);
+      const partitions = await getPartitions(
+        collectionGroup,
+        desiredPartitionCount
+      );
+
+      expect(partitions.length).to.equal(1);
+      expect(partitions[0].startAt).to.be.undefined;
+      expect(partitions[0].endBefore).to.be.undefined;
+    });
+  }
+);
 
 describe('CollectionReference class', () => {
   let firestore: Firestore;
@@ -711,13 +715,19 @@ describe('DocumentReference class', () => {
       });
   });
 
-  it('enforces that updated document exists', () => {
-    return randomCol
-      .doc()
-      .update({foo: 'b'})
-      .catch(err => {
-        expect(err.message).to.match(/No document to update/);
-      });
+  it('enforces that updated document exists', async () => {
+    await expect(
+      randomCol
+        .doc()
+        .update({foo: 'b'})
+        .catch(err => {
+          if (!process.env.FIRESTORE_EMULATOR_HOST) {
+            expect(err.message).to.match(/No document to update/);
+          }
+
+          throw err;
+        })
+    ).to.be.rejected;
   });
 
   it('has delete() method', () => {
@@ -744,14 +754,19 @@ describe('DocumentReference class', () => {
     return ref.delete();
   });
 
-  it('will fail to delete document with exists: true if doc does not exist', () => {
+  it('will fail to delete document with exists: true if doc does not exist', async () => {
     const ref = randomCol.doc();
-    return ref
-      .delete({exists: true})
-      .then(() => Promise.reject('Delete should have failed'))
-      .catch((err: Error) => {
-        expect(err.message).to.contain('No document to update');
-      });
+    await expect(
+      ref
+        .delete({exists: true})
+        .then(() => Promise.reject('Delete should have failed'))
+        .catch((err: Error) => {
+          if (!process.env.FIRESTORE_EMULATOR_HOST) {
+            expect(err.message).to.contain('No document to update');
+          }
+          throw err;
+        })
+    ).to.be.rejected;
   });
 
   it('supports non-alphanumeric field names', () => {
@@ -2472,51 +2487,61 @@ describe('Transaction class', () => {
 
     let attempts = 0;
 
-    await expect(
-      firestore.runTransaction(async transaction => {
-        ++attempts;
-        transaction.update(ref, {foo: 'b'});
-      })
-    ).to.eventually.be.rejectedWith('No document to update');
+    const promise = firestore.runTransaction(async transaction => {
+      ++attempts;
+      transaction.update(ref, {foo: 'b'});
+    });
+
+    if (!process.env.FIRESTORE_EMULATOR_HOST) {
+      await expect(promise).to.eventually.be.rejectedWith(
+        'No document to update'
+      );
+    } else {
+      await expect(promise).to.eventually.be.rejected;
+    }
 
     expect(attempts).to.equal(1);
   });
 
-  it('retries transactions that fail with contention', async () => {
-    const ref = randomCol.doc('doc');
+  // Skip this test when running against the emulator
+  (!process.env.FIRESTORE_EMULATOR_HOST ? it : it.skip)(
+    'retries transactions that fail with contention',
+    async () => {
+      const ref = randomCol.doc('doc');
 
-    let attempts = 0;
+      let attempts = 0;
 
-    // Create two transactions that both read and update the same document.
-    // `contentionPromise` is used to ensure that both transactions are active
-    // on commit, which causes one of transactions to fail with Code ABORTED
-    // and be retried.
-    const contentionPromise = [new Deferred<void>(), new Deferred<void>()];
+      // Create two transactions that both read and update the same document.
+      // `contentionPromise` is used to ensure that both transactions are active
+      // on commit, which causes one of transactions to fail with Code ABORTED
+      // and be retried.
+      const contentionPromise = [new Deferred<void>(), new Deferred<void>()];
 
-    const firstTransaction = firestore.runTransaction(async transaction => {
-      ++attempts;
-      await transaction.get(ref);
-      contentionPromise[0].resolve();
-      await contentionPromise[1].promise;
-      transaction.set(ref, {first: true}, {merge: true});
-    });
+      const firstTransaction = firestore.runTransaction(async transaction => {
+        ++attempts;
+        await transaction.get(ref);
+        contentionPromise[0].resolve();
+        await contentionPromise[1].promise;
+        transaction.set(ref, {first: true}, {merge: true});
+      });
 
-    const secondTransaction = firestore.runTransaction(async transaction => {
-      ++attempts;
-      await transaction.get(ref);
-      contentionPromise[1].resolve();
-      await contentionPromise[0].promise;
-      transaction.set(ref, {second: true}, {merge: true});
-    });
+      const secondTransaction = firestore.runTransaction(async transaction => {
+        ++attempts;
+        await transaction.get(ref);
+        contentionPromise[1].resolve();
+        await contentionPromise[0].promise;
+        transaction.set(ref, {second: true}, {merge: true});
+      });
 
-    await firstTransaction;
-    await secondTransaction;
+      await firstTransaction;
+      await secondTransaction;
 
-    expect(attempts).to.equal(3);
+      expect(attempts).to.equal(3);
 
-    const finalSnapshot = await ref.get();
-    expect(finalSnapshot.data()).to.deep.equal({first: true, second: true});
-  });
+      const finalSnapshot = await ref.get();
+      expect(finalSnapshot.data()).to.deep.equal({first: true, second: true});
+    }
+  );
 
   it('supports read-only transactions', async () => {
     const ref = randomCol.doc('doc');
@@ -2555,7 +2580,11 @@ describe('Transaction class', () => {
       expect.fail();
     } catch (e) {
       expect(attempts).to.equal(1);
-      expect(e.code).to.equal(Status.INVALID_ARGUMENT);
+
+      // Don't validate error code when running against the emulator
+      if (!process.env.FIRESTORE_EMULATOR_HOST) {
+        expect(e.code).to.equal(Status.INVALID_ARGUMENT);
+      }
     }
   });
 });
@@ -2972,91 +3001,100 @@ describe('BulkWriter class', () => {
 });
 
 describe('Client initialization', () => {
-  const ops: Array<[string, (coll: CollectionReference) => Promise<unknown>]> =
+  const ops: Array<
     [
-      ['CollectionReference.get()', randomColl => randomColl.get()],
-      ['CollectionReference.add()', randomColl => randomColl.add({})],
-      [
-        'CollectionReference.stream()',
-        randomColl => {
-          const deferred = new Deferred<void>();
-          randomColl.stream().on('finish', () => {
-            deferred.resolve();
-          });
-          return deferred.promise;
-        },
-      ],
-      [
-        'CollectionReference.listDocuments()',
-        randomColl => randomColl.listDocuments(),
-      ],
-      [
-        'CollectionReference.onSnapshot()',
-        randomColl => {
-          const deferred = new Deferred<void>();
-          const unsubscribe = randomColl.onSnapshot(() => {
-            unsubscribe();
-            deferred.resolve();
-          });
-          return deferred.promise;
-        },
-      ],
-      ['DocumentReference.get()', randomColl => randomColl.doc().get()],
-      ['DocumentReference.create()', randomColl => randomColl.doc().create({})],
-      ['DocumentReference.set()', randomColl => randomColl.doc().set({})],
-      [
-        'DocumentReference.update()',
-        async randomColl => {
-          const update = randomColl.doc().update('foo', 'bar');
+      string,
+      (coll: CollectionReference) => Promise<unknown>,
+      /* skip */ boolean?
+    ]
+  > = [
+    ['CollectionReference.get()', randomColl => randomColl.get()],
+    ['CollectionReference.add()', randomColl => randomColl.add({})],
+    [
+      'CollectionReference.stream()',
+      randomColl => {
+        const deferred = new Deferred<void>();
+        randomColl.stream().on('finish', () => {
+          deferred.resolve();
+        });
+        return deferred.promise;
+      },
+    ],
+    [
+      'CollectionReference.listDocuments()',
+      randomColl => randomColl.listDocuments(),
+    ],
+    [
+      'CollectionReference.onSnapshot()',
+      randomColl => {
+        const deferred = new Deferred<void>();
+        const unsubscribe = randomColl.onSnapshot(() => {
+          unsubscribe();
+          deferred.resolve();
+        });
+        return deferred.promise;
+      },
+    ],
+    ['DocumentReference.get()', randomColl => randomColl.doc().get()],
+    ['DocumentReference.create()', randomColl => randomColl.doc().create({})],
+    ['DocumentReference.set()', randomColl => randomColl.doc().set({})],
+    [
+      'DocumentReference.update()',
+      async randomColl => {
+        const update = randomColl.doc().update('foo', 'bar');
+
+        // Don't validate the error message when running against the emulator
+        if (!process.env.FIRESTORE_EMULATOR_HOST) {
           await expect(update).to.eventually.be.rejectedWith(
             'No document to update'
           );
-        },
-      ],
-      ['DocumentReference.delete()', randomColl => randomColl.doc().delete()],
-      [
-        'DocumentReference.listCollections()',
-        randomColl => randomColl.doc().listCollections(),
-      ],
-      [
-        'DocumentReference.onSnapshot()',
-        randomColl => {
-          const deferred = new Deferred<void>();
-          const unsubscribe = randomColl.doc().onSnapshot(() => {
-            unsubscribe();
-            deferred.resolve();
-          });
-          return deferred.promise;
-        },
-      ],
-      [
-        'CollectionGroup.getPartitions()',
-        async randomColl => {
-          const partitions = randomColl.firestore
-            .collectionGroup('id')
-            .getPartitions(2);
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          for await (const _ of partitions);
-        },
-      ],
-      [
-        'Firestore.runTransaction()',
-        randomColl =>
-          randomColl.firestore.runTransaction(t => t.get(randomColl)),
-      ],
-      [
-        'Firestore.getAll()',
-        randomColl => randomColl.firestore.getAll(randomColl.doc()),
-      ],
-      [
-        'Firestore.batch()',
-        randomColl => randomColl.firestore.batch().commit(),
-      ],
-      ['Firestore.terminate()', randomColl => randomColl.firestore.terminate()],
-    ];
+        } else {
+          await expect(update).to.eventually.be.rejected;
+        }
+      },
+    ],
+    ['DocumentReference.delete()', randomColl => randomColl.doc().delete()],
+    [
+      'DocumentReference.listCollections()',
+      randomColl => randomColl.doc().listCollections(),
+    ],
+    [
+      'DocumentReference.onSnapshot()',
+      randomColl => {
+        const deferred = new Deferred<void>();
+        const unsubscribe = randomColl.doc().onSnapshot(() => {
+          unsubscribe();
+          deferred.resolve();
+        });
+        return deferred.promise;
+      },
+    ],
+    [
+      'CollectionGroup.getPartitions()',
+      async randomColl => {
+        const partitions = randomColl.firestore
+          .collectionGroup('id')
+          .getPartitions(2);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const _ of partitions);
+      },
+      // Skip this test when running against the emulator
+      !!process.env.FIRESTORE_EMULATOR_HOST,
+    ],
+    [
+      'Firestore.runTransaction()',
+      randomColl => randomColl.firestore.runTransaction(t => t.get(randomColl)),
+    ],
+    [
+      'Firestore.getAll()',
+      randomColl => randomColl.firestore.getAll(randomColl.doc()),
+    ],
+    ['Firestore.batch()', randomColl => randomColl.firestore.batch().commit()],
+    ['Firestore.terminate()', randomColl => randomColl.firestore.terminate()],
+  ];
 
-  for (const [description, op] of ops) {
-    it(`succeeds for ${description}`, () => {
+  for (const [description, op, skip] of ops) {
+    (!skip ? it : it.skip)(`succeeds for ${description}`, () => {
       const randomCol = getTestRoot();
       return op(randomCol);
     });
