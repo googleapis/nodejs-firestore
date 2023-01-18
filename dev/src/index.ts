@@ -609,6 +609,8 @@ export class Firestore implements firestore.Firestore {
                 // eslint-disable-next-line node/no-extraneous-require
                 new (require('google-auth-library').OAuth2Client)();
               emulatorClient.setCredentials(emulatorCredentials);
+              emulatorClient.projectId =
+                settings.projectId ?? process.env.GCLOUD_PROJECT;
               const emulatorAuth = new (require('google-gax').GoogleAuth)({
                 authClient: emulatorClient,
               });
