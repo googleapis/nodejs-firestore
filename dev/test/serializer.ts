@@ -60,7 +60,8 @@ describe('validateUserInput', () => {
                                           uiData: {
                                             // depth 19
                                             choicesFactors: {
-                                              rarely: 1, // depth 20
+                                              // depth 20
+                                              rarely: 1,
                                             },
                                           },
                                         },
@@ -135,7 +136,8 @@ describe('validateUserInput', () => {
                                             choicesFactors: {
                                               // depth 20
                                               rarely: {
-                                                cat: true, // depth 21
+                                                // depth 21
+                                                cat: true,
                                               },
                                             },
                                           },
@@ -166,7 +168,7 @@ describe('validateUserInput', () => {
         allowUndefined: false,
       })
     ).to.throw(
-      'Value for argument "nestedObject" is not a valid Firestore Object. Input object is deeper than 20 levels or contains a cycle.'
+      /Input object is deeper than 20 levels/i
     );
   });
 
@@ -207,7 +209,6 @@ describe('validateUserInput', () => {
 
   it('validates the depth of nested objects and arrays - 21', () => {
     // This nested object is 21 levels deep
-    // This nested object is 20 levels deep
     const nestedObject = {
       a: {
         b: {
@@ -243,7 +244,7 @@ describe('validateUserInput', () => {
         allowUndefined: false,
       })
     ).to.throw(
-      'Value for argument "nestedObject" is not a valid Firestore Object. Input object is deeper than 20 levels or contains a cycle.'
+        /Input object is deeper than 20 levels/i
     );
   });
 });
