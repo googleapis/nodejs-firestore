@@ -167,9 +167,7 @@ describe('validateUserInput', () => {
         allowTransforms: false,
         allowUndefined: false,
       })
-    ).to.throw(
-      /Input object is deeper than 20 levels/i
-    );
+    ).to.throw(/Input object is deeper than 20 levels/i);
   });
 
   it('validates the depth of nested objects - 20', () => {
@@ -243,8 +241,6 @@ describe('validateUserInput', () => {
         allowTransforms: false,
         allowUndefined: false,
       })
-    ).to.throw(
-        /Input object is deeper than 20 levels/i
-    );
+    ).to.throw(/Input object is deeper than 20 levels/i);
   });
 });
