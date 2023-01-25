@@ -208,8 +208,9 @@ describe('Firestore class', () => {
   });
 });
 
-// Skip partition query tests when running against the emulator
-(!process.env.FIRESTORE_EMULATOR_HOST ? describe : describe.skip)(
+// Skip partition query tests when running against the emulator because
+// partition queries are not supported by the emulator.
+(process.env.FIRESTORE_EMULATOR_HOST === undefined ? describe : describe.skip)(
   'CollectionGroup class',
   () => {
     const desiredPartitionCount = 3;
@@ -721,7 +722,8 @@ describe('DocumentReference class', () => {
         .doc()
         .update({foo: 'b'})
         .catch(err => {
-          if (!process.env.FIRESTORE_EMULATOR_HOST) {
+          // The emulator generates a different error message, do not validate.
+          if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
             expect(err.message).to.match(/No document to update/);
           }
 
@@ -761,7 +763,8 @@ describe('DocumentReference class', () => {
         .delete({exists: true})
         .then(() => Promise.reject('Delete should have failed'))
         .catch((err: Error) => {
-          if (!process.env.FIRESTORE_EMULATOR_HOST) {
+          // The emulator generates a different error message, do not validate.
+          if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
             expect(err.message).to.contain('No document to update');
           }
           throw err;
@@ -2492,19 +2495,22 @@ describe('Transaction class', () => {
       transaction.update(ref, {foo: 'b'});
     });
 
-    if (!process.env.FIRESTORE_EMULATOR_HOST) {
+    // Validate the error message when testing against the firestore backend.
+    if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
       await expect(promise).to.eventually.be.rejectedWith(
         'No document to update'
       );
     } else {
+      // The emulator generates a different error message, do not validate the error message.
       await expect(promise).to.eventually.be.rejected;
     }
 
     expect(attempts).to.equal(1);
   });
 
-  // Skip this test when running against the emulator
-  (!process.env.FIRESTORE_EMULATOR_HOST ? it : it.skip)(
+  // Skip this test when running against the emulator because it does not work
+  // against the emulator. Contention in the emulator may behave differently.
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it.skip)(
     'retries transactions that fail with contention',
     async () => {
       const ref = randomCol.doc('doc');
@@ -2565,28 +2571,28 @@ describe('Transaction class', () => {
     expect(snapshot.get('foo')).to.equal(1);
   });
 
-  it('fails read-only with writes', async () => {
-    let attempts = 0;
+  // This is not supported when working with the emulator. Do not run tests against emulator.
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it.skip)(
+    'fails read-only with writes',
+    async () => {
+      let attempts = 0;
 
-    const ref = randomCol.doc('doc');
-    try {
-      await firestore.runTransaction(
-        async updateFunction => {
-          ++attempts;
-          updateFunction.set(ref, {});
-        },
-        {readOnly: true}
-      );
-      expect.fail();
-    } catch (e) {
-      expect(attempts).to.equal(1);
-
-      // Don't validate error code when running against the emulator
-      if (!process.env.FIRESTORE_EMULATOR_HOST) {
+      const ref = randomCol.doc('doc');
+      try {
+        await firestore.runTransaction(
+          async updateFunction => {
+            ++attempts;
+            updateFunction.set(ref, {});
+          },
+          {readOnly: true}
+        );
+        expect.fail();
+      } catch (e) {
+        expect(attempts).to.equal(1);
         expect(e.code).to.equal(Status.INVALID_ARGUMENT);
       }
     }
-  });
+  );
 });
 
 describe('WriteBatch class', () => {
@@ -3043,8 +3049,9 @@ describe('Client initialization', () => {
       async randomColl => {
         const update = randomColl.doc().update('foo', 'bar');
 
-        // Don't validate the error message when running against the emulator
-        if (!process.env.FIRESTORE_EMULATOR_HOST) {
+        // Don't validate the error message when running against the emulator.
+        // Emulator gives different error message.
+        if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
           await expect(update).to.eventually.be.rejectedWith(
             'No document to update'
           );
@@ -3078,7 +3085,8 @@ describe('Client initialization', () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const _ of partitions);
       },
-      // Skip this test when running against the emulator
+      // Skip this test when running against the emulator because partition queries
+      // are not supported in the emulator.
       !!process.env.FIRESTORE_EMULATOR_HOST,
     ],
     [
