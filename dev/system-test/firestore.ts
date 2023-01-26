@@ -717,19 +717,17 @@ describe('DocumentReference class', () => {
   });
 
   it('enforces that updated document exists', async () => {
-    await expect(
-      randomCol
-        .doc()
-        .update({foo: 'b'})
-        .catch(err => {
-          // The emulator generates a different error message, do not validate.
-          if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
-            expect(err.message).to.match(/No document to update/);
-          }
+    const promise = randomCol.doc().update({foo: 'b'});
 
-          throw err;
-        })
-    ).to.be.rejected;
+    // Validate the error message when testing against the firestore backend.
+    if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
+      await expect(promise).to.eventually.be.rejectedWith(
+        /No document to update/
+      );
+    } else {
+      // The emulator generates a different error message, do not validate the error message.
+      await expect(promise).to.eventually.be.rejected;
+    }
   });
 
   it('has delete() method', () => {
@@ -758,18 +756,19 @@ describe('DocumentReference class', () => {
 
   it('will fail to delete document with exists: true if doc does not exist', async () => {
     const ref = randomCol.doc();
-    await expect(
-      ref
-        .delete({exists: true})
-        .then(() => Promise.reject('Delete should have failed'))
-        .catch((err: Error) => {
-          // The emulator generates a different error message, do not validate.
-          if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
-            expect(err.message).to.contain('No document to update');
-          }
-          throw err;
-        })
-    ).to.be.rejected;
+    const promise = ref
+      .delete({exists: true})
+      .then(() => Promise.reject('Delete should have failed'));
+
+    // Validate the error message when testing against the firestore backend.
+    if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
+      await expect(promise).to.eventually.be.rejectedWith(
+        /No document to update/
+      );
+    } else {
+      // The emulator generates a different error message, do not validate the error message.
+      await expect(promise).to.eventually.be.rejected;
+    }
   });
 
   it('supports non-alphanumeric field names', () => {
@@ -2498,7 +2497,7 @@ describe('Transaction class', () => {
     // Validate the error message when testing against the firestore backend.
     if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
       await expect(promise).to.eventually.be.rejectedWith(
-        'No document to update'
+        /No document to update/
       );
     } else {
       // The emulator generates a different error message, do not validate the error message.
@@ -2571,7 +2570,8 @@ describe('Transaction class', () => {
     expect(snapshot.get('foo')).to.equal(1);
   });
 
-  // This is not supported when working with the emulator. Do not run tests against emulator.
+  // Skip this test when running against the emulator because it does not work
+  // against the emulator. The emulator fails to enforce read-only transactions.
   (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it.skip)(
     'fails read-only with writes',
     async () => {
