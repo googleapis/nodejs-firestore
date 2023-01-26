@@ -1619,7 +1619,13 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * returned query.
    */
   count(): AggregateQuery<{count: firestore.AggregateField<number>}> {
-    return new AggregateQuery(this, {count: {}});
+    return new AggregateQuery<{count: firestore.AggregateField<number>}>(this, {count: AggregateField.count()});
+  }
+
+  aggregate<T extends firestore.AggregateSpec>(
+    aggregates: T
+  ): AggregateQuery<T> {
+    throw new Error('Not Implemented');
   }
 
   /**
@@ -3168,6 +3174,31 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
     }
 
     return deepEqual(this._data, other._data);
+  }
+}
+
+export class AggregateField<T> implements firestore.AggregateField<T> {
+  /** A type string to uniquely identify instances of this class. */
+  readonly type = 'AggregateField';
+
+  private constructor(readonly aggregateType: firestore.AggregateType) {}
+
+  public static sum(field: string | FieldPath): AggregateField<number> {
+    throw new Error('Not implemented;');
+  }
+
+  public static average(
+    field: string | FieldPath
+  ): AggregateField<number | null> {
+    throw new Error('Not implemented;');
+  }
+
+  public static count(): AggregateField<number> {
+    throw new Error('Not implemented;');
+  }
+
+  public isEqual(other: AggregateField<any>): boolean {
+    throw new Error('Not implemented');
   }
 }
 

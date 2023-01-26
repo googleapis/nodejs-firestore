@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {
+  AggregateField,
   DocumentData,
   PartialWithFieldValue,
   QuerySnapshot,
@@ -2265,6 +2266,70 @@ describe('Aggregates', () => {
       await runQueryAndExpectCount(count5, 1);
     });
   }
+
+  it('sums multiple documents', async () => {
+    await randomCol.doc('doc1').set({foo: 2});
+    await randomCol.doc('doc2').set({foo: 4});
+    await randomCol.doc('doc3').set({foo: 6});
+    await randomCol.doc('doc4').set({notfoo: 8});
+
+    const aggregateQuery = randomCol.aggregate({
+      fooSum: AggregateField.sum('foo'),
+    });
+    const res = await aggregateQuery.get();
+
+    expect(res.data().fooSum).to.equal(12);
+  });
+
+  it('averages multiple documents', async () => {
+    await randomCol.doc('doc1').set({foo: 2});
+    await randomCol.doc('doc2').set({foo: 4});
+    await randomCol.doc('doc3').set({foo: 6});
+    await randomCol.doc('doc4').set({notfoo: 8});
+
+    const aggregateQuery = randomCol.aggregate({
+      fooAverage: AggregateField.average('foo'),
+    });
+    const res = await aggregateQuery.get();
+
+    expect(res.data().fooAverage).to.equal(4);
+  });
+
+  it('runs multiple aggregates over the same field', async () => {
+    await randomCol.doc('doc1').set({foo: 2});
+    await randomCol.doc('doc2').set({foo: 4});
+    await randomCol.doc('doc3').set({foo: 6});
+    await randomCol.doc('doc4').set({notfoo: 8});
+
+    const aggregateQuery = randomCol.aggregate({
+      fooAverage: AggregateField.average('foo'),
+      fooSum: AggregateField.sum('foo'),
+      count: AggregateField.count(),
+    });
+    const res = await aggregateQuery.get();
+
+    expect(res.data().fooAverage).to.equal(4);
+    expect(res.data().fooSum).to.equal(12);
+    expect(res.data().count).to.equal(3);
+  });
+
+  it('runs multiple aggregates over the multiple fields', async () => {
+    await randomCol.doc('doc1').set({foo: 2, bar: 10});
+    await randomCol.doc('doc2').set({foo: 4, bar: 20});
+    await randomCol.doc('doc3').set({foo: 6});
+    await randomCol.doc('doc4').set({notfoo: 8});
+
+    const aggregateQuery = randomCol.aggregate({
+      barAverage: AggregateField.average('bar'),
+      fooSum: AggregateField.sum('foo'),
+      count: AggregateField.count(),
+    });
+    const res = await aggregateQuery.get();
+
+    expect(res.data().barAverage).to.equal(15);
+    expect(res.data().fooSum).to.equal(3);
+    expect(res.data().count).to.equal(2);
+  });
 });
 
 describe('Transaction class', () => {

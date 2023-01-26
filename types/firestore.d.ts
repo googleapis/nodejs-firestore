@@ -2058,12 +2058,24 @@ declare namespace FirebaseFirestore {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export class AggregateField<T> {
     private constructor();
+
+    static sum(field: string | FieldPath): AggregateField<number>;
+
+    static average(field: string | FieldPath): AggregateField<number | null>;
+
+    static count(): AggregateField<number>;
+
+    isEqual(other: AggregateField<any>): boolean;
   }
 
   /**
    * The union of all `AggregateField` types that are supported by Firestore.
    */
-  export type AggregateFieldType = AggregateField<number>;
+  export type AggregateFieldType =
+    | AggregateField<number>
+    | AggregateField<number | null>;
+
+  export type AggregateType = 'average' | 'count' | 'sum';
 
   /**
    * A type whose property values are all `AggregateField` objects.
