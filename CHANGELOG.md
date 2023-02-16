@@ -4,6 +4,15 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.4.3](https://github.com/googleapis/nodejs-firestore/compare/v6.4.2...v6.4.3) (2023-02-16)
+
+
+### Bug Fixes
+
+* **deps:** Use google-gax v3.5.3 ([#1818](https://github.com/googleapis/nodejs-firestore/issues/1818)) ([88981ad](https://github.com/googleapis/nodejs-firestore/commit/88981ad8749b0aa38dfe9bcdd4ca5e60d76c8776))
+* Emulator support for system tests. Run system tests against the emulator using: `yarn system-test:grpc:emulator` or `yarn system-test:rest:emulator` ([8aedc63](https://github.com/googleapis/nodejs-firestore/commit/8aedc63138827ea03a8dacae4e7bccdf048a2be7))
+* Update the depth validation used when writing documents, so that it matches the validation of the Firestore backend. ([789d9eb](https://github.com/googleapis/nodejs-firestore/commit/789d9eb7f54b5329b17ef759f29252d17da47e26))
+
 ## [6.4.2](https://github.com/googleapis/nodejs-firestore/compare/v6.4.1...v6.4.2) (2023-01-09)
 
 
