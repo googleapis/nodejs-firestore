@@ -17,15 +17,11 @@
 import * as firestore from '@google-cloud/firestore';
 
 /**
- * A `Filter` is used to narrow the set of documents returned by
- * a Firestore query by filtering on one or more document fields.
+ * A `Filter` represents a restriction on one or more field values and can
+ * be used to refine the results of a {@link Query}.
  * `Filters`s are created by invoking {@link Filter#where}, {@link Filter#or},
  * or {@link Filter#and} and can then be passed to {@link Query#where}
  * to create a new {@link Query} instance that also contains this `Filter`.
- *
- *
- * @private TODO remove private and internal when OR query support is public
- * @internal
  */
 export abstract class Filter {
   /**
@@ -53,9 +49,6 @@ export abstract class Filter {
    *   });
    * });
    * ```
-   *
-   * @private TODO remove private and internal when OR query support is public
-   * @internal
    */
   public static where(
     fieldPath: string | firestore.FieldPath,
@@ -66,11 +59,14 @@ export abstract class Filter {
   }
 
   /**
-   * Creates and returns a new [Filter]{@link Filter} that performs
-   * a logical OR of all the provided {@link Filter}s. The returned Filter can be
-   * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
-   * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
-   * it requires that documents must satisfy one of the provided {@link Filter}s.
+   * Creates and returns a new [Filter]{@link Filter} that is a
+   * disjunction of the given {@link Filter}s. A disjunction filter includes
+   * a document if it satisfies any of the given {@link Filter}s.
+   *
+   * The returned Filter can be applied to [Query.where()]{@link Query#where},
+   * [Filter.or()]{@link Filter#or}, or [Filter.and()]{@link Filter#and}. When
+   * applied to a [Query]{@link Query} it requires that documents must satisfy
+   * one of the provided {@link Filter}s.
    *
    * @param {...Filter} filters  Optional. The {@link Filter}s
    * for OR operation. These must be created with calls to {@link Filter#where},
@@ -90,20 +86,20 @@ export abstract class Filter {
    *   });
    * });
    * ```
-   *
-   * @private TODO remove private and internal when OR query support is public
-   * @internal
    */
   public static or(...filters: Filter[]): Filter {
     return new CompositeFilter(filters, 'OR');
   }
 
   /**
-   * Creates and returns a new [Filter]{@link Filter} that performs
-   * a logical AND of all the provided {@link Filter}s. The returned Filter can be
-   * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
-   * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
-   * it requires that documents must satisfy all of the provided {@link Filter}s.
+   * Creates and returns a new [Filter]{@link Filter} that is a
+   * conjunction of the given {@link Filter}s. A conjunction filter includes
+   * a document if it satisfies any of the given {@link Filter}s.
+   *
+   * The returned Filter can be applied to [Query.where()]{@link Query#where},
+   * [Filter.or()]{@link Filter#or}, or [Filter.and()]{@link Filter#and}. When
+   * applied to a [Query]{@link Query} it requires that documents must satisfy
+   * one of the provided {@link Filter}s.
    *
    * @param {...Filter} filters  Optional. The {@link Filter}s
    * for AND operation. These must be created with calls to {@link Filter#where},
@@ -123,9 +119,6 @@ export abstract class Filter {
    *   });
    * });
    * ```
-   *
-   * @private TODO remove private and internal when OR query support is public
-   * @internal
    */
   public static and(...filters: Filter[]): Filter {
     return new CompositeFilter(filters, 'AND');
@@ -133,12 +126,11 @@ export abstract class Filter {
 }
 
 /**
- * A `UnaryFilter` is used to narrow the set of documents returned by
- * a Firestore query by filtering on a document field.
+ * A `UnaryFilter` represents a restriction on one field value and can
+ * be used to refine the results of a {@link Query}.
  * `UnaryFilter`s are created by invoking {@link Filter#where} and can then
  * be passed to {@link Query#where} to create a new {@link Query} instance
  * that also contains this `UnaryFilter`.
- *
  *
  * @private
  * @internal
@@ -187,7 +179,6 @@ export class UnaryFilter extends Filter {
  * {@link Filters}s. `CompositeFilters`s are created by invoking {@link Filter#or}
  * or {@link Filter#and} and can then be passed to {@link Query#where}
  * to create a new query instance that also contains the `CompositeFilter`.
- *
  *
  * @private
  * @internal

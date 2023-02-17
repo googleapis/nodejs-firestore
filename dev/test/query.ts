@@ -174,8 +174,7 @@ export function orFilter(
   op: api.StructuredQuery.CompositeFilter.Operator,
   ...filters: api.StructuredQuery.IFilter[]
 ): api.StructuredQuery.IFilter {
-  // TODO (orquery)
-  return compositeFilter('OPERATOR_UNSPECIFIED', ...filters);
+  return compositeFilter('OR', ...filters);
 }
 
 export function andFilter(
@@ -939,7 +938,7 @@ describe('query interface', () => {
           request,
           where(
             compositeFilter(
-              'OPERATOR_UNSPECIFIED',
+              'OR',
               fieldFilter('a', 'GREATER_THAN', {integerValue: 10}),
               unaryFilters('b', 'IS_NOT_NULL')
             )
@@ -1436,14 +1435,14 @@ describe('where() interface', () => {
           request,
           where(
             compositeFilter(
-              'OPERATOR_UNSPECIFIED',
+              'OR',
               fieldFilter('a', 'EQUAL', {integerValue: 10}),
               compositeFilter(
                 'AND',
                 fieldFilter('b', 'EQUAL', {integerValue: 20}),
                 fieldFilter('c', 'EQUAL', {integerValue: 30}),
                 compositeFilter(
-                  'OPERATOR_UNSPECIFIED',
+                  'OR',
                   fieldFilter('d', 'EQUAL', {integerValue: 40}),
                   fieldFilter('e', 'GREATER_THAN', {integerValue: 50})
                 ),
@@ -1485,7 +1484,7 @@ describe('where() interface', () => {
               'AND',
               fieldFilter('a', 'EQUAL', {integerValue: 10}),
               compositeFilter(
-                'OPERATOR_UNSPECIFIED',
+                'OR',
                 fieldFilter('b', 'EQUAL', {integerValue: 20}),
                 fieldFilter('c', 'EQUAL', {integerValue: 30}),
                 compositeFilter(

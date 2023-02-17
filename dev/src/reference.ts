@@ -1495,9 +1495,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *     });
    * });
    * ```
-   *
-   * @private TODO remove private and internal when OR query support is public
-   * @internal
    */
   where(filter: Filter): Query<T>;
 
@@ -1592,10 +1589,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     }
     return new CompositeFilterInternal(
       parsedFilters,
-      // TODO(orquery) update this line after OR is added to the proto
-      compositeFilterData._getOperator() === 'AND'
-        ? 'AND'
-        : 'OPERATOR_UNSPECIFIED'
+      compositeFilterData._getOperator() === 'AND' ? 'AND' : 'OR'
     );
   }
 
