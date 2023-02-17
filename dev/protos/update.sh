@@ -20,6 +20,7 @@ IFS=$'\n\t'
 # Variables
 PROTOS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 WORK_DIR=`mktemp -d`
+cd ${PROTOS_DIR}
 
 # deletes the temp directory on exit
 function cleanup {
@@ -43,7 +44,7 @@ git clone --depth 1 https://github.com/google/protobuf.git
 
 # Copy necessary protos.
 mkdir -p "${PROTOS_DIR}/google/api"
-cp googleapis/google/api/{annotations,client,field_behavior,http,resource}.proto \
+cp googleapis/google/api/{annotations,client,field_behavior,http,launch_stage,resource}.proto \
    "${PROTOS_DIR}/google/api/"
 
 mkdir -p "${PROTOS_DIR}/google/firestore/v1"
