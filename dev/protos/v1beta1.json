@@ -88,93 +88,6 @@
                 }
               }
             },
-            "Empty": {
-              "fields": {}
-            },
-            "DoubleValue": {
-              "fields": {
-                "value": {
-                  "type": "double",
-                  "id": 1
-                }
-              }
-            },
-            "FloatValue": {
-              "fields": {
-                "value": {
-                  "type": "float",
-                  "id": 1
-                }
-              }
-            },
-            "Int64Value": {
-              "fields": {
-                "value": {
-                  "type": "int64",
-                  "id": 1
-                }
-              }
-            },
-            "UInt64Value": {
-              "fields": {
-                "value": {
-                  "type": "uint64",
-                  "id": 1
-                }
-              }
-            },
-            "Int32Value": {
-              "fields": {
-                "value": {
-                  "type": "int32",
-                  "id": 1
-                }
-              }
-            },
-            "UInt32Value": {
-              "fields": {
-                "value": {
-                  "type": "uint32",
-                  "id": 1
-                }
-              }
-            },
-            "BoolValue": {
-              "fields": {
-                "value": {
-                  "type": "bool",
-                  "id": 1
-                }
-              }
-            },
-            "StringValue": {
-              "fields": {
-                "value": {
-                  "type": "string",
-                  "id": 1
-                }
-              }
-            },
-            "BytesValue": {
-              "fields": {
-                "value": {
-                  "type": "bytes",
-                  "id": 1
-                }
-              }
-            },
-            "Any": {
-              "fields": {
-                "type_url": {
-                  "type": "string",
-                  "id": 1
-                },
-                "value": {
-                  "type": "bytes",
-                  "id": 2
-                }
-              }
-            },
             "FileDescriptorSet": {
               "fields": {
                 "file": {
@@ -246,10 +159,6 @@
                 "syntax": {
                   "type": "string",
                   "id": 12
-                },
-                "edition": {
-                  "type": "string",
-                  "id": 13
                 }
               }
             },
@@ -314,10 +223,6 @@
                     "end": {
                       "type": "int32",
                       "id": 2
-                    },
-                    "options": {
-                      "type": "ExtensionRangeOptions",
-                      "id": 3
                     }
                   }
                 },
@@ -334,21 +239,6 @@
                   }
                 }
               }
-            },
-            "ExtensionRangeOptions": {
-              "fields": {
-                "uninterpretedOption": {
-                  "rule": "repeated",
-                  "type": "UninterpretedOption",
-                  "id": 999
-                }
-              },
-              "extensions": [
-                [
-                  1000,
-                  536870911
-                ]
-              ]
             },
             "FieldDescriptorProto": {
               "fields": {
@@ -391,10 +281,6 @@
                 "options": {
                   "type": "FieldOptions",
                   "id": 8
-                },
-                "proto3Optional": {
-                  "type": "bool",
-                  "id": 17
                 }
               },
               "nested": {
@@ -455,30 +341,6 @@
                 "options": {
                   "type": "EnumOptions",
                   "id": 3
-                },
-                "reservedRange": {
-                  "rule": "repeated",
-                  "type": "EnumReservedRange",
-                  "id": 4
-                },
-                "reservedName": {
-                  "rule": "repeated",
-                  "type": "string",
-                  "id": 5
-                }
-              },
-              "nested": {
-                "EnumReservedRange": {
-                  "fields": {
-                    "start": {
-                      "type": "int32",
-                      "id": 1
-                    },
-                    "end": {
-                      "type": "int32",
-                      "id": 2
-                    }
-                  }
                 }
               }
             },
@@ -535,17 +397,11 @@
                 },
                 "clientStreaming": {
                   "type": "bool",
-                  "id": 5,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 5
                 },
                 "serverStreaming": {
                   "type": "bool",
-                  "id": 6,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 6
                 }
               }
             },
@@ -561,10 +417,7 @@
                 },
                 "javaMultipleFiles": {
                   "type": "bool",
-                  "id": 10,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 10
                 },
                 "javaGenerateEqualsAndHash": {
                   "type": "bool",
@@ -575,10 +428,7 @@
                 },
                 "javaStringCheckUtf8": {
                   "type": "bool",
-                  "id": 27,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 27
                 },
                 "optimizeFor": {
                   "type": "OptimizeMode",
@@ -593,45 +443,23 @@
                 },
                 "ccGenericServices": {
                   "type": "bool",
-                  "id": 16,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 16
                 },
                 "javaGenericServices": {
                   "type": "bool",
-                  "id": 17,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 17
                 },
                 "pyGenericServices": {
                   "type": "bool",
-                  "id": 18,
-                  "options": {
-                    "default": false
-                  }
-                },
-                "phpGenericServices": {
-                  "type": "bool",
-                  "id": 42,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 18
                 },
                 "deprecated": {
                   "type": "bool",
-                  "id": 23,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 23
                 },
                 "ccEnableArenas": {
                   "type": "bool",
-                  "id": 31,
-                  "options": {
-                    "default": true
-                  }
+                  "id": 31
                 },
                 "objcClassPrefix": {
                   "type": "string",
@@ -640,26 +468,6 @@
                 "csharpNamespace": {
                   "type": "string",
                   "id": 37
-                },
-                "swiftPrefix": {
-                  "type": "string",
-                  "id": 39
-                },
-                "phpClassPrefix": {
-                  "type": "string",
-                  "id": 40
-                },
-                "phpNamespace": {
-                  "type": "string",
-                  "id": 41
-                },
-                "phpMetadataNamespace": {
-                  "type": "string",
-                  "id": 44
-                },
-                "rubyPackage": {
-                  "type": "string",
-                  "id": 45
                 },
                 "uninterpretedOption": {
                   "rule": "repeated",
@@ -693,24 +501,15 @@
               "fields": {
                 "messageSetWireFormat": {
                   "type": "bool",
-                  "id": 1,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 1
                 },
                 "noStandardDescriptorAccessor": {
                   "type": "bool",
-                  "id": 2,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 2
                 },
                 "deprecated": {
                   "type": "bool",
-                  "id": 3,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 3
                 },
                 "mapEntry": {
                   "type": "bool",
@@ -730,24 +529,8 @@
               ],
               "reserved": [
                 [
-                  4,
-                  4
-                ],
-                [
-                  5,
-                  5
-                ],
-                [
-                  6,
-                  6
-                ],
-                [
                   8,
                   8
-                ],
-                [
-                  9,
-                  9
                 ]
               ]
             },
@@ -773,31 +556,15 @@
                 },
                 "lazy": {
                   "type": "bool",
-                  "id": 5,
-                  "options": {
-                    "default": false
-                  }
-                },
-                "unverifiedLazy": {
-                  "type": "bool",
-                  "id": 15,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 5
                 },
                 "deprecated": {
                   "type": "bool",
-                  "id": 3,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 3
                 },
                 "weak": {
                   "type": "bool",
-                  "id": 10,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 10
                 },
                 "uninterpretedOption": {
                   "rule": "repeated",
@@ -857,10 +624,7 @@
                 },
                 "deprecated": {
                   "type": "bool",
-                  "id": 3,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 3
                 },
                 "uninterpretedOption": {
                   "rule": "repeated",
@@ -873,22 +637,13 @@
                   1000,
                   536870911
                 ]
-              ],
-              "reserved": [
-                [
-                  5,
-                  5
-                ]
               ]
             },
             "EnumValueOptions": {
               "fields": {
                 "deprecated": {
                   "type": "bool",
-                  "id": 1,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 1
                 },
                 "uninterpretedOption": {
                   "rule": "repeated",
@@ -907,10 +662,7 @@
               "fields": {
                 "deprecated": {
                   "type": "bool",
-                  "id": 33,
-                  "options": {
-                    "default": false
-                  }
+                  "id": 33
                 },
                 "uninterpretedOption": {
                   "rule": "repeated",
@@ -929,17 +681,7 @@
               "fields": {
                 "deprecated": {
                   "type": "bool",
-                  "id": 33,
-                  "options": {
-                    "default": false
-                  }
-                },
-                "idempotencyLevel": {
-                  "type": "IdempotencyLevel",
-                  "id": 34,
-                  "options": {
-                    "default": "IDEMPOTENCY_UNKNOWN"
-                  }
+                  "id": 33
                 },
                 "uninterpretedOption": {
                   "rule": "repeated",
@@ -952,16 +694,7 @@
                   1000,
                   536870911
                 ]
-              ],
-              "nested": {
-                "IdempotencyLevel": {
-                  "values": {
-                    "IDEMPOTENCY_UNKNOWN": 0,
-                    "NO_SIDE_EFFECTS": 1,
-                    "IDEMPOTENT": 2
-                  }
-                }
-              }
+              ]
             },
             "UninterpretedOption": {
               "fields": {
@@ -1077,21 +810,95 @@
                     "end": {
                       "type": "int32",
                       "id": 4
-                    },
-                    "semantic": {
-                      "type": "Semantic",
-                      "id": 5
-                    }
-                  },
-                  "nested": {
-                    "Semantic": {
-                      "values": {
-                        "NONE": 0,
-                        "SET": 1,
-                        "ALIAS": 2
-                      }
                     }
                   }
+                }
+              }
+            },
+            "Empty": {
+              "fields": {}
+            },
+            "DoubleValue": {
+              "fields": {
+                "value": {
+                  "type": "double",
+                  "id": 1
+                }
+              }
+            },
+            "FloatValue": {
+              "fields": {
+                "value": {
+                  "type": "float",
+                  "id": 1
+                }
+              }
+            },
+            "Int64Value": {
+              "fields": {
+                "value": {
+                  "type": "int64",
+                  "id": 1
+                }
+              }
+            },
+            "UInt64Value": {
+              "fields": {
+                "value": {
+                  "type": "uint64",
+                  "id": 1
+                }
+              }
+            },
+            "Int32Value": {
+              "fields": {
+                "value": {
+                  "type": "int32",
+                  "id": 1
+                }
+              }
+            },
+            "UInt32Value": {
+              "fields": {
+                "value": {
+                  "type": "uint32",
+                  "id": 1
+                }
+              }
+            },
+            "BoolValue": {
+              "fields": {
+                "value": {
+                  "type": "bool",
+                  "id": 1
+                }
+              }
+            },
+            "StringValue": {
+              "fields": {
+                "value": {
+                  "type": "string",
+                  "id": 1
+                }
+              }
+            },
+            "BytesValue": {
+              "fields": {
+                "value": {
+                  "type": "bytes",
+                  "id": 1
+                }
+              }
+            },
+            "Any": {
+              "fields": {
+                "type_url": {
+                  "type": "string",
+                  "id": 1
+                },
+                "value": {
+                  "type": "bytes",
+                  "id": 2
                 }
               }
             },
@@ -1101,6 +908,18 @@
                   "rule": "repeated",
                   "type": "string",
                   "id": 1
+                }
+              }
+            },
+            "Duration": {
+              "fields": {
+                "seconds": {
+                  "type": "int64",
+                  "id": 1
+                },
+                "nanos": {
+                  "type": "int32",
+                  "id": 2
                 }
               }
             }
@@ -2696,59 +2515,6 @@
             }
           }
         },
-        "type": {
-          "options": {
-            "cc_enable_arenas": true,
-            "go_package": "google.golang.org/genproto/googleapis/type/latlng;latlng",
-            "java_multiple_files": true,
-            "java_outer_classname": "LatLngProto",
-            "java_package": "com.google.type",
-            "objc_class_prefix": "GTP"
-          },
-          "nested": {
-            "LatLng": {
-              "fields": {
-                "latitude": {
-                  "type": "double",
-                  "id": 1
-                },
-                "longitude": {
-                  "type": "double",
-                  "id": 2
-                }
-              }
-            }
-          }
-        },
-        "rpc": {
-          "options": {
-            "cc_enable_arenas": true,
-            "go_package": "google.golang.org/genproto/googleapis/rpc/status;status",
-            "java_multiple_files": true,
-            "java_outer_classname": "StatusProto",
-            "java_package": "com.google.rpc",
-            "objc_class_prefix": "RPC"
-          },
-          "nested": {
-            "Status": {
-              "fields": {
-                "code": {
-                  "type": "int32",
-                  "id": 1
-                },
-                "message": {
-                  "type": "string",
-                  "id": 2
-                },
-                "details": {
-                  "rule": "repeated",
-                  "type": "google.protobuf.Any",
-                  "id": 3
-                }
-              }
-            }
-          }
-        },
         "api": {
           "options": {
             "go_package": "google.golang.org/genproto/googleapis/api/annotations;annotations",
@@ -2764,50 +2530,12 @@
               "id": 72295728,
               "extend": "google.protobuf.MethodOptions"
             },
-            "methodSignature": {
-              "rule": "repeated",
-              "type": "string",
-              "id": 1051,
-              "extend": "google.protobuf.MethodOptions"
-            },
-            "defaultHost": {
-              "type": "string",
-              "id": 1049,
-              "extend": "google.protobuf.ServiceOptions"
-            },
-            "oauthScopes": {
-              "type": "string",
-              "id": 1050,
-              "extend": "google.protobuf.ServiceOptions"
-            },
-            "fieldBehavior": {
-              "rule": "repeated",
-              "type": "google.api.FieldBehavior",
-              "id": 1052,
-              "extend": "google.protobuf.FieldOptions"
-            },
-            "FieldBehavior": {
-              "values": {
-                "FIELD_BEHAVIOR_UNSPECIFIED": 0,
-                "OPTIONAL": 1,
-                "REQUIRED": 2,
-                "OUTPUT_ONLY": 3,
-                "INPUT_ONLY": 4,
-                "IMMUTABLE": 5,
-                "UNORDERED_LIST": 6,
-                "NON_EMPTY_DEFAULT": 7
-              }
-            },
             "Http": {
               "fields": {
                 "rules": {
                   "rule": "repeated",
                   "type": "HttpRule",
                   "id": 1
-                },
-                "fullyDecodeReservedExpansion": {
-                  "type": "bool",
-                  "id": 2
                 }
               }
             },
@@ -2825,10 +2553,6 @@
                 }
               },
               "fields": {
-                "selector": {
-                  "type": "string",
-                  "id": 1
-                },
                 "get": {
                   "type": "string",
                   "id": 2
@@ -2853,13 +2577,13 @@
                   "type": "CustomHttpPattern",
                   "id": 8
                 },
+                "selector": {
+                  "type": "string",
+                  "id": 1
+                },
                 "body": {
                   "type": "string",
                   "id": 7
-                },
-                "responseBody": {
-                  "type": "string",
-                  "id": 12
                 },
                 "additionalBindings": {
                   "rule": "repeated",
@@ -2878,6 +2602,282 @@
                   "type": "string",
                   "id": 2
                 }
+              }
+            },
+            "methodSignature": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 1051,
+              "extend": "google.protobuf.MethodOptions"
+            },
+            "defaultHost": {
+              "type": "string",
+              "id": 1049,
+              "extend": "google.protobuf.ServiceOptions"
+            },
+            "oauthScopes": {
+              "type": "string",
+              "id": 1050,
+              "extend": "google.protobuf.ServiceOptions"
+            },
+            "CommonLanguageSettings": {
+              "fields": {
+                "referenceDocsUri": {
+                  "type": "string",
+                  "id": 1,
+                  "options": {
+                    "deprecated": true
+                  }
+                },
+                "destinations": {
+                  "rule": "repeated",
+                  "type": "ClientLibraryDestination",
+                  "id": 2
+                }
+              }
+            },
+            "ClientLibrarySettings": {
+              "fields": {
+                "version": {
+                  "type": "string",
+                  "id": 1
+                },
+                "launchStage": {
+                  "type": "LaunchStage",
+                  "id": 2
+                },
+                "restNumericEnums": {
+                  "type": "bool",
+                  "id": 3
+                },
+                "javaSettings": {
+                  "type": "JavaSettings",
+                  "id": 21
+                },
+                "cppSettings": {
+                  "type": "CppSettings",
+                  "id": 22
+                },
+                "phpSettings": {
+                  "type": "PhpSettings",
+                  "id": 23
+                },
+                "pythonSettings": {
+                  "type": "PythonSettings",
+                  "id": 24
+                },
+                "nodeSettings": {
+                  "type": "NodeSettings",
+                  "id": 25
+                },
+                "dotnetSettings": {
+                  "type": "DotnetSettings",
+                  "id": 26
+                },
+                "rubySettings": {
+                  "type": "RubySettings",
+                  "id": 27
+                },
+                "goSettings": {
+                  "type": "GoSettings",
+                  "id": 28
+                }
+              }
+            },
+            "Publishing": {
+              "fields": {
+                "methodSettings": {
+                  "rule": "repeated",
+                  "type": "MethodSettings",
+                  "id": 2
+                },
+                "newIssueUri": {
+                  "type": "string",
+                  "id": 101
+                },
+                "documentationUri": {
+                  "type": "string",
+                  "id": 102
+                },
+                "apiShortName": {
+                  "type": "string",
+                  "id": 103
+                },
+                "githubLabel": {
+                  "type": "string",
+                  "id": 104
+                },
+                "codeownerGithubTeams": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 105
+                },
+                "docTagPrefix": {
+                  "type": "string",
+                  "id": 106
+                },
+                "organization": {
+                  "type": "ClientLibraryOrganization",
+                  "id": 107
+                },
+                "librarySettings": {
+                  "rule": "repeated",
+                  "type": "ClientLibrarySettings",
+                  "id": 109
+                }
+              }
+            },
+            "JavaSettings": {
+              "fields": {
+                "libraryPackage": {
+                  "type": "string",
+                  "id": 1
+                },
+                "serviceClassNames": {
+                  "keyType": "string",
+                  "type": "string",
+                  "id": 2
+                },
+                "common": {
+                  "type": "CommonLanguageSettings",
+                  "id": 3
+                }
+              }
+            },
+            "CppSettings": {
+              "fields": {
+                "common": {
+                  "type": "CommonLanguageSettings",
+                  "id": 1
+                }
+              }
+            },
+            "PhpSettings": {
+              "fields": {
+                "common": {
+                  "type": "CommonLanguageSettings",
+                  "id": 1
+                }
+              }
+            },
+            "PythonSettings": {
+              "fields": {
+                "common": {
+                  "type": "CommonLanguageSettings",
+                  "id": 1
+                }
+              }
+            },
+            "NodeSettings": {
+              "fields": {
+                "common": {
+                  "type": "CommonLanguageSettings",
+                  "id": 1
+                }
+              }
+            },
+            "DotnetSettings": {
+              "fields": {
+                "common": {
+                  "type": "CommonLanguageSettings",
+                  "id": 1
+                }
+              }
+            },
+            "RubySettings": {
+              "fields": {
+                "common": {
+                  "type": "CommonLanguageSettings",
+                  "id": 1
+                }
+              }
+            },
+            "GoSettings": {
+              "fields": {
+                "common": {
+                  "type": "CommonLanguageSettings",
+                  "id": 1
+                }
+              }
+            },
+            "MethodSettings": {
+              "fields": {
+                "selector": {
+                  "type": "string",
+                  "id": 1
+                },
+                "longRunning": {
+                  "type": "LongRunning",
+                  "id": 2
+                }
+              },
+              "nested": {
+                "LongRunning": {
+                  "fields": {
+                    "initialPollDelay": {
+                      "type": "google.protobuf.Duration",
+                      "id": 1
+                    },
+                    "pollDelayMultiplier": {
+                      "type": "float",
+                      "id": 2
+                    },
+                    "maxPollDelay": {
+                      "type": "google.protobuf.Duration",
+                      "id": 3
+                    },
+                    "totalPollTimeout": {
+                      "type": "google.protobuf.Duration",
+                      "id": 4
+                    }
+                  }
+                }
+              }
+            },
+            "ClientLibraryOrganization": {
+              "values": {
+                "CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED": 0,
+                "CLOUD": 1,
+                "ADS": 2,
+                "PHOTOS": 3,
+                "STREET_VIEW": 4
+              }
+            },
+            "ClientLibraryDestination": {
+              "values": {
+                "CLIENT_LIBRARY_DESTINATION_UNSPECIFIED": 0,
+                "GITHUB": 10,
+                "PACKAGE_MANAGER": 20
+              }
+            },
+            "fieldBehavior": {
+              "rule": "repeated",
+              "type": "google.api.FieldBehavior",
+              "id": 1052,
+              "extend": "google.protobuf.FieldOptions"
+            },
+            "FieldBehavior": {
+              "values": {
+                "FIELD_BEHAVIOR_UNSPECIFIED": 0,
+                "OPTIONAL": 1,
+                "REQUIRED": 2,
+                "OUTPUT_ONLY": 3,
+                "INPUT_ONLY": 4,
+                "IMMUTABLE": 5,
+                "UNORDERED_LIST": 6,
+                "NON_EMPTY_DEFAULT": 7
+              }
+            },
+            "LaunchStage": {
+              "values": {
+                "LAUNCH_STAGE_UNSPECIFIED": 0,
+                "UNIMPLEMENTED": 6,
+                "PRELAUNCH": 7,
+                "EARLY_ACCESS": 1,
+                "ALPHA": 2,
+                "BETA": 3,
+                "GA": 4,
+                "DEPRECATED": 5
               }
             },
             "resourceReference": {
@@ -2954,6 +2954,59 @@
                 "childType": {
                   "type": "string",
                   "id": 2
+                }
+              }
+            }
+          }
+        },
+        "type": {
+          "options": {
+            "cc_enable_arenas": true,
+            "go_package": "google.golang.org/genproto/googleapis/type/latlng;latlng",
+            "java_multiple_files": true,
+            "java_outer_classname": "LatLngProto",
+            "java_package": "com.google.type",
+            "objc_class_prefix": "GTP"
+          },
+          "nested": {
+            "LatLng": {
+              "fields": {
+                "latitude": {
+                  "type": "double",
+                  "id": 1
+                },
+                "longitude": {
+                  "type": "double",
+                  "id": 2
+                }
+              }
+            }
+          }
+        },
+        "rpc": {
+          "options": {
+            "cc_enable_arenas": true,
+            "go_package": "google.golang.org/genproto/googleapis/rpc/status;status",
+            "java_multiple_files": true,
+            "java_outer_classname": "StatusProto",
+            "java_package": "com.google.rpc",
+            "objc_class_prefix": "RPC"
+          },
+          "nested": {
+            "Status": {
+              "fields": {
+                "code": {
+                  "type": "int32",
+                  "id": 1
+                },
+                "message": {
+                  "type": "string",
+                  "id": 2
+                },
+                "details": {
+                  "rule": "repeated",
+                  "type": "google.protobuf.Any",
+                  "id": 3
                 }
               }
             }
