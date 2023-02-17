@@ -1435,14 +1435,14 @@ describe('where() interface', () => {
           request,
           where(
             compositeFilter(
-              'OPERATOR_UNSPECIFIED',
+              'OR',
               fieldFilter('a', 'EQUAL', {integerValue: 10}),
               compositeFilter(
                 'AND',
                 fieldFilter('b', 'EQUAL', {integerValue: 20}),
                 fieldFilter('c', 'EQUAL', {integerValue: 30}),
                 compositeFilter(
-                  'OPERATOR_UNSPECIFIED',
+                  'OR',
                   fieldFilter('d', 'EQUAL', {integerValue: 40}),
                   fieldFilter('e', 'GREATER_THAN', {integerValue: 50})
                 ),
