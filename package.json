@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "6.4.1",
+  "version": "6.4.3",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -32,6 +32,8 @@
     "docs": "jsdoc -c .jsdoc.js",
     "system-test:rest": "USE_REST_FALLBACK=YES mocha build/system-test --timeout 600000",
     "system-test:grpc": "mocha build/system-test --timeout 600000",
+    "system-test:rest:emulator": "USE_REST_FALLBACK=YES FIRESTORE_EMULATOR_HOST=localhost:8080 mocha build/system-test --timeout 600000",
+    "system-test:grpc:emulator": "FIRESTORE_EMULATOR_HOST=localhost:8080 mocha build/system-test --timeout 600000",
     "system-test": "npm run system-test:grpc && npm run system-test:rest",
     "presystem-test": "npm run compile",
     "samples-test": "npm link && cd samples/ && npm link ../ && npm test && cd ../",
@@ -54,7 +56,7 @@
   "dependencies": {
     "fast-deep-equal": "^3.1.1",
     "functional-red-black-tree": "^1.0.1",
-    "google-gax": "^3.5.2",
+    "google-gax": "^3.5.3",
     "protobufjs": "^7.0.0"
   },
   "devDependencies": {
@@ -82,7 +84,7 @@
     "mocha": "^9.2.2",
     "protobufjs-cli": "^1.0.0",
     "proxyquire": "^2.1.3",
-    "sinon": "^13.0.0",
+    "sinon": "^15.0.0",
     "through2": "^4.0.0",
     "ts-node": "^10.0.0",
     "typescript": "~4.7.4"

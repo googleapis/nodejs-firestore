@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,8 +46,8 @@ const version = require('../../../package.json').version;
  *  document database that simplifies storing, syncing, and querying data for
  *  your mobile, web, and IoT apps at global scale. Its client libraries provide
  *  live synchronization and offline support, while its security features and
- *  integrations with Firebase and Google Cloud Platform (GCP) accelerate
- *  building truly serverless apps.
+ *  integrations with Firebase and Google Cloud Platform accelerate building
+ *  truly serverless apps.
  * @class
  * @memberof v1
  */
@@ -418,7 +418,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Document]{@link google.firestore.v1.Document}.
+   *   The first element of the array is an object representing {@link google.firestore.v1.Document | Document}.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
@@ -518,7 +518,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Document]{@link google.firestore.v1.Document}.
+   *   The first element of the array is an object representing {@link google.firestore.v1.Document | Document}.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
@@ -605,7 +605,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Empty]{@link google.protobuf.Empty}.
+   *   The first element of the array is an object representing {@link google.protobuf.Empty | Empty}.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
@@ -692,7 +692,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [BeginTransactionResponse]{@link google.firestore.v1.BeginTransactionResponse}.
+   *   The first element of the array is an object representing {@link google.firestore.v1.BeginTransactionResponse | BeginTransactionResponse}.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
@@ -784,7 +784,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [CommitResponse]{@link google.firestore.v1.CommitResponse}.
+   *   The first element of the array is an object representing {@link google.firestore.v1.CommitResponse | CommitResponse}.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
@@ -870,7 +870,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Empty]{@link google.protobuf.Empty}.
+   *   The first element of the array is an object representing {@link google.protobuf.Empty | Empty}.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
@@ -949,7 +949,8 @@ export class FirestoreClient {
    * The BatchWrite method does not apply the write operations atomically
    * and can apply them out of order. Method does not allow more than one write
    * per document. Each write succeeds or fails independently. See the
-   * {@link google.firestore.v1.BatchWriteResponse|BatchWriteResponse} for the success status of each write.
+   * {@link google.firestore.v1.BatchWriteResponse|BatchWriteResponse} for the
+   * success status of each write.
    *
    * If you require an atomically applied set of writes, use
    * {@link google.firestore.v1.Firestore.Commit|Commit} instead.
@@ -970,7 +971,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [BatchWriteResponse]{@link google.firestore.v1.BatchWriteResponse}.
+   *   The first element of the array is an object representing {@link google.firestore.v1.BatchWriteResponse | BatchWriteResponse}.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
@@ -1053,7 +1054,8 @@ export class FirestoreClient {
    *   `projects/{project_id}/databases/{database_id}/documents` or
    *   `projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}`
    * @param {string} request.collectionId
-   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`.
+   *   Required. The collection ID, relative to `parent`, to list. For example:
+   *   `chatrooms`.
    * @param {string} request.documentId
    *   The client-assigned document ID to use for this document.
    *
@@ -1068,7 +1070,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Document]{@link google.firestore.v1.Document}.
+   *   The first element of the array is an object representing {@link google.firestore.v1.Document | Document}.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
@@ -1177,7 +1179,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
-   *   An object stream which emits [BatchGetDocumentsResponse]{@link google.firestore.v1.BatchGetDocumentsResponse} on 'data' event.
+   *   An object stream which emits {@link google.firestore.v1.BatchGetDocumentsResponse | BatchGetDocumentsResponse} on 'data' event.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#server-streaming)
    *   for more details and examples.
@@ -1229,7 +1231,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
-   *   An object stream which emits [RunQueryResponse]{@link google.firestore.v1.RunQueryResponse} on 'data' event.
+   *   An object stream which emits {@link google.firestore.v1.RunQueryResponse | RunQueryResponse} on 'data' event.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#server-streaming)
    *   for more details and examples.
@@ -1255,8 +1257,9 @@ export class FirestoreClient {
   /**
    * Runs an aggregation query.
    *
-   * Rather than producing {@link google.firestore.v1.Document|Document} results like {@link google.firestore.v1.Firestore.RunQuery|Firestore.RunQuery},
-   * this API allows running an aggregation to produce a series of
+   * Rather than producing {@link google.firestore.v1.Document|Document} results like
+   * {@link google.firestore.v1.Firestore.RunQuery|Firestore.RunQuery}, this API
+   * allows running an aggregation to produce a series of
    * {@link google.firestore.v1.AggregationResult|AggregationResult} server-side.
    *
    * High-Level Example:
@@ -1295,7 +1298,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
-   *   An object stream which emits [RunAggregationQueryResponse]{@link google.firestore.v1.RunAggregationQueryResponse} on 'data' event.
+   *   An object stream which emits {@link google.firestore.v1.RunAggregationQueryResponse | RunAggregationQueryResponse} on 'data' event.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#server-streaming)
    *   for more details and examples.
@@ -1319,14 +1322,15 @@ export class FirestoreClient {
   }
 
   /**
-   * Streams batches of document updates and deletes, in order.
+   * Streams batches of document updates and deletes, in order. This method is
+   * only available via the gRPC API (not REST).
    *
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
    *   An object stream which is both readable and writable. It accepts objects
-   *   representing [WriteRequest]{@link google.firestore.v1.WriteRequest} for write() method, and
-   *   will emit objects representing [WriteResponse]{@link google.firestore.v1.WriteResponse} on 'data' event asynchronously.
+   *   representing {@link google.firestore.v1.WriteRequest | WriteRequest} for write() method, and
+   *   will emit objects representing {@link google.firestore.v1.WriteResponse | WriteResponse} on 'data' event asynchronously.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#bi-directional-streaming)
    *   for more details and examples.
@@ -1339,14 +1343,15 @@ export class FirestoreClient {
   }
 
   /**
-   * Listens to changes.
+   * Listens to changes. This method is only available via the gRPC API (not
+   * REST).
    *
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
    *   An object stream which is both readable and writable. It accepts objects
-   *   representing [ListenRequest]{@link google.firestore.v1.ListenRequest} for write() method, and
-   *   will emit objects representing [ListenResponse]{@link google.firestore.v1.ListenResponse} on 'data' event asynchronously.
+   *   representing {@link google.firestore.v1.ListenRequest | ListenRequest} for write() method, and
+   *   will emit objects representing {@link google.firestore.v1.ListenResponse | ListenResponse} on 'data' event asynchronously.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#bi-directional-streaming)
    *   for more details and examples.
@@ -1367,40 +1372,60 @@ export class FirestoreClient {
    *   Required. The parent resource name. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents` or
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
+   *
    *   For example:
    *   `projects/my-project/databases/my-database/documents` or
    *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
-   * @param {string} request.collectionId
-   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`
-   *   or `messages`.
-   * @param {number} request.pageSize
-   *   The maximum number of documents to return.
-   * @param {string} request.pageToken
-   *   The `next_page_token` value returned from a previous List request, if any.
-   * @param {string} request.orderBy
-   *   The order to sort results by. For example: `priority desc, name`.
-   * @param {google.firestore.v1.DocumentMask} request.mask
-   *   The fields to return. If not set, returns all fields.
+   * @param {string} [request.collectionId]
+   *   Optional. The collection ID, relative to `parent`, to list.
+   *
+   *   For example: `chatrooms` or `messages`.
+   *
+   *   This is optional, and when not provided, Firestore will list documents
+   *   from all collections under the provided `parent`.
+   * @param {number} [request.pageSize]
+   *   Optional. The maximum number of documents to return in a single response.
+   *
+   *   Firestore may return fewer than this value.
+   * @param {string} [request.pageToken]
+   *   Optional. A page token, received from a previous `ListDocuments` response.
+   *
+   *   Provide this to retrieve the subsequent page. When paginating, all other
+   *   parameters (with the exception of `page_size`) must match the values set
+   *   in the request that generated the page token.
+   * @param {string} [request.orderBy]
+   *   Optional. The optional ordering of the documents to return.
+   *
+   *   For example: `priority desc, __name__ desc`.
+   *
+   *   This mirrors the {@link google.firestore.v1.StructuredQuery.order_by|`ORDER BY`}
+   *   used in Firestore queries but in a string representation. When absent,
+   *   documents are ordered based on `__name__ ASC`.
+   * @param {google.firestore.v1.DocumentMask} [request.mask]
+   *   Optional. The fields to return. If not set, returns all fields.
    *
    *   If a document has a field that is not present in this mask, that field
    *   will not be returned in the response.
    * @param {Buffer} request.transaction
-   *   Reads documents in a transaction.
+   *   Perform the read as part of an already active transaction.
    * @param {google.protobuf.Timestamp} request.readTime
-   *   Reads documents as they were at the given time.
+   *   Perform the read at the provided time.
+   *
    *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
-   *   If the list should show missing documents. A missing document is a
-   *   document that does not exist but has sub-documents. These documents will
-   *   be returned with a key but will not have fields, {@link google.firestore.v1.Document.create_time|Document.create_time},
-   *   or {@link google.firestore.v1.Document.update_time|Document.update_time} set.
+   *   If the list should show missing documents.
    *
-   *   Requests with `show_missing` may not specify `where` or
-   *   `order_by`.
+   *   A document is missing if it does not exist, but there are sub-documents
+   *   nested underneath it. When true, such missing documents will be returned
+   *   with a key but will not have fields,
+   *   {@link google.firestore.v1.Document.create_time|`create_time`}, or
+   *   {@link google.firestore.v1.Document.update_time|`update_time`} set.
+   *
+   *   Requests with `show_missing` may not specify `where` or `order_by`.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is Array of [Document]{@link google.firestore.v1.Document}.
+   *   The first element of the array is Array of {@link google.firestore.v1.Document | Document}.
    *   The client library will perform auto-pagination by default: it will call the API as many
    *   times as needed and will merge results from all the pages into this array.
    *   Note that it can affect your quota.
@@ -1486,40 +1511,60 @@ export class FirestoreClient {
    *   Required. The parent resource name. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents` or
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
+   *
    *   For example:
    *   `projects/my-project/databases/my-database/documents` or
    *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
-   * @param {string} request.collectionId
-   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`
-   *   or `messages`.
-   * @param {number} request.pageSize
-   *   The maximum number of documents to return.
-   * @param {string} request.pageToken
-   *   The `next_page_token` value returned from a previous List request, if any.
-   * @param {string} request.orderBy
-   *   The order to sort results by. For example: `priority desc, name`.
-   * @param {google.firestore.v1.DocumentMask} request.mask
-   *   The fields to return. If not set, returns all fields.
+   * @param {string} [request.collectionId]
+   *   Optional. The collection ID, relative to `parent`, to list.
+   *
+   *   For example: `chatrooms` or `messages`.
+   *
+   *   This is optional, and when not provided, Firestore will list documents
+   *   from all collections under the provided `parent`.
+   * @param {number} [request.pageSize]
+   *   Optional. The maximum number of documents to return in a single response.
+   *
+   *   Firestore may return fewer than this value.
+   * @param {string} [request.pageToken]
+   *   Optional. A page token, received from a previous `ListDocuments` response.
+   *
+   *   Provide this to retrieve the subsequent page. When paginating, all other
+   *   parameters (with the exception of `page_size`) must match the values set
+   *   in the request that generated the page token.
+   * @param {string} [request.orderBy]
+   *   Optional. The optional ordering of the documents to return.
+   *
+   *   For example: `priority desc, __name__ desc`.
+   *
+   *   This mirrors the {@link google.firestore.v1.StructuredQuery.order_by|`ORDER BY`}
+   *   used in Firestore queries but in a string representation. When absent,
+   *   documents are ordered based on `__name__ ASC`.
+   * @param {google.firestore.v1.DocumentMask} [request.mask]
+   *   Optional. The fields to return. If not set, returns all fields.
    *
    *   If a document has a field that is not present in this mask, that field
    *   will not be returned in the response.
    * @param {Buffer} request.transaction
-   *   Reads documents in a transaction.
+   *   Perform the read as part of an already active transaction.
    * @param {google.protobuf.Timestamp} request.readTime
-   *   Reads documents as they were at the given time.
+   *   Perform the read at the provided time.
+   *
    *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
-   *   If the list should show missing documents. A missing document is a
-   *   document that does not exist but has sub-documents. These documents will
-   *   be returned with a key but will not have fields, {@link google.firestore.v1.Document.create_time|Document.create_time},
-   *   or {@link google.firestore.v1.Document.update_time|Document.update_time} set.
+   *   If the list should show missing documents.
    *
-   *   Requests with `show_missing` may not specify `where` or
-   *   `order_by`.
+   *   A document is missing if it does not exist, but there are sub-documents
+   *   nested underneath it. When true, such missing documents will be returned
+   *   with a key but will not have fields,
+   *   {@link google.firestore.v1.Document.create_time|`create_time`}, or
+   *   {@link google.firestore.v1.Document.update_time|`update_time`} set.
+   *
+   *   Requests with `show_missing` may not specify `where` or `order_by`.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
-   *   An object stream which emits an object representing [Document]{@link google.firestore.v1.Document} on 'data' event.
+   *   An object stream which emits an object representing {@link google.firestore.v1.Document | Document} on 'data' event.
    *   The client library will perform auto-pagination by default: it will call the API as many
    *   times as needed. Note that it can affect your quota.
    *   We recommend using `listDocumentsAsync()`
@@ -1561,42 +1606,62 @@ export class FirestoreClient {
    *   Required. The parent resource name. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents` or
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
+   *
    *   For example:
    *   `projects/my-project/databases/my-database/documents` or
    *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
-   * @param {string} request.collectionId
-   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`
-   *   or `messages`.
-   * @param {number} request.pageSize
-   *   The maximum number of documents to return.
-   * @param {string} request.pageToken
-   *   The `next_page_token` value returned from a previous List request, if any.
-   * @param {string} request.orderBy
-   *   The order to sort results by. For example: `priority desc, name`.
-   * @param {google.firestore.v1.DocumentMask} request.mask
-   *   The fields to return. If not set, returns all fields.
+   * @param {string} [request.collectionId]
+   *   Optional. The collection ID, relative to `parent`, to list.
+   *
+   *   For example: `chatrooms` or `messages`.
+   *
+   *   This is optional, and when not provided, Firestore will list documents
+   *   from all collections under the provided `parent`.
+   * @param {number} [request.pageSize]
+   *   Optional. The maximum number of documents to return in a single response.
+   *
+   *   Firestore may return fewer than this value.
+   * @param {string} [request.pageToken]
+   *   Optional. A page token, received from a previous `ListDocuments` response.
+   *
+   *   Provide this to retrieve the subsequent page. When paginating, all other
+   *   parameters (with the exception of `page_size`) must match the values set
+   *   in the request that generated the page token.
+   * @param {string} [request.orderBy]
+   *   Optional. The optional ordering of the documents to return.
+   *
+   *   For example: `priority desc, __name__ desc`.
+   *
+   *   This mirrors the {@link google.firestore.v1.StructuredQuery.order_by|`ORDER BY`}
+   *   used in Firestore queries but in a string representation. When absent,
+   *   documents are ordered based on `__name__ ASC`.
+   * @param {google.firestore.v1.DocumentMask} [request.mask]
+   *   Optional. The fields to return. If not set, returns all fields.
    *
    *   If a document has a field that is not present in this mask, that field
    *   will not be returned in the response.
    * @param {Buffer} request.transaction
-   *   Reads documents in a transaction.
+   *   Perform the read as part of an already active transaction.
    * @param {google.protobuf.Timestamp} request.readTime
-   *   Reads documents as they were at the given time.
+   *   Perform the read at the provided time.
+   *
    *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
-   *   If the list should show missing documents. A missing document is a
-   *   document that does not exist but has sub-documents. These documents will
-   *   be returned with a key but will not have fields, {@link google.firestore.v1.Document.create_time|Document.create_time},
-   *   or {@link google.firestore.v1.Document.update_time|Document.update_time} set.
+   *   If the list should show missing documents.
    *
-   *   Requests with `show_missing` may not specify `where` or
-   *   `order_by`.
+   *   A document is missing if it does not exist, but there are sub-documents
+   *   nested underneath it. When true, such missing documents will be returned
+   *   with a key but will not have fields,
+   *   {@link google.firestore.v1.Document.create_time|`create_time`}, or
+   *   {@link google.firestore.v1.Document.update_time|`update_time`} set.
+   *
+   *   Requests with `show_missing` may not specify `where` or `order_by`.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
    *   An iterable Object that allows [async iteration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols).
    *   When you iterate the returned iterable, each element will be an object representing
-   *   [Document]{@link google.firestore.v1.Document}. The API will be called under the hood as needed, once per the page,
+   *   {@link google.firestore.v1.Document | Document}. The API will be called under the hood as needed, once per the page,
    *   so you can stop the iteration when you don't need more results.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
@@ -1680,7 +1745,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is Array of [Cursor]{@link google.firestore.v1.Cursor}.
+   *   The first element of the array is Array of {@link google.firestore.v1.Cursor | Cursor}.
    *   The client library will perform auto-pagination by default: it will call the API as many
    *   times as needed and will merge results from all the pages into this array.
    *   Note that it can affect your quota.
@@ -1808,7 +1873,7 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
-   *   An object stream which emits an object representing [Cursor]{@link google.firestore.v1.Cursor} on 'data' event.
+   *   An object stream which emits an object representing {@link google.firestore.v1.Cursor | Cursor} on 'data' event.
    *   The client library will perform auto-pagination by default: it will call the API as many
    *   times as needed. Note that it can affect your quota.
    *   We recommend using `partitionQueryAsync()`
@@ -1894,7 +1959,7 @@ export class FirestoreClient {
    * @returns {Object}
    *   An iterable Object that allows [async iteration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols).
    *   When you iterate the returned iterable, each element will be an object representing
-   *   [Cursor]{@link google.firestore.v1.Cursor}. The API will be called under the hood as needed, once per the page,
+   *   {@link google.firestore.v1.Cursor | Cursor}. The API will be called under the hood as needed, once per the page,
    *   so you can stop the iteration when you don't need more results.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
@@ -2135,9 +2200,9 @@ export class FirestoreClient {
    * @param {string} request.name
    *   Resource name for the location.
    * @param {object} [options]
-   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html | CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Location]{@link google.cloud.location.Location}.
+   *   The first element of the array is an object representing {@link google.cloud.location.Location | Location}.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
    *   for more details and examples.
@@ -2187,7 +2252,7 @@ export class FirestoreClient {
    * @returns {Object}
    *   An iterable Object that allows [async iteration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols).
    *   When you iterate the returned iterable, each element will be an object representing
-   *   [Location]{@link google.cloud.location.Location}. The API will be called under the hood as needed, once per the page,
+   *   {@link google.cloud.location.Location | Location}. The API will be called under the hood as needed, once per the page,
    *   so you can stop the iteration when you don't need more results.
    *   Please see the
    *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
