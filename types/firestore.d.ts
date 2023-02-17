@@ -290,12 +290,12 @@ declare namespace FirebaseFirestore {
     ignoreUndefinedProperties?: boolean;
 
     /**
-     * Use HTTP for requests that can be served over HTTP and JSON. This reduces
-     * the amount of networking code that is loaded to serve requests within
-     * Firestore.
-     *
-     * This setting does not apply to `onSnapshot` APIs as they cannot be served
-     * over native HTTP.
+     * Whether to force the use of HTTP/1.1 REST transport until a method that requires gRPC
+     * is called. When a method requires gRPC, this Firestore client will load dependent gRPC
+     * libraries and then use gRPC transport for communication from that point forward.
+     * Currently the only operation that requires gRPC is creating a snapshot listener with
+     * the method `DocumentReference<T>.onSnapshot()`, `CollectionReference<T>.onSnapshot()`,
+     * or `Query<T>.onSnapshot()`.
      */
     preferRest?: boolean;
 
