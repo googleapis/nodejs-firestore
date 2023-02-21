@@ -1927,16 +1927,6 @@ describe('Query class', () => {
       'doc5'
     );
 
-    // with one inequality: a>2 || b==1.
-    expectDocs(
-      await collection
-        .where(Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1)))
-        .get(),
-      'doc5',
-      'doc2',
-      'doc3'
-    );
-
     // (a==1 && b==0) || (a==3 && b==2)
     expectDocs(
       await collection
@@ -1978,52 +1968,6 @@ describe('Query class', () => {
       'doc3'
     );
 
-    // Test with limits (implicit order by ASC): (a==1) || (b > 0) LIMIT 2
-    expectDocs(
-      await collection
-        .where(Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)))
-        .limit(2)
-        .get(),
-      'doc1',
-      'doc2'
-    );
-
-    // Test with limits (explicit order by): (a==1) || (b > 0) LIMIT_TO_LAST 2
-    // Note: The public query API does not allow implicit ordering when limitToLast is used.
-    expectDocs(
-      await collection
-        .where(Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)))
-        .limitToLast(2)
-        .orderBy('b')
-        .get(),
-      'doc3',
-      'doc4'
-    );
-
-    // Test with limits (explicit order by ASC): (a==2) || (b == 1) ORDER BY a LIMIT 1
-    expectDocs(
-      await collection
-        .where(
-          Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1))
-        )
-        .limit(1)
-        .orderBy('a')
-        .get(),
-      'doc5'
-    );
-
-    // Test with limits (explicit order by DESC): (a==2) || (b == 1) ORDER BY a LIMIT 1
-    expectDocs(
-      await collection
-        .where(
-          Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1))
-        )
-        .limit(1)
-        .orderBy('a', 'desc')
-        .get(),
-      'doc2'
-    );
-
     // Test with limits without orderBy (the __name__ ordering is the tie breaker).
     expectDocs(
       await collection
@@ -2036,6 +1980,83 @@ describe('Query class', () => {
     );
   });
 
+  // Skip this test if running against production because it results in a 'missing index' error.
+  // The Firestore Emulator, however, does serve these queries.
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+    'supports OR queries with composite indexes',
+    async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {a: 1, b: 0},
+        doc2: {a: 2, b: 1},
+        doc3: {a: 3, b: 2},
+        doc4: {a: 1, b: 3},
+        doc5: {a: 1, b: 1},
+      });
+
+      // with one inequality: a>2 || b==1.
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1))
+          )
+          .get(),
+        'doc5',
+        'doc2',
+        'doc3'
+      );
+
+      // Test with limits (implicit order by ASC): (a==1) || (b > 0) LIMIT 2
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0))
+          )
+          .limit(2)
+          .get(),
+        'doc1',
+        'doc2'
+      );
+
+      // Test with limits (explicit order by): (a==1) || (b > 0) LIMIT_TO_LAST 2
+      // Note: The public query API does not allow implicit ordering when limitToLast is used.
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0))
+          )
+          .limitToLast(2)
+          .orderBy('b')
+          .get(),
+        'doc3',
+        'doc4'
+      );
+
+      // Test with limits (explicit order by ASC): (a==2) || (b == 1) ORDER BY a LIMIT 1
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1))
+          )
+          .limit(1)
+          .orderBy('a')
+          .get(),
+        'doc5'
+      );
+
+      // Test with limits (explicit order by DESC): (a==2) || (b == 1) ORDER BY a LIMIT 1
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1))
+          )
+          .limit(1)
+          .orderBy('a', 'desc')
+          .get(),
+        'doc2'
+      );
+    }
+  );
+
   it('supports OR queries on documents with missing fields', async () => {
     const collection = await testCollectionWithDocs({
       doc1: {a: 1, b: 0},
@@ -2045,56 +2066,6 @@ describe('Query class', () => {
       doc5: {a: 1},
       doc6: {a: 2},
     });
-
-    // Query: a==1 || b==1 order by a.
-    // doc2 should not be included because it's missing the field 'a', and we have "orderBy a".
-    expectDocs(
-      await collection
-        .where(
-          Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1))
-        )
-        .orderBy('a')
-        .get(),
-      'doc1',
-      'doc4',
-      'doc5'
-    );
-
-    // Query: a==1 || b==1 order by b.
-    // doc5 should not be included because it's missing the field 'b', and we have "orderBy b".
-    expectDocs(
-      await collection
-        .where(
-          Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1))
-        )
-        .orderBy('b')
-        .get(),
-      'doc1',
-      'doc2',
-      'doc4'
-    );
-
-    // Query: a>2 || b==1.
-    // This query has an implicit 'order by a'.
-    // doc2 should not be included because it's missing the field 'a'.
-    expectDocs(
-      await collection
-        .where(Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1)))
-        .get(),
-      'doc3'
-    );
-
-    // Query: a>1 || b==1 order by a order by b.
-    // doc6 should not be included because it's missing the field 'b'.
-    // doc2 should not be included because it's missing the field 'a'.
-    expectDocs(
-      await collection
-        .where(Filter.or(Filter.where('a', '>', 1), Filter.where('b', '==', 1)))
-        .orderBy('a')
-        .orderBy('b')
-        .get(),
-      'doc3'
-    );
 
     // Query: a==1 || b==1
     // There's no explicit nor implicit orderBy. Documents with missing 'a' or missing 'b' should be
@@ -2112,43 +2083,121 @@ describe('Query class', () => {
     );
   });
 
-  it('supports OR queries with in and not-in', async () => {
-    const collection = await testCollectionWithDocs({
-      doc1: {a: 1, b: 0},
-      doc2: {b: 1},
-      doc3: {a: 3, b: 2},
-      doc4: {a: 1, b: 3},
-      doc5: {a: 1},
-      doc6: {a: 2},
-    });
+  // Skip this test if running against production because it results in a 'missing index' error.
+  // The Firestore Emulator, however, does serve these queries.
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+    'supports OR queries on documents with missing fields',
+    async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {a: 1, b: 0},
+        doc2: {b: 1},
+        doc3: {a: 3, b: 2},
+        doc4: {a: 1, b: 3},
+        doc5: {a: 1},
+        doc6: {a: 2},
+      });
 
-    // Query: a==2 || b in [2, 3]
-    expectDocs(
-      await collection
-        .where(
-          Filter.or(Filter.where('a', '==', 2), Filter.where('b', 'in', [2, 3]))
-        )
-        .get(),
-      'doc3',
-      'doc4',
-      'doc6'
-    );
-
-    // a==2 || (b != 2 && b != 3)
-    // Has implicit "orderBy b"
-    expectDocs(
-      await collection
-        .where(
-          Filter.or(
-            Filter.where('a', '==', 2),
-            Filter.where('b', 'not-in', [2, 3])
+      // Query: a==1 || b==1 order by a.
+      // doc2 should not be included because it's missing the field 'a', and we have "orderBy a".
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1))
           )
-        )
-        .get(),
-      'doc1',
-      'doc2'
-    );
-  });
+          .orderBy('a')
+          .get(),
+        'doc1',
+        'doc4',
+        'doc5'
+      );
+
+      // Query: a==1 || b==1 order by b.
+      // doc5 should not be included because it's missing the field 'b', and we have "orderBy b".
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1))
+          )
+          .orderBy('b')
+          .get(),
+        'doc1',
+        'doc2',
+        'doc4'
+      );
+
+      // Query: a>2 || b==1.
+      // This query has an implicit 'order by a'.
+      // doc2 should not be included because it's missing the field 'a'.
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1))
+          )
+          .get(),
+        'doc3'
+      );
+
+      // Query: a>1 || b==1 order by a order by b.
+      // doc6 should not be included because it's missing the field 'b'.
+      // doc2 should not be included because it's missing the field 'a'.
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '>', 1), Filter.where('b', '==', 1))
+          )
+          .orderBy('a')
+          .orderBy('b')
+          .get(),
+        'doc3'
+      );
+    }
+  );
+
+  // Skip this test if running against production because it results in a 'missing index' error.
+  // The Firestore Emulator, however, does serve these queries.
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+    'supports OR queries with in and not-in',
+    async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {a: 1, b: 0},
+        doc2: {b: 1},
+        doc3: {a: 3, b: 2},
+        doc4: {a: 1, b: 3},
+        doc5: {a: 1},
+        doc6: {a: 2},
+      });
+
+      // Query: a==2 || b in [2, 3]
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(
+              Filter.where('a', '==', 2),
+              Filter.where('b', 'in', [2, 3])
+            )
+          )
+          .get(),
+        'doc3',
+        'doc4',
+        'doc6'
+      );
+
+      // a==2 || (b != 2 && b != 3)
+      // Has implicit "orderBy b"
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(
+              Filter.where('a', '==', 2),
+              Filter.where('b', 'not-in', [2, 3])
+            )
+          )
+          .get(),
+        'doc1',
+        'doc2'
+      );
+    }
+  );
 
   it('supports OR queries with array membership', async () => {
     const collection = await testCollectionWithDocs({
