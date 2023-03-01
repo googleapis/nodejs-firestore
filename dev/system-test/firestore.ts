@@ -2153,10 +2153,33 @@ describe('Query class', () => {
     }
   );
 
+  it('supports OR queries with in', async () => {
+    const collection = await testCollectionWithDocs({
+      doc1: {a: 1, b: 0},
+      doc2: {b: 1},
+      doc3: {a: 3, b: 2},
+      doc4: {a: 1, b: 3},
+      doc5: {a: 1},
+      doc6: {a: 2},
+    });
+
+    // Query: a==2 || b in [2, 3]
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(Filter.where('a', '==', 2), Filter.where('b', 'in', [2, 3]))
+        )
+        .get(),
+      'doc3',
+      'doc4',
+      'doc6'
+    );
+  });
+
   // Skip this test if running against production because it results in a 'missing index' error.
   // The Firestore Emulator, however, does serve these queries.
   (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
-    'supports OR queries with in and not-in',
+    'supports OR queries with not-in',
     async () => {
       const collection = await testCollectionWithDocs({
         doc1: {a: 1, b: 0},
@@ -2166,21 +2189,6 @@ describe('Query class', () => {
         doc5: {a: 1},
         doc6: {a: 2},
       });
-
-      // Query: a==2 || b in [2, 3]
-      expectDocs(
-        await collection
-          .where(
-            Filter.or(
-              Filter.where('a', '==', 2),
-              Filter.where('b', 'in', [2, 3])
-            )
-          )
-          .get(),
-        'doc3',
-        'doc4',
-        'doc6'
-      );
 
       // a==2 || (b != 2 && b != 3)
       // Has implicit "orderBy b"
