@@ -4,6 +4,19 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.5.0](https://github.com/googleapis/nodejs-firestore/compare/v6.4.3...v6.5.0) (2023-03-06)
+
+
+### Features
+
+* OR Queries ([#1800](https://github.com/googleapis/nodejs-firestore/issues/1800)) ([983a477](https://github.com/googleapis/nodejs-firestore/commit/983a477a6c1a22e4efba0df07e750910028e0afb))
+
+
+### Bug Fixes
+
+* Enable REST numeric enums ([#1829](https://github.com/googleapis/nodejs-firestore/issues/1829)) ([3737696](https://github.com/googleapis/nodejs-firestore/commit/3737696791b3b77fe9b333323523d8a0abcf5f7b))
+* Update generated proto types; fix the update script ([#1825](https://github.com/googleapis/nodejs-firestore/issues/1825)) ([a7e4212](https://github.com/googleapis/nodejs-firestore/commit/a7e42123da1325f526fa5c3a62f1d3dc7a2569c3))
+
 ## [6.4.3](https://github.com/googleapis/nodejs-firestore/compare/v6.4.2...v6.4.3) (2023-02-16)
 
 
