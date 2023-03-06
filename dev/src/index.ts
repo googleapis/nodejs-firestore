@@ -93,6 +93,7 @@ export {
 export {BulkWriter} from './bulk-writer';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
+export {Filter} from './filter';
 export {WriteBatch, WriteResult} from './write-batch';
 export {Transaction} from './transaction';
 export {Timestamp} from './timestamp';

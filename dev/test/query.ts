@@ -53,6 +53,7 @@ import {
 import {GoogleError} from 'google-gax';
 import api = google.firestore.v1;
 import protobuf = google.protobuf;
+import {Filter} from '../src/filter';
 import {Deferred} from '../src/util';
 
 const PROJECT_ID = 'test-project';
@@ -81,7 +82,13 @@ function snapshot(
   });
 }
 
-export function fieldFilters(
+function where(filter: api.StructuredQuery.IFilter): api.IStructuredQuery {
+  return {
+    where: filter,
+  };
+}
+
+export function fieldFiltersQuery(
   fieldPath: string,
   op: api.StructuredQuery.FieldFilter.Operator,
   value: string | api.IValue,
@@ -89,6 +96,19 @@ export function fieldFilters(
     string | api.StructuredQuery.FieldFilter.Operator | string | api.IValue
   >
 ): api.IStructuredQuery {
+  return {
+    where: fieldFilters(fieldPath, op, value, ...fieldPathOpAndValues),
+  };
+}
+
+export function fieldFilters(
+  fieldPath: string,
+  op: api.StructuredQuery.FieldFilter.Operator,
+  value: string | api.IValue,
+  ...fieldPathOpAndValues: Array<
+    string | api.StructuredQuery.FieldFilter.Operator | string | api.IValue
+  >
+): api.StructuredQuery.IFilter {
   const filters: api.StructuredQuery.IFilter[] = [];
 
   fieldPathOpAndValues = [fieldPath, op, value, ...fieldPathOpAndValues];
@@ -118,27 +138,67 @@ export function fieldFilters(
 
   if (filters.length === 1) {
     return {
-      where: {
-        fieldFilter: filters[0].fieldFilter,
-      },
+      fieldFilter: filters[0].fieldFilter,
     };
   } else {
     return {
-      where: {
-        compositeFilter: {
-          op: 'AND',
-          filters,
-        },
+      compositeFilter: {
+        op: 'AND',
+        filters,
       },
     };
   }
+}
+
+export function fieldFilter(
+  fieldPath: string,
+  op: api.StructuredQuery.FieldFilter.Operator,
+  value: string | api.IValue
+): api.StructuredQuery.IFilter {
+  return fieldFilters(fieldPath, op, value);
+}
+
+export function compositeFilter(
+  op: api.StructuredQuery.CompositeFilter.Operator,
+  ...filters: api.StructuredQuery.IFilter[]
+): api.StructuredQuery.IFilter {
+  return {
+    compositeFilter: {
+      op: op,
+      filters,
+    },
+  };
+}
+
+export function orFilter(
+  op: api.StructuredQuery.CompositeFilter.Operator,
+  ...filters: api.StructuredQuery.IFilter[]
+): api.StructuredQuery.IFilter {
+  return compositeFilter('OR', ...filters);
+}
+
+export function andFilter(
+  op: api.StructuredQuery.CompositeFilter.Operator,
+  ...filters: api.StructuredQuery.IFilter[]
+): api.StructuredQuery.IFilter {
+  return compositeFilter('AND', ...filters);
+}
+
+function unaryFiltersQuery(
+  fieldPath: string,
+  equals: 'IS_NAN' | 'IS_NULL' | 'IS_NOT_NAN' | 'IS_NOT_NULL',
+  ...fieldPathsAndEquals: string[]
+): api.IStructuredQuery {
+  return {
+    where: unaryFilters(fieldPath, equals, ...fieldPathsAndEquals),
+  };
 }
 
 function unaryFilters(
   fieldPath: string,
   equals: 'IS_NAN' | 'IS_NULL' | 'IS_NOT_NAN' | 'IS_NOT_NULL',
   ...fieldPathsAndEquals: string[]
-): api.IStructuredQuery {
+): api.StructuredQuery.IFilter {
   const filters: api.StructuredQuery.IFilter[] = [];
 
   fieldPathsAndEquals.unshift(fieldPath, equals);
@@ -166,17 +226,13 @@ function unaryFilters(
 
   if (filters.length === 1) {
     return {
-      where: {
-        unaryFilter: filters[0].unaryFilter,
-      },
+      unaryFilter: filters[0].unaryFilter,
     };
   } else {
     return {
-      where: {
-        compositeFilter: {
-          op: 'AND',
-          filters,
-        },
+      compositeFilter: {
+        op: 'AND',
+        filters,
       },
     };
   }
@@ -511,7 +567,7 @@ describe('query interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          fieldFilters('foo', 'EQUAL', 'bar'),
+          fieldFiltersQuery('foo', 'EQUAL', 'bar'),
           orderBy('foo', 'ASCENDING'),
           limit(10)
         );
@@ -810,7 +866,7 @@ describe('query interface', () => {
         return response(writeResult(1));
       },
       runQuery: request => {
-        queryEquals(request, fieldFilters('title', 'EQUAL', 'post'));
+        queryEquals(request, fieldFiltersQuery('title', 'EQUAL', 'post'));
         return stream({document: doc, readTime: {seconds: 5, nanos: 6}});
       },
     };
@@ -835,7 +891,7 @@ describe('query interface', () => {
     const doc = document('documentId', 'author', 'author', 'title', 'post');
     const overrides: ApiOverride = {
       runQuery: request => {
-        queryEquals(request, fieldFilters('title', 'EQUAL', 'post'));
+        queryEquals(request, fieldFiltersQuery('title', 'EQUAL', 'post'));
         return stream({document: doc, readTime: {seconds: 5, nanos: 6}});
       },
     };
@@ -857,7 +913,7 @@ describe('query interface', () => {
     const doc = document('documentId', 'author', 'author', 'title', 'post');
     const overrides: ApiOverride = {
       runQuery: request => {
-        queryEquals(request, fieldFilters('title', 'EQUAL', 'post'));
+        queryEquals(request, fieldFiltersQuery('title', 'EQUAL', 'post'));
         return stream({document: doc, readTime: {seconds: 5, nanos: 6}});
       },
     };
@@ -872,6 +928,40 @@ describe('query interface', () => {
       const posts = await coll.where('title', '==', 'post').get();
       expect(posts.size).to.equal(1);
       expect(posts.docs[0].data()).to.not.be.instanceOf(Post);
+    });
+  });
+
+  it('supports OR query with cursor', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          where(
+            compositeFilter(
+              'OR',
+              fieldFilter('a', 'GREATER_THAN', {integerValue: 10}),
+              unaryFilters('b', 'IS_NOT_NULL')
+            )
+          ),
+          limit(3),
+          orderBy('a', 'ASCENDING'),
+          startAt(true, {integerValue: 1})
+        );
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      let query: Query = firestore.collection('collectionId');
+      query = query
+        .where(
+          Filter.or(Filter.where('a', '>', 10), Filter.where('b', '!=', null))
+        )
+        .orderBy('a')
+        .startAt(1)
+        .limit(3);
+      return query.get();
     });
   });
 });
@@ -890,7 +980,7 @@ describe('where() interface', () => {
   it('generates proto', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
-        queryEquals(request, fieldFilters('foo', 'EQUAL', 'bar'));
+        queryEquals(request, fieldFiltersQuery('foo', 'EQUAL', 'bar'));
         return stream();
       },
     };
@@ -917,7 +1007,7 @@ describe('where() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          fieldFilters(
+          fieldFiltersQuery(
             'fooSmaller',
             'LESS_THAN',
             'barSmaller',
@@ -981,7 +1071,7 @@ describe('where() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          fieldFilters('foo', 'EQUAL', {
+          fieldFiltersQuery('foo', 'EQUAL', {
             mapValue: {
               fields: {
                 foo: {stringValue: 'bar'},
@@ -1007,7 +1097,7 @@ describe('where() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          fieldFilters(
+          fieldFiltersQuery(
             'foo.bar',
             'EQUAL',
             'foobar',
@@ -1034,7 +1124,7 @@ describe('where() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          fieldFilters('__name__', 'EQUAL', {
+          fieldFiltersQuery('__name__', 'EQUAL', {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/foo',
@@ -1058,7 +1148,7 @@ describe('where() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          fieldFilters('__name__', 'IN', {
+          fieldFiltersQuery('__name__', 'IN', {
             arrayValue: {
               values: [
                 {
@@ -1092,7 +1182,7 @@ describe('where() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          fieldFilters('foo', 'IN', {
+          fieldFiltersQuery('foo', 'IN', {
             arrayValue: {
               values: [
                 {
@@ -1261,7 +1351,10 @@ describe('where() interface', () => {
   it('supports unary filters', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
-        queryEquals(request, unaryFilters('foo', 'IS_NAN', 'bar', 'IS_NULL'));
+        queryEquals(
+          request,
+          unaryFiltersQuery('foo', 'IS_NAN', 'bar', 'IS_NULL')
+        );
 
         return stream();
       },
@@ -1281,7 +1374,7 @@ describe('where() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          unaryFilters('foo', 'IS_NOT_NAN', 'bar', 'IS_NOT_NULL')
+          unaryFiltersQuery('foo', 'IS_NOT_NAN', 'bar', 'IS_NOT_NULL')
         );
 
         return stream();
@@ -1332,6 +1425,162 @@ describe('where() interface', () => {
       query = query.where('foo', '@' as InvalidApiUsage, 'foobar');
     }).to.throw(
       'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, !=, >, >=, array-contains, in, not-in, array-contains-any'
+    );
+  });
+
+  it('supports composite filters - outer OR', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          where(
+            compositeFilter(
+              'OR',
+              fieldFilter('a', 'EQUAL', {integerValue: 10}),
+              compositeFilter(
+                'AND',
+                fieldFilter('b', 'EQUAL', {integerValue: 20}),
+                fieldFilter('c', 'EQUAL', {integerValue: 30}),
+                compositeFilter(
+                  'OR',
+                  fieldFilter('d', 'EQUAL', {integerValue: 40}),
+                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50})
+                ),
+                unaryFilters('f', 'IS_NAN')
+              )
+            )
+          )
+        );
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      let query: Query = firestore.collection('collectionId');
+      query = query.where(
+        Filter.or(
+          Filter.where('a', '==', 10),
+          Filter.and(
+            Filter.where('b', '==', 20),
+            Filter.where('c', '==', 30),
+            Filter.or(Filter.where('d', '==', 40), Filter.where('e', '>', 50)),
+            Filter.or(Filter.where('f', '==', NaN)),
+            Filter.and(Filter.or())
+          )
+        )
+      );
+      return query.get();
+    });
+  });
+
+  it('supports composite filters - outer AND', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          where(
+            compositeFilter(
+              'AND',
+              fieldFilter('a', 'EQUAL', {integerValue: 10}),
+              compositeFilter(
+                'OR',
+                fieldFilter('b', 'EQUAL', {integerValue: 20}),
+                fieldFilter('c', 'EQUAL', {integerValue: 30}),
+                compositeFilter(
+                  'AND',
+                  fieldFilter('d', 'EQUAL', {integerValue: 40}),
+                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50})
+                ),
+                unaryFilters('f', 'IS_NAN')
+              )
+            )
+          )
+        );
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      let query: Query = firestore.collection('collectionId');
+      query = query.where(
+        Filter.and(
+          Filter.where('a', '==', 10),
+          Filter.or(
+            Filter.where('b', '==', 20),
+            Filter.where('c', '==', 30),
+            Filter.and(Filter.where('d', '==', 40), Filter.where('e', '>', 50)),
+            Filter.and(Filter.where('f', '==', NaN)),
+            Filter.or(Filter.and())
+          )
+        )
+      );
+      return query.get();
+    });
+  });
+
+  it('supports implicit AND filters', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          where(
+            compositeFilter(
+              'AND',
+              fieldFilter('a', 'EQUAL', {integerValue: 10}),
+              fieldFilter('b', 'EQUAL', {integerValue: 20}),
+              fieldFilter('c', 'EQUAL', {integerValue: 30}),
+              fieldFilter('d', 'EQUAL', {integerValue: 40}),
+              fieldFilter('e', 'GREATER_THAN', {integerValue: 50}),
+              unaryFilters('f', 'IS_NAN')
+            )
+          )
+        );
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      let query: Query = firestore.collection('collectionId');
+      query = query
+        .where('a', '==', 10)
+        .where('b', '==', 20)
+        .where('c', '==', 30)
+        .where('d', '==', 40)
+        .where('e', '>', 50)
+        .where('f', '==', NaN);
+      return query.get();
+    });
+  });
+
+  it('supports single filter composite filters', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          where(fieldFilter('a', 'GREATER_THAN', {integerValue: 10}))
+        );
+        return stream();
+      },
+    };
+
+    const filters = [
+      Filter.and(Filter.where('a', '>', 10)),
+      Filter.or(Filter.where('a', '>', 10)),
+      Filter.or(Filter.and(Filter.or(Filter.and(Filter.where('a', '>', 10))))),
+    ];
+
+    return Promise.all(
+      filters.map(filter =>
+        createInstance(overrides).then(firestoreInstance => {
+          firestore = firestoreInstance;
+          let query: Query = firestore.collection('collectionId');
+          query = query.where(filter);
+          return query.get();
+        })
+      )
     );
   });
 });
@@ -2126,7 +2375,7 @@ describe('startAt() interface', () => {
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
           }),
-          fieldFilters(
+          fieldFiltersQuery(
             'a',
             'EQUAL',
             'a',
@@ -2172,7 +2421,7 @@ describe('startAt() interface', () => {
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
           }),
-          fieldFilters('foo', 'EQUAL', 'bar')
+          fieldFiltersQuery('foo', 'EQUAL', 'bar')
         );
 
         return stream();
@@ -2474,7 +2723,7 @@ describe('collectionGroup queries', () => {
         queryEquals(
           request,
           allDescendants(),
-          fieldFilters('foo', 'EQUAL', 'bar')
+          fieldFiltersQuery('foo', 'EQUAL', 'bar')
         );
         return stream();
       },

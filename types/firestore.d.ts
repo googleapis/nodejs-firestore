@@ -1525,6 +1525,19 @@ declare namespace FirebaseFirestore {
     ): Query<T>;
 
     /**
+     * Creates and returns a new [Query]{@link Query} with the additional filter
+     * that documents should satisfy the relation constraint provided. Documents
+     * must contain the field specified in the filter.
+     *
+     * This function returns a new (immutable) instance of the Query (rather than
+     * modify the existing instance) to impose the filter.
+     *
+     * @param {Filter} filter A filter to apply to the Query.
+     * @returns {Query} The created Query.
+     */
+    where(filter: Filter): Query<T>;
+
+    /**
      * Creates and returns a new Query that's additionally sorted by the
      * specified field, optionally in descending order instead of ascending.
      *
@@ -2423,6 +2436,110 @@ declare namespace FirebaseFirestore {
     UNAVAILABLE = 14,
     DATA_LOSS = 15,
     UNAUTHENTICATED = 16,
+  }
+
+  /**
+   * A `Filter` represents a restriction on one or more field values and can
+   * be used to refine the results of a {@link Query}.
+   * `Filters`s are created by invoking {@link Filter#where}, {@link Filter#or},
+   * or {@link Filter#and} and can then be passed to {@link Query#where}
+   * to create a new {@link Query} instance that also contains this `Filter`.
+   */
+  export abstract class Filter {
+    /**
+     * Creates and returns a new [Filter]{@link Filter}, which can be
+     * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},
+     * or [Filter.and()]{@link Filter#and}. When applied to a [Query]{@link Query}
+     * it requires that documents must contain the specified field and that its value should
+     * satisfy the relation constraint provided.
+     *
+     * Returns a new Filter that can be used to constrain the value of a Document property.
+     *
+     * @param {string|FieldPath} fieldPath The name of a property value to compare.
+     * @param {string} opStr A comparison operation in the form of a string
+     * (e.g., "<").
+     * @param {*} value The value to which to compare the field for inclusion in
+     * a query.
+     * @returns {Filter} The created Filter.
+     *
+     * @example
+     * ```
+     * let collectionRef = firestore.collection('col');
+     *
+     * collectionRef.where(Filter.where('foo', '==', 'bar')).get().then(querySnapshot => {
+     *   querySnapshot.forEach(documentSnapshot => {
+     *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+     *   });
+     * });
+     * ```
+     */
+    static where(
+      fieldPath: string | FieldPath,
+      opStr: WhereFilterOp,
+      value: unknown
+    ): Filter;
+
+    /**
+     * Creates and returns a new [Filter]{@link Filter} that is a
+     * disjunction of the given {@link Filter}s. A disjunction filter includes
+     * a document if it satisfies any of the given {@link Filter}s.
+     *
+     * The returned Filter can be applied to [Query.where()]{@link Query#where},
+     * [Filter.or()]{@link Filter#or}, or [Filter.and()]{@link Filter#and}. When
+     * applied to a [Query]{@link Query} it requires that documents must satisfy
+     * one of the provided {@link Filter}s.
+     *
+     * @param {...Filter} filters  Optional. The {@link Filter}s
+     * for OR operation. These must be created with calls to {@link Filter#where},
+     * {@link Filter#or}, or {@link Filter#and}.
+     * @returns {Filter} The created {@link Filter}.
+     *
+     * @example
+     * ```
+     * let collectionRef = firestore.collection('col');
+     *
+     * // doc.foo == 'bar' || doc.baz > 0
+     * let orFilter = Filter.or(Filter.where('foo', '==', 'bar'), Filter.where('baz', '>', 0));
+     *
+     * collectionRef.where(orFilter).get().then(querySnapshot => {
+     *   querySnapshot.forEach(documentSnapshot => {
+     *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+     *   });
+     * });
+     * ```
+     */
+    static or(...filters: Filter[]): Filter;
+
+    /**
+     * Creates and returns a new [Filter]{@link Filter} that is a
+     * conjunction of the given {@link Filter}s. A conjunction filter includes
+     * a document if it satisfies any of the given {@link Filter}s.
+     *
+     * The returned Filter can be applied to [Query.where()]{@link Query#where},
+     * [Filter.or()]{@link Filter#or}, or [Filter.and()]{@link Filter#and}. When
+     * applied to a [Query]{@link Query} it requires that documents must satisfy
+     * one of the provided {@link Filter}s.
+     *
+     * @param {...Filter} filters  Optional. The {@link Filter}s
+     * for OR operation. These must be created with calls to {@link Filter#where},
+     * {@link Filter#or}, or {@link Filter#and}.
+     * @returns {Filter} The created {@link Filter}.
+     *
+     * @example
+     * ```
+     * let collectionRef = firestore.collection('col');
+     *
+     * // doc.foo == 'bar' && doc.baz > 0
+     * let orFilter = Filter.and(Filter.where('foo', '==', 'bar'), Filter.where('baz', '>', 0));
+     *
+     * collectionRef.where(orFilter).get().then(querySnapshot => {
+     *   querySnapshot.forEach(documentSnapshot => {
+     *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+     *   });
+     * });
+     * ```
+     */
+    static and(...filters: Filter[]): Filter;
   }
 }
 
