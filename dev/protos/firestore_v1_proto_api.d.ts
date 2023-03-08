@@ -6629,6 +6629,12 @@ export namespace google {
                     /** Aggregation count */
                     count?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null);
 
+                    /** Aggregation sum */
+                    sum?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum|null);
+
+                    /** Aggregation avg */
+                    avg?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg|null);
+
                     /** Aggregation alias */
                     alias?: (string|null);
                 }
@@ -6645,11 +6651,17 @@ export namespace google {
                     /** Aggregation count. */
                     public count?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null);
 
+                    /** Aggregation sum. */
+                    public sum?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum|null);
+
+                    /** Aggregation avg. */
+                    public avg?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg|null);
+
                     /** Aggregation alias. */
                     public alias: string;
 
                     /** Aggregation operator. */
-                    public operator?: "count";
+                    public operator?: ("count"|"sum"|"avg");
 
                     /**
                      * Creates an Aggregation message from a plain object. Also converts values to their respective internal types.
@@ -6724,6 +6736,102 @@ export namespace google {
 
                         /**
                          * Gets the default type url for Count
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    /** Properties of a Sum. */
+                    interface ISum {
+
+                        /** Sum field */
+                        field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+                    }
+
+                    /** Represents a Sum. */
+                    class Sum implements ISum {
+
+                        /**
+                         * Constructs a new Sum.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum);
+
+                        /** Sum field. */
+                        public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                        /**
+                         * Creates a Sum message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns Sum
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum;
+
+                        /**
+                         * Creates a plain object from a Sum message. Also converts values to other types if specified.
+                         * @param message Sum
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this Sum to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for Sum
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    /** Properties of an Avg. */
+                    interface IAvg {
+
+                        /** Avg field */
+                        field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+                    }
+
+                    /** Represents an Avg. */
+                    class Avg implements IAvg {
+
+                        /**
+                         * Constructs a new Avg.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg);
+
+                        /** Avg field. */
+                        public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                        /**
+                         * Creates an Avg message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns Avg
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg;
+
+                        /**
+                         * Creates a plain object from an Avg message. Also converts values to other types if specified.
+                         * @param message Avg
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this Avg to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for Avg
                          * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                          * @returns The default type url
                          */

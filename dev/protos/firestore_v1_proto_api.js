@@ -15918,6 +15918,8 @@
                          * @memberof google.firestore.v1.StructuredAggregationQuery
                          * @interface IAggregation
                          * @property {google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null} [count] Aggregation count
+                         * @property {google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum|null} [sum] Aggregation sum
+                         * @property {google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg|null} [avg] Aggregation avg
                          * @property {string|null} [alias] Aggregation alias
                          */
     
@@ -15945,6 +15947,22 @@
                         Aggregation.prototype.count = null;
     
                         /**
+                         * Aggregation sum.
+                         * @member {google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum|null|undefined} sum
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @instance
+                         */
+                        Aggregation.prototype.sum = null;
+    
+                        /**
+                         * Aggregation avg.
+                         * @member {google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg|null|undefined} avg
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @instance
+                         */
+                        Aggregation.prototype.avg = null;
+    
+                        /**
                          * Aggregation alias.
                          * @member {string} alias
                          * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
@@ -15957,12 +15975,12 @@
     
                         /**
                          * Aggregation operator.
-                         * @member {"count"|undefined} operator
+                         * @member {"count"|"sum"|"avg"|undefined} operator
                          * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
                          * @instance
                          */
                         Object.defineProperty(Aggregation.prototype, "operator", {
-                            get: $util.oneOfGetter($oneOfFields = ["count"]),
+                            get: $util.oneOfGetter($oneOfFields = ["count", "sum", "avg"]),
                             set: $util.oneOfSetter($oneOfFields)
                         });
     
@@ -15982,6 +16000,16 @@
                                 if (typeof object.count !== "object")
                                     throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.count: object expected");
                                 message.count = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Count.fromObject(object.count);
+                            }
+                            if (object.sum != null) {
+                                if (typeof object.sum !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.sum: object expected");
+                                message.sum = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum.fromObject(object.sum);
+                            }
+                            if (object.avg != null) {
+                                if (typeof object.avg !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.avg: object expected");
+                                message.avg = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg.fromObject(object.avg);
                             }
                             if (object.alias != null)
                                 message.alias = String(object.alias);
@@ -16007,6 +16035,16 @@
                                 object.count = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Count.toObject(message.count, options);
                                 if (options.oneofs)
                                     object.operator = "count";
+                            }
+                            if (message.sum != null && message.hasOwnProperty("sum")) {
+                                object.sum = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum.toObject(message.sum, options);
+                                if (options.oneofs)
+                                    object.operator = "sum";
+                            }
+                            if (message.avg != null && message.hasOwnProperty("avg")) {
+                                object.avg = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg.toObject(message.avg, options);
+                                if (options.oneofs)
+                                    object.operator = "avg";
                             }
                             if (message.alias != null && message.hasOwnProperty("alias"))
                                 object.alias = message.alias;
@@ -16138,6 +16176,208 @@
                             };
     
                             return Count;
+                        })();
+    
+                        Aggregation.Sum = (function() {
+    
+                            /**
+                             * Properties of a Sum.
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                             * @interface ISum
+                             * @property {google.firestore.v1.StructuredQuery.IFieldReference|null} [field] Sum field
+                             */
+    
+                            /**
+                             * Constructs a new Sum.
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                             * @classdesc Represents a Sum.
+                             * @implements ISum
+                             * @constructor
+                             * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum=} [properties] Properties to set
+                             */
+                            function Sum(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * Sum field.
+                             * @member {google.firestore.v1.StructuredQuery.IFieldReference|null|undefined} field
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum
+                             * @instance
+                             */
+                            Sum.prototype.field = null;
+    
+                            /**
+                             * Creates a Sum message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum} Sum
+                             */
+                            Sum.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum)
+                                    return object;
+                                var message = new $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum();
+                                if (object.field != null) {
+                                    if (typeof object.field !== "object")
+                                        throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum.field: object expected");
+                                    message.field = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.field);
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a Sum message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum
+                             * @static
+                             * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum} message Sum
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            Sum.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.field = null;
+                                if (message.field != null && message.hasOwnProperty("field"))
+                                    object.field = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.field, options);
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this Sum to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            Sum.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for Sum
+                             * @function getTypeUrl
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            Sum.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum";
+                            };
+    
+                            return Sum;
+                        })();
+    
+                        Aggregation.Avg = (function() {
+    
+                            /**
+                             * Properties of an Avg.
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                             * @interface IAvg
+                             * @property {google.firestore.v1.StructuredQuery.IFieldReference|null} [field] Avg field
+                             */
+    
+                            /**
+                             * Constructs a new Avg.
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                             * @classdesc Represents an Avg.
+                             * @implements IAvg
+                             * @constructor
+                             * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg=} [properties] Properties to set
+                             */
+                            function Avg(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * Avg field.
+                             * @member {google.firestore.v1.StructuredQuery.IFieldReference|null|undefined} field
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg
+                             * @instance
+                             */
+                            Avg.prototype.field = null;
+    
+                            /**
+                             * Creates an Avg message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg} Avg
+                             */
+                            Avg.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg)
+                                    return object;
+                                var message = new $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg();
+                                if (object.field != null) {
+                                    if (typeof object.field !== "object")
+                                        throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg.field: object expected");
+                                    message.field = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.field);
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from an Avg message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg
+                             * @static
+                             * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg} message Avg
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            Avg.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.field = null;
+                                if (message.field != null && message.hasOwnProperty("field"))
+                                    object.field = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.field, options);
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this Avg to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            Avg.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for Avg
+                             * @function getTypeUrl
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            Avg.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg";
+                            };
+    
+                            return Avg;
                         })();
     
                         return Aggregation;
