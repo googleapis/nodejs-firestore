@@ -1732,6 +1732,8 @@ declare namespace FirebaseFirestore {
      */
     count(): AggregateQuery<{count: AggregateField<number>}>;
 
+    // TODO(ehsan): add aggregate(...).
+
     /**
      * Returns true if this `Query` is equal to the provided one.
      *
@@ -2053,17 +2055,49 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * Union type representing the aggregate type to be performed.
+   * @internal
+   */
+  export type AggregateType = 'count' | 'avg' | 'sum';
+
+  /**
+   * An alias for aggregation results.
+   * @internal
+   */
+  export class AggregateAlias {
+    private constructor(alias: string);
+  }
+
+  /**
+   * Represents an Aggregate to be performed over a query result set.
+   */
+  export interface Aggregate {
+    readonly alias: AggregateAlias;
+    readonly aggregateType: AggregateType;
+    readonly fieldPath?: string;
+  }
+
+  /**
    * Represents an aggregation that can be performed by Firestore.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export class AggregateField<T> {
     private constructor();
+    getType() : AggregateType;
+    getPath(): string | undefined;
+
+    // TODO(ehsan): add doc.
+    public static count() : AggregateField<number>;
+    public static sum(): AggregateField<number>;
+    public static sum(): AggregateField<number>;
   }
 
+  // TODO (sum/avg) Update the definition of AggregateFieldType to be based
+  // on the return type of `sum(..)`, `average(...)`, and `count()`
   /**
    * The union of all `AggregateField` types that are supported by Firestore.
    */
-  export type AggregateFieldType = AggregateField<number>;
+  export type AggregateFieldType = AggregateField<number | null>;
 
   /**
    * A type whose property values are all `AggregateField` objects.

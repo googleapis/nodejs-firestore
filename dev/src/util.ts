@@ -217,3 +217,27 @@ export function wrapError(err: Error, stack: string): Error {
   err.stack += '\nCaused by: ' + stack;
   return err;
 }
+
+interface Dict<V> {
+  [stringKey: string]: V;
+}
+
+/**
+ * Returns an array of values that are calculated by performing the given `fn`
+ * on all keys in the given `obj` dictionary.
+ *
+ * @private
+ * @internal
+ */
+export function mapToArray<V, R>(
+    obj: Dict<V>,
+    fn: (element: V, key: string, obj: Dict<V>) => R
+): R[] {
+  const result: R[] = [];
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      result.push(fn(obj[key], key, obj));
+    }
+  }
+  return result;
+}
