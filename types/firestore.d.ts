@@ -1732,7 +1732,39 @@ declare namespace FirebaseFirestore {
      */
     count(): AggregateQuery<{count: AggregateField<number>}>;
 
-    // TODO(ehsan): add aggregate(...).
+    /**
+     * Returns a query that can perform the given aggregations.
+     *
+     * The returned query, when executed, calculates the specified aggregations
+     * over the documents in the result set of this query, without actually
+     * downloading the documents.
+     *
+     * Using the returned query to perform aggregations is efficient because only
+     * the final aggregation values, not the documents' data, is downloaded. The
+     * returned query can even perform aggregations of the documents if the result set
+     * would be prohibitively large to download entirely (e.g. thousands of documents).
+     *
+     * @param aggregateSpec An `AggregateSpec` object that specifies the aggregates
+     * to perform over the result set. The AggregateSpec specifies aliases for each
+     * aggregate, which can be used to retrieve the aggregate result.
+     * @example
+     * ```typescript
+     * const aggregateQuery = col.aggregate(query, {
+     *   countOfDocs: count(),
+     *   totalHours: sum('hours'),
+     *   averageScore: average('score')
+     * });
+     *
+     * const aggregateSnapshot = await aggregateQuery.get();
+     * const countOfDocs: number = aggregateSnapshot.data().countOfDocs;
+     * const totalHours: number = aggregateSnapshot.data().totalHours;
+     * const averageScore: number | null = aggregateSnapshot.data().averageScore;
+     * ```
+     * @internal TODO (sum/avg) remove when public
+     */
+    aggregate<T extends AggregateSpec>(
+        aggregateSpec: T
+    ): AggregateQuery<T>;
 
     /**
      * Returns true if this `Query` is equal to the provided one.
