@@ -2087,11 +2087,12 @@ declare namespace FirebaseFirestore {
   /**
    * Represents an aggregation that can be performed by Firestore.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export class AggregateField<T> {
     private constructor();
 
     // TODO(ehsan): add doc.
-    getType() : AggregateType;
+    getType(): AggregateType;
 
     // TODO(ehsan): add doc.
     getPath(): string | undefined;
@@ -2100,10 +2101,10 @@ declare namespace FirebaseFirestore {
     isEqual(other: AggregateField<any>): boolean;
 
     // TODO(ehsan): add doc.
-    static count() : AggregateField<number>;
+    static count(): AggregateField<number>;
 
     // TODO(ehsan): add doc.
-    static avg(fieldPath : string | FieldPath): AggregateField<number | null>;
+    static avg(fieldPath: string | FieldPath): AggregateField<number | null>;
 
     // TODO(ehsan): add doc.
     static sum(fieldPath: string | FieldPath): AggregateField<number>;

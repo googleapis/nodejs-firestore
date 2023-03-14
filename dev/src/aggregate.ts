@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import {AggregateAlias} from "./aggregate_alias";
-import {FieldPath} from "./path";
-import {google} from "../protos/firestore_v1_proto_api";
+import {AggregateAlias} from './aggregate_alias';
+import {FieldPath} from './path';
+import {google} from '../protos/firestore_v1_proto_api';
 
 import * as firestore from '@google-cloud/firestore';
 import IAggregation = google.firestore.v1.StructuredAggregationQuery.IAggregation;
@@ -26,92 +26,100 @@ import IAggregation = google.firestore.v1.StructuredAggregationQuery.IAggregatio
  * Concrete implementation of the Aggregate type.
  */
 export class AggregateImpl implements firestore.Aggregate {
-    constructor(
-        readonly alias: AggregateAlias,
-        readonly aggregateType: firestore.AggregateType,
-        readonly fieldPath?: string
-    ) {}
+  constructor(
+    readonly alias: AggregateAlias,
+    readonly aggregateType: firestore.AggregateType,
+    readonly fieldPath?: string
+  ) {}
 
-    toProto() : IAggregation {
-        const proto : IAggregation = {};
-        if(this.aggregateType === 'count') {
-            proto.count = {};
-        } else if(this.aggregateType === 'sum') {
-            proto.sum = {
-                field: {
-                    fieldPath: this.fieldPath
-                }
-            }
-        } else if(this.aggregateType === 'avg') {
-            proto.avg = {
-                field: {
-                    fieldPath: this.fieldPath
-                }
-            }
-        } else {
-            throw new Error(`Aggregate type ${this.aggregateType} unimplemented.`);
-        }
-        proto.alias = this.alias.canonicalString();
-        return proto;
+  toProto(): IAggregation {
+    const proto: IAggregation = {};
+    if (this.aggregateType === 'count') {
+      proto.count = {};
+    } else if (this.aggregateType === 'sum') {
+      proto.sum = {
+        field: {
+          fieldPath: this.fieldPath,
+        },
+      };
+    } else if (this.aggregateType === 'avg') {
+      proto.avg = {
+        field: {
+          fieldPath: this.fieldPath,
+        },
+      };
+    } else {
+      throw new Error(`Aggregate type ${this.aggregateType} unimplemented.`);
     }
+    proto.alias = this.alias.canonicalString();
+    return proto;
+  }
 }
 
 /**
  * Represents an aggregation that can be performed by Firestore.
  */
-export class AggregateField<T>  implements firestore.AggregateField<T> {
-    /** A type string to uniquely identify instances of this class. */
-    readonly type = 'AggregateField';
+export class AggregateField<T> implements firestore.AggregateField<T> {
+  /** A type string to uniquely identify instances of this class. */
+  readonly type = 'AggregateField';
 
-    readonly _aggregateType : firestore.AggregateType;
-    readonly _internalFieldPath : FieldPath | undefined;
+  readonly _aggregateType: firestore.AggregateType;
+  readonly _internalFieldPath: FieldPath | undefined;
 
-    /**
-     * Create a new AggregateField<T>
-     * @param aggregateType Specifies the type of aggregation operation to perform.
-     * @param fieldPath Optionally specifies the field that is aggregated.
-     * @internal
-     */
-    constructor(
-        // TODO (sum/avg) make aggregateType public when the feature is supported
-        aggregateType: firestore.AggregateType = 'count',
-        fieldPath?: firestore.FieldPath
-    ) {
-        this._aggregateType = aggregateType;
-        if(fieldPath) {
-            this._internalFieldPath = FieldPath.fromArgument(fieldPath);
-        }
+  /**
+   * Create a new AggregateField<T>
+   * @param aggregateType Specifies the type of aggregation operation to perform.
+   * @param fieldPath Optionally specifies the field that is aggregated.
+   * @internal
+   */
+  constructor(
+    // TODO (sum/avg) make aggregateType public when the feature is supported
+    aggregateType: firestore.AggregateType = 'count',
+    fieldPath?: firestore.FieldPath
+  ) {
+    this._aggregateType = aggregateType;
+    if (fieldPath) {
+      this._internalFieldPath = FieldPath.fromArgument(fieldPath);
     }
+  }
 
-    getType() : firestore.AggregateType {
-        return this._aggregateType;
-    }
-    getPath(): string | undefined {
-        return this._internalFieldPath?.formattedName;
-    }
+  getType(): firestore.AggregateType {
+    return this._aggregateType;
+  }
+  getPath(): string | undefined {
+    return this._internalFieldPath?.formattedName;
+  }
 
-    isEqual(other: firestore.AggregateField<any>): boolean {
-        if (this === other) {
-            return true;
-        }
-        if (!(other instanceof AggregateField)) {
-            return false;
-        }
-        if (this._aggregateType !== other._aggregateType) {
-            return false;
-        }
-        return (this._internalFieldPath === undefined && other._internalFieldPath===undefined) ||
-        (this._internalFieldPath !== undefined && other._internalFieldPath!==undefined &&
-                this._internalFieldPath.isEqual(other._internalFieldPath));
+  isEqual(other: firestore.AggregateField<T>): boolean {
+    if (this === other) {
+      return true;
     }
+    if (!(other instanceof AggregateField)) {
+      return false;
+    }
+    if (this._aggregateType !== other._aggregateType) {
+      return false;
+    }
+    return (
+      (this._internalFieldPath === undefined &&
+        other._internalFieldPath === undefined) ||
+      (this._internalFieldPath !== undefined &&
+        other._internalFieldPath !== undefined &&
+        this._internalFieldPath.isEqual(other._internalFieldPath))
+    );
+  }
 
-    public static count() : firestore.AggregateField<number> {
-        return new AggregateField('count');
-    }
-    public static avg(fieldPath : string | firestore.FieldPath): firestore.AggregateField<number | null> {
-        return new AggregateField('avg', FieldPath.fromArgument(fieldPath));
-    }
-    public static sum(fieldPath: string | firestore.FieldPath): firestore.AggregateField<number> {
-        return new AggregateField('sum', FieldPath.fromArgument(fieldPath));
-    }
+  public static count(): firestore.AggregateField<number> {
+    return new AggregateField('count');
+  }
+  public static avg(
+    fieldPath: string | firestore.FieldPath
+  ): firestore.AggregateField<number | null> {
+    return new AggregateField('avg', FieldPath.fromArgument(fieldPath));
+  }
+  public static sum(
+    fieldPath: string | firestore.FieldPath
+  ): firestore.AggregateField<number> {
+    return new AggregateField('sum', FieldPath.fromArgument(fieldPath));
+  }
 }

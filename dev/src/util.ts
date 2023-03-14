@@ -230,8 +230,8 @@ interface Dict<V> {
  * @internal
  */
 export function mapToArray<V, R>(
-    obj: Dict<V>,
-    fn: (element: V, key: string, obj: Dict<V>) => R
+  obj: Dict<V>,
+  fn: (element: V, key: string, obj: Dict<V>) => R
 ): R[] {
   const result: R[] = [];
   for (const key in obj) {

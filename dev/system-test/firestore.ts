@@ -2161,13 +2161,11 @@ describe.only('Aggregates', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    randomCol = getTestRoot(
-        {
-          host: '127.0.0.1',
-          port: 8080,
-          ssl: false
-        }
-    );
+    randomCol = getTestRoot({
+      host: '127.0.0.1',
+      port: 8080,
+      ssl: false,
+    });
     firestore = randomCol.firestore;
   });
 

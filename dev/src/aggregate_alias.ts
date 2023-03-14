@@ -23,28 +23,28 @@ const aliasRegExp = /^[_a-zA-Z][_a-zA-Z0-9]*(?:\.[_a-zA-Z][_a-zA-Z0-9]*)*$/;
  * An alias for aggregation results.
  * @internal
  */
-export class AggregateAlias implements  firestore.AggregateAlias {
-    /**
-     * @internal
-     * @param alias Un-escaped alias representation
-     */
-    constructor(private alias: string) {}
+export class AggregateAlias implements firestore.AggregateAlias {
+  /**
+   * @internal
+   * @param alias Un-escaped alias representation
+   */
+  constructor(private alias: string) {}
 
-    /**
-     * Returns true if the string could be used as an alias.
-     */
-    private static isValidAlias(value: string): boolean {
-        return aliasRegExp.test(value);
-    }
+  /**
+   * Returns true if the string could be used as an alias.
+   */
+  private static isValidAlias(value: string): boolean {
+    return aliasRegExp.test(value);
+  }
 
-    /**
-     * Return an escaped and quoted string representation of the alias.
-     */
-    canonicalString(): string {
-        let alias = this.alias.replace(/\\/g, '\\\\').replace(/`/g, '\\`');
-        if (!AggregateAlias.isValidAlias(alias)) {
-            alias = '`' + alias + '`';
-        }
-        return alias;
+  /**
+   * Return an escaped and quoted string representation of the alias.
+   */
+  canonicalString(): string {
+    let alias = this.alias.replace(/\\/g, '\\\\').replace(/`/g, '\\`');
+    if (!AggregateAlias.isValidAlias(alias)) {
+      alias = '`' + alias + '`';
     }
+    return alias;
+  }
 }

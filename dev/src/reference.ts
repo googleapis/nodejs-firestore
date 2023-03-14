@@ -43,7 +43,8 @@ import {defaultConverter} from './types';
 import {
   autoId,
   Deferred,
-  isPermanentRpcError, mapToArray,
+  isPermanentRpcError,
+  mapToArray,
   requestTag,
   wrapError,
 } from './util';
@@ -57,8 +58,8 @@ import {
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
-import {AggregateField, AggregateImpl} from "./aggregate";
-import {AggregateAlias} from "./aggregate_alias";
+import {AggregateField, AggregateImpl} from './aggregate';
+import {AggregateAlias} from './aggregate_alias';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1656,7 +1657,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @internal TODO (sum/avg) remove when public
    */
   aggregate<T extends firestore.AggregateSpec>(
-      aggregateSpec: T
+    aggregateSpec: T
   ): AggregateQuery<T> {
     return new AggregateQuery<T>(this, aggregateSpec);
   }
@@ -3091,12 +3092,11 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
       parent: queryProto.parent,
       structuredAggregationQuery: {
         structuredQuery: queryProto.structuredQuery,
-        aggregations: mapToArray(this._aggregates,
-            (aggregate, alias) => {
+        aggregations: mapToArray(this._aggregates, (aggregate, alias) => {
           return new AggregateImpl(
-              new AggregateAlias(alias),
-              aggregate.getType(),
-              aggregate.getPath()
+            new AggregateAlias(alias),
+            aggregate.getType(),
+            aggregate.getPath()
           ).toProto();
         }),
       },
