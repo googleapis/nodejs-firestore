@@ -73,7 +73,6 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
    * @internal
    */
   constructor(
-    // TODO (sum/avg) make aggregateType public when the feature is supported
     aggregateType: firestore.AggregateType = 'count',
     fieldPath?: firestore.FieldPath
   ) {

@@ -1622,8 +1622,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * returned query.
    */
   count(): AggregateQuery<{count: firestore.AggregateField<number>}> {
-    return new AggregateQuery(this, {count: AggregateField.count()});
-    // return new AggregateQuery(this, {count: {}});
+    return this.aggregate({
+      count: AggregateField.count(),
+    });
   }
 
   /**
