@@ -2077,27 +2077,37 @@ declare namespace FirebaseFirestore {
     readonly fieldPath?: string;
   }
 
-  /**
-   * Represents an aggregation that can be performed by Firestore.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  export class AggregateField<T> {
-    private constructor();
-    getType() : AggregateType;
-    getPath(): string | undefined;
-
-    // TODO(ehsan): add doc.
-    public static count() : AggregateField<number>;
-    public static sum(): AggregateField<number>;
-    public static sum(): AggregateField<number>;
-  }
-
   // TODO (sum/avg) Update the definition of AggregateFieldType to be based
   // on the return type of `sum(..)`, `average(...)`, and `count()`
   /**
    * The union of all `AggregateField` types that are supported by Firestore.
    */
   export type AggregateFieldType = AggregateField<number | null>;
+
+  /**
+   * Represents an aggregation that can be performed by Firestore.
+   */
+  export class AggregateField<T> {
+    private constructor();
+
+    // TODO(ehsan): add doc.
+    getType() : AggregateType;
+
+    // TODO(ehsan): add doc.
+    getPath(): string | undefined;
+
+    // TODO(ehsan): add doc.
+    isEqual(other: AggregateField<any>): boolean;
+
+    // TODO(ehsan): add doc.
+    static count() : AggregateField<number>;
+
+    // TODO(ehsan): add doc.
+    static avg(fieldPath : string | FieldPath): AggregateField<number | null>;
+
+    // TODO(ehsan): add doc.
+    static sum(fieldPath: string | FieldPath): AggregateField<number>;
+  }
 
   /**
    * A type whose property values are all `AggregateField` objects.

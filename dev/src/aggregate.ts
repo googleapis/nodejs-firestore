@@ -59,7 +59,7 @@ export class AggregateImpl implements firestore.Aggregate {
 /**
  * Represents an aggregation that can be performed by Firestore.
  */
-export class AggregateFieldImpl<T> implements firestore.AggregateField<T>{
+export class AggregateField<T>  implements firestore.AggregateField<T> {
     /** A type string to uniquely identify instances of this class. */
     readonly type = 'AggregateField';
 
@@ -88,5 +88,30 @@ export class AggregateFieldImpl<T> implements firestore.AggregateField<T>{
     }
     getPath(): string | undefined {
         return this._internalFieldPath?.formattedName;
+    }
+
+    isEqual(other: firestore.AggregateField<any>): boolean {
+        if (this === other) {
+            return true;
+        }
+        if (!(other instanceof AggregateField)) {
+            return false;
+        }
+        if (this._aggregateType !== other._aggregateType) {
+            return false;
+        }
+        return (this._internalFieldPath === undefined && other._internalFieldPath===undefined) ||
+        (this._internalFieldPath !== undefined && other._internalFieldPath!==undefined &&
+                this._internalFieldPath.isEqual(other._internalFieldPath));
+    }
+
+    public static count() : firestore.AggregateField<number> {
+        return new AggregateField('count');
+    }
+    public static avg(fieldPath : string | firestore.FieldPath): firestore.AggregateField<number | null> {
+        return new AggregateField('avg', FieldPath.fromArgument(fieldPath));
+    }
+    public static sum(fieldPath: string | firestore.FieldPath): firestore.AggregateField<number> {
+        return new AggregateField('sum', FieldPath.fromArgument(fieldPath));
     }
 }

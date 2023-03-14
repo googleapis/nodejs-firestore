@@ -2156,12 +2156,18 @@ describe('Query class', () => {
   });
 });
 
-describe('Aggregates', () => {
+describe.only('Aggregates', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    randomCol = getTestRoot();
+    randomCol = getTestRoot(
+        {
+          host: '127.0.0.1',
+          port: 8080,
+          ssl: false
+        }
+    );
     firestore = randomCol.firestore;
   });
 

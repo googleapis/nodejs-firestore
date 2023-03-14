@@ -15,13 +15,15 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 const aliasRegExp = /^[_a-zA-Z][_a-zA-Z0-9]*(?:\.[_a-zA-Z][_a-zA-Z0-9]*)*$/;
 
 /**
  * An alias for aggregation results.
  * @internal
  */
-export class AggregateAlias {
+export class AggregateAlias implements  firestore.AggregateAlias {
     /**
      * @internal
      * @param alias Un-escaped alias representation

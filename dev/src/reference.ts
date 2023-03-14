@@ -57,8 +57,7 @@ import {
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
-import {AggregateField, AggregateSpec} from "@google-cloud/firestore";
-import {AggregateImpl} from "./aggregate";
+import {AggregateField, AggregateImpl} from "./aggregate";
 import {AggregateAlias} from "./aggregate_alias";
 
 /**
@@ -1623,6 +1622,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    */
   count(): AggregateQuery<{count: firestore.AggregateField<number>}> {
     return new AggregateQuery(this, {count: AggregateField.count()});
+    // return new AggregateQuery(this, {count: {}});
   }
 
   /**
@@ -1655,7 +1655,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * ```
    * @internal TODO (sum/avg) remove when public
    */
-  aggregate<T extends AggregateSpec>(
+  aggregate<T extends firestore.AggregateSpec>(
       aggregateSpec: T
   ): AggregateQuery<T> {
     return new AggregateQuery<T>(this, aggregateSpec);
