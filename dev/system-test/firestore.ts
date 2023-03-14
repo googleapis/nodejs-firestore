@@ -28,6 +28,7 @@ import * as extend from 'extend';
 import {firestore} from '../protos/firestore_v1_proto_api';
 
 import {
+  AggregateField,
   CollectionReference,
   DocumentReference,
   DocumentSnapshot,
@@ -2156,7 +2157,7 @@ describe('Query class', () => {
   });
 });
 
-describe.only('Aggregates', () => {
+describe('count queries', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
@@ -2286,6 +2287,293 @@ describe.only('Aggregates', () => {
       await runQueryAndExpectCount(count5, 1);
     });
   }
+});
+
+describe('count queries using aggregate api', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+
+  beforeEach(() => {
+    randomCol = getTestRoot({
+      host: '127.0.0.1',
+      port: 8080,
+      ssl: false,
+    });
+    firestore = randomCol.firestore;
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  describe('Run outside Transaction', () => {
+    countTests(async (q, n) => {
+      const res = await q.get();
+      expect(res.data().count).to.equal(n);
+    });
+  });
+
+  describe('Run within Transaction', () => {
+    countTests(async (q, n) => {
+      const res = await firestore.runTransaction(f => f.get(q));
+      expect(res.data().count).to.equal(n);
+    });
+  });
+
+  function countTests(
+    runQueryAndExpectCount: (
+      query: FirebaseFirestore.AggregateQuery<{
+        count: FirebaseFirestore.AggregateField<number>;
+      }>,
+      expectedCount: number
+    ) => Promise<void>
+  ) {
+    it('counts 0 document from non-existent collection', async () => {
+      const count = randomCol.aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 0);
+    });
+
+    it('counts 0 document from filtered empty collection', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.where('foo', '==', 'notbar').aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 0);
+    });
+
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 1);
+    });
+
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 1);
+    });
+
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 1);
+    });
+
+    it('counts multiple documents with filter', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'notbar'});
+      await randomCol.doc('doc3').set({notfoo: 'bar'});
+      const count = randomCol.where('foo', '==', 'bar').aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 2);
+    });
+
+    it('counts up to limit', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+      await randomCol.doc('doc8').set({foo: 'bar'});
+      const count = randomCol.limit(5).aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 5);
+    });
+
+    it('counts with orderBy', async () => {
+      await randomCol.doc('doc1').set({foo1: 'bar1'});
+      await randomCol.doc('doc2').set({foo1: 'bar2'});
+      await randomCol.doc('doc3').set({foo1: 'bar3'});
+      await randomCol.doc('doc4').set({foo1: 'bar4'});
+      await randomCol.doc('doc5').set({foo1: 'bar5'});
+      await randomCol.doc('doc6').set({foo2: 'bar6'});
+      await randomCol.doc('doc7').set({foo2: 'bar7'});
+      await randomCol.doc('doc8').set({foo2: 'bar8'});
+
+      const count1 = randomCol.orderBy('foo2').aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count1, 3);
+
+      const count2 = randomCol.orderBy('foo3').aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count2, 0);
+    });
+
+    it('counts with startAt, endAt and offset', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+
+      const count1 = randomCol.startAfter(randomCol.doc('doc3')).aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count1, 4);
+
+      const count2 = randomCol.startAt(randomCol.doc('doc3')).aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count2, 5);
+
+      const count3 = randomCol.endAt(randomCol.doc('doc3')).aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count3, 3);
+
+      const count4 = randomCol.endBefore(randomCol.doc('doc3')).aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count4, 2);
+
+      const count5 = randomCol.offset(6).aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count5, 1);
+    });
+  }
+});
+
+describe.only('Aggregation queries', () => {
+  let firestore: Firestore;
+  let col: CollectionReference;
+
+  beforeEach(() => {
+    col = getTestRoot({
+      host: '127.0.0.1',
+      port: 8080,
+      ssl: false,
+    });
+    firestore = col.firestore;
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  async function addTestDocs(
+      docs: { [key: string]: DocumentData }
+  ) : Promise<Awaited<WriteResult>[]> {
+    const sets: Array<Promise<WriteResult>> = [];
+    Object.keys(docs).forEach(key => {
+      //sets.push(setDoc(doc(setupCollection, key), docs[key]));
+      sets.push(col.doc(key).set(docs[key]));
+    });
+    return Promise.all(sets);
+  }
+
+  it('can run count query using aggregate api', async () => {
+    const testDocs = {
+      a: { author: 'authorA', title: 'titleA' },
+      b: { author: 'authorB', title: 'titleB' }
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col.aggregate({
+      count: AggregateField.count()
+    }).get();
+    expect(snapshot.data().count).to.equal(2);
+  });
+
+  it('can alias aggregations using aggregate api', async () => {
+    const testDocs = {
+      a: { author: 'authorA', title: 'titleA' },
+      b: { author: 'authorB', title: 'titleB' }
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col.aggregate({
+      foo: AggregateField.count(),
+      'with.dots': AggregateField.count()
+    }).get();
+    expect(snapshot.data().foo).to.equal(2);
+    expect(snapshot.data()['with.dots']).to.equal(2);
+  });
+
+  it('allows special chars in aliases when using aggregate api', async () => {
+    const testDocs = {
+      a: { author: 'authorA', title: 'titleA' },
+      b: { author: 'authorB', title: 'titleB' }
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col.aggregate({
+        'with-un/su+pp[or]ted': AggregateField.count()
+      }).get();
+
+      expect(snapshot.data()['with-un/su+pp[or]ted']).to.equal(2);
+  });
+
+  it('allows backticks in aliases when using aggregate api', async () => {
+    const testDocs = {
+      a: { author: 'authorA', title: 'titleA' },
+      b: { author: 'authorB', title: 'titleB' }
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col.aggregate({
+      '`with-un/su+pp[or]ted`': AggregateField.count()
+    }).get();
+
+    expect(snapshot.data()['`with-un/su+pp[or]ted`']).to.equal(2);
+  });
+
+  it('allows backslash in aliases when using aggregate api', async () => {
+    const testDocs = {
+      a: { author: 'authorA', title: 'titleA' },
+      b: { author: 'authorB', title: 'titleB' }
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col.aggregate({
+      'with\\backshash\\es': AggregateField.count()
+    }).get();
+
+    expect(snapshot.data()['with\\backshash\\es']).to.equal(2);
+  });
+
+  it('can get duplicate aggregations using aggregate api', async () => {
+    const testDocs = {
+      a: { author: 'authorA', title: 'titleA' },
+      b: { author: 'authorB', title: 'titleB' }
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col.aggregate({
+      count: AggregateField.count(),
+      foo:   AggregateField.count()
+    }).get();
+    expect(snapshot.data().foo).to.equal(2);
+    expect(snapshot.data().count).to.equal(2);
+  });
+
+  it("aggregate() doesn't use converter", async () => {
+    const testDocs = {
+      a: { author: 'authorA', title: 'titleA' },
+      b: { author: 'authorB', title: 'titleB' }
+    };
+    const throwingConverter = {
+      toFirestore(obj: never): DocumentData {
+        throw new Error('should never be called');
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot): never {
+        throw new Error('should never be called');
+      }
+    };
+    await addTestDocs(testDocs);
+    const query = col.where('author', '==', 'authorA').withConverter(throwingConverter);
+    const snapshot = await query.aggregate({
+      count: AggregateField.count()
+    }).get();
+    expect(snapshot.data().count).to.equal(1);
+  });
+
+  it('aggregate query supports collection groups', async () => {
+    const collectionGroupId = autoId();
+    const docPaths = [
+      `${collectionGroupId}/cg-doc1`,
+      `abc/123/${collectionGroupId}/cg-doc2`,
+      `zzz${collectionGroupId}/cg-doc3`,
+      `abc/123/zzz${collectionGroupId}/cg-doc4`,
+      `abc/123/zzz/${collectionGroupId}`
+    ];
+    const batch = firestore.batch();
+    for (const docPath of docPaths) {
+      batch.set(firestore.doc(docPath), { x: 1 });
+    }
+    await batch.commit();
+    const snapshot = await firestore.collectionGroup(collectionGroupId).aggregate({
+          count: AggregateField.count()
+        }).get();
+    expect(snapshot.data().count).to.equal(2);
+  });
+
+  it.only('aggregate() fails if firestore is terminated', async () => {
+    await firestore.terminate();
+    await expect(col.aggregate({ count: AggregateField.count() }).get()).to.eventually.be.rejectedWith(
+        "The client has already been terminated"
+    );
+  });
+
 });
 
 describe('Transaction class', () => {
