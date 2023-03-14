@@ -91,21 +91,14 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
   }
 
   isEqual(other: firestore.AggregateField<T>): boolean {
-    if (this === other) {
-      return true;
-    }
-    if (!(other instanceof AggregateField)) {
-      return false;
-    }
-    if (this._aggregateType !== other._aggregateType) {
-      return false;
-    }
     return (
-      (this._internalFieldPath === undefined &&
+      other instanceof AggregateField &&
+      this._aggregateType === other._aggregateType &&
+      ((this._internalFieldPath === undefined &&
         other._internalFieldPath === undefined) ||
-      (this._internalFieldPath !== undefined &&
-        other._internalFieldPath !== undefined &&
-        this._internalFieldPath.isEqual(other._internalFieldPath))
+        (this._internalFieldPath !== undefined &&
+          other._internalFieldPath !== undefined &&
+          this._internalFieldPath.isEqual(other._internalFieldPath)))
     );
   }
 
