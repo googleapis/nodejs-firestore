@@ -1762,9 +1762,7 @@ declare namespace FirebaseFirestore {
      * ```
      * @internal TODO (sum/avg) remove when public
      */
-    aggregate<T extends AggregateSpec>(
-        aggregateSpec: T
-    ): AggregateQuery<T>;
+    aggregate<T extends AggregateSpec>(aggregateSpec: T): AggregateQuery<T>;
 
     /**
      * Returns true if this `Query` is equal to the provided one.

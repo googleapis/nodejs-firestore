@@ -20,6 +20,7 @@ import {randomBytes} from 'crypto';
 import type {CallSettings, ClientConfig, GoogleError} from 'google-gax';
 import type {BackoffSettings} from 'google-gax/build/src/gax';
 import * as gapicConfig from './v1/firestore_client_config.json';
+import Dict = NodeJS.Dict;
 
 /**
  * A Promise implementation that supports deferred resolution.
@@ -218,10 +219,6 @@ export function wrapError(err: Error, stack: string): Error {
   return err;
 }
 
-interface Dict<V> {
-  [stringKey: string]: V;
-}
-
 /**
  * Returns an array of values that are calculated by performing the given `fn`
  * on all keys in the given `obj` dictionary.
@@ -236,7 +233,7 @@ export function mapToArray<V, R>(
   const result: R[] = [];
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      result.push(fn(obj[key], key, obj));
+      result.push(fn(obj[key]!, key, obj));
     }
   }
   return result;
