@@ -2645,7 +2645,7 @@ describe.skip('Aggregation queries', () => {
       };
       await addTestDocs(testDocs);
       const snapshot = await col
-        .aggregate({averagePages: AggregateField.avg('pages')})
+        .aggregate({averagePages: AggregateField.average('pages')})
         .get();
       expect(snapshot.data().averagePages).to.equal(75);
     });
@@ -2659,7 +2659,7 @@ describe.skip('Aggregation queries', () => {
       const snapshot = await col
         .aggregate({
           totalPages: AggregateField.sum('pages'),
-          averagePages: AggregateField.avg('pages'),
+          averagePages: AggregateField.average('pages'),
           count: AggregateField.count(),
         })
         .get();
@@ -2677,9 +2677,9 @@ describe.skip('Aggregation queries', () => {
       const snapshot = await col
         .aggregate({
           totalPages: AggregateField.sum('pages'),
-          averagePages: AggregateField.avg('pages'),
+          averagePages: AggregateField.average('pages'),
           totalPagesX: AggregateField.sum('pages'),
-          averagePagesY: AggregateField.avg('pages'),
+          averagePagesY: AggregateField.average('pages'),
         })
         .get();
       expect(snapshot.data().totalPages).to.equal(150);
@@ -2697,10 +2697,10 @@ describe.skip('Aggregation queries', () => {
       const snapshot = await col
         .aggregate({
           totalPages: AggregateField.sum('pages'),
-          averagePages: AggregateField.avg('pages'),
+          averagePages: AggregateField.average('pages'),
           count: AggregateField.count(),
           totalPagesX: AggregateField.sum('pages'),
-          averagePagesY: AggregateField.avg('pages'),
+          averagePagesY: AggregateField.average('pages'),
         })
         .get();
       expect(snapshot.data().totalPages).to.equal(150);
@@ -2718,10 +2718,10 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const aggregateQuery = await col.aggregate({
         totalPages: AggregateField.sum('pages'),
-        averagePages: AggregateField.avg('pages'),
+        averagePages: AggregateField.average('pages'),
         count: AggregateField.count(),
         totalPagesX: AggregateField.sum('pages'),
-        averagePagesY: AggregateField.avg('pages'),
+        averagePagesY: AggregateField.average('pages'),
         countZ: AggregateField.count(),
       });
       await expect(aggregateQuery.get()).to.eventually.be.rejectedWith(
@@ -2748,7 +2748,7 @@ describe.skip('Aggregation queries', () => {
         .aggregate({
           count: AggregateField.count(),
           sum: AggregateField.sum('x'),
-          avg: AggregateField.avg('x'),
+          avg: AggregateField.average('x'),
         })
         .get();
       expect(snapshot.data().count).to.equal(2);
@@ -2767,8 +2767,8 @@ describe.skip('Aggregation queries', () => {
       const snapshot = await col
         .aggregate({
           totalPages: AggregateField.sum('pages'),
-          averagePages: AggregateField.avg('pages'),
-          averageYear: AggregateField.avg('year'),
+          averagePages: AggregateField.average('pages'),
+          averageYear: AggregateField.average('year'),
           count: AggregateField.count(),
         })
         .get();
@@ -2814,7 +2814,7 @@ describe.skip('Aggregation queries', () => {
         .aggregate({
           totalRating: AggregateField.sum('rating'),
           totalPages: AggregateField.sum('pages'),
-          averageYear: AggregateField.avg('year'),
+          averageYear: AggregateField.average('year'),
         })
         .get();
       expect(snapshot.data().totalRating).to.be.NaN;
@@ -2858,7 +2858,7 @@ describe.skip('Aggregation queries', () => {
         .where('pages', '>', 200)
         .aggregate({
           totalRating: AggregateField.sum('rating'),
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       // @ts-expect-error expected error as 'totalPages' is not in the AggregateSpec.
@@ -2902,9 +2902,9 @@ describe.skip('Aggregation queries', () => {
         .where('rating', 'in', [5, 3])
         .aggregate({
           totalRating: AggregateField.sum('rating'),
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
           totalPages: AggregateField.sum('pages'),
-          averagePages: AggregateField.avg('pages'),
+          averagePages: AggregateField.average('pages'),
           countOfDocs: AggregateField.count(),
         })
         .get();
@@ -2951,9 +2951,9 @@ describe.skip('Aggregation queries', () => {
         .where('rating', 'array-contains-any', [5, 3])
         .aggregate({
           totalRating: AggregateField.sum('rating'),
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
           totalPages: AggregateField.sum('pages'),
-          averagePages: AggregateField.avg('pages'),
+          averagePages: AggregateField.average('pages'),
           countOfDocs: AggregateField.count(),
         })
         .get();
@@ -2981,8 +2981,8 @@ describe.skip('Aggregation queries', () => {
       const snapshot = await col
         .aggregate({
           totalPages: AggregateField.sum('metadata.pages'),
-          averagePages: AggregateField.avg('metadata.pages'),
-          averageCriticRating: AggregateField.avg('metadata.rating.critic'),
+          averagePages: AggregateField.average('metadata.pages'),
+          averageCriticRating: AggregateField.average('metadata.rating.critic'),
           totalUserRating: AggregateField.sum('metadata.rating.user'),
           count: AggregateField.count(),
         })
@@ -3478,7 +3478,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       expect(snapshot.data().averageRating).to.equal(5);
@@ -3504,7 +3504,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       expect(snapshot.data().averageRating).to.equal(10);
@@ -3537,7 +3537,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       expect(snapshot.data().averageRating).to.equal(10);
@@ -3570,7 +3570,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       expect(snapshot.data().averageRating).to.equal(4.5);
@@ -3603,7 +3603,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       // TODO: Reference implementation uses 9.2, but the result is 9.200000000000001.
@@ -3630,7 +3630,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       expect(snapshot.data().averageRating).to.equal(9.5);
@@ -3656,7 +3656,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       expect(snapshot.data().averageRating).to.equal(0);
@@ -3675,7 +3675,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       expect(snapshot.data().averageRating).to.equal(Number.MIN_VALUE);
@@ -3701,7 +3701,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       // TODO: The reference implementation uses MAX_VALUE, but the result is Infinity.
@@ -3742,7 +3742,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       expect(snapshot.data().averageRating).to.be.NaN;
@@ -3783,7 +3783,7 @@ describe.skip('Aggregation queries', () => {
       const snapshot = await col
         .where('pages', '>', 200)
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
         })
         .get();
       expect(snapshot.data().averageRating).to.be.null;
@@ -3823,7 +3823,7 @@ describe.skip('Aggregation queries', () => {
       await addTestDocs(testDocs);
       const snapshot = await col
         .aggregate({
-          averageRating: AggregateField.avg('rating'),
+          averageRating: AggregateField.average('rating'),
           countOfDocs: AggregateField.count(),
         })
         .get();

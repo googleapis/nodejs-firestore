@@ -2134,7 +2134,9 @@ declare namespace FirebaseFirestore {
     static count(): AggregateField<number>;
 
     // TODO(ehsan): add doc.
-    static avg(fieldPath: string | FieldPath): AggregateField<number | null>;
+    static average(
+      fieldPath: string | FieldPath
+    ): AggregateField<number | null>;
 
     // TODO(ehsan): add doc.
     static sum(fieldPath: string | FieldPath): AggregateField<number>;

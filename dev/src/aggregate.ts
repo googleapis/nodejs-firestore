@@ -101,10 +101,10 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
     );
   }
 
-  public static count(): AggregateField<number> {
+  static count(): AggregateField<number> {
     return new AggregateField<number>('count');
   }
-  public static avg(
+  static average(
     fieldPath: string | firestore.FieldPath
   ): AggregateField<number | null> {
     return new AggregateField<number | null>(
@@ -112,9 +112,7 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
       FieldPath.fromArgument(fieldPath)
     );
   }
-  public static sum(
-    fieldPath: string | firestore.FieldPath
-  ): AggregateField<number> {
+  static sum(fieldPath: string | firestore.FieldPath): AggregateField<number> {
     return new AggregateField<number>('sum', FieldPath.fromArgument(fieldPath));
   }
 }
