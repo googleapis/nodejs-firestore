@@ -2157,16 +2157,12 @@ describe('Query class', () => {
   });
 });
 
-describe.only('count queries', () => {
+describe('count queries', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    randomCol = getTestRoot({
-      host: '127.0.0.1',
-      port: 8080,
-      ssl: false,
-    });
+    randomCol = getTestRoot();
     firestore = randomCol.firestore;
   });
 
@@ -2289,16 +2285,12 @@ describe.only('count queries', () => {
   }
 });
 
-describe.only('count queries using aggregate api', () => {
+describe('count queries using aggregate api', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    randomCol = getTestRoot({
-      host: '127.0.0.1',
-      port: 8080,
-      ssl: false,
-    });
+    randomCol = getTestRoot();
     firestore = randomCol.firestore;
   });
 
@@ -2442,16 +2434,12 @@ describe.only('count queries using aggregate api', () => {
 });
 
 // TODO (sum/avg) enable these tests when sum/avg is supported by the backend
-describe.only('Aggregation queries', () => {
+describe.skip('Aggregation queries', () => {
   let firestore: Firestore;
   let col: CollectionReference;
 
   beforeEach(() => {
-    col = getTestRoot({
-      host: '127.0.0.1',
-      port: 8080,
-      ssl: false,
-    });
+    col = getTestRoot();
     firestore = col.firestore;
   });
 
