@@ -23,22 +23,22 @@ describe('aggregate field equality checks', () => {
     expect(AggregateField.count().isEqual(AggregateField.count())).to.be.true;
     expect(AggregateField.sum('foo').isEqual(AggregateField.sum('foo'))).to.be
       .true;
-    expect(AggregateField.avg('bar').isEqual(AggregateField.avg('bar'))).to.be
+    expect(AggregateField.average('bar').isEqual(AggregateField.average('bar'))).to.be
       .true;
     expect(AggregateField.sum('foo.bar').isEqual(AggregateField.sum('foo.bar')))
       .to.be.true;
-    expect(AggregateField.avg('bar.baz').isEqual(AggregateField.avg('bar.baz')))
+    expect(AggregateField.average('bar.baz').isEqual(AggregateField.average('bar.baz')))
       .to.be.true;
   });
 
   it('differentiates two different aggregate fields', () => {
     expect(AggregateField.sum('foo').isEqual(AggregateField.sum('bar'))).to.be
       .false;
-    expect(AggregateField.avg('foo').isEqual(AggregateField.avg('bar'))).to.be
+    expect(AggregateField.average('foo').isEqual(AggregateField.average('bar'))).to.be
       .false;
-    expect(AggregateField.avg('foo').isEqual(AggregateField.sum('foo'))).to.be
+    expect(AggregateField.average('foo').isEqual(AggregateField.sum('foo'))).to.be
       .false;
-    expect(AggregateField.sum('foo').isEqual(AggregateField.avg('foo'))).to.be
+    expect(AggregateField.sum('foo').isEqual(AggregateField.average('foo'))).to.be
       .false;
   });
 });
