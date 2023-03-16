@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
-
 const aliasRegExp = /^[_a-zA-Z][_a-zA-Z0-9]*(?:\.[_a-zA-Z][_a-zA-Z0-9]*)*$/;
 
 /**
  * An alias for aggregation results.
  * @internal
  */
-export class AggregateAlias implements firestore.AggregateAlias {
+export class AggregateAlias {
   /**
    * @internal
    * @param alias Un-escaped alias representation

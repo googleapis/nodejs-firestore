@@ -2090,23 +2090,6 @@ declare namespace FirebaseFirestore {
    */
   export type AggregateType = 'count' | 'avg' | 'sum';
 
-  /**
-   * An alias for aggregation results.
-   * @internal
-   */
-  export class AggregateAlias {
-    private constructor(alias: string);
-  }
-
-  /**
-   * Represents an Aggregate to be performed over a query result set.
-   */
-  export interface Aggregate {
-    readonly alias: AggregateAlias;
-    readonly aggregateType: AggregateType;
-    readonly fieldPath?: string;
-  }
-
   // TODO (sum/avg) Update the definition of AggregateFieldType to be based
   // on the return type of `sum(..)`, `average(...)`, and `count()`
   /**
@@ -2121,25 +2104,52 @@ declare namespace FirebaseFirestore {
   export class AggregateField<T> {
     private constructor();
 
-    // TODO(ehsan): add doc.
-    getType(): AggregateType;
+    /**
+     * Returns the kind of aggregation performed by this AggregateField.
+     * @internal
+     */
+    _getType(): AggregateType;
 
-    // TODO(ehsan): add doc.
-    getPath(): string | undefined;
+    /**
+     * Returns the field on which the aggregation is performed.
+     * @internal
+     */
+    _getPath(): string | undefined;
 
-    // TODO(ehsan): add doc.
+    /**
+     * Compares this object with the given object for equality.
+     *
+     * This object is considered "equal" to the other object if and only if
+     * `other` performs the same kind of aggregation on the same field (if any).
+     *
+     * @param other The object to compare to this object for equality.
+     * @return `true` if this object is "equal" to the given object, as
+     * defined above, or `false` otherwise.
+     */
     isEqual(other: AggregateField<any>): boolean;
 
-    // TODO(ehsan): add doc.
+    /**
+     * Create an AggregateField object that can be used to compute the count of
+     * documents in the result set of a query.
+     * @internal TODO (sum/avg) remove when public
+     */
     static count(): AggregateField<number>;
 
-    // TODO(ehsan): add doc.
-    static average(
-      fieldPath: string | FieldPath
-    ): AggregateField<number | null>;
+    /**
+     * Create an AggregateField object that can be used to compute the average of
+     * a specified field over a range of documents in the result set of a query.
+     * @param field Specifies the field to average across the result set.
+     * @internal TODO (sum/avg) remove when public
+     */
+    static average(field: string | FieldPath): AggregateField<number | null>;
 
-    // TODO(ehsan): add doc.
-    static sum(fieldPath: string | FieldPath): AggregateField<number>;
+    /**
+     * Create an AggregateField object that can be used to compute the sum of
+     * a specified field over a range of documents in the result set of a query.
+     * @param field Specifies the field to sum across the result set.
+     * @internal TODO (sum/avg) remove when public
+     */
+    static sum(field: string | FieldPath): AggregateField<number>;
   }
 
   /**

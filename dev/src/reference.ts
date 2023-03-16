@@ -58,7 +58,7 @@ import {
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
-import {AggregateField, AggregateImpl} from './aggregate';
+import {AggregateField, Aggregate} from './aggregate';
 import {AggregateAlias} from './aggregate_alias';
 
 /**
@@ -3094,10 +3094,10 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
       structuredAggregationQuery: {
         structuredQuery: queryProto.structuredQuery,
         aggregations: mapToArray(this._aggregates, (aggregate, alias) => {
-          return new AggregateImpl(
+          return new Aggregate(
             new AggregateAlias(alias),
-            aggregate.getType(),
-            aggregate.getPath()
+            aggregate._getType(),
+            aggregate._getPath()
           ).toProto();
         }),
       },

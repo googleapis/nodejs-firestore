@@ -25,13 +25,17 @@ import IAggregation = google.firestore.v1.StructuredAggregationQuery.IAggregatio
 /**
  * Concrete implementation of the Aggregate type.
  */
-export class AggregateImpl implements firestore.Aggregate {
+export class Aggregate {
   constructor(
     readonly alias: AggregateAlias,
     readonly aggregateType: firestore.AggregateType,
     readonly fieldPath?: string
   ) {}
 
+  /**
+   * Converts this object to the proto representation of an Aggregate.
+   * @internal
+   */
   toProto(): IAggregation {
     const proto: IAggregation = {};
     if (this.aggregateType === 'count') {
@@ -82,13 +86,32 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
     }
   }
 
-  getType(): firestore.AggregateType {
+  /**
+   * Returns the kind of aggregation performed by this AggregateField.
+   * @internal
+   */
+  _getType(): firestore.AggregateType {
     return this._aggregateType;
   }
-  getPath(): string | undefined {
+
+  /**
+   * Returns the field on which the aggregation is performed.
+   * @internal
+   */
+  _getPath(): string | undefined {
     return this._internalFieldPath?.formattedName;
   }
 
+  /**
+   * Compares this object with the given object for equality.
+   *
+   * This object is considered "equal" to the other object if and only if
+   * `other` performs the same kind of aggregation on the same field (if any).
+   *
+   * @param other The object to compare to this object for equality.
+   * @return `true` if this object is "equal" to the given object, as
+   * defined above, or `false` otherwise.
+   */
   isEqual(other: firestore.AggregateField<T>): boolean {
     return (
       other instanceof AggregateField &&
@@ -101,9 +124,20 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
     );
   }
 
+  /**
+   * Create an AggregateField object that can be used to compute the count of
+   * documents in the result set of a query.
+   * @internal TODO (sum/avg) remove when public
+   */
   static count(): AggregateField<number> {
     return new AggregateField<number>('count');
   }
+  /**
+   * Create an AggregateField object that can be used to compute the average of
+   * a specified field over a range of documents in the result set of a query.
+   * @param field Specifies the field to average across the result set.
+   * @internal TODO (sum/avg) remove when public
+   */
   static average(
     fieldPath: string | firestore.FieldPath
   ): AggregateField<number | null> {
@@ -112,6 +146,12 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
       FieldPath.fromArgument(fieldPath)
     );
   }
+  /**
+   * Create an AggregateField object that can be used to compute the sum of
+   * a specified field over a range of documents in the result set of a query.
+   * @param field Specifies the field to sum across the result set.
+   * @internal TODO (sum/avg) remove when public
+   */
   static sum(fieldPath: string | firestore.FieldPath): AggregateField<number> {
     return new AggregateField<number>('sum', FieldPath.fromArgument(fieldPath));
   }
