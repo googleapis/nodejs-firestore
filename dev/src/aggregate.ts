@@ -77,7 +77,7 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
    * @internal
    */
   constructor(
-    aggregateType: firestore.AggregateType = 'count',
+    aggregateType: firestore.AggregateType,
     fieldPath?: firestore.FieldPath
   ) {
     this._aggregateType = aggregateType;

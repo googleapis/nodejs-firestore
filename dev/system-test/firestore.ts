@@ -2337,18 +2337,6 @@ describe('count queries using aggregate api', () => {
       await runQueryAndExpectCount(count, 1);
     });
 
-    it('counts 1 document', async () => {
-      await randomCol.doc('doc').set({foo: 'bar'});
-      const count = randomCol.aggregate({count: AggregateField.count()});
-      await runQueryAndExpectCount(count, 1);
-    });
-
-    it('counts 1 document', async () => {
-      await randomCol.doc('doc').set({foo: 'bar'});
-      const count = randomCol.aggregate({count: AggregateField.count()});
-      await runQueryAndExpectCount(count, 1);
-    });
-
     it('counts multiple documents with filter', async () => {
       await randomCol.doc('doc1').set({foo: 'bar'});
       await randomCol.doc('doc2').set({foo: 'bar'});
