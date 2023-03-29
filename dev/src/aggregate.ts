@@ -42,17 +42,23 @@ export class Aggregate {
     if (this.aggregateType === 'count') {
       proto.count = {};
     } else if (this.aggregateType === 'sum') {
-      assert(this.fieldPath !== undefined, 'Missing field path for sum aggregation.');
+      assert(
+        this.fieldPath !== undefined,
+        'Missing field path for sum aggregation.'
+      );
       proto.sum = {
         field: {
-          fieldPath: FieldPath.fromArgument(this.fieldPath!).formattedName
+          fieldPath: FieldPath.fromArgument(this.fieldPath!).formattedName,
         },
       };
     } else if (this.aggregateType === 'avg') {
-      assert(this.fieldPath !== undefined, 'Missing field path for average aggregation.');
+      assert(
+        this.fieldPath !== undefined,
+        'Missing field path for average aggregation.'
+      );
       proto.avg = {
         field: {
-          fieldPath: FieldPath.fromArgument(this.fieldPath!).formattedName
+          fieldPath: FieldPath.fromArgument(this.fieldPath!).formattedName,
         },
       };
     } else {
