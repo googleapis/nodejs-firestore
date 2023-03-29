@@ -21,7 +21,7 @@ import {google} from '../protos/firestore_v1_proto_api';
 
 import * as firestore from '@google-cloud/firestore';
 import IAggregation = google.firestore.v1.StructuredAggregationQuery.IAggregation;
-import assert from "assert";
+import * as assert from 'assert';
 
 /**
  * Concrete implementation of the Aggregate type.
