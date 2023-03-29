@@ -2104,17 +2104,11 @@ declare namespace FirebaseFirestore {
   export class AggregateField<T> {
     private constructor();
 
-    /**
-     * Returns the kind of aggregation performed by this AggregateField.
-     * @internal
-     */
-    _getType(): AggregateType;
+    /** The kind of aggregation performed by this AggregateField. */
+    public readonly aggregateType: AggregateType;
 
-    /**
-     * Returns the field on which the aggregation is performed.
-     * @internal
-     */
-    _getPath(): string | undefined;
+    /** The field on which the aggregation is performed. */
+    public readonly field?: string | FieldPath;
 
     /**
      * Compares this object with the given object for equality.

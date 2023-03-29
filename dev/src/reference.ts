@@ -3096,8 +3096,8 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
         aggregations: mapToArray(this._aggregates, (aggregate, alias) => {
           return new Aggregate(
             new AggregateAlias(alias),
-            aggregate._getType(),
-            aggregate._getPath()
+            aggregate.aggregateType,
+            aggregate.field
           ).toProto();
         }),
       },

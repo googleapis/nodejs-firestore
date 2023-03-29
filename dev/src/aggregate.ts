@@ -21,6 +21,7 @@ import {google} from '../protos/firestore_v1_proto_api';
 
 import * as firestore from '@google-cloud/firestore';
 import IAggregation = google.firestore.v1.StructuredAggregationQuery.IAggregation;
+import assert from "assert";
 
 /**
  * Concrete implementation of the Aggregate type.
@@ -29,7 +30,7 @@ export class Aggregate {
   constructor(
     readonly alias: AggregateAlias,
     readonly aggregateType: firestore.AggregateType,
-    readonly fieldPath?: string
+    readonly fieldPath?: string | firestore.FieldPath
   ) {}
 
   /**
@@ -41,15 +42,17 @@ export class Aggregate {
     if (this.aggregateType === 'count') {
       proto.count = {};
     } else if (this.aggregateType === 'sum') {
+      assert(this.fieldPath !== undefined, 'Missing field path for sum aggregation.');
       proto.sum = {
         field: {
-          fieldPath: this.fieldPath,
+          fieldPath: FieldPath.fromArgument(this.fieldPath!).formattedName
         },
       };
     } else if (this.aggregateType === 'avg') {
+      assert(this.fieldPath !== undefined, 'Missing field path for average aggregation.');
       proto.avg = {
         field: {
-          fieldPath: this.fieldPath,
+          fieldPath: FieldPath.fromArgument(this.fieldPath!).formattedName
         },
       };
     } else {
@@ -67,40 +70,16 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
   /** A type string to uniquely identify instances of this class. */
   readonly type = 'AggregateField';
 
-  readonly _aggregateType: firestore.AggregateType;
-  readonly _internalFieldPath: FieldPath | undefined;
-
   /**
    * Create a new AggregateField<T>
    * @param aggregateType Specifies the type of aggregation operation to perform.
-   * @param fieldPath Optionally specifies the field that is aggregated.
+   * @param field Optionally specifies the field that is aggregated.
    * @internal
    */
-  constructor(
-    aggregateType: firestore.AggregateType,
-    fieldPath?: firestore.FieldPath
-  ) {
-    this._aggregateType = aggregateType;
-    if (fieldPath) {
-      this._internalFieldPath = FieldPath.fromArgument(fieldPath);
-    }
-  }
-
-  /**
-   * Returns the kind of aggregation performed by this AggregateField.
-   * @internal
-   */
-  _getType(): firestore.AggregateType {
-    return this._aggregateType;
-  }
-
-  /**
-   * Returns the field on which the aggregation is performed.
-   * @internal
-   */
-  _getPath(): string | undefined {
-    return this._internalFieldPath?.formattedName;
-  }
+  private constructor(
+    public readonly aggregateType: firestore.AggregateType,
+    public readonly field?: string | firestore.FieldPath
+  ) {}
 
   /**
    * Compares this object with the given object for equality.
@@ -115,12 +94,13 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
   isEqual(other: firestore.AggregateField<T>): boolean {
     return (
       other instanceof AggregateField &&
-      this._aggregateType === other._aggregateType &&
-      ((this._internalFieldPath === undefined &&
-        other._internalFieldPath === undefined) ||
-        (this._internalFieldPath !== undefined &&
-          other._internalFieldPath !== undefined &&
-          this._internalFieldPath.isEqual(other._internalFieldPath)))
+      this.aggregateType === other.aggregateType &&
+      ((this.field === undefined && other.field === undefined) ||
+        (this.field !== undefined &&
+          other.field !== undefined &&
+          FieldPath.fromArgument(this.field).isEqual(
+            FieldPath.fromArgument(other.field)
+          )))
     );
   }
 
@@ -132,6 +112,7 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
   static count(): AggregateField<number> {
     return new AggregateField<number>('count');
   }
+
   /**
    * Create an AggregateField object that can be used to compute the average of
    * a specified field over a range of documents in the result set of a query.
@@ -139,20 +120,18 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
    * @internal TODO (sum/avg) remove when public
    */
   static average(
-    fieldPath: string | firestore.FieldPath
+    field: string | firestore.FieldPath
   ): AggregateField<number | null> {
-    return new AggregateField<number | null>(
-      'avg',
-      FieldPath.fromArgument(fieldPath)
-    );
+    return new AggregateField<number | null>('avg', field);
   }
+
   /**
    * Create an AggregateField object that can be used to compute the sum of
    * a specified field over a range of documents in the result set of a query.
    * @param field Specifies the field to sum across the result set.
    * @internal TODO (sum/avg) remove when public
    */
-  static sum(fieldPath: string | firestore.FieldPath): AggregateField<number> {
-    return new AggregateField<number>('sum', FieldPath.fromArgument(fieldPath));
+  static sum(field: string | firestore.FieldPath): AggregateField<number> {
+    return new AggregateField<number>('sum', field);
   }
 }
