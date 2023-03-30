@@ -132,6 +132,18 @@ describe('Firestore class', () => {
         tx.set(docRef, docData);
       });
       promises.push(promise);
+      promise.then(() => {
+        console.log(
+          `Transaction ${myTransactionNumber} completed successfully ` +
+            `after ${iterationNumber} iterations`
+        );
+      });
+      promise.catch(err => {
+        console.log(
+          `Transaction ${myTransactionNumber} FAILED ` +
+            `after ${iterationNumber} iterations:`, err
+        );
+      });
     }
 
     console.log(`Transaction race: ${promises.length} transaction started`);
