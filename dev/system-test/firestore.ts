@@ -113,7 +113,7 @@ describe('Firestore class', () => {
     let nextTransactionNumber = 0;
     let totalIterations = 0;
     const promises: Promise<void>[] = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 10; i++) {
       let myTransactionNumber: number | null = null;
       let iterationNumber = 0;
       const promise = firestore.runTransaction(async tx => {
