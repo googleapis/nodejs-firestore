@@ -101,7 +101,7 @@ describe('Firestore class', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it.only('https://github.com/googleapis/nodejs-firestore/issues/1834', async () => {
+  it.only('nodejs-firestore/issues/1834', async () => {
     const docRef = randomCol.doc();
     {
       const docData = getTestData();
@@ -124,7 +124,7 @@ describe('Firestore class', () => {
         const myIteration = ++totalIterations;
         console.log(
           `Transaction ${myTransactionNumber}.${iterationNumber} ` +
-          `(${myIteration})`
+            `(${myIteration})`
         );
         const snapshot = await tx.get(docRef);
         const docData = snapshot.data() as DocumentData;
