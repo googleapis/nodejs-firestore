@@ -20,6 +20,7 @@ import {
   Settings,
   WithFieldValue,
 } from '@google-cloud/firestore';
+import {getTestData} from './testdata';
 
 import {afterEach, before, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
@@ -99,6 +100,44 @@ describe('Firestore class', () => {
   });
 
   afterEach(() => verifyInstance(firestore));
+
+  it.only('https://github.com/googleapis/nodejs-firestore/issues/1834', async () => {
+    const docRef = randomCol.doc();
+    {
+      const docData = getTestData();
+      console.log(`Writing test data to document: ${docRef.path}`);
+      await docRef.set(docData);
+    }
+
+    console.log('Transaction race started');
+    let nextTransactionNumber = 0;
+    let totalIterations = 0;
+    const promises: Promise<void>[] = [];
+    for (let i = 0; i < 5; i++) {
+      let myTransactionNumber: number | null = null;
+      let iterationNumber = 0;
+      const promise = firestore.runTransaction(async tx => {
+        if (myTransactionNumber === null) {
+          myTransactionNumber = ++nextTransactionNumber;
+        }
+        iterationNumber++;
+        const myIteration = ++totalIterations;
+        console.log(
+          `Transaction ${myTransactionNumber}.${iterationNumber} ` +
+          `(${myIteration})`
+        );
+        const snapshot = await tx.get(docRef);
+        const docData = snapshot.data() as DocumentData;
+        docData.createTime += 1;
+        tx.set(docRef, docData);
+      });
+      promises.push(promise);
+    }
+
+    console.log(`Transaction race: ${promises.length} transaction started`);
+    await Promise.all(promises);
+    console.log('Transaction race completed');
+  });
 
   it('has collection() method', () => {
     const ref = firestore.collection('col');
