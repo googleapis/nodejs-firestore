@@ -3049,20 +3049,25 @@ describe.skip('Aggregation queries', () => {
     });
 
     it('performs sum that overflows max int', async () => {
+      // A large value that will be represented as a Long on the server, but
+      // doubling (2x) this value must overflow Long and force the result to be
+      // represented as a Double type on the server.
+      const maxLong = Math.pow(2, 63) - 1;
+
       const testDocs = {
         a: {
           author: 'authorA',
           title: 'titleA',
           pages: 100,
           year: 1980,
-          rating: Number.MAX_SAFE_INTEGER,
+          rating: maxLong,
         },
         b: {
           author: 'authorB',
           title: 'titleB',
           pages: 50,
           year: 2020,
-          rating: Number.MAX_SAFE_INTEGER,
+          rating: maxLong,
         },
       };
       await addTestDocs(testDocs);
@@ -3071,9 +3076,7 @@ describe.skip('Aggregation queries', () => {
           totalRating: AggregateField.sum('rating'),
         })
         .get();
-      expect(snapshot.data().totalRating).to.equal(
-        Number.MAX_SAFE_INTEGER + Number.MAX_SAFE_INTEGER
-      );
+      expect(snapshot.data().totalRating).to.equal(maxLong + maxLong);
     });
 
     it('performs sum that can overflow integer values during accumulation', async () => {
@@ -3594,8 +3597,7 @@ describe.skip('Aggregation queries', () => {
           averageRating: AggregateField.average('rating'),
         })
         .get();
-      // TODO: Reference implementation uses 9.2, but the result is 9.200000000000001.
-      expect(snapshot.data().averageRating).to.equal(27.6 / 3);
+      expect(snapshot.data().averageRating).to.be.approximately(9.2, 0.0000001);
     });
 
     it('performs average of ints that results in a float', async () => {
@@ -3669,7 +3671,7 @@ describe.skip('Aggregation queries', () => {
       expect(snapshot.data().averageRating).to.equal(Number.MIN_VALUE);
     });
 
-    it('performs average that could overflow IEEE754 during accumulation', async () => {
+    it('performs average that overflows IEEE754 during accumulation', async () => {
       const testDocs = {
         a: {
           author: 'authorA',
@@ -3692,7 +3694,6 @@ describe.skip('Aggregation queries', () => {
           averageRating: AggregateField.average('rating'),
         })
         .get();
-      // TODO: The reference implementation uses MAX_VALUE, but the result is Infinity.
       expect(snapshot.data().averageRating).to.equal(Number.POSITIVE_INFINITY);
     });
 
