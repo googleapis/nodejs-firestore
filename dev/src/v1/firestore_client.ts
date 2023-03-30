@@ -842,6 +842,16 @@ export class FirestoreClient {
       {} | undefined
     ]
   > | void {
+    let xid: string;
+    if (request?.transaction instanceof Uint8Array) {
+      const xidR = Array.from(createHash('md5').update(request.transaction).digest())
+        .map(n => String.fromCharCode(n))
+        .join('');
+      xid = Buffer.from(xidR, 'binary').toString('base64');
+    } else {
+      xid = "<unknown>";
+    }
+
     request = request || {};
     let options: CallOptions;
     if (typeof optionsOrCallback === 'function' && callback === undefined) {
@@ -858,7 +868,15 @@ export class FirestoreClient {
         database: request.database ?? '',
       });
     this.initialize();
-    return this.innerApiCalls.commit(request, options, callback);
+    console.log(`zzyzx commit() ${xid} start`);
+    const promise = this.innerApiCalls.commit(request, options, callback);
+    promise.then(() => {
+      console.log(`zzyzx commit() ${xid} completed successfully`);
+    });
+    promise.catch((err: unknown) => {
+      console.log(`zzyzx commit() ${xid} FAILED: ${err}`);
+    });
+    return promise;
   }
   /**
    * Rolls back a transaction.
