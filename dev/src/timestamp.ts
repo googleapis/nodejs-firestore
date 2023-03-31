@@ -216,7 +216,7 @@ export class Timestamp implements firestore.Timestamp {
    */
   toDate(): Date {
     return new Date(
-      this._seconds * 1000 + Math.round(this._nanoseconds / MS_TO_NANOS)
+      this._seconds * 1000 + Math.floor(this._nanoseconds / MS_TO_NANOS)
     );
   }
 
@@ -307,5 +307,12 @@ export class Timestamp implements firestore.Timestamp {
     const formattedSeconds = String(adjustedSeconds).padStart(12, '0');
     const formattedNanoseconds = String(this.nanoseconds).padStart(9, '0');
     return formattedSeconds + '.' + formattedNanoseconds;
+  }
+
+  /**
+   * Returns a value to use when encoding this object into JSON.
+   */
+  toJSON(): string {
+    return this.toDate().toISOString();
   }
 }

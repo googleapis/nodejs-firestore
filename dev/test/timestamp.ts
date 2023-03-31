@@ -221,4 +221,19 @@ describe('timestamps', () => {
     expect(t1 > t2).to.be.false;
     expect(t1 >= t2).to.be.false;
   });
+
+  it('JSON.stringify() on the smallest Timestamp object', () => {
+    const timestamp = new Firestore.Timestamp(-62135596800, 0);
+    expect(JSON.stringify(timestamp)).to.equal('"0001-01-01T00:00:00.000Z"');
+  });
+
+  it('JSON.stringify() on the largest Timestamp object', () => {
+    const timestamp = new Firestore.Timestamp(253402300799, 999999999);
+    expect(JSON.stringify(timestamp)).to.equal('"9999-12-31T23:59:59.999Z"');
+  });
+
+  it('JSON.stringify() on a Timestamp object whose date is in 2023', () => {
+    const timestamp = new Firestore.Timestamp(1680272000, 840000000);
+    expect(JSON.stringify(timestamp)).to.equal('"2023-03-31T14:13:20.840Z"');
+  });
 });
