@@ -1668,7 +1668,8 @@ export class Firestore implements firestore.Firestore {
         logger(
           'Firestore._initializeStream',
           requestTag,
-          'Sending request'
+          'Sending request: %j',
+          request
         );
         backendStream.write(request, 'utf-8', err => {
           if (err) {
@@ -1716,7 +1717,8 @@ export class Firestore implements firestore.Firestore {
           logger(
             'Firestore.request',
             requestTag,
-            'Sending request'
+            'Sending request: %j',
+            request
           );
           const [result] = await (
             gapicClient[methodName] as UnaryMethod<Req, Resp>
@@ -1724,7 +1726,8 @@ export class Firestore implements firestore.Firestore {
           logger(
             'Firestore.request',
             requestTag,
-            'Received response',
+            'Received response: %j',
+            result
           );
           return result;
         } catch (err) {
@@ -1769,7 +1772,8 @@ export class Firestore implements firestore.Firestore {
         logger(
           'Firestore.requestStream',
           requestTag,
-          'Sending request'
+          'Sending request: %j',
+          request
         );
         try {
           const stream = bidirectional
@@ -1781,7 +1785,8 @@ export class Firestore implements firestore.Firestore {
               logger(
                 'Firestore.requestStream',
                 requestTag,
-                'Received response'
+                'Received response: %j',
+                chunk
               );
               callback();
             },

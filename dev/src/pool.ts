@@ -256,28 +256,31 @@ export class ClientPool<T> {
    * @private
    * @internal
    */
-  async run<V>(
+  run<V>(
     requestTag: string,
     requiresGrpc: boolean,
     op: (client: T) => Promise<V>
   ): Promise<V> {
     if (this.terminated) {
-      throw new Error(CLIENT_TERMINATED_ERROR_MSG);
+      return Promise.reject(new Error(CLIENT_TERMINATED_ERROR_MSG));
     }
     const client = this.acquire(requestTag, requiresGrpc);
-    try {
-      return await op(client);
-    } catch (err: unknown) {
-      if ((err as GoogleError)?.message?.match(/RST_STREAM/)) {
-        // Once a client has seen a RST_STREAM error, the GRPC channel can
-        // no longer be used. We mark the client as failed, which ensures that
-        // we open a new GRPC channel for the next request.
-        this.failedClients.add(client);
-      }
-      throw err;
-    } finally {
-      await this.release(requestTag, client);
-    }
+
+    return op(client)
+      .catch(async (err: GoogleError) => {
+        if (err.message?.match(/RST_STREAM/)) {
+          // Once a client has seen a RST_STREAM error, the GRPC channel can
+          // no longer be used. We mark the client as failed, which ensures that
+          // we open a new GRPC channel for the next request.
+          this.failedClients.add(client);
+        }
+        await this.release(requestTag, client);
+        return Promise.reject(err);
+      })
+      .then(async res => {
+        await this.release(requestTag, client);
+        return res;
+      });
   }
 
   async terminate(): Promise<void> {

@@ -110,22 +110,10 @@ describe('Firestore class', () => {
     }
 
     console.log('Transaction race started');
-    let nextTransactionNumber = 0;
-    let totalIterations = 0;
     const promises: Promise<void>[] = [];
     for (let i = 0; i < 10; i++) {
-      let myTransactionNumber: number | null = null;
-      let iterationNumber = 0;
       const promise = firestore.runTransaction(async tx => {
-        if (myTransactionNumber === null) {
-          myTransactionNumber = ++nextTransactionNumber;
-        }
-        iterationNumber++;
-        const myIteration = ++totalIterations;
-        console.log(
-          `Transaction ${myTransactionNumber}.${iterationNumber} ` +
-            `(${myIteration})`
-        );
+        console.log(`Transaction started`);
         const snapshot = await tx.get(docRef);
         const docData = snapshot.data() as DocumentData;
         docData.createTime += 1;
@@ -133,16 +121,10 @@ describe('Firestore class', () => {
       });
       promises.push(promise);
       promise.then(() => {
-        console.log(
-          `Transaction ${myTransactionNumber} completed successfully ` +
-            `after ${iterationNumber} iterations`
-        );
+        console.log(`Transaction completed successfully`);
       });
       promise.catch(err => {
-        console.log(
-          `Transaction ${myTransactionNumber} FAILED ` +
-            `after ${iterationNumber} iterations:`, err
-        );
+        console.log(`Transaction FAILED:`, err);
       });
     }
 
