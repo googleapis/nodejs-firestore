@@ -17,6 +17,7 @@
 // ** All changes to this file may be overwritten. **
 
 /* global window */
+import { createHash } from 'node:crypto';
 import type * as gax from 'google-gax';
 import type {
   Callback,
