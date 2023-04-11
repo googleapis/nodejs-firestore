@@ -2513,7 +2513,7 @@ declare namespace FirebaseFirestore {
     /**
      * Creates and returns a new [Filter]{@link Filter} that is a
      * conjunction of the given {@link Filter}s. A conjunction filter includes
-     * a document if it satisfies any of the given {@link Filter}s.
+     * a document if it satisfies all of the given {@link Filter}s.
      *
      * The returned Filter can be applied to [Query.where()]{@link Query#where},
      * [Filter.or()]{@link Filter#or}, or [Filter.and()]{@link Filter#and}. When
