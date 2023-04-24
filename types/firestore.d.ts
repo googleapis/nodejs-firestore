@@ -1744,6 +1744,38 @@ declare namespace FirebaseFirestore {
     count(): AggregateQuery<{count: AggregateField<number>}>;
 
     /**
+     * Returns a query that can perform the given aggregations.
+     *
+     * The returned query, when executed, calculates the specified aggregations
+     * over the documents in the result set of this query, without actually
+     * downloading the documents.
+     *
+     * Using the returned query to perform aggregations is efficient because only
+     * the final aggregation values, not the documents' data, is downloaded. The
+     * returned query can even perform aggregations of the documents if the result set
+     * would be prohibitively large to download entirely (e.g. thousands of documents).
+     *
+     * @param aggregateSpec An `AggregateSpec` object that specifies the aggregates
+     * to perform over the result set. The AggregateSpec specifies aliases for each
+     * aggregate, which can be used to retrieve the aggregate result.
+     * @example
+     * ```typescript
+     * const aggregateQuery = col.aggregate(query, {
+     *   countOfDocs: count(),
+     *   totalHours: sum('hours'),
+     *   averageScore: average('score')
+     * });
+     *
+     * const aggregateSnapshot = await aggregateQuery.get();
+     * const countOfDocs: number = aggregateSnapshot.data().countOfDocs;
+     * const totalHours: number = aggregateSnapshot.data().totalHours;
+     * const averageScore: number | null = aggregateSnapshot.data().averageScore;
+     * ```
+     * @internal TODO (sum/avg) remove when public
+     */
+    aggregate<T extends AggregateSpec>(aggregateSpec: T): AggregateQuery<T>;
+
+    /**
      * Returns true if this `Query` is equal to the provided one.
      *
      * @param other The `Query` to compare against.
@@ -2064,17 +2096,66 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * Union type representing the aggregate type to be performed.
+   * @internal
+   */
+  export type AggregateType = 'count' | 'avg' | 'sum';
+
+  // TODO (sum/avg) Update the definition of AggregateFieldType to be based
+  // on the return type of `sum(..)`, `average(...)`, and `count()`
+  /**
+   * The union of all `AggregateField` types that are supported by Firestore.
+   */
+  export type AggregateFieldType = AggregateField<number | null>;
+
+  /**
    * Represents an aggregation that can be performed by Firestore.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export class AggregateField<T> {
     private constructor();
-  }
 
-  /**
-   * The union of all `AggregateField` types that are supported by Firestore.
-   */
-  export type AggregateFieldType = AggregateField<number>;
+    /** The kind of aggregation performed by this AggregateField. */
+    public readonly aggregateType: AggregateType;
+
+    /** The field on which the aggregation is performed. */
+    public readonly field?: string | FieldPath;
+
+    /**
+     * Compares this object with the given object for equality.
+     *
+     * This object is considered "equal" to the other object if and only if
+     * `other` performs the same kind of aggregation on the same field (if any).
+     *
+     * @param other The object to compare to this object for equality.
+     * @return `true` if this object is "equal" to the given object, as
+     * defined above, or `false` otherwise.
+     */
+    isEqual(other: AggregateField<any>): boolean;
+
+    /**
+     * Create an AggregateField object that can be used to compute the count of
+     * documents in the result set of a query.
+     * @internal TODO (sum/avg) remove when public
+     */
+    static count(): AggregateField<number>;
+
+    /**
+     * Create an AggregateField object that can be used to compute the average of
+     * a specified field over a range of documents in the result set of a query.
+     * @param field Specifies the field to average across the result set.
+     * @internal TODO (sum/avg) remove when public
+     */
+    static average(field: string | FieldPath): AggregateField<number | null>;
+
+    /**
+     * Create an AggregateField object that can be used to compute the sum of
+     * a specified field over a range of documents in the result set of a query.
+     * @param field Specifies the field to sum across the result set.
+     * @internal TODO (sum/avg) remove when public
+     */
+    static sum(field: string | FieldPath): AggregateField<number>;
+  }
 
   /**
    * A type whose property values are all `AggregateField` objects.

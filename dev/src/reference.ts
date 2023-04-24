@@ -44,6 +44,7 @@ import {
   autoId,
   Deferred,
   isPermanentRpcError,
+  mapToArray,
   requestTag,
   wrapError,
 } from './util';
@@ -58,6 +59,8 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
+import {AggregateField, Aggregate} from './aggregate';
+import {AggregateAlias} from './aggregate_alias';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1802,7 +1805,45 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * returned query.
    */
   count(): AggregateQuery<{count: firestore.AggregateField<number>}> {
-    return new AggregateQuery(this, {count: {}});
+    return this.aggregate({
+      count: AggregateField.count(),
+    });
+  }
+
+  /**
+   * Returns a query that can perform the given aggregations.
+   *
+   * The returned query, when executed, calculates the specified aggregations
+   * over the documents in the result set of this query, without actually
+   * downloading the documents.
+   *
+   * Using the returned query to perform aggregations is efficient because only
+   * the final aggregation values, not the documents' data, is downloaded. The
+   * returned query can even perform aggregations of the documents if the result set
+   * would be prohibitively large to download entirely (e.g. thousands of documents).
+   *
+   * @param aggregateSpec An `AggregateSpec` object that specifies the aggregates
+   * to perform over the result set. The AggregateSpec specifies aliases for each
+   * aggregate, which can be used to retrieve the aggregate result.
+   * @example
+   * ```typescript
+   * const aggregateQuery = col.aggregate(query, {
+   *   countOfDocs: count(),
+   *   totalHours: sum('hours'),
+   *   averageScore: average('score')
+   * });
+   *
+   * const aggregateSnapshot = await aggregateQuery.get();
+   * const countOfDocs: number = aggregateSnapshot.data().countOfDocs;
+   * const totalHours: number = aggregateSnapshot.data().totalHours;
+   * const averageScore: number | null = aggregateSnapshot.data().averageScore;
+   * ```
+   * @internal TODO (sum/avg) remove when public
+   */
+  aggregate<T extends firestore.AggregateSpec>(
+    aggregateSpec: T
+  ): AggregateQuery<T> {
+    return new AggregateQuery<T>(this, aggregateSpec);
   }
 
   /**
@@ -3231,18 +3272,17 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    */
   toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
-    //TODO(tomandersen) inspect _query to build request - this is just hard
-    // coded count right now.
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
       structuredAggregationQuery: {
         structuredQuery: queryProto.structuredQuery,
-        aggregations: [
-          {
-            alias: 'count',
-            count: {},
-          },
-        ],
+        aggregations: mapToArray(this._aggregates, (aggregate, alias) => {
+          return new Aggregate(
+            new AggregateAlias(alias),
+            aggregate.aggregateType,
+            aggregate.field
+          ).toProto();
+        }),
       },
     };
 
