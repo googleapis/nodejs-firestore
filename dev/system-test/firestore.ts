@@ -3819,6 +3819,29 @@ describe.skip('Aggregation queries', () => {
       expect(snapshot.data().averageRating).to.equal(5);
       expect(snapshot.data().countOfDocs).to.equal(4);
     });
+
+    it('allows aliases with length greater than 1500 bytes', async () => {
+      // Alias string length is bytes of UTF-8 encoded alias + 1;
+      let longAlias = '';
+      for (let i = 0; i < 1500; i++) {
+        longAlias += '0123456789';
+      }
+
+      const longerAlias = longAlias + longAlias;
+
+      const testDocs = {
+        a: {num: 3},
+        b: {num: 5},
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col.aggregate({
+            [longAlias]: AggregateField.count(),
+            [longerAlias]: AggregateField.count()
+          })
+          .get();
+      expect(snapshot.data()[longAlias]).to.equal(2);
+      expect(snapshot.data()[longerAlias]).to.equal(2);
+    });
   });
 });
 

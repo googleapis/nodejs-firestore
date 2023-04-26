@@ -15,6 +15,7 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
+import * as assert from 'assert';
 import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 import {GoogleError} from 'google-gax';
@@ -59,7 +60,6 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {AggregateField, Aggregate} from './aggregate';
-import {AggregateAlias} from './aggregate_alias';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2917,6 +2917,9 @@ export class CollectionReference<T = firestore.DocumentData>
 export class AggregateQuery<T extends firestore.AggregateSpec>
   implements firestore.AggregateQuery<T>
 {
+  private readonly clientAliasToServerAliasMap: Record<string, string> = {};
+  private readonly serverAliasToClientAliasMap: Record<string, string> = {};
+
   /**
    * @private
    * @internal
@@ -2929,7 +2932,19 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _query: Query<any>,
     private readonly _aggregates: T
-  ) {}
+  ) {
+    // Client-side aliases may be too long and exceed the 1500-byte string size limit.
+    // Such long strings do not need to be transferred over the wire either.
+    // The client maps the user's alias to a short form alias and send that to the server.
+    let aggregationNum = 0;
+    for (const clientAlias in this._aggregates) {
+      if (Object.prototype.hasOwnProperty.call(this._aggregates, clientAlias)) {
+        const serverAlias = `aggregate_${aggregationNum++}`;
+        this.clientAliasToServerAliasMap[clientAlias] = serverAlias;
+        this.serverAliasToClientAliasMap[serverAlias] = clientAlias;
+      }
+    }
+  }
 
   /** The query whose aggregations will be calculated by this object. */
   get query(): firestore.Query<unknown> {
@@ -3068,12 +3083,17 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
     if (fields) {
       const serializer = this._query.firestore._serializer!;
       for (const prop of Object.keys(fields)) {
-        if (this._aggregates[prop] === undefined) {
+        const alias = this.serverAliasToClientAliasMap[prop];
+        assert(
+          alias !== null && alias !== undefined,
+          `'${prop}' not present in client-server alias mapping.`
+        );
+        if (this._aggregates[alias] === undefined) {
           throw new Error(
             `Unexpected alias [${prop}] in result aggregate result`
           );
         }
-        data[prop] = serializer.decodeValue(fields[prop]);
+        data[alias] = serializer.decodeValue(fields[prop]);
       }
     }
     return data;
@@ -3093,9 +3113,14 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
       parent: queryProto.parent,
       structuredAggregationQuery: {
         structuredQuery: queryProto.structuredQuery,
-        aggregations: mapToArray(this._aggregates, (aggregate, alias) => {
+        aggregations: mapToArray(this._aggregates, (aggregate, clientAlias) => {
+          const serverAlias = this.clientAliasToServerAliasMap[clientAlias];
+          assert(
+            serverAlias !== null && serverAlias !== undefined,
+            `'${clientAlias}' not present in client-server alias mapping.`
+          );
           return new Aggregate(
-            new AggregateAlias(alias),
+            serverAlias,
             aggregate.aggregateType,
             aggregate.field
           ).toProto();
