@@ -3834,11 +3834,12 @@ describe.skip('Aggregation queries', () => {
         b: {num: 5},
       };
       await addTestDocs(testDocs);
-      const snapshot = await col.aggregate({
-            [longAlias]: AggregateField.count(),
-            [longerAlias]: AggregateField.count()
-          })
-          .get();
+      const snapshot = await col
+        .aggregate({
+          [longAlias]: AggregateField.count(),
+          [longerAlias]: AggregateField.count(),
+        })
+        .get();
       expect(snapshot.data()[longAlias]).to.equal(2);
       expect(snapshot.data()[longerAlias]).to.equal(2);
     });
