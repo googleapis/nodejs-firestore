@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import {AggregateAlias} from './aggregate_alias';
 import {FieldPath} from './path';
 import {google} from '../protos/firestore_v1_proto_api';
 
@@ -28,7 +27,7 @@ import * as assert from 'assert';
  */
 export class Aggregate {
   constructor(
-    readonly alias: AggregateAlias,
+    readonly alias: string,
     readonly aggregateType: firestore.AggregateType,
     readonly fieldPath?: string | firestore.FieldPath
   ) {}
@@ -64,7 +63,7 @@ export class Aggregate {
     } else {
       throw new Error(`Aggregate type ${this.aggregateType} unimplemented.`);
     }
-    proto.alias = this.alias.canonicalString();
+    proto.alias = this.alias;
     return proto;
   }
 }
