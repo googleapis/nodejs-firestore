@@ -3086,7 +3086,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
         const alias = this.serverAliasToClientAliasMap[prop];
         assert(
           alias !== null && alias !== undefined,
-          `'${prop}' not present in client-server alias mapping.`
+          `'${prop}' not present in server-client alias mapping.`
         );
         if (this._aggregates[alias] === undefined) {
           throw new Error(
