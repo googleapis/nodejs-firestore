@@ -1326,7 +1326,7 @@ export class FirestoreClient {
 
   /**
    * Streams batches of document updates and deletes, in order. This method is
-   * only available via the gRPC API (not REST).
+   * only available via gRPC or WebChannel (not REST).
    *
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
@@ -1346,8 +1346,8 @@ export class FirestoreClient {
   }
 
   /**
-   * Listens to changes. This method is only available via the gRPC API (not
-   * REST).
+   * Listens to changes. This method is only available via gRPC or WebChannel
+   * (not REST).
    *
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
