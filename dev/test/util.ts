@@ -14,7 +14,8 @@
 
 import {describe, it} from 'mocha';
 import {expect} from 'chai';
-import {isPlainObject} from '../src/util';
+import {isPlainObject, tryGetPreferRestEnvironmentVariable} from '../src/util';
+import * as sinon from 'sinon';
 
 describe('isPlainObject()', () => {
   it('allows Object.create()', () => {
@@ -32,5 +33,74 @@ describe('isPlainObject()', () => {
     class Foo {}
     expect(isPlainObject(new Foo())).to.be.false;
     expect(isPlainObject(Object.create(new Foo()))).to.be.false;
+  });
+
+  describe('tryGetPreferRestEnvironmentVariable', () => {
+    const sandbox = sinon.createSandbox();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let warnSpy: any;
+
+    beforeEach(() => {
+      warnSpy = sandbox.spy(console, 'warn');
+    });
+
+    afterEach(() => {
+      delete process.env.FIRESTORE_PREFER_REST;
+      sandbox.restore();
+    });
+
+    it('reads true', async () => {
+      process.env.FIRESTORE_PREFER_REST = 'true';
+      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
+      expect(prevSet).to.be.true;
+      expect(prevValue).to.be.true;
+    });
+
+    it('reads 1', async () => {
+      process.env.FIRESTORE_PREFER_REST = '1';
+      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
+      expect(prevSet).to.be.true;
+      expect(prevValue).to.be.true;
+    });
+
+    it('reads false', async () => {
+      process.env.FIRESTORE_PREFER_REST = 'false';
+      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
+      expect(prevSet).to.be.true;
+      expect(prevValue).to.be.false;
+    });
+
+    it('reads 0', async () => {
+      process.env.FIRESTORE_PREFER_REST = '0';
+      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
+      expect(prevSet).to.be.true;
+      expect(prevValue).to.be.false;
+    });
+
+    it('ignores case', async () => {
+      process.env.FIRESTORE_PREFER_REST = 'True';
+      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
+      expect(prevSet).to.be.true;
+      expect(prevValue).to.be.true;
+    });
+
+    it('indicates when the environment variable is not set', async () => {
+      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
+      expect(prevSet).to.be.false;
+      expect(prevValue).to.be.undefined;
+      expect(warnSpy.calledOnce).to.be.false;
+    });
+
+    it('indicates when the environment variable is set to an unsupported value', async () => {
+      process.env.FIRESTORE_PREFER_REST = 'enable';
+      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
+      expect(prevSet).to.be.false;
+      expect(prevValue).to.be.undefined;
+      expect(warnSpy.calledOnce).to.be.true;
+      expect(warnSpy.getCall(0).args[0]).to.match(
+        /unsupported value.*FIRESTORE_PREFER_REST/
+      );
+    });
   });
 });

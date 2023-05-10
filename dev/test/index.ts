@@ -639,6 +639,46 @@ describe('instantiation', () => {
     );
   });
 
+  describe('preferRest configuration', () => {
+    afterEach(() => {
+      delete process.env.FIRESTORE_PREFER_REST;
+    });
+
+    it('preferRest is disabled (falsy) by default', async () => {
+      const firestore = new Firestore.Firestore({});
+      expect(!!firestore['_settings'].preferRest).to.be.false;
+    });
+
+    it('preferRest can be enabled by setting', async () => {
+      const firestore = new Firestore.Firestore({
+        preferRest: true,
+      });
+      expect(firestore['_settings'].preferRest).to.be.true;
+    });
+
+    it('preferRest can be enabled by environment variable', async () => {
+      process.env.FIRESTORE_PREFER_REST = 'true';
+      const firestore = new Firestore.Firestore({});
+      expect(firestore['_settings'].preferRest).to.be.true;
+    });
+
+    it('the preferRest value from settings takes precedent over the environment var - disable', async () => {
+      process.env.FIRESTORE_PREFER_REST = 'true';
+      const firestore = new Firestore.Firestore({
+        preferRest: false,
+      });
+      expect(firestore['_settings'].preferRest).to.be.false;
+    });
+
+    it('the preferRest value from settings takes precedent over the environment var - enable', async () => {
+      process.env.FIRESTORE_PREFER_REST = 'false';
+      const firestore = new Firestore.Firestore({
+        preferRest: true,
+      });
+      expect(firestore['_settings'].preferRest).to.be.true;
+    });
+  });
+
   it('exports all types', () => {
     // Ordering as per firestore.d.ts
     expect(Firestore.Firestore).to.exist;
