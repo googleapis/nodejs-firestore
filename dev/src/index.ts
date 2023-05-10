@@ -60,6 +60,7 @@ import {
   isPermanentRpcError,
   requestTag,
   wrapError,
+  tryGetPreferRestEnvironmentVariable,
 } from './util';
 import {
   validateBoolean,
@@ -534,7 +535,10 @@ export class Firestore implements firestore.Firestore {
    * for communication from that point forward. Currently the only operation
    * that requires gRPC is creating a snapshot listener with the method
    * `DocumentReference<T>.onSnapshot()`, `CollectionReference<T>.onSnapshot()`, or
-   * `Query<T>.onSnapshot()`.
+   * `Query<T>.onSnapshot()`. If specified, this setting value will take precedent over the
+   * environment variable `FIRESTORE_PREFER_REST`. If not specified, the
+   * SDK will use the value specified in environment variable `FIRESTORE_PREFER_REST=true|false`. And if the
+   * environment variable is also not set, then the setting will default to `false`.
    */
   constructor(settings?: firestore.Settings) {
     const libraryHeader = {
@@ -662,6 +666,17 @@ export class Firestore implements firestore.Firestore {
     }
 
     let url: URL | null = null;
+
+    // If preferRest is not specified in settings, but is set as environment variable,
+    // then use the environment variable value.
+    const [preferRestEnvIsSet, preferRestEnvValue] =
+      tryGetPreferRestEnvironmentVariable();
+    if (settings.preferRest === undefined && preferRestEnvIsSet) {
+      settings = {
+        ...settings,
+        preferRest: preferRestEnvValue,
+      };
+    }
 
     // If the environment variable is set, it should always take precedence
     // over any user passed in settings.
