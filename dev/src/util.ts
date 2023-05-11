@@ -228,12 +228,12 @@ export function wrapError(err: Error, stack: string): Error {
 export function tryGetPreferRestEnvironmentVariable():
   | [false, undefined]
   | [true, boolean] {
-  const rawValue = process.env.FIRESTORE_PREFER_REST;
+  const rawValue = process.env.FIRESTORE_PREFER_REST?.trim().toLowerCase();
   if (rawValue === undefined) {
     return [false, undefined];
-  } else if (rawValue === '1' || rawValue.toLowerCase() === 'true') {
+  } else if (rawValue === '1' || rawValue === 'true') {
     return [true, true];
-  } else if (rawValue === '0' || rawValue.toLowerCase() === 'false') {
+  } else if (rawValue === '0' || rawValue === 'false') {
     return [true, false];
   } else {
     // eslint-disable-next-line no-console

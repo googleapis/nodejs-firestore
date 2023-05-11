@@ -40,14 +40,20 @@ describe('isPlainObject()', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let warnSpy: any;
+    let originalValue: string | undefined;
 
     beforeEach(() => {
       warnSpy = sandbox.spy(console, 'warn');
+      originalValue = process.env.FIRESTORE_PREFER_REST;
     });
 
     afterEach(() => {
-      delete process.env.FIRESTORE_PREFER_REST;
       sandbox.restore();
+      if (originalValue === undefined) {
+        delete process.env.FIRESTORE_PREFER_REST;
+      } else {
+        process.env.FIRESTORE_PREFER_REST = originalValue;
+      }
     });
 
     it('reads true', async () => {
@@ -86,6 +92,7 @@ describe('isPlainObject()', () => {
     });
 
     it('indicates when the environment variable is not set', async () => {
+      delete process.env.FIRESTORE_PREFER_REST;
       const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
       expect(prevSet).to.be.false;
       expect(prevValue).to.be.undefined;

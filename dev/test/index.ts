@@ -640,16 +640,28 @@ describe('instantiation', () => {
   });
 
   describe('preferRest configuration', () => {
+    let originalValue: string | undefined;
+
+    beforeEach(() => {
+      originalValue = process.env.FIRESTORE_PREFER_REST;
+    });
+
     afterEach(() => {
-      delete process.env.FIRESTORE_PREFER_REST;
+      if (originalValue === undefined) {
+        delete process.env.FIRESTORE_PREFER_REST;
+      } else {
+        process.env.FIRESTORE_PREFER_REST = originalValue;
+      }
     });
 
     it('preferRest is disabled (falsy) by default', async () => {
+      delete process.env.FIRESTORE_PREFER_REST;
       const firestore = new Firestore.Firestore({});
       expect(!!firestore['_settings'].preferRest).to.be.false;
     });
 
     it('preferRest can be enabled by setting', async () => {
+      delete process.env.FIRESTORE_PREFER_REST;
       const firestore = new Firestore.Firestore({
         preferRest: true,
       });
