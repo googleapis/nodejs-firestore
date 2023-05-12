@@ -58,51 +58,50 @@ describe('isPlainObject()', () => {
 
     it('reads true', async () => {
       process.env.FIRESTORE_PREFER_REST = 'true';
-      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
-      expect(prevSet).to.be.true;
+      const prevValue = tryGetPreferRestEnvironmentVariable();
       expect(prevValue).to.be.true;
     });
 
     it('reads 1', async () => {
       process.env.FIRESTORE_PREFER_REST = '1';
-      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
-      expect(prevSet).to.be.true;
+      const prevValue = tryGetPreferRestEnvironmentVariable();
       expect(prevValue).to.be.true;
     });
 
     it('reads false', async () => {
       process.env.FIRESTORE_PREFER_REST = 'false';
-      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
-      expect(prevSet).to.be.true;
+      const prevValue = tryGetPreferRestEnvironmentVariable();
       expect(prevValue).to.be.false;
     });
 
     it('reads 0', async () => {
       process.env.FIRESTORE_PREFER_REST = '0';
-      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
-      expect(prevSet).to.be.true;
+      const prevValue = tryGetPreferRestEnvironmentVariable();
       expect(prevValue).to.be.false;
     });
 
     it('ignores case', async () => {
       process.env.FIRESTORE_PREFER_REST = 'True';
-      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
-      expect(prevSet).to.be.true;
+      const prevValue = tryGetPreferRestEnvironmentVariable();
       expect(prevValue).to.be.true;
     });
 
-    it('indicates when the environment variable is not set', async () => {
+    it('trims whitespace', async () => {
+      process.env.FIRESTORE_PREFER_REST = '  true  ';
+      const prevValue = tryGetPreferRestEnvironmentVariable();
+      expect(prevValue).to.be.true;
+    });
+
+    it('returns undefined when the environment variable is not set', async () => {
       delete process.env.FIRESTORE_PREFER_REST;
-      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
-      expect(prevSet).to.be.false;
+      const prevValue = tryGetPreferRestEnvironmentVariable();
       expect(prevValue).to.be.undefined;
       expect(warnSpy.calledOnce).to.be.false;
     });
 
-    it('indicates when the environment variable is set to an unsupported value', async () => {
+    it('returns undefined and warns when the environment variable is set to an unsupported value', async () => {
       process.env.FIRESTORE_PREFER_REST = 'enable';
-      const [prevSet, prevValue] = tryGetPreferRestEnvironmentVariable();
-      expect(prevSet).to.be.false;
+      const prevValue = tryGetPreferRestEnvironmentVariable();
       expect(prevValue).to.be.undefined;
       expect(warnSpy.calledOnce).to.be.true;
       expect(warnSpy.getCall(0).args[0]).to.match(

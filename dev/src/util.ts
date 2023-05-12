@@ -219,27 +219,28 @@ export function wrapError(err: Error, stack: string): Error {
 }
 
 /**
- * Returns a tuple indicating if FIRESTORE_PREFER_REST is set to a valid value,
- * and if so, whether the value enables preferRest or disables preferRest.
+ * Parses the value of the environment variable FIRESTORE_PREFER_REST, and returns
+ * a value indicating if the environment variable enables or disables preferRest.
  *
- * @return A tuple where the first value indicates if the environment variable is set to a valid value,
- * and the second value indicates if the environment variable enables preferRest or disables preferRest.
+ * This method will warn to the console if the environment variable is set to an unsupported value.
+ *
+ * @return {boolean | undefined} `true` if the environment variable enables `preferRest`,
+ * `false` if the environment variable disable `preferRest`, or `undefined` if the
+ * environment variable is not set or is set to an unsupported value.
  */
-export function tryGetPreferRestEnvironmentVariable():
-  | [false, undefined]
-  | [true, boolean] {
+export function tryGetPreferRestEnvironmentVariable(): boolean | undefined {
   const rawValue = process.env.FIRESTORE_PREFER_REST?.trim().toLowerCase();
   if (rawValue === undefined) {
-    return [false, undefined];
+    return undefined;
   } else if (rawValue === '1' || rawValue === 'true') {
-    return [true, true];
+    return true;
   } else if (rawValue === '0' || rawValue === 'false') {
-    return [true, false];
+    return false;
   } else {
     // eslint-disable-next-line no-console
     console.warn(
       `An unsupported value was specified for the environment variable FIRESTORE_PREFER_REST. Value ${rawValue} is unsupported.`
     );
-    return [false, undefined];
+    return undefined;
   }
 }

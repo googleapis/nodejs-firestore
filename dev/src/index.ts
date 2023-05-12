@@ -537,8 +537,10 @@ export class Firestore implements firestore.Firestore {
    * `DocumentReference<T>.onSnapshot()`, `CollectionReference<T>.onSnapshot()`, or
    * `Query<T>.onSnapshot()`. If specified, this setting value will take precedent over the
    * environment variable `FIRESTORE_PREFER_REST`. If not specified, the
-   * SDK will use the value specified in environment variable `FIRESTORE_PREFER_REST=true|false`. And if the
-   * environment variable is also not set, then the setting will default to `false`.
+   * SDK will use the value specified in the environment variable `FIRESTORE_PREFER_REST`.
+   * Valid values of `FIRESTORE_PREFER_REST` are `true` ('1') or `false` (`0`). Values are
+   * not case-sensitive. Any other value for the environment variable will be ignored and
+   * a warning will be logged to the console.
    */
   constructor(settings?: firestore.Settings) {
     const libraryHeader = {
@@ -669,9 +671,8 @@ export class Firestore implements firestore.Firestore {
 
     // If preferRest is not specified in settings, but is set as environment variable,
     // then use the environment variable value.
-    const [preferRestEnvIsSet, preferRestEnvValue] =
-      tryGetPreferRestEnvironmentVariable();
-    if (settings.preferRest === undefined && preferRestEnvIsSet) {
+    const preferRestEnvValue = tryGetPreferRestEnvironmentVariable();
+    if (settings.preferRest === undefined && preferRestEnvValue !== undefined) {
       settings = {
         ...settings,
         preferRest: preferRestEnvValue,

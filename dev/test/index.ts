@@ -657,6 +657,10 @@ describe('instantiation', () => {
     it('preferRest is disabled (falsy) by default', async () => {
       delete process.env.FIRESTORE_PREFER_REST;
       const firestore = new Firestore.Firestore({});
+      // Convention with settings is to leave undefined settings as
+      // undefined. We could test for undefined here, but converting
+      // to boolean and testing for falsy-ness is consistent with the
+      // code that consumes settings.
       expect(!!firestore['_settings'].preferRest).to.be.false;
     });
 
