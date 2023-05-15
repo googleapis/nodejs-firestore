@@ -219,14 +219,16 @@ export function wrapError(err: Error, stack: string): Error {
 }
 
 /**
- * Parses the value of the environment variable FIRESTORE_PREFER_REST, and returns
- * a value indicating if the environment variable enables or disables preferRest.
+ * Parses the value of the environment variable FIRESTORE_PREFER_REST, and
+ * returns a value indicating if the environment variable enables or disables
+ * preferRest.
  *
- * This function will warn to the console if the environment variable is set to an unsupported value.
+ * This function will warn to the console if the environment variable is set
+ * to an unsupported value.
  *
  * @return `true` if the environment variable enables `preferRest`,
- * `false` if the environment variable disables `preferRest`, or `undefined` if the
- * environment variable is not set or is set to an unsupported value.
+ * `false` if the environment variable disables `preferRest`, or `undefined`
+ * if the environment variable is not set or is set to an unsupported value.
  */
 export function tryGetPreferRestEnvironmentVariable(): boolean | undefined {
   const rawValue = process.env.FIRESTORE_PREFER_REST?.trim().toLowerCase();
