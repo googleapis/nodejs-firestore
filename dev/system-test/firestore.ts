@@ -84,7 +84,6 @@ if (process.env.NODE_ENV === 'DEBUG') {
 function getTestRoot(settings: Settings = {}) {
   const firestore = new Firestore({
     ...settings,
-    preferRest: !!process.env.USE_REST_FALLBACK,
   });
   return firestore.collection(`node_${version}_${autoId()}`);
 }

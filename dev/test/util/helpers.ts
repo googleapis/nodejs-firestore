@@ -35,7 +35,7 @@ import {GapicClient} from '../../src/types';
 import api = proto.google.firestore.v1;
 
 let SSL_CREDENTIALS: grpc.ChannelCredentials | null = null;
-if (!process.env.USE_REST_FALLBACK) {
+if (!isPreferRest()) {
   const grpc = require('google-gax').grpc;
   SSL_CREDENTIALS = grpc.credentials.createInsecure();
 }
@@ -443,4 +443,17 @@ export async function collect<T, TReturn, TNext>(
     values.push(value);
   }
   return values;
+}
+
+/**
+ * Returns a value indicating whether preferRest is enabled
+ * via the environment variable `FIRESTORE_PREFER_REST`.
+ *
+ * @return `true` if preferRest is enabled via the environment variable `FIRESTORE_PREFER_REST`.
+ */
+export function isPreferRest(): boolean {
+  return (
+    process.env.FIRESTORE_PREFER_REST === '1' ||
+    process.env.FIRESTORE_PREFER_REST === 'true'
+  );
 }
