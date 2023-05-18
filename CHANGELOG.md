@@ -4,6 +4,15 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.6.0](https://github.com/googleapis/nodejs-firestore/compare/v6.5.0...v6.6.0) (2023-05-18)
+
+
+### Features
+
+* Add ApiScope and COLLECTION_RECURSIVE query_scope for Firestore index ([#1849](https://github.com/googleapis/nodejs-firestore/issues/1849)) ([b671452](https://github.com/googleapis/nodejs-firestore/commit/b6714528956f3907b1ca4aded372592ef00d34d6))
+* Add bloom filter related proto fields ([#1843](https://github.com/googleapis/nodejs-firestore/issues/1843)) ([b64e0c1](https://github.com/googleapis/nodejs-firestore/commit/b64e0c15d0f824a688ff42a8ad940b520f87cf9b))
+* Add support for environment variable FIRESTORE_PREFER_REST ([#1848](https://github.com/googleapis/nodejs-firestore/issues/1848)) ([96b1d2a](https://github.com/googleapis/nodejs-firestore/commit/96b1d2ab3248f6c4bb70d1cf735aea827a2a13da))
+
 ## [6.5.0](https://github.com/googleapis/nodejs-firestore/compare/v6.4.3...v6.5.0) (2023-03-06)
 
 
