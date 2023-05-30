@@ -122,7 +122,12 @@ export class ClientPool<T> {
         this.concurrentOperationLimit - selectedClientRequestCount
       );
     } else {
-      logger('ClientPool.acquire', requestTag, 'Creating a new client');
+      logger(
+        'ClientPool.acquire',
+        requestTag,
+        'Creating a new client (requiresGrpc: %s)',
+        requiresGrpc
+      );
       selectedClient = this.clientFactory(requiresGrpc);
       selectedClientRequestCount = 0;
       assert(

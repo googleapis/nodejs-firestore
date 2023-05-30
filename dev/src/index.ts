@@ -617,7 +617,12 @@ export class Firestore implements firestore.Firestore {
           );
         }
 
-        logger('Firestore', null, 'Initialized Firestore GAPIC Client');
+        logger(
+          'clientFactory',
+          null,
+          'Initialized Firestore GAPIC Client (useFallback: %s)',
+          useFallback
+        );
         return client;
       },
       /* clientDestructor= */ client => client.close()
