@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.6.1](https://github.com/googleapis/nodejs-firestore/compare/v6.6.0...v6.6.1) (2023-06-01)
+
+
+### Bug Fixes
+
+* Updated logging in the client pool and client factory to log information about the required transport and actual transport used. ([#1853](https://github.com/googleapis/nodejs-firestore/issues/1853)) ([fe03d02](https://github.com/googleapis/nodejs-firestore/commit/fe03d02efc0d8e4ca90daea97f9e3339074d415d))
+
 ## [6.6.0](https://github.com/googleapis/nodejs-firestore/compare/v6.5.0...v6.6.0) (2023-05-18)
 
 
