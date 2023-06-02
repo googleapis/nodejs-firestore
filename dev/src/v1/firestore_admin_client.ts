@@ -305,6 +305,12 @@ export class FirestoreAdminClient {
     const importDocumentsMetadata = protoFilesRoot.lookup(
       '.google.firestore.admin.v1.ImportDocumentsMetadata'
     ) as gax.protobuf.Type;
+    const createDatabaseResponse = protoFilesRoot.lookup(
+      '.google.firestore.admin.v1.Database'
+    ) as gax.protobuf.Type;
+    const createDatabaseMetadata = protoFilesRoot.lookup(
+      '.google.firestore.admin.v1.CreateDatabaseMetadata'
+    ) as gax.protobuf.Type;
     const updateDatabaseResponse = protoFilesRoot.lookup(
       '.google.firestore.admin.v1.Database'
     ) as gax.protobuf.Type;
@@ -332,6 +338,11 @@ export class FirestoreAdminClient {
         this.operationsClient,
         importDocumentsResponse.decode.bind(importDocumentsResponse),
         importDocumentsMetadata.decode.bind(importDocumentsMetadata)
+      ),
+      createDatabase: new this._gaxModule.LongrunningDescriptor(
+        this.operationsClient,
+        createDatabaseResponse.decode.bind(createDatabaseResponse),
+        createDatabaseMetadata.decode.bind(createDatabaseMetadata)
       ),
       updateDatabase: new this._gaxModule.LongrunningDescriptor(
         this.operationsClient,
@@ -399,6 +410,7 @@ export class FirestoreAdminClient {
       'listFields',
       'exportDocuments',
       'importDocuments',
+      'createDatabase',
       'getDatabase',
       'listDatabases',
       'updateDatabase',
@@ -919,9 +931,11 @@ export class FirestoreAdminClient {
   }
 
   /**
-   * Creates a composite index. This returns a {@link google.longrunning.Operation|google.longrunning.Operation}
-   * which may be used to track the status of the creation. The metadata for
-   * the operation will be the type {@link google.firestore.admin.v1.IndexOperationMetadata|IndexOperationMetadata}.
+   * Creates a composite index. This returns a
+   * {@link google.longrunning.Operation|google.longrunning.Operation} which may be
+   * used to track the status of the creation. The metadata for the operation
+   * will be the type
+   * {@link google.firestore.admin.v1.IndexOperationMetadata|IndexOperationMetadata}.
    *
    * @param {Object} request
    *   The request object that will be sent.
@@ -1064,13 +1078,16 @@ export class FirestoreAdminClient {
   /**
    * Updates a field configuration. Currently, field updates apply only to
    * single field index configuration. However, calls to
-   * {@link google.firestore.admin.v1.FirestoreAdmin.UpdateField|FirestoreAdmin.UpdateField} should provide a field mask to avoid
-   * changing any configuration that the caller isn't aware of. The field mask
-   * should be specified as: `{ paths: "index_config" }`.
+   * {@link google.firestore.admin.v1.FirestoreAdmin.UpdateField|FirestoreAdmin.UpdateField}
+   * should provide a field mask to avoid changing any configuration that the
+   * caller isn't aware of. The field mask should be specified as: `{ paths:
+   * "index_config" }`.
    *
-   * This call returns a {@link google.longrunning.Operation|google.longrunning.Operation} which may be used to
-   * track the status of the field update. The metadata for
-   * the operation will be the type {@link google.firestore.admin.v1.FieldOperationMetadata|FieldOperationMetadata}.
+   * This call returns a
+   * {@link google.longrunning.Operation|google.longrunning.Operation} which may be
+   * used to track the status of the field update. The metadata for the
+   * operation will be the type
+   * {@link google.firestore.admin.v1.FieldOperationMetadata|FieldOperationMetadata}.
    *
    * To configure the default field settings for the database, use
    * the special `Field` with resource name:
@@ -1527,6 +1544,152 @@ export class FirestoreAdminClient {
     >;
   }
   /**
+   * Create a database.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. A parent name of the form
+   *   `projects/{project_id}`
+   * @param {google.firestore.admin.v1.Database} request.database
+   *   Required. The Database to create.
+   * @param {string} request.databaseId
+   *   Required. The ID to use for the database, which will become the final
+   *   component of the database's resource name.
+   *
+   *   The value must be set to "(default)".
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing
+   *   a long running operation. Its `promise()` method returns a promise
+   *   you can `await` for.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.create_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_CreateDatabase_async
+   */
+  createDatabase(
+    request?: protos.google.firestore.admin.v1.ICreateDatabaseRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICreateDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | undefined,
+      {} | undefined
+    ]
+  >;
+  createDatabase(
+    request: protos.google.firestore.admin.v1.ICreateDatabaseRequest,
+    options: CallOptions,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICreateDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  createDatabase(
+    request: protos.google.firestore.admin.v1.ICreateDatabaseRequest,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICreateDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  createDatabase(
+    request?: protos.google.firestore.admin.v1.ICreateDatabaseRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          LROperation<
+            protos.google.firestore.admin.v1.IDatabase,
+            protos.google.firestore.admin.v1.ICreateDatabaseMetadata
+          >,
+          protos.google.longrunning.IOperation | null | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICreateDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICreateDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | undefined,
+      {} | undefined
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.createDatabase(request, options, callback);
+  }
+  /**
+   * Check the status of the long running operation returned by `createDatabase()`.
+   * @param {String} name
+   *   The operation name that will be passed.
+   * @returns {Promise} - The promise which resolves to an object.
+   *   The decoded operation object has result and metadata field to get information from.
+   *   Please see the
+   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.create_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_CreateDatabase_async
+   */
+  async checkCreateDatabaseProgress(
+    name: string
+  ): Promise<
+    LROperation<
+      protos.google.firestore.admin.v1.Database,
+      protos.google.firestore.admin.v1.CreateDatabaseMetadata
+    >
+  > {
+    const request =
+      new this._gaxModule.operationsProtos.google.longrunning.GetOperationRequest(
+        {name}
+      );
+    const [operation] = await this.operationsClient.getOperation(request);
+    const decodeOperation = new this._gaxModule.Operation(
+      operation,
+      this.descriptors.longrunning.createDatabase,
+      this._gaxModule.createDefaultBackoffSettings()
+    );
+    return decodeOperation as LROperation<
+      protos.google.firestore.admin.v1.Database,
+      protos.google.firestore.admin.v1.CreateDatabaseMetadata
+    >;
+  }
+  /**
    * Updates a database.
    *
    * @param {Object} request
@@ -1680,8 +1843,8 @@ export class FirestoreAdminClient {
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes}, that may be used to get the next
-   *   page of results.
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes},
+   *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1777,8 +1940,8 @@ export class FirestoreAdminClient {
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes}, that may be used to get the next
-   *   page of results.
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes},
+   *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1828,8 +1991,8 @@ export class FirestoreAdminClient {
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes}, that may be used to get the next
-   *   page of results.
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes},
+   *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
@@ -1867,10 +2030,12 @@ export class FirestoreAdminClient {
   /**
    * Lists the field configuration and metadata for this database.
    *
-   * Currently, {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
-   * that have been explicitly overridden. To issue this query, call
-   * {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with the filter set to
-   * `indexConfig.usesAncestorConfig:false` .
+   * Currently,
+   * {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   * only supports listing fields that have been explicitly overridden. To issue
+   * this query, call
+   * {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   * with the filter set to `indexConfig.usesAncestorConfig:false` .
    *
    * @param {Object} request
    *   The request object that will be sent.
@@ -1879,16 +2044,17 @@ export class FirestoreAdminClient {
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} request.filter
    *   The filter to apply to list results. Currently,
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
-   *   that have been explicitly overridden. To issue this query, call
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with a filter that includes
-   *   `indexConfig.usesAncestorConfig:false` .
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   only supports listing fields that have been explicitly overridden. To issue
+   *   this query, call
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   with a filter that includes `indexConfig.usesAncestorConfig:false` .
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}, that may be used to get the next
-   *   page of results.
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields},
+   *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1980,16 +2146,17 @@ export class FirestoreAdminClient {
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} request.filter
    *   The filter to apply to list results. Currently,
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
-   *   that have been explicitly overridden. To issue this query, call
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with a filter that includes
-   *   `indexConfig.usesAncestorConfig:false` .
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   only supports listing fields that have been explicitly overridden. To issue
+   *   this query, call
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   with a filter that includes `indexConfig.usesAncestorConfig:false` .
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}, that may be used to get the next
-   *   page of results.
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields},
+   *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -2035,16 +2202,17 @@ export class FirestoreAdminClient {
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} request.filter
    *   The filter to apply to list results. Currently,
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
-   *   that have been explicitly overridden. To issue this query, call
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with a filter that includes
-   *   `indexConfig.usesAncestorConfig:false` .
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   only supports listing fields that have been explicitly overridden. To issue
+   *   this query, call
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   with a filter that includes `indexConfig.usesAncestorConfig:false` .
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}, that may be used to get the next
-   *   page of results.
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields},
+   *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
