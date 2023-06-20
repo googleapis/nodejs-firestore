@@ -232,8 +232,6 @@ declare namespace FirebaseFirestore {
 
     /**
      * The database name. If omitted, the default database will be used.
-     *
-     * @internal
      */
     databaseId?: string;
 
