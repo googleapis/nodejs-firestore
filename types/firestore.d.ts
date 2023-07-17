@@ -144,8 +144,8 @@ declare namespace FirebaseFirestore {
   function setLogFunction(logger: ((msg: string) => void) | null): void;
 
   /**
-   * Converter used by `withConverter()` to transform user objects of type T
-   * into Firestore data.
+   * Converter used by `withConverter()` to transform user objects of type
+   * `AppModelType` into Firestore data of type `DbModelType`.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
@@ -159,14 +159,19 @@ declare namespace FirebaseFirestore {
    *   }
    * }
    *
+   * interface PostDbModel {
+   *   title: string;
+   *   author: string;
+   * }
+   *
    * const postConverter = {
-   *   toFirestore(post: Post): FirebaseFirestore.DocumentData {
+   *   toFirestore(post: Post): PostDbModel {
    *     return {title: post.title, author: post.author};
    *   },
    *   fromFirestore(
    *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
    *   ): Post {
-   *     const data = snapshot.data();
+   *     const data = snapshot.data() as PostDbModel;
    *     return new Post(data.title, data.author);
    *   }
    * };
@@ -182,22 +187,33 @@ declare namespace FirebaseFirestore {
    *   post.someNonExistentProperty; // TS error
    * }
    */
-  export interface FirestoreDataConverter<T> {
+  export interface FirestoreDataConverter<
+    AppModelType,
+    DbModelType extends DocumentData = DocumentData
+  > {
     /**
-     * Called by the Firestore SDK to convert a custom model object of type T
-     * into a plain Javascript object (suitable for writing directly to the
-     * Firestore database). To use set() with `merge` and `mergeFields`,
+     * Called by the Firestore SDK to convert a custom model object of type
+     * `AppModelType` into a plain Javascript object (suitable for writing
+     * directly to the Firestore database) of type `DbModelType`.
+     *
+     //TODO(tomandersen) : following test is different that JS...
+     * To use set() with `merge` and `mergeFields`,
      * toFirestore() must be defined with `Partial<T>`.
      *
      * The `WithFieldValue<T>` type extends `T` to also allow FieldValues such
      * as `FieldValue.delete()` to be used as property values.
      */
-    toFirestore(modelObject: WithFieldValue<T>): DocumentData;
+    toFirestore(
+      modelObject: WithFieldValue<AppModelType>
+    ): WithFieldValue<DbModelType>;
 
     /**
-     * Called by the Firestore SDK to convert a custom model object of type T
-     * into a plain Javascript object (suitable for writing directly to the
-     * Firestore database). To use set() with `merge` and `mergeFields`,
+     * Called by the Firestore SDK to convert a custom model object of type
+     * `AppModelType` into a plain Javascript object (suitable for writing
+     * directly to the Firestore database) of type `DbModelType`.
+     *
+     //TODO(tomandersen) : following test is different that JS...
+     * To use set() with `merge` and `mergeFields`,
      * toFirestore() must be defined with `Partial<T>`.
      *
      * The `PartialWithFieldValue<T>` type extends `Partial<T>` to allow
@@ -206,15 +222,15 @@ declare namespace FirebaseFirestore {
      * omitted.
      */
     toFirestore(
-      modelObject: PartialWithFieldValue<T>,
+      modelObject: PartialWithFieldValue<AppModelType>,
       options: SetOptions
-    ): DocumentData;
+    ): PartialWithFieldValue<DbModelType>;
 
     /**
      * Called by the Firestore SDK to convert Firestore data into an object of
      * type T.
      */
-    fromFirestore(snapshot: QueryDocumentSnapshot): T;
+    fromFirestore(snapshot: QueryDocumentSnapshot<DocumentData, DocumentData>): AppModelType;
   }
 
   /**
@@ -1373,7 +1389,10 @@ declare namespace FirebaseFirestore {
    * access will return 'undefined'. You can use the `exists` property to
    * explicitly verify a document's existence.
    */
-  export class DocumentSnapshot<T = DocumentData> {
+  export class DocumentSnapshot<
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData
+  > {
     protected constructor();
 
     /** True if the document exists. */
@@ -1443,8 +1462,9 @@ declare namespace FirebaseFirestore {
    * 'undefined'.
    */
   export class QueryDocumentSnapshot<
-    T = DocumentData
-  > extends DocumentSnapshot<T> {
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData
+  > extends DocumentSnapshot<AppModelType, DbModelType> {
     private constructor();
 
     /**
