@@ -82,8 +82,14 @@ if (process.env.NODE_ENV === 'DEBUG') {
 }
 
 function getTestRoot(settings: Settings = {}) {
+  const internalSettings: Settings = {};
+  if (process.env.FIRESTORE_NAMED_DATABASE) {
+    internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
+  }
+
   const firestore = new Firestore({
-    ...settings,
+    ...internalSettings,
+    ...settings, // caller settings take precedent over internal settings
   });
   return firestore.collection(`node_${version}_${autoId()}`);
 }
