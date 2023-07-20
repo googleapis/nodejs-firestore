@@ -14,7 +14,7 @@
 
 ### Bug Fixes
 
-* Resolving issues with multi-DB support ([#1864](https://github.com/googleapis/nodejs-firestore/issues/1864)) ([1af49c1](https://github.com/googleapis/nodejs-firestore/commit/1af49c1a852c6a89a7e21a9e749d667b3b728acf))
+* Resolving issues with MultiDb support ([#1864](https://github.com/googleapis/nodejs-firestore/issues/1864)) ([1af49c1](https://github.com/googleapis/nodejs-firestore/commit/1af49c1a852c6a89a7e21a9e749d667b3b728acf))
 
 ## [6.6.1](https://github.com/googleapis/nodejs-firestore/compare/v6.6.0...v6.6.1) (2023-06-01)
 
