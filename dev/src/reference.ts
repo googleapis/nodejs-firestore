@@ -155,7 +155,9 @@ export class DocumentReference<T = firestore.DocumentData>
    */
   get formattedName(): string {
     const projectId = this.firestore.projectId;
-    return this._path.toQualifiedResourcePath(projectId).formattedName;
+    const databaseId = this.firestore.databaseId;
+    return this._path.toQualifiedResourcePath(projectId, databaseId)
+      .formattedName;
   }
 
   /**
@@ -2328,8 +2330,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     transactionIdOrReadTime?: Uint8Array | Timestamp
   ): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
-    const parentPath =
-      this._queryOptions.parentPath.toQualifiedResourcePath(projectId);
+    const databaseId = this.firestore.databaseId;
+    const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
+      projectId,
+      databaseId
+    );
 
     const structuredQuery = this.toStructuredQuery();
 
@@ -2387,8 +2392,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    */
   _toBundledQuery(): protos.firestore.IBundledQuery {
     const projectId = this.firestore.projectId;
-    const parentPath =
-      this._queryOptions.parentPath.toQualifiedResourcePath(projectId);
+    const databaseId = this.firestore.databaseId;
+    const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
+      projectId,
+      databaseId
+    );
     const structuredQuery = this.toStructuredQuery();
 
     const bundledQuery: protos.firestore.IBundledQuery = {
@@ -2858,7 +2866,8 @@ export class CollectionReference<T = firestore.DocumentData>
     const tag = requestTag();
     return this.firestore.initializeIfNeeded(tag).then(() => {
       const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
-        this.firestore.projectId
+        this.firestore.projectId,
+        this.firestore.databaseId
       );
 
       const request: api.IListDocumentsRequest = {
