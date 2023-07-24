@@ -77,9 +77,17 @@ class DeferredPromise<T> {
   }
 }
 
+const firestoreEnv: {
+  [key: string]: string | undefined;
+} = {};
+for (const key in process.env) {
+  if (key.startsWith('FIRESTORE')) {
+    firestoreEnv[key] = process.env[key];
+  }
+}
 console.log(
   `Running system tests with environment variables:\n ${JSON.stringify(
-    process.env,
+    firestoreEnv,
     null,
     2
   )}`
