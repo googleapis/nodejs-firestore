@@ -79,20 +79,19 @@ class DeferredPromise<T> {
 
 if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
+  console.log(
+    `Testing with environment variables:\n ${JSON.stringify(
+      process.env,
+      null,
+      2
+    )}`
+  );
 }
 
 function getTestRoot(settings: Settings = {}) {
   const internalSettings: Settings = {};
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
-  }
-
-  if (process.env.GCLOUD_PROJECT) {
-    console.log(`GCLOUD_PROJECT is ${process.env.GCLOUD_PROJECT}`);
-  }
-
-  if (process.env.GOOGLE_CLOUD_PROJECT) {
-    console.log(`GOOGLE_CLOUD_PROJECT is ${process.env.GCLOUD_PROJECT}`);
   }
 
   const firestore = new Firestore({
