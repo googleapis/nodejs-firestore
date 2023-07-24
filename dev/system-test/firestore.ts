@@ -87,6 +87,14 @@ function getTestRoot(settings: Settings = {}) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }
 
+  if(process.env.GCLOUD_PROJECT) {
+    console.log(`GCLOUD_PROJECT is ${process.env.GCLOUD_PROJECT}`);
+  }
+
+  if(process.env.GOOGLE_CLOUD_PROJECT) {
+    console.log(`GOOGLE_CLOUD_PROJECT is ${process.env.GCLOUD_PROJECT}`);
+  }
+
   const firestore = new Firestore({
     ...internalSettings,
     ...settings, // caller settings take precedent over internal settings
