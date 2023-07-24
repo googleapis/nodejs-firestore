@@ -77,15 +77,16 @@ class DeferredPromise<T> {
   }
 }
 
+console.log(
+  `Running system tests with environment variables:\n ${JSON.stringify(
+    process.env,
+    null,
+    2
+  )}`
+);
+
 if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
-  console.log(
-    `Testing with environment variables:\n ${JSON.stringify(
-      process.env,
-      null,
-      2
-    )}`
-  );
 }
 
 function getTestRoot(settings: Settings = {}) {
