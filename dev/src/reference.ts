@@ -58,6 +58,7 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
+import {QueryProfileInfo, AggregateQueryProfileInfo} from './profiling';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2205,6 +2206,48 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   }
 
   /**
+   * Performs the planning stage of this query, without actually executing the
+   * query. Returns a Promise that will be resolved with the result of the
+   * query planning information.
+   *
+   * Note: the information included in the output of this function is subject
+   * to change.
+   *
+   * @return A Promise that will be resolved with the results of the query
+   * planning information.
+   */
+  plan(): Promise<Record<string, unknown>> {
+    return Promise.resolve({foo: 'bar'});
+  }
+
+  /**
+   * Plans and executes this query. Returns a Promise that will be resolved
+   * with the planning information, statistics from the query execution, and
+   * the query results.
+   *
+   * Note: the information included in the output of this function is subject
+   * to change.
+   *
+   * @return A Promise that will be resolved with the planning information,
+   * statistics from the query execution, and the query results.
+   */
+  profile(): Promise<firestore.QueryProfileInfo<T>> {
+    const mock = {
+      plan: {foo: 'bar'},
+      stats: {cpu: '3ms'},
+      snapshot: new QuerySnapshot(
+        this,
+        new Timestamp(0, 0),
+        0,
+        () => [],
+        () => []
+      ),
+    };
+
+    return Promise.resolve(mock);
+  }
+
+  /**
    * Internal get() method that accepts an optional transaction id.
    *
    * @private
@@ -3276,6 +3319,23 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
       return false;
     }
     return deepEqual(this._aggregates, other._aggregates);
+  }
+
+  plan(): Promise<Record<string, unknown>> {
+    return Promise.resolve({foo: 'bar'});
+  }
+
+  profile(): Promise<firestore.AggregateQueryProfileInfo<T>> {
+    const mock = {
+      plan: {foo: 'bar'},
+      stats: {cpu: '3ms'},
+      snapshot: new AggregateQuerySnapshot(
+        this,
+        new Timestamp(0, 0),
+        this.decodeResult({})
+      ),
+    };
+    return Promise.resolve(mock);
   }
 }
 
