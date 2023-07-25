@@ -1756,6 +1756,32 @@ declare namespace FirebaseFirestore {
      */
     get(): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
+    /**
+     * Performs the planning stage of this query, without actually executing the
+     * query. Returns a Promise that will be resolved with the result of the
+     * query planning information.
+     *
+     * Note: the information included in the output of this function is subject
+     * to change.
+     *
+     * @return A Promise that will be resolved with the results of the query
+     * planning information.
+     */
+    plan(): Promise<Record<string, unknown>>;
+
+    /**
+     * Plans and executes this query. Returns a Promise that will be resolved
+     * with the planning information, statistics from the query execution, and
+     * the query results.
+     *
+     * Note: the information included in the output of this function is subject
+     * to change.
+     *
+     * @return A Promise that will be resolved with the planning information,
+     * statistics from the query execution, and the query results.
+     */
+    profile(): Promise<QueryProfileInfo<T>>;
+
     /*
      * Executes the query and returns the results as Node Stream.
      *
@@ -2288,6 +2314,32 @@ declare namespace FirebaseFirestore {
     >;
 
     /**
+     * Performs the planning stage of this query, without actually executing the
+     * query. Returns a Promise that will be resolved with the result of the
+     * query planning information.
+     *
+     * Note: the information included in the output of this function is subject
+     * to change.
+     *
+     * @return A Promise that will be resolved with the results of the query
+     * planning information.
+     */
+    plan(): Promise<Record<string, unknown>>;
+
+    /**
+     * Plans and executes this query. Returns a Promise that will be resolved
+     * with the planning information, statistics from the query execution, and
+     * the query results.
+     *
+     * Note: the information included in the output of this function is subject
+     * to change.
+     *
+     * @return A Promise that will be resolved with the planning information,
+     * statistics from the query execution, and the query results.
+     */
+    profile(): Promise<AggregateQueryProfileInfo<T>>;
+
+    /**
      * Compares this object with the given object for equality.
      *
      * This object is considered "equal" to the other object if and only if
@@ -2738,6 +2790,49 @@ declare namespace FirebaseFirestore {
      * ```
      */
     static and(...filters: Filter[]): Filter;
+  }
+
+  /** A QueryProfileInfo contains information about planning, execution, and results of a query. */
+  export interface QueryProfileInfo<T extends DocumentData> {
+    /**
+     * A Map that contains information about the query plan.
+     * Contents are subject to change.
+     */
+    readonly plan: Record<string, unknown>;
+
+    /**
+     * A Map that contains statistics about the execution of the query.
+     * Contents are subject to change.
+     */
+    readonly stats: Record<string, unknown>;
+
+    /**
+     * The snapshot that contains the results of executing the query.
+     */
+    readonly snapshot: QuerySnapshot<T>;
+  }
+
+  /**
+   * An AggregateQueryProfileInfo contains information about planning,
+   * execution, and results of an aggregate query.
+   */
+  export interface AggregateQueryProfileInfo<T extends AggregateSpec> {
+    /**
+     * A Map that contains information about the query plan.
+     * Contents are subject to change.
+     */
+    readonly plan: Record<string, unknown>;
+
+    /**
+     * A Map that contains statistics about the execution of the aggregate query.
+     * Contents are subject to change.
+     */
+    readonly stats: Record<string, unknown>;
+
+    /**
+     * The snapshot that contains the results of executing the aggregate query.
+     */
+    readonly snapshot: AggregateQuerySnapshot<T>;
   }
 }
 
