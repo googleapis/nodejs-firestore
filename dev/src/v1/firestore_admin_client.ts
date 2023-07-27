@@ -514,9 +514,8 @@ export class FirestoreAdminClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing {@link google.firestore.admin.v1.Index | Index}.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.Index|Index}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.get_index.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_GetIndex_async
@@ -598,9 +597,8 @@ export class FirestoreAdminClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing {@link google.protobuf.Empty | Empty}.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   The first element of the array is an object representing {@link protos.google.protobuf.Empty|Empty}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.delete_index.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_DeleteIndex_async
@@ -684,9 +682,8 @@ export class FirestoreAdminClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing {@link google.firestore.admin.v1.Field | Field}.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.Field|Field}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.get_field.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_GetField_async
@@ -768,9 +765,8 @@ export class FirestoreAdminClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing {@link google.firestore.admin.v1.Database | Database}.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.Database|Database}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.get_database.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_GetDatabase_async
@@ -854,9 +850,8 @@ export class FirestoreAdminClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing {@link google.firestore.admin.v1.ListDatabasesResponse | ListDatabasesResponse}.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.ListDatabasesResponse|ListDatabasesResponse}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.list_databases.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_ListDatabases_async
@@ -932,10 +927,10 @@ export class FirestoreAdminClient {
 
   /**
    * Creates a composite index. This returns a
-   * {@link google.longrunning.Operation|google.longrunning.Operation} which may be
+   * {@link protos.google.longrunning.Operation|google.longrunning.Operation} which may be
    * used to track the status of the creation. The metadata for the operation
    * will be the type
-   * {@link google.firestore.admin.v1.IndexOperationMetadata|IndexOperationMetadata}.
+   * {@link protos.google.firestore.admin.v1.IndexOperationMetadata|IndexOperationMetadata}.
    *
    * @param {Object} request
    *   The request object that will be sent.
@@ -950,8 +945,7 @@ export class FirestoreAdminClient {
    *   The first element of the array is an object representing
    *   a long running operation. Its `promise()` method returns a promise
    *   you can `await` for.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.create_index.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_CreateIndex_async
@@ -1046,8 +1040,7 @@ export class FirestoreAdminClient {
    *   The operation name that will be passed.
    * @returns {Promise} - The promise which resolves to an object.
    *   The decoded operation object has result and metadata field to get information from.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.create_index.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_CreateIndex_async
@@ -1078,16 +1071,16 @@ export class FirestoreAdminClient {
   /**
    * Updates a field configuration. Currently, field updates apply only to
    * single field index configuration. However, calls to
-   * {@link google.firestore.admin.v1.FirestoreAdmin.UpdateField|FirestoreAdmin.UpdateField}
+   * {@link protos.google.firestore.admin.v1.FirestoreAdmin.UpdateField|FirestoreAdmin.UpdateField}
    * should provide a field mask to avoid changing any configuration that the
    * caller isn't aware of. The field mask should be specified as: `{ paths:
    * "index_config" }`.
    *
    * This call returns a
-   * {@link google.longrunning.Operation|google.longrunning.Operation} which may be
+   * {@link protos.google.longrunning.Operation|google.longrunning.Operation} which may be
    * used to track the status of the field update. The metadata for the
    * operation will be the type
-   * {@link google.firestore.admin.v1.FieldOperationMetadata|FieldOperationMetadata}.
+   * {@link protos.google.firestore.admin.v1.FieldOperationMetadata|FieldOperationMetadata}.
    *
    * To configure the default field settings for the database, use
    * the special `Field` with resource name:
@@ -1106,8 +1099,7 @@ export class FirestoreAdminClient {
    *   The first element of the array is an object representing
    *   a long running operation. Its `promise()` method returns a promise
    *   you can `await` for.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.update_field.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateField_async
@@ -1202,8 +1194,7 @@ export class FirestoreAdminClient {
    *   The operation name that will be passed.
    * @returns {Promise} - The promise which resolves to an object.
    *   The decoded operation object has result and metadata field to get information from.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.update_field.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateField_async
@@ -1266,8 +1257,7 @@ export class FirestoreAdminClient {
    *   The first element of the array is an object representing
    *   a long running operation. Its `promise()` method returns a promise
    *   you can `await` for.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.export_documents.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_ExportDocuments_async
@@ -1362,8 +1352,7 @@ export class FirestoreAdminClient {
    *   The operation name that will be passed.
    * @returns {Promise} - The promise which resolves to an object.
    *   The decoded operation object has result and metadata field to get information from.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.export_documents.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_ExportDocuments_async
@@ -1411,15 +1400,14 @@ export class FirestoreAdminClient {
    *   This must match the output_uri_prefix of an ExportDocumentsResponse from
    *   an export that has completed successfully.
    *   See:
-   *   {@link google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix|google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix}.
+   *   {@link protos.google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix|google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix}.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is an object representing
    *   a long running operation. Its `promise()` method returns a promise
    *   you can `await` for.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.import_documents.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_ImportDocuments_async
@@ -1514,8 +1502,7 @@ export class FirestoreAdminClient {
    *   The operation name that will be passed.
    * @returns {Promise} - The promise which resolves to an object.
    *   The decoded operation object has result and metadata field to get information from.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.import_documents.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_ImportDocuments_async
@@ -1564,8 +1551,7 @@ export class FirestoreAdminClient {
    *   The first element of the array is an object representing
    *   a long running operation. Its `promise()` method returns a promise
    *   you can `await` for.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.create_database.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_CreateDatabase_async
@@ -1660,8 +1646,7 @@ export class FirestoreAdminClient {
    *   The operation name that will be passed.
    * @returns {Promise} - The promise which resolves to an object.
    *   The decoded operation object has result and metadata field to get information from.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.create_database.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_CreateDatabase_async
@@ -1704,8 +1689,7 @@ export class FirestoreAdminClient {
    *   The first element of the array is an object representing
    *   a long running operation. Its `promise()` method returns a promise
    *   you can `await` for.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.update_database.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateDatabase_async
@@ -1800,8 +1784,7 @@ export class FirestoreAdminClient {
    *   The operation name that will be passed.
    * @returns {Promise} - The promise which resolves to an object.
    *   The decoded operation object has result and metadata field to get information from.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.update_database.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateDatabase_async
@@ -1843,19 +1826,18 @@ export class FirestoreAdminClient {
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes},
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes},
    *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is Array of {@link google.firestore.admin.v1.Index | Index}.
+   *   The first element of the array is Array of {@link protos.google.firestore.admin.v1.Index|Index}.
    *   The client library will perform auto-pagination by default: it will call the API as many
    *   times as needed and will merge results from all the pages into this array.
    *   Note that it can affect your quota.
    *   We recommend using `listIndexesAsync()`
    *   method described below for async iteration which you can stop as needed.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination | documentation }
    *   for more details and examples.
    */
   listIndexes(
@@ -1940,18 +1922,17 @@ export class FirestoreAdminClient {
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes},
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes},
    *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
-   *   An object stream which emits an object representing {@link google.firestore.admin.v1.Index | Index} on 'data' event.
+   *   An object stream which emits an object representing {@link protos.google.firestore.admin.v1.Index|Index} on 'data' event.
    *   The client library will perform auto-pagination by default: it will call the API as many
    *   times as needed. Note that it can affect your quota.
    *   We recommend using `listIndexesAsync()`
    *   method described below for async iteration which you can stop as needed.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination | documentation }
    *   for more details and examples.
    */
   listIndexesStream(
@@ -1991,17 +1972,16 @@ export class FirestoreAdminClient {
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes},
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes},
    *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
-   *   An iterable Object that allows [async iteration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols).
+   *   An iterable Object that allows {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols | async iteration }.
    *   When you iterate the returned iterable, each element will be an object representing
-   *   {@link google.firestore.admin.v1.Index | Index}. The API will be called under the hood as needed, once per the page,
+   *   {@link protos.google.firestore.admin.v1.Index|Index}. The API will be called under the hood as needed, once per the page,
    *   so you can stop the iteration when you don't need more results.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.list_indexes.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_ListIndexes_async
@@ -2031,10 +2011,10 @@ export class FirestoreAdminClient {
    * Lists the field configuration and metadata for this database.
    *
    * Currently,
-   * {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   * {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
    * only supports listing fields that have been explicitly overridden. To issue
    * this query, call
-   * {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   * {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
    * with the filter set to `indexConfig.usesAncestorConfig:false` .
    *
    * @param {Object} request
@@ -2044,28 +2024,27 @@ export class FirestoreAdminClient {
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} request.filter
    *   The filter to apply to list results. Currently,
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
    *   only supports listing fields that have been explicitly overridden. To issue
    *   this query, call
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
    *   with a filter that includes `indexConfig.usesAncestorConfig:false` .
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields},
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields},
    *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is Array of {@link google.firestore.admin.v1.Field | Field}.
+   *   The first element of the array is Array of {@link protos.google.firestore.admin.v1.Field|Field}.
    *   The client library will perform auto-pagination by default: it will call the API as many
    *   times as needed and will merge results from all the pages into this array.
    *   Note that it can affect your quota.
    *   We recommend using `listFieldsAsync()`
    *   method described below for async iteration which you can stop as needed.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination | documentation }
    *   for more details and examples.
    */
   listFields(
@@ -2146,27 +2125,26 @@ export class FirestoreAdminClient {
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} request.filter
    *   The filter to apply to list results. Currently,
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
    *   only supports listing fields that have been explicitly overridden. To issue
    *   this query, call
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
    *   with a filter that includes `indexConfig.usesAncestorConfig:false` .
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields},
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields},
    *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
-   *   An object stream which emits an object representing {@link google.firestore.admin.v1.Field | Field} on 'data' event.
+   *   An object stream which emits an object representing {@link protos.google.firestore.admin.v1.Field|Field} on 'data' event.
    *   The client library will perform auto-pagination by default: it will call the API as many
    *   times as needed. Note that it can affect your quota.
    *   We recommend using `listFieldsAsync()`
    *   method described below for async iteration which you can stop as needed.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination | documentation }
    *   for more details and examples.
    */
   listFieldsStream(
@@ -2202,26 +2180,25 @@ export class FirestoreAdminClient {
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} request.filter
    *   The filter to apply to list results. Currently,
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
    *   only supports listing fields that have been explicitly overridden. To issue
    *   this query, call
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
    *   with a filter that includes `indexConfig.usesAncestorConfig:false` .
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields},
+   *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields},
    *   that may be used to get the next page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
-   *   An iterable Object that allows [async iteration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols).
+   *   An iterable Object that allows {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols | async iteration }.
    *   When you iterate the returned iterable, each element will be an object representing
-   *   {@link google.firestore.admin.v1.Field | Field}. The API will be called under the hood as needed, once per the page,
+   *   {@link protos.google.firestore.admin.v1.Field|Field}. The API will be called under the hood as needed, once per the page,
    *   so you can stop the iteration when you don't need more results.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination | documentation }
    *   for more details and examples.
    * @example <caption>include:samples/generated/v1/firestore_admin.list_fields.js</caption>
    * region_tag:firestore_v1_generated_FirestoreAdmin_ListFields_async
@@ -2258,8 +2235,7 @@ export class FirestoreAdminClient {
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html | CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is an object representing {@link google.cloud.location.Location | Location}.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
    *   for more details and examples.
    * @example
    * ```
@@ -2305,12 +2281,11 @@ export class FirestoreAdminClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
-   *   An iterable Object that allows [async iteration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols).
+   *   An iterable Object that allows {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols | async iteration }.
    *   When you iterate the returned iterable, each element will be an object representing
    *   {@link google.cloud.location.Location | Location}. The API will be called under the hood as needed, once per the page,
    *   so you can stop the iteration when you don't need more results.
-   *   Please see the
-   *   [documentation](https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination)
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#auto-pagination | documentation }
    *   for more details and examples.
    * @example
    * ```
