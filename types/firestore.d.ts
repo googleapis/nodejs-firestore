@@ -1760,7 +1760,6 @@ declare namespace FirebaseFirestore {
      * const totalHours: number = aggregateSnapshot.data().totalHours;
      * const averageScore: number | null = aggregateSnapshot.data().averageScore;
      * ```
-     * @internal TODO (sum/avg) remove when public
      */
     aggregate<T extends AggregateSpec>(aggregateSpec: T): AggregateQuery<T>;
 
@@ -2090,7 +2089,6 @@ declare namespace FirebaseFirestore {
    */
   export type AggregateType = 'count' | 'avg' | 'sum';
 
-  // TODO (sum/avg) Update the definition of AggregateFieldType to be based
   // on the return type of `sum(..)`, `average(...)`, and `count()`
   /**
    * The union of all `AggregateField` types that are supported by Firestore.
@@ -2125,7 +2123,6 @@ declare namespace FirebaseFirestore {
     /**
      * Create an AggregateField object that can be used to compute the count of
      * documents in the result set of a query.
-     * @internal TODO (sum/avg) remove when public
      */
     static count(): AggregateField<number>;
 
@@ -2133,7 +2130,6 @@ declare namespace FirebaseFirestore {
      * Create an AggregateField object that can be used to compute the average of
      * a specified field over a range of documents in the result set of a query.
      * @param field Specifies the field to average across the result set.
-     * @internal TODO (sum/avg) remove when public
      */
     static average(field: string | FieldPath): AggregateField<number | null>;
 
@@ -2141,7 +2137,6 @@ declare namespace FirebaseFirestore {
      * Create an AggregateField object that can be used to compute the sum of
      * a specified field over a range of documents in the result set of a query.
      * @param field Specifies the field to sum across the result set.
-     * @internal TODO (sum/avg) remove when public
      */
     static sum(field: string | FieldPath): AggregateField<number>;
   }

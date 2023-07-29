@@ -1655,7 +1655,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * const totalHours: number = aggregateSnapshot.data().totalHours;
    * const averageScore: number | null = aggregateSnapshot.data().averageScore;
    * ```
-   * @internal TODO (sum/avg) remove when public
    */
   aggregate<T extends firestore.AggregateSpec>(
     aggregateSpec: T

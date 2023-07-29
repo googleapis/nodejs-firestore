@@ -112,7 +112,6 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
   /**
    * Create an AggregateField object that can be used to compute the count of
    * documents in the result set of a query.
-   * @internal TODO (sum/avg) remove when public
    */
   static count(): AggregateField<number> {
     return new AggregateField<number>('count');
@@ -122,7 +121,6 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
    * Create an AggregateField object that can be used to compute the average of
    * a specified field over a range of documents in the result set of a query.
    * @param field Specifies the field to average across the result set.
-   * @internal TODO (sum/avg) remove when public
    */
   static average(
     field: string | firestore.FieldPath
@@ -134,7 +132,6 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
    * Create an AggregateField object that can be used to compute the sum of
    * a specified field over a range of documents in the result set of a query.
    * @param field Specifies the field to sum across the result set.
-   * @internal TODO (sum/avg) remove when public
    */
   static sum(field: string | firestore.FieldPath): AggregateField<number> {
     return new AggregateField<number>('sum', field);
