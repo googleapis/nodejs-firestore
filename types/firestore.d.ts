@@ -1726,7 +1726,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the planning information,
      * statistics from the query execution, and the query results.
      */
-    profile(): Promise<QueryProfileInfo<T>>;
+    profile(): Promise<QueryProfileInfo<QuerySnapshot<T>>>;
 
     /*
      * Executes the query and returns the results as Node Stream.
@@ -2158,7 +2158,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the planning information,
      * statistics from the query execution, and the query results.
      */
-    profile(): Promise<AggregateQueryProfileInfo<T>>;
+    profile(): Promise<QueryProfileInfo<AggregateQuerySnapshot<T>>>;
 
     /**
      * Compares this object with the given object for equality.
@@ -2593,7 +2593,7 @@ declare namespace FirebaseFirestore {
   }
 
   /** A QueryProfileInfo contains information about planning, execution, and results of a query. */
-  export interface QueryProfileInfo<T extends DocumentData> {
+  export interface QueryProfileInfo<T> {
     /**
      * A Map that contains information about the query plan.
      * Contents are subject to change.
@@ -2609,30 +2609,7 @@ declare namespace FirebaseFirestore {
     /**
      * The snapshot that contains the results of executing the query.
      */
-    readonly snapshot: QuerySnapshot<T>;
-  }
-
-  /**
-   * An AggregateQueryProfileInfo contains information about planning,
-   * execution, and results of an aggregate query.
-   */
-  export interface AggregateQueryProfileInfo<T extends AggregateSpec> {
-    /**
-     * A Map that contains information about the query plan.
-     * Contents are subject to change.
-     */
-    readonly plan: Record<string, unknown>;
-
-    /**
-     * A Map that contains statistics about the execution of the aggregate query.
-     * Contents are subject to change.
-     */
-    readonly stats: Record<string, unknown>;
-
-    /**
-     * The snapshot that contains the results of executing the aggregate query.
-     */
-    readonly snapshot: AggregateQuerySnapshot<T>;
+    readonly snapshot: T;
   }
 }
 

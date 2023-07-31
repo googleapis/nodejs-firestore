@@ -58,7 +58,6 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
-import {QueryProfileInfo, AggregateQueryProfileInfo} from './profiling';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2231,7 +2230,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @return A Promise that will be resolved with the planning information,
    * statistics from the query execution, and the query results.
    */
-  profile(): Promise<firestore.QueryProfileInfo<T>> {
+  profile(): Promise<firestore.QueryProfileInfo<QuerySnapshot<T>>> {
     const mock = {
       plan: {foo: 'bar'},
       stats: {cpu: '3ms'},
@@ -3325,7 +3324,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
     return Promise.resolve({foo: 'bar'});
   }
 
-  profile(): Promise<firestore.AggregateQueryProfileInfo<T>> {
+  profile(): Promise<firestore.QueryProfileInfo<AggregateQuerySnapshot<T>>> {
     const mock = {
       plan: {foo: 'bar'},
       stats: {cpu: '3ms'},
