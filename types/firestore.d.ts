@@ -1534,6 +1534,18 @@ declare namespace FirebaseFirestore {
     | 'array-contains-any';
 
   /**
+   * InformationalQueryPlan contains information about the query plan.
+   * Contents are subject to change.
+   */
+  export type InformationalQueryPlan = Record<string,unknown>;
+
+  /**
+   * InformationalQueryExecutionStats contains statistics about the
+   * execution of the query. Contents are subject to change.
+   */
+  export type InformationalQueryExecutionStats = Record<string, unknown>;
+
+  /**
    * A `Query` refers to a Query which you can read or listen to. You can also
    * construct refined `Query` objects by adding filters and ordering.
    */
@@ -1767,7 +1779,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the results of the query
      * planning information.
      */
-    plan(): Promise<Record<string, unknown>>;
+    explain(): Promise<InformationalQueryPlan>;
 
     /**
      * Plans and executes this query. Returns a Promise that will be resolved
@@ -1780,7 +1792,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the planning information,
      * statistics from the query execution, and the query results.
      */
-    profile(): Promise<QueryProfileInfo<T>>;
+    explainAnalyze(): Promise<QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>>;
 
     /*
      * Executes the query and returns the results as Node Stream.
@@ -2324,7 +2336,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the results of the query
      * planning information.
      */
-    plan(): Promise<Record<string, unknown>>;
+    explain(): Promise<InformationalQueryPlan>;
 
     /**
      * Plans and executes this query. Returns a Promise that will be resolved
@@ -2337,7 +2349,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the planning information,
      * statistics from the query execution, and the query results.
      */
-    profile(): Promise<AggregateQueryProfileInfo<T>>;
+    explainAnalyze(): Promise<QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>>;
 
     /**
      * Compares this object with the given object for equality.
@@ -2792,47 +2804,27 @@ declare namespace FirebaseFirestore {
     static and(...filters: Filter[]): Filter;
   }
 
-  /** A QueryProfileInfo contains information about planning, execution, and results of a query. */
-  export interface QueryProfileInfo<T extends DocumentData> {
+  /**
+   * A QueryProfileInfo contains information about planning, execution, and results of a query.
+   * All informational content are subject to change.
+   */
+  export interface QueryProfileInfo<T> {
     /**
      * A Map that contains information about the query plan.
      * Contents are subject to change.
      */
-    readonly plan: Record<string, unknown>;
+    readonly plan: InformationalQueryPlan;
 
     /**
      * A Map that contains statistics about the execution of the query.
      * Contents are subject to change.
      */
-    readonly stats: Record<string, unknown>;
+    readonly stats: InformationalQueryExecutionStats;
 
     /**
      * The snapshot that contains the results of executing the query.
      */
-    readonly snapshot: QuerySnapshot<T>;
-  }
-
-  /**
-   * An AggregateQueryProfileInfo contains information about planning,
-   * execution, and results of an aggregate query.
-   */
-  export interface AggregateQueryProfileInfo<T extends AggregateSpec> {
-    /**
-     * A Map that contains information about the query plan.
-     * Contents are subject to change.
-     */
-    readonly plan: Record<string, unknown>;
-
-    /**
-     * A Map that contains statistics about the execution of the aggregate query.
-     * Contents are subject to change.
-     */
-    readonly stats: Record<string, unknown>;
-
-    /**
-     * The snapshot that contains the results of executing the aggregate query.
-     */
-    readonly snapshot: AggregateQuerySnapshot<T>;
+    readonly snapshot: T;
   }
 }
 

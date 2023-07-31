@@ -145,24 +145,24 @@ describe('Firestore class', () => {
   });
 
   it.only('can plan a query', async () => {
-    const plan = await randomCol.where('a', '>', 10).plan();
+    const plan = await randomCol.where('a', '>', 10).explain();
     console.log(plan);
   });
 
   it.only('can profile a query', async () => {
-    const profile = await randomCol.where('a', '>', 10).profile();
+    const profile = await randomCol.where('a', '>', 10).explainAnalyze();
     console.log(profile.plan);
     console.log(profile.stats);
     console.log(profile.snapshot.size);
   });
 
   it.only('can plan an aggregate query', async () => {
-    const plan = await randomCol.where('a', '>', 10).count().plan();
+    const plan = await randomCol.where('a', '>', 10).count().explain();
     console.log(plan);
   });
 
   it.only('can profile an aggregate query', async () => {
-    const profile = await randomCol.where('a', '>', 10).count().profile();
+    const profile = await randomCol.where('a', '>', 10).count().explainAnalyze();
     console.log(profile.plan);
     console.log(profile.stats);
     console.log(profile.snapshot.data());

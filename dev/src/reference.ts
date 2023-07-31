@@ -61,7 +61,6 @@ import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
-import {QueryProfileInfo, AggregateQueryProfileInfo} from './profiling';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2323,7 +2322,7 @@ export class Query<
    * @return A Promise that will be resolved with the results of the query
    * planning information.
    */
-  plan(): Promise<Record<string, unknown>> {
+  explain(): Promise<Record<string, unknown>> {
     return Promise.resolve({foo: 'bar'});
   }
 
@@ -2338,7 +2337,7 @@ export class Query<
    * @return A Promise that will be resolved with the planning information,
    * statistics from the query execution, and the query results.
    */
-  profile(): Promise<firestore.QueryProfileInfo<T>> {
+  explainAnalyze(): Promise<firestore.QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>> {
     const mock = {
       plan: {foo: 'bar'},
       stats: {cpu: '3ms'},
@@ -3507,11 +3506,11 @@ export class AggregateQuery<
     return deepEqual(this._aggregates, other._aggregates);
   }
 
-  plan(): Promise<Record<string, unknown>> {
+  explain(): Promise<Record<string, unknown>> {
     return Promise.resolve({foo: 'bar'});
   }
 
-  profile(): Promise<firestore.AggregateQueryProfileInfo<T>> {
+  explainAnalyze(): Promise<firestore.QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>> {
     const mock = {
       plan: {foo: 'bar'},
       stats: {cpu: '3ms'},
