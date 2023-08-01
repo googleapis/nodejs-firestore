@@ -930,7 +930,7 @@
             "v1beta1": {
               "options": {
                 "csharp_namespace": "Google.Cloud.Firestore.V1Beta1",
-                "go_package": "google.golang.org/genproto/googleapis/firestore/v1beta1;firestore",
+                "go_package": "cloud.google.com/go/firestore/apiv1beta1/firestorepb;firestorepb",
                 "java_multiple_files": true,
                 "java_outer_classname": "WriteProto",
                 "java_package": "com.google.firestore.v1beta1",
@@ -2724,6 +2724,10 @@
                   "rule": "repeated",
                   "type": "ClientLibrarySettings",
                   "id": 109
+                },
+                "protoReferenceDocumentationUri": {
+                  "type": "string",
+                  "id": 110
                 }
               }
             },
@@ -2781,6 +2785,31 @@
                 "common": {
                   "type": "CommonLanguageSettings",
                   "id": 1
+                },
+                "renamedServices": {
+                  "keyType": "string",
+                  "type": "string",
+                  "id": 2
+                },
+                "renamedResources": {
+                  "keyType": "string",
+                  "type": "string",
+                  "id": 3
+                },
+                "ignoredResources": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 4
+                },
+                "forcedNamespaceAliases": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 5
+                },
+                "handwrittenSignatures": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 6
                 }
               }
             },
@@ -2840,7 +2869,10 @@
                 "CLOUD": 1,
                 "ADS": 2,
                 "PHOTOS": 3,
-                "STREET_VIEW": 4
+                "STREET_VIEW": 4,
+                "SHOPPING": 5,
+                "GEO": 6,
+                "GENERATIVE_AI": 7
               }
             },
             "ClientLibraryDestination": {

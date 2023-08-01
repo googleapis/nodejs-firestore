@@ -930,7 +930,7 @@
             "v1": {
               "options": {
                 "csharp_namespace": "Google.Cloud.Firestore.V1",
-                "go_package": "google.golang.org/genproto/googleapis/firestore/v1;firestore",
+                "go_package": "cloud.google.com/go/firestore/apiv1/firestorepb;firestorepb",
                 "java_multiple_files": true,
                 "java_outer_classname": "WriteProto",
                 "java_package": "com.google.firestore.v1",
@@ -944,6 +944,30 @@
                     "aggregateFields": {
                       "keyType": "string",
                       "type": "Value",
+                      "id": 2
+                    }
+                  }
+                },
+                "BitSequence": {
+                  "fields": {
+                    "bitmap": {
+                      "type": "bytes",
+                      "id": 1
+                    },
+                    "padding": {
+                      "type": "int32",
+                      "id": 2
+                    }
+                  }
+                },
+                "BloomFilter": {
+                  "fields": {
+                    "bits": {
+                      "type": "BitSequence",
+                      "id": 1
+                    },
+                    "hashCount": {
+                      "type": "int32",
                       "id": 2
                     }
                   }
@@ -2108,6 +2132,10 @@
                     "once": {
                       "type": "bool",
                       "id": 6
+                    },
+                    "expectedCount": {
+                      "type": "google.protobuf.Int32Value",
+                      "id": 12
                     }
                   },
                   "nested": {
@@ -2480,7 +2508,9 @@
                       "oneofs": {
                         "operator": {
                           "oneof": [
-                            "count"
+                            "count",
+                            "sum",
+                            "avg"
                           ]
                         }
                       },
@@ -2488,6 +2518,14 @@
                         "count": {
                           "type": "Count",
                           "id": 1
+                        },
+                        "sum": {
+                          "type": "Sum",
+                          "id": 2
+                        },
+                        "avg": {
+                          "type": "Avg",
+                          "id": 3
                         },
                         "alias": {
                           "type": "string",
@@ -2506,6 +2544,22 @@
                               "options": {
                                 "(google.api.field_behavior)": "OPTIONAL"
                               }
+                            }
+                          }
+                        },
+                        "Sum": {
+                          "fields": {
+                            "field": {
+                              "type": "StructuredQuery.FieldReference",
+                              "id": 1
+                            }
+                          }
+                        },
+                        "Avg": {
+                          "fields": {
+                            "field": {
+                              "type": "StructuredQuery.FieldReference",
+                              "id": 1
                             }
                           }
                         }
@@ -2705,6 +2759,10 @@
                     "count": {
                       "type": "int32",
                       "id": 2
+                    },
+                    "unchangedNames": {
+                      "type": "BloomFilter",
+                      "id": 3
                     }
                   }
                 }
@@ -2921,6 +2979,10 @@
                   "rule": "repeated",
                   "type": "ClientLibrarySettings",
                   "id": 109
+                },
+                "protoReferenceDocumentationUri": {
+                  "type": "string",
+                  "id": 110
                 }
               }
             },
@@ -2978,6 +3040,31 @@
                 "common": {
                   "type": "CommonLanguageSettings",
                   "id": 1
+                },
+                "renamedServices": {
+                  "keyType": "string",
+                  "type": "string",
+                  "id": 2
+                },
+                "renamedResources": {
+                  "keyType": "string",
+                  "type": "string",
+                  "id": 3
+                },
+                "ignoredResources": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 4
+                },
+                "forcedNamespaceAliases": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 5
+                },
+                "handwrittenSignatures": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 6
                 }
               }
             },
@@ -3037,7 +3124,10 @@
                 "CLOUD": 1,
                 "ADS": 2,
                 "PHOTOS": 3,
-                "STREET_VIEW": 4
+                "STREET_VIEW": 4,
+                "SHOPPING": 5,
+                "GEO": 6,
+                "GENERATIVE_AI": 7
               }
             },
             "ClientLibraryDestination": {

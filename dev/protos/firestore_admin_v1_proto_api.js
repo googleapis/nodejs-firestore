@@ -1100,6 +1100,39 @@
                          */
     
                         /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createDatabase}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef CreateDatabaseCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.longrunning.Operation} [response] Operation
+                         */
+    
+                        /**
+                         * Calls CreateDatabase.
+                         * @function createDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICreateDatabaseRequest} request CreateDatabaseRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.CreateDatabaseCallback} callback Node-style callback called with the error, if any, and Operation
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.createDatabase = function createDatabase(request, callback) {
+                            return this.rpcCall(createDatabase, $root.google.firestore.admin.v1.CreateDatabaseRequest, $root.google.longrunning.Operation, request, callback);
+                        }, "name", { value: "CreateDatabase" });
+    
+                        /**
+                         * Calls CreateDatabase.
+                         * @function createDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICreateDatabaseRequest} request CreateDatabaseRequest message or plain object
+                         * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
                          * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getDatabase}.
                          * @memberof google.firestore.admin.v1.FirestoreAdmin
                          * @typedef GetDatabaseCallback
@@ -1297,6 +1330,215 @@
                         };
     
                         return ListDatabasesRequest;
+                    })();
+    
+                    v1.CreateDatabaseRequest = (function() {
+    
+                        /**
+                         * Properties of a CreateDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface ICreateDatabaseRequest
+                         * @property {string|null} [parent] CreateDatabaseRequest parent
+                         * @property {google.firestore.admin.v1.IDatabase|null} [database] CreateDatabaseRequest database
+                         * @property {string|null} [databaseId] CreateDatabaseRequest databaseId
+                         */
+    
+                        /**
+                         * Constructs a new CreateDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a CreateDatabaseRequest.
+                         * @implements ICreateDatabaseRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.ICreateDatabaseRequest=} [properties] Properties to set
+                         */
+                        function CreateDatabaseRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * CreateDatabaseRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @instance
+                         */
+                        CreateDatabaseRequest.prototype.parent = "";
+    
+                        /**
+                         * CreateDatabaseRequest database.
+                         * @member {google.firestore.admin.v1.IDatabase|null|undefined} database
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @instance
+                         */
+                        CreateDatabaseRequest.prototype.database = null;
+    
+                        /**
+                         * CreateDatabaseRequest databaseId.
+                         * @member {string} databaseId
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @instance
+                         */
+                        CreateDatabaseRequest.prototype.databaseId = "";
+    
+                        /**
+                         * Creates a CreateDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.CreateDatabaseRequest} CreateDatabaseRequest
+                         */
+                        CreateDatabaseRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.CreateDatabaseRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.CreateDatabaseRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            if (object.database != null) {
+                                if (typeof object.database !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CreateDatabaseRequest.database: object expected");
+                                message.database = $root.google.firestore.admin.v1.Database.fromObject(object.database);
+                            }
+                            if (object.databaseId != null)
+                                message.databaseId = String(object.databaseId);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a CreateDatabaseRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.CreateDatabaseRequest} message CreateDatabaseRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        CreateDatabaseRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.parent = "";
+                                object.database = null;
+                                object.databaseId = "";
+                            }
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            if (message.database != null && message.hasOwnProperty("database"))
+                                object.database = $root.google.firestore.admin.v1.Database.toObject(message.database, options);
+                            if (message.databaseId != null && message.hasOwnProperty("databaseId"))
+                                object.databaseId = message.databaseId;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this CreateDatabaseRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        CreateDatabaseRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for CreateDatabaseRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.CreateDatabaseRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        CreateDatabaseRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.CreateDatabaseRequest";
+                        };
+    
+                        return CreateDatabaseRequest;
+                    })();
+    
+                    v1.CreateDatabaseMetadata = (function() {
+    
+                        /**
+                         * Properties of a CreateDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @interface ICreateDatabaseMetadata
+                         */
+    
+                        /**
+                         * Constructs a new CreateDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a CreateDatabaseMetadata.
+                         * @implements ICreateDatabaseMetadata
+                         * @constructor
+                         * @param {google.firestore.admin.v1.ICreateDatabaseMetadata=} [properties] Properties to set
+                         */
+                        function CreateDatabaseMetadata(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Creates a CreateDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.CreateDatabaseMetadata
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.CreateDatabaseMetadata} CreateDatabaseMetadata
+                         */
+                        CreateDatabaseMetadata.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.CreateDatabaseMetadata)
+                                return object;
+                            return new $root.google.firestore.admin.v1.CreateDatabaseMetadata();
+                        };
+    
+                        /**
+                         * Creates a plain object from a CreateDatabaseMetadata message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.CreateDatabaseMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.CreateDatabaseMetadata} message CreateDatabaseMetadata
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        CreateDatabaseMetadata.toObject = function toObject() {
+                            return {};
+                        };
+    
+                        /**
+                         * Converts this CreateDatabaseMetadata to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.CreateDatabaseMetadata
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        CreateDatabaseMetadata.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for CreateDatabaseMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.CreateDatabaseMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        CreateDatabaseMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.CreateDatabaseMetadata";
+                        };
+    
+                        return CreateDatabaseMetadata;
                     })();
     
                     v1.ListDatabasesResponse = (function() {
@@ -3048,6 +3290,7 @@
                          * @interface IIndex
                          * @property {string|null} [name] Index name
                          * @property {google.firestore.admin.v1.Index.QueryScope|null} [queryScope] Index queryScope
+                         * @property {google.firestore.admin.v1.Index.ApiScope|null} [apiScope] Index apiScope
                          * @property {Array.<google.firestore.admin.v1.Index.IIndexField>|null} [fields] Index fields
                          * @property {google.firestore.admin.v1.Index.State|null} [state] Index state
                          */
@@ -3083,6 +3326,14 @@
                          * @instance
                          */
                         Index.prototype.queryScope = 0;
+    
+                        /**
+                         * Index apiScope.
+                         * @member {google.firestore.admin.v1.Index.ApiScope} apiScope
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.apiScope = 0;
     
                         /**
                          * Index fields.
@@ -3132,6 +3383,26 @@
                             case "COLLECTION_GROUP":
                             case 2:
                                 message.queryScope = 2;
+                                break;
+                            case "COLLECTION_RECURSIVE":
+                            case 3:
+                                message.queryScope = 3;
+                                break;
+                            }
+                            switch (object.apiScope) {
+                            default:
+                                if (typeof object.apiScope === "number") {
+                                    message.apiScope = object.apiScope;
+                                    break;
+                                }
+                                break;
+                            case "ANY_API":
+                            case 0:
+                                message.apiScope = 0;
+                                break;
+                            case "DATASTORE_MODE_API":
+                            case 1:
+                                message.apiScope = 1;
                                 break;
                             }
                             if (object.fields) {
@@ -3190,6 +3461,7 @@
                                 object.name = "";
                                 object.queryScope = options.enums === String ? "QUERY_SCOPE_UNSPECIFIED" : 0;
                                 object.state = options.enums === String ? "STATE_UNSPECIFIED" : 0;
+                                object.apiScope = options.enums === String ? "ANY_API" : 0;
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
@@ -3202,6 +3474,8 @@
                             }
                             if (message.state != null && message.hasOwnProperty("state"))
                                 object.state = options.enums === String ? $root.google.firestore.admin.v1.Index.State[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.Index.State[message.state] : message.state;
+                            if (message.apiScope != null && message.hasOwnProperty("apiScope"))
+                                object.apiScope = options.enums === String ? $root.google.firestore.admin.v1.Index.ApiScope[message.apiScope] === undefined ? message.apiScope : $root.google.firestore.admin.v1.Index.ApiScope[message.apiScope] : message.apiScope;
                             return object;
                         };
     
@@ -3238,12 +3512,28 @@
                          * @property {string} QUERY_SCOPE_UNSPECIFIED=QUERY_SCOPE_UNSPECIFIED QUERY_SCOPE_UNSPECIFIED value
                          * @property {string} COLLECTION=COLLECTION COLLECTION value
                          * @property {string} COLLECTION_GROUP=COLLECTION_GROUP COLLECTION_GROUP value
+                         * @property {string} COLLECTION_RECURSIVE=COLLECTION_RECURSIVE COLLECTION_RECURSIVE value
                          */
                         Index.QueryScope = (function() {
                             var valuesById = {}, values = Object.create(valuesById);
                             values[valuesById[0] = "QUERY_SCOPE_UNSPECIFIED"] = "QUERY_SCOPE_UNSPECIFIED";
                             values[valuesById[1] = "COLLECTION"] = "COLLECTION";
                             values[valuesById[2] = "COLLECTION_GROUP"] = "COLLECTION_GROUP";
+                            values[valuesById[3] = "COLLECTION_RECURSIVE"] = "COLLECTION_RECURSIVE";
+                            return values;
+                        })();
+    
+                        /**
+                         * ApiScope enum.
+                         * @name google.firestore.admin.v1.Index.ApiScope
+                         * @enum {string}
+                         * @property {string} ANY_API=ANY_API ANY_API value
+                         * @property {string} DATASTORE_MODE_API=DATASTORE_MODE_API DATASTORE_MODE_API value
+                         */
+                        Index.ApiScope = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "ANY_API"] = "ANY_API";
+                            values[valuesById[1] = "DATASTORE_MODE_API"] = "DATASTORE_MODE_API";
                             return values;
                         })();
     
@@ -6018,6 +6308,7 @@
                  * @property {string|null} [docTagPrefix] Publishing docTagPrefix
                  * @property {google.api.ClientLibraryOrganization|null} [organization] Publishing organization
                  * @property {Array.<google.api.IClientLibrarySettings>|null} [librarySettings] Publishing librarySettings
+                 * @property {string|null} [protoReferenceDocumentationUri] Publishing protoReferenceDocumentationUri
                  */
     
                 /**
@@ -6111,6 +6402,14 @@
                 Publishing.prototype.librarySettings = $util.emptyArray;
     
                 /**
+                 * Publishing protoReferenceDocumentationUri.
+                 * @member {string} protoReferenceDocumentationUri
+                 * @memberof google.api.Publishing
+                 * @instance
+                 */
+                Publishing.prototype.protoReferenceDocumentationUri = "";
+    
+                /**
                  * Creates a Publishing message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.Publishing
@@ -6176,6 +6475,18 @@
                     case 4:
                         message.organization = 4;
                         break;
+                    case "SHOPPING":
+                    case 5:
+                        message.organization = 5;
+                        break;
+                    case "GEO":
+                    case 6:
+                        message.organization = 6;
+                        break;
+                    case "GENERATIVE_AI":
+                    case 7:
+                        message.organization = 7;
+                        break;
                     }
                     if (object.librarySettings) {
                         if (!Array.isArray(object.librarySettings))
@@ -6187,6 +6498,8 @@
                             message.librarySettings[i] = $root.google.api.ClientLibrarySettings.fromObject(object.librarySettings[i]);
                         }
                     }
+                    if (object.protoReferenceDocumentationUri != null)
+                        message.protoReferenceDocumentationUri = String(object.protoReferenceDocumentationUri);
                     return message;
                 };
     
@@ -6215,6 +6528,7 @@
                         object.githubLabel = "";
                         object.docTagPrefix = "";
                         object.organization = options.enums === String ? "CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED" : 0;
+                        object.protoReferenceDocumentationUri = "";
                     }
                     if (message.methodSettings && message.methodSettings.length) {
                         object.methodSettings = [];
@@ -6243,6 +6557,8 @@
                         for (var j = 0; j < message.librarySettings.length; ++j)
                             object.librarySettings[j] = $root.google.api.ClientLibrarySettings.toObject(message.librarySettings[j], options);
                     }
+                    if (message.protoReferenceDocumentationUri != null && message.hasOwnProperty("protoReferenceDocumentationUri"))
+                        object.protoReferenceDocumentationUri = message.protoReferenceDocumentationUri;
                     return object;
                 };
     
@@ -6827,6 +7143,11 @@
                  * @memberof google.api
                  * @interface IDotnetSettings
                  * @property {google.api.ICommonLanguageSettings|null} [common] DotnetSettings common
+                 * @property {Object.<string,string>|null} [renamedServices] DotnetSettings renamedServices
+                 * @property {Object.<string,string>|null} [renamedResources] DotnetSettings renamedResources
+                 * @property {Array.<string>|null} [ignoredResources] DotnetSettings ignoredResources
+                 * @property {Array.<string>|null} [forcedNamespaceAliases] DotnetSettings forcedNamespaceAliases
+                 * @property {Array.<string>|null} [handwrittenSignatures] DotnetSettings handwrittenSignatures
                  */
     
                 /**
@@ -6838,6 +7159,11 @@
                  * @param {google.api.IDotnetSettings=} [properties] Properties to set
                  */
                 function DotnetSettings(properties) {
+                    this.renamedServices = {};
+                    this.renamedResources = {};
+                    this.ignoredResources = [];
+                    this.forcedNamespaceAliases = [];
+                    this.handwrittenSignatures = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -6851,6 +7177,46 @@
                  * @instance
                  */
                 DotnetSettings.prototype.common = null;
+    
+                /**
+                 * DotnetSettings renamedServices.
+                 * @member {Object.<string,string>} renamedServices
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.renamedServices = $util.emptyObject;
+    
+                /**
+                 * DotnetSettings renamedResources.
+                 * @member {Object.<string,string>} renamedResources
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.renamedResources = $util.emptyObject;
+    
+                /**
+                 * DotnetSettings ignoredResources.
+                 * @member {Array.<string>} ignoredResources
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.ignoredResources = $util.emptyArray;
+    
+                /**
+                 * DotnetSettings forcedNamespaceAliases.
+                 * @member {Array.<string>} forcedNamespaceAliases
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.forcedNamespaceAliases = $util.emptyArray;
+    
+                /**
+                 * DotnetSettings handwrittenSignatures.
+                 * @member {Array.<string>} handwrittenSignatures
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.handwrittenSignatures = $util.emptyArray;
     
                 /**
                  * Creates a DotnetSettings message from a plain object. Also converts values to their respective internal types.
@@ -6869,6 +7235,41 @@
                             throw TypeError(".google.api.DotnetSettings.common: object expected");
                         message.common = $root.google.api.CommonLanguageSettings.fromObject(object.common);
                     }
+                    if (object.renamedServices) {
+                        if (typeof object.renamedServices !== "object")
+                            throw TypeError(".google.api.DotnetSettings.renamedServices: object expected");
+                        message.renamedServices = {};
+                        for (var keys = Object.keys(object.renamedServices), i = 0; i < keys.length; ++i)
+                            message.renamedServices[keys[i]] = String(object.renamedServices[keys[i]]);
+                    }
+                    if (object.renamedResources) {
+                        if (typeof object.renamedResources !== "object")
+                            throw TypeError(".google.api.DotnetSettings.renamedResources: object expected");
+                        message.renamedResources = {};
+                        for (var keys = Object.keys(object.renamedResources), i = 0; i < keys.length; ++i)
+                            message.renamedResources[keys[i]] = String(object.renamedResources[keys[i]]);
+                    }
+                    if (object.ignoredResources) {
+                        if (!Array.isArray(object.ignoredResources))
+                            throw TypeError(".google.api.DotnetSettings.ignoredResources: array expected");
+                        message.ignoredResources = [];
+                        for (var i = 0; i < object.ignoredResources.length; ++i)
+                            message.ignoredResources[i] = String(object.ignoredResources[i]);
+                    }
+                    if (object.forcedNamespaceAliases) {
+                        if (!Array.isArray(object.forcedNamespaceAliases))
+                            throw TypeError(".google.api.DotnetSettings.forcedNamespaceAliases: array expected");
+                        message.forcedNamespaceAliases = [];
+                        for (var i = 0; i < object.forcedNamespaceAliases.length; ++i)
+                            message.forcedNamespaceAliases[i] = String(object.forcedNamespaceAliases[i]);
+                    }
+                    if (object.handwrittenSignatures) {
+                        if (!Array.isArray(object.handwrittenSignatures))
+                            throw TypeError(".google.api.DotnetSettings.handwrittenSignatures: array expected");
+                        message.handwrittenSignatures = [];
+                        for (var i = 0; i < object.handwrittenSignatures.length; ++i)
+                            message.handwrittenSignatures[i] = String(object.handwrittenSignatures[i]);
+                    }
                     return message;
                 };
     
@@ -6885,10 +7286,45 @@
                     if (!options)
                         options = {};
                     var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.ignoredResources = [];
+                        object.forcedNamespaceAliases = [];
+                        object.handwrittenSignatures = [];
+                    }
+                    if (options.objects || options.defaults) {
+                        object.renamedServices = {};
+                        object.renamedResources = {};
+                    }
                     if (options.defaults)
                         object.common = null;
                     if (message.common != null && message.hasOwnProperty("common"))
                         object.common = $root.google.api.CommonLanguageSettings.toObject(message.common, options);
+                    var keys2;
+                    if (message.renamedServices && (keys2 = Object.keys(message.renamedServices)).length) {
+                        object.renamedServices = {};
+                        for (var j = 0; j < keys2.length; ++j)
+                            object.renamedServices[keys2[j]] = message.renamedServices[keys2[j]];
+                    }
+                    if (message.renamedResources && (keys2 = Object.keys(message.renamedResources)).length) {
+                        object.renamedResources = {};
+                        for (var j = 0; j < keys2.length; ++j)
+                            object.renamedResources[keys2[j]] = message.renamedResources[keys2[j]];
+                    }
+                    if (message.ignoredResources && message.ignoredResources.length) {
+                        object.ignoredResources = [];
+                        for (var j = 0; j < message.ignoredResources.length; ++j)
+                            object.ignoredResources[j] = message.ignoredResources[j];
+                    }
+                    if (message.forcedNamespaceAliases && message.forcedNamespaceAliases.length) {
+                        object.forcedNamespaceAliases = [];
+                        for (var j = 0; j < message.forcedNamespaceAliases.length; ++j)
+                            object.forcedNamespaceAliases[j] = message.forcedNamespaceAliases[j];
+                    }
+                    if (message.handwrittenSignatures && message.handwrittenSignatures.length) {
+                        object.handwrittenSignatures = [];
+                        for (var j = 0; j < message.handwrittenSignatures.length; ++j)
+                            object.handwrittenSignatures[j] = message.handwrittenSignatures[j];
+                    }
                     return object;
                 };
     
@@ -7398,6 +7834,9 @@
              * @property {string} ADS=ADS ADS value
              * @property {string} PHOTOS=PHOTOS PHOTOS value
              * @property {string} STREET_VIEW=STREET_VIEW STREET_VIEW value
+             * @property {string} SHOPPING=SHOPPING SHOPPING value
+             * @property {string} GEO=GEO GEO value
+             * @property {string} GENERATIVE_AI=GENERATIVE_AI GENERATIVE_AI value
              */
             api.ClientLibraryOrganization = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
@@ -7406,6 +7845,9 @@
                 values[valuesById[2] = "ADS"] = "ADS";
                 values[valuesById[3] = "PHOTOS"] = "PHOTOS";
                 values[valuesById[4] = "STREET_VIEW"] = "STREET_VIEW";
+                values[valuesById[5] = "SHOPPING"] = "SHOPPING";
+                values[valuesById[6] = "GEO"] = "GEO";
+                values[valuesById[7] = "GENERATIVE_AI"] = "GENERATIVE_AI";
                 return values;
             })();
     

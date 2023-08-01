@@ -16701,6 +16701,7 @@
                  * @property {string|null} [docTagPrefix] Publishing docTagPrefix
                  * @property {google.api.ClientLibraryOrganization|null} [organization] Publishing organization
                  * @property {Array.<google.api.IClientLibrarySettings>|null} [librarySettings] Publishing librarySettings
+                 * @property {string|null} [protoReferenceDocumentationUri] Publishing protoReferenceDocumentationUri
                  */
     
                 /**
@@ -16794,6 +16795,14 @@
                 Publishing.prototype.librarySettings = $util.emptyArray;
     
                 /**
+                 * Publishing protoReferenceDocumentationUri.
+                 * @member {string} protoReferenceDocumentationUri
+                 * @memberof google.api.Publishing
+                 * @instance
+                 */
+                Publishing.prototype.protoReferenceDocumentationUri = "";
+    
+                /**
                  * Creates a Publishing message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.Publishing
@@ -16859,6 +16868,18 @@
                     case 4:
                         message.organization = 4;
                         break;
+                    case "SHOPPING":
+                    case 5:
+                        message.organization = 5;
+                        break;
+                    case "GEO":
+                    case 6:
+                        message.organization = 6;
+                        break;
+                    case "GENERATIVE_AI":
+                    case 7:
+                        message.organization = 7;
+                        break;
                     }
                     if (object.librarySettings) {
                         if (!Array.isArray(object.librarySettings))
@@ -16870,6 +16891,8 @@
                             message.librarySettings[i] = $root.google.api.ClientLibrarySettings.fromObject(object.librarySettings[i]);
                         }
                     }
+                    if (object.protoReferenceDocumentationUri != null)
+                        message.protoReferenceDocumentationUri = String(object.protoReferenceDocumentationUri);
                     return message;
                 };
     
@@ -16898,6 +16921,7 @@
                         object.githubLabel = "";
                         object.docTagPrefix = "";
                         object.organization = options.enums === String ? "CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED" : 0;
+                        object.protoReferenceDocumentationUri = "";
                     }
                     if (message.methodSettings && message.methodSettings.length) {
                         object.methodSettings = [];
@@ -16926,6 +16950,8 @@
                         for (var j = 0; j < message.librarySettings.length; ++j)
                             object.librarySettings[j] = $root.google.api.ClientLibrarySettings.toObject(message.librarySettings[j], options);
                     }
+                    if (message.protoReferenceDocumentationUri != null && message.hasOwnProperty("protoReferenceDocumentationUri"))
+                        object.protoReferenceDocumentationUri = message.protoReferenceDocumentationUri;
                     return object;
                 };
     
@@ -17510,6 +17536,11 @@
                  * @memberof google.api
                  * @interface IDotnetSettings
                  * @property {google.api.ICommonLanguageSettings|null} [common] DotnetSettings common
+                 * @property {Object.<string,string>|null} [renamedServices] DotnetSettings renamedServices
+                 * @property {Object.<string,string>|null} [renamedResources] DotnetSettings renamedResources
+                 * @property {Array.<string>|null} [ignoredResources] DotnetSettings ignoredResources
+                 * @property {Array.<string>|null} [forcedNamespaceAliases] DotnetSettings forcedNamespaceAliases
+                 * @property {Array.<string>|null} [handwrittenSignatures] DotnetSettings handwrittenSignatures
                  */
     
                 /**
@@ -17521,6 +17552,11 @@
                  * @param {google.api.IDotnetSettings=} [properties] Properties to set
                  */
                 function DotnetSettings(properties) {
+                    this.renamedServices = {};
+                    this.renamedResources = {};
+                    this.ignoredResources = [];
+                    this.forcedNamespaceAliases = [];
+                    this.handwrittenSignatures = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -17534,6 +17570,46 @@
                  * @instance
                  */
                 DotnetSettings.prototype.common = null;
+    
+                /**
+                 * DotnetSettings renamedServices.
+                 * @member {Object.<string,string>} renamedServices
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.renamedServices = $util.emptyObject;
+    
+                /**
+                 * DotnetSettings renamedResources.
+                 * @member {Object.<string,string>} renamedResources
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.renamedResources = $util.emptyObject;
+    
+                /**
+                 * DotnetSettings ignoredResources.
+                 * @member {Array.<string>} ignoredResources
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.ignoredResources = $util.emptyArray;
+    
+                /**
+                 * DotnetSettings forcedNamespaceAliases.
+                 * @member {Array.<string>} forcedNamespaceAliases
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.forcedNamespaceAliases = $util.emptyArray;
+    
+                /**
+                 * DotnetSettings handwrittenSignatures.
+                 * @member {Array.<string>} handwrittenSignatures
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.handwrittenSignatures = $util.emptyArray;
     
                 /**
                  * Creates a DotnetSettings message from a plain object. Also converts values to their respective internal types.
@@ -17552,6 +17628,41 @@
                             throw TypeError(".google.api.DotnetSettings.common: object expected");
                         message.common = $root.google.api.CommonLanguageSettings.fromObject(object.common);
                     }
+                    if (object.renamedServices) {
+                        if (typeof object.renamedServices !== "object")
+                            throw TypeError(".google.api.DotnetSettings.renamedServices: object expected");
+                        message.renamedServices = {};
+                        for (var keys = Object.keys(object.renamedServices), i = 0; i < keys.length; ++i)
+                            message.renamedServices[keys[i]] = String(object.renamedServices[keys[i]]);
+                    }
+                    if (object.renamedResources) {
+                        if (typeof object.renamedResources !== "object")
+                            throw TypeError(".google.api.DotnetSettings.renamedResources: object expected");
+                        message.renamedResources = {};
+                        for (var keys = Object.keys(object.renamedResources), i = 0; i < keys.length; ++i)
+                            message.renamedResources[keys[i]] = String(object.renamedResources[keys[i]]);
+                    }
+                    if (object.ignoredResources) {
+                        if (!Array.isArray(object.ignoredResources))
+                            throw TypeError(".google.api.DotnetSettings.ignoredResources: array expected");
+                        message.ignoredResources = [];
+                        for (var i = 0; i < object.ignoredResources.length; ++i)
+                            message.ignoredResources[i] = String(object.ignoredResources[i]);
+                    }
+                    if (object.forcedNamespaceAliases) {
+                        if (!Array.isArray(object.forcedNamespaceAliases))
+                            throw TypeError(".google.api.DotnetSettings.forcedNamespaceAliases: array expected");
+                        message.forcedNamespaceAliases = [];
+                        for (var i = 0; i < object.forcedNamespaceAliases.length; ++i)
+                            message.forcedNamespaceAliases[i] = String(object.forcedNamespaceAliases[i]);
+                    }
+                    if (object.handwrittenSignatures) {
+                        if (!Array.isArray(object.handwrittenSignatures))
+                            throw TypeError(".google.api.DotnetSettings.handwrittenSignatures: array expected");
+                        message.handwrittenSignatures = [];
+                        for (var i = 0; i < object.handwrittenSignatures.length; ++i)
+                            message.handwrittenSignatures[i] = String(object.handwrittenSignatures[i]);
+                    }
                     return message;
                 };
     
@@ -17568,10 +17679,45 @@
                     if (!options)
                         options = {};
                     var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.ignoredResources = [];
+                        object.forcedNamespaceAliases = [];
+                        object.handwrittenSignatures = [];
+                    }
+                    if (options.objects || options.defaults) {
+                        object.renamedServices = {};
+                        object.renamedResources = {};
+                    }
                     if (options.defaults)
                         object.common = null;
                     if (message.common != null && message.hasOwnProperty("common"))
                         object.common = $root.google.api.CommonLanguageSettings.toObject(message.common, options);
+                    var keys2;
+                    if (message.renamedServices && (keys2 = Object.keys(message.renamedServices)).length) {
+                        object.renamedServices = {};
+                        for (var j = 0; j < keys2.length; ++j)
+                            object.renamedServices[keys2[j]] = message.renamedServices[keys2[j]];
+                    }
+                    if (message.renamedResources && (keys2 = Object.keys(message.renamedResources)).length) {
+                        object.renamedResources = {};
+                        for (var j = 0; j < keys2.length; ++j)
+                            object.renamedResources[keys2[j]] = message.renamedResources[keys2[j]];
+                    }
+                    if (message.ignoredResources && message.ignoredResources.length) {
+                        object.ignoredResources = [];
+                        for (var j = 0; j < message.ignoredResources.length; ++j)
+                            object.ignoredResources[j] = message.ignoredResources[j];
+                    }
+                    if (message.forcedNamespaceAliases && message.forcedNamespaceAliases.length) {
+                        object.forcedNamespaceAliases = [];
+                        for (var j = 0; j < message.forcedNamespaceAliases.length; ++j)
+                            object.forcedNamespaceAliases[j] = message.forcedNamespaceAliases[j];
+                    }
+                    if (message.handwrittenSignatures && message.handwrittenSignatures.length) {
+                        object.handwrittenSignatures = [];
+                        for (var j = 0; j < message.handwrittenSignatures.length; ++j)
+                            object.handwrittenSignatures[j] = message.handwrittenSignatures[j];
+                    }
                     return object;
                 };
     
@@ -18081,6 +18227,9 @@
              * @property {string} ADS=ADS ADS value
              * @property {string} PHOTOS=PHOTOS PHOTOS value
              * @property {string} STREET_VIEW=STREET_VIEW STREET_VIEW value
+             * @property {string} SHOPPING=SHOPPING SHOPPING value
+             * @property {string} GEO=GEO GEO value
+             * @property {string} GENERATIVE_AI=GENERATIVE_AI GENERATIVE_AI value
              */
             api.ClientLibraryOrganization = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
@@ -18089,6 +18238,9 @@
                 values[valuesById[2] = "ADS"] = "ADS";
                 values[valuesById[3] = "PHOTOS"] = "PHOTOS";
                 values[valuesById[4] = "STREET_VIEW"] = "STREET_VIEW";
+                values[valuesById[5] = "SHOPPING"] = "SHOPPING";
+                values[valuesById[6] = "GEO"] = "GEO";
+                values[valuesById[7] = "GENERATIVE_AI"] = "GENERATIVE_AI";
                 return values;
             })();
     
