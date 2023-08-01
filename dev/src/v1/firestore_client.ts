@@ -417,7 +417,10 @@ export class FirestoreClient {
    *   Reads the document in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads the version of the document at the given time.
-   *   This may not be older than 270 seconds.
+   *
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1170,7 +1173,10 @@ export class FirestoreClient {
    *   stream.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 270 seconds.
+   *
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1221,7 +1227,10 @@ export class FirestoreClient {
    *   stream.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 270 seconds.
+   *
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1285,9 +1294,9 @@ export class FirestoreClient {
    * @param {google.protobuf.Timestamp} request.readTime
    *   Executes the query at the given timestamp.
    *
-   *   Requires:
-   *
-   *   * Cannot be more than 270 seconds in the past.
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1401,7 +1410,9 @@ export class FirestoreClient {
    * @param {google.protobuf.Timestamp} request.readTime
    *   Perform the read at the provided time.
    *
-   *   This may not be older than 270 seconds.
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents.
    *
@@ -1539,7 +1550,9 @@ export class FirestoreClient {
    * @param {google.protobuf.Timestamp} request.readTime
    *   Perform the read at the provided time.
    *
-   *   This may not be older than 270 seconds.
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents.
    *
@@ -1633,7 +1646,9 @@ export class FirestoreClient {
    * @param {google.protobuf.Timestamp} request.readTime
    *   Perform the read at the provided time.
    *
-   *   This may not be older than 270 seconds.
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents.
    *
@@ -1728,7 +1743,10 @@ export class FirestoreClient {
    *   2 partitions, to complete the total of 10 specified in `partition_count`.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 270 seconds.
+   *
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1855,7 +1873,10 @@ export class FirestoreClient {
    *   2 partitions, to complete the total of 10 specified in `partition_count`.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 270 seconds.
+   *
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1938,7 +1959,10 @@ export class FirestoreClient {
    *   2 partitions, to complete the total of 10 specified in `partition_count`.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 270 seconds.
+   *
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
@@ -1989,7 +2013,10 @@ export class FirestoreClient {
    *   {@link protos.google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 270 seconds.
+   *
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -2087,7 +2114,10 @@ export class FirestoreClient {
    *   {@link protos.google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 270 seconds.
+   *
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -2139,7 +2169,10 @@ export class FirestoreClient {
    *   {@link protos.google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 270 seconds.
+   *
+   *   This must be a microsecond precision timestamp within the past one hour,
+   *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+   *   minute timestamp within the past 7 days.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Object}
