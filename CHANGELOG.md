@@ -4,6 +4,18 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.7.0](https://github.com/googleapis/nodejs-firestore/compare/v6.6.1...v6.7.0) (2023-07-20)
+
+
+### Features
+
+* Expose MultiDb ([#1857](https://github.com/googleapis/nodejs-firestore/issues/1857)) ([1e913db](https://github.com/googleapis/nodejs-firestore/commit/1e913dbec97a6ec9339f641e7590ac4d65c7fd17))
+
+
+### Bug Fixes
+
+* Resolving issues with MultiDb support ([#1864](https://github.com/googleapis/nodejs-firestore/issues/1864)) ([1af49c1](https://github.com/googleapis/nodejs-firestore/commit/1af49c1a852c6a89a7e21a9e749d667b3b728acf))
+
 ## [6.6.1](https://github.com/googleapis/nodejs-firestore/compare/v6.6.0...v6.6.1) (2023-06-01)
 
 
