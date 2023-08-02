@@ -663,6 +663,10 @@ export class Firestore implements firestore.Firestore {
 
     let url: URL | null = null;
 
+    settings.host = 'test-firestore.sandbox.googleapis.com';
+    settings.ssl = true;
+    settings.projectId = 'firestore-sdk-nightly';
+
     // If the environment variable is set, it should always take precedence
     // over any user passed in settings.
     if (process.env.FIRESTORE_EMULATOR_HOST) {

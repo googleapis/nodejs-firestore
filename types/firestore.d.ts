@@ -2085,7 +2085,6 @@ declare namespace FirebaseFirestore {
 
   /**
    * Union type representing the aggregate type to be performed.
-   * @internal
    */
   export type AggregateType = 'count' | 'avg' | 'sum';
 
