@@ -5700,7 +5700,7 @@ export namespace google {
 
                     /** Operator enum. */
                     type Operator =
-                        "OPERATOR_UNSPECIFIED"| "AND"| "OR";
+                        "OPERATOR_UNSPECIFIED"| "AND";
                 }
 
                 /** Properties of a FieldFilter. */
@@ -6960,6 +6960,9 @@ export namespace google {
 
             /** Publishing librarySettings */
             librarySettings?: (google.api.IClientLibrarySettings[]|null);
+
+            /** Publishing protoReferenceDocumentationUri */
+            protoReferenceDocumentationUri?: (string|null);
         }
 
         /** Represents a Publishing. */
@@ -6997,6 +7000,9 @@ export namespace google {
 
             /** Publishing librarySettings. */
             public librarySettings: google.api.IClientLibrarySettings[];
+
+            /** Publishing protoReferenceDocumentationUri. */
+            public protoReferenceDocumentationUri: string;
 
             /**
              * Creates a Publishing message from a plain object. Also converts values to their respective internal types.
@@ -7284,6 +7290,21 @@ export namespace google {
 
             /** DotnetSettings common */
             common?: (google.api.ICommonLanguageSettings|null);
+
+            /** DotnetSettings renamedServices */
+            renamedServices?: ({ [k: string]: string }|null);
+
+            /** DotnetSettings renamedResources */
+            renamedResources?: ({ [k: string]: string }|null);
+
+            /** DotnetSettings ignoredResources */
+            ignoredResources?: (string[]|null);
+
+            /** DotnetSettings forcedNamespaceAliases */
+            forcedNamespaceAliases?: (string[]|null);
+
+            /** DotnetSettings handwrittenSignatures */
+            handwrittenSignatures?: (string[]|null);
         }
 
         /** Represents a DotnetSettings. */
@@ -7297,6 +7318,21 @@ export namespace google {
 
             /** DotnetSettings common. */
             public common?: (google.api.ICommonLanguageSettings|null);
+
+            /** DotnetSettings renamedServices. */
+            public renamedServices: { [k: string]: string };
+
+            /** DotnetSettings renamedResources. */
+            public renamedResources: { [k: string]: string };
+
+            /** DotnetSettings ignoredResources. */
+            public ignoredResources: string[];
+
+            /** DotnetSettings forcedNamespaceAliases. */
+            public forcedNamespaceAliases: string[];
+
+            /** DotnetSettings handwrittenSignatures. */
+            public handwrittenSignatures: string[];
 
             /**
              * Creates a DotnetSettings message from a plain object. Also converts values to their respective internal types.
@@ -7548,7 +7584,7 @@ export namespace google {
 
         /** ClientLibraryOrganization enum. */
         type ClientLibraryOrganization =
-            "CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED"| "CLOUD"| "ADS"| "PHOTOS"| "STREET_VIEW";
+            "CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED"| "CLOUD"| "ADS"| "PHOTOS"| "STREET_VIEW"| "SHOPPING"| "GEO"| "GENERATIVE_AI";
 
         /** ClientLibraryDestination enum. */
         type ClientLibraryDestination =

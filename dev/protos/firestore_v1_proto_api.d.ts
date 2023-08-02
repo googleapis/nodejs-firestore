@@ -3067,6 +3067,114 @@ export namespace google {
                 public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
+            /** Properties of a BitSequence. */
+            interface IBitSequence {
+
+                /** BitSequence bitmap */
+                bitmap?: (Uint8Array|null);
+
+                /** BitSequence padding */
+                padding?: (number|null);
+            }
+
+            /** Represents a BitSequence. */
+            class BitSequence implements IBitSequence {
+
+                /**
+                 * Constructs a new BitSequence.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IBitSequence);
+
+                /** BitSequence bitmap. */
+                public bitmap: Uint8Array;
+
+                /** BitSequence padding. */
+                public padding: number;
+
+                /**
+                 * Creates a BitSequence message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns BitSequence
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.BitSequence;
+
+                /**
+                 * Creates a plain object from a BitSequence message. Also converts values to other types if specified.
+                 * @param message BitSequence
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.BitSequence, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this BitSequence to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for BitSequence
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a BloomFilter. */
+            interface IBloomFilter {
+
+                /** BloomFilter bits */
+                bits?: (google.firestore.v1.IBitSequence|null);
+
+                /** BloomFilter hashCount */
+                hashCount?: (number|null);
+            }
+
+            /** Represents a BloomFilter. */
+            class BloomFilter implements IBloomFilter {
+
+                /**
+                 * Constructs a new BloomFilter.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IBloomFilter);
+
+                /** BloomFilter bits. */
+                public bits?: (google.firestore.v1.IBitSequence|null);
+
+                /** BloomFilter hashCount. */
+                public hashCount: number;
+
+                /**
+                 * Creates a BloomFilter message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns BloomFilter
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.BloomFilter;
+
+                /**
+                 * Creates a plain object from a BloomFilter message. Also converts values to other types if specified.
+                 * @param message BloomFilter
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.BloomFilter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this BloomFilter to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for BloomFilter
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
             /** Properties of a DocumentMask. */
             interface IDocumentMask {
 
@@ -5520,6 +5628,9 @@ export namespace google {
 
                 /** Target once */
                 once?: (boolean|null);
+
+                /** Target expectedCount */
+                expectedCount?: (google.protobuf.IInt32Value|null);
             }
 
             /** Represents a Target. */
@@ -5548,6 +5659,9 @@ export namespace google {
 
                 /** Target once. */
                 public once: boolean;
+
+                /** Target expectedCount. */
+                public expectedCount?: (google.protobuf.IInt32Value|null);
 
                 /** Target targetType. */
                 public targetType?: ("query"|"documents");
@@ -6629,6 +6743,12 @@ export namespace google {
                     /** Aggregation count */
                     count?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null);
 
+                    /** Aggregation sum */
+                    sum?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum|null);
+
+                    /** Aggregation avg */
+                    avg?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg|null);
+
                     /** Aggregation alias */
                     alias?: (string|null);
                 }
@@ -6645,11 +6765,17 @@ export namespace google {
                     /** Aggregation count. */
                     public count?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null);
 
+                    /** Aggregation sum. */
+                    public sum?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum|null);
+
+                    /** Aggregation avg. */
+                    public avg?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg|null);
+
                     /** Aggregation alias. */
                     public alias: string;
 
                     /** Aggregation operator. */
-                    public operator?: "count";
+                    public operator?: ("count"|"sum"|"avg");
 
                     /**
                      * Creates an Aggregation message from a plain object. Also converts values to their respective internal types.
@@ -6724,6 +6850,102 @@ export namespace google {
 
                         /**
                          * Gets the default type url for Count
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    /** Properties of a Sum. */
+                    interface ISum {
+
+                        /** Sum field */
+                        field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+                    }
+
+                    /** Represents a Sum. */
+                    class Sum implements ISum {
+
+                        /**
+                         * Constructs a new Sum.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum);
+
+                        /** Sum field. */
+                        public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                        /**
+                         * Creates a Sum message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns Sum
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum;
+
+                        /**
+                         * Creates a plain object from a Sum message. Also converts values to other types if specified.
+                         * @param message Sum
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this Sum to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for Sum
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    /** Properties of an Avg. */
+                    interface IAvg {
+
+                        /** Avg field */
+                        field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+                    }
+
+                    /** Represents an Avg. */
+                    class Avg implements IAvg {
+
+                        /**
+                         * Constructs a new Avg.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg);
+
+                        /** Avg field. */
+                        public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                        /**
+                         * Creates an Avg message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns Avg
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg;
+
+                        /**
+                         * Creates a plain object from an Avg message. Also converts values to other types if specified.
+                         * @param message Avg
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this Avg to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for Avg
                          * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                          * @returns The default type url
                          */
@@ -7260,6 +7482,9 @@ export namespace google {
 
                 /** ExistenceFilter count */
                 count?: (number|null);
+
+                /** ExistenceFilter unchangedNames */
+                unchangedNames?: (google.firestore.v1.IBloomFilter|null);
             }
 
             /** Represents an ExistenceFilter. */
@@ -7276,6 +7501,9 @@ export namespace google {
 
                 /** ExistenceFilter count. */
                 public count: number;
+
+                /** ExistenceFilter unchangedNames. */
+                public unchangedNames?: (google.firestore.v1.IBloomFilter|null);
 
                 /**
                  * Creates an ExistenceFilter message from a plain object. Also converts values to their respective internal types.
@@ -7703,6 +7931,9 @@ export namespace google {
 
             /** Publishing librarySettings */
             librarySettings?: (google.api.IClientLibrarySettings[]|null);
+
+            /** Publishing protoReferenceDocumentationUri */
+            protoReferenceDocumentationUri?: (string|null);
         }
 
         /** Represents a Publishing. */
@@ -7740,6 +7971,9 @@ export namespace google {
 
             /** Publishing librarySettings. */
             public librarySettings: google.api.IClientLibrarySettings[];
+
+            /** Publishing protoReferenceDocumentationUri. */
+            public protoReferenceDocumentationUri: string;
 
             /**
              * Creates a Publishing message from a plain object. Also converts values to their respective internal types.
@@ -8027,6 +8261,21 @@ export namespace google {
 
             /** DotnetSettings common */
             common?: (google.api.ICommonLanguageSettings|null);
+
+            /** DotnetSettings renamedServices */
+            renamedServices?: ({ [k: string]: string }|null);
+
+            /** DotnetSettings renamedResources */
+            renamedResources?: ({ [k: string]: string }|null);
+
+            /** DotnetSettings ignoredResources */
+            ignoredResources?: (string[]|null);
+
+            /** DotnetSettings forcedNamespaceAliases */
+            forcedNamespaceAliases?: (string[]|null);
+
+            /** DotnetSettings handwrittenSignatures */
+            handwrittenSignatures?: (string[]|null);
         }
 
         /** Represents a DotnetSettings. */
@@ -8040,6 +8289,21 @@ export namespace google {
 
             /** DotnetSettings common. */
             public common?: (google.api.ICommonLanguageSettings|null);
+
+            /** DotnetSettings renamedServices. */
+            public renamedServices: { [k: string]: string };
+
+            /** DotnetSettings renamedResources. */
+            public renamedResources: { [k: string]: string };
+
+            /** DotnetSettings ignoredResources. */
+            public ignoredResources: string[];
+
+            /** DotnetSettings forcedNamespaceAliases. */
+            public forcedNamespaceAliases: string[];
+
+            /** DotnetSettings handwrittenSignatures. */
+            public handwrittenSignatures: string[];
 
             /**
              * Creates a DotnetSettings message from a plain object. Also converts values to their respective internal types.
@@ -8291,7 +8555,7 @@ export namespace google {
 
         /** ClientLibraryOrganization enum. */
         type ClientLibraryOrganization =
-            "CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED"| "CLOUD"| "ADS"| "PHOTOS"| "STREET_VIEW";
+            "CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED"| "CLOUD"| "ADS"| "PHOTOS"| "STREET_VIEW"| "SHOPPING"| "GEO"| "GENERATIVE_AI";
 
         /** ClientLibraryDestination enum. */
         type ClientLibraryDestination =

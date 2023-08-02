@@ -7519,6 +7519,244 @@
                     return AggregationResult;
                 })();
     
+                v1.BitSequence = (function() {
+    
+                    /**
+                     * Properties of a BitSequence.
+                     * @memberof google.firestore.v1
+                     * @interface IBitSequence
+                     * @property {Uint8Array|null} [bitmap] BitSequence bitmap
+                     * @property {number|null} [padding] BitSequence padding
+                     */
+    
+                    /**
+                     * Constructs a new BitSequence.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a BitSequence.
+                     * @implements IBitSequence
+                     * @constructor
+                     * @param {google.firestore.v1.IBitSequence=} [properties] Properties to set
+                     */
+                    function BitSequence(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * BitSequence bitmap.
+                     * @member {Uint8Array} bitmap
+                     * @memberof google.firestore.v1.BitSequence
+                     * @instance
+                     */
+                    BitSequence.prototype.bitmap = $util.newBuffer([]);
+    
+                    /**
+                     * BitSequence padding.
+                     * @member {number} padding
+                     * @memberof google.firestore.v1.BitSequence
+                     * @instance
+                     */
+                    BitSequence.prototype.padding = 0;
+    
+                    /**
+                     * Creates a BitSequence message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.BitSequence
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.BitSequence} BitSequence
+                     */
+                    BitSequence.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.BitSequence)
+                            return object;
+                        var message = new $root.google.firestore.v1.BitSequence();
+                        if (object.bitmap != null)
+                            if (typeof object.bitmap === "string")
+                                $util.base64.decode(object.bitmap, message.bitmap = $util.newBuffer($util.base64.length(object.bitmap)), 0);
+                            else if (object.bitmap.length >= 0)
+                                message.bitmap = object.bitmap;
+                        if (object.padding != null)
+                            message.padding = object.padding | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a BitSequence message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.BitSequence
+                     * @static
+                     * @param {google.firestore.v1.BitSequence} message BitSequence
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    BitSequence.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            if (options.bytes === String)
+                                object.bitmap = "";
+                            else {
+                                object.bitmap = [];
+                                if (options.bytes !== Array)
+                                    object.bitmap = $util.newBuffer(object.bitmap);
+                            }
+                            object.padding = 0;
+                        }
+                        if (message.bitmap != null && message.hasOwnProperty("bitmap"))
+                            object.bitmap = options.bytes === String ? $util.base64.encode(message.bitmap, 0, message.bitmap.length) : options.bytes === Array ? Array.prototype.slice.call(message.bitmap) : message.bitmap;
+                        if (message.padding != null && message.hasOwnProperty("padding"))
+                            object.padding = message.padding;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this BitSequence to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.BitSequence
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    BitSequence.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for BitSequence
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.BitSequence
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    BitSequence.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.BitSequence";
+                    };
+    
+                    return BitSequence;
+                })();
+    
+                v1.BloomFilter = (function() {
+    
+                    /**
+                     * Properties of a BloomFilter.
+                     * @memberof google.firestore.v1
+                     * @interface IBloomFilter
+                     * @property {google.firestore.v1.IBitSequence|null} [bits] BloomFilter bits
+                     * @property {number|null} [hashCount] BloomFilter hashCount
+                     */
+    
+                    /**
+                     * Constructs a new BloomFilter.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a BloomFilter.
+                     * @implements IBloomFilter
+                     * @constructor
+                     * @param {google.firestore.v1.IBloomFilter=} [properties] Properties to set
+                     */
+                    function BloomFilter(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * BloomFilter bits.
+                     * @member {google.firestore.v1.IBitSequence|null|undefined} bits
+                     * @memberof google.firestore.v1.BloomFilter
+                     * @instance
+                     */
+                    BloomFilter.prototype.bits = null;
+    
+                    /**
+                     * BloomFilter hashCount.
+                     * @member {number} hashCount
+                     * @memberof google.firestore.v1.BloomFilter
+                     * @instance
+                     */
+                    BloomFilter.prototype.hashCount = 0;
+    
+                    /**
+                     * Creates a BloomFilter message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.BloomFilter
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.BloomFilter} BloomFilter
+                     */
+                    BloomFilter.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.BloomFilter)
+                            return object;
+                        var message = new $root.google.firestore.v1.BloomFilter();
+                        if (object.bits != null) {
+                            if (typeof object.bits !== "object")
+                                throw TypeError(".google.firestore.v1.BloomFilter.bits: object expected");
+                            message.bits = $root.google.firestore.v1.BitSequence.fromObject(object.bits);
+                        }
+                        if (object.hashCount != null)
+                            message.hashCount = object.hashCount | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a BloomFilter message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.BloomFilter
+                     * @static
+                     * @param {google.firestore.v1.BloomFilter} message BloomFilter
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    BloomFilter.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.bits = null;
+                            object.hashCount = 0;
+                        }
+                        if (message.bits != null && message.hasOwnProperty("bits"))
+                            object.bits = $root.google.firestore.v1.BitSequence.toObject(message.bits, options);
+                        if (message.hashCount != null && message.hasOwnProperty("hashCount"))
+                            object.hashCount = message.hashCount;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this BloomFilter to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.BloomFilter
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    BloomFilter.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for BloomFilter
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.BloomFilter
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    BloomFilter.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.BloomFilter";
+                    };
+    
+                    return BloomFilter;
+                })();
+    
                 v1.DocumentMask = (function() {
     
                     /**
@@ -13122,6 +13360,7 @@
                      * @property {google.protobuf.ITimestamp|null} [readTime] Target readTime
                      * @property {number|null} [targetId] Target targetId
                      * @property {boolean|null} [once] Target once
+                     * @property {google.protobuf.IInt32Value|null} [expectedCount] Target expectedCount
                      */
     
                     /**
@@ -13187,6 +13426,14 @@
                      */
                     Target.prototype.once = false;
     
+                    /**
+                     * Target expectedCount.
+                     * @member {google.protobuf.IInt32Value|null|undefined} expectedCount
+                     * @memberof google.firestore.v1.Target
+                     * @instance
+                     */
+                    Target.prototype.expectedCount = null;
+    
                     // OneOf field names bound to virtual getters and setters
                     var $oneOfFields;
     
@@ -13248,6 +13495,11 @@
                             message.targetId = object.targetId | 0;
                         if (object.once != null)
                             message.once = Boolean(object.once);
+                        if (object.expectedCount != null) {
+                            if (typeof object.expectedCount !== "object")
+                                throw TypeError(".google.firestore.v1.Target.expectedCount: object expected");
+                            message.expectedCount = $root.google.protobuf.Int32Value.fromObject(object.expectedCount);
+                        }
                         return message;
                     };
     
@@ -13267,6 +13519,7 @@
                         if (options.defaults) {
                             object.targetId = 0;
                             object.once = false;
+                            object.expectedCount = null;
                         }
                         if (message.query != null && message.hasOwnProperty("query")) {
                             object.query = $root.google.firestore.v1.Target.QueryTarget.toObject(message.query, options);
@@ -13292,6 +13545,8 @@
                             if (options.oneofs)
                                 object.resumeType = "readTime";
                         }
+                        if (message.expectedCount != null && message.hasOwnProperty("expectedCount"))
+                            object.expectedCount = $root.google.protobuf.Int32Value.toObject(message.expectedCount, options);
                         return object;
                     };
     
@@ -15918,6 +16173,8 @@
                          * @memberof google.firestore.v1.StructuredAggregationQuery
                          * @interface IAggregation
                          * @property {google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null} [count] Aggregation count
+                         * @property {google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum|null} [sum] Aggregation sum
+                         * @property {google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg|null} [avg] Aggregation avg
                          * @property {string|null} [alias] Aggregation alias
                          */
     
@@ -15945,6 +16202,22 @@
                         Aggregation.prototype.count = null;
     
                         /**
+                         * Aggregation sum.
+                         * @member {google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum|null|undefined} sum
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @instance
+                         */
+                        Aggregation.prototype.sum = null;
+    
+                        /**
+                         * Aggregation avg.
+                         * @member {google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg|null|undefined} avg
+                         * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                         * @instance
+                         */
+                        Aggregation.prototype.avg = null;
+    
+                        /**
                          * Aggregation alias.
                          * @member {string} alias
                          * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
@@ -15957,12 +16230,12 @@
     
                         /**
                          * Aggregation operator.
-                         * @member {"count"|undefined} operator
+                         * @member {"count"|"sum"|"avg"|undefined} operator
                          * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
                          * @instance
                          */
                         Object.defineProperty(Aggregation.prototype, "operator", {
-                            get: $util.oneOfGetter($oneOfFields = ["count"]),
+                            get: $util.oneOfGetter($oneOfFields = ["count", "sum", "avg"]),
                             set: $util.oneOfSetter($oneOfFields)
                         });
     
@@ -15982,6 +16255,16 @@
                                 if (typeof object.count !== "object")
                                     throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.count: object expected");
                                 message.count = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Count.fromObject(object.count);
+                            }
+                            if (object.sum != null) {
+                                if (typeof object.sum !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.sum: object expected");
+                                message.sum = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum.fromObject(object.sum);
+                            }
+                            if (object.avg != null) {
+                                if (typeof object.avg !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.avg: object expected");
+                                message.avg = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg.fromObject(object.avg);
                             }
                             if (object.alias != null)
                                 message.alias = String(object.alias);
@@ -16007,6 +16290,16 @@
                                 object.count = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Count.toObject(message.count, options);
                                 if (options.oneofs)
                                     object.operator = "count";
+                            }
+                            if (message.sum != null && message.hasOwnProperty("sum")) {
+                                object.sum = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum.toObject(message.sum, options);
+                                if (options.oneofs)
+                                    object.operator = "sum";
+                            }
+                            if (message.avg != null && message.hasOwnProperty("avg")) {
+                                object.avg = $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg.toObject(message.avg, options);
+                                if (options.oneofs)
+                                    object.operator = "avg";
                             }
                             if (message.alias != null && message.hasOwnProperty("alias"))
                                 object.alias = message.alias;
@@ -16138,6 +16431,208 @@
                             };
     
                             return Count;
+                        })();
+    
+                        Aggregation.Sum = (function() {
+    
+                            /**
+                             * Properties of a Sum.
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                             * @interface ISum
+                             * @property {google.firestore.v1.StructuredQuery.IFieldReference|null} [field] Sum field
+                             */
+    
+                            /**
+                             * Constructs a new Sum.
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                             * @classdesc Represents a Sum.
+                             * @implements ISum
+                             * @constructor
+                             * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum=} [properties] Properties to set
+                             */
+                            function Sum(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * Sum field.
+                             * @member {google.firestore.v1.StructuredQuery.IFieldReference|null|undefined} field
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum
+                             * @instance
+                             */
+                            Sum.prototype.field = null;
+    
+                            /**
+                             * Creates a Sum message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum} Sum
+                             */
+                            Sum.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum)
+                                    return object;
+                                var message = new $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum();
+                                if (object.field != null) {
+                                    if (typeof object.field !== "object")
+                                        throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum.field: object expected");
+                                    message.field = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.field);
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a Sum message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum
+                             * @static
+                             * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum} message Sum
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            Sum.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.field = null;
+                                if (message.field != null && message.hasOwnProperty("field"))
+                                    object.field = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.field, options);
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this Sum to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            Sum.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for Sum
+                             * @function getTypeUrl
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            Sum.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum";
+                            };
+    
+                            return Sum;
+                        })();
+    
+                        Aggregation.Avg = (function() {
+    
+                            /**
+                             * Properties of an Avg.
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                             * @interface IAvg
+                             * @property {google.firestore.v1.StructuredQuery.IFieldReference|null} [field] Avg field
+                             */
+    
+                            /**
+                             * Constructs a new Avg.
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation
+                             * @classdesc Represents an Avg.
+                             * @implements IAvg
+                             * @constructor
+                             * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg=} [properties] Properties to set
+                             */
+                            function Avg(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * Avg field.
+                             * @member {google.firestore.v1.StructuredQuery.IFieldReference|null|undefined} field
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg
+                             * @instance
+                             */
+                            Avg.prototype.field = null;
+    
+                            /**
+                             * Creates an Avg message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg} Avg
+                             */
+                            Avg.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg)
+                                    return object;
+                                var message = new $root.google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg();
+                                if (object.field != null) {
+                                    if (typeof object.field !== "object")
+                                        throw TypeError(".google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg.field: object expected");
+                                    message.field = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.field);
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from an Avg message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg
+                             * @static
+                             * @param {google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg} message Avg
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            Avg.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.field = null;
+                                if (message.field != null && message.hasOwnProperty("field"))
+                                    object.field = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.field, options);
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this Avg to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            Avg.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for Avg
+                             * @function getTypeUrl
+                             * @memberof google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            Avg.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg";
+                            };
+    
+                            return Avg;
                         })();
     
                         return Aggregation;
@@ -17426,6 +17921,7 @@
                      * @interface IExistenceFilter
                      * @property {number|null} [targetId] ExistenceFilter targetId
                      * @property {number|null} [count] ExistenceFilter count
+                     * @property {google.firestore.v1.IBloomFilter|null} [unchangedNames] ExistenceFilter unchangedNames
                      */
     
                     /**
@@ -17460,6 +17956,14 @@
                     ExistenceFilter.prototype.count = 0;
     
                     /**
+                     * ExistenceFilter unchangedNames.
+                     * @member {google.firestore.v1.IBloomFilter|null|undefined} unchangedNames
+                     * @memberof google.firestore.v1.ExistenceFilter
+                     * @instance
+                     */
+                    ExistenceFilter.prototype.unchangedNames = null;
+    
+                    /**
                      * Creates an ExistenceFilter message from a plain object. Also converts values to their respective internal types.
                      * @function fromObject
                      * @memberof google.firestore.v1.ExistenceFilter
@@ -17475,6 +17979,11 @@
                             message.targetId = object.targetId | 0;
                         if (object.count != null)
                             message.count = object.count | 0;
+                        if (object.unchangedNames != null) {
+                            if (typeof object.unchangedNames !== "object")
+                                throw TypeError(".google.firestore.v1.ExistenceFilter.unchangedNames: object expected");
+                            message.unchangedNames = $root.google.firestore.v1.BloomFilter.fromObject(object.unchangedNames);
+                        }
                         return message;
                     };
     
@@ -17494,11 +18003,14 @@
                         if (options.defaults) {
                             object.targetId = 0;
                             object.count = 0;
+                            object.unchangedNames = null;
                         }
                         if (message.targetId != null && message.hasOwnProperty("targetId"))
                             object.targetId = message.targetId;
                         if (message.count != null && message.hasOwnProperty("count"))
                             object.count = message.count;
+                        if (message.unchangedNames != null && message.hasOwnProperty("unchangedNames"))
+                            object.unchangedNames = $root.google.firestore.v1.BloomFilter.toObject(message.unchangedNames, options);
                         return object;
                     };
     
@@ -18478,6 +18990,7 @@
                  * @property {string|null} [docTagPrefix] Publishing docTagPrefix
                  * @property {google.api.ClientLibraryOrganization|null} [organization] Publishing organization
                  * @property {Array.<google.api.IClientLibrarySettings>|null} [librarySettings] Publishing librarySettings
+                 * @property {string|null} [protoReferenceDocumentationUri] Publishing protoReferenceDocumentationUri
                  */
     
                 /**
@@ -18571,6 +19084,14 @@
                 Publishing.prototype.librarySettings = $util.emptyArray;
     
                 /**
+                 * Publishing protoReferenceDocumentationUri.
+                 * @member {string} protoReferenceDocumentationUri
+                 * @memberof google.api.Publishing
+                 * @instance
+                 */
+                Publishing.prototype.protoReferenceDocumentationUri = "";
+    
+                /**
                  * Creates a Publishing message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.Publishing
@@ -18636,6 +19157,18 @@
                     case 4:
                         message.organization = 4;
                         break;
+                    case "SHOPPING":
+                    case 5:
+                        message.organization = 5;
+                        break;
+                    case "GEO":
+                    case 6:
+                        message.organization = 6;
+                        break;
+                    case "GENERATIVE_AI":
+                    case 7:
+                        message.organization = 7;
+                        break;
                     }
                     if (object.librarySettings) {
                         if (!Array.isArray(object.librarySettings))
@@ -18647,6 +19180,8 @@
                             message.librarySettings[i] = $root.google.api.ClientLibrarySettings.fromObject(object.librarySettings[i]);
                         }
                     }
+                    if (object.protoReferenceDocumentationUri != null)
+                        message.protoReferenceDocumentationUri = String(object.protoReferenceDocumentationUri);
                     return message;
                 };
     
@@ -18675,6 +19210,7 @@
                         object.githubLabel = "";
                         object.docTagPrefix = "";
                         object.organization = options.enums === String ? "CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED" : 0;
+                        object.protoReferenceDocumentationUri = "";
                     }
                     if (message.methodSettings && message.methodSettings.length) {
                         object.methodSettings = [];
@@ -18703,6 +19239,8 @@
                         for (var j = 0; j < message.librarySettings.length; ++j)
                             object.librarySettings[j] = $root.google.api.ClientLibrarySettings.toObject(message.librarySettings[j], options);
                     }
+                    if (message.protoReferenceDocumentationUri != null && message.hasOwnProperty("protoReferenceDocumentationUri"))
+                        object.protoReferenceDocumentationUri = message.protoReferenceDocumentationUri;
                     return object;
                 };
     
@@ -19287,6 +19825,11 @@
                  * @memberof google.api
                  * @interface IDotnetSettings
                  * @property {google.api.ICommonLanguageSettings|null} [common] DotnetSettings common
+                 * @property {Object.<string,string>|null} [renamedServices] DotnetSettings renamedServices
+                 * @property {Object.<string,string>|null} [renamedResources] DotnetSettings renamedResources
+                 * @property {Array.<string>|null} [ignoredResources] DotnetSettings ignoredResources
+                 * @property {Array.<string>|null} [forcedNamespaceAliases] DotnetSettings forcedNamespaceAliases
+                 * @property {Array.<string>|null} [handwrittenSignatures] DotnetSettings handwrittenSignatures
                  */
     
                 /**
@@ -19298,6 +19841,11 @@
                  * @param {google.api.IDotnetSettings=} [properties] Properties to set
                  */
                 function DotnetSettings(properties) {
+                    this.renamedServices = {};
+                    this.renamedResources = {};
+                    this.ignoredResources = [];
+                    this.forcedNamespaceAliases = [];
+                    this.handwrittenSignatures = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -19311,6 +19859,46 @@
                  * @instance
                  */
                 DotnetSettings.prototype.common = null;
+    
+                /**
+                 * DotnetSettings renamedServices.
+                 * @member {Object.<string,string>} renamedServices
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.renamedServices = $util.emptyObject;
+    
+                /**
+                 * DotnetSettings renamedResources.
+                 * @member {Object.<string,string>} renamedResources
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.renamedResources = $util.emptyObject;
+    
+                /**
+                 * DotnetSettings ignoredResources.
+                 * @member {Array.<string>} ignoredResources
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.ignoredResources = $util.emptyArray;
+    
+                /**
+                 * DotnetSettings forcedNamespaceAliases.
+                 * @member {Array.<string>} forcedNamespaceAliases
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.forcedNamespaceAliases = $util.emptyArray;
+    
+                /**
+                 * DotnetSettings handwrittenSignatures.
+                 * @member {Array.<string>} handwrittenSignatures
+                 * @memberof google.api.DotnetSettings
+                 * @instance
+                 */
+                DotnetSettings.prototype.handwrittenSignatures = $util.emptyArray;
     
                 /**
                  * Creates a DotnetSettings message from a plain object. Also converts values to their respective internal types.
@@ -19329,6 +19917,41 @@
                             throw TypeError(".google.api.DotnetSettings.common: object expected");
                         message.common = $root.google.api.CommonLanguageSettings.fromObject(object.common);
                     }
+                    if (object.renamedServices) {
+                        if (typeof object.renamedServices !== "object")
+                            throw TypeError(".google.api.DotnetSettings.renamedServices: object expected");
+                        message.renamedServices = {};
+                        for (var keys = Object.keys(object.renamedServices), i = 0; i < keys.length; ++i)
+                            message.renamedServices[keys[i]] = String(object.renamedServices[keys[i]]);
+                    }
+                    if (object.renamedResources) {
+                        if (typeof object.renamedResources !== "object")
+                            throw TypeError(".google.api.DotnetSettings.renamedResources: object expected");
+                        message.renamedResources = {};
+                        for (var keys = Object.keys(object.renamedResources), i = 0; i < keys.length; ++i)
+                            message.renamedResources[keys[i]] = String(object.renamedResources[keys[i]]);
+                    }
+                    if (object.ignoredResources) {
+                        if (!Array.isArray(object.ignoredResources))
+                            throw TypeError(".google.api.DotnetSettings.ignoredResources: array expected");
+                        message.ignoredResources = [];
+                        for (var i = 0; i < object.ignoredResources.length; ++i)
+                            message.ignoredResources[i] = String(object.ignoredResources[i]);
+                    }
+                    if (object.forcedNamespaceAliases) {
+                        if (!Array.isArray(object.forcedNamespaceAliases))
+                            throw TypeError(".google.api.DotnetSettings.forcedNamespaceAliases: array expected");
+                        message.forcedNamespaceAliases = [];
+                        for (var i = 0; i < object.forcedNamespaceAliases.length; ++i)
+                            message.forcedNamespaceAliases[i] = String(object.forcedNamespaceAliases[i]);
+                    }
+                    if (object.handwrittenSignatures) {
+                        if (!Array.isArray(object.handwrittenSignatures))
+                            throw TypeError(".google.api.DotnetSettings.handwrittenSignatures: array expected");
+                        message.handwrittenSignatures = [];
+                        for (var i = 0; i < object.handwrittenSignatures.length; ++i)
+                            message.handwrittenSignatures[i] = String(object.handwrittenSignatures[i]);
+                    }
                     return message;
                 };
     
@@ -19345,10 +19968,45 @@
                     if (!options)
                         options = {};
                     var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.ignoredResources = [];
+                        object.forcedNamespaceAliases = [];
+                        object.handwrittenSignatures = [];
+                    }
+                    if (options.objects || options.defaults) {
+                        object.renamedServices = {};
+                        object.renamedResources = {};
+                    }
                     if (options.defaults)
                         object.common = null;
                     if (message.common != null && message.hasOwnProperty("common"))
                         object.common = $root.google.api.CommonLanguageSettings.toObject(message.common, options);
+                    var keys2;
+                    if (message.renamedServices && (keys2 = Object.keys(message.renamedServices)).length) {
+                        object.renamedServices = {};
+                        for (var j = 0; j < keys2.length; ++j)
+                            object.renamedServices[keys2[j]] = message.renamedServices[keys2[j]];
+                    }
+                    if (message.renamedResources && (keys2 = Object.keys(message.renamedResources)).length) {
+                        object.renamedResources = {};
+                        for (var j = 0; j < keys2.length; ++j)
+                            object.renamedResources[keys2[j]] = message.renamedResources[keys2[j]];
+                    }
+                    if (message.ignoredResources && message.ignoredResources.length) {
+                        object.ignoredResources = [];
+                        for (var j = 0; j < message.ignoredResources.length; ++j)
+                            object.ignoredResources[j] = message.ignoredResources[j];
+                    }
+                    if (message.forcedNamespaceAliases && message.forcedNamespaceAliases.length) {
+                        object.forcedNamespaceAliases = [];
+                        for (var j = 0; j < message.forcedNamespaceAliases.length; ++j)
+                            object.forcedNamespaceAliases[j] = message.forcedNamespaceAliases[j];
+                    }
+                    if (message.handwrittenSignatures && message.handwrittenSignatures.length) {
+                        object.handwrittenSignatures = [];
+                        for (var j = 0; j < message.handwrittenSignatures.length; ++j)
+                            object.handwrittenSignatures[j] = message.handwrittenSignatures[j];
+                    }
                     return object;
                 };
     
@@ -19858,6 +20516,9 @@
              * @property {string} ADS=ADS ADS value
              * @property {string} PHOTOS=PHOTOS PHOTOS value
              * @property {string} STREET_VIEW=STREET_VIEW STREET_VIEW value
+             * @property {string} SHOPPING=SHOPPING SHOPPING value
+             * @property {string} GEO=GEO GEO value
+             * @property {string} GENERATIVE_AI=GENERATIVE_AI GENERATIVE_AI value
              */
             api.ClientLibraryOrganization = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
@@ -19866,6 +20527,9 @@
                 values[valuesById[2] = "ADS"] = "ADS";
                 values[valuesById[3] = "PHOTOS"] = "PHOTOS";
                 values[valuesById[4] = "STREET_VIEW"] = "STREET_VIEW";
+                values[valuesById[5] = "SHOPPING"] = "SHOPPING";
+                values[valuesById[6] = "GEO"] = "GEO";
+                values[valuesById[7] = "GENERATIVE_AI"] = "GENERATIVE_AI";
                 return values;
             })();
     
