@@ -114,7 +114,7 @@ declare namespace FirebaseFirestore {
    */
   export type AddPrefixToKeys<
     Prefix extends string,
-    T extends Record<string, unknown>
+    T extends Record<string, unknown>,
   > =
     // Remap K => Prefix.K. See https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
     {[K in keyof T & string as `${Prefix}.${K}`]+?: T[K]};
@@ -1443,7 +1443,7 @@ declare namespace FirebaseFirestore {
    * 'undefined'.
    */
   export class QueryDocumentSnapshot<
-    T = DocumentData
+    T = DocumentData,
   > extends DocumentSnapshot<T> {
     private constructor();
 
