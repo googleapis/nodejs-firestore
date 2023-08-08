@@ -1645,7 +1645,7 @@ describe('Query class', () => {
   });
 
   it('has limit() method', async () => {
-    await addDocs({ foo: 'a' }, { foo: 'b' });
+    await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').limit(1).get();
     expectDocs(res, {foo: 'a'});
   });
@@ -2854,9 +2854,6 @@ describe('Query class', () => {
       expectDocs(res, 'doc5', 'doc4', 'doc3', 'doc2');
     });
 
-    // TODO(Mila): do we need this?
-    it('can use in aggregate query', async () => {});
-
     it('can use document ID im multiple inequality query', async () => {
       const collection = await testCollectionWithDocs({
         doc1: {key: 'a', sort: 5},
@@ -2892,6 +2889,25 @@ describe('Query class', () => {
         .get();
       // Ordered by: 'sort' desc,'key' desc,  __name__ desc
       expectDocs(res, 'doc2', 'doc3', 'doc4');
+    });
+
+    it('Cursors with DocumentSnapshot implicitly adds inequality fields', async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {key: 'a', sort: 0, v: 5},
+        doc2: {key: 'aa', sort: 4, v: 4},
+        doc3: {key: 'b', sort: 3, v: 3},
+        doc4: {key: 'b', sort: 2, v: 2},
+        doc5: {key: 'b', sort: 2, v: 1},
+        doc6: {key: 'b', sort: 0, v: 0},
+      });
+
+      const docSnap = await collection.doc('doc4').get();
+      let res = await collection
+        .where('key', '!=', 'a')
+        .where('sort', '>', 1)
+        .startAt(docSnap)
+        .get();
+      expectDocs(res, 'doc4', 'doc5', 'doc3');
     });
   });
 });

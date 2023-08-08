@@ -843,6 +843,7 @@ class FieldFilterInternal extends FilterInternal {
       case 'GREATER_THAN_OR_EQUAL':
       case 'LESS_THAN':
       case 'LESS_THAN_OR_EQUAL':
+      case 'NOT_EQUAL':
         return true;
       default:
         return false;
@@ -1821,6 +1822,22 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     );
   }
 
+  private getInequalityFilterFields(): FieldPath[] {
+    let FieldPathSet = new Set<FieldPath>();
+
+    for (const filter of this._queryOptions.filters) {
+      for (const subFilter of filter.getFlattenedFilters()) {
+        if (subFilter.isInequalityFilter()) {
+          FieldPathSet = FieldPathSet.add(subFilter.field);
+        }
+      }
+    }
+
+    // Sort the inequality fields lexicographically.
+    const sortedFieldPath = [...FieldPathSet].sort((a, b) => a.compareTo(b));
+    return sortedFieldPath;
+  }
+
   /**
    * Computes the backend ordering semantics for DocumentSnapshot cursors.
    *
@@ -1846,29 +1863,32 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     }
 
     const fieldOrders = this._queryOptions.fieldOrders.slice();
+    const fieldsNormalized = new Set([...fieldOrders.map(item => item.field)]);
 
-    // If no explicit ordering is specified, use the first inequality to
-    // define an implicit order.
-    if (fieldOrders.length === 0) {
-      for (const filter of this._queryOptions.filters) {
-        const fieldReference = filter.getFirstInequalityField();
-        if (fieldReference !== null) {
-          fieldOrders.push(new FieldOrder(fieldReference));
-          break;
-        }
+    /** The order of the implicit ordering always matches the last explicit order by. */
+    const lastDirection =
+      fieldOrders.length === 0
+        ? directionOperators.ASC
+        : fieldOrders[fieldOrders.length - 1].direction;
+
+    /**
+     * Any inequality fields not explicitly ordered should be implicitly ordered in a
+     * lexicographical order. When there are multiple inequality filters on the same field, the
+     * field should be added only once.
+     * Note: getInequalityFilterFields function sorts the key field before
+     * other fields. However, we want the key field to be sorted last.
+     */
+    const inequalityFields = this.getInequalityFilterFields();
+    for (const field of inequalityFields) {
+      if (
+        !fieldsNormalized.has(field) &&
+        !field.isEqual(FieldPath.documentId())
+      ) {
+        fieldOrders.push(new FieldOrder(field, lastDirection));
       }
     }
 
-    const hasDocumentId = !!fieldOrders.find(fieldOrder =>
-      FieldPath.documentId().isEqual(fieldOrder.field)
-    );
-    if (!hasDocumentId) {
-      // Add implicit sorting by name, using the last specified direction.
-      const lastDirection =
-        fieldOrders.length === 0
-          ? directionOperators.ASC
-          : fieldOrders[fieldOrders.length - 1].direction;
-
+    if (!fieldsNormalized.has(FieldPath.documentId())) {
       fieldOrders.push(new FieldOrder(FieldPath.documentId(), lastDirection));
     }
 
