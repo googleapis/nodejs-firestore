@@ -2897,8 +2897,7 @@ describe('Query class', () => {
         doc2: {key: 'aa', sort: 4, v: 4},
         doc3: {key: 'b', sort: 3, v: 3},
         doc4: {key: 'b', sort: 2, v: 2},
-        doc5: {key: 'b', sort: 2, v: 1},
-        doc6: {key: 'b', sort: 0, v: 0},
+        doc5: {key: 'b', sort: 0, v: 1},
       });
 
       const docSnap = await collection.doc('doc4').get();
@@ -2907,7 +2906,8 @@ describe('Query class', () => {
         .where('sort', '>', 1)
         .startAt(docSnap)
         .get();
-      expectDocs(res, 'doc4', 'doc5', 'doc3');
+      // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
+      expectDocs(res, 'doc4', 'doc3');
     });
   });
 });
