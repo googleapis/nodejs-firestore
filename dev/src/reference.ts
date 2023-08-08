@@ -710,9 +710,6 @@ abstract class FilterInternal {
   /** Returns a list of all filters that are contained within this filter */
   abstract getFilters(): FilterInternal[];
 
-  /** Returns the field of the first filter that's an inequality, or null if none. */
-  abstract getFirstInequalityField(): FieldPath | null;
-
   /** Returns the proto representation of this filter */
   abstract toProto(): Filter;
 
@@ -733,13 +730,6 @@ class CompositeFilterInternal extends FilterInternal {
 
   public getFilters(): FilterInternal[] {
     return this.filters;
-  }
-
-  public getFirstInequalityField(): FieldPath | null {
-    return (
-      this.getFlattenedFilters().find(filter => filter.isInequalityFilter())
-        ?.field ?? null
-    );
   }
 
   public isConjunction(): boolean {
@@ -805,14 +795,6 @@ class FieldFilterInternal extends FilterInternal {
 
   public getFilters(): FilterInternal[] {
     return [this];
-  }
-
-  getFirstInequalityField(): FieldPath | null {
-    if (this.isInequalityFilter()) {
-      return this.field;
-    } else {
-      return null;
-    }
   }
 
   /**
