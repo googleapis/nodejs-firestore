@@ -2099,11 +2099,13 @@ declare namespace FirebaseFirestore {
    */
   export type AggregateType = 'count' | 'avg' | 'sum';
 
-  // on the return type of `sum(..)`, `average(...)`, and `count()`
   /**
    * The union of all `AggregateField` types that are supported by Firestore.
    */
-  export type AggregateFieldType = AggregateField<number | null>;
+  export type AggregateFieldType =
+    | ReturnType<typeof AggregateField.count>
+    | ReturnType<typeof AggregateField.sum>
+    | ReturnType<typeof AggregateField.average>;
 
   /**
    * Represents an aggregation that can be performed by Firestore.

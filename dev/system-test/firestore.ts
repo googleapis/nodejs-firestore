@@ -2827,7 +2827,6 @@ describe('Aggregation queries', () => {
   }): Promise<Awaited<WriteResult>[]> {
     const sets: Array<Promise<WriteResult>> = [];
     Object.keys(docs).forEach(key => {
-      //sets.push(setDoc(doc(setupCollection, key), docs[key]));
       sets.push(col.doc(key).set(docs[key]));
     });
     return Promise.all(sets);
