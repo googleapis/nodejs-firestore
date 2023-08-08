@@ -1834,8 +1834,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     }
 
     // Sort the inequality fields lexicographically.
-    const sortedFieldPath = [...FieldPathSet].sort((a, b) => a.compareTo(b));
-    return sortedFieldPath;
+    return [...FieldPathSet].sort((a, b) => a.compareTo(b));
   }
 
   /**
@@ -1863,7 +1862,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     }
 
     const fieldOrders = this._queryOptions.fieldOrders.slice();
-    const fieldsNormalized = new Set([...fieldOrders.map(item => item.field)]);
+    const fieldsNormalized = new Set([
+      ...fieldOrders.map(item => item.field.toString()),
+    ]);
 
     /** The order of the implicit ordering always matches the last explicit order by. */
     const lastDirection =
@@ -1881,14 +1882,14 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     const inequalityFields = this.getInequalityFilterFields();
     for (const field of inequalityFields) {
       if (
-        !fieldsNormalized.has(field) &&
+        !fieldsNormalized.has(field.toString()) &&
         !field.isEqual(FieldPath.documentId())
       ) {
         fieldOrders.push(new FieldOrder(field, lastDirection));
       }
     }
 
-    if (!fieldsNormalized.has(FieldPath.documentId())) {
+    if (!fieldsNormalized.has(FieldPath.documentId().toString())) {
       fieldOrders.push(new FieldOrder(FieldPath.documentId(), lastDirection));
     }
 

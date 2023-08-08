@@ -2667,6 +2667,7 @@ describe('Query class', () => {
     });
 
     it('can use with nested field', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const testData = (n?: number): any => {
         n = n || 1;
         return {
@@ -2901,7 +2902,7 @@ describe('Query class', () => {
       });
 
       const docSnap = await collection.doc('doc4').get();
-      let res = await collection
+      const res = await collection
         .where('key', '!=', 'a')
         .where('sort', '>', 1)
         .startAt(docSnap)
