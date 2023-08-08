@@ -1420,7 +1420,9 @@ describe('v1.FirestoreClient', () => {
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
-      const stream = client.batchGetDocuments(request);
+      const stream = client.batchGetDocuments(request, {
+        retryRequestOptions: {noResponseRetries: 0},
+      });
       const promise = new Promise((resolve, reject) => {
         stream.on(
           'data',
@@ -1539,7 +1541,9 @@ describe('v1.FirestoreClient', () => {
       request.parent = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
-      const stream = client.runQuery(request);
+      const stream = client.runQuery(request, {
+        retryRequestOptions: {noResponseRetries: 0},
+      });
       const promise = new Promise((resolve, reject) => {
         stream.on(
           'data',
@@ -1663,7 +1667,9 @@ describe('v1.FirestoreClient', () => {
       request.parent = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
-      const stream = client.runAggregationQuery(request);
+      const stream = client.runAggregationQuery(request, {
+        retryRequestOptions: {noResponseRetries: 0},
+      });
       const promise = new Promise((resolve, reject) => {
         stream.on(
           'data',
