@@ -1871,6 +1871,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       }
     }
 
+    // Add the document key field to the last if it is not explicitly ordered.
     if (!fieldsNormalized.has(FieldPath.documentId().toString())) {
       fieldOrders.push(new FieldOrder(FieldPath.documentId(), lastDirection));
     }
