@@ -2557,63 +2557,63 @@ describe('Query class', () => {
       });
 
       // Multiple inequality fields
-      let res = await collection
+      let results = await collection
         .where('key', '!=', 'a')
         .where('sort', '<=', 2)
         .where('v', '>', 2)
         .get();
-      expectDocs(res, 'doc3');
+      expectDocs(results, 'doc3');
 
       // Duplicate inequality fields
-      res = await collection
+      results = await collection
         .where('key', '!=', 'a')
         .where('sort', '<=', 2)
         .where('sort', '>', 1)
         .get();
-      expectDocs(res, 'doc4');
+      expectDocs(results, 'doc4');
 
       // With multiple IN
-      res = await collection
+      results = await collection
         .where('key', '>=', 'a')
         .where('sort', '<=', 2)
         .where('v', 'in', [2, 3, 4])
         .where('sort', 'in', [2, 3])
         .get();
-      expectDocs(res, 'doc4');
+      expectDocs(results, 'doc4');
 
       // With NOT-IN
-      res = await collection
+      results = await collection
         .where('key', '>=', 'a')
         .where('sort', '<=', 2)
         .where('v', 'not-in', [2, 4, 5])
         .get();
-      expectDocs(res, 'doc1', 'doc3');
+      expectDocs(results, 'doc1', 'doc3');
 
       // With orderby
-      res = await collection
+      results = await collection
         .where('key', '>=', 'a')
         .where('sort', '<=', 2)
         .orderBy('v', 'desc')
         .get();
-      expectDocs(res, 'doc3', 'doc4', 'doc1');
+      expectDocs(results, 'doc3', 'doc4', 'doc1');
 
       // With limit
-      res = await collection
+      results = await collection
         .where('key', '>=', 'a')
         .where('sort', '<=', 2)
         .orderBy('v', 'desc')
         .limit(2)
         .get();
-      expectDocs(res, 'doc3', 'doc4');
+      expectDocs(results, 'doc3', 'doc4');
 
       // With limitToLast
-      res = await collection
+      results = await collection
         .where('key', '>=', 'a')
         .where('sort', '<=', 2)
         .orderBy('v', 'desc')
         .limitToLast(2)
         .get();
-      expectDocs(res, 'doc4', 'doc1');
+      expectDocs(results, 'doc4', 'doc1');
     });
 
     it('can use on special values', async () => {
@@ -2626,18 +2626,18 @@ describe('Query class', () => {
         doc6: {key: 'f', sort: 1, v: 1},
       });
 
-      let res = await collection
+      let results = await collection
         .where('key', '!=', 'a')
         .where('sort', '<=', 2)
         .get();
-      expectDocs(res, 'doc5', 'doc6');
+      expectDocs(results, 'doc5', 'doc6');
 
-      res = await collection
+      results = await collection
         .where('key', '!=', 'a')
         .where('sort', '<=', 2)
         .where('v', '<=', 1)
         .get();
-      expectDocs(res, 'doc6');
+      expectDocs(results, 'doc6');
     });
 
     it('can use with array membership', async () => {
@@ -2651,19 +2651,19 @@ describe('Query class', () => {
         doc7: {key: 'g', sort: 4, v: [null]},
       });
 
-      let res = await collection
+      let results = await collection
         .where('key', '!=', 'a')
         .where('sort', '>=', 1)
         .where('v', 'array-contains', 0)
         .get();
-      expectDocs(res, 'doc2');
+      expectDocs(results, 'doc2');
 
-      res = await collection
+      results = await collection
         .where('key', '!=', 'a')
         .where('sort', '>=', 1)
         .where('v', 'array-contains-any', [0, 1])
         .get();
-      expectDocs(res, 'doc2', 'doc4');
+      expectDocs(results, 'doc2', 'doc4');
     });
 
     it('can use with nested field', async () => {
@@ -2688,21 +2688,21 @@ describe('Query class', () => {
         doc4: testData(300),
       });
 
-      let res = await collection
+      let results = await collection
         .where('metadata.createdAt', '<=', 500)
         .where('metadata.createdAt', '>', 100)
         .where('name', '!=', 'room 200')
         .orderBy('name')
         .get();
-      expectDocs(res, 'doc4', 'doc1');
+      expectDocs(results, 'doc4', 'doc1');
 
-      res = await collection
+      results = await collection
         .where('field', '>=', 'field 100')
         .where(new FieldPath('field.dot'), '!=', 300)
         .where('field\\slash', '<', 400)
         .orderBy('name', 'desc')
         .get();
-      expectDocs(res, 'doc2', 'doc3');
+      expectDocs(results, 'doc2', 'doc3');
     });
 
     it('can use with nested composite filters', async () => {
@@ -2715,7 +2715,7 @@ describe('Query class', () => {
         doc6: {key: 'b', sort: 0, v: 0},
       });
 
-      let res = await collection
+      let results = await collection
         .where(
           Filter.or(
             Filter.and(
@@ -2730,9 +2730,9 @@ describe('Query class', () => {
         )
         .get();
       // Implicitly ordered by: 'key' asc, 'sort' asc, 'v' asc, __name__ asc
-      expectDocs(res, 'doc1', 'doc6', 'doc5', 'doc4');
+      expectDocs(results, 'doc1', 'doc6', 'doc5', 'doc4');
 
-      res = await collection
+      results = await collection
         .where(
           Filter.or(
             Filter.and(
@@ -2749,9 +2749,9 @@ describe('Query class', () => {
         .orderBy('key')
         .get();
       // Ordered by: 'sort' desc, 'key' asc, 'v' asc, __name__ asc
-      expectDocs(res, 'doc5', 'doc4', 'doc1', 'doc6');
+      expectDocs(results, 'doc5', 'doc4', 'doc1', 'doc6');
 
-      res = await collection
+      results = await collection
         .where(
           Filter.and(
             Filter.or(
@@ -2778,7 +2778,7 @@ describe('Query class', () => {
         )
         .get();
       // Implicitly ordered by: 'key' asc, 'sort' asc, 'v' asc, __name__ asc
-      expectDocs(res, 'doc1', 'doc2');
+      expectDocs(results, 'doc1', 'doc2');
     });
 
     it('inequality fields will be implicitly ordered lexicographically by the server', async () => {
@@ -2791,22 +2791,22 @@ describe('Query class', () => {
         doc6: {key: 'b', sort: 0, v: 0},
       });
 
-      let res = await collection
+      let results = await collection
         .where('key', '!=', 'a')
         .where('sort', '>', 1)
         .where('v', 'in', [1, 2, 3, 4])
         .get();
       // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
-      expectDocs(res, 'doc2', 'doc4', 'doc5', 'doc3');
+      expectDocs(results, 'doc2', 'doc4', 'doc5', 'doc3');
 
-      res = await collection
+      results = await collection
         .where('sort', '>', 1)
         .where('key', '!=', 'a')
         .where('v', 'in', [1, 2, 3, 4])
         .get();
       // Changing filters order will not effect implicit order.
       // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
-      expectDocs(res, 'doc2', 'doc4', 'doc5', 'doc3');
+      expectDocs(results, 'doc2', 'doc4', 'doc5', 'doc3');
     });
 
     it('can use multiple explicit order by field', async () => {
@@ -2819,40 +2819,59 @@ describe('Query class', () => {
         doc6: {key: 'c', sort: 0, v: 2},
       });
 
-      let res = await collection
+      let results = await collection
         .where('key', '>', 'a')
         .where('sort', '>=', 1)
         .orderBy('v')
         .get();
       // Ordered by: 'v' asc, 'key' asc, 'sort' asc, __name__ asc
-      expectDocs(res, 'doc2', 'doc4', 'doc3', 'doc5');
+      expectDocs(results, 'doc2', 'doc4', 'doc3', 'doc5');
 
-      res = await collection
+      results = await collection
         .where('key', '>', 'a')
         .where('sort', '>=', 1)
         .orderBy('v')
         .orderBy('sort')
         .get();
       // Ordered by: 'v asc, 'sort' asc, 'key' asc,  __name__ asc
-      expectDocs(res, 'doc2', 'doc5', 'doc4', 'doc3');
+      expectDocs(results, 'doc2', 'doc5', 'doc4', 'doc3');
 
-      res = await collection
+      results = await collection
         .where('key', '>', 'a')
         .where('sort', '>=', 1)
         .orderBy('v', 'desc')
         .get();
       // Implicit order by matches the direction of last explicit order by.
       // Ordered by: 'v' desc, 'key' desc, 'sort' desc, __name__ desc
-      expectDocs(res, 'doc5', 'doc3', 'doc4', 'doc2');
+      expectDocs(results, 'doc5', 'doc3', 'doc4', 'doc2');
 
-      res = await collection
+      results = await collection
         .where('key', '>', 'a')
         .where('sort', '>=', 1)
         .orderBy('v', 'desc')
         .orderBy('sort')
         .get();
       // Ordered by: 'v desc, 'sort' asc, 'key' asc,  __name__ asc
-      expectDocs(res, 'doc5', 'doc4', 'doc3', 'doc2');
+      expectDocs(results, 'doc5', 'doc4', 'doc3', 'doc2');
+    });
+
+    it('can use in aggregate query', async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {key: 'a', sort: 5, v: 0},
+        doc2: {key: 'aa', sort: 4, v: 0},
+        doc3: {key: 'b', sort: 3, v: 1},
+        doc4: {key: 'b', sort: 2, v: 1},
+        doc5: {key: 'bb', sort: 1, v: 1},
+      });
+
+      let results = await collection
+        .where('key', '>', 'a')
+        .where('sort', '>=', 1)
+        .orderBy('v')
+        .count()
+        .get();
+      expect(results.data().count).to.be.equal(4);
+      //TODO(MIEQ): Add sum and average when they are public.
     });
 
     it('can use document ID im multiple inequality query', async () => {
@@ -2864,32 +2883,32 @@ describe('Query class', () => {
         doc5: {key: 'bb', sort: 1},
       });
 
-      let res = await collection
+      let results = await collection
         .where('sort', '>=', 1)
         .where('key', '!=', 'a')
         .where(FieldPath.documentId(), '<', 'doc5')
         .get();
       // Document Key in inequality field will implicitly ordered to the last.
       // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
-      expectDocs(res, 'doc2', 'doc4', 'doc3');
+      expectDocs(results, 'doc2', 'doc4', 'doc3');
 
-      res = await collection
+      results = await collection
         .where(FieldPath.documentId(), '<', 'doc5')
         .where('sort', '>=', 1)
         .where('key', '!=', 'a')
         .get();
       // Changing filters order will not effect implicit order.
       // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
-      expectDocs(res, 'doc2', 'doc4', 'doc3');
+      expectDocs(results, 'doc2', 'doc4', 'doc3');
 
-      res = await collection
+      results = await collection
         .where(FieldPath.documentId(), '<', 'doc5')
         .where('sort', '>=', 1)
         .where('key', '!=', 'a')
         .orderBy('sort', 'desc')
         .get();
       // Ordered by: 'sort' desc,'key' desc,  __name__ desc
-      expectDocs(res, 'doc2', 'doc3', 'doc4');
+      expectDocs(results, 'doc2', 'doc3', 'doc4');
     });
 
     it('Cursors with DocumentSnapshot implicitly adds inequality fields', async () => {
@@ -2902,13 +2921,13 @@ describe('Query class', () => {
       });
 
       const docSnap = await collection.doc('doc4').get();
-      const res = await collection
+      const results = await collection
         .where('key', '!=', 'a')
         .where('sort', '>', 1)
         .startAt(docSnap)
         .get();
       // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
-      expectDocs(res, 'doc4', 'doc3');
+      expectDocs(results, 'doc4', 'doc3');
     });
   });
 });

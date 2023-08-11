@@ -1804,6 +1804,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     );
   }
 
+  /**
+   * Returns the sorted array of unique inequality filter fields used in this query.
+   *
+   * @return An array of inequality filter fields sorted lexicographically by FieldPath.
+   */
   private getInequalityFilterFields(): FieldPath[] {
     let FieldPathSet = new Set<FieldPath>();
 
@@ -1815,7 +1820,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       }
     }
 
-    // Sort the inequality fields lexicographically.
     return [...FieldPathSet].sort((a, b) => a.compareTo(b));
   }
 
