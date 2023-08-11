@@ -2864,7 +2864,7 @@ describe('Query class', () => {
         doc5: {key: 'bb', sort: 1, v: 1},
       });
 
-      let results = await collection
+      const results = await collection
         .where('key', '>', 'a')
         .where('sort', '>=', 1)
         .orderBy('v')
