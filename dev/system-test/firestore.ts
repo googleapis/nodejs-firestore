@@ -2703,6 +2703,17 @@ describe('Query class', () => {
         .orderBy('name', 'desc')
         .get();
       expectDocs(results, 'doc2', 'doc3');
+
+      // Cursor will add implicit order by fields in the same order as server does.
+      const docSnap = await collection.doc('doc2').get();
+      results = await collection
+        .where('field', '>=', 'field 100')
+        .where(new FieldPath('field.dot'), '!=', 300)
+        .where('field\\slash', '<', 400)
+        .orderBy('name', 'desc')
+        .startAfter(docSnap)
+        .get();
+      expectDocs(results, 'doc3');
     });
 
     it('can use with nested composite filters', async () => {
