@@ -1805,22 +1805,22 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   }
 
   /**
-   * Returns the sorted array of unique inequality filter fields used in this query.
+   * Returns the sorted array of inequality filter fields used in this query.
    *
    * @return An array of inequality filter fields sorted lexicographically by FieldPath.
    */
   private getInequalityFilterFields(): FieldPath[] {
-    let FieldPathSet = new Set<FieldPath>();
+    const inequalityFields: FieldPath[] = [];
 
     for (const filter of this._queryOptions.filters) {
       for (const subFilter of filter.getFlattenedFilters()) {
         if (subFilter.isInequalityFilter()) {
-          FieldPathSet = FieldPathSet.add(subFilter.field);
+          inequalityFields.push(subFilter.field);
         }
       }
     }
 
-    return [...FieldPathSet].sort((a, b) => a.compareTo(b));
+    return inequalityFields.sort((a, b) => a.compareTo(b));
   }
 
   /**
@@ -1872,6 +1872,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
         !field.isEqual(FieldPath.documentId())
       ) {
         fieldOrders.push(new FieldOrder(field, lastDirection));
+        fieldsNormalized.add(field.toString());
       }
     }
 
