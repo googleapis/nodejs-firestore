@@ -1833,14 +1833,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   private createImplicitOrderBy(
     cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): FieldOrder[] {
-    // Add an implicit orderBy if the only cursor value is a DocumentSnapshot
-    // or a DocumentReference.
+    // Add an implicit orderBy if the only cursor value is a DocumentSnapshot.
     if (
       cursorValuesOrDocumentSnapshot.length !== 1 ||
-      !(
-        cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot ||
-        cursorValuesOrDocumentSnapshot[0] instanceof DocumentReference
-      )
+      !(cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot)
     ) {
       return this._queryOptions.fieldOrders;
     }
