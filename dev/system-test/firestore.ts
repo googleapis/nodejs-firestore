@@ -2905,7 +2905,7 @@ describe('Query class', () => {
         doc4: {key: 'b', sort: 2},
         doc5: {key: 'bb', sort: 1},
       });
-      let docSnap = await collection.doc('doc2').get();
+      const docSnap = await collection.doc('doc2').get();
 
       let results = await collection
         .where('sort', '>=', 1)
