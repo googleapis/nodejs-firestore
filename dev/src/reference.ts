@@ -60,7 +60,7 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
-import {AggregateField, Aggregate} from './aggregate';
+import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -3096,7 +3096,7 @@ export class CollectionReference<T = firestore.DocumentData>
 /**
  * A query that calculates aggregations over an underlying query.
  */
-export class AggregateQuery<T extends firestore.AggregateSpec>
+export class AggregateQuery<T extends AggregateSpec>
   implements firestore.AggregateQuery<T>
 {
   private readonly clientAliasToServerAliasMap: Record<string, string> = {};
@@ -3304,7 +3304,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
           return new Aggregate(
             serverAlias,
             aggregate.aggregateType,
-            aggregate.field
+            aggregate._field
           ).toProto();
         }),
       },

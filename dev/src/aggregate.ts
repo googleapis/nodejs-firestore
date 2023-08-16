@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {FieldPath} from './path';
 import {google} from '../protos/firestore_v1_proto_api';
 
-import * as firestore from '@google-cloud/firestore';
 import IAggregation = google.firestore.v1.StructuredAggregationQuery.IAggregation;
 import * as assert from 'assert';
 
@@ -28,8 +29,8 @@ import * as assert from 'assert';
 export class Aggregate {
   constructor(
     readonly alias: string,
-    readonly aggregateType: firestore.AggregateType,
-    readonly fieldPath?: string | firestore.FieldPath
+    readonly aggregateType: AggregateType,
+    readonly fieldPath?: string | FieldPath
   ) {}
 
   /**
@@ -76,15 +77,23 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
   readonly type = 'AggregateField';
 
   /**
+   * The field on which the aggregation is performed.
+   * @internal
+   **/
+  public readonly _field?: string | FieldPath;
+
+  /**
    * Create a new AggregateField<T>
    * @param aggregateType Specifies the type of aggregation operation to perform.
    * @param field Optionally specifies the field that is aggregated.
    * @internal
    */
   private constructor(
-    public readonly aggregateType: firestore.AggregateType,
-    public readonly field?: string | firestore.FieldPath
-  ) {}
+    public readonly aggregateType: AggregateType,
+    field?: string | FieldPath
+  ) {
+    this._field = field;
+  }
 
   /**
    * Compares this object with the given object for equality.
@@ -96,15 +105,15 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
    * @return `true` if this object is "equal" to the given object, as
    * defined above, or `false` otherwise.
    */
-  isEqual(other: firestore.AggregateField<T>): boolean {
+  isEqual(other: AggregateField<T>): boolean {
     return (
       other instanceof AggregateField &&
       this.aggregateType === other.aggregateType &&
-      ((this.field === undefined && other.field === undefined) ||
-        (this.field !== undefined &&
-          other.field !== undefined &&
-          FieldPath.fromArgument(this.field).isEqual(
-            FieldPath.fromArgument(other.field)
+      ((this._field === undefined && other._field === undefined) ||
+        (this._field !== undefined &&
+          other._field !== undefined &&
+          FieldPath.fromArgument(this._field).isEqual(
+            FieldPath.fromArgument(other._field)
           )))
     );
   }
@@ -122,9 +131,7 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
    * a specified field over a range of documents in the result set of a query.
    * @param field Specifies the field to average across the result set.
    */
-  static average(
-    field: string | firestore.FieldPath
-  ): AggregateField<number | null> {
+  static average(field: string | FieldPath): AggregateField<number | null> {
     return new AggregateField<number | null>('avg', field);
   }
 
@@ -133,7 +140,27 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
    * a specified field over a range of documents in the result set of a query.
    * @param field Specifies the field to sum across the result set.
    */
-  static sum(field: string | firestore.FieldPath): AggregateField<number> {
+  static sum(field: string | FieldPath): AggregateField<number> {
     return new AggregateField<number>('sum', field);
   }
 }
+
+/**
+ * A type whose property values are all `AggregateField` objects.
+ */
+export interface AggregateSpec {
+  [field: string]: AggregateFieldType;
+}
+
+/**
+ * The union of all `AggregateField` types that are supported by Firestore.
+ */
+export type AggregateFieldType =
+  | ReturnType<typeof AggregateField.count>
+  | ReturnType<typeof AggregateField.sum>
+  | ReturnType<typeof AggregateField.average>;
+
+/**
+ * Union type representing the aggregate type to be performed.
+ */
+export type AggregateType = 'count' | 'avg' | 'sum';
