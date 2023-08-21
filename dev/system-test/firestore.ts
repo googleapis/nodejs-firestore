@@ -2697,9 +2697,9 @@ describe('Query class', () => {
         .where('name', '!=', 'room 200')
         .orderBy('name');
       let docSnap = await collection.doc('doc4').get();
-      let query_sdk_normalized = query.startAt(docSnap);
+      let queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc4', 'doc1');
-      expectDocs(await query_sdk_normalized.get(), 'doc4', 'doc1');
+      expectDocs(await queryWithCursor.get(), 'doc4', 'doc1');
 
       // ordered by: name desc, field desc, field.dot desc, field\\slash desc, __name__ desc
       query = collection
@@ -2708,9 +2708,9 @@ describe('Query class', () => {
         .where('field\\slash', '<', 400)
         .orderBy('name', 'desc');
       docSnap = await collection.doc('doc2').get();
-      query_sdk_normalized = query.startAt(docSnap);
+      queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc2', 'doc3');
-      expectDocs(await query_sdk_normalized.get(), 'doc2', 'doc3');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc3');
     });
 
     it('can use with nested composite filters', async () => {
@@ -2734,15 +2734,9 @@ describe('Query class', () => {
         )
       );
       let docSnap = await collection.doc('doc1').get();
-      let query_sdk_normalized = query.startAt(docSnap);
+      let queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc1', 'doc6', 'doc5', 'doc4');
-      expectDocs(
-        await query_sdk_normalized.get(),
-        'doc1',
-        'doc6',
-        'doc5',
-        'doc4'
-      );
+      expectDocs(await queryWithCursor.get(), 'doc1', 'doc6', 'doc5', 'doc4');
 
       // Ordered by: 'sort' desc, 'key' asc, 'v' asc, __name__ asc
       query = collection
@@ -2761,15 +2755,9 @@ describe('Query class', () => {
         .orderBy('sort', 'desc')
         .orderBy('key');
       docSnap = await collection.doc('doc5').get();
-      query_sdk_normalized = query.startAt(docSnap);
+      queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc5', 'doc4', 'doc1', 'doc6');
-      expectDocs(
-        await query_sdk_normalized.get(),
-        'doc5',
-        'doc4',
-        'doc1',
-        'doc6'
-      );
+      expectDocs(await queryWithCursor.get(), 'doc5', 'doc4', 'doc1', 'doc6');
 
       // Implicitly ordered by: 'key' asc, 'sort' asc, 'v' asc, __name__ asc
       query = collection.where(
@@ -2794,9 +2782,9 @@ describe('Query class', () => {
         )
       );
       docSnap = await collection.doc('doc1').get();
-      query_sdk_normalized = query.startAt(docSnap);
+      queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc1', 'doc2');
-      expectDocs(await query_sdk_normalized.get(), 'doc1', 'doc2');
+      expectDocs(await queryWithCursor.get(), 'doc1', 'doc2');
     });
 
     it('inequality fields will be implicitly ordered lexicographically by the server', async () => {
@@ -2816,15 +2804,9 @@ describe('Query class', () => {
         .where('key', '!=', 'a')
         .where('sort', '>', 1)
         .where('v', 'in', [1, 2, 3, 4]);
-      let query_sdk_normalized = query.startAt(docSnap);
+      let queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc2', 'doc4', 'doc5', 'doc3');
-      expectDocs(
-        await query_sdk_normalized.get(),
-        'doc2',
-        'doc4',
-        'doc5',
-        'doc3'
-      );
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc4', 'doc5', 'doc3');
 
       // Changing filters order will not effect implicit order.
       // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
@@ -2832,15 +2814,9 @@ describe('Query class', () => {
         .where('sort', '>', 1)
         .where('key', '!=', 'a')
         .where('v', 'in', [1, 2, 3, 4]);
-      query_sdk_normalized = query.startAt(docSnap);
+      queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc2', 'doc4', 'doc5', 'doc3');
-      expectDocs(
-        await query_sdk_normalized.get(),
-        'doc2',
-        'doc4',
-        'doc5',
-        'doc3'
-      );
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc4', 'doc5', 'doc3');
     });
 
     it('can use multiple explicit order by field', async () => {
@@ -2860,15 +2836,9 @@ describe('Query class', () => {
         .where('key', '>', 'a')
         .where('sort', '>=', 1)
         .orderBy('v');
-      let query_sdk_normalized = query.startAt(docSnap);
+      let queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc2', 'doc4', 'doc3', 'doc5');
-      expectDocs(
-        await query_sdk_normalized.get(),
-        'doc2',
-        'doc4',
-        'doc3',
-        'doc5'
-      );
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc4', 'doc3', 'doc5');
 
       // Ordered by: 'v asc, 'sort' asc, 'key' asc,  __name__ asc
       query = collection
@@ -2876,15 +2846,9 @@ describe('Query class', () => {
         .where('sort', '>=', 1)
         .orderBy('v')
         .orderBy('sort');
-      query_sdk_normalized = query.startAt(docSnap);
+      queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc2', 'doc5', 'doc4', 'doc3');
-      expectDocs(
-        await query_sdk_normalized.get(),
-        'doc2',
-        'doc5',
-        'doc4',
-        'doc3'
-      );
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc5', 'doc4', 'doc3');
 
       docSnap = await collection.doc('doc5').get();
 
@@ -2894,15 +2858,9 @@ describe('Query class', () => {
         .where('key', '>', 'a')
         .where('sort', '>=', 1)
         .orderBy('v', 'desc');
-      query_sdk_normalized = query.startAt(docSnap);
+      queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc5', 'doc3', 'doc4', 'doc2');
-      expectDocs(
-        await query_sdk_normalized.get(),
-        'doc5',
-        'doc3',
-        'doc4',
-        'doc2'
-      );
+      expectDocs(await queryWithCursor.get(), 'doc5', 'doc3', 'doc4', 'doc2');
 
       // Ordered by: 'v desc, 'sort' asc, 'key' asc,  __name__ asc
       query = collection
@@ -2910,15 +2868,9 @@ describe('Query class', () => {
         .where('sort', '>=', 1)
         .orderBy('v', 'desc')
         .orderBy('sort');
-      query_sdk_normalized = query.startAt(docSnap);
+      queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc5', 'doc4', 'doc3', 'doc2');
-      expectDocs(
-        await query_sdk_normalized.get(),
-        'doc5',
-        'doc4',
-        'doc3',
-        'doc2'
-      );
+      expectDocs(await queryWithCursor.get(), 'doc5', 'doc4', 'doc3', 'doc2');
     });
 
     it('can use in aggregate query', async () => {
@@ -2957,9 +2909,9 @@ describe('Query class', () => {
         .where('sort', '>=', 1)
         .where('key', '!=', 'a')
         .where(FieldPath.documentId(), '<', 'doc5');
-      let query_sdk_normalized = query.startAt(docSnap);
+      let queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc2', 'doc4', 'doc3');
-      expectDocs(await query_sdk_normalized.get(), 'doc2', 'doc4', 'doc3');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc4', 'doc3');
 
       // Changing filters order will not effect implicit order.
       // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
@@ -2967,9 +2919,9 @@ describe('Query class', () => {
         .where(FieldPath.documentId(), '<', 'doc5')
         .where('sort', '>=', 1)
         .where('key', '!=', 'a');
-      query_sdk_normalized = query.startAt(docSnap);
+      queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc2', 'doc4', 'doc3');
-      expectDocs(await query_sdk_normalized.get(), 'doc2', 'doc4', 'doc3');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc4', 'doc3');
 
       // Ordered by: 'sort' desc,'key' desc,  __name__ desc
       query = collection
@@ -2977,9 +2929,9 @@ describe('Query class', () => {
         .where('sort', '>=', 1)
         .where('key', '!=', 'a')
         .orderBy('sort', 'desc');
-      query_sdk_normalized = query.startAt(docSnap);
+      queryWithCursor = query.startAt(docSnap);
       expectDocs(await query.get(), 'doc2', 'doc3', 'doc4');
-      expectDocs(await query_sdk_normalized.get(), 'doc2', 'doc3', 'doc4');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc3', 'doc4');
     });
   });
 });
