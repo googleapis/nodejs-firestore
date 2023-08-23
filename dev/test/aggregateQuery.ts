@@ -28,7 +28,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {setTimeoutHandler} from '../src/backoff';
 use(chaiAsPromised);
 
-describe.only('aggregate query interface', () => {
+describe('aggregate query interface', () => {
   let firestore: Firestore;
 
   beforeEach(() => {

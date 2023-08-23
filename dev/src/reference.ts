@@ -3189,7 +3189,9 @@ export class AggregateQuery<
    *
    * @return A promise that will be resolved with the results of the query.
    */
-  get(): Promise<AggregateQuerySnapshot<AggregateSpecType>> {
+  get(): Promise<
+    AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+  > {
     return this._get();
   }
 
@@ -3202,7 +3204,9 @@ export class AggregateQuery<
    */
   _get(
     transactionId?: Uint8Array
-  ): Promise<AggregateQuerySnapshot<AggregateSpecType>> {
+  ): Promise<
+    AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+  > {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
@@ -3241,7 +3245,11 @@ export class AggregateQuery<
           const data = this.decodeResult(proto.result);
           callback(
             undefined,
-            new AggregateQuerySnapshot<AggregateSpecType>(this, readTime, data)
+            new AggregateQuerySnapshot<
+              AggregateSpecType,
+              AppModelType,
+              DbModelType
+            >(this, readTime, data)
           );
         } else {
           callback(Error('RunAggregationQueryResponse is missing result'));
@@ -3390,8 +3398,16 @@ export class AggregateQuery<
 /**
  * The results of executing an aggregation query.
  */
-export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
-  implements firestore.AggregateQuerySnapshot<T>
+export class AggregateQuerySnapshot<
+  AggregateSpecType extends firestore.AggregateSpec,
+  AppModelType,
+  DbModelType
+> implements
+    firestore.AggregateQuerySnapshot<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >
 {
   /**
    * @private
@@ -3403,13 +3419,21 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
    * query.
    */
   constructor(
-    private readonly _query: AggregateQuery<T>,
+    private readonly _query: AggregateQuery<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >,
     private readonly _readTime: Timestamp,
-    private readonly _data: firestore.AggregateSpecData<T>
+    private readonly _data: firestore.AggregateSpecData<AggregateSpecType>
   ) {}
 
   /** The query that was executed to produce this result. */
-  get query(): firestore.AggregateQuery<T> {
+  get query(): firestore.AggregateQuery<
+    AggregateSpecType,
+    AppModelType,
+    DbModelType
+  > {
     return this._query;
   }
 
@@ -3429,7 +3453,7 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
    * @returns The results of the aggregations performed over the underlying
    * query.
    */
-  data(): firestore.AggregateSpecData<T> {
+  data(): firestore.AggregateSpecData<AggregateSpecType> {
     return this._data;
   }
 
@@ -3444,7 +3468,13 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
    * @return `true` if this object is "equal" to the given object, as
    * defined above, or `false` otherwise.
    */
-  isEqual(other: firestore.AggregateQuerySnapshot<T>): boolean {
+  isEqual(
+    other: firestore.AggregateQuerySnapshot<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >
+  ): boolean {
     if (this === other) {
       return true;
     }

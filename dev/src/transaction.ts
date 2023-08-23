@@ -120,7 +120,9 @@ export class Transaction implements firestore.Transaction {
       AppModelType,
       DbModelType
     >
-  ): Promise<AggregateQuerySnapshot<AggregateSpecType>>;
+  ): Promise<
+    AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+  >;
 
   /**
    * Retrieve a document or a query result from the database. Holds a
@@ -157,7 +159,7 @@ export class Transaction implements firestore.Transaction {
   ): Promise<
     | DocumentSnapshot<AppModelType, DbModelType>
     | QuerySnapshot<AppModelType, DbModelType>
-    | AggregateQuerySnapshot<AggregateSpecType>
+    | AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
