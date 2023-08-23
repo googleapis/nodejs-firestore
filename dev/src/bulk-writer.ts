@@ -737,9 +737,9 @@ export class BulkWriter {
    * });
    * ```
    */
-  update<T>(
-    documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData<T> | string | FieldPath,
+  update<AppModelType, DbModelType>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    dataOrField: firestore.UpdateData<DbModelType> | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >

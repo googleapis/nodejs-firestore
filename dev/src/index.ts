@@ -1285,11 +1285,15 @@ export class Firestore implements firestore.Firestore {
    * });
    * ```
    */
-  getAll<T>(
+  getAll<
+    AppModelType,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData
+  >(
     ...documentRefsOrReadOptions: Array<
-      firestore.DocumentReference<T> | firestore.ReadOptions
+      | firestore.DocumentReference<AppModelType, DbModelType>
+      | firestore.ReadOptions
     >
-  ): Promise<Array<DocumentSnapshot<T>>> {
+  ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
     validateMinNumberOfArguments(
       'Firestore.getAll',
       documentRefsOrReadOptions,

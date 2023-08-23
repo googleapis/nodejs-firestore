@@ -2551,7 +2551,10 @@ describe('Aggregates', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    randomCol = getTestRoot();
+    randomCol = getTestRoot({
+      projectId: "cicd-demo-e9b7d",
+      databaseId: "db01"
+    });
     firestore = randomCol.firestore;
   });
 

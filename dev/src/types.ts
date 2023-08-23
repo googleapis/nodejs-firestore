@@ -136,8 +136,14 @@ const defaultConverterObj: FirestoreDataConverter<DocumentData> = {
  * @private
  * @internal
  */
-export function defaultConverter<T>(): FirestoreDataConverter<T> {
-  return defaultConverterObj as FirestoreDataConverter<T>;
+export function defaultConverter<
+  AppModelType,
+  DbModelType
+>(): FirestoreDataConverter<AppModelType, DbModelType> {
+  return defaultConverterObj as FirestoreDataConverter<
+    AppModelType,
+    DbModelType
+  >;
 }
 
 /**

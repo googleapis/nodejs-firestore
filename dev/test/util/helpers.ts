@@ -40,8 +40,8 @@ if (!isPreferRest()) {
   SSL_CREDENTIALS = grpc.credentials.createInsecure();
 }
 
-export const PROJECT_ID = 'test-project';
-export const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
+export const PROJECT_ID = 'xxx';
+export const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/db01`;
 export const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
 export const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
@@ -67,6 +67,7 @@ export function createInstance(
   const initializationOptions = {
     ...{projectId: PROJECT_ID, sslCreds: SSL_CREDENTIALS!},
     ...firestoreSettings,
+    databaseId: 'db01',
   };
 
   const firestore = new Firestore();

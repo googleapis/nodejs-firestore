@@ -1494,7 +1494,7 @@ declare namespace FirebaseFirestore {
      * @override
      * @return An Object containing all fields in the document.
      */
-    data(): T;
+    data(): AppModelType;
   }
 
   /**
@@ -1650,7 +1650,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to start after.
      * @return The created Query.
      */
-    startAt(snapshot: DocumentSnapshot<AppModelType, DbModelType>): Query<AppModelType, DbModelType>;
+    startAt(
+      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+    ): Query<AppModelType, DbModelType>;
 
     /**
      * Creates and returns a new Query that starts at the provided fields
@@ -1672,7 +1674,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to start after.
      * @return The created Query.
      */
-    startAfter(snapshot: DocumentSnapshot<AppModelType, DbModelType>): Query<AppModelType, DbModelType>;
+    startAfter(
+      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+    ): Query<AppModelType, DbModelType>;
 
     /**
      * Creates and returns a new Query that starts after the provided fields
@@ -1695,7 +1699,9 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     //TODO Why are we constraining snapshot?
-    endBefore(snapshot: DocumentSnapshot<AppModelType, DbModelType>): Query<AppModelType, DbModelType>;
+    endBefore(
+      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+    ): Query<AppModelType, DbModelType>;
 
     /**
      * Creates and returns a new Query that ends before the provided fields
@@ -1717,7 +1723,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to end at.
      * @return The created Query.
      */
-    endAt(snapshot: DocumentSnapshot<AppModelType, DbModelType>): Query<AppModelType, DbModelType>;
+    endAt(
+      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+    ): Query<AppModelType, DbModelType>;
 
     /**
      * Creates and returns a new Query that ends at the provided fields
@@ -1755,7 +1763,7 @@ declare namespace FirebaseFirestore {
      * the snapshot listener.
      */
     onSnapshot(
-      onNext: (snapshot: QuerySnapshot<T>) => void,
+      onNext: (snapshot: QuerySnapshot<AppModelType, DbModelType>) => void,
       onError?: (error: Error) => void
     ): () => void;
 
@@ -1784,20 +1792,22 @@ declare namespace FirebaseFirestore {
      * @param other The `Query` to compare against.
      * @return true if this `Query` is equal to the provided one.
      */
-    isEqual(other: Query<T>): boolean;
+    isEqual(other: Query<AppModelType, DbModelType>): boolean;
 
     /**
      * Applies a custom data converter to this Query, allowing you to use your
      * own custom model objects with Firestore. When you call get() on the
      * returned Query, the provided converter will convert between Firestore
-     * data and your custom type U.
+     * data of type `NewDbModelType` and your custom type `NewAppModelType`.
      *
      * @param converter Converts objects to and from Firestore. Passing in
      * `null` removes the current converter.
-     * @return A Query<U> that uses the provided converter.
+     * @return A Query that uses the provided converter.
      */
-    withConverter<U>(converter: FirestoreDataConverter<U>): Query<U>;
-    withConverter(converter: null): Query<DocumentData>;
+    withConverter<NewAppModelType, NewDbModelType extends DocumentData>(
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
+    ): Query<NewAppModelType, NewDbModelType>;
+    withConverter(converter: null): Query;
   }
 
   /**
@@ -1808,7 +1818,7 @@ declare namespace FirebaseFirestore {
    * properties.
    */
   export class QuerySnapshot<
-    AppModelType,
+    AppModelType = DocumentData,
     DbModelType extends DocumentData = DocumentData
   > {
     private constructor();
@@ -1846,7 +1856,9 @@ declare namespace FirebaseFirestore {
      * @param thisArg The `this` binding for the callback.
      */
     forEach(
-      callback: (result: QueryDocumentSnapshot<T>) => void,
+      callback: (
+        result: QueryDocumentSnapshot<AppModelType, DbModelType>
+      ) => void,
       thisArg?: any
     ): void;
 
@@ -1857,11 +1869,11 @@ declare namespace FirebaseFirestore {
      * @param other The `QuerySnapshot` to compare against.
      * @return true if this `QuerySnapshot` is equal to the provided one.
      */
-    isEqual(other: QuerySnapshot<T>): boolean;
+    isEqual(other: QuerySnapshot<AppModelType, DbModelType>): boolean;
   }
 
   /**
-   * The type of of a `DocumentChange` may be 'added', 'removed', or 'modified'.
+   * The type of `DocumentChange` may be 'added', 'removed', or 'modified'.
    */
   export type DocumentChangeType = 'added' | 'removed' | 'modified';
 
@@ -1870,7 +1882,7 @@ declare namespace FirebaseFirestore {
    * It contains the document affected and the type of change that occurred.
    */
   export interface DocumentChange<
-    AppModelType,
+    AppModelType = DocumentData,
     DbModelType extends DocumentData = DocumentData
   > {
     /** The type of change ('added', 'modified', or 'removed'). */
@@ -1942,7 +1954,9 @@ declare namespace FirebaseFirestore {
      * @return {Promise<DocumentReference[]>} The list of documents in this
      * collection.
      */
-    listDocuments(): Promise<Array<DocumentReference<AppModelType, DbModelType>>>;
+    listDocuments(): Promise<
+      Array<DocumentReference<AppModelType, DbModelType>>
+    >;
 
     /**
      * Get a `DocumentReference` for a randomly-named document within this
@@ -1971,7 +1985,9 @@ declare namespace FirebaseFirestore {
      * @return A Promise resolved with a `DocumentReference` pointing to the
      * newly created document after it has been written to the backend.
      */
-    add(data: WithFieldValue<T>): Promise<DocumentReference<AppModelType, DbModelType>>;
+    add(
+      data: WithFieldValue<AppModelType>
+    ): Promise<DocumentReference<AppModelType, DbModelType>>;
 
     /**
      * Returns true if this `CollectionReference` is equal to the provided one.
@@ -1985,23 +2001,27 @@ declare namespace FirebaseFirestore {
      * Applies a custom data converter to this CollectionReference, allowing you
      * to use your own custom model objects with Firestore. When you call add()
      * on the returned CollectionReference instance, the provided converter will
-     * convert between Firestore data and your custom type U.
+     * convert between Firestore data of type `NewDbModelType` and your custom
+     * type `NewAppModelType`.
      *
      * @param converter Converts objects to and from Firestore. Passing in
      * `null` removes the current converter.
-     * @return A CollectionReference<U> that uses the provided converter.
+     * @return A CollectionReference that uses the provided converter.
      */
     withConverter<NewAppModelType>(
       converter: FirestoreDataConverter<NewAppModelType, DbModelType>
     ): CollectionReference<NewAppModelType, DbModelType>;
-    withConverter(converter: null): CollectionReference<DbModelType, DbModelType>;
+    withConverter(converter: null): CollectionReference;
   }
 
   /**
    * A `CollectionGroup` refers to all documents that are contained in a
    * collection or subcollection with a specific collection ID.
    */
-  export class CollectionGroup<T = DocumentData> extends Query<T> {
+  export class CollectionGroup<
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData
+  > extends Query<AppModelType, DbModelType> {
     private constructor();
 
     /**
@@ -2016,7 +2036,7 @@ declare namespace FirebaseFirestore {
      */
     getPartitions(
       desiredPartitionCount: number
-    ): AsyncIterable<QueryPartition<T>>;
+    ): AsyncIterable<QueryPartition<AppModelType, DbModelType>>;
 
     /**
      * Applies a custom data converter to this `CollectionGroup`, allowing you
@@ -2073,7 +2093,10 @@ declare namespace FirebaseFirestore {
    * #endBefore} can only be used in a query that matches the constraint of query
    * that produced this partition.
    */
-  export class QueryPartition<T = DocumentData> {
+  export class QueryPartition<
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData
+  > {
     private constructor();
 
     /**
@@ -2104,7 +2127,7 @@ declare namespace FirebaseFirestore {
      * @return A query partitioned by a {@link Query#startAt} and {@link
      * Query#endBefore} cursor.
      */
-    toQuery(): Query<T>;
+    toQuery(): Query<AppModelType, DbModelType>;
   }
 
   /**
@@ -2139,18 +2162,22 @@ declare namespace FirebaseFirestore {
   /**
    * A query that calculates aggregations over an underlying query.
    */
-  export class AggregateQuery<T extends AggregateSpec> {
+  export class AggregateQuery<
+    AggregateSpecType extends AggregateSpec,
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData
+  > {
     private constructor();
 
     /** The query whose aggregations will be calculated by this object. */
-    readonly query: Query<unknown>;
+    readonly query: Query<AppModelType, DbModelType>;
 
     /**
      * Executes this query.
      *
      * @return A promise that will be resolved with the results of the query.
      */
-    get(): Promise<AggregateQuerySnapshot<T>>;
+    get(): Promise<AggregateQuerySnapshot<AggregateSpecType>>;
 
     /**
      * Compares this object with the given object for equality.
@@ -2164,17 +2191,25 @@ declare namespace FirebaseFirestore {
      * @return `true` if this object is "equal" to the given object, as
      * defined above, or `false` otherwise.
      */
-    isEqual(other: AggregateQuery<T>): boolean;
+    isEqual(other: AggregateQuery<AggregateSpecType>): boolean;
   }
 
   /**
    * The results of executing an aggregation query.
    */
-  export class AggregateQuerySnapshot<T extends AggregateSpec> {
+  export class AggregateQuerySnapshot<
+    AggregateSpecType extends AggregateSpec,
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData
+  > {
     private constructor();
 
     /** The query that was executed to produce this result. */
-    readonly query: AggregateQuery<T>;
+    readonly query: AggregateQuery<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >;
 
     /** The time this snapshot was read. */
     readonly readTime: Timestamp;
@@ -2190,7 +2225,7 @@ declare namespace FirebaseFirestore {
      * @returns The results of the aggregations performed over the underlying
      * query.
      */
-    data(): AggregateSpecData<T>;
+    data(): AggregateSpecData<AggregateSpecType>;
 
     /**
      * Compares this object with the given object for equality.
@@ -2203,7 +2238,7 @@ declare namespace FirebaseFirestore {
      * @return `true` if this object is "equal" to the given object, as
      * defined above, or `false` otherwise.
      */
-    isEqual(other: AggregateQuerySnapshot<T>): boolean;
+    isEqual(other: AggregateQuerySnapshot<AggregateSpecType>): boolean;
   }
 
   /**
@@ -2421,7 +2456,7 @@ declare namespace FirebaseFirestore {
      * @param documentSnapshot A `DocumentSnapshot` to add.
      * @returns This instance.
      */
-    add<T>(documentSnapshot: DocumentSnapshot<T>): BundleBuilder;
+    add(documentSnapshot: DocumentSnapshot): BundleBuilder;
 
     /**
      * Adds a Firestore `QuerySnapshot` to the bundle. Both the documents in the query results and
@@ -2431,7 +2466,7 @@ declare namespace FirebaseFirestore {
      * @param querySnapshot A `QuerySnapshot` to add to the bundle.
      * @returns This instance.
      */
-    add<T>(queryName: string, querySnapshot: QuerySnapshot<T>): BundleBuilder;
+    add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;
 
     /**
      * Builds the bundle and returns the result as a `Buffer` instance.
