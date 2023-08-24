@@ -442,7 +442,8 @@ export class DocumentReference<
    * [SetOptions]{@link SetOptions}, the provided data can be merged into an
    * existing document.
    *
-   * @param {T|Partial<T>} data A map of the fields and values for the document.
+   * @param {T|Partial<AppModelType>} data A map of the fields and values for
+   * the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge If true, set() merges the values specified
    * in its data argument. Fields omitted from this set() call remain untouched.
@@ -630,7 +631,8 @@ export class DocumentReference<
    * Applies a custom data converter to this DocumentReference, allowing you to
    * use your own custom model objects with Firestore. When you call set(),
    * get(), etc. on the returned DocumentReference instance, the provided
-   * converter will convert between Firestore data and your custom type U.
+   * converter will convert between Firestore data of type `NewDbModelType` and
+   * your custom type `NewAppModelType`.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
@@ -1678,9 +1680,7 @@ export class Query<
    * });
    * ```
    */
-  select(
-    ...fieldPaths: Array<string | FieldPath>
-  ): Query<firestore.DocumentData> {
+  select(...fieldPaths: Array<string | FieldPath>): Query {
     const fields: api.StructuredQuery.IFieldReference[] = [];
 
     if (fieldPaths.length === 0) {
@@ -2766,8 +2766,7 @@ export class Query<
    * Applies a custom data converter to this Query, allowing you to use your
    * own custom model objects with Firestore. When you call get() on the
    * returned Query, the provided converter will convert between Firestore
-   * data and your custom type of type `NewDbModelType` and your custom type
-   * `NewAppModelType`.
+   * data of type `NewDbModelType` and your custom type `NewAppModelType`.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
@@ -3096,7 +3095,8 @@ export class CollectionReference<
    * Applies a custom data converter to this CollectionReference, allowing you
    * to use your own custom model objects with Firestore. When you call add() on
    * the returned CollectionReference instance, the provided converter will
-   * convert between Firestore data and your custom type U.
+   * convert between Firestore data of type `NewDbModelType` and your custom
+   * type `NewAppModelType`.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.

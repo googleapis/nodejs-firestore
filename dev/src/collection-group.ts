@@ -146,7 +146,8 @@ export class CollectionGroup<
    * Applies a custom data converter to this `CollectionGroup`, allowing you
    * to use your own custom model objects with Firestore. When you call get()
    * on the returned `CollectionGroup`, the provided converter will convert
-   * between Firestore data and your custom type U.
+   * between Firestore data of type `NewDbModelType` and your custom type
+   * `NewAppModelType`.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.

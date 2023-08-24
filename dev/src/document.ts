@@ -151,13 +151,14 @@ export class DocumentSnapshot<
    * @param obj The object to store in the DocumentSnapshot.
    * @return The created DocumentSnapshot.
    */
-  static fromObject<U>(
-    ref: firestore.DocumentReference<U>,
-    obj: firestore.DocumentData
-  ): DocumentSnapshot<U> {
-    const serializer = (ref as DocumentReference<U>).firestore._serializer!;
+  static fromObject<AppModelType, DbModelType>(
+    ref: firestore.DocumentReference<AppModelType, DbModelType>,
+    obj: DbModelType
+  ): DocumentSnapshot<AppModelType, DbModelType> {
+    const serializer = (ref as DocumentReference<AppModelType, DbModelType>)
+      .firestore._serializer!;
     return new DocumentSnapshot(
-      ref as DocumentReference<U>,
+      ref as DocumentReference<AppModelType, DbModelType>,
       serializer.encodeFields(obj)
     );
   }
@@ -173,11 +174,12 @@ export class DocumentSnapshot<
    * @param data The field/value map to expand.
    * @return The created DocumentSnapshot.
    */
-  static fromUpdateMap<U>(
-    ref: firestore.DocumentReference<U>,
+  static fromUpdateMap<AppModelType, DbModelType>(
+    ref: firestore.DocumentReference<AppModelType, DbModelType>,
     data: UpdateMap
-  ): DocumentSnapshot<U> {
-    const serializer = (ref as DocumentReference<U>).firestore._serializer!;
+  ): DocumentSnapshot<AppModelType, DbModelType> {
+    const serializer = (ref as DocumentReference<AppModelType, DbModelType>)
+      .firestore._serializer!;
 
     /**
      * Merges 'value' at the field path specified by the path array into
@@ -247,7 +249,10 @@ export class DocumentSnapshot<
       merge(res, value, path, 0);
     }
 
-    return new DocumentSnapshot(ref as DocumentReference<U>, res);
+    return new DocumentSnapshot(
+      ref as DocumentReference<AppModelType, DbModelType>,
+      res
+    );
   }
 
   /**

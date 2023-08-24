@@ -172,7 +172,8 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
 
 /**
  * Converter used by [withConverter()]{@link Query#withConverter} to transform
- * user objects of type T into Firestore data.
+ * user objects of type `AppModelType` into Firestore data of type
+ * `DbModelType`.
  *
  * Using the converter allows you to specify generic type arguments when storing
  * and retrieving objects from Firestore.
@@ -212,10 +213,10 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *
  * ```
  * @property {Function} toFirestore Called by the Firestore SDK to convert a
- * custom model object of type T into a plain Javascript object (suitable for
- * writing directly to the Firestore database).
+ * custom model object of type `AppModelType` into a plain Javascript object
+ * (suitable for writing directly to the Firestore database).
  * @property {Function} fromFirestore Called by the Firestore SDK to convert
- * Firestore data into an object of type T.
+ * Firestore data into an object of type `AppModelType`.
  * @typedef {Object} FirestoreDataConverter
  */
 

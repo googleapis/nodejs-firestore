@@ -1377,8 +1377,8 @@ declare namespace FirebaseFirestore {
      * Applies a custom data converter to this DocumentReference, allowing you
      * to use your own custom model objects with Firestore. When you call
      * set(), get(), etc. on the returned DocumentReference instance, the
-     * provided converter will convert between Firestore data and your custom
-     * type U.
+     * provided converter will convert between Firestore data of type
+     * `NewDbModelType` and your custom type `NewAppModelType`.
      *
      * @param converter Converts objects to and from Firestore. Passing in
      * `null` removes the current converter.
@@ -2042,7 +2042,8 @@ declare namespace FirebaseFirestore {
      * Applies a custom data converter to this `CollectionGroup`, allowing you
      * to use your own custom model objects with Firestore. When you call get()
      * on the returned `CollectionGroup`, the provided converter will convert
-     * between Firestore data and your custom type U.
+     * between Firestore data of type `NewDbModelType` and your custom type
+     * `NewAppModelType`.
      *
      * Using the converter allows you to specify generic type arguments when
      * storing and retrieving objects from Firestore.
@@ -2081,10 +2082,12 @@ declare namespace FirebaseFirestore {
      *
      * @param converter Converts objects to and from Firestore. Passing in
      * `null` removes the current converter.
-     * @return A `CollectionGroup<U>` that uses the provided converter.
+     * @return A `CollectionGroup` that uses the provided converter.
      */
-    withConverter<U>(converter: FirestoreDataConverter<U>): CollectionGroup<U>;
-    withConverter(converter: null): CollectionGroup<DocumentData>;
+    withConverter<AppModelType, DbModelType>(
+      converter: FirestoreDataConverter<AppModelType, DbModelType>
+    ): CollectionGroup<AppModelType, DbModelType>;
+    withConverter(converter: null): CollectionGroup;
   }
 
   /**
