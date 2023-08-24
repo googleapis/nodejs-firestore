@@ -88,7 +88,7 @@ export class Transaction implements firestore.Transaction {
    * @param {Query} query A query to execute.
    * @return {Promise<QuerySnapshot>} A QuerySnapshot for the retrieved data.
    */
-  get<AppModelType, DbModelType>(
+  get<AppModelType, DbModelType extends firestore.DocumentData>(
     query: Query<AppModelType, DbModelType>
   ): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
@@ -99,7 +99,7 @@ export class Transaction implements firestore.Transaction {
    * @param {DocumentReference} documentRef A reference to the document to be read.
    * @return {Promise<DocumentSnapshot>}  A DocumentSnapshot for the read data.
    */
-  get<AppModelType, DbModelType>(
+  get<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: DocumentReference<AppModelType, DbModelType>
   ): Promise<DocumentSnapshot<AppModelType, DbModelType>>;
 
@@ -113,7 +113,7 @@ export class Transaction implements firestore.Transaction {
   get<
     AggregateSpecType extends firestore.AggregateSpec,
     AppModelType,
-    DbModelType
+    DbModelType extends firestore.DocumentData
   >(
     aggregateQuery: firestore.AggregateQuery<
       AggregateSpecType,
@@ -149,7 +149,7 @@ export class Transaction implements firestore.Transaction {
    */
   get<
     AppModelType,
-    DbModelType,
+    DbModelType extends firestore.DocumentData,
     AggregateSpecType extends firestore.AggregateSpec
   >(
     refOrQuery:
@@ -215,7 +215,7 @@ export class Transaction implements firestore.Transaction {
    * });
    * ```
    */
-  getAll<AppModelType, DbModelType>(
+  getAll<AppModelType, DbModelType extends firestore.DocumentData>(
     ...documentRefsOrReadOptions: Array<
       | firestore.DocumentReference<AppModelType, DbModelType>
       | firestore.ReadOptions
@@ -264,7 +264,7 @@ export class Transaction implements firestore.Transaction {
    * });
    * ```
    */
-  create<AppModelType, DbModelType>(
+  create<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.WithFieldValue<AppModelType>
   ): Transaction {
@@ -272,12 +272,12 @@ export class Transaction implements firestore.Transaction {
     return this;
   }
 
-  set<AppModelType, DbModelType>(
-    documentRef: firestore.DocumentReference<AppModelType>,
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.PartialWithFieldValue<AppModelType>,
     options: firestore.SetOptions
   ): Transaction;
-  set<AppModelType, DbModelType>(
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.WithFieldValue<AppModelType>
   ): Transaction;
@@ -313,7 +313,7 @@ export class Transaction implements firestore.Transaction {
    * });
    * ```
    */
-  set<AppModelType, DbModelType>(
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.PartialWithFieldValue<AppModelType>,
     options?: firestore.SetOptions
@@ -370,7 +370,7 @@ export class Transaction implements firestore.Transaction {
    * });
    * ```
    */
-  update<AppModelType, DbModelType>(
+  update<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     dataOrField:
       | firestore.UpdateData<DbModelType>
@@ -412,7 +412,7 @@ export class Transaction implements firestore.Transaction {
    * });
    * ```
    */
-  delete<AppModelType, DbModelType>(
+  delete<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: DocumentReference<AppModelType, DbModelType>,
     precondition?: firestore.Precondition
   ): this {
