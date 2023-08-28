@@ -83,7 +83,7 @@
     "gts": "^3.1.0",
     "jsdoc": "^4.0.0",
     "jsdoc-fresh": "^3.0.0",
-    "jsdoc-region-tag": "^2.0.0",
+    "jsdoc-region-tag": "^3.0.0",
     "length-prefixed-json-stream": "^1.0.1",
     "linkinator": "^5.0.0",
     "mocha": "^9.2.2",
