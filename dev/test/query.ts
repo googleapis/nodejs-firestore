@@ -2440,7 +2440,7 @@ describe('startAt() interface', () => {
     });
   });
 
-  describe('inequality fields are implicitly ordered lexicographically', () => {
+  describe('inequality fields are implicitly ordered lexicographically for cursors', () => {
     it('upper and lower case characters', () => {
       const overrides: ApiOverride = {
         runQuery: request => {
