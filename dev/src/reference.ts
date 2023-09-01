@@ -1847,6 +1847,15 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       return this._queryOptions.fieldOrders;
     }
 
+    // TODO(b/296435819): Remove this warning message.
+    if (cursorValuesOrDocumentSnapshot[0] instanceof DocumentReference) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Warning: Passing DocumentReference into a cursor without orderBy clause is not an intended
+        behavior. Please use DocumentSnapshot or add an explicit orderBy on document key field.`
+      );
+    }
+
     const fieldOrders = this._queryOptions.fieldOrders.slice();
     const fieldsNormalized = new Set([
       ...fieldOrders.map(item => item.field.toString()),
