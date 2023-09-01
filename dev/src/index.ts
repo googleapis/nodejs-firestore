@@ -85,6 +85,13 @@ import {
   RecursiveDelete,
 } from './recursive-delete';
 import {stringify} from 'querystring';
+import {NodeSDK} from "@opentelemetry/sdk-node";
+import {HttpInstrumentation} from "@opentelemetry/instrumentation-http";
+import {GrpcInstrumentation} from "@opentelemetry/instrumentation-grpc";
+import {CloudPropagator} from "@google-cloud/opentelemetry-cloud-trace-propagator";
+import {gcpDetector} from "@opentelemetry/resource-detector-gcp";
+import {TraceExporter} from "@google-cloud/opentelemetry-cloud-trace-exporter";
+import {ConsoleSpanExporter, SimpleSpanProcessor} from "@opentelemetry/sdk-trace-base";
 
 export {
   CollectionReference,
@@ -403,6 +410,9 @@ export class Firestore implements firestore.Firestore {
    */
   private _gax?: typeof googleGax;
 
+  private _otelSdk?: NodeSDK;
+  private _traceProvider?: any;
+
   /**
    * Preloaded instance of google-gax HTTP fallback implementation (no gRPC).
    */
@@ -644,6 +654,63 @@ export class Firestore implements firestore.Firestore {
       /* clientDestructor= */ client => client.close()
     );
 
+    // We should be able to flip this on/off.
+    if (true) {
+      const opentelemetry = require("@opentelemetry/sdk-node");
+      const {TraceExporter} = require("@google-cloud/opentelemetry-cloud-trace-exporter");
+      const {HttpInstrumentation} = require("@opentelemetry/instrumentation-http");
+      const {GrpcInstrumentation} = require("@opentelemetry/instrumentation-grpc");
+      const {gcpDetector} = require("@opentelemetry/resource-detector-gcp");
+      const {CloudPropagator} = require("@google-cloud/opentelemetry-cloud-trace-propagator");
+      const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+      const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+      const { trace }  = require("@opentelemetry/api");
+
+      // Initialize the exporter. When your application is running on Google Cloud,
+      // you don't need to provide auth credentials or a project id.
+      const exporter = new TraceExporter();
+
+      this._otelSdk = new opentelemetry.NodeSDK({
+        // Setup automatic instrumentation for
+        //   http, grpc, and express modules.
+        instrumentations: [
+          new HttpInstrumentation(),
+          new GrpcInstrumentation(),
+        ],
+        // Make sure opentelemetry know about Cloud Trace http headers
+        //   i.e. 'X-Cloud-Trace-Context'
+        textMapPropagator: new CloudPropagator(),
+        // Automatically detect and include span metadata when running
+        //   in GCP, e.g. region of the function.
+        resourceDetectors: [gcpDetector],
+        // Export generated traces to Cloud Trace.
+        traceExporter: exporter,
+      });
+      this._otelSdk?.start();
+
+      // Enable OpenTelemetry exporters to export traces to Google Cloud Trace.
+      // Exporters use Application Default Credentials (ADCs) to authenticate.
+      // See https://developers.google.com/identity/protocols/application-default-credentials
+      // for more details.
+      this._traceProvider = new NodeTracerProvider();
+
+      // Configure the span processor to send spans to the exporter
+      this._traceProvider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+      this._traceProvider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+      this._traceProvider.register();
+
+      registerInstrumentations({
+        instrumentations: [
+          new HttpInstrumentation(),
+          new GrpcInstrumentation(),
+        ],
+      });
+
+      // Initialize the OpenTelemetry APIs to use the
+      // NodeTracerProvider bindings
+      trace.setGlobalTracerProvider(this._traceProvider);
+    }
+
     logger('Firestore', null, 'Initialized Firestore');
   }
 
@@ -767,6 +834,10 @@ export class Firestore implements firestore.Firestore {
       return temp;
     };
     this._serializer = new Serializer(this);
+  }
+
+  get otelSDK(): NodeSDK | undefined {
+    return this._otelSdk;
   }
 
   /**
@@ -1453,6 +1524,13 @@ export class Firestore implements firestore.Firestore {
           `${this.bulkWritersCount} open BulkWriter instances.`
       );
     }
+
+    if (this._otelSdk) {
+      return this._otelSdk.shutdown()
+          .then(()=>this._traceProvider.shutdown())
+          .then(()=>this._clientPool.terminate());
+    }
+
     return this._clientPool.terminate();
   }
 

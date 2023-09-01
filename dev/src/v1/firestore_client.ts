@@ -37,6 +37,7 @@ import jsonProtos = require('../../protos/v1.json');
  * This file defines retry strategy and timeouts for all API methods in this library.
  */
 import * as gapicConfig from './firestore_client_config.json';
+import {logger} from "../logger";
 const version = require('../../../package.json').version;
 
 /**
@@ -2291,11 +2292,12 @@ export class FirestoreClient {
    * @returns {Promise} A promise that resolves when the client is closed.
    */
   close(): Promise<void> {
+    logger('Firestore', null, 'FirestoreClient.close()');
     if (this.firestoreStub && !this._terminated) {
       return this.firestoreStub.then(stub => {
         this._terminated = true;
         stub.close();
-        this.locationsClient.close();
+        return this.locationsClient.close();
       });
     }
     return Promise.resolve();

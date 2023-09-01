@@ -58,6 +58,9 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
+import {
+  trace
+} from "@opentelemetry/api";
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -277,6 +280,13 @@ export class DocumentReference<T = firestore.DocumentData>
    * ```
    */
   get(): Promise<DocumentSnapshot<T>> {
+    logger('Firestore', null, 'DocumentReference.get() started.');
+    const tracer = trace.getTracer("in-the-sdk");
+    const span = tracer.startSpan('foo');
+    // Set a span attribute
+    span.setAttribute('method', 'DocumentReference.get()');
+    // We must end the spans, so they become available for exporting.
+    span.end();
     return this._firestore.getAll(this).then(([result]) => result);
   }
 
