@@ -826,6 +826,7 @@ class FieldFilterInternal extends FilterInternal {
       case 'LESS_THAN':
       case 'LESS_THAN_OR_EQUAL':
       case 'NOT_EQUAL':
+      case 'NOT_IN':
         return true;
       default:
         return false;
