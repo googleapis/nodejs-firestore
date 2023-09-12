@@ -79,7 +79,7 @@ export function createInstance(
       ({
         ...new v1.FirestoreClient(initializationOptions),
         ...apiOverrides,
-      } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      }) as any // eslint-disable-line @typescript-eslint/no-explicit-any
   );
 
   return Promise.resolve(firestore);
@@ -363,7 +363,10 @@ export function response<T>(result: T): Promise<[T, unknown, unknown]> {
 
 /** Sample user object class used in tests. */
 export class Post {
-  constructor(readonly title: string, readonly author: string) {}
+  constructor(
+    readonly title: string,
+    readonly author: string
+  ) {}
   toString(): string {
     return this.title + ', by ' + this.author;
   }
