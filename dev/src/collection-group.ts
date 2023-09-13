@@ -195,16 +195,16 @@ export class CollectionGroup<
    * converter.
    */
   withConverter(converter: null): CollectionGroup;
-  withConverter<AppModelType, DbModelType>(
-    converter: firestore.FirestoreDataConverter<AppModelType, DbModelType>
-  ): CollectionGroup<AppModelType, DbModelType>;
-  withConverter<AppModelType, DbModelType>(
+  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
+    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+  ): CollectionGroup<NewAppModelType, NewDbModelType>;
+  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
     converter: firestore.FirestoreDataConverter<
-      AppModelType,
-      DbModelType
+      NewAppModelType,
+      NewDbModelType
     > | null
-  ): CollectionGroup<AppModelType, DbModelType> {
-    return new CollectionGroup<AppModelType, DbModelType>(
+  ): CollectionGroup<NewAppModelType, NewDbModelType> {
+    return new CollectionGroup<NewAppModelType, NewDbModelType>(
       this.firestore,
       this._queryOptions.collectionId,
       converter ?? defaultConverter()

@@ -23,13 +23,14 @@ import * as assert from 'assert';
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldTransform} from './field-value';
 import {FieldPath, validateFieldPath} from './path';
-import {DocumentReference} from './reference';
+import {DocumentReference, validateDocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, defaultConverter, UpdateMap} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 
 import api = google.firestore.v1;
+import Firestore from './index';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -55,7 +56,8 @@ export class DocumentSnapshotBuilder<
   updateTime?: Timestamp;
 
   // We include the DocumentReference in the constructor in order to allow the
-  // DocumentSnapshotBuilder to be typed with <T> when it is constructed.
+  // DocumentSnapshotBuilder to be typed with <AppModelType, DbModelType> when
+  // it is constructed.
   constructor(readonly ref: DocumentReference<AppModelType, DbModelType>) {}
 
   /**
@@ -78,14 +80,18 @@ export class DocumentSnapshotBuilder<
       'Update time should be set iff document exists.'
     );
     return this.fieldsProto
-      ? new QueryDocumentSnapshot(
-          this.ref!,
+      ? new QueryDocumentSnapshot<AppModelType, DbModelType>(
+          this.ref,
           this.fieldsProto!,
           this.readTime!,
           this.createTime!,
           this.updateTime!
         )
-      : new DocumentSnapshot(this.ref!, undefined, this.readTime!);
+      : new DocumentSnapshot<AppModelType, DbModelType>(
+          this.ref,
+          undefined,
+          this.readTime!
+        );
   }
 }
 
@@ -151,14 +157,13 @@ export class DocumentSnapshot<
    * @param obj The object to store in the DocumentSnapshot.
    * @return The created DocumentSnapshot.
    */
-  static fromObject<AppModelType, DbModelType>(
+  static fromObject<AppModelType, DbModelType extends firestore.DocumentData>(
     ref: firestore.DocumentReference<AppModelType, DbModelType>,
-    obj: DbModelType
+    obj: firestore.DocumentData
   ): DocumentSnapshot<AppModelType, DbModelType> {
-    const serializer = (ref as DocumentReference<AppModelType, DbModelType>)
-      .firestore._serializer!;
+    const serializer = (ref.firestore as Firestore)._serializer!;
     return new DocumentSnapshot(
-      ref as DocumentReference<AppModelType, DbModelType>,
+      validateDocumentReference('documentRef', ref),
       serializer.encodeFields(obj)
     );
   }
@@ -174,7 +179,10 @@ export class DocumentSnapshot<
    * @param data The field/value map to expand.
    * @return The created DocumentSnapshot.
    */
-  static fromUpdateMap<AppModelType, DbModelType>(
+  static fromUpdateMap<
+    AppModelType,
+    DbModelType extends firestore.DocumentData
+  >(
     ref: firestore.DocumentReference<AppModelType, DbModelType>,
     data: UpdateMap
   ): DocumentSnapshot<AppModelType, DbModelType> {
@@ -432,7 +440,7 @@ export class DocumentSnapshot<
           this.readTime,
           this.createTime!,
           this.updateTime!
-        )
+        ) as firestore.QueryDocumentSnapshot
       );
     } else {
       const obj: firestore.DocumentData = {};
@@ -547,9 +555,7 @@ export class DocumentSnapshot<
    * @return {boolean} true if this `DocumentSnapshot` is equal to the provided
    * value.
    */
-  isEqual(
-    other: firestore.DocumentSnapshot<AppModelType, DbModelType>
-  ): boolean {
+  isEqual(other: unknown): boolean {
     // Since the read time is different on every document read, we explicitly
     // ignore all document metadata in this comparison.
     return (
@@ -944,7 +950,10 @@ export class DocumentMask {
  * @internal
  * @class
  */
-export class DocumentTransform<T = firestore.DocumentData> {
+export class DocumentTransform<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
+> {
   /**
    * @private
    * @internal
@@ -954,7 +963,7 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * @param transforms A Map of FieldPaths to FieldTransforms.
    */
   constructor(
-    private readonly ref: DocumentReference<T>,
+    private readonly ref: DocumentReference<AppModelType, DbModelType>,
     private readonly transforms: Map<FieldPath, FieldTransform>
   ) {}
 
@@ -967,10 +976,10 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * @param obj The object to extract the transformations from.
    * @returns The Document Transform.
    */
-  static fromObject<T>(
-    ref: firestore.DocumentReference<T>,
+  static fromObject<AppModelType, DbModelType extends firestore.DocumentData>(
+    ref: firestore.DocumentReference<AppModelType, DbModelType>,
     obj: firestore.DocumentData
-  ): DocumentTransform<T> {
+  ): DocumentTransform<AppModelType, DbModelType> {
     const updateMap = new Map<FieldPath, unknown>();
 
     for (const prop of Object.keys(obj)) {
@@ -989,10 +998,13 @@ export class DocumentTransform<T = firestore.DocumentData> {
    * @param data The update data to extract the transformations from.
    * @returns The Document Transform.
    */
-  static fromUpdateMap<T>(
-    ref: firestore.DocumentReference<T>,
+  static fromUpdateMap<
+    AppModelType,
+    DbModelType extends firestore.DocumentData
+  >(
+    ref: firestore.DocumentReference<AppModelType, DbModelType>,
     data: UpdateMap
-  ): DocumentTransform<T> {
+  ): DocumentTransform<AppModelType, DbModelType> {
     const transforms = new Map<FieldPath, FieldTransform>();
 
     function encode_(
@@ -1024,7 +1036,10 @@ export class DocumentTransform<T = firestore.DocumentData> {
       encode_(value, FieldPath.fromArgument(key), true);
     });
 
-    return new DocumentTransform(ref as DocumentReference<T>, transforms);
+    return new DocumentTransform(
+      ref as DocumentReference<AppModelType, DbModelType>,
+      transforms
+    );
   }
 
   /**

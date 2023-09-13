@@ -23,7 +23,7 @@ import * as firestore from '@google-cloud/firestore';
  * or {@link Filter#and} and can then be passed to {@link Query#where}
  * to create a new {@link Query} instance that also contains this `Filter`.
  */
-export abstract class Filter {
+export abstract class Filter extends firestore.Filter {
   /**
    * Creates and returns a new [Filter]{@link Filter}, which can be
    * applied to [Query.where()]{@link Query#where}, [Filter.or()]{@link Filter#or},

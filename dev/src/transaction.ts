@@ -89,7 +89,7 @@ export class Transaction implements firestore.Transaction {
    * @return {Promise<QuerySnapshot>} A QuerySnapshot for the retrieved data.
    */
   get<AppModelType, DbModelType extends firestore.DocumentData>(
-    query: Query<AppModelType, DbModelType>
+    query: firestore.Query<AppModelType, DbModelType>
   ): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
   /**
@@ -111,9 +111,9 @@ export class Transaction implements firestore.Transaction {
    * @return An AggregateQuerySnapshot for the retrieved data.
    */
   get<
-    AggregateSpecType extends firestore.AggregateSpec,
     AppModelType,
-    DbModelType extends firestore.DocumentData
+    DbModelType extends firestore.DocumentData,
+    AggregateSpecType extends firestore.AggregateSpec
   >(
     aggregateQuery: firestore.AggregateQuery<
       AggregateSpecType,
@@ -175,10 +175,7 @@ export class Transaction implements firestore.Transaction {
       return refOrQuery._get(this._transactionId);
     }
 
-    if (
-      refOrQuery instanceof
-      AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
-    ) {
+    if (refOrQuery instanceof AggregateQuery) {
       return refOrQuery._get(this._transactionId);
     }
 

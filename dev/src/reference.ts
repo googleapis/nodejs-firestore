@@ -58,7 +58,7 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
-import {DocumentData, FirestoreDataConverter} from '@google-cloud/firestore';
+import {DocumentData} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -257,7 +257,7 @@ export class DocumentReference<
    * }):
    * ```
    */
-  get parent(): CollectionReference<AppModelType, DbModelType> {
+  get parent(): firestore.CollectionReference<AppModelType, DbModelType> {
     return new CollectionReference<AppModelType, DbModelType>(
       this._firestore,
       this._path.parent()!,
@@ -285,7 +285,9 @@ export class DocumentReference<
    * ```
    */
   get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
-    return this._firestore.getAll(this).then(([result]) => result);
+    return this._firestore
+      .getAll<AppModelType, DbModelType>(this)
+      .then(([result]) => result);
   }
 
   /**
@@ -601,9 +603,7 @@ export class DocumentReference<
    * @return {boolean} true if this `DocumentReference` is equal to the provided
    * value.
    */
-  isEqual(
-    other: firestore.DocumentReference<AppModelType, DbModelType>
-  ): boolean {
+  isEqual(other: unknown): boolean {
     return (
       this === other ||
       (other instanceof DocumentReference &&
@@ -739,7 +739,7 @@ abstract class FilterInternal {
   /** Returns the proto representation of this filter */
   abstract toProto(): Filter;
 
-  abstract isEqual(other: FilterInternal): boolean;
+  abstract isEqual(other: unknown): boolean;
 }
 
 class CompositeFilterInternal extends FilterInternal {
@@ -1159,7 +1159,7 @@ export class QuerySnapshot<
    * @return {boolean} true if this `QuerySnapshot` is equal to the provided
    * value.
    */
-  isEqual(other: firestore.QuerySnapshot<AppModelType, DbModelType>): boolean {
+  isEqual(other: unknown): boolean {
     // Since the read time is different on every query read, we explicitly
     // ignore all metadata in this comparison.
 
@@ -1349,7 +1349,7 @@ export class QueryOptions<
     );
   }
 
-  withConverter<AppModelType, DbModelType>(
+  withConverter<AppModelType, DbModelType extends firestore.DocumentData>(
     converter: firestore.FirestoreDataConverter<AppModelType, DbModelType>
   ): QueryOptions<AppModelType, DbModelType> {
     return new QueryOptions<AppModelType, DbModelType>(
@@ -1372,7 +1372,7 @@ export class QueryOptions<
     return this.fieldOrders.length > 0;
   }
 
-  isEqual(other: QueryOptions<AppModelType, DbModelType>): boolean {
+  isEqual(other: unknown): boolean {
     if (this === other) {
       return true;
     }
@@ -1556,16 +1556,16 @@ export class Query<
    * });
    * ```
    */
-  where(filter: Filter): Query<AppModelType, DbModelType>;
+  where(filter: firestore.Filter): Query<AppModelType, DbModelType>;
 
   where(
-    fieldPathOrFilter: string | firestore.FieldPath | Filter,
+    fieldPathOrFilter: string | firestore.FieldPath | firestore.Filter,
     opStr?: firestore.WhereFilterOp,
     value?: unknown
   ): Query<AppModelType, DbModelType> {
-    let filter: Filter;
+    let filter: firestore.Filter;
 
-    if (fieldPathOrFilter instanceof Filter) {
+    if (fieldPathOrFilter instanceof firestore.Filter) {
       filter = fieldPathOrFilter;
     } else {
       filter = Filter.where(fieldPathOrFilter, opStr!, value);
@@ -2094,9 +2094,7 @@ export class Query<
    * ```
    */
   startAt(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: unknown[]
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.startAt',
@@ -2140,9 +2138,7 @@ export class Query<
    * ```
    */
   startAfter(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.startAfter',
@@ -2185,9 +2181,7 @@ export class Query<
    * ```
    */
   endBefore(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.endBefore',
@@ -2230,9 +2224,7 @@ export class Query<
    * ```
    */
   endAt(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.endAt',
@@ -2759,9 +2751,9 @@ export class Query<
   }
 
   withConverter(converter: null): Query;
-  withConverter<AppModelType, DbModelType>(
-    converter: firestore.FirestoreDataConverter<AppModelType, DbModelType>
-  ): Query<AppModelType, DbModelType>;
+  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
+    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+  ): Query<NewAppModelType, NewDbModelType>;
   /**
    * Applies a custom data converter to this Query, allowing you to use your
    * own custom model objects with Firestore. When you call get() on the
@@ -2812,13 +2804,13 @@ export class Query<
    * from Firestore. Passing in `null` removes the current converter.
    * @return A Query that uses the provided converter.
    */
-  withConverter<AppModelType, DbModelType>(
+  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
     converter: firestore.FirestoreDataConverter<
-      AppModelType,
-      DbModelType
+      NewAppModelType,
+      NewDbModelType
     > | null
-  ): Query<AppModelType, DbModelType> {
-    return new Query<AppModelType, DbModelType>(
+  ): Query<NewAppModelType, NewDbModelType> {
+    return new Query<NewAppModelType, NewDbModelType>(
       this.firestore,
       this._queryOptions.withConverter(converter ?? defaultConverter())
     );
@@ -2845,6 +2837,7 @@ export class CollectionReference<
    *
    * @param firestore The Firestore Database client.
    * @param path The Path of this collection.
+   * @param converter
    */
   constructor(
     firestore: Firestore,
@@ -3163,7 +3156,8 @@ export class AggregateQuery<
   AggregateSpecType extends firestore.AggregateSpec,
   AppModelType = DocumentData,
   DbModelType extends DocumentData = DocumentData
-> implements firestore.AggregateQuery<AggregateSpecType>
+> implements
+    firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
 {
   /**
    * @private
@@ -3401,7 +3395,7 @@ export class AggregateQuery<
 export class AggregateQuerySnapshot<
   AggregateSpecType extends firestore.AggregateSpec,
   AppModelType,
-  DbModelType
+  DbModelType extends firestore.DocumentData
 > implements
     firestore.AggregateQuerySnapshot<
       AggregateSpecType,
@@ -3566,10 +3560,13 @@ export function validateQueryOperator(
  * @param value The argument to validate.
  * @return the DocumentReference if valid
  */
-export function validateDocumentReference(
+export function validateDocumentReference<
+  AppModelType,
+  DbModelType extends DocumentData
+>(
   arg: string | number,
-  value: unknown
-): DocumentReference {
+  value: firestore.DocumentReference<AppModelType, DbModelType>
+): DocumentReference<AppModelType, DbModelType> {
   if (!(value instanceof DocumentReference)) {
     throw new Error(invalidArgumentMessage(arg, 'DocumentReference'));
   }

@@ -89,7 +89,7 @@ export class WriteResult implements firestore.WriteResult {
    * @param {*} other The value to compare against.
    * @return true if this `WriteResult` is equal to the provided value.
    */
-  isEqual(other: firestore.WriteResult): boolean {
+  isEqual(other: unknown): boolean {
     return (
       this === other ||
       (other instanceof WriteResult &&
@@ -189,7 +189,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  create<AppModelType, DbModelType>(
+  create<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.WithFieldValue<AppModelType>
   ): WriteBatch {
@@ -253,7 +253,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  delete<AppModelType, DbModelType>(
+  delete<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     precondition?: firestore.Precondition
   ): WriteBatch {
@@ -277,12 +277,12 @@ export class WriteBatch implements firestore.WriteBatch {
     return this;
   }
 
-  set<AppModelType, DbModelType>(
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.PartialWithFieldValue<AppModelType>,
     options: firestore.SetOptions
   ): WriteBatch;
-  set<AppModelType, DbModelType>(
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.WithFieldValue<AppModelType>
   ): WriteBatch;
@@ -320,7 +320,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  set<AppModelType, DbModelType>(
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.PartialWithFieldValue<AppModelType>,
     options?: firestore.SetOptions

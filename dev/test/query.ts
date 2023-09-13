@@ -898,7 +898,7 @@ describe('query interface', () => {
 
     return createInstance(overrides).then(async firestoreInstance => {
       firestore = firestoreInstance;
-      const coll = await firestore
+      const coll = firestore
         .collection('collectionId')
         .withConverter(postConverter);
 

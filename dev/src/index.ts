@@ -1301,9 +1301,10 @@ export class Firestore implements firestore.Firestore {
       1
     );
 
-    const {documents, fieldMask} = parseGetAllArguments(
-      documentRefsOrReadOptions
-    );
+    const {documents, fieldMask} = parseGetAllArguments<
+      AppModelType,
+      DbModelType
+    >(documentRefsOrReadOptions);
     const tag = requestTag();
 
     // Capture the error stack to preserve stack tracing across async calls.
@@ -1311,7 +1312,10 @@ export class Firestore implements firestore.Firestore {
 
     return this.initializeIfNeeded(tag)
       .then(() => {
-        const reader = new DocumentReader(this, documents);
+        const reader = new DocumentReader<AppModelType, DbModelType>(
+          this,
+          documents
+        );
         reader.fieldMask = fieldMask || undefined;
         return reader.get(tag);
       })

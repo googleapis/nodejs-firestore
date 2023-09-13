@@ -33,6 +33,7 @@ import {defaultConverter, RBTree} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
+import {DocumentData} from '@google-cloud/firestore';
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -53,7 +54,7 @@ export const WATCH_IDLE_TIMEOUT_MS = 120 * 1000;
 /*!
  * Sentinel value for a document remove.
  */
-const REMOVED = {} as DocumentSnapshotBuilder<unknown, any>;
+const REMOVED = {} as DocumentSnapshotBuilder<any, any>;
 
 /*!
  * The change type for document change events.
@@ -69,7 +70,10 @@ const ChangeType: {[k: string]: DocumentChangeType} = {
  * The comparator used for document watches (which should always get called with
  * the same document).
  */
-const DOCUMENT_WATCH_COMPARATOR: <AppModelType, DbModelType>(
+const DOCUMENT_WATCH_COMPARATOR: <
+  AppModelType,
+  DbModelType extends DocumentData
+>(
   doc1: QueryDocumentSnapshot<AppModelType, DbModelType>,
   doc2: QueryDocumentSnapshot<AppModelType, DbModelType>
 ) => number = (doc1, doc2) => {
@@ -109,7 +113,10 @@ const EMPTY_FUNCTION: () => void = () => {};
  * changed documents since the last snapshot delivered for this watch.
  */
 
-type DocumentComparator<AppModelType, DbModelType> = (
+type DocumentComparator<
+  AppModelType,
+  DbModelType extends firestore.DocumentData
+> = (
   l: QueryDocumentSnapshot<AppModelType, DbModelType>,
   r: QueryDocumentSnapshot<AppModelType, DbModelType>
 ) => number;
@@ -226,6 +233,7 @@ abstract class Watch<
    * @internal
    *
    * @param firestore The Firestore Database client.
+   * @param _converter
    */
   constructor(
     firestore: Firestore,
@@ -598,7 +606,7 @@ abstract class Watch<
       if (changed) {
         logger('Watch.onData', this.requestTag, 'Received document change');
         const ref = this.firestore.doc(relativeName);
-        const snapshot = new DocumentSnapshotBuilder(
+        const snapshot = new DocumentSnapshotBuilder<AppModelType, DbModelType>(
           ref.withConverter(this._converter)
         );
         snapshot.fieldsProto = document.fields || {};
