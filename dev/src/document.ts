@@ -30,7 +30,7 @@ import {ApiMapValue, defaultConverter, UpdateMap} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 
 import api = google.firestore.v1;
-import Firestore from './index';
+import {Firestore} from './index';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.

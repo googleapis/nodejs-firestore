@@ -28,7 +28,6 @@ import {
   MAX_RETRY_ATTEMPTS,
 } from './backoff';
 import {RateLimiter} from './rate-limiter';
-import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
 import {
   Deferred,
