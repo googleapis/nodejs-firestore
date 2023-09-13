@@ -58,7 +58,6 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
-import {DocumentData} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1304,8 +1303,11 @@ export class QueryOptions<
     parent: ResourcePath,
     id: string,
     requireConsistency = true
-  ): QueryOptions<DocumentData, DocumentData> {
-    let options = new QueryOptions<DocumentData, DocumentData>(
+  ): QueryOptions<firestore.DocumentData, firestore.DocumentData> {
+    let options = new QueryOptions<
+      firestore.DocumentData,
+      firestore.DocumentData
+    >(
       parent,
       id,
       defaultConverter(),
@@ -3081,7 +3083,7 @@ export class CollectionReference<
   }
 
   withConverter(converter: null): CollectionReference;
-  withConverter<NewAppModelType, NewDbModelType extends DocumentData>(
+  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): CollectionReference<NewAppModelType, NewDbModelType>;
   /**
@@ -3135,7 +3137,7 @@ export class CollectionReference<
    * from Firestore. Passing in `null` removes the current converter.
    * @return A CollectionReference that uses the provided converter.
    */
-  withConverter<NewAppModelType, NewDbModelType extends DocumentData>(
+  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
       NewDbModelType
@@ -3154,8 +3156,8 @@ export class CollectionReference<
  */
 export class AggregateQuery<
   AggregateSpecType extends firestore.AggregateSpec,
-  AppModelType = DocumentData,
-  DbModelType extends DocumentData = DocumentData
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > implements
     firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
 {
@@ -3562,7 +3564,7 @@ export function validateQueryOperator(
  */
 export function validateDocumentReference<
   AppModelType,
-  DbModelType extends DocumentData
+  DbModelType extends firestore.DocumentData
 >(
   arg: string | number,
   value: firestore.DocumentReference<AppModelType, DbModelType>
