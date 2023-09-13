@@ -2440,6 +2440,570 @@ describe('startAt() interface', () => {
     });
   });
 
+  describe('inequality fields are implicitly ordered lexicographically for cursors', () => {
+    it('upper and lower case characters', () => {
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          queryEquals(
+            request,
+            orderBy(
+              'A',
+              'ASCENDING',
+              'a',
+              'ASCENDING',
+              'aa',
+              'ASCENDING',
+              'b',
+              'ASCENDING',
+              '__name__',
+              'ASCENDING'
+            ),
+            startAt(true, 'A', 'a', 'aa', 'b', {
+              referenceValue:
+                `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+            }),
+            fieldFiltersQuery(
+              'a',
+              'LESS_THAN',
+              'value',
+              'a',
+              'GREATER_THAN_OR_EQUAL',
+              'value',
+              'aa',
+              'GREATER_THAN',
+              'value',
+              'b',
+              'GREATER_THAN',
+              'value',
+              'A',
+              'GREATER_THAN',
+              'value'
+            )
+          );
+          return stream();
+        },
+      };
+
+      return createInstance(overrides).then(firestoreInstance => {
+        firestore = firestoreInstance;
+        return snapshot('collectionId/doc', {
+          a: 'a',
+          aa: 'aa',
+          b: 'b',
+          A: 'A',
+        }).then(doc => {
+          const query = firestore
+            .collection('collectionId')
+            .where('a', '<', 'value')
+            .where('a', '>=', 'value')
+            .where('aa', '>', 'value')
+            .where('b', '>', 'value')
+            .where('A', '>', 'value')
+            .startAt(doc);
+          return query.get();
+        });
+      });
+    });
+
+    it('characters and numbers', () => {
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          queryEquals(
+            request,
+            orderBy(
+              '`1`',
+              'ASCENDING',
+              '`19`',
+              'ASCENDING',
+              '`2`',
+              'ASCENDING',
+              'a',
+              'ASCENDING',
+              '__name__',
+              'ASCENDING'
+            ),
+            startAt(true, '1', '19', '2', 'a', {
+              referenceValue:
+                `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+            }),
+            fieldFiltersQuery(
+              'a',
+              'LESS_THAN',
+              'value',
+              '`1`',
+              'GREATER_THAN',
+              'value',
+              '`19`',
+              'GREATER_THAN',
+              'value',
+              '`2`',
+              'GREATER_THAN',
+              'value'
+            )
+          );
+          return stream();
+        },
+      };
+
+      return createInstance(overrides).then(firestoreInstance => {
+        firestore = firestoreInstance;
+        return snapshot('collectionId/doc', {
+          a: 'a',
+          1: '1',
+          19: '19',
+          2: '2',
+        }).then(doc => {
+          const query = firestore
+            .collection('collectionId')
+            .where('a', '<', 'value')
+            .where('1', '>', 'value')
+            .where('19', '>', 'value')
+            .where('2', '>', 'value')
+            .startAt(doc);
+          return query.get();
+        });
+      });
+    });
+
+    it('nested fields', () => {
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          queryEquals(
+            request,
+            orderBy(
+              'a',
+              'ASCENDING',
+              'a.a',
+              'ASCENDING',
+              'aa',
+              'ASCENDING',
+              '__name__',
+              'ASCENDING'
+            ),
+            startAt(
+              true,
+              {
+                mapValue: {
+                  fields: {
+                    a: {
+                      stringValue: 'a.a',
+                    },
+                  },
+                },
+              },
+              'a.a',
+              'aa',
+              {
+                referenceValue:
+                  `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc',
+              }
+            ),
+            fieldFiltersQuery(
+              'a',
+              'LESS_THAN',
+              'value',
+              'a.a',
+              'GREATER_THAN',
+              'value',
+              'aa',
+              'GREATER_THAN',
+              'value'
+            )
+          );
+          return stream();
+        },
+      };
+
+      return createInstance(overrides).then(firestoreInstance => {
+        firestore = firestoreInstance;
+        return snapshot('collectionId/doc', {a: {a: 'a.a'}, aa: 'aa'}).then(
+          doc => {
+            const query = firestore
+              .collection('collectionId')
+              .where('a', '<', 'value')
+              .where('a.a', '>', 'value')
+              .where('aa', '>', 'value')
+              .startAt(doc);
+            return query.get();
+          }
+        );
+      });
+    });
+
+    it('special characters', () => {
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          queryEquals(
+            request,
+            orderBy(
+              '_a',
+              'ASCENDING',
+              'a',
+              'ASCENDING',
+              'a.a',
+              'ASCENDING',
+              '__name__',
+              'ASCENDING'
+            ),
+            startAt(
+              true,
+              '_a',
+              {
+                mapValue: {
+                  fields: {
+                    a: {
+                      stringValue: 'a.a',
+                    },
+                  },
+                },
+              },
+              'a.a',
+              {
+                referenceValue:
+                  `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc',
+              }
+            ),
+            fieldFiltersQuery(
+              'a',
+              'LESS_THAN',
+              'a',
+              '_a',
+              'GREATER_THAN',
+              '_a',
+              'a.a',
+              'GREATER_THAN',
+              'a.a'
+            )
+          );
+          return stream();
+        },
+      };
+
+      return createInstance(overrides).then(firestoreInstance => {
+        firestore = firestoreInstance;
+        return snapshot('collectionId/doc', {a: {a: 'a.a'}, _a: '_a'}).then(
+          doc => {
+            const query = firestore
+              .collection('collectionId')
+              .where('a', '<', 'a')
+              .where('_a', '>', '_a')
+              .where('a.a', '>', 'a.a')
+              .startAt(doc);
+            return query.get();
+          }
+        );
+      });
+    });
+
+    it('field name with dot', () => {
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          queryEquals(
+            request,
+            orderBy(
+              'a',
+              'ASCENDING',
+              'a.z',
+              'ASCENDING',
+              '`a.a`',
+              'ASCENDING',
+              '__name__',
+              'ASCENDING'
+            ),
+            startAt(
+              true,
+              {
+                mapValue: {
+                  fields: {
+                    z: {
+                      stringValue: 'a.z',
+                    },
+                  },
+                },
+              },
+              'a.z',
+              'a.a',
+              {
+                referenceValue:
+                  `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc',
+              }
+            ),
+            fieldFiltersQuery(
+              'a',
+              'LESS_THAN',
+              'value',
+              '`a.a`',
+              'GREATER_THAN',
+              'value',
+              'a.z',
+              'GREATER_THAN',
+              'value'
+            )
+          );
+          return stream();
+        },
+      };
+
+      return createInstance(overrides).then(firestoreInstance => {
+        firestore = firestoreInstance;
+        return snapshot('collectionId/doc', {a: {z: 'a.z'}, 'a.a': 'a.a'}).then(
+          doc => {
+            const query = firestore
+              .collection('collectionId')
+              .where('a', '<', 'value')
+              .where(new FieldPath('a.a'), '>', 'value') // field name with dot
+              .where('a.z', '>', 'value') // nested field
+              .startAt(doc);
+            return query.get();
+          }
+        );
+      });
+    });
+
+    it('composite filter', () => {
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          queryEquals(
+            request,
+            orderBy(
+              'a',
+              'ASCENDING',
+              'b',
+              'ASCENDING',
+              'c',
+              'ASCENDING',
+              'd',
+              'ASCENDING',
+              '__name__',
+              'ASCENDING'
+            ),
+            startAt(true, 'a', 'b', 'c', 'd', {
+              referenceValue:
+                `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+            }),
+            where(
+              compositeFilter(
+                'AND',
+                fieldFilter('a', 'LESS_THAN', 'value'),
+
+                compositeFilter(
+                  'AND',
+                  compositeFilter(
+                    'OR',
+                    fieldFilter('b', 'GREATER_THAN_OR_EQUAL', 'value'),
+                    fieldFilter('c', 'LESS_THAN_OR_EQUAL', 'value')
+                  ),
+                  compositeFilter(
+                    'OR',
+                    fieldFilter('d', 'GREATER_THAN', 'value'),
+                    fieldFilter('e', 'EQUAL', 'value')
+                  )
+                )
+              )
+            )
+          );
+          return stream();
+        },
+      };
+
+      return createInstance(overrides).then(firestoreInstance => {
+        firestore = firestoreInstance;
+        return snapshot('collectionId/doc', {
+          a: 'a',
+          b: 'b',
+          c: 'c',
+          d: 'd',
+          e: 'e',
+        }).then(doc => {
+          const query = firestore
+            .collection('collectionId')
+            .where('a', '<', 'value')
+            .where(
+              Filter.and(
+                Filter.or(
+                  Filter.where('b', '>=', 'value'),
+                  Filter.where('c', '<=', 'value')
+                ),
+                Filter.or(
+                  Filter.where('d', '>', 'value'),
+                  Filter.where('e', '==', 'value')
+                )
+              )
+            )
+            .startAt(doc);
+          return query.get();
+        });
+      });
+    });
+
+    it('explicit orderby', () => {
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          queryEquals(
+            request,
+            orderBy(
+              'z',
+              'ASCENDING',
+              'a',
+              'ASCENDING',
+              'b',
+              'ASCENDING',
+              '__name__',
+              'ASCENDING'
+            ),
+            startAt(true, 'z', 'a', 'b', {
+              referenceValue:
+                `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+            }),
+            fieldFiltersQuery(
+              'b',
+              'LESS_THAN',
+              'value',
+              'a',
+              'GREATER_THAN',
+              'value',
+              'z',
+              'GREATER_THAN',
+              'value'
+            )
+          );
+          return stream();
+        },
+      };
+
+      return createInstance(overrides).then(firestoreInstance => {
+        firestore = firestoreInstance;
+        return snapshot('collectionId/doc', {
+          a: 'a',
+          b: 'b',
+          z: 'z',
+        }).then(doc => {
+          const query = firestore
+            .collection('collectionId')
+            .where('b', '<', 'value')
+            .where('a', '>', 'value')
+            .where('z', '>', 'value')
+            .orderBy('z')
+            .startAt(doc);
+          return query.get();
+        });
+      });
+    });
+
+    it('explicit order by direction', () => {
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          queryEquals(
+            request,
+            orderBy(
+              'z',
+              'DESCENDING',
+              'a',
+              'DESCENDING',
+              'b',
+              'DESCENDING',
+              '__name__',
+              'DESCENDING'
+            ),
+            startAt(true, 'z', 'a', 'b', {
+              referenceValue:
+                `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+            }),
+            fieldFiltersQuery(
+              'b',
+              'LESS_THAN',
+              'value',
+              'a',
+              'GREATER_THAN',
+              'value'
+            )
+          );
+          return stream();
+        },
+      };
+
+      return createInstance(overrides).then(firestoreInstance => {
+        firestore = firestoreInstance;
+        return snapshot('collectionId/doc', {
+          a: 'a',
+          b: 'b',
+          z: 'z',
+        }).then(doc => {
+          const query = firestore
+            .collection('collectionId')
+            .where('b', '<', 'value')
+            .where('a', '>', 'value')
+            .orderBy('z', 'desc')
+            .startAt(doc);
+          return query.get();
+        });
+      });
+    });
+
+    it('last explicit order by direction', () => {
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          queryEquals(
+            request,
+            orderBy(
+              'z',
+              'DESCENDING',
+              'c',
+              'ASCENDING',
+              'a',
+              'ASCENDING',
+              'b',
+              'ASCENDING',
+              '__name__',
+              'ASCENDING'
+            ),
+            startAt(true, 'z', 'c', 'a', 'b', {
+              referenceValue:
+                `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+            }),
+            fieldFiltersQuery(
+              'b',
+              'LESS_THAN',
+              'value',
+              'a',
+              'GREATER_THAN',
+              'value'
+            )
+          );
+          return stream();
+        },
+      };
+
+      return createInstance(overrides).then(firestoreInstance => {
+        firestore = firestoreInstance;
+        return snapshot('collectionId/doc', {
+          a: 'a',
+          b: 'b',
+          c: 'c',
+          z: 'z',
+        }).then(doc => {
+          const query = firestore
+            .collection('collectionId')
+            .where('b', '<', 'value')
+            .where('a', '>', 'value')
+            .orderBy('z', 'desc')
+            .orderBy('c')
+            .startAt(doc);
+          return query.get();
+        });
+      });
+    });
+  });
+
   it('validates field exists in document snapshot', () => {
     const query = firestore.collection('collectionId').orderBy('foo', 'desc');
 
