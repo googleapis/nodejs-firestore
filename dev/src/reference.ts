@@ -1561,13 +1561,13 @@ export class Query<
   where(filter: firestore.Filter): Query<AppModelType, DbModelType>;
 
   where(
-    fieldPathOrFilter: string | firestore.FieldPath | firestore.Filter,
+    fieldPathOrFilter: string | FieldPath | Filter,
     opStr?: firestore.WhereFilterOp,
     value?: unknown
   ): Query<AppModelType, DbModelType> {
     let filter: firestore.Filter;
 
-    if (fieldPathOrFilter instanceof firestore.Filter) {
+    if (fieldPathOrFilter instanceof Filter) {
       filter = fieldPathOrFilter;
     } else {
       filter = Filter.where(fieldPathOrFilter, opStr!, value);
