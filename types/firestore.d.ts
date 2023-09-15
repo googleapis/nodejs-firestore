@@ -578,7 +578,7 @@ declare namespace FirebaseFirestore {
      * @param other The `GeoPoint` to compare against.
      * @return true if this `GeoPoint` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: GeoPoint): boolean;
   }
 
   /**
@@ -1217,7 +1217,7 @@ declare namespace FirebaseFirestore {
      * @param other The `WriteResult` to compare against.
      * @return true if this `WriteResult` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: WriteResult): boolean;
   }
 
   /**
@@ -1259,14 +1259,14 @@ declare namespace FirebaseFirestore {
      * @param collectionPath A slash-separated path to a collection.
      * @return The `CollectionReference` instance.
      */
-    collection(collectionPath: string): CollectionReference<DocumentData>;
+    collection(collectionPath: string): CollectionReference;
 
     /**
      * Fetches the subcollections that are direct children of this document.
      *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
-    listCollections(): Promise<Array<CollectionReference<DocumentData>>>;
+    listCollections(): Promise<Array<CollectionReference>>;
 
     /**
      * Creates a document referred to by this `DocumentReference` with the
@@ -1381,7 +1381,7 @@ declare namespace FirebaseFirestore {
      * @param other The `DocumentReference` to compare against.
      * @return true if this `DocumentReference` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: DocumentReference<AppModelType, DbModelType>): boolean;
 
     /**
      * Applies a custom data converter to this DocumentReference, allowing you
@@ -1562,7 +1562,7 @@ declare namespace FirebaseFirestore {
     where(
       fieldPath: string | FieldPath,
       opStr: WhereFilterOp,
-      value: unknown
+      value: any
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1659,7 +1659,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to start after.
      * @return The created Query.
      */
-    startAt(snapshot: DocumentSnapshot): Query<AppModelType, DbModelType>;
+    startAt(
+      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+    ): Query<AppModelType, DbModelType>;
 
     /**
      * Creates and returns a new Query that starts at the provided fields
@@ -1670,7 +1672,7 @@ declare namespace FirebaseFirestore {
      * of the query's order by.
      * @return The created Query.
      */
-    startAt(...fieldValues: unknown[]): Query<AppModelType, DbModelType>;
+    startAt(...fieldValues: any[]): Query<AppModelType, DbModelType>;
 
     /**
      * Creates and returns a new Query that starts after the provided document
@@ -1681,7 +1683,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to start after.
      * @return The created Query.
      */
-    startAfter(snapshot: DocumentSnapshot): Query<AppModelType, DbModelType>;
+    startAfter(
+      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+    ): Query<AppModelType, DbModelType>;
 
     /**
      * Creates and returns a new Query that starts after the provided fields
@@ -1703,7 +1707,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to end before.
      * @return The created Query.
      */
-    endBefore(snapshot: DocumentSnapshot): Query<AppModelType, DbModelType>;
+    endBefore(
+      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+    ): Query<AppModelType, DbModelType>;
 
     /**
      * Creates and returns a new Query that ends before the provided fields
@@ -1714,7 +1720,7 @@ declare namespace FirebaseFirestore {
      * of the query's order by.
      * @return The created Query.
      */
-    endBefore(...fieldValues: unknown[]): Query<AppModelType, DbModelType>;
+    endBefore(...fieldValues: any[]): Query<AppModelType, DbModelType>;
 
     /**
      * Creates and returns a new Query that ends at the provided document
@@ -1725,7 +1731,9 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to end at.
      * @return The created Query.
      */
-    endAt(snapshot: DocumentSnapshot): Query<AppModelType, DbModelType>;
+    endAt(
+      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+    ): Query<AppModelType, DbModelType>;
 
     /**
      * Creates and returns a new Query that ends at the provided fields
@@ -1796,7 +1804,7 @@ declare namespace FirebaseFirestore {
      * @param other The `Query` to compare against.
      * @return true if this `Query` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: Query<AppModelType, DbModelType>): boolean;
 
     /**
      * Applies a custom data converter to this Query, allowing you to use your
@@ -1873,7 +1881,7 @@ declare namespace FirebaseFirestore {
      * @param other The `QuerySnapshot` to compare against.
      * @return true if this `QuerySnapshot` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: QuerySnapshot<AppModelType, DbModelType>): boolean;
   }
 
   /**
@@ -1917,7 +1925,7 @@ declare namespace FirebaseFirestore {
      * @param other The `DocumentChange` to compare against.
      * @return true if this `DocumentChange` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: DocumentChange<AppModelType, DbModelType>): boolean;
   }
 
   /**
@@ -1938,7 +1946,7 @@ declare namespace FirebaseFirestore {
      * A reference to the containing Document if this is a subcollection, else
      * null.
      */
-    readonly parent: DocumentReference<DocumentData> | null;
+    readonly parent: DocumentReference | null;
 
     /**
      * A string representing the path of the referenced collection (relative
@@ -1999,7 +2007,7 @@ declare namespace FirebaseFirestore {
      * @param other The `CollectionReference` to compare against.
      * @return true if this `CollectionReference` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: CollectionReference<AppModelType, DbModelType>): boolean;
 
     /**
      * Applies a custom data converter to this CollectionReference, allowing you
@@ -2012,9 +2020,9 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A CollectionReference that uses the provided converter.
      */
-    withConverter<NewAppModelType>(
+    withConverter<NewAppModelType, NewDbModelType extends DocumentData>(
       converter: FirestoreDataConverter<NewAppModelType>
-    ): CollectionReference<NewAppModelType, DbModelType>;
+    ): CollectionReference<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): CollectionReference;
   }
 
@@ -2184,7 +2192,9 @@ declare namespace FirebaseFirestore {
      *
      * @return A promise that will be resolved with the results of the query.
      */
-    get(): Promise<AggregateQuerySnapshot<AggregateSpecType>>;
+    get(): Promise<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >;
 
     /**
      * Compares this object with the given object for equality.
@@ -2198,7 +2208,9 @@ declare namespace FirebaseFirestore {
      * @return `true` if this object is "equal" to the given object, as
      * defined above, or `false` otherwise.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(
+      other: AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
+    ): boolean;
   }
 
   /**
@@ -2245,7 +2257,13 @@ declare namespace FirebaseFirestore {
      * @return `true` if this object is "equal" to the given object, as
      * defined above, or `false` otherwise.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(
+      other: AggregateQuerySnapshot<
+        AggregateSpecType,
+        AppModelType,
+        DbModelType
+      >
+    ): boolean;
   }
 
   /**
@@ -2324,7 +2342,7 @@ declare namespace FirebaseFirestore {
      * @param other The `FieldValue` to compare against.
      * @return true if this `FieldValue` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: FieldValue): boolean;
   }
 
   /**
@@ -2353,7 +2371,7 @@ declare namespace FirebaseFirestore {
      * @param other The `FieldPath` to compare against.
      * @return true if this `FieldPath` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: FieldPath): boolean;
   }
 
   /**
@@ -2438,7 +2456,7 @@ declare namespace FirebaseFirestore {
      * @param other The `Timestamp` to compare against.
      * @return 'true' if this `Timestamp` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: Timestamp): boolean;
 
     /**
      * Converts this object to a primitive `string`, which allows `Timestamp` objects to be compared
@@ -2463,7 +2481,9 @@ declare namespace FirebaseFirestore {
      * @param documentSnapshot A `DocumentSnapshot` to add.
      * @returns This instance.
      */
-    add(documentSnapshot: DocumentSnapshot): BundleBuilder;
+    add<AppModelType, DbModelType extends DocumentData>(
+      documentSnapshot: DocumentSnapshot<AppModelType, DbModelType>
+    ): BundleBuilder;
 
     /**
      * Adds a Firestore `QuerySnapshot` to the bundle. Both the documents in the query results and
@@ -2473,7 +2493,10 @@ declare namespace FirebaseFirestore {
      * @param querySnapshot A `QuerySnapshot` to add to the bundle.
      * @returns This instance.
      */
-    add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;
+    add<AppModelType, DbModelType extends DocumentData>(
+      queryName: string,
+      querySnapshot: QuerySnapshot<AppModelType, DbModelType>
+    ): BundleBuilder;
 
     /**
      * Builds the bundle and returns the result as a `Buffer` instance.
@@ -2560,7 +2583,7 @@ declare namespace FirebaseFirestore {
     static where(
       fieldPath: string | FieldPath,
       opStr: WhereFilterOp,
-      value: unknown
+      value: any
     ): Filter;
 
     /**

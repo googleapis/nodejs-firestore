@@ -2073,13 +2073,9 @@ describe('update document', () => {
     }).to.throw(INVALID_ARGUMENTS_TO_UPDATE);
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        {foo: 'bar'},
-        {exists: true},
-        'foo'
-      );
+      firestore
+        .doc('collectionId/documentId')
+        .update({foo: 'bar'}, {exists: true}, 'foo');
     }).to.throw(INVALID_ARGUMENTS_TO_UPDATE);
   });
 

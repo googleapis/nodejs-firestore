@@ -89,7 +89,7 @@ export class WriteResult implements firestore.WriteResult {
    * @param {*} other The value to compare against.
    * @return true if this `WriteResult` is equal to the provided value.
    */
-  isEqual(other: unknown): boolean {
+  isEqual(other: firestore.WriteResult): boolean {
     return (
       this === other ||
       (other instanceof WriteResult &&
@@ -331,10 +331,7 @@ export class WriteBatch implements firestore.WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
     let firestoreData: firestore.DocumentData;
     if (mergeLeaves || mergePaths) {
-      // Cast to any in order to satisfy the union type constraint on
-      // toFirestore().
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      firestoreData = (ref._converter as any).toFirestore(data, options);
+      firestoreData = ref._converter.toFirestore(data, options);
     } else {
       firestoreData = ref._converter.toFirestore(data as AppModelType);
     }
@@ -356,11 +353,11 @@ export class WriteBatch implements firestore.WriteBatch {
       firestoreData = documentMask.applyTo(firestoreData);
     }
 
-    const transform = DocumentTransform.fromObject(documentRef, firestoreData);
+    const transform = DocumentTransform.fromObject(ref, firestoreData);
     transform.validate();
 
     const op: PendingWriteOp = () => {
-      const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
+      const document = DocumentSnapshot.fromObject(ref, firestoreData);
 
       if (mergePaths) {
         documentMask!.removeFields(transform.fields);

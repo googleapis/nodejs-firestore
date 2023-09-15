@@ -100,7 +100,7 @@ export class Transaction implements firestore.Transaction {
    * @return {Promise<DocumentSnapshot>}  A DocumentSnapshot for the read data.
    */
   get<AppModelType, DbModelType extends firestore.DocumentData>(
-    documentRef: DocumentReference<AppModelType, DbModelType>
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>
   ): Promise<DocumentSnapshot<AppModelType, DbModelType>>;
 
   /**
@@ -413,7 +413,10 @@ export class Transaction implements firestore.Transaction {
     documentRef: DocumentReference<AppModelType, DbModelType>,
     precondition?: firestore.Precondition
   ): this {
-    this._writeBatch.delete(documentRef, precondition);
+    this._writeBatch.delete<AppModelType, DbModelType>(
+      documentRef,
+      precondition
+    );
     return this;
   }
 
@@ -584,7 +587,7 @@ export class Transaction implements firestore.Transaction {
  */
 export function parseGetAllArguments<
   AppModelType,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData
+  DbModelType extends firestore.DocumentData
 >(
   documentRefsOrReadOptions: Array<
     | firestore.DocumentReference<AppModelType, DbModelType>
@@ -621,7 +624,7 @@ export function parseGetAllArguments<
   }
 
   for (let i = 0; i < documents.length; ++i) {
-    validateDocumentReference(i, documents[i]);
+    validateDocumentReference<AppModelType, DbModelType>(i, documents[i]);
   }
 
   validateReadOptions('options', readOptions, {optional: true});

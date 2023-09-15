@@ -334,9 +334,7 @@ export class DocumentReference<
    * });
    * ```
    */
-  listCollections(): Promise<
-    Array<CollectionReference<firestore.DocumentData>>
-  > {
+  listCollections(): Promise<Array<CollectionReference>> {
     const tag = requestTag();
     return this.firestore.initializeIfNeeded(tag).then(() => {
       const request: api.IListCollectionIdsRequest = {
@@ -353,9 +351,7 @@ export class DocumentReference<
           tag
         )
         .then(collectionIds => {
-          const collections: Array<
-            CollectionReference<firestore.DocumentData>
-          > = [];
+          const collections: Array<CollectionReference> = [];
 
           // We can just sort this list using the default comparator since it
           // will only contain collection ids.
@@ -602,7 +598,9 @@ export class DocumentReference<
    * @return {boolean} true if this `DocumentReference` is equal to the provided
    * value.
    */
-  isEqual(other: unknown): boolean {
+  isEqual(
+    other: firestore.DocumentReference<AppModelType, DbModelType>
+  ): boolean {
     return (
       this === other ||
       (other instanceof DocumentReference &&
@@ -738,7 +736,7 @@ abstract class FilterInternal {
   /** Returns the proto representation of this filter */
   abstract toProto(): Filter;
 
-  abstract isEqual(other: unknown): boolean;
+  abstract isEqual(other: FilterInternal): boolean;
 }
 
 class CompositeFilterInternal extends FilterInternal {
@@ -1158,7 +1156,7 @@ export class QuerySnapshot<
    * @return {boolean} true if this `QuerySnapshot` is equal to the provided
    * value.
    */
-  isEqual(other: unknown): boolean {
+  isEqual(other: firestore.QuerySnapshot<AppModelType, DbModelType>): boolean {
     // Since the read time is different on every query read, we explicitly
     // ignore all metadata in this comparison.
 
@@ -1252,7 +1250,7 @@ export class QueryOptions<
    */
   static forCollectionGroupQuery<
     AppModelType,
-    DbModelType extends firestore.DocumentData = firestore.DocumentData
+    DbModelType extends firestore.DocumentData
   >(
     collectionId: string,
     converter: firestore.FirestoreDataConverter<
@@ -1374,7 +1372,7 @@ export class QueryOptions<
     return this.fieldOrders.length > 0;
   }
 
-  isEqual(other: unknown): boolean {
+  isEqual(other: QueryOptions<AppModelType, DbModelType>): boolean {
     if (this === other) {
       return true;
     }
@@ -1531,9 +1529,9 @@ export class Query<
    * ```
    */
   where(
-    fieldPath: string | firestore.FieldPath,
+    fieldPath: string | FieldPath,
     opStr: firestore.WhereFilterOp,
-    value: unknown
+    value: any
   ): Query<AppModelType, DbModelType>;
 
   /**
@@ -1558,7 +1556,7 @@ export class Query<
    * });
    * ```
    */
-  where(filter: firestore.Filter): Query<AppModelType, DbModelType>;
+  where(filter: Filter): Query<AppModelType, DbModelType>;
 
   where(
     fieldPathOrFilter: string | FieldPath | Filter,
@@ -2096,7 +2094,9 @@ export class Query<
    * ```
    */
   startAt(
-    ...fieldValuesOrDocumentSnapshot: unknown[]
+    ...fieldValuesOrDocumentSnapshot: Array<
+      firestore.DocumentSnapshot<unknown> | unknown
+    >
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.startAt',
@@ -2140,7 +2140,9 @@ export class Query<
    * ```
    */
   startAfter(
-    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+    ...fieldValuesOrDocumentSnapshot: Array<
+      firestore.DocumentSnapshot<unknown> | unknown
+    >
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.startAfter',
@@ -2183,7 +2185,9 @@ export class Query<
    * ```
    */
   endBefore(
-    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+    ...fieldValuesOrDocumentSnapshot: Array<
+      firestore.DocumentSnapshot<unknown> | unknown
+    >
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.endBefore',
@@ -2226,7 +2230,9 @@ export class Query<
    * ```
    */
   endAt(
-    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+    ...fieldValuesOrDocumentSnapshot: Array<
+      firestore.DocumentSnapshot<unknown> | unknown
+    >
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.endAt',
@@ -2683,9 +2689,7 @@ export class Query<
    * ```
    */
   onSnapshot(
-    onNext: (
-      snapshot: firestore.QuerySnapshot<AppModelType, DbModelType>
-    ) => void,
+    onNext: (snapshot: QuerySnapshot<AppModelType, DbModelType>) => void,
     onError?: (error: Error) => void
   ): () => void {
     validateFunction('onNext', onNext);
@@ -2844,7 +2848,7 @@ export class CollectionReference<
   constructor(
     firestore: Firestore,
     path: ResourcePath,
-    converter = defaultConverter<AppModelType, DbModelType>()
+    converter?: firestore.FirestoreDataConverter<AppModelType, DbModelType>
   ) {
     super(firestore, QueryOptions.forCollectionQuery(path, converter));
   }
@@ -2892,7 +2896,7 @@ export class CollectionReference<
    * console.log(`Parent name: ${documentRef.path}`);
    * ```
    */
-  get parent(): DocumentReference<firestore.DocumentData> | null {
+  get parent(): DocumentReference | null {
     if (this._queryOptions.parentPath.isDocument) {
       return new DocumentReference(
         this.firestore,
@@ -3176,7 +3180,7 @@ export class AggregateQuery<
   ) {}
 
   /** The query whose aggregations will be calculated by this object. */
-  get query(): firestore.Query<AppModelType, DbModelType> {
+  get query(): Query<AppModelType, DbModelType> {
     return this._query;
   }
 
@@ -3239,14 +3243,7 @@ export class AggregateQuery<
         if (proto.result) {
           const readTime = Timestamp.fromProto(proto.readTime!);
           const data = this.decodeResult(proto.result);
-          callback(
-            undefined,
-            new AggregateQuerySnapshot<
-              AggregateSpecType,
-              AppModelType,
-              DbModelType
-            >(this, readTime, data)
-          );
+          callback(undefined, new AggregateQuerySnapshot(this, readTime, data));
         } else {
           callback(Error('RunAggregationQueryResponse is missing result'));
         }
@@ -3377,7 +3374,13 @@ export class AggregateQuery<
    * @return `true` if this object is "equal" to the given object, as
    * defined above, or `false` otherwise.
    */
-  isEqual(other: firestore.AggregateQuery<AggregateSpecType>): boolean {
+  isEqual(
+    other: firestore.AggregateQuery<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >
+  ): boolean {
     if (this === other) {
       return true;
     }
@@ -3396,8 +3399,8 @@ export class AggregateQuery<
  */
 export class AggregateQuerySnapshot<
   AggregateSpecType extends firestore.AggregateSpec,
-  AppModelType,
-  DbModelType extends firestore.DocumentData
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > implements
     firestore.AggregateQuerySnapshot<
       AggregateSpecType,
@@ -3425,16 +3428,12 @@ export class AggregateQuerySnapshot<
   ) {}
 
   /** The query that was executed to produce this result. */
-  get query(): firestore.AggregateQuery<
-    AggregateSpecType,
-    AppModelType,
-    DbModelType
-  > {
+  get query(): AggregateQuery<AggregateSpecType, AppModelType, DbModelType> {
     return this._query;
   }
 
   /** The time this snapshot was read. */
-  get readTime(): firestore.Timestamp {
+  get readTime(): Timestamp {
     return this._readTime;
   }
 

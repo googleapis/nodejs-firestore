@@ -23,14 +23,13 @@ import * as assert from 'assert';
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldTransform} from './field-value';
 import {FieldPath, validateFieldPath} from './path';
-import {DocumentReference, validateDocumentReference} from './reference';
+import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, defaultConverter, UpdateMap} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 
 import api = google.firestore.v1;
-import {Firestore} from './index';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -158,14 +157,11 @@ export class DocumentSnapshot<
    * @return The created DocumentSnapshot.
    */
   static fromObject<AppModelType, DbModelType extends firestore.DocumentData>(
-    ref: firestore.DocumentReference<AppModelType, DbModelType>,
+    ref: DocumentReference<AppModelType, DbModelType>,
     obj: firestore.DocumentData
   ): DocumentSnapshot<AppModelType, DbModelType> {
-    const serializer = (ref.firestore as Firestore)._serializer!;
-    return new DocumentSnapshot(
-      validateDocumentReference('documentRef', ref),
-      serializer.encodeFields(obj)
-    );
+    const serializer = ref.firestore._serializer!;
+    return new DocumentSnapshot(ref, serializer.encodeFields(obj));
   }
   /**
    * Creates a DocumentSnapshot from an UpdateMap.
@@ -440,7 +436,7 @@ export class DocumentSnapshot<
           this.readTime,
           this.createTime!,
           this.updateTime!
-        ) as firestore.QueryDocumentSnapshot
+        )
       );
     } else {
       const obj: firestore.DocumentData = {};
@@ -555,7 +551,9 @@ export class DocumentSnapshot<
    * @return {boolean} true if this `DocumentSnapshot` is equal to the provided
    * value.
    */
-  isEqual(other: unknown): boolean {
+  isEqual(
+    other: firestore.DocumentSnapshot<AppModelType, DbModelType>
+  ): boolean {
     // Since the read time is different on every document read, we explicitly
     // ignore all document metadata in this comparison.
     return (
@@ -986,7 +984,10 @@ export class DocumentTransform<
       updateMap.set(new FieldPath(prop), obj[prop]);
     }
 
-    return DocumentTransform.fromUpdateMap(ref, updateMap);
+    return DocumentTransform.fromUpdateMap<AppModelType, DbModelType>(
+      ref,
+      updateMap
+    );
   }
 
   /**
