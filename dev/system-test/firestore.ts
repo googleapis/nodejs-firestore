@@ -1015,6 +1015,17 @@ describe('DocumentReference class', () => {
     return promise;
   });
 
+  it.only('can write and read vector embeddings', async () => {
+    const ref = randomCol.doc();
+    await ref.create({
+      vectorEmpty: FieldValue.vector([1, 3]),
+      vector1: FieldValue.vector([1, 2, 3.99]),
+    });
+    const snap1 = await ref.get();
+    expect(snap1.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    // expect(snap1.get('vector1')).to.deep.equal(FieldValue.vector([1, 2, 3.99]));
+  });
+
   describe('watch', () => {
     const currentDeferred = new DeferredPromise<DocumentSnapshot>();
 

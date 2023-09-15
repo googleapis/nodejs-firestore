@@ -30,6 +30,49 @@ import {
 
 import api = proto.google.firestore.v1;
 
+export class VectorValue {
+  private readonly values: number[];
+  constructor(values: number[] | undefined) {
+    this.values = values || [];
+  }
+
+  public toArray(): number[] {
+    return this.values;
+  }
+
+  /**
+   * @private
+   */
+  toProto(serializer: Serializer): api.IValue {
+    return serializer.encodeVector({
+      arrayValue: {
+        values: this.values.map(value => {
+          return {
+            doubleValue: value,
+          };
+        }),
+      },
+    });
+  }
+
+  /**
+   * @private
+   */
+  static fromProto(valueArray: api.IValue): VectorValue {
+    const values = valueArray.arrayValue?.values?.map(v => {
+      return v.doubleValue!;
+    });
+    return new VectorValue(values);
+  }
+
+  /**
+   * @private
+   */
+  isEqual(other: VectorValue): boolean {
+    return this.values === other.values;
+  }
+}
+
 /**
  * Sentinel values that can be used when writing documents with set(), create()
  * or update().
@@ -39,6 +82,10 @@ import api = proto.google.firestore.v1;
 export class FieldValue implements firestore.FieldValue {
   /** @private */
   constructor() {}
+
+  static vector(values?: number[]): VectorValue {
+    return new VectorValue(values);
+  }
 
   /**
    * Returns a sentinel for use with update() or set() with {merge:true} to mark

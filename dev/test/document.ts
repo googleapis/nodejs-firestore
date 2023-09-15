@@ -470,6 +470,43 @@ describe('serialize document', () => {
       return ref.set({ref});
     });
   });
+
+  it('is able to translate FirestoreVector to internal representation with set', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'embedding1', {
+              mapValue: {
+                fields: {
+                  __type__: {
+                    stringValue: '__vector__',
+                  },
+                  value: {
+                    arrayValue: {
+                      values: [
+                        {doubleValue: 0},
+                        {doubleValue: 1},
+                        {doubleValue: 2},
+                      ],
+                    },
+                  },
+                },
+              },
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        embedding1: FieldValue.vector([0, 1, 2]),
+      });
+    });
+  });
 });
 
 describe('deserialize document', () => {
@@ -594,6 +631,46 @@ describe('deserialize document', () => {
         .then(res => {
           expect(res.get('bigIntValue')).to.be.a('bigint');
           expect(res.get('bigIntValue')).to.equal(BigInt('9007199254740992'));
+        });
+    });
+  });
+
+  it('deserializes FirestoreVector', () => {
+    const overrides: ApiOverride = {
+      batchGetDocuments: () => {
+        return stream(
+          found(
+            document('documentId', 'embedding', {
+              mapValue: {
+                fields: {
+                  __type__: {
+                    stringValue: '__vector__',
+                  },
+                  value: {
+                    arrayValue: {
+                      values: [
+                        {doubleValue: -41.0},
+                        {doubleValue: 0},
+                        {doubleValue: 42},
+                      ],
+                    },
+                  },
+                },
+              },
+            })
+          )
+        );
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore
+        .doc('collectionId/documentId')
+        .get()
+        .then(res => {
+          expect(res.get('embedding')).to.deep.equal(
+            FieldValue.vector([-41.0, 0, 42])
+          );
         });
     });
   });
