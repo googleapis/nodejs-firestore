@@ -195,7 +195,7 @@ export class WriteBatch implements firestore.WriteBatch {
   ): WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
     const firestoreData = ref._converter.toFirestore(
-      data as firestore.WithFieldValue<T>
+      data as firestore.WithFieldValue<Document>
     );
     validateDocumentData(
       'data',
@@ -336,7 +336,7 @@ export class WriteBatch implements firestore.WriteBatch {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       firestoreData = (ref._converter as any).toFirestore(data, options);
     } else {
-      firestoreData = ref._converter.toFirestore(data as T);
+      firestoreData = ref._converter.toFirestore(data as any);
     }
     validateDocumentData(
       'data',
@@ -489,7 +489,7 @@ export class WriteBatch implements firestore.WriteBatch {
         // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
 
-        Object.entries(dataOrField as firestore.UpdateData<T>).forEach(
+        Object.entries(dataOrField as firestore.UpdateData<{}>).forEach(
           ([key, value]) => {
             // Skip `undefined` values (can be hit if `ignoreUndefinedProperties`
             // is set)

@@ -581,8 +581,10 @@ export class BulkWriter {
     data: firestore.WithFieldValue<T>
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    return this._enqueue(documentRef, 'create', bulkCommitBatch =>
-      bulkCommitBatch.create(documentRef, data)
+    return this._enqueue(
+      documentRef as firestore.DocumentReference<unknown>,
+      'create',
+      bulkCommitBatch => bulkCommitBatch.create(documentRef, data)
     );
   }
 
@@ -621,8 +623,10 @@ export class BulkWriter {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    return this._enqueue(documentRef, 'delete', bulkCommitBatch =>
-      bulkCommitBatch.delete(documentRef, precondition)
+    return this._enqueue(
+      documentRef as firestore.DocumentReference<unknown>,
+      'delete',
+      bulkCommitBatch => bulkCommitBatch.delete(documentRef, precondition)
     );
   }
 
@@ -681,16 +685,20 @@ export class BulkWriter {
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    return this._enqueue(documentRef, 'set', bulkCommitBatch => {
-      if (options) {
-        return bulkCommitBatch.set(documentRef, data, options);
-      } else {
-        return bulkCommitBatch.set(
-          documentRef,
-          data as firestore.WithFieldValue<T>
-        );
+    return this._enqueue(
+      documentRef as firestore.DocumentReference<unknown>,
+      'set',
+      bulkCommitBatch => {
+        if (options) {
+          return bulkCommitBatch.set(documentRef, data, options);
+        } else {
+          return bulkCommitBatch.set(
+            documentRef,
+            data as firestore.WithFieldValue<T>
+          );
+        }
       }
-    });
+    );
   }
 
   /**
@@ -745,8 +753,15 @@ export class BulkWriter {
     >
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    return this._enqueue(documentRef, 'update', bulkCommitBatch =>
-      bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues)
+    return this._enqueue(
+      documentRef as firestore.DocumentReference<unknown>,
+      'update',
+      bulkCommitBatch =>
+        bulkCommitBatch.update(
+          documentRef,
+          dataOrField,
+          ...preconditionOrValues
+        )
     );
   }
 

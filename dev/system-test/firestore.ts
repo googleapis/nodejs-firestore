@@ -3769,7 +3769,7 @@ describe('BulkWriter class', () => {
 
   it('can retry failed writes with a provided callback', async () => {
     let retryCount = 0;
-    let code: Status = -1;
+    let code = -1 as number;
     writer.onWriteError(error => {
       retryCount = error.failedAttempts;
       return error.failedAttempts < 3;
