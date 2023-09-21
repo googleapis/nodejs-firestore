@@ -1349,10 +1349,10 @@ export class QueryOptions<
     );
   }
 
-  withConverter<AppModelType, DbModelType extends firestore.DocumentData>(
-    converter: firestore.FirestoreDataConverter<AppModelType, DbModelType>
-  ): QueryOptions<AppModelType, DbModelType> {
-    return new QueryOptions<AppModelType, DbModelType>(
+  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
+    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+  ): QueryOptions<NewAppModelType, NewDbModelType> {
+    return new QueryOptions<NewAppModelType, NewDbModelType>(
       this.parentPath,
       this.collectionId,
       converter,
