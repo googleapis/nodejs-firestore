@@ -1307,10 +1307,7 @@ export class Firestore implements firestore.Firestore {
 
     return this.initializeIfNeeded(tag)
       .then(() => {
-        const reader = new DocumentReader(
-          this,
-          documents
-        );
+        const reader = new DocumentReader(this, documents);
         reader.fieldMask = fieldMask || undefined;
         return reader.get(tag);
       })
