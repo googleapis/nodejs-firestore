@@ -1286,25 +1286,20 @@ export class Firestore implements firestore.Firestore {
    * });
    * ```
    */
-  getAll<
-    AppModelType,
-    DbModelType extends firestore.DocumentData = firestore.DocumentData
-  >(
+  getAll(
     ...documentRefsOrReadOptions: Array<
-      | firestore.DocumentReference<AppModelType, DbModelType>
-      | firestore.ReadOptions
+      firestore.DocumentReference<any, any> | firestore.ReadOptions
     >
-  ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
+  ): Promise<Array<DocumentSnapshot<any, any>>> {
     validateMinNumberOfArguments(
       'Firestore.getAll',
       documentRefsOrReadOptions,
       1
     );
 
-    const {documents, fieldMask} = parseGetAllArguments<
-      AppModelType,
-      DbModelType
-    >(documentRefsOrReadOptions);
+    const {documents, fieldMask} = parseGetAllArguments(
+      documentRefsOrReadOptions
+    );
     const tag = requestTag();
 
     // Capture the error stack to preserve stack tracing across async calls.
@@ -1312,7 +1307,7 @@ export class Firestore implements firestore.Firestore {
 
     return this.initializeIfNeeded(tag)
       .then(() => {
-        const reader = new DocumentReader<AppModelType, DbModelType>(
+        const reader = new DocumentReader(
           this,
           documents
         );
@@ -1409,8 +1404,8 @@ export class Firestore implements firestore.Firestore {
    */
   recursiveDelete(
     ref:
-      | firestore.CollectionReference<unknown>
-      | firestore.DocumentReference<unknown>,
+      | firestore.CollectionReference<any, any>
+      | firestore.DocumentReference<any, any>,
     bulkWriter?: BulkWriter
   ): Promise<void> {
     return this._recursiveDelete(

@@ -410,8 +410,10 @@ declare namespace FirebaseFirestore {
      * snapshots.
      */
     getAll(
-      ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
-    ): Promise<Array<DocumentSnapshot>>;
+      ...documentRefsOrReadOptions: Array<
+        DocumentReference<any, any> | ReadOptions
+      >
+    ): Promise<Array<DocumentSnapshot<any, any>>>;
 
     /**
      * Recursively deletes all documents and subcollections at and under the
@@ -449,7 +451,7 @@ declare namespace FirebaseFirestore {
      * await firestore.recursiveDelete(docRef, bulkWriter);
      */
     recursiveDelete(
-      ref: CollectionReference<unknown> | DocumentReference<unknown>,
+      ref: CollectionReference<any, any> | DocumentReference<any, any>,
       bulkWriter?: BulkWriter
     ): Promise<void>;
 
@@ -739,7 +741,7 @@ declare namespace FirebaseFirestore {
      * @return This `Transaction` instance. Used for chaining method calls.
      */
     update(
-      documentRef: DocumentReference<any>,
+      documentRef: DocumentReference<any, any>,
       field: string | FieldPath,
       value: any,
       ...fieldsOrPrecondition: any[]
@@ -753,7 +755,7 @@ declare namespace FirebaseFirestore {
      * @return This `Transaction` instance. Used for chaining method calls.
      */
     delete(
-      documentRef: DocumentReference<any>,
+      documentRef: DocumentReference<any, any>,
       precondition?: Precondition
     ): Transaction;
   }
@@ -800,8 +802,8 @@ declare namespace FirebaseFirestore {
      * delete fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
-    delete<AppModelType, DbModelType extends DocumentData>(
-      documentRef: DocumentReference<AppModelType, DbModelType>,
+    delete(
+      documentRef: DocumentReference<any, any>,
       precondition?: Precondition
     ): Promise<WriteResult>;
 
@@ -896,7 +898,7 @@ declare namespace FirebaseFirestore {
      * [BulkWriterError]{@link BulkWriterError}.
      */
     update(
-      documentRef: DocumentReference<any>,
+      documentRef: DocumentReference<any, any>,
       field: string | FieldPath,
       value: any,
       ...fieldsOrPrecondition: any[]
@@ -911,7 +913,7 @@ declare namespace FirebaseFirestore {
      */
     onWriteResult(
       callback: (
-        documentRef: DocumentReference<any>,
+        documentRef: DocumentReference<any, any>,
         result: WriteResult
       ) => void
     ): void;
@@ -1004,7 +1006,7 @@ declare namespace FirebaseFirestore {
     readonly message: string;
 
     /** The document reference the operation was performed on. */
-    readonly documentRef: DocumentReference<any>;
+    readonly documentRef: DocumentReference<any, any>;
 
     /** The type of operation performed. */
     readonly operationType: 'create' | 'set' | 'update' | 'delete';
@@ -1113,7 +1115,7 @@ declare namespace FirebaseFirestore {
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
     update(
-      documentRef: DocumentReference<any>,
+      documentRef: DocumentReference<any, any>,
       field: string | FieldPath,
       value: any,
       ...fieldsOrPrecondition: any[]
@@ -1127,7 +1129,7 @@ declare namespace FirebaseFirestore {
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
     delete(
-      documentRef: DocumentReference<any>,
+      documentRef: DocumentReference<any, any>,
       precondition?: Precondition
     ): WriteBatch;
 
@@ -1467,7 +1469,7 @@ declare namespace FirebaseFirestore {
      * @param other The `DocumentSnapshot` to compare against.
      * @return true if this `DocumentSnapshot` is equal to the provided one.
      */
-    isEqual(other: unknown): boolean;
+    isEqual(other: DocumentSnapshot<AppModelType, DbModelType>): boolean;
   }
 
   /**
@@ -1660,7 +1662,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     startAt(
-      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+      snapshot: DocumentSnapshot<any, any>
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1684,7 +1686,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     startAfter(
-      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+      snapshot: DocumentSnapshot<any, any>
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1708,7 +1710,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     endBefore(
-      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+      snapshot: DocumentSnapshot<any, any>
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1732,7 +1734,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     endAt(
-      snapshot: DocumentSnapshot<AppModelType, DbModelType>
+      snapshot: DocumentSnapshot<any, any>
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1744,7 +1746,7 @@ declare namespace FirebaseFirestore {
      * of the query's order by.
      * @return The created Query.
      */
-    endAt(...fieldValues: unknown[]): Query<AppModelType, DbModelType>;
+    endAt(...fieldValues: any[]): Query<AppModelType, DbModelType>;
 
     /**
      * Executes the query and returns the results as a `QuerySnapshot`.

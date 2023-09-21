@@ -336,7 +336,7 @@ export class BulkWriterError extends Error {
     readonly message: string,
 
     /** The document reference the operation was performed on. */
-    readonly documentRef: firestore.DocumentReference<unknown>,
+    readonly documentRef: firestore.DocumentReference<any, any>,
 
     /** The type of operation performed. */
     readonly operationType: 'create' | 'set' | 'update' | 'delete',
@@ -782,7 +782,7 @@ export class BulkWriter {
    */
   onWriteResult(
     successCallback: (
-      documentRef: firestore.DocumentReference<unknown>,
+      documentRef: firestore.DocumentReference<any, any>,
       result: WriteResult
     ) => void
   ): void {

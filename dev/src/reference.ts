@@ -256,7 +256,7 @@ export class DocumentReference<
    * }):
    * ```
    */
-  get parent(): firestore.CollectionReference<AppModelType, DbModelType> {
+  get parent(): CollectionReference<AppModelType, DbModelType> {
     return new CollectionReference<AppModelType, DbModelType>(
       this._firestore,
       this._path.parent()!,
@@ -284,9 +284,7 @@ export class DocumentReference<
    * ```
    */
   get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
-    return this._firestore
-      .getAll<AppModelType, DbModelType>(this)
-      .then(([result]) => result);
+    return this._firestore.getAll(this).then(([result]) => result);
   }
 
   /**
@@ -1563,7 +1561,7 @@ export class Query<
     opStr?: firestore.WhereFilterOp,
     value?: unknown
   ): Query<AppModelType, DbModelType> {
-    let filter: firestore.Filter;
+    let filter: Filter;
 
     if (fieldPathOrFilter instanceof Filter) {
       filter = fieldPathOrFilter;
@@ -1891,7 +1889,9 @@ export class Query<
    * @returns The implicit ordering semantics.
    */
   private createImplicitOrderBy(
-    cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
+    cursorValuesOrDocumentSnapshot: Array<
+      DocumentSnapshot<AppModelType, DbModelType> | unknown
+    >
   ): FieldOrder[] {
     // Add an implicit orderBy if the only cursor value is a DocumentSnapshot
     // or a DocumentReference.
@@ -2095,7 +2095,7 @@ export class Query<
    */
   startAt(
     ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
+      firestore.DocumentSnapshot<any, any> | unknown
     >
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
@@ -2141,7 +2141,7 @@ export class Query<
    */
   startAfter(
     ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
+      firestore.DocumentSnapshot<any, any> | unknown
     >
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
@@ -2186,7 +2186,7 @@ export class Query<
    */
   endBefore(
     ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
+      firestore.DocumentSnapshot<any, any> | unknown
     >
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
@@ -2231,7 +2231,7 @@ export class Query<
    */
   endAt(
     ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
+      firestore.DocumentSnapshot<any, any> | unknown
     >
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
@@ -2843,7 +2843,6 @@ export class CollectionReference<
    *
    * @param firestore The Firestore Database client.
    * @param path The Path of this collection.
-   * @param converter
    */
   constructor(
     firestore: Firestore,

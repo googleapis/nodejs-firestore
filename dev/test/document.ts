@@ -18,6 +18,7 @@ import {GoogleError, Status} from 'google-gax';
 import * as through2 from 'through2';
 
 import {
+  DocumentReference,
   FieldPath,
   FieldValue,
   Firestore,
@@ -48,7 +49,7 @@ import {
   verifyInstance,
   writeResult,
 } from './util/helpers';
-import {Precondition, DocumentReference} from '@google-cloud/firestore';
+import {Precondition} from '@google-cloud/firestore';
 
 const PROJECT_ID = 'test-project';
 

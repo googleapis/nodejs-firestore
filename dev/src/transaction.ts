@@ -409,14 +409,11 @@ export class Transaction implements firestore.Transaction {
    * });
    * ```
    */
-  delete<AppModelType, DbModelType extends firestore.DocumentData>(
-    documentRef: DocumentReference<AppModelType, DbModelType>,
+  delete(
+    documentRef: DocumentReference<any, any>,
     precondition?: firestore.Precondition
   ): this {
-    this._writeBatch.delete<AppModelType, DbModelType>(
-      documentRef,
-      precondition
-    );
+    this._writeBatch.delete(documentRef, precondition);
     return this;
   }
 

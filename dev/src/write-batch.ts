@@ -253,8 +253,8 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  delete<AppModelType, DbModelType extends firestore.DocumentData>(
-    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+  delete(
+    documentRef: firestore.DocumentReference<any, any>,
     precondition?: firestore.Precondition
   ): WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
