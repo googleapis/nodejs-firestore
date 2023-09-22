@@ -411,9 +411,9 @@ declare namespace FirebaseFirestore {
      */
     getAll(
       ...documentRefsOrReadOptions: Array<
-        DocumentReference<any, any> | ReadOptions
+        DocumentReference<any, DocumentData> | ReadOptions
       >
-    ): Promise<Array<DocumentSnapshot<any, any>>>;
+    ): Promise<Array<DocumentSnapshot<any, DocumentData>>>;
 
     /**
      * Recursively deletes all documents and subcollections at and under the
@@ -2585,7 +2585,7 @@ declare namespace FirebaseFirestore {
     static where(
       fieldPath: string | FieldPath,
       opStr: WhereFilterOp,
-      value: any
+      value: unknown
     ): Filter;
 
     /**

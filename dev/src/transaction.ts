@@ -155,7 +155,7 @@ export class Transaction implements firestore.Transaction {
     refOrQuery:
       | firestore.DocumentReference<AppModelType, DbModelType>
       | firestore.Query<AppModelType, DbModelType>
-      | firestore.AggregateQuery<AggregateSpecType>
+      | firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
   ): Promise<
     | DocumentSnapshot<AppModelType, DbModelType>
     | QuerySnapshot<AppModelType, DbModelType>

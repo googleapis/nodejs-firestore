@@ -147,10 +147,7 @@ export class DocumentReference<
     /** @private */
     readonly _path: ResourcePath,
     /** @private */
-    readonly _converter: firestore.FirestoreDataConverter<
-      AppModelType,
-      DbModelType
-    > = defaultConverter()
+    readonly _converter = defaultConverter<AppModelType, DbModelType>()
   ) {}
 
   /**
@@ -1198,7 +1195,7 @@ enum LimitType {
  */
 export class QueryOptions<
   AppModelType,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData
+  DbModelType extends firestore.DocumentData
 > {
   constructor(
     readonly parentPath: ResourcePath,
@@ -1231,8 +1228,8 @@ export class QueryOptions<
    * @internal
    */
   static forCollectionGroupQuery<
-    AppModelType,
-    DbModelType extends firestore.DocumentData
+    AppModelType = firestore.DocumentData,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData
   >(
     collectionId: string,
     converter: firestore.FirestoreDataConverter<
@@ -1513,7 +1510,7 @@ export class Query<
   where(
     fieldPath: string | FieldPath,
     opStr: firestore.WhereFilterOp,
-    value: any
+    value: unknown
   ): Query<AppModelType, DbModelType>;
 
   /**
@@ -1541,7 +1538,7 @@ export class Query<
   where(filter: Filter): Query<AppModelType, DbModelType>;
 
   where(
-    fieldPathOrFilter: string | FieldPath | Filter,
+    fieldPathOrFilter: string | firestore.FieldPath | Filter,
     opStr?: firestore.WhereFilterOp,
     value?: unknown
   ): Query<AppModelType, DbModelType> {
@@ -1680,7 +1677,7 @@ export class Query<
     // `T`. We there return `Query<DocumentData>`;
     const options = this._queryOptions.with({
       projection: {fields},
-    }) as QueryOptions<firestore.DocumentData>;
+    }) as QueryOptions<firestore.DocumentData, firestore.DocumentData>;
     return new Query(this._firestore, options);
   }
 

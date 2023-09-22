@@ -31,10 +31,7 @@ import api = google.firestore.v1;
  * @private
  * @internal
  */
-export class DocumentReader<
-  AppModelType,
-  DbModelType extends DocumentData = DocumentData
-> {
+export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
   /** An optional field mask to apply to this read. */
   fieldMask?: FieldPath[];
   /** An optional transaction ID to use for this read. */
