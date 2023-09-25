@@ -281,12 +281,7 @@ export class DocumentReference<
    * ```
    */
   get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
-    return this._firestore
-      .getAll(this as unknown as DocumentReference)
-      .then(
-        ([result]) =>
-          result as unknown as DocumentSnapshot<AppModelType, DbModelType>
-      );
+    return this._firestore.getAll(this).then(([result]) => result);
   }
 
   /**
@@ -621,7 +616,10 @@ export class DocumentReference<
   }
 
   withConverter(converter: null): DocumentReference;
-  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+  >(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): DocumentReference<NewAppModelType, NewDbModelType>;
   /**
@@ -675,7 +673,10 @@ export class DocumentReference<
    * from Firestore. Passing in `null` removes the current converter.
    * @return A DocumentReference that uses the provided converter.
    */
-  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+  >(
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
       NewDbModelType
@@ -1330,7 +1331,10 @@ export class QueryOptions<
     );
   }
 
-  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+  >(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): QueryOptions<NewAppModelType, NewDbModelType> {
     return new QueryOptions<NewAppModelType, NewDbModelType>(
@@ -2766,7 +2770,10 @@ export class Query<
   }
 
   withConverter(converter: null): Query;
-  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+  >(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): Query<NewAppModelType, NewDbModelType>;
   /**
@@ -2819,7 +2826,10 @@ export class Query<
    * from Firestore. Passing in `null` removes the current converter.
    * @return A Query that uses the provided converter.
    */
-  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+  >(
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
       NewDbModelType
@@ -3095,7 +3105,10 @@ export class CollectionReference<
   }
 
   withConverter(converter: null): CollectionReference;
-  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+  >(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): CollectionReference<NewAppModelType, NewDbModelType>;
   /**
@@ -3149,7 +3162,10 @@ export class CollectionReference<
    * from Firestore. Passing in `null` removes the current converter.
    * @return A CollectionReference that uses the provided converter.
    */
-  withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+  >(
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
       NewDbModelType
