@@ -272,7 +272,7 @@ export class ExponentialBackoff {
         'ExponentialBackoff.backoffAndWait',
         null,
         `Backing off for ${delayWithJitterMs} ms ` +
-        `(base delay: ${this.currentBaseMs} ms)`
+          `(base delay: ${this.currentBaseMs} ms)`
       );
     }
 
