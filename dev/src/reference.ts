@@ -58,6 +58,7 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
+import { DocumentData } from "@google-cloud/firestore";
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -281,7 +282,12 @@ export class DocumentReference<
    * ```
    */
   get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
-    return this._firestore.getAll(this).then(([result]) => result);
+    return this._firestore
+      .getAll(this as unknown as DocumentReference)
+      .then(
+        ([result]) =>
+          result as unknown as DocumentSnapshot<AppModelType, DbModelType>
+      );
   }
 
   /**

@@ -1288,9 +1288,9 @@ export class Firestore implements firestore.Firestore {
    */
   getAll(
     ...documentRefsOrReadOptions: Array<
-      firestore.DocumentReference<any, any> | firestore.ReadOptions
+      firestore.DocumentReference | firestore.ReadOptions
     >
-  ): Promise<Array<DocumentSnapshot<any, any>>> {
+  ): Promise<Array<DocumentSnapshot>> {
     validateMinNumberOfArguments(
       'Firestore.getAll',
       documentRefsOrReadOptions,

@@ -410,10 +410,8 @@ declare namespace FirebaseFirestore {
      * snapshots.
      */
     getAll(
-      ...documentRefsOrReadOptions: Array<
-        DocumentReference<any, DocumentData> | ReadOptions
-      >
-    ): Promise<Array<DocumentSnapshot<any, DocumentData>>>;
+      ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
+    ): Promise<Array<DocumentSnapshot>>;
 
     /**
      * Recursively deletes all documents and subcollections at and under the
@@ -1396,7 +1394,10 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A DocumentReference<U> that uses the provided converter.
      */
-    withConverter<NewAppModelType, NewDbModelType extends DocumentData>(
+    withConverter<
+      NewAppModelType,
+      NewDbModelType extends DocumentData = DocumentData
+    >(
       converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
     ): DocumentReference<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): DocumentReference;
@@ -1818,7 +1819,10 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A Query that uses the provided converter.
      */
-    withConverter<NewAppModelType, NewDbModelType extends DocumentData>(
+    withConverter<
+      NewAppModelType,
+      NewDbModelType extends DocumentData = DocumentData
+    >(
       converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
     ): Query<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): Query;
@@ -2022,7 +2026,10 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A CollectionReference that uses the provided converter.
      */
-    withConverter<NewAppModelType, NewDbModelType extends DocumentData>(
+    withConverter<
+      NewAppModelType,
+      NewDbModelType extends DocumentData = DocumentData
+    >(
       converter: FirestoreDataConverter<NewAppModelType>
     ): CollectionReference<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): CollectionReference;
@@ -2098,7 +2105,10 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A `CollectionGroup` that uses the provided converter.
      */
-    withConverter<NewAppModelType, NewDbModelType extends DocumentData>(
+    withConverter<
+      NewAppModelType,
+      NewDbModelType extends DocumentData = DocumentData
+    >(
       converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
     ): CollectionGroup<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): CollectionGroup;

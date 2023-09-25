@@ -233,7 +233,6 @@ abstract class Watch<
    * @internal
    *
    * @param firestore The Firestore Database client.
-   * @param _converter
    */
   constructor(
     firestore: Firestore,
