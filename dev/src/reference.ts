@@ -58,7 +58,6 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
-import { DocumentData } from "@google-cloud/firestore";
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
