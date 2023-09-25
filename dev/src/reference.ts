@@ -1237,10 +1237,7 @@ export class QueryOptions<
     DbModelType extends firestore.DocumentData = firestore.DocumentData
   >(
     collectionId: string,
-    converter: firestore.FirestoreDataConverter<
-      AppModelType,
-      DbModelType
-    > = defaultConverter()
+    converter = defaultConverter<AppModelType, DbModelType>()
   ): QueryOptions<AppModelType, DbModelType> {
     return new QueryOptions<AppModelType, DbModelType>(
       /*parentPath=*/ ResourcePath.EMPTY,
