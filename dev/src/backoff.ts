@@ -97,7 +97,7 @@ export function setTimeoutHandler(
     // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/66176/files#diff-e838d0ace9cd5f6516bacfbd3ad00d02cd37bd60f9993ce6223f52d889a1fdbaR122-R126
     //
     // Adding `[Symbol.dispose](): void;` cannot be done on older versions of
-    // NodeJS. So we simply cast to `NodeJS.Timout`.
+    // NodeJS. So we simply cast to `NodeJS.Timeout`.
     return timeout;
   };
 }
