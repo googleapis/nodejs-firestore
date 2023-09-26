@@ -409,11 +409,9 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll<AppModelType, DbModelType extends DocumentData>(
-      ...documentRefsOrReadOptions: Array<
-        DocumentReference<AppModelType, DbModelType> | ReadOptions
-      >
-    ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>>;
+    getAll(
+      ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
+    ): Promise<Array<DocumentSnapshot>>;
 
     /**
      * Recursively deletes all documents and subcollections at and under the
