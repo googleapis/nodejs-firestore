@@ -949,7 +949,7 @@ describe('BulkWriter', () => {
         response: failedResponse(Status.INTERNAL),
       },
     ]);
-    let code = -1;
+    let code: Status = -1 as Status;
     bulkWriter.onWriteError(error => {
       return error.failedAttempts < 3;
     });

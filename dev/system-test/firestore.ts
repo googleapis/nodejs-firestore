@@ -97,7 +97,7 @@ if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
 }
 
-function getTestRoot(settings: Settings = {}) {
+function getTestRoot(settings: Settings = {}): CollectionReference {
   const internalSettings: Settings = {};
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
@@ -3769,7 +3769,7 @@ describe('BulkWriter class', () => {
 
   it('can retry failed writes with a provided callback', async () => {
     let retryCount = 0;
-    let code = -1 as number;
+    let code: Status = -1 as Status;
     writer.onWriteError(error => {
       retryCount = error.failedAttempts;
       return error.failedAttempts < 3;

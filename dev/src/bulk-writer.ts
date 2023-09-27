@@ -28,7 +28,6 @@ import {
   MAX_RETRY_ATTEMPTS,
 } from './backoff';
 import {RateLimiter} from './rate-limiter';
-import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
 import {
   Deferred,
@@ -337,7 +336,7 @@ export class BulkWriterError extends Error {
     readonly message: string,
 
     /** The document reference the operation was performed on. */
-    readonly documentRef: firestore.DocumentReference<unknown>,
+    readonly documentRef: firestore.DocumentReference<any, any>,
 
     /** The type of operation performed. */
     readonly operationType: 'create' | 'set' | 'update' | 'delete',
@@ -576,9 +575,9 @@ export class BulkWriter {
    * });
    * ```
    */
-  create<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.WithFieldValue<T>
+  create<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: firestore.WithFieldValue<AppModelType>
   ): Promise<WriteResult> {
     this._verifyNotClosed();
     return this._enqueue(
@@ -618,8 +617,8 @@ export class BulkWriter {
    * });
    * ```
    */
-  delete<T>(
-    documentRef: firestore.DocumentReference<T>,
+  delete<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this._verifyNotClosed();
@@ -630,14 +629,14 @@ export class BulkWriter {
     );
   }
 
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: Partial<T>,
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: Partial<AppModelType>,
     options: firestore.SetOptions
   ): Promise<WriteResult>;
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: T
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: AppModelType
   ): Promise<WriteResult>;
   /**
    * Write to the document referred to by the provided
@@ -679,24 +678,20 @@ export class BulkWriter {
    * });
    * ```
    */
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.PartialWithFieldValue<T>,
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: firestore.PartialWithFieldValue<AppModelType>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    return this._enqueue(
-      documentRef as firestore.DocumentReference<unknown>,
-      'set',
-      bulkCommitBatch => {
-        if (options) {
-          return bulkCommitBatch.set(documentRef, data, options);
-        } else {
-          return bulkCommitBatch.set(
-            documentRef,
-            data as firestore.WithFieldValue<T>
-          );
-        }
+    return this._enqueue(documentRef, 'set', bulkCommitBatch => {
+      if (options) {
+        return bulkCommitBatch.set(documentRef, data, options);
+      } else {
+        return bulkCommitBatch.set(
+          documentRef,
+          data as firestore.WithFieldValue<AppModelType>
+        );
       }
     );
   }
@@ -745,9 +740,9 @@ export class BulkWriter {
    * });
    * ```
    */
-  update<T>(
-    documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData<T> | string | FieldPath,
+  update<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    dataOrField: firestore.UpdateData<DbModelType> | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
@@ -798,7 +793,7 @@ export class BulkWriter {
    */
   onWriteResult(
     successCallback: (
-      documentRef: firestore.DocumentReference<unknown>,
+      documentRef: firestore.DocumentReference<any, any>,
       result: WriteResult
     ) => void
   ): void {

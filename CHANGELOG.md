@@ -4,6 +4,19 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [6.8.0](https://github.com/googleapis/nodejs-firestore/compare/v6.7.0...v6.8.0) (2023-09-26)
+
+
+### Features
+
+* Publish proto definitions for SUM/AVG in Firestore ([#1856](https://github.com/googleapis/nodejs-firestore/issues/1856)) ([ac35b37](https://github.com/googleapis/nodejs-firestore/commit/ac35b372faf32f093d83af18d487f1b3f23ee673))
+
+
+### Bug Fixes
+
+* **deps:** Use protobufjs v7.2.5 ([#1889](https://github.com/googleapis/nodejs-firestore/pull/1889))
+* Add tests for multiple inequality support ([#1878](https://github.com/googleapis/nodejs-firestore/issues/1878)) ([8e621d5](https://github.com/googleapis/nodejs-firestore/commit/8e621d580396b7e3bc7e42dad0c63f91e999411f))
+
 ## [6.7.0](https://github.com/googleapis/nodejs-firestore/compare/v6.6.1...v6.7.0) (2023-07-20)
 
 
