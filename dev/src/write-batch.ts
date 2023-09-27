@@ -189,13 +189,13 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  create<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.WithFieldValue<T>
+  create<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: firestore.WithFieldValue<AppModelType>
   ): WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
     const firestoreData = ref._converter.toFirestore(
-      data as firestore.WithFieldValue<T>
+      data as firestore.WithFieldValue<AppModelType>
     );
     validateDocumentData(
       'data',
@@ -253,8 +253,8 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  delete<T>(
-    documentRef: firestore.DocumentReference<T>,
+  delete(
+    documentRef: firestore.DocumentReference<any, any>,
     precondition?: firestore.Precondition
   ): WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
@@ -277,14 +277,14 @@ export class WriteBatch implements firestore.WriteBatch {
     return this;
   }
 
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.PartialWithFieldValue<T>,
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: firestore.PartialWithFieldValue<AppModelType>,
     options: firestore.SetOptions
   ): WriteBatch;
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.WithFieldValue<T>
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: firestore.WithFieldValue<AppModelType>
   ): WriteBatch;
   /**
    * Write to the document referred to by the provided
@@ -320,9 +320,9 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.PartialWithFieldValue<T>,
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: firestore.PartialWithFieldValue<AppModelType>,
     options?: firestore.SetOptions
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});
@@ -331,12 +331,9 @@ export class WriteBatch implements firestore.WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
     let firestoreData: firestore.DocumentData;
     if (mergeLeaves || mergePaths) {
-      // Cast to any in order to satisfy the union type constraint on
-      // toFirestore().
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      firestoreData = (ref._converter as any).toFirestore(data, options);
+      firestoreData = ref._converter.toFirestore(data, options);
     } else {
-      firestoreData = ref._converter.toFirestore(data as T);
+      firestoreData = ref._converter.toFirestore(data as AppModelType);
     }
     validateDocumentData(
       'data',
@@ -356,11 +353,11 @@ export class WriteBatch implements firestore.WriteBatch {
       firestoreData = documentMask.applyTo(firestoreData);
     }
 
-    const transform = DocumentTransform.fromObject(documentRef, firestoreData);
+    const transform = DocumentTransform.fromObject(ref, firestoreData);
     transform.validate();
 
     const op: PendingWriteOp = () => {
-      const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
+      const document = DocumentSnapshot.fromObject(ref, firestoreData);
 
       if (mergePaths) {
         documentMask!.removeFields(transform.fields);
@@ -422,9 +419,15 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  update<T = firestore.DocumentData>(
-    documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData<T> | string | firestore.FieldPath,
+  update<
+    AppModelType = firestore.DocumentData,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData
+  >(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    dataOrField:
+      | firestore.UpdateData<DbModelType>
+      | string
+      | firestore.FieldPath,
     ...preconditionOrValues: Array<
       | {lastUpdateTime?: firestore.Timestamp}
       | unknown
@@ -489,16 +492,16 @@ export class WriteBatch implements firestore.WriteBatch {
         // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
 
-        Object.entries(dataOrField as firestore.UpdateData<T>).forEach(
-          ([key, value]) => {
-            // Skip `undefined` values (can be hit if `ignoreUndefinedProperties`
-            // is set)
-            if (value !== undefined) {
-              validateFieldPath(key, key);
-              updateMap.set(FieldPath.fromArgument(key), value);
-            }
+        Object.entries(
+          dataOrField as firestore.UpdateData<DbModelType>
+        ).forEach(([key, value]) => {
+          // Skip `undefined` values (can be hit if `ignoreUndefinedProperties`
+          // is set)
+          if (value !== undefined) {
+            validateFieldPath(key, key);
+            updateMap.set(FieldPath.fromArgument(key), value);
           }
-        );
+        });
 
         if (preconditionOrValues.length > 0) {
           validateUpdatePrecondition(
