@@ -14,6 +14,7 @@
 
 ### Bug Fixes
 
+* **deps:** Use protobufjs v7.2.5 ([#1889](https://github.com/googleapis/nodejs-firestore/pull/1889))
 * Add tests for multiple inequality support ([#1878](https://github.com/googleapis/nodejs-firestore/issues/1878)) ([8e621d5](https://github.com/googleapis/nodejs-firestore/commit/8e621d580396b7e3bc7e42dad0c63f91e999411f))
 
 ## [6.7.0](https://github.com/googleapis/nodejs-firestore/compare/v6.6.1...v6.7.0) (2023-07-20)
