@@ -580,10 +580,8 @@ export class BulkWriter {
     data: firestore.WithFieldValue<AppModelType>
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    return this._enqueue(
-      documentRef as firestore.DocumentReference<unknown>,
-      'create',
-      bulkCommitBatch => bulkCommitBatch.create(documentRef, data)
+    return this._enqueue(documentRef, 'create', bulkCommitBatch =>
+      bulkCommitBatch.create(documentRef, data)
     );
   }
 
@@ -622,10 +620,8 @@ export class BulkWriter {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    return this._enqueue(
-      documentRef as firestore.DocumentReference<unknown>,
-      'delete',
-      bulkCommitBatch => bulkCommitBatch.delete(documentRef, precondition)
+    return this._enqueue(documentRef, 'delete', bulkCommitBatch =>
+      bulkCommitBatch.delete(documentRef, precondition)
     );
   }
 
@@ -693,7 +689,7 @@ export class BulkWriter {
           data as firestore.WithFieldValue<AppModelType>
         );
       }
-    );
+    });
   }
 
   /**
@@ -748,10 +744,7 @@ export class BulkWriter {
     >
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-    return this._enqueue(
-      documentRef as firestore.DocumentReference<unknown>,
-      'update',
-      bulkCommitBatch =>
+    return this._enqueue(documentRef, 'update', bulkCommitBatch =>
         bulkCommitBatch.update(
           documentRef,
           dataOrField,

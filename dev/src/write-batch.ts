@@ -332,7 +332,7 @@ export class WriteBatch implements firestore.WriteBatch {
     let firestoreData: firestore.DocumentData;
     if (mergeLeaves || mergePaths) {
       firestoreData = ref._converter.toFirestore(data, options);
-    } else 
+    } else {
       firestoreData = ref._converter.toFirestore(data as AppModelType);
     }
     validateDocumentData(
