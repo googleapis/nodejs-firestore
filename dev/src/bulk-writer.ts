@@ -745,11 +745,7 @@ export class BulkWriter {
   ): Promise<WriteResult> {
     this._verifyNotClosed();
     return this._enqueue(documentRef, 'update', bulkCommitBatch =>
-        bulkCommitBatch.update(
-          documentRef,
-          dataOrField,
-          ...preconditionOrValues
-        )
+      bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues)
     );
   }
 
