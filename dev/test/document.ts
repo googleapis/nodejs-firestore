@@ -49,6 +49,7 @@ import {
   verifyInstance,
   writeResult,
 } from './util/helpers';
+import {Precondition} from '@google-cloud/firestore';
 
 const PROJECT_ID = 'test-project';
 
@@ -1703,12 +1704,12 @@ describe('update document', () => {
 
   it('with invalid last update time precondition', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').update(
-        {foo: 'bar'},
-        {
-          lastUpdateTime: 'foo',
-        }
-      );
+      const malformedPrecondition: Precondition = {
+        lastUpdateTime: 'foo',
+      } as unknown as Precondition;
+      firestore
+        .doc('collectionId/documentId')
+        .update({foo: 'bar'}, malformedPrecondition);
     }).to.throw('"lastUpdateTime" is not a Firestore Timestamp.');
   });
 
