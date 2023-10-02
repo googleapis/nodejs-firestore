@@ -31,7 +31,7 @@ import api = google.firestore.v1;
  * @private
  * @internal
  */
-export class DocumentReader<T> {
+export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
   /** An optional field mask to apply to this read. */
   fieldMask?: FieldPath[];
   /** An optional transaction ID to use for this read. */
@@ -49,7 +49,7 @@ export class DocumentReader<T> {
    */
   constructor(
     private firestore: Firestore,
-    private allDocuments: Array<DocumentReference<T>>
+    private allDocuments: Array<DocumentReference<AppModelType, DbModelType>>
   ) {
     for (const docRef of this.allDocuments) {
       this.outstandingDocuments.add(docRef.formattedName);
@@ -61,12 +61,15 @@ export class DocumentReader<T> {
    *
    * @param requestTag A unique client-assigned identifier for this request.
    */
-  async get(requestTag: string): Promise<Array<DocumentSnapshot<T>>> {
+  async get(
+    requestTag: string
+  ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
     await this.fetchDocuments(requestTag);
 
     // BatchGetDocuments doesn't preserve document order. We use the request
     // order to sort the resulting documents.
-    const orderedDocuments: Array<DocumentSnapshot<T>> = [];
+    const orderedDocuments: Array<DocumentSnapshot<AppModelType, DbModelType>> =
+      [];
 
     for (const docRef of this.allDocuments) {
       const document = this.retrievedDocuments.get(docRef.formattedName);
@@ -74,7 +77,7 @@ export class DocumentReader<T> {
         // Recreate the DocumentSnapshot with the DocumentReference
         // containing the original converter.
         const finalDoc = new DocumentSnapshotBuilder(
-          docRef as DocumentReference<T>
+          docRef as DocumentReference<AppModelType, DbModelType>
         );
         finalDoc.fieldsProto = document._fieldsProto;
         finalDoc.readTime = document.readTime;

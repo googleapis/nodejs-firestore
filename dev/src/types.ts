@@ -16,6 +16,7 @@
 
 import {
   FirestoreDataConverter,
+  QueryDocumentSnapshot,
   DocumentData,
   WithFieldValue,
 } from '@google-cloud/firestore';
@@ -27,7 +28,6 @@ import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath} from './path';
 
 import api = google.firestore.v1;
-import {QueryDocumentSnapshot} from './document';
 
 /**
  * A map in the format of the Proto API
@@ -136,8 +136,14 @@ const defaultConverterObj: FirestoreDataConverter<DocumentData> = {
  * @private
  * @internal
  */
-export function defaultConverter<T>(): FirestoreDataConverter<T> {
-  return defaultConverterObj as FirestoreDataConverter<T>;
+export function defaultConverter<
+  AppModelType,
+  DbModelType extends DocumentData
+>(): FirestoreDataConverter<AppModelType, DbModelType> {
+  return defaultConverterObj as FirestoreDataConverter<
+    AppModelType,
+    DbModelType
+  >;
 }
 
 /**
