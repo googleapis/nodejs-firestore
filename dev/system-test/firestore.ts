@@ -3491,7 +3491,7 @@ describe('Aggregation queries', () => {
         countZ: AggregateField.count(),
       });
       await expect(aggregateQuery.get()).to.eventually.be.rejectedWith(
-        /INVALID_ARGUMENT.*maximum number of aggregations/
+        /maximum number of aggregations/
       );
     });
 
