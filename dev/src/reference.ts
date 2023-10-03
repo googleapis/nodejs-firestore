@@ -1900,25 +1900,12 @@ export class Query<
       DocumentSnapshot<AppModelType, DbModelType> | unknown
     >
   ): FieldOrder[] {
-    // Add an implicit orderBy if the only cursor value is a DocumentSnapshot
-    // or a DocumentReference.
+    // Add an implicit orderBy if the only cursor value is a DocumentSnapshot.
     if (
       cursorValuesOrDocumentSnapshot.length !== 1 ||
-      !(
-        cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot ||
-        cursorValuesOrDocumentSnapshot[0] instanceof DocumentReference
-      )
+      !(cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot)
     ) {
       return this._queryOptions.fieldOrders;
-    }
-
-    // TODO(b/296435819): Remove this warning message.
-    if (cursorValuesOrDocumentSnapshot[0] instanceof DocumentReference) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `Warning: Passing DocumentReference into a cursor without orderBy clause is not an intended
-        behavior. Please use DocumentSnapshot or add an explicit orderBy on document key field.`
-      );
     }
 
     const fieldOrders = this._queryOptions.fieldOrders.slice();
