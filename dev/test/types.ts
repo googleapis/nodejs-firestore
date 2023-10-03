@@ -39,6 +39,8 @@ describe('FirestoreTypeConverter', () => {
         };
       },
     };
+    // The intent of the function below is to test TypeScript compile and not execute.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function _(docRef: DocumentReference): Promise<void> {
       const newDocRef = docRef.withConverter(converter);
       await newDocRef.set({stringProperty: 'foo', numberProperty: 42});
@@ -66,6 +68,8 @@ describe('FirestoreTypeConverter', () => {
         };
       },
     };
+    // The intent of the function below is to test TypeScript compile and not execute.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function _(docRef: DocumentReference): Promise<void> {
       const newDocRef = docRef.withConverter(converter);
       await newDocRef.set({stringProperty: 'foo', numberProperty: 42});
@@ -109,6 +113,8 @@ describe('FirestoreTypeConverter', () => {
         };
       },
     };
+    // The intent of the function below is to test TypeScript compile and not execute.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function _(docRef: DocumentReference): Promise<void> {
       const newDocRef = docRef.withConverter(converter);
       await newDocRef.set({stringProperty: 'foo', numberProperty: 42});
@@ -136,6 +142,8 @@ describe('FirestoreTypeConverter', () => {
         };
       },
     };
+    // The intent of the function below is to test TypeScript compile and not execute.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function _(docRef: DocumentReference): Promise<void> {
       const newDocRef = docRef.withConverter(converter);
       await newDocRef.set({stringProperty: 'foo', numberProperty: 42});
@@ -167,6 +175,8 @@ describe('FirestoreTypeConverter', () => {
         };
       },
     };
+    // The intent of the function below is to test TypeScript compile and not execute.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function _(docRef: DocumentReference): Promise<void> {
       const newDocRef = docRef.withConverter(converter);
       await newDocRef.set({stringProperty: 'foo', numberProperty: 42});

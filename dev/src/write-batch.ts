@@ -254,6 +254,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * ```
    */
   delete(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     documentRef: firestore.DocumentReference<any, any>,
     precondition?: firestore.Precondition
   ): WriteBatch {

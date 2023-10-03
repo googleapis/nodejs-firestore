@@ -410,6 +410,7 @@ export class Transaction implements firestore.Transaction {
    * ```
    */
   delete(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     documentRef: DocumentReference<any, any>,
     precondition?: firestore.Precondition
   ): this {
