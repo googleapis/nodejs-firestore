@@ -37,7 +37,7 @@ import {compareArrays} from './order';
  */
 export class CollectionGroup<
     AppModelType = firestore.DocumentData,
-    DbModelType extends firestore.DocumentData = firestore.DocumentData
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
   >
   extends Query<AppModelType, DbModelType>
   implements firestore.CollectionGroup<AppModelType, DbModelType>
@@ -197,13 +197,13 @@ export class CollectionGroup<
   withConverter(converter: null): CollectionGroup;
   withConverter<
     NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): CollectionGroup<NewAppModelType, NewDbModelType>;
   withConverter<
     NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,

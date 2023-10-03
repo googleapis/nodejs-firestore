@@ -114,7 +114,7 @@ declare namespace FirebaseFirestore {
    */
   export type AddPrefixToKeys<
     Prefix extends string,
-    T extends Record<string, unknown>
+    T extends Record<string, unknown>,
   > =
     // Remap K => Prefix.K. See https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
     {[K in keyof T & string as `${Prefix}.${K}`]+?: T[K]};
@@ -189,7 +189,7 @@ declare namespace FirebaseFirestore {
    */
   export interface FirestoreDataConverter<
     AppModelType,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > {
     /**
      * Called by the Firestore SDK to convert a custom model object of type
@@ -622,7 +622,7 @@ declare namespace FirebaseFirestore {
     get<
       AppModelType,
       DbModelType extends DocumentData,
-      AggregateSpecType extends AggregateSpec
+      AggregateSpecType extends AggregateSpec,
     >(
       aggregateQuery: AggregateQuery<
         AggregateSpecType,
@@ -1228,7 +1228,7 @@ declare namespace FirebaseFirestore {
    */
   export class DocumentReference<
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > {
     private constructor();
 
@@ -1396,7 +1396,7 @@ declare namespace FirebaseFirestore {
      */
     withConverter<
       NewAppModelType,
-      NewDbModelType extends DocumentData = DocumentData
+      NewDbModelType extends DocumentData = DocumentData,
     >(
       converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
     ): DocumentReference<NewAppModelType, NewDbModelType>;
@@ -1414,7 +1414,7 @@ declare namespace FirebaseFirestore {
    */
   export class DocumentSnapshot<
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > {
     protected constructor();
 
@@ -1486,7 +1486,7 @@ declare namespace FirebaseFirestore {
    */
   export class QueryDocumentSnapshot<
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > extends DocumentSnapshot<AppModelType, DbModelType> {
     private constructor();
 
@@ -1539,7 +1539,7 @@ declare namespace FirebaseFirestore {
    */
   export class Query<
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > {
     protected constructor();
 
@@ -1821,7 +1821,7 @@ declare namespace FirebaseFirestore {
      */
     withConverter<
       NewAppModelType,
-      NewDbModelType extends DocumentData = DocumentData
+      NewDbModelType extends DocumentData = DocumentData,
     >(
       converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
     ): Query<NewAppModelType, NewDbModelType>;
@@ -1837,7 +1837,7 @@ declare namespace FirebaseFirestore {
    */
   export class QuerySnapshot<
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > {
     private constructor();
 
@@ -1901,7 +1901,7 @@ declare namespace FirebaseFirestore {
    */
   export interface DocumentChange<
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > {
     /** The type of change ('added', 'modified', or 'removed'). */
     readonly type: DocumentChangeType;
@@ -1941,7 +1941,7 @@ declare namespace FirebaseFirestore {
    */
   export class CollectionReference<
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > extends Query<AppModelType, DbModelType> {
     private constructor();
 
@@ -2028,7 +2028,7 @@ declare namespace FirebaseFirestore {
      */
     withConverter<
       NewAppModelType,
-      NewDbModelType extends DocumentData = DocumentData
+      NewDbModelType extends DocumentData = DocumentData,
     >(
       converter: FirestoreDataConverter<NewAppModelType>
     ): CollectionReference<NewAppModelType, NewDbModelType>;
@@ -2041,7 +2041,7 @@ declare namespace FirebaseFirestore {
    */
   export class CollectionGroup<
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > extends Query<AppModelType, DbModelType> {
     private constructor();
 
@@ -2107,7 +2107,7 @@ declare namespace FirebaseFirestore {
      */
     withConverter<
       NewAppModelType,
-      NewDbModelType extends DocumentData = DocumentData
+      NewDbModelType extends DocumentData = DocumentData,
     >(
       converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
     ): CollectionGroup<NewAppModelType, NewDbModelType>;
@@ -2122,7 +2122,7 @@ declare namespace FirebaseFirestore {
    */
   export class QueryPartition<
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > {
     private constructor();
 
@@ -2192,7 +2192,7 @@ declare namespace FirebaseFirestore {
   export class AggregateQuery<
     AggregateSpecType extends AggregateSpec,
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > {
     private constructor();
 
@@ -2231,7 +2231,7 @@ declare namespace FirebaseFirestore {
   export class AggregateQuerySnapshot<
     AggregateSpecType extends AggregateSpec,
     AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData
+    DbModelType extends DocumentData = DocumentData,
   > {
     private constructor();
 
