@@ -54,6 +54,7 @@ export const WATCH_IDLE_TIMEOUT_MS = 120 * 1000;
 /*!
  * Sentinel value for a document remove.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const REMOVED = {} as DocumentSnapshotBuilder<any, any>;
 
 /*!

@@ -1401,8 +1401,9 @@ export class Firestore implements firestore.Firestore {
    * ```
    */
   recursiveDelete(
-    ref:
-      | firestore.CollectionReference<any, any>
+    ref: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | firestore.CollectionReference<any, any>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       | firestore.DocumentReference<any, any>,
     bulkWriter?: BulkWriter
   ): Promise<void> {
