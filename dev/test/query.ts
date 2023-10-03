@@ -2302,7 +2302,7 @@ describe('startAt() interface', () => {
       firestore = firestoreInstance;
       return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
         let query: Query = firestore.collection('collectionId');
-        query = query.startAt(doc.ref);
+        query = query.startAt(doc);
         return query.get();
       });
     });

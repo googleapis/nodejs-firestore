@@ -309,7 +309,9 @@ describe('Firestore class', () => {
 
       const documents: QueryDocumentSnapshot<DocumentData>[] = [];
       for (const partition of partitions) {
-        let partitionedQuery: Query = collectionGroup;
+        let partitionedQuery: Query = collectionGroup.orderBy(
+          FieldPath.documentId()
+        );
         if (partition.startAt) {
           partitionedQuery = partitionedQuery.startAt(...partition.startAt);
         }
@@ -1740,9 +1742,10 @@ describe('Query class', () => {
     expectDocs(res, {foo: 'b'});
   });
 
-  it('startAt() adds implicit order by for DocumentReference', async () => {
+  it('startAt() adds implicit order by for DocumentSnapshot', async () => {
     const references = await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol.startAt(references[1]).get();
+    const docSnap = await references[1].get();
+    const res = await randomCol.startAt(docSnap).get();
     expectDocs(res, {foo: 'b'});
   });
 
@@ -3046,16 +3049,18 @@ describe('Aggregates', () => {
       await randomCol.doc('doc6').set({foo: 'bar'});
       await randomCol.doc('doc7').set({foo: 'bar'});
 
-      const count1 = randomCol.startAfter(randomCol.doc('doc3')).count();
+      const docSnap = await randomCol.doc('doc3').get();
+
+      const count1 = randomCol.startAfter(docSnap).count();
       await runQueryAndExpectCount(count1, 4);
 
-      const count2 = randomCol.startAt(randomCol.doc('doc3')).count();
+      const count2 = randomCol.startAt(docSnap).count();
       await runQueryAndExpectCount(count2, 5);
 
-      const count3 = randomCol.endAt(randomCol.doc('doc3')).count();
+      const count3 = randomCol.endAt(docSnap).count();
       await runQueryAndExpectCount(count3, 3);
 
-      const count4 = randomCol.endBefore(randomCol.doc('doc3')).count();
+      const count4 = randomCol.endBefore(docSnap).count();
       await runQueryAndExpectCount(count4, 2);
 
       const count5 = randomCol.offset(6).count();
