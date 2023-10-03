@@ -113,7 +113,7 @@ export class Transaction implements firestore.Transaction {
   get<
     AppModelType,
     DbModelType extends firestore.DocumentData,
-    AggregateSpecType extends firestore.AggregateSpec
+    AggregateSpecType extends firestore.AggregateSpec,
   >(
     aggregateQuery: firestore.AggregateQuery<
       AggregateSpecType,
@@ -150,7 +150,7 @@ export class Transaction implements firestore.Transaction {
   get<
     AppModelType,
     DbModelType extends firestore.DocumentData,
-    AggregateSpecType extends firestore.AggregateSpec
+    AggregateSpecType extends firestore.AggregateSpec,
   >(
     refOrQuery:
       | firestore.DocumentReference<AppModelType, DbModelType>
@@ -584,7 +584,7 @@ export class Transaction implements firestore.Transaction {
  */
 export function parseGetAllArguments<
   AppModelType,
-  DbModelType extends firestore.DocumentData
+  DbModelType extends firestore.DocumentData,
 >(
   documentRefsOrReadOptions: Array<
     | firestore.DocumentReference<AppModelType, DbModelType>

@@ -527,7 +527,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IIndex,
       protos.google.firestore.admin.v1.IGetIndexRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   getIndex(
@@ -565,7 +565,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IIndex,
       protos.google.firestore.admin.v1.IGetIndexRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -610,7 +610,7 @@ export class FirestoreAdminClient {
     [
       protos.google.protobuf.IEmpty,
       protos.google.firestore.admin.v1.IDeleteIndexRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   deleteIndex(
@@ -650,7 +650,7 @@ export class FirestoreAdminClient {
     [
       protos.google.protobuf.IEmpty,
       protos.google.firestore.admin.v1.IDeleteIndexRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -695,7 +695,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IField,
       protos.google.firestore.admin.v1.IGetFieldRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   getField(
@@ -733,7 +733,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IField,
       protos.google.firestore.admin.v1.IGetFieldRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -778,7 +778,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IDatabase,
       protos.google.firestore.admin.v1.IGetDatabaseRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   getDatabase(
@@ -818,7 +818,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IDatabase,
       protos.google.firestore.admin.v1.IGetDatabaseRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -863,7 +863,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IListDatabasesResponse,
       protos.google.firestore.admin.v1.IListDatabasesRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   listDatabases(
@@ -903,7 +903,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IListDatabasesResponse,
       protos.google.firestore.admin.v1.IListDatabasesRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -960,7 +960,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.IIndexOperationMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   createIndex(
@@ -1013,7 +1013,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.IIndexOperationMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -1114,7 +1114,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.IFieldOperationMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   updateField(
@@ -1167,7 +1167,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.IFieldOperationMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -1272,7 +1272,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.IExportDocumentsMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   exportDocuments(
@@ -1325,7 +1325,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.IExportDocumentsMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -1422,7 +1422,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.IImportDocumentsMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   importDocuments(
@@ -1475,7 +1475,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.IImportDocumentsMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -1566,7 +1566,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.ICreateDatabaseMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   createDatabase(
@@ -1619,7 +1619,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.ICreateDatabaseMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -1704,7 +1704,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.IUpdateDatabaseMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   updateDatabase(
@@ -1757,7 +1757,7 @@ export class FirestoreAdminClient {
         protos.google.firestore.admin.v1.IUpdateDatabaseMetadata
       >,
       protos.google.longrunning.IOperation | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   > | void {
     request = request || {};
@@ -1847,7 +1847,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IIndex[],
       protos.google.firestore.admin.v1.IListIndexesRequest | null,
-      protos.google.firestore.admin.v1.IListIndexesResponse
+      protos.google.firestore.admin.v1.IListIndexesResponse,
     ]
   >;
   listIndexes(
@@ -1887,7 +1887,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IIndex[],
       protos.google.firestore.admin.v1.IListIndexesRequest | null,
-      protos.google.firestore.admin.v1.IListIndexesResponse
+      protos.google.firestore.admin.v1.IListIndexesResponse,
     ]
   > | void {
     request = request || {};
@@ -2054,7 +2054,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IField[],
       protos.google.firestore.admin.v1.IListFieldsRequest | null,
-      protos.google.firestore.admin.v1.IListFieldsResponse
+      protos.google.firestore.admin.v1.IListFieldsResponse,
     ]
   >;
   listFields(
@@ -2094,7 +2094,7 @@ export class FirestoreAdminClient {
     [
       protos.google.firestore.admin.v1.IField[],
       protos.google.firestore.admin.v1.IListFieldsRequest | null,
-      protos.google.firestore.admin.v1.IListFieldsResponse
+      protos.google.firestore.admin.v1.IListFieldsResponse,
     ]
   > | void {
     request = request || {};
