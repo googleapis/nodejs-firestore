@@ -421,7 +421,7 @@ export class WriteBatch implements firestore.WriteBatch {
    */
   update<
     AppModelType = firestore.DocumentData,
-    DbModelType extends firestore.DocumentData = firestore.DocumentData
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     dataOrField:
@@ -491,7 +491,6 @@ export class WriteBatch implements firestore.WriteBatch {
         validateUpdateMap('dataOrField', dataOrField, this._allowUndefined);
         // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
-
         Object.entries(
           dataOrField as firestore.UpdateData<DbModelType>
         ).forEach(([key, value]) => {

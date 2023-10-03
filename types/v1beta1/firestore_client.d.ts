@@ -163,7 +163,7 @@ export declare class FirestoreClient {
     [
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.IGetDocumentRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   getDocument(
@@ -224,7 +224,7 @@ export declare class FirestoreClient {
     [
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.IUpdateDocumentRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   updateDocument(
@@ -272,7 +272,7 @@ export declare class FirestoreClient {
     [
       protos.google.protobuf.IEmpty,
       protos.google.firestore.v1beta1.IDeleteDocumentRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   deleteDocument(
@@ -320,7 +320,7 @@ export declare class FirestoreClient {
     [
       protos.google.firestore.v1beta1.IBeginTransactionResponse,
       protos.google.firestore.v1beta1.IBeginTransactionRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   beginTransaction(
@@ -375,7 +375,7 @@ export declare class FirestoreClient {
     [
       protos.google.firestore.v1beta1.ICommitResponse,
       protos.google.firestore.v1beta1.ICommitRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   commit(
@@ -422,7 +422,7 @@ export declare class FirestoreClient {
     [
       protos.google.protobuf.IEmpty,
       protos.google.firestore.v1beta1.IRollbackRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   rollback(
@@ -483,7 +483,7 @@ export declare class FirestoreClient {
     [
       protos.google.firestore.v1beta1.IBatchWriteResponse,
       protos.google.firestore.v1beta1.IBatchWriteRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   batchWrite(
@@ -542,7 +542,7 @@ export declare class FirestoreClient {
     [
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.ICreateDocumentRequest | undefined,
-      {} | undefined
+      {} | undefined,
     ]
   >;
   createDocument(
@@ -736,7 +736,7 @@ export declare class FirestoreClient {
     [
       protos.google.firestore.v1beta1.IDocument[],
       protos.google.firestore.v1beta1.IListDocumentsRequest | null,
-      protos.google.firestore.v1beta1.IListDocumentsResponse
+      protos.google.firestore.v1beta1.IListDocumentsResponse,
     ]
   >;
   listDocuments(
@@ -935,7 +935,7 @@ export declare class FirestoreClient {
     [
       protos.google.firestore.v1beta1.ICursor[],
       protos.google.firestore.v1beta1.IPartitionQueryRequest | null,
-      protos.google.firestore.v1beta1.IPartitionQueryResponse
+      protos.google.firestore.v1beta1.IPartitionQueryResponse,
     ]
   >;
   partitionQuery(
@@ -1119,7 +1119,7 @@ export declare class FirestoreClient {
     [
       string[],
       protos.google.firestore.v1beta1.IListCollectionIdsRequest | null,
-      protos.google.firestore.v1beta1.IListCollectionIdsResponse
+      protos.google.firestore.v1beta1.IListCollectionIdsResponse,
     ]
   >;
   listCollectionIds(

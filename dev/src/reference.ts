@@ -131,9 +131,10 @@ const NOOP_MESSAGE = Symbol('a noop message');
  * @class DocumentReference
  */
 export class DocumentReference<
-  AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData
-> implements
+    AppModelType = firestore.DocumentData,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >
+  implements
     Serializable,
     firestore.DocumentReference<AppModelType, DbModelType>
 {
@@ -621,7 +622,7 @@ export class DocumentReference<
   withConverter(converter: null): DocumentReference;
   withConverter<
     NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): DocumentReference<NewAppModelType, NewDbModelType>;
@@ -678,7 +679,7 @@ export class DocumentReference<
    */
   withConverter<
     NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
@@ -921,7 +922,7 @@ class FieldFilterInternal extends FilterInternal {
  */
 export class QuerySnapshot<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
 > implements firestore.QuerySnapshot<AppModelType, DbModelType>
 {
   private _materializedDocs: Array<
@@ -1204,7 +1205,7 @@ enum LimitType {
  */
 export class QueryOptions<
   AppModelType,
-  DbModelType extends firestore.DocumentData
+  DbModelType extends firestore.DocumentData,
 > {
   constructor(
     readonly parentPath: ResourcePath,
@@ -1238,7 +1239,7 @@ export class QueryOptions<
    */
   static forCollectionGroupQuery<
     AppModelType = firestore.DocumentData,
-    DbModelType extends firestore.DocumentData = firestore.DocumentData
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     collectionId: string,
     converter = defaultConverter<AppModelType, DbModelType>()
@@ -1260,7 +1261,7 @@ export class QueryOptions<
    */
   static forCollectionQuery<
     AppModelType = firestore.DocumentData,
-    DbModelType extends firestore.DocumentData = firestore.DocumentData
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     collectionRef: ResourcePath,
     converter = defaultConverter<AppModelType, DbModelType>()
@@ -1336,7 +1337,7 @@ export class QueryOptions<
 
   withConverter<
     NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): QueryOptions<NewAppModelType, NewDbModelType> {
@@ -1405,7 +1406,7 @@ export class QueryOptions<
  */
 export class Query<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
 > implements firestore.Query<AppModelType, DbModelType>
 {
   private readonly _serializer: Serializer;
@@ -2815,7 +2816,7 @@ export class Query<
   withConverter(converter: null): Query;
   withConverter<
     NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): Query<NewAppModelType, NewDbModelType>;
@@ -2871,7 +2872,7 @@ export class Query<
    */
   withConverter<
     NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
@@ -2895,7 +2896,7 @@ export class Query<
  */
 export class CollectionReference<
     AppModelType = firestore.DocumentData,
-    DbModelType extends firestore.DocumentData = firestore.DocumentData
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
   >
   extends Query<AppModelType, DbModelType>
   implements firestore.CollectionReference<AppModelType, DbModelType>
@@ -3150,7 +3151,7 @@ export class CollectionReference<
   withConverter(converter: null): CollectionReference;
   withConverter<
     NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): CollectionReference<NewAppModelType, NewDbModelType>;
@@ -3207,7 +3208,7 @@ export class CollectionReference<
    */
   withConverter<
     NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
@@ -3228,7 +3229,7 @@ export class CollectionReference<
 export class AggregateQuery<
   AggregateSpecType extends AggregateSpec,
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
 > implements
     firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
 {
@@ -3491,7 +3492,7 @@ export class AggregateQuery<
 export class AggregateQuerySnapshot<
   AggregateSpecType extends firestore.AggregateSpec,
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
 > implements
     firestore.AggregateQuerySnapshot<
       AggregateSpecType,
@@ -3654,7 +3655,7 @@ export function validateQueryOperator(
  */
 export function validateDocumentReference<
   AppModelType,
-  DbModelType extends firestore.DocumentData
+  DbModelType extends firestore.DocumentData,
 >(
   arg: string | number,
   value: firestore.DocumentReference<AppModelType, DbModelType>
