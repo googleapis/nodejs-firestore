@@ -336,6 +336,7 @@ export class BulkWriterError extends Error {
     readonly message: string,
 
     /** The document reference the operation was performed on. */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     readonly documentRef: firestore.DocumentReference<any, any>,
 
     /** The type of operation performed. */
@@ -782,6 +783,7 @@ export class BulkWriter {
    */
   onWriteResult(
     successCallback: (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       documentRef: firestore.DocumentReference<any, any>,
       result: WriteResult
     ) => void

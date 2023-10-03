@@ -2095,9 +2095,7 @@ export class Query<
    * ```
    */
   startAt(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<any, any> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.startAt',
@@ -2141,9 +2139,7 @@ export class Query<
    * ```
    */
   startAfter(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<any, any> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.startAfter',
@@ -2186,9 +2182,7 @@ export class Query<
    * ```
    */
   endBefore(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<any, any> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.endBefore',
@@ -2231,9 +2225,7 @@ export class Query<
    * ```
    */
   endAt(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<any, any> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.endAt',
