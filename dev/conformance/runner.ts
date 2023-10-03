@@ -193,7 +193,7 @@ const convertInput = {
     }
     return args;
   },
-  snapshot: (snapshot: ConformanceProto) => {
+  snapshot: (snapshot: ConformanceProto): QuerySnapshot => {
     const docs: QueryDocumentSnapshot[] = [];
     const changes: DocumentChange[] = [];
     const readTime = Timestamp.fromProto(snapshot.readTime);
