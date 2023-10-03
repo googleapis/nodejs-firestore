@@ -1943,25 +1943,12 @@ export class Query<
       DocumentSnapshot<AppModelType, DbModelType> | unknown
     >
   ): FieldOrder[] {
-    // Add an implicit orderBy if the only cursor value is a DocumentSnapshot
-    // or a DocumentReference.
+    // Add an implicit orderBy if the only cursor value is a DocumentSnapshot.
     if (
       cursorValuesOrDocumentSnapshot.length !== 1 ||
-      !(
-        cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot ||
-        cursorValuesOrDocumentSnapshot[0] instanceof DocumentReference
-      )
+      !(cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot)
     ) {
       return this._queryOptions.fieldOrders;
-    }
-
-    // TODO(b/296435819): Remove this warning message.
-    if (cursorValuesOrDocumentSnapshot[0] instanceof DocumentReference) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `Warning: Passing DocumentReference into a cursor without orderBy clause is not an intended
-        behavior. Please use DocumentSnapshot or add an explicit orderBy on document key field.`
-      );
     }
 
     const fieldOrders = this._queryOptions.fieldOrders.slice();
@@ -2151,9 +2138,7 @@ export class Query<
    * ```
    */
   startAt(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<any, any> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.startAt',
@@ -2197,9 +2182,7 @@ export class Query<
    * ```
    */
   startAfter(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<any, any> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.startAfter',
@@ -2242,9 +2225,7 @@ export class Query<
    * ```
    */
   endBefore(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<any, any> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.endBefore',
@@ -2287,9 +2268,7 @@ export class Query<
    * ```
    */
   endAt(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<any, any> | unknown
-    >
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.endAt',
