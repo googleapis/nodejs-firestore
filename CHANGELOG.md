@@ -4,6 +4,28 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.0.0](https://github.com/googleapis/nodejs-firestore/compare/v6.8.0...v7.0.0) (2023-10-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade to Node 14 ([#1900](https://github.com/googleapis/nodejs-firestore/issues/1900))
+* Fix the UpdateData incorrect parameter type issue ([#1887](https://github.com/googleapis/nodejs-firestore/issues/1887))
+
+### Features
+
+* Fix the UpdateData incorrect parameter type issue ([#1887](https://github.com/googleapis/nodejs-firestore/issues/1887)) ([0afadef](https://github.com/googleapis/nodejs-firestore/commit/0afadeff4706e7bff173d8eda7b9681498b570a8))
+
+
+### Bug Fixes
+
+* Remove DocumentReference from cursor ([#1882](https://github.com/googleapis/nodejs-firestore/issues/1882)) ([da4f8f8](https://github.com/googleapis/nodejs-firestore/commit/da4f8f8b6a35fa93aca0eddc96703d3321a998f6))
+
+
+### Miscellaneous Chores
+
+* Upgrade to Node 14 ([#1900](https://github.com/googleapis/nodejs-firestore/issues/1900)) ([1f5abb8](https://github.com/googleapis/nodejs-firestore/commit/1f5abb8fbef91e372313b2dbf4d51c7d03ce69b0))
+
 ## [6.8.0](https://github.com/googleapis/nodejs-firestore/compare/v6.7.0...v6.8.0) (2023-09-26)
 
 
