@@ -3169,7 +3169,7 @@ describe('count queries using aggregate api', () => {
       await runQueryAndExpectCount(count2, 0);
     });
 
-    it('counts with startAt, endAt and offset', async () => {
+    it('counts with startAt, endAt and offset with DocumentReference cursor', async () => {
       await randomCol.doc('doc1').set({foo: 'bar'});
       await randomCol.doc('doc2').set({foo: 'bar'});
       await randomCol.doc('doc3').set({foo: 'bar'});
@@ -3207,8 +3207,45 @@ describe('count queries using aggregate api', () => {
         .aggregate({count: AggregateField.count()});
       await runQueryAndExpectCount(count5, 1);
     });
+
+    it('counts with startAt, endAt and offset with DocumentSnapshot cursor', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+      const docSnap = await randomCol.doc('doc3').get();
+
+      const count1 = randomCol
+        .startAfter(docSnap)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count1, 4);
+
+      const count2 = randomCol
+        .startAt(docSnap)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count2, 5);
+
+      const count3 = randomCol
+        .endAt(docSnap)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count3, 3);
+
+      const count4 = randomCol
+        .endBefore(docSnap)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count4, 2);
+
+      const count5 = randomCol
+        .offset(6)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count5, 1);
+    });
   }
 });
+
 
 describe('Aggregation queries', () => {
   let firestore: Firestore;
@@ -4633,6 +4670,219 @@ describe('Aggregation queries', () => {
       });
     }
   );
+
+  describe.only('Aggregation queries - orderBy Normalization Checks', () => {
+    async function addTwoDocs() : Promise<void> {
+      const testDocs = {
+        a: {author: 'authorA', title: 'titleA', num: 5, foo:1},
+        b: {author: 'authorB', title: 'titleB', num: 7, foo:2},
+      };
+      await addTestDocs(testDocs);
+    }
+
+    it('no filter, no orderBy, no cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(12);
+    });
+
+    it('equality filter, no orderBy, no cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .where('num', '==', 5)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(5);
+    });
+
+    it('inequality filter, no orderBy, no cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .where('num', '>', 5)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    it('no filter, explicit orderBy, no cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .orderBy('num')
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(12);
+    });
+
+    it('equality filter, explicit orderBy, no cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .where('num', '==', 5)
+          .orderBy('num')
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(5);
+    });
+
+    it('inequality filter, explicit orderBy, no cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .where('num', '>', 5)
+          .orderBy('num')
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    it('no filter, explicit orderBy, field value cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .orderBy("num")
+          .startAfter(5)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `__name__, num` index.
+    // SDK sends: orderBy __name__
+    it.skip('no filter, explicit orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .orderBy(FieldPath.documentId())
+          .startAfter(col.doc('a'))
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `__name__, num` index.
+    // SDK sends: orderBy __name__
+    it.skip('no filter, no orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      let snapshot = await col
+          .startAfter(docSnap)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `foo, __name__, num` index.
+    // SDK sends: orderBy foo, __name__
+    it.skip('no filter, explicit orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      let snapshot = await col
+          .orderBy('foo')
+          .startAfter(docSnap)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This just happens to work because the orderBy field matches the aggregation field.
+    // SDK sends: orderBy num, __name__
+    it('no filter, explicit orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      let snapshot = await col
+          .orderBy('num')
+          .startAfter(docSnap)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    it('equality filter, explicit orderBy, field value cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .where('num', '==', 5)
+          .orderBy("num")
+          .startAt(5)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(5);
+    });
+
+    it('inequality filter, explicit orderBy, field value cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .where('num', '>', 5)
+          .orderBy("num")
+          .startAt(5)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `__name__, num` index.
+    // SDK sends: orderBy __name__
+    it.skip('equality filter, explicit orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .where('num', '==', 7)
+          .orderBy(FieldPath.documentId())
+          .startAfter(col.doc('a'))
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // Full orderBy is provided.
+    // SDK sends: orderBy num, __name__
+    it('inequality filter, explicit orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      let snapshot = await col
+          .where('num', '>', 5)
+          .orderBy('num')
+          .orderBy(FieldPath.documentId())
+          .startAfter(5, col.doc('a'))
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `__name__, num` index.
+    // SDK sends: orderBy __name__
+    it.skip('equality filter, no orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      let snapshot = await col
+          .where('num', '==', 7)
+          .startAfter(docSnap)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This just happens to work because the orderBy field matches the aggregation field.
+    // SDK sends: orderBy num, __name__
+    it('inequality filter, no orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      let snapshot = await col
+          .where('num', '>', 0)
+          .startAfter(docSnap)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `foo, __name__, num` index.
+    // SDK sends: orderBy foo, __name__
+    it.skip('inequality filter, no orderBy, document reference cursor 2', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      let snapshot = await col
+          .where('foo', '>', 0)
+          .startAfter(docSnap)
+          .aggregate({sum: AggregateField.sum('num')})
+          .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+  });
 });
 
 describe('Transaction class', () => {
