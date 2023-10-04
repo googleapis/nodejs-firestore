@@ -3179,21 +3179,25 @@ describe('count queries using aggregate api', () => {
       await randomCol.doc('doc7').set({foo: 'bar'});
 
       const count1 = randomCol
+        .orderBy(FieldPath.documentId())
         .startAfter(randomCol.doc('doc3'))
         .aggregate({count: AggregateField.count()});
       await runQueryAndExpectCount(count1, 4);
 
       const count2 = randomCol
+        .orderBy(FieldPath.documentId())
         .startAt(randomCol.doc('doc3'))
         .aggregate({count: AggregateField.count()});
       await runQueryAndExpectCount(count2, 5);
 
       const count3 = randomCol
+        .orderBy(FieldPath.documentId())
         .endAt(randomCol.doc('doc3'))
         .aggregate({count: AggregateField.count()});
       await runQueryAndExpectCount(count3, 3);
 
       const count4 = randomCol
+        .orderBy(FieldPath.documentId())
         .endBefore(randomCol.doc('doc3'))
         .aggregate({count: AggregateField.count()});
       await runQueryAndExpectCount(count4, 2);
