@@ -4681,7 +4681,7 @@ describe('Aggregation queries', () => {
 
     it('no filter, no orderBy, no cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .aggregate({sum: AggregateField.sum('num')})
         .get();
       expect(snapshot.data().sum).to.equal(12);
@@ -4689,7 +4689,7 @@ describe('Aggregation queries', () => {
 
     it('equality filter, no orderBy, no cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .where('num', '==', 5)
         .aggregate({sum: AggregateField.sum('num')})
         .get();
@@ -4698,7 +4698,7 @@ describe('Aggregation queries', () => {
 
     it('inequality filter, no orderBy, no cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .where('num', '>', 5)
         .aggregate({sum: AggregateField.sum('num')})
         .get();
@@ -4707,7 +4707,7 @@ describe('Aggregation queries', () => {
 
     it('no filter, explicit orderBy, no cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .orderBy('num')
         .aggregate({sum: AggregateField.sum('num')})
         .get();
@@ -4716,7 +4716,7 @@ describe('Aggregation queries', () => {
 
     it('equality filter, explicit orderBy, no cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .where('num', '==', 5)
         .orderBy('num')
         .aggregate({sum: AggregateField.sum('num')})
@@ -4726,7 +4726,7 @@ describe('Aggregation queries', () => {
 
     it('inequality filter, explicit orderBy, no cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .where('num', '>', 5)
         .orderBy('num')
         .aggregate({sum: AggregateField.sum('num')})
@@ -4736,7 +4736,7 @@ describe('Aggregation queries', () => {
 
     it('no filter, explicit orderBy, field value cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .orderBy('num')
         .startAfter(5)
         .aggregate({sum: AggregateField.sum('num')})
@@ -4748,7 +4748,7 @@ describe('Aggregation queries', () => {
     // SDK sends: orderBy __name__
     it.skip('no filter, explicit orderBy, document reference cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .orderBy(FieldPath.documentId())
         .startAfter(col.doc('a'))
         .aggregate({sum: AggregateField.sum('num')})
@@ -4761,7 +4761,7 @@ describe('Aggregation queries', () => {
     it.skip('no filter, no orderBy, document reference cursor', async () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
-      let snapshot = await col
+      const snapshot = await col
         .startAfter(docSnap)
         .aggregate({sum: AggregateField.sum('num')})
         .get();
@@ -4773,7 +4773,7 @@ describe('Aggregation queries', () => {
     it.skip('no filter, explicit orderBy, document reference cursor', async () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
-      let snapshot = await col
+      const snapshot = await col
         .orderBy('foo')
         .startAfter(docSnap)
         .aggregate({sum: AggregateField.sum('num')})
@@ -4786,7 +4786,7 @@ describe('Aggregation queries', () => {
     it('no filter, explicit orderBy, document reference cursor', async () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
-      let snapshot = await col
+      const snapshot = await col
         .orderBy('num')
         .startAfter(docSnap)
         .aggregate({sum: AggregateField.sum('num')})
@@ -4796,7 +4796,7 @@ describe('Aggregation queries', () => {
 
     it('equality filter, explicit orderBy, field value cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .where('num', '==', 5)
         .orderBy('num')
         .startAt(5)
@@ -4807,7 +4807,7 @@ describe('Aggregation queries', () => {
 
     it('inequality filter, explicit orderBy, field value cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .where('num', '>', 5)
         .orderBy('num')
         .startAt(5)
@@ -4820,7 +4820,7 @@ describe('Aggregation queries', () => {
     // SDK sends: orderBy __name__
     it.skip('equality filter, explicit orderBy, document reference cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .where('num', '==', 7)
         .orderBy(FieldPath.documentId())
         .startAfter(col.doc('a'))
@@ -4833,7 +4833,7 @@ describe('Aggregation queries', () => {
     // SDK sends: orderBy num, __name__
     it('inequality filter, explicit orderBy, document reference cursor', async () => {
       await addTwoDocs();
-      let snapshot = await col
+      const snapshot = await col
         .where('num', '>', 5)
         .orderBy('num')
         .orderBy(FieldPath.documentId())
@@ -4848,7 +4848,7 @@ describe('Aggregation queries', () => {
     it.skip('equality filter, no orderBy, document reference cursor', async () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
-      let snapshot = await col
+      const snapshot = await col
         .where('num', '==', 7)
         .startAfter(docSnap)
         .aggregate({sum: AggregateField.sum('num')})
@@ -4861,7 +4861,7 @@ describe('Aggregation queries', () => {
     it('inequality filter, no orderBy, document reference cursor', async () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
-      let snapshot = await col
+      const snapshot = await col
         .where('num', '>', 0)
         .startAfter(docSnap)
         .aggregate({sum: AggregateField.sum('num')})
@@ -4874,7 +4874,7 @@ describe('Aggregation queries', () => {
     it.skip('inequality filter, no orderBy, document reference cursor 2', async () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
-      let snapshot = await col
+      const snapshot = await col
         .where('foo', '>', 0)
         .startAfter(docSnap)
         .aggregate({sum: AggregateField.sum('num')})
@@ -5611,7 +5611,7 @@ describe('Client initialization', () => {
     [
       string,
       (coll: CollectionReference) => Promise<unknown>,
-      /* skip */ boolean?
+      /* skip */ boolean?,
     ]
   > = [
     ['CollectionReference.get()', randomColl => randomColl.get()],
