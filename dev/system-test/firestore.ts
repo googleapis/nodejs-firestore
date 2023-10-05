@@ -3246,7 +3246,6 @@ describe('count queries using aggregate api', () => {
   }
 });
 
-
 describe('Aggregation queries', () => {
   let firestore: Firestore;
   let col: CollectionReference;
@@ -4671,11 +4670,11 @@ describe('Aggregation queries', () => {
     }
   );
 
-  describe.only('Aggregation queries - orderBy Normalization Checks', () => {
-    async function addTwoDocs() : Promise<void> {
+  describe('Aggregation queries - orderBy Normalization Checks', () => {
+    async function addTwoDocs(): Promise<void> {
       const testDocs = {
-        a: {author: 'authorA', title: 'titleA', num: 5, foo:1},
-        b: {author: 'authorB', title: 'titleB', num: 7, foo:2},
+        a: {author: 'authorA', title: 'titleA', num: 5, foo: 1},
+        b: {author: 'authorB', title: 'titleB', num: 7, foo: 2},
       };
       await addTestDocs(testDocs);
     }
@@ -4683,65 +4682,65 @@ describe('Aggregation queries', () => {
     it('no filter, no orderBy, no cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(12);
     });
 
     it('equality filter, no orderBy, no cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .where('num', '==', 5)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('num', '==', 5)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(5);
     });
 
     it('inequality filter, no orderBy, no cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .where('num', '>', 5)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('num', '>', 5)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
     it('no filter, explicit orderBy, no cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .orderBy('num')
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .orderBy('num')
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(12);
     });
 
     it('equality filter, explicit orderBy, no cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .where('num', '==', 5)
-          .orderBy('num')
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('num', '==', 5)
+        .orderBy('num')
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(5);
     });
 
     it('inequality filter, explicit orderBy, no cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .where('num', '>', 5)
-          .orderBy('num')
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('num', '>', 5)
+        .orderBy('num')
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
     it('no filter, explicit orderBy, field value cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .orderBy("num")
-          .startAfter(5)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .orderBy('num')
+        .startAfter(5)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
@@ -4750,10 +4749,10 @@ describe('Aggregation queries', () => {
     it.skip('no filter, explicit orderBy, document reference cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .orderBy(FieldPath.documentId())
-          .startAfter(col.doc('a'))
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .orderBy(FieldPath.documentId())
+        .startAfter(col.doc('a'))
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
@@ -4763,9 +4762,9 @@ describe('Aggregation queries', () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
       let snapshot = await col
-          .startAfter(docSnap)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
@@ -4775,10 +4774,10 @@ describe('Aggregation queries', () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
       let snapshot = await col
-          .orderBy('foo')
-          .startAfter(docSnap)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .orderBy('foo')
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
@@ -4788,32 +4787,32 @@ describe('Aggregation queries', () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
       let snapshot = await col
-          .orderBy('num')
-          .startAfter(docSnap)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .orderBy('num')
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
     it('equality filter, explicit orderBy, field value cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .where('num', '==', 5)
-          .orderBy("num")
-          .startAt(5)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('num', '==', 5)
+        .orderBy('num')
+        .startAt(5)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(5);
     });
 
     it('inequality filter, explicit orderBy, field value cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .where('num', '>', 5)
-          .orderBy("num")
-          .startAt(5)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('num', '>', 5)
+        .orderBy('num')
+        .startAt(5)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
@@ -4822,11 +4821,11 @@ describe('Aggregation queries', () => {
     it.skip('equality filter, explicit orderBy, document reference cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .where('num', '==', 7)
-          .orderBy(FieldPath.documentId())
-          .startAfter(col.doc('a'))
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('num', '==', 7)
+        .orderBy(FieldPath.documentId())
+        .startAfter(col.doc('a'))
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
@@ -4835,12 +4834,12 @@ describe('Aggregation queries', () => {
     it('inequality filter, explicit orderBy, document reference cursor', async () => {
       await addTwoDocs();
       let snapshot = await col
-          .where('num', '>', 5)
-          .orderBy('num')
-          .orderBy(FieldPath.documentId())
-          .startAfter(5, col.doc('a'))
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('num', '>', 5)
+        .orderBy('num')
+        .orderBy(FieldPath.documentId())
+        .startAfter(5, col.doc('a'))
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
@@ -4850,10 +4849,10 @@ describe('Aggregation queries', () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
       let snapshot = await col
-          .where('num', '==', 7)
-          .startAfter(docSnap)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('num', '==', 7)
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
@@ -4863,10 +4862,10 @@ describe('Aggregation queries', () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
       let snapshot = await col
-          .where('num', '>', 0)
-          .startAfter(docSnap)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('num', '>', 0)
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
 
@@ -4876,10 +4875,10 @@ describe('Aggregation queries', () => {
       await addTwoDocs();
       const docSnap = await col.doc('a').get();
       let snapshot = await col
-          .where('foo', '>', 0)
-          .startAfter(docSnap)
-          .aggregate({sum: AggregateField.sum('num')})
-          .get();
+        .where('foo', '>', 0)
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
       expect(snapshot.data().sum).to.equal(7);
     });
   });
@@ -5612,7 +5611,7 @@ describe('Client initialization', () => {
     [
       string,
       (coll: CollectionReference) => Promise<unknown>,
-      /* skip */ boolean?,
+      /* skip */ boolean?
     ]
   > = [
     ['CollectionReference.get()', randomColl => randomColl.get()],
