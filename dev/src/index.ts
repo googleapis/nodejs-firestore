@@ -105,6 +105,7 @@ export {GeoPoint} from './geo-point';
 export {CollectionGroup};
 export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
+export {AggregateField, Aggregate} from './aggregate';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);

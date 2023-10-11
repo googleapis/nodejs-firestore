@@ -15,6 +15,7 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
+import * as assert from 'assert';
 import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 import {GoogleError} from 'google-gax';
@@ -44,6 +45,7 @@ import {
   autoId,
   Deferred,
   isPermanentRpcError,
+  mapToArray,
   requestTag,
   wrapError,
 } from './util';
@@ -58,6 +60,7 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
+import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1848,7 +1851,47 @@ export class Query<
     AppModelType,
     DbModelType
   > {
-    return new AggregateQuery(this, {count: {}});
+    return this.aggregate({
+      count: AggregateField.count(),
+    });
+  }
+
+  /**
+   * Returns a query that can perform the given aggregations.
+   *
+   * The returned query, when executed, calculates the specified aggregations
+   * over the documents in the result set of this query, without actually
+   * downloading the documents.
+   *
+   * Using the returned query to perform aggregations is efficient because only
+   * the final aggregation values, not the documents' data, is downloaded. The
+   * returned query can even perform aggregations of the documents if the result set
+   * would be prohibitively large to download entirely (e.g. thousands of documents).
+   *
+   * @param aggregateSpec An `AggregateSpec` object that specifies the aggregates
+   * to perform over the result set. The AggregateSpec specifies aliases for each
+   * aggregate, which can be used to retrieve the aggregate result.
+   * @example
+   * ```typescript
+   * const aggregateQuery = col.aggregate(query, {
+   *   countOfDocs: count(),
+   *   totalHours: sum('hours'),
+   *   averageScore: average('score')
+   * });
+   *
+   * const aggregateSnapshot = await aggregateQuery.get();
+   * const countOfDocs: number = aggregateSnapshot.data().countOfDocs;
+   * const totalHours: number = aggregateSnapshot.data().totalHours;
+   * const averageScore: number | null = aggregateSnapshot.data().averageScore;
+   * ```
+   */
+  aggregate<T extends firestore.AggregateSpec>(
+    aggregateSpec: T
+  ): AggregateQuery<T, AppModelType, DbModelType> {
+    return new AggregateQuery<T, AppModelType, DbModelType>(
+      this,
+      aggregateSpec
+    );
   }
 
   /**
@@ -3163,12 +3206,15 @@ export class CollectionReference<
  * A query that calculates aggregations over an underlying query.
  */
 export class AggregateQuery<
-  AggregateSpecType extends firestore.AggregateSpec,
+  AggregateSpecType extends AggregateSpec,
   AppModelType = firestore.DocumentData,
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
 > implements
     firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
 {
+  private readonly clientAliasToServerAliasMap: Record<string, string> = {};
+  private readonly serverAliasToClientAliasMap: Record<string, string> = {};
+
   /**
    * @private
    * @internal
@@ -3181,7 +3227,19 @@ export class AggregateQuery<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _query: Query<AppModelType, DbModelType>,
     private readonly _aggregates: AggregateSpecType
-  ) {}
+  ) {
+    // Client-side aliases may be too long and exceed the 1500-byte string size limit.
+    // Such long strings do not need to be transferred over the wire either.
+    // The client maps the user's alias to a short form alias and send that to the server.
+    let aggregationNum = 0;
+    for (const clientAlias in this._aggregates) {
+      if (Object.prototype.hasOwnProperty.call(this._aggregates, clientAlias)) {
+        const serverAlias = `aggregate_${aggregationNum++}`;
+        this.clientAliasToServerAliasMap[clientAlias] = serverAlias;
+        this.serverAliasToClientAliasMap[serverAlias] = clientAlias;
+      }
+    }
+  }
 
   /** The query whose aggregations will be calculated by this object. */
   get query(): Query<AppModelType, DbModelType> {
@@ -3323,12 +3381,17 @@ export class AggregateQuery<
     if (fields) {
       const serializer = this._query.firestore._serializer!;
       for (const prop of Object.keys(fields)) {
-        if (this._aggregates[prop] === undefined) {
+        const alias = this.serverAliasToClientAliasMap[prop];
+        assert(
+          alias !== null && alias !== undefined,
+          `'${prop}' not present in server-client alias mapping.`
+        );
+        if (this._aggregates[alias] === undefined) {
           throw new Error(
             `Unexpected alias [${prop}] in result aggregate result`
           );
         }
-        data[prop] = serializer.decodeValue(fields[prop]);
+        data[alias] = serializer.decodeValue(fields[prop]);
       }
     }
     return data;
@@ -3344,18 +3407,22 @@ export class AggregateQuery<
    */
   toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
-    //TODO(tomandersen) inspect _query to build request - this is just hard
-    // coded count right now.
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
       structuredAggregationQuery: {
         structuredQuery: queryProto.structuredQuery,
-        aggregations: [
-          {
-            alias: 'count',
-            count: {},
-          },
-        ],
+        aggregations: mapToArray(this._aggregates, (aggregate, clientAlias) => {
+          const serverAlias = this.clientAliasToServerAliasMap[clientAlias];
+          assert(
+            serverAlias !== null && serverAlias !== undefined,
+            `'${clientAlias}' not present in client-server alias mapping.`
+          );
+          return new Aggregate(
+            serverAlias,
+            aggregate.aggregateType,
+            aggregate._field
+          ).toProto();
+        }),
       },
     };
 

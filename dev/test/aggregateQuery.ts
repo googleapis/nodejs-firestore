@@ -77,10 +77,12 @@ describe('aggregate query interface', () => {
   });
 
   it('returns results', async () => {
+    // Here we are mocking the response from the server. The client uses
+    // `aggregate_$i` aliases in requests and will receive these in responses.
     const result: api.IRunAggregationQueryResponse = {
       result: {
         aggregateFields: {
-          count: {integerValue: '99'},
+          aggregate_0: {integerValue: '99'},
         },
       },
       readTime: {seconds: 5, nanos: 6},
@@ -100,10 +102,12 @@ describe('aggregate query interface', () => {
   });
 
   it('successful return without ending the stream on get()', async () => {
+    // Here we are mocking the response from the server. The client uses
+    // `aggregate_$i` aliases in requests and will receive these in responses.
     const result: api.IRunAggregationQueryResponse = {
       result: {
         aggregateFields: {
-          count: {integerValue: '99'},
+          aggregate_0: {integerValue: '99'},
         },
       },
       readTime: {seconds: 5, nanos: 6},
