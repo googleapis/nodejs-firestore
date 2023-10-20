@@ -18,7 +18,7 @@ import * as firestore from '@google-cloud/firestore';
 import * as assert from 'assert';
 import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
-import {GoogleError} from 'google-gax';
+import {GoogleError, serializer} from 'google-gax';
 
 import * as protos from '../protos/firestore_v1_proto_api';
 
@@ -61,6 +61,11 @@ import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
+import {google} from "../protos/firestore_v1_proto_api";
+import QueryMode = google.firestore.v1.QueryMode;
+import {QueryProfileInfo} from './profile';
+import IStruct = google.protobuf.IStruct;
+import {InformationalQueryExecutionStats, InformationalQueryPlan} from "@google-cloud/firestore";
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2322,8 +2327,8 @@ export class Query<
    * @return A Promise that will be resolved with the results of the query
    * planning information.
    */
-  explain(): Promise<Record<string, unknown>> {
-    return Promise.resolve({foo: 'bar'});
+  explain(): Promise<firestore.InformationalQueryPlan> {
+    return this._getQueryProfileInfo("PLAN").then(info => info.plan);
   }
 
   /**
@@ -2338,19 +2343,7 @@ export class Query<
    * statistics from the query execution, and the query results.
    */
   explainAnalyze(): Promise<firestore.QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>> {
-    const mock = {
-      plan: {foo: 'bar'},
-      stats: {cpu: '3ms'},
-      snapshot: new QuerySnapshot(
-        this,
-        new Timestamp(0, 0),
-        0,
-        () => [],
-        () => []
-      ),
-    };
-
-    return Promise.resolve(mock);
+    return this._getQueryProfileInfo("PROFILE");
   }
 
   /**
@@ -2739,6 +2732,131 @@ export class Query<
       .catch(e => stream.destroy(e));
 
     return stream;
+  }
+
+  /**
+   * Internal streaming method for query profiling.
+   *
+   * @param queryMode The query profiling mode.
+   * @private
+   * @internal
+   * @returns A QueryProfileInfo object containing the results of the profiling.
+   */
+  _getQueryProfileInfo(queryMode: QueryMode):
+      Promise<firestore.QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>> {
+    const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
+    let planInfo : InformationalQueryPlan = {};
+    let executionStats : InformationalQueryExecutionStats = {};
+    let readTime: Timestamp;
+
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    const tag = requestTag();
+    let backendStream: Duplex;
+    const stream = new Transform({
+      objectMode: true,
+      transform: (proto, enc, callback) => {
+        if (proto === NOOP_MESSAGE) {
+          callback(undefined);
+          return;
+        }
+        readTime = Timestamp.fromProto(proto.readTime);
+        if (proto.document) {
+          const document = this.firestore.snapshot_(
+              proto.document,
+              proto.readTime
+          );
+          const doc = new DocumentSnapshotBuilder<
+              AppModelType,
+              DbModelType
+          >(document.ref.withConverter(this._queryOptions.converter));
+          // Recreate the QueryDocumentSnapshot with the DocumentReference
+          // containing the original converter.
+          doc.fieldsProto = document._fieldsProto;
+          doc.readTime = document.readTime;
+          doc.createTime = document.createTime;
+          doc.updateTime = document.updateTime;
+          docs.push(doc.build() as QueryDocumentSnapshot<AppModelType, DbModelType>);
+        }
+
+        if (proto.stats?.queryPlan?.planInfo) {
+          planInfo = this.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryPlan.planInfo);
+        }
+
+        if (proto.stats?.queryStats) {
+          executionStats = this.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryStats);
+        }
+      },
+    });
+
+    this.firestore
+        .initializeIfNeeded(tag)
+        .then(async () => {
+          // `toProto()` might throw an exception. We rely on the behavior of an
+          // async function to convert this exception into the rejected Promise we
+          // catch below.
+          let request = this.toProto();
+
+          // Apply the profiling mode.
+          request.mode = queryMode;
+
+          let streamActive: Deferred<boolean>;
+          do {
+            streamActive = new Deferred<boolean>();
+            backendStream = await this._firestore.requestStream(
+                'runQuery',
+                /* bidirectional= */ false,
+                request,
+                tag
+            );
+            backendStream.on('error', err => {
+              backendStream.unpipe(stream);
+              logger(
+                  'Query._stream',
+                  tag,
+                  'Query Profiling failed with stream error:',
+                  err
+              );
+              stream.destroy(err);
+              streamActive.resolve(/* active= */ false);
+            });
+            backendStream.on('end', () => {
+              streamActive.resolve(/* active= */ false);
+            });
+            backendStream.resume();
+            backendStream.pipe(stream);
+          } while (await streamActive.promise);
+        })
+        .catch(e => stream.destroy(e));
+
+    return new Promise((resolve, reject) => {
+      let readTime: Timestamp;
+      stream.on('error', err => {
+            reject(wrapError(err, stack));
+          })
+          .on('end', () => {
+            const querySnapshot =
+                new QuerySnapshot(
+                    this,
+                    readTime,
+                    docs.length,
+                    () => docs,
+                    () => {
+                      const changes: Array<
+                          DocumentChange<AppModelType, DbModelType>
+                      > = [];
+                      for (let i = 0; i < docs.length; ++i) {
+                        changes.push(new DocumentChange('added', docs[i], -1, i));
+                      }
+                      return changes;
+                    }
+                );
+            resolve(
+                new QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>(
+                    planInfo, executionStats, querySnapshot));
+          });
+    });
   }
 
   /**

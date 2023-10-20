@@ -145,24 +145,36 @@ describe('Firestore class', () => {
   });
 
   it.only('can plan a query', async () => {
-    const plan = await randomCol.where('a', '>', 10).explain();
+    await randomCol.doc('doc1').set({'foo': 1});
+    await randomCol.doc('doc2').set({'foo': 2});
+    await randomCol.doc('doc3').set({'foo': 1});
+    const plan = await randomCol.where('foo', '>', 1).explain();
     console.log(plan);
   });
 
   it.only('can profile a query', async () => {
-    const profile = await randomCol.where('a', '>', 10).explainAnalyze();
+    await randomCol.doc('doc1').set({foo: 1});
+    await randomCol.doc('doc2').set({foo: 2});
+    await randomCol.doc('doc3').set({foo: 1});
+    const profile = await randomCol.where('foo', '==', 1).explainAnalyze();
     console.log(profile.plan);
     console.log(profile.stats);
     console.log(profile.snapshot.size);
   });
 
   it.only('can plan an aggregate query', async () => {
-    const plan = await randomCol.where('a', '>', 10).count().explain();
+    await randomCol.doc('doc1').set({foo: 1});
+    await randomCol.doc('doc2').set({foo: 2});
+    await randomCol.doc('doc3').set({foo: 1});
+    const plan = await randomCol.where('foo', '>', 0).count().explain();
     console.log(plan);
   });
 
   it.only('can profile an aggregate query', async () => {
-    const profile = await randomCol.where('a', '>', 10).count().explainAnalyze();
+    await randomCol.doc('doc1').set({foo: 1});
+    await randomCol.doc('doc2').set({foo: 2});
+    await randomCol.doc('doc3').set({foo: 1});
+    const profile = await randomCol.where('foo', '<', 3).count().explainAnalyze();
     console.log(profile.plan);
     console.log(profile.stats);
     console.log(profile.snapshot.data());

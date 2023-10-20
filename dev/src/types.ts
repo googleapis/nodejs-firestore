@@ -28,6 +28,7 @@ import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath} from './path';
 
 import api = google.firestore.v1;
+import IValue = google.protobuf.IValue;
 
 /**
  * A map in the format of the Proto API

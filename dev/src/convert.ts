@@ -20,6 +20,7 @@ import {ApiMapValue, ProtobufJsValue} from './types';
 import {validateObject} from './validate';
 
 import api = google.firestore.v1;
+import IValue = google.protobuf.IValue;
 
 /*!
  * @module firestore/convert
@@ -155,6 +156,45 @@ export function detectValueType(proto: ProtobufJsValue): string {
   if (detectedValues.length !== 1) {
     throw new Error(
       `Unable to infer type value from '${JSON.stringify(proto)}'.`
+    );
+  }
+
+  return detectedValues[0];
+}
+
+/**
+ * Detects the value kind from a Proto3 JSON `google.protobuf.Value` proto.
+ *
+ * @private
+ * @internal
+ * @param proto The `firestore.v1.Value` proto.
+ * @return The string value for 'valueType'.
+ */
+export function detectGoogleProtobufValueKind(proto: IValue): string {
+  const detectedValues: string[] = [];
+
+  if (proto.nullValue !== undefined) {
+    detectedValues.push('nullValue');
+  }
+  if (proto.numberValue !== undefined) {
+    detectedValues.push('numberValue');
+  }
+  if (proto.stringValue !== undefined) {
+    detectedValues.push('stringValue');
+  }
+  if (proto.boolValue !== undefined) {
+    detectedValues.push('boolValue');
+  }
+  if (proto.structValue !== undefined) {
+    detectedValues.push('structValue');
+  }
+  if (proto.listValue !== undefined) {
+    detectedValues.push('listValue');
+  }
+
+  if (detectedValues.length !== 1) {
+    throw new Error(
+        `Unable to infer type value from '${JSON.stringify(proto)}'.`
     );
   }
 

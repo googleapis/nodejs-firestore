@@ -18,7 +18,7 @@ import {DocumentData} from '@google-cloud/firestore';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
-import {detectValueType} from './convert';
+import {detectGoogleProtobufValueKind, detectValueType} from './convert';
 import {DeleteTransform, FieldTransform} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
@@ -29,6 +29,10 @@ import {isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;
+import {google} from "../protos/firestore_v1_proto_api";
+import Value = google.protobuf.Value;
+import IValue = google.protobuf.IValue;
+import IStruct = google.protobuf.IStruct;
 
 /**
  * The maximum depth of a Firestore object.
@@ -285,6 +289,75 @@ export class Serializer {
         );
       }
     }
+  }
+
+
+  /**
+   * Decodes a google.protobuf.Value
+   *
+   * @private
+   * @internal
+   * @param proto A Google Protobuf 'Value'.
+   * @returns The converted JS type.
+   */
+  decodeGoogleProtobufValue(proto: IValue): unknown {
+    switch (detectGoogleProtobufValueKind(proto)) {
+      case 'nullValue': {
+        return null;
+      }
+      case 'numberValue': {
+        return proto.numberValue;
+      }
+      case 'stringValue': {
+        return proto.stringValue;
+      }
+      case 'boolValue': {
+        return proto.boolValue;
+      }
+      case 'listValue': {
+        const array: unknown[] = [];
+        if (Array.isArray(proto.listValue?.values)) {
+          for (const value of proto.listValue?.values!) {
+            array.push(this.decodeGoogleProtobufValue(value));
+          }
+        }
+        return array;
+      }
+      case 'structValue': {
+        const obj: DocumentData = {};
+        const fields = proto.structValue?.fields;
+        if (fields) {
+          for (const prop of Object.keys(fields)) {
+            obj[prop] = this.decodeGoogleProtobufValue(fields[prop]);
+          }
+        }
+
+        return obj;
+      }
+      default: {
+        throw new Error(
+            'Cannot decode type from google.protobuf.Value: ' + JSON.stringify(proto)
+        );
+      }
+    }
+  }
+
+  /**
+   * Decodes a google.protobuf.Struct
+   *
+   * @private
+   * @internal
+   * @param proto A Google Protobuf 'Struct'.
+   * @returns The converted JS type.
+   */
+  decodeGoogleProtobufStruct(proto: IStruct): Record<string, unknown> {
+    let result : Record<string, unknown> = {};
+    if(proto.fields) {
+      for (const prop of Object.keys(proto.fields)) {
+        result[prop] = this.decodeGoogleProtobufValue(proto.fields[prop]);
+      }
+    }
+    return result;
   }
 }
 
