@@ -371,7 +371,7 @@ export class DocumentReference<
    *
    * @param {DocumentData} data An object that contains the fields and data to
    * serialize as the document.
-   * @throws {Error} If the provided input is not a valid Firestore document.
+   * @throws {Error} If the provided input is not a valid Firestore document or if the document already exists.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this create.
    *
