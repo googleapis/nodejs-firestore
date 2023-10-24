@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -71,7 +71,7 @@
     "@types/duplexify": "^3.5.0",
     "@types/extend": "^3.0.0",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^18.0.0",
+    "@types/node": "^20.0.0",
     "@types/sinon": "^10.0.0",
     "@types/through2": "^2.0.34",
     "c8": "^8.0.0",

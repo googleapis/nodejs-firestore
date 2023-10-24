@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.1.0](https://github.com/googleapis/nodejs-firestore/compare/v7.0.0...v7.1.0) (2023-10-11)
+
+
+### Features
+
+* Sum and Average aggregations ([#1873](https://github.com/googleapis/nodejs-firestore/issues/1873)) ([b9ea514](https://github.com/googleapis/nodejs-firestore/commit/b9ea5143f997dd217200ffa83ed481ad74f558e4))
+
 ## [7.0.0](https://github.com/googleapis/nodejs-firestore/compare/v6.8.0...v7.0.0) (2023-10-03)
 
 
