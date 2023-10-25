@@ -166,7 +166,7 @@ describe('Firestore class', () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const plan = await randomCol.where('foo', '>', 0).count().explain();
+    const plan = await randomCol.where('foo', '>', 0).count().get();
     console.log(plan);
   });
 

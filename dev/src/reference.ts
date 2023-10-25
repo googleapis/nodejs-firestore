@@ -2473,7 +2473,8 @@ export class Query<
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionIdOrReadTime?: Uint8Array | Timestamp
+    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    queryMode?: QueryMode
   ): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
     const databaseId = this.firestore.databaseId;
@@ -2525,6 +2526,10 @@ export class Query<
     } else if (transactionIdOrReadTime instanceof Timestamp) {
       runQueryRequest.readTime =
         transactionIdOrReadTime.toProto().timestampValue;
+    }
+
+    if (queryMode) {
+      runQueryRequest.mode = queryMode;
     }
 
     return runQueryRequest;
@@ -2612,7 +2617,7 @@ export class Query<
    * @internal
    * @returns A stream of document results.
    */
-  _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
+  _stream(transactionId?: Uint8Array, queryMode?: QueryMode): NodeJS.ReadableStream {
     const tag = requestTag();
 
     let lastReceivedDocument: QueryDocumentSnapshot<
@@ -2656,6 +2661,17 @@ export class Query<
             backendStream.end();
             stream.end();
           }
+        } else if (proto.stats) {
+          if (proto.stats.queryPlan?.planInfo) {
+            callback(undefined, {
+              planInfo: this.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryPlan.planInfo)
+            });
+          }
+          if (proto.stats.queryStats) {
+            callback(undefined, {
+              executionStats: this.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryStats)
+            });
+          }
         } else {
           callback(undefined, {readTime});
         }
@@ -2668,7 +2684,7 @@ export class Query<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        let request = this.toProto(transactionId);
+        let request = this.toProto(transactionId, queryMode);
 
         let streamActive: Deferred<boolean>;
         do {
@@ -2682,9 +2698,10 @@ export class Query<
           backendStream.on('error', err => {
             backendStream.unpipe(stream);
 
-            // If a non-transactional query failed, attempt to restart.
+            // If a non-transactional NORMAL query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
-            if (!transactionId && !this._isPermanentRpcError(err, 'runQuery')) {
+            const isNormalQueryMode = queryMode === undefined || queryMode === "NORMAL";
+            if (isNormalQueryMode && !transactionId && !this._isPermanentRpcError(err, 'runQuery')) {
               logger(
                 'Query._stream',
                 tag,
@@ -2747,95 +2764,36 @@ export class Query<
     const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
     let planInfo : InformationalQueryPlan = {};
     let executionStats : InformationalQueryExecutionStats = {};
-    let readTime: Timestamp;
 
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    const tag = requestTag();
-    let backendStream: Duplex;
-    const stream = new Transform({
-      objectMode: true,
-      transform: (proto, enc, callback) => {
-        if (proto === NOOP_MESSAGE) {
-          callback(undefined);
-          return;
-        }
-        readTime = Timestamp.fromProto(proto.readTime);
-        if (proto.document) {
-          const document = this.firestore.snapshot_(
-              proto.document,
-              proto.readTime
-          );
-          const doc = new DocumentSnapshotBuilder<
-              AppModelType,
-              DbModelType
-          >(document.ref.withConverter(this._queryOptions.converter));
-          // Recreate the QueryDocumentSnapshot with the DocumentReference
-          // containing the original converter.
-          doc.fieldsProto = document._fieldsProto;
-          doc.readTime = document.readTime;
-          doc.createTime = document.createTime;
-          doc.updateTime = document.updateTime;
-          docs.push(doc.build() as QueryDocumentSnapshot<AppModelType, DbModelType>);
-        }
-
-        if (proto.stats?.queryPlan?.planInfo) {
-          planInfo = this.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryPlan.planInfo);
-        }
-
-        if (proto.stats?.queryStats) {
-          executionStats = this.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryStats);
-        }
-      },
-    });
-
-    this.firestore
-        .initializeIfNeeded(tag)
-        .then(async () => {
-          // `toProto()` might throw an exception. We rely on the behavior of an
-          // async function to convert this exception into the rejected Promise we
-          // catch below.
-          let request = this.toProto();
-
-          // Apply the profiling mode.
-          request.mode = queryMode;
-
-          let streamActive: Deferred<boolean>;
-          do {
-            streamActive = new Deferred<boolean>();
-            backendStream = await this._firestore.requestStream(
-                'runQuery',
-                /* bidirectional= */ false,
-                request,
-                tag
-            );
-            backendStream.on('error', err => {
-              backendStream.unpipe(stream);
-              logger(
-                  'Query._stream',
-                  tag,
-                  'Query Profiling failed with stream error:',
-                  err
-              );
-              stream.destroy(err);
-              streamActive.resolve(/* active= */ false);
-            });
-            backendStream.on('end', () => {
-              streamActive.resolve(/* active= */ false);
-            });
-            backendStream.resume();
-            backendStream.pipe(stream);
-          } while (await streamActive.promise);
-        })
-        .catch(e => stream.destroy(e));
-
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
-      stream.on('error', err => {
+
+      this._stream(/* transactionId */ undefined, /* QueryMode */ queryMode)
+          .on('error', err => {
             reject(wrapError(err, stack));
           })
+          .on('data', result => {
+            readTime = result.readTime;
+            if (result.document) {
+              docs.push(result.document);
+            }
+            if (result.planInfo) {
+              planInfo = result.planInfo;
+            }
+            if (result.executionStats) {
+              executionStats = result.executionStats;
+            }
+          })
           .on('end', () => {
+            if (this._queryOptions.limitType === LimitType.Last) {
+              // The results for limitToLast queries need to be flipped since
+              // we reversed the ordering constraints before sending the query
+              // to the backend.
+              docs.reverse();
+            }
             const querySnapshot =
                 new QuerySnapshot(
                     this,
@@ -3448,6 +3406,47 @@ export class AggregateQuery<
   }
 
   /**
+   * TODO.
+   *
+   * @private
+   * @internal
+   */
+  _getQueryProfileInfo(queryMode: QueryMode): Promise<
+    QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>
+  > {
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    let aggregationResult: AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>;
+    let planInfo : InformationalQueryPlan = {};
+    let executionStats : InformationalQueryExecutionStats = {};
+
+    return new Promise((resolve, reject) => {
+      const stream = this._stream(undefined, queryMode);
+      stream.on('error', err => {
+        reject(wrapError(err, stack));
+      });
+      stream.on('data', result => {
+        if (result.aggregationResult) {
+          aggregationResult = result.aggregationResult;
+        }
+        if (result.planInfo) {
+          planInfo = result.planInfo;
+        }
+        if (result.executionStats) {
+          executionStats = result.executionStats;
+        }
+      });
+      stream.on('end', () => {
+        //stream.destroy();
+        resolve(
+            new QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>(
+                planInfo, executionStats, aggregationResult));
+      });
+    });
+  }
+
+  /**
    * Internal streaming method that accepts an optional transaction ID.
    *
    * @private
@@ -3455,7 +3454,7 @@ export class AggregateQuery<
    * @param transactionId A transaction ID.
    * @returns A stream of document results.
    */
-  _stream(transactionId?: Uint8Array): Readable {
+  _stream(transactionId?: Uint8Array, queryMode?: QueryMode): Readable {
     const tag = requestTag();
     const firestore = this._query.firestore;
 
@@ -3465,8 +3464,22 @@ export class AggregateQuery<
         if (proto.result) {
           const readTime = Timestamp.fromProto(proto.readTime!);
           const data = this.decodeResult(proto.result);
-          callback(undefined, new AggregateQuerySnapshot(this, readTime, data));
-        } else {
+          callback(undefined, {
+            aggregationResult: new AggregateQuerySnapshot(this, readTime, data)
+          });
+        } else if (proto.stats) {
+          if (proto.stats.queryPlan?.planInfo) {
+            callback(undefined, {
+              planInfo: this._query.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryPlan.planInfo)
+            });
+          }
+          if (proto.stats.queryStats) {
+            callback(undefined, {
+              executionStats: this._query.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryStats)
+            });
+          }
+        }
+        else {
           callback(Error('RunAggregationQueryResponse is missing result'));
         }
       },
@@ -3478,7 +3491,7 @@ export class AggregateQuery<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = this.toProto(transactionId);
+        const request = this.toProto(transactionId, queryMode);
 
         let streamActive: Deferred<boolean>;
         do {
@@ -3565,7 +3578,7 @@ export class AggregateQuery<
    * @internal
    * @returns Serialized JSON for the query.
    */
-  toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
+  toProto(transactionId?: Uint8Array, queryMode?: QueryMode): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
@@ -3588,6 +3601,10 @@ export class AggregateQuery<
 
     if (transactionId instanceof Uint8Array) {
       runQueryRequest.transaction = transactionId;
+    }
+
+    if (queryMode) {
+      runQueryRequest.mode = queryMode;
     }
 
     return runQueryRequest;
@@ -3625,20 +3642,11 @@ export class AggregateQuery<
   }
 
   explain(): Promise<Record<string, unknown>> {
-    return Promise.resolve({foo: 'bar'});
+    return this._getQueryProfileInfo("PLAN").then(info => info.plan);
   }
 
   explainAnalyze(): Promise<firestore.QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>> {
-    const mock = {
-      plan: {foo: 'bar'},
-      stats: {cpu: '3ms'},
-      snapshot: new AggregateQuerySnapshot(
-        this,
-        new Timestamp(0, 0),
-        this.decodeResult({})
-      ),
-    };
-    return Promise.resolve(mock);
+    return this._getQueryProfileInfo("PROFILE");
   }
 }
 
