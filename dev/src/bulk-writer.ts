@@ -943,8 +943,8 @@ export class BulkWriter {
     );
 
     // Use the write with the longest backoff duration when determining backoff.
-    const highestBackoffDuration = pendingBatch.pendingOps.reduce((prev, cur) =>
-      prev.backoffDuration > cur.backoffDuration ? prev : cur
+    const highestBackoffDuration = pendingBatch.pendingOps.reduce(
+      (prev, cur) => (prev.backoffDuration > cur.backoffDuration ? prev : cur)
     ).backoffDuration;
     const backoffMsWithJitter = BulkWriter._applyJitter(highestBackoffDuration);
     const delayedExecution = new Deferred<void>();
