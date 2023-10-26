@@ -149,7 +149,7 @@ describe('Firestore class', () => {
     await randomCol.doc('doc2').set({'foo': 2});
     await randomCol.doc('doc3').set({'foo': 1});
     const plan = await randomCol.where('foo', '>', 1).explain();
-    console.log(plan);
+    expect(Object.keys(plan).length).to.be.greaterThan(0);
   });
 
   it.only('can profile a query', async () => {
@@ -157,17 +157,17 @@ describe('Firestore class', () => {
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
     const profile = await randomCol.where('foo', '==', 1).explainAnalyze();
-    console.log(profile.plan);
-    console.log(profile.stats);
-    console.log(profile.snapshot.size);
+    expect(Object.keys(profile.plan).length).to.be.greaterThan(0);
+    expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
+    expect(profile.snapshot.size).to.equal(2);
   });
 
   it.only('can plan an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const plan = await randomCol.where('foo', '>', 0).count().get();
-    console.log(plan);
+    const plan = await randomCol.where('foo', '>', 0).count().explain();
+    expect(Object.keys(plan).length).to.be.greaterThan(0);
   });
 
   it.only('can profile an aggregate query', async () => {
@@ -175,9 +175,10 @@ describe('Firestore class', () => {
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
     const profile = await randomCol.where('foo', '<', 3).count().explainAnalyze();
-    console.log(profile.plan);
-    console.log(profile.stats);
     console.log(profile.snapshot.data());
+    expect(Object.keys(profile.plan).length).to.be.greaterThan(0);
+    expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
+    expect(profile.snapshot.data().count).to.equal(3);
   });
 
   it('getAll() supports array destructuring', () => {
