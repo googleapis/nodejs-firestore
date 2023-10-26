@@ -40,7 +40,7 @@ import api = google.firestore.v1;
  */
 export class DocumentSnapshotBuilder<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > {
   /** The fields of the Firestore `Document` Protobuf backing this document. */
   fieldsProto?: ApiMapValue;
@@ -110,7 +110,7 @@ export class DocumentSnapshotBuilder<
  */
 export class DocumentSnapshot<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > implements firestore.DocumentSnapshot<AppModelType, DbModelType>
 {
   private _ref: DocumentReference<AppModelType, DbModelType>;
@@ -177,7 +177,7 @@ export class DocumentSnapshot<
    */
   static fromUpdateMap<
     AppModelType,
-    DbModelType extends firestore.DocumentData,
+    DbModelType extends firestore.DocumentData
   >(
     ref: firestore.DocumentReference<AppModelType, DbModelType>,
     data: UpdateMap
@@ -584,7 +584,7 @@ export class DocumentSnapshot<
  */
 export class QueryDocumentSnapshot<
     AppModelType = firestore.DocumentData,
-    DbModelType extends firestore.DocumentData = firestore.DocumentData,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData
   >
   extends DocumentSnapshot<AppModelType, DbModelType>
   implements firestore.QueryDocumentSnapshot<AppModelType, DbModelType>
@@ -950,7 +950,7 @@ export class DocumentMask {
  */
 export class DocumentTransform<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > {
   /**
    * @private
@@ -1001,7 +1001,7 @@ export class DocumentTransform<
    */
   static fromUpdateMap<
     AppModelType,
-    DbModelType extends firestore.DocumentData,
+    DbModelType extends firestore.DocumentData
   >(
     ref: firestore.DocumentReference<AppModelType, DbModelType>,
     data: UpdateMap

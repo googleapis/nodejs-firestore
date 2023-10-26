@@ -138,7 +138,7 @@ const defaultConverterObj: FirestoreDataConverter<DocumentData> = {
  */
 export function defaultConverter<
   AppModelType,
-  DbModelType extends DocumentData,
+  DbModelType extends DocumentData
 >(): FirestoreDataConverter<AppModelType, DbModelType> {
   return defaultConverterObj as FirestoreDataConverter<
     AppModelType,

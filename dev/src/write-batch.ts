@@ -422,7 +422,7 @@ export class WriteBatch implements firestore.WriteBatch {
    */
   update<
     AppModelType = firestore.DocumentData,
-    DbModelType extends firestore.DocumentData = firestore.DocumentData,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData
   >(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     dataOrField:

@@ -5611,7 +5611,7 @@ describe('Client initialization', () => {
     [
       string,
       (coll: CollectionReference) => Promise<unknown>,
-      /* skip */ boolean?,
+      /* skip */ boolean?
     ]
   > = [
     ['CollectionReference.get()', randomColl => randomColl.get()],

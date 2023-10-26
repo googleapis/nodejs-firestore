@@ -28,7 +28,7 @@ export type DocumentChangeType = 'added' | 'removed' | 'modified';
  */
 export class DocumentChange<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > implements firestore.DocumentChange<AppModelType, DbModelType>
 {
   private readonly _type: DocumentChangeType;

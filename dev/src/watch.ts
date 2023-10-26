@@ -73,7 +73,7 @@ const ChangeType: {[k: string]: DocumentChangeType} = {
  */
 const DOCUMENT_WATCH_COMPARATOR: <
   AppModelType,
-  DbModelType extends DocumentData,
+  DbModelType extends DocumentData
 >(
   doc1: QueryDocumentSnapshot<AppModelType, DbModelType>,
   doc2: QueryDocumentSnapshot<AppModelType, DbModelType>
@@ -116,7 +116,7 @@ const EMPTY_FUNCTION: () => void = () => {};
 
 type DocumentComparator<
   AppModelType,
-  DbModelType extends firestore.DocumentData,
+  DbModelType extends firestore.DocumentData
 > = (
   l: QueryDocumentSnapshot<AppModelType, DbModelType>,
   r: QueryDocumentSnapshot<AppModelType, DbModelType>
@@ -124,7 +124,7 @@ type DocumentComparator<
 
 interface DocumentChangeSet<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > {
   deletes: string[];
   adds: Array<QueryDocumentSnapshot<AppModelType, DbModelType>>;
@@ -141,7 +141,7 @@ interface DocumentChangeSet<
  */
 abstract class Watch<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > {
   protected readonly firestore: Firestore;
   private readonly backoff: ExponentialBackoff;
@@ -884,7 +884,7 @@ abstract class Watch<
  */
 export class DocumentWatch<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > extends Watch<AppModelType, DbModelType> {
   constructor(
     firestore: Firestore,
@@ -917,7 +917,7 @@ export class DocumentWatch<
  */
 export class QueryWatch<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > extends Watch<AppModelType, DbModelType> {
   private comparator: DocumentComparator<AppModelType, DbModelType>;
 

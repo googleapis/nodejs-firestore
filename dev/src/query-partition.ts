@@ -34,7 +34,7 @@ import api = protos.google.firestore.v1;
  */
 export class QueryPartition<
   AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData
 > implements firestore.QueryPartition<AppModelType, DbModelType>
 {
   private readonly _serializer: Serializer;
