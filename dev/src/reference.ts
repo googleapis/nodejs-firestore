@@ -18,7 +18,7 @@ import * as firestore from '@google-cloud/firestore';
 import * as assert from 'assert';
 import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
-import {GoogleError, serializer} from 'google-gax';
+import {GoogleError} from 'google-gax';
 
 import * as protos from '../protos/firestore_v1_proto_api';
 
@@ -64,7 +64,6 @@ import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 import {google} from "../protos/firestore_v1_proto_api";
 import QueryMode = google.firestore.v1.QueryMode;
 import {QueryProfileInfo} from './profile';
-import IStruct = google.protobuf.IStruct;
 import {InformationalQueryExecutionStats, InformationalQueryPlan} from "@google-cloud/firestore";
 
 /**
@@ -2698,7 +2697,7 @@ export class Query<
           backendStream.on('error', err => {
             backendStream.unpipe(stream);
 
-            // If a non-transactional NORMAL query failed, attempt to restart.
+            // If a non-transactional 'NORMAL' query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
             const isNormalQueryMode = queryMode === undefined || queryMode === "NORMAL";
             if (isNormalQueryMode && !transactionId && !this._isPermanentRpcError(err, 'runQuery')) {
@@ -3406,10 +3405,12 @@ export class AggregateQuery<
   }
 
   /**
-   * TODO.
+   * Internal streaming method for aggregate query profiling.
    *
+   * @param queryMode The query profiling mode.
    * @private
    * @internal
+   * @returns A QueryProfileInfo object containing the results of the profiling.
    */
   _getQueryProfileInfo(queryMode: QueryMode): Promise<
     QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>
@@ -3438,7 +3439,6 @@ export class AggregateQuery<
         }
       });
       stream.on('end', () => {
-        //stream.destroy();
         resolve(
             new QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>(
                 planInfo, executionStats, aggregationResult));

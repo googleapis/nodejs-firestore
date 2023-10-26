@@ -144,7 +144,7 @@ describe('Firestore class', () => {
       });
   });
 
-  it.only('can plan a query', async () => {
+  it('can plan a query', async () => {
     await randomCol.doc('doc1').set({'foo': 1});
     await randomCol.doc('doc2').set({'foo': 2});
     await randomCol.doc('doc3').set({'foo': 1});
@@ -152,7 +152,7 @@ describe('Firestore class', () => {
     expect(Object.keys(plan).length).to.be.greaterThan(0);
   });
 
-  it.only('can profile a query', async () => {
+  it('can profile a query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
@@ -162,7 +162,7 @@ describe('Firestore class', () => {
     expect(profile.snapshot.size).to.equal(2);
   });
 
-  it.only('can plan an aggregate query', async () => {
+  it('can plan an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
@@ -170,7 +170,7 @@ describe('Firestore class', () => {
     expect(Object.keys(plan).length).to.be.greaterThan(0);
   });
 
-  it.only('can profile an aggregate query', async () => {
+  it('can profile an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});

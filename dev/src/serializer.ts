@@ -30,7 +30,6 @@ import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;
 import {google} from "../protos/firestore_v1_proto_api";
-import Value = google.protobuf.Value;
 import IValue = google.protobuf.IValue;
 import IStruct = google.protobuf.IStruct;
 
