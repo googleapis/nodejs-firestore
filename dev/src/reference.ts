@@ -61,10 +61,13 @@ import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
-import {google} from "../protos/firestore_v1_proto_api";
+import {google} from '../protos/firestore_v1_proto_api';
 import QueryMode = google.firestore.v1.QueryMode;
 import {QueryProfileInfo} from './profile';
-import {InformationalQueryExecutionStats, InformationalQueryPlan} from "@google-cloud/firestore";
+import {
+  InformationalQueryExecutionStats,
+  InformationalQueryPlan,
+} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2327,7 +2330,7 @@ export class Query<
    * planning information.
    */
   explain(): Promise<firestore.InformationalQueryPlan> {
-    return this._getQueryProfileInfo("PLAN").then(info => info.plan);
+    return this._getQueryProfileInfo('PLAN').then(info => info.plan);
   }
 
   /**
@@ -2341,8 +2344,10 @@ export class Query<
    * @return A Promise that will be resolved with the planning information,
    * statistics from the query execution, and the query results.
    */
-  explainAnalyze(): Promise<firestore.QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>> {
-    return this._getQueryProfileInfo("PROFILE");
+  explainAnalyze(): Promise<
+    firestore.QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>
+  > {
+    return this._getQueryProfileInfo('PROFILE');
   }
 
   /**
@@ -2616,7 +2621,10 @@ export class Query<
    * @internal
    * @returns A stream of document results.
    */
-  _stream(transactionId?: Uint8Array, queryMode?: QueryMode): NodeJS.ReadableStream {
+  _stream(
+    transactionId?: Uint8Array,
+    queryMode?: QueryMode
+  ): NodeJS.ReadableStream {
     const tag = requestTag();
 
     let lastReceivedDocument: QueryDocumentSnapshot<
@@ -2663,12 +2671,17 @@ export class Query<
         } else if (proto.stats) {
           if (proto.stats.queryPlan?.planInfo) {
             callback(undefined, {
-              planInfo: this.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryPlan.planInfo)
+              planInfo: this.firestore._serializer!.decodeGoogleProtobufStruct(
+                proto.stats.queryPlan.planInfo
+              ),
             });
           }
           if (proto.stats.queryStats) {
             callback(undefined, {
-              executionStats: this.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryStats)
+              executionStats:
+                this.firestore._serializer!.decodeGoogleProtobufStruct(
+                  proto.stats.queryStats
+                ),
             });
           }
         } else {
@@ -2699,8 +2712,13 @@ export class Query<
 
             // If a non-transactional 'NORMAL' query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
-            const isNormalQueryMode = queryMode === undefined || queryMode === "NORMAL";
-            if (isNormalQueryMode && !transactionId && !this._isPermanentRpcError(err, 'runQuery')) {
+            const isNormalQueryMode =
+              queryMode === undefined || queryMode === 'NORMAL';
+            if (
+              isNormalQueryMode &&
+              !transactionId &&
+              !this._isPermanentRpcError(err, 'runQuery')
+            ) {
               logger(
                 'Query._stream',
                 tag,
@@ -2758,11 +2776,14 @@ export class Query<
    * @internal
    * @returns A QueryProfileInfo object containing the results of the profiling.
    */
-  _getQueryProfileInfo(queryMode: QueryMode):
-      Promise<firestore.QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>> {
+  _getQueryProfileInfo(
+    queryMode: QueryMode
+  ): Promise<
+    firestore.QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>
+  > {
     const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
-    let planInfo : InformationalQueryPlan = {};
-    let executionStats : InformationalQueryExecutionStats = {};
+    let planInfo: InformationalQueryPlan = {};
+    let executionStats: InformationalQueryExecutionStats = {};
 
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -2771,48 +2792,50 @@ export class Query<
       let readTime: Timestamp;
 
       this._stream(/* transactionId */ undefined, /* QueryMode */ queryMode)
-          .on('error', err => {
-            reject(wrapError(err, stack));
-          })
-          .on('data', result => {
-            readTime = result.readTime;
-            if (result.document) {
-              docs.push(result.document);
+        .on('error', err => {
+          reject(wrapError(err, stack));
+        })
+        .on('data', result => {
+          readTime = result.readTime;
+          if (result.document) {
+            docs.push(result.document);
+          }
+          if (result.planInfo) {
+            planInfo = result.planInfo;
+          }
+          if (result.executionStats) {
+            executionStats = result.executionStats;
+          }
+        })
+        .on('end', () => {
+          if (this._queryOptions.limitType === LimitType.Last) {
+            // The results for limitToLast queries need to be flipped since
+            // we reversed the ordering constraints before sending the query
+            // to the backend.
+            docs.reverse();
+          }
+          const querySnapshot = new QuerySnapshot(
+            this,
+            readTime,
+            docs.length,
+            () => docs,
+            () => {
+              const changes: Array<DocumentChange<AppModelType, DbModelType>> =
+                [];
+              for (let i = 0; i < docs.length; ++i) {
+                changes.push(new DocumentChange('added', docs[i], -1, i));
+              }
+              return changes;
             }
-            if (result.planInfo) {
-              planInfo = result.planInfo;
-            }
-            if (result.executionStats) {
-              executionStats = result.executionStats;
-            }
-          })
-          .on('end', () => {
-            if (this._queryOptions.limitType === LimitType.Last) {
-              // The results for limitToLast queries need to be flipped since
-              // we reversed the ordering constraints before sending the query
-              // to the backend.
-              docs.reverse();
-            }
-            const querySnapshot =
-                new QuerySnapshot(
-                    this,
-                    readTime,
-                    docs.length,
-                    () => docs,
-                    () => {
-                      const changes: Array<
-                          DocumentChange<AppModelType, DbModelType>
-                      > = [];
-                      for (let i = 0; i < docs.length; ++i) {
-                        changes.push(new DocumentChange('added', docs[i], -1, i));
-                      }
-                      return changes;
-                    }
-                );
-            resolve(
-                new QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>(
-                    planInfo, executionStats, querySnapshot));
-          });
+          );
+          resolve(
+            new QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>(
+              planInfo,
+              executionStats,
+              querySnapshot
+            )
+          );
+        });
     });
   }
 
@@ -3412,15 +3435,23 @@ export class AggregateQuery<
    * @internal
    * @returns A QueryProfileInfo object containing the results of the profiling.
    */
-  _getQueryProfileInfo(queryMode: QueryMode): Promise<
-    QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>
+  _getQueryProfileInfo(
+    queryMode: QueryMode
+  ): Promise<
+    QueryProfileInfo<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >
   > {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    let aggregationResult: AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>;
-    let planInfo : InformationalQueryPlan = {};
-    let executionStats : InformationalQueryExecutionStats = {};
+    let aggregationResult: AggregateQuerySnapshot<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >;
+    let planInfo: InformationalQueryPlan = {};
+    let executionStats: InformationalQueryExecutionStats = {};
 
     return new Promise((resolve, reject) => {
       const stream = this._stream(undefined, queryMode);
@@ -3440,8 +3471,10 @@ export class AggregateQuery<
       });
       stream.on('end', () => {
         resolve(
-            new QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>(
-                planInfo, executionStats, aggregationResult));
+          new QueryProfileInfo<
+            AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+          >(planInfo, executionStats, aggregationResult)
+        );
       });
     });
   }
@@ -3465,21 +3498,26 @@ export class AggregateQuery<
           const readTime = Timestamp.fromProto(proto.readTime!);
           const data = this.decodeResult(proto.result);
           callback(undefined, {
-            aggregationResult: new AggregateQuerySnapshot(this, readTime, data)
+            aggregationResult: new AggregateQuerySnapshot(this, readTime, data),
           });
         } else if (proto.stats) {
           if (proto.stats.queryPlan?.planInfo) {
             callback(undefined, {
-              planInfo: this._query.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryPlan.planInfo)
+              planInfo:
+                this._query.firestore._serializer!.decodeGoogleProtobufStruct(
+                  proto.stats.queryPlan.planInfo
+                ),
             });
           }
           if (proto.stats.queryStats) {
             callback(undefined, {
-              executionStats: this._query.firestore._serializer!.decodeGoogleProtobufStruct(proto.stats.queryStats)
+              executionStats:
+                this._query.firestore._serializer!.decodeGoogleProtobufStruct(
+                  proto.stats.queryStats
+                ),
             });
           }
-        }
-        else {
+        } else {
           callback(Error('RunAggregationQueryResponse is missing result'));
         }
       },
@@ -3578,7 +3616,10 @@ export class AggregateQuery<
    * @internal
    * @returns Serialized JSON for the query.
    */
-  toProto(transactionId?: Uint8Array, queryMode?: QueryMode): api.IRunAggregationQueryRequest {
+  toProto(
+    transactionId?: Uint8Array,
+    queryMode?: QueryMode
+  ): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
@@ -3642,11 +3683,15 @@ export class AggregateQuery<
   }
 
   explain(): Promise<Record<string, unknown>> {
-    return this._getQueryProfileInfo("PLAN").then(info => info.plan);
+    return this._getQueryProfileInfo('PLAN').then(info => info.plan);
   }
 
-  explainAnalyze(): Promise<firestore.QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>> {
-    return this._getQueryProfileInfo("PROFILE");
+  explainAnalyze(): Promise<
+    firestore.QueryProfileInfo<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >
+  > {
+    return this._getQueryProfileInfo('PROFILE');
   }
 }
 

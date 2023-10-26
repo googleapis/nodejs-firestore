@@ -1537,7 +1537,7 @@ declare namespace FirebaseFirestore {
    * InformationalQueryPlan contains information about the query plan.
    * Contents are subject to change.
    */
-  export type InformationalQueryPlan = Record<string,unknown>;
+  export type InformationalQueryPlan = Record<string, unknown>;
 
   /**
    * InformationalQueryExecutionStats contains statistics about the
@@ -1792,7 +1792,9 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the planning information,
      * statistics from the query execution, and the query results.
      */
-    explainAnalyze(): Promise<QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>>;
+    explainAnalyze(): Promise<
+      QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>
+    >;
 
     /*
      * Executes the query and returns the results as Node Stream.
@@ -2349,7 +2351,11 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the planning information,
      * statistics from the query execution, and the query results.
      */
-    explainAnalyze(): Promise<QueryProfileInfo<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>>;
+    explainAnalyze(): Promise<
+      QueryProfileInfo<
+        AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+      >
+    >;
 
     /**
      * Compares this object with the given object for equality.

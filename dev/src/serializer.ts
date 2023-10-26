@@ -29,7 +29,7 @@ import {isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;
-import {google} from "../protos/firestore_v1_proto_api";
+import {google} from '../protos/firestore_v1_proto_api';
 import IValue = google.protobuf.IValue;
 import IStruct = google.protobuf.IStruct;
 
@@ -290,7 +290,6 @@ export class Serializer {
     }
   }
 
-
   /**
    * Decodes a google.protobuf.Value
    *
@@ -315,8 +314,8 @@ export class Serializer {
       }
       case 'listValue': {
         const array: unknown[] = [];
-        if (Array.isArray(proto.listValue?.values)) {
-          for (const value of proto.listValue?.values!) {
+        if (Array.isArray(proto.listValue!.values)) {
+          for (const value of proto.listValue!.values!) {
             array.push(this.decodeGoogleProtobufValue(value));
           }
         }
@@ -335,7 +334,8 @@ export class Serializer {
       }
       default: {
         throw new Error(
-            'Cannot decode type from google.protobuf.Value: ' + JSON.stringify(proto)
+          'Cannot decode type from google.protobuf.Value: ' +
+            JSON.stringify(proto)
         );
       }
     }
@@ -350,8 +350,8 @@ export class Serializer {
    * @returns The converted JS type.
    */
   decodeGoogleProtobufStruct(proto: IStruct): Record<string, unknown> {
-    let result : Record<string, unknown> = {};
-    if(proto.fields) {
+    const result: Record<string, unknown> = {};
+    if (proto.fields) {
       for (const prop of Object.keys(proto.fields)) {
         result[prop] = this.decodeGoogleProtobufValue(proto.fields[prop]);
       }
