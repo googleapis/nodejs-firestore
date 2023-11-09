@@ -84,7 +84,6 @@ import {
   RECURSIVE_DELETE_MIN_PENDING_OPS,
   RecursiveDelete,
 } from './recursive-delete';
-import {stringify} from 'querystring';
 
 export {
   CollectionReference,
