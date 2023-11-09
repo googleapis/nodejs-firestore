@@ -84,7 +84,6 @@ import {
   RECURSIVE_DELETE_MIN_PENDING_OPS,
   RecursiveDelete,
 } from './recursive-delete';
-import {stringify} from 'querystring';
 
 export {
   CollectionReference,
@@ -592,21 +591,6 @@ export class Firestore implements firestore.Firestore {
             gax = this._gax;
           }
         }
-
-        // TODO (multi-db) Revert this override of gax.routingHeader.fromParams
-        // after a permanent fix is applied. See b/292075646
-        // This override of the routingHeader.fromParams does not
-        // encode forward slash characters. This is a temporary fix for b/291780066
-        gax.routingHeader.fromParams = params => {
-          return stringify(params, undefined, undefined, {
-            encodeURIComponent: (val: string) => {
-              return val
-                .split('/')
-                .map(component => encodeURIComponent(component))
-                .join('/');
-            },
-          });
-        };
 
         if (this._settings.ssl === false) {
           const grpcModule = this._settings.grpc ?? require('google-gax').grpc;
