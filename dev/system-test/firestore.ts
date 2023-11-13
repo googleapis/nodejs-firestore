@@ -13,20 +13,22 @@
 // limitations under the License.
 
 import {
-  QuerySnapshot,
   DocumentData,
-  WithFieldValue,
   PartialWithFieldValue,
+  QuerySnapshot,
   SetOptions,
+  Settings,
+  WithFieldValue,
 } from '@google-cloud/firestore';
 
-import {describe, it, before, beforeEach, afterEach} from 'mocha';
+import {afterEach, before, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 import {firestore} from '../protos/firestore_v1_proto_api';
 
 import {
+  AggregateField,
   CollectionReference,
   DocumentReference,
   DocumentSnapshot,
@@ -53,8 +55,8 @@ import {BulkWriter} from '../src/bulk-writer';
 import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
-
 import IBundleElement = firestore.IBundleElement;
+import {Filter} from '../src/filter';
 
 use(chaiAsPromised);
 
@@ -76,11 +78,36 @@ class DeferredPromise<T> {
   }
 }
 
+const firestoreEnv: {
+  [key: string]: string | undefined;
+} = {};
+for (const key in process.env) {
+  if (key.startsWith('FIRESTORE')) {
+    firestoreEnv[key] = process.env[key];
+  }
+}
+console.log(
+  `Running system tests with environment variables:\n ${JSON.stringify(
+    firestoreEnv,
+    null,
+    2
+  )}`
+);
+
 if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
 }
 
-function getTestRoot(firestore: Firestore) {
+function getTestRoot(settings: Settings = {}): CollectionReference {
+  const internalSettings: Settings = {};
+  if (process.env.FIRESTORE_NAMED_DATABASE) {
+    internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
+  }
+
+  const firestore = new Firestore({
+    ...internalSettings,
+    ...settings, // caller settings take precedent over internal settings
+  });
   return firestore.collection(`node_${version}_${autoId()}`);
 }
 
@@ -89,8 +116,8 @@ describe('Firestore class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore();
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -204,131 +231,138 @@ describe('Firestore class', () => {
   });
 });
 
-describe('CollectionGroup class', () => {
-  const desiredPartitionCount = 3;
-  const documentCount = 2 * 128 + 127; // Minimum partition size is 128.
-
-  let firestore: Firestore;
-  let randomColl: CollectionReference;
-  let collectionGroup: CollectionGroup;
-
-  before(async () => {
-    firestore = new Firestore({});
-    randomColl = getTestRoot(firestore);
-    collectionGroup = firestore.collectionGroup(randomColl.id);
-
-    const batch = firestore.batch();
-    for (let i = 0; i < documentCount; ++i) {
-      batch.create(randomColl.doc(), {title: 'post', author: 'author'});
-    }
-    await batch.commit();
-  });
-
-  async function getPartitions<T>(
-    collectionGroup: CollectionGroup<T>,
-    desiredPartitionsCount: number
-  ): Promise<QueryPartition<T>[]> {
-    const partitions: QueryPartition<T>[] = [];
-    for await (const partition of collectionGroup.getPartitions(
-      desiredPartitionsCount
-    )) {
-      partitions.push(partition);
-    }
-    return partitions;
-  }
-
-  async function verifyPartitions<T>(
-    partitions: QueryPartition<T>[]
-  ): Promise<QueryDocumentSnapshot<T>[]> {
-    expect(partitions.length).to.not.be.greaterThan(desiredPartitionCount);
-
-    expect(partitions[0].startAt).to.be.undefined;
-    for (let i = 0; i < partitions.length - 1; ++i) {
-      // The cursor value is a single DocumentReference
-      expect(
-        (partitions[i].endBefore![0] as DocumentReference<T>).isEqual(
-          partitions[i + 1].startAt![0] as DocumentReference<T>
-        )
-      ).to.be.true;
-    }
-    expect(partitions[partitions.length - 1].endBefore).to.be.undefined;
-
-    // Validate that we can use the partitions to read the original documents.
-    const documents: QueryDocumentSnapshot<T>[] = [];
-    for (const partition of partitions) {
-      documents.push(...(await partition.toQuery().get()).docs);
-    }
-    expect(documents.length).to.equal(documentCount);
-
-    return documents;
-  }
-
-  it('partition query', async () => {
-    const partitions = await getPartitions(
-      collectionGroup,
-      desiredPartitionCount
-    );
-    await verifyPartitions(partitions);
-  });
-
-  it('partition query with manual cursors', async () => {
-    const partitions = await getPartitions(
-      collectionGroup,
-      desiredPartitionCount
-    );
-
-    const documents: QueryDocumentSnapshot<DocumentData>[] = [];
-    for (const partition of partitions) {
-      let partitionedQuery: Query = collectionGroup;
-      if (partition.startAt) {
-        partitionedQuery = partitionedQuery.startAt(...partition.startAt);
-      }
-      if (partition.endBefore) {
-        partitionedQuery = partitionedQuery.endBefore(...partition.endBefore);
-      }
-      documents.push(...(await partitionedQuery.get()).docs);
-    }
-
-    expect(documents.length).to.equal(documentCount);
-  });
-
-  it('partition query with converter', async () => {
-    const collectionGroupWithConverter =
-      collectionGroup.withConverter(postConverter);
-    const partitions = await getPartitions(
-      collectionGroupWithConverter,
-      desiredPartitionCount
-    );
-    const documents = await verifyPartitions(partitions);
-
-    for (const document of documents) {
-      expect(document.data()).to.be.an.instanceOf(Post);
-    }
-  });
-
-  it('empty partition query', async () => {
+// Skip partition query tests when running against the emulator because
+// partition queries are not supported by the emulator.
+(process.env.FIRESTORE_EMULATOR_HOST === undefined ? describe : describe.skip)(
+  'CollectionGroup class',
+  () => {
     const desiredPartitionCount = 3;
+    const documentCount = 2 * 128 + 127; // Minimum partition size is 128.
 
-    const collectionGroupId = randomColl.doc().id;
-    const collectionGroup = firestore.collectionGroup(collectionGroupId);
-    const partitions = await getPartitions(
-      collectionGroup,
-      desiredPartitionCount
-    );
+    let firestore: Firestore;
+    let randomColl: CollectionReference;
+    let collectionGroup: CollectionGroup;
 
-    expect(partitions.length).to.equal(1);
-    expect(partitions[0].startAt).to.be.undefined;
-    expect(partitions[0].endBefore).to.be.undefined;
-  });
-});
+    before(async () => {
+      randomColl = getTestRoot();
+      firestore = randomColl.firestore;
+      collectionGroup = firestore.collectionGroup(randomColl.id);
+
+      const batch = firestore.batch();
+      for (let i = 0; i < documentCount; ++i) {
+        batch.create(randomColl.doc(), {title: 'post', author: 'author'});
+      }
+      await batch.commit();
+    });
+
+    async function getPartitions<T>(
+      collectionGroup: CollectionGroup<T>,
+      desiredPartitionsCount: number
+    ): Promise<QueryPartition<T>[]> {
+      const partitions: QueryPartition<T>[] = [];
+      for await (const partition of collectionGroup.getPartitions(
+        desiredPartitionsCount
+      )) {
+        partitions.push(partition);
+      }
+      return partitions;
+    }
+
+    async function verifyPartitions<T>(
+      partitions: QueryPartition<T>[]
+    ): Promise<QueryDocumentSnapshot<T>[]> {
+      expect(partitions.length).to.not.be.greaterThan(desiredPartitionCount);
+
+      expect(partitions[0].startAt).to.be.undefined;
+      for (let i = 0; i < partitions.length - 1; ++i) {
+        // The cursor value is a single DocumentReference
+        expect(
+          (partitions[i].endBefore![0] as DocumentReference<T>).isEqual(
+            partitions[i + 1].startAt![0] as DocumentReference<T>
+          )
+        ).to.be.true;
+      }
+      expect(partitions[partitions.length - 1].endBefore).to.be.undefined;
+
+      // Validate that we can use the partitions to read the original documents.
+      const documents: QueryDocumentSnapshot<T>[] = [];
+      for (const partition of partitions) {
+        documents.push(...(await partition.toQuery().get()).docs);
+      }
+      expect(documents.length).to.equal(documentCount);
+
+      return documents;
+    }
+
+    it('partition query', async () => {
+      const partitions = await getPartitions(
+        collectionGroup,
+        desiredPartitionCount
+      );
+      await verifyPartitions(partitions);
+    });
+
+    it('partition query with manual cursors', async () => {
+      const partitions = await getPartitions(
+        collectionGroup,
+        desiredPartitionCount
+      );
+
+      const documents: QueryDocumentSnapshot<DocumentData>[] = [];
+      for (const partition of partitions) {
+        let partitionedQuery: Query = collectionGroup.orderBy(
+          FieldPath.documentId()
+        );
+        if (partition.startAt) {
+          partitionedQuery = partitionedQuery.startAt(...partition.startAt);
+        }
+        if (partition.endBefore) {
+          partitionedQuery = partitionedQuery.endBefore(...partition.endBefore);
+        }
+        documents.push(...(await partitionedQuery.get()).docs);
+      }
+
+      expect(documents.length).to.equal(documentCount);
+    });
+
+    it('partition query with converter', async () => {
+      const collectionGroupWithConverter =
+        collectionGroup.withConverter(postConverter);
+      const partitions = await getPartitions(
+        collectionGroupWithConverter,
+        desiredPartitionCount
+      );
+      const documents = await verifyPartitions(partitions);
+
+      for (const document of documents) {
+        expect(document.data()).to.be.an.instanceOf(Post);
+      }
+    });
+
+    it('empty partition query', async () => {
+      const desiredPartitionCount = 3;
+
+      const collectionGroupId = randomColl.doc().id;
+      const collectionGroup = firestore.collectionGroup(collectionGroupId);
+      const partitions = await getPartitions(
+        collectionGroup,
+        desiredPartitionCount
+      );
+
+      expect(partitions.length).to.equal(1);
+      expect(partitions[0].startAt).to.be.undefined;
+      expect(partitions[0].endBefore).to.be.undefined;
+    });
+  }
+);
 
 describe('CollectionReference class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -406,8 +440,8 @@ describe('DocumentReference class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore();
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -508,8 +542,7 @@ describe('DocumentReference class', () => {
   it('round-trips BigInts', () => {
     const bigIntValue = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
 
-    const firestore = new Firestore({useBigInt: true});
-    const randomCol = getTestRoot(firestore);
+    const randomCol = getTestRoot({useBigInt: true});
     const ref = randomCol.doc('doc');
     return ref
       .set({bigIntValue})
@@ -708,13 +741,18 @@ describe('DocumentReference class', () => {
       });
   });
 
-  it('enforces that updated document exists', () => {
-    return randomCol
-      .doc()
-      .update({foo: 'b'})
-      .catch(err => {
-        expect(err.message).to.match(/No document to update/);
-      });
+  it('enforces that updated document exists', async () => {
+    const promise = randomCol.doc().update({foo: 'b'});
+
+    // Validate the error message when testing against the firestore backend.
+    if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
+      await expect(promise).to.eventually.be.rejectedWith(
+        /No document to update/
+      );
+    } else {
+      // The emulator generates a different error message, do not validate the error message.
+      await expect(promise).to.eventually.be.rejected;
+    }
   });
 
   it('has delete() method', () => {
@@ -741,14 +779,21 @@ describe('DocumentReference class', () => {
     return ref.delete();
   });
 
-  it('will fail to delete document with exists: true if doc does not exist', () => {
+  it('will fail to delete document with exists: true if doc does not exist', async () => {
     const ref = randomCol.doc();
-    return ref
+    const promise = ref
       .delete({exists: true})
-      .then(() => Promise.reject('Delete should have failed'))
-      .catch((err: Error) => {
-        expect(err.message).to.contain('No document to update');
-      });
+      .then(() => Promise.reject('Delete should have failed'));
+
+    // Validate the error message when testing against the firestore backend.
+    if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
+      await expect(promise).to.eventually.be.rejectedWith(
+        /No document to update/
+      );
+    } else {
+      // The emulator generates a different error message, do not validate the error message.
+      await expect(promise).to.eventually.be.rejected;
+    }
   });
 
   it('supports non-alphanumeric field names', () => {
@@ -1313,16 +1358,40 @@ describe('Query class', () => {
     return refs;
   }
 
-  function expectDocs(result: QuerySnapshot, ...data: DocumentData[]) {
+  async function testCollectionWithDocs(docs: {
+    [id: string]: DocumentData;
+  }): Promise<CollectionReference<DocumentData>> {
+    for (const id in docs) {
+      const ref = randomCol.doc(id);
+      await ref.set(docs[id]);
+    }
+    return randomCol;
+  }
+
+  function expectDocs(result: QuerySnapshot, ...docs: string[]): void;
+  function expectDocs(result: QuerySnapshot, ...data: DocumentData[]): void;
+
+  function expectDocs(
+    result: QuerySnapshot,
+    ...data: DocumentData[] | string[]
+  ): void {
     expect(result.size).to.equal(data.length);
-    result.forEach(doc => {
-      expect(doc.data()).to.deep.equal(data.shift());
-    });
+
+    if (data.length > 0) {
+      if (typeof data[0] === 'string') {
+        const actualIds = result.docs.map(docSnapshot => docSnapshot.id);
+        expect(actualIds).to.deep.equal(data);
+      } else {
+        result.forEach(doc => {
+          expect(doc.data()).to.deep.equal(data.shift());
+        });
+      }
+    }
   }
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -1674,9 +1743,10 @@ describe('Query class', () => {
     expectDocs(res, {foo: 'b'});
   });
 
-  it('startAt() adds implicit order by for DocumentReference', async () => {
+  it('startAt() adds implicit order by for DocumentSnapshot', async () => {
     const references = await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol.startAt(references[1]).get();
+    const docSnap = await references[1].get();
+    const res = await randomCol.startAt(docSnap).get();
     expectDocs(res, {foo: 'b'});
   });
 
@@ -1858,6 +1928,350 @@ describe('Query class', () => {
 
     const snapshot = await randomCol.get();
     expect(snapshot.size).to.equal(100);
+  });
+
+  it('supports OR queries', async () => {
+    const collection = await testCollectionWithDocs({
+      doc1: {a: 1, b: 0},
+      doc2: {a: 2, b: 1},
+      doc3: {a: 3, b: 2},
+      doc4: {a: 1, b: 3},
+      doc5: {a: 1, b: 1},
+    });
+
+    // Two equalities: a==1 || b==1.
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1))
+        )
+        .get(),
+      'doc1',
+      'doc2',
+      'doc4',
+      'doc5'
+    );
+
+    // (a==1 && b==0) || (a==3 && b==2)
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(
+            Filter.and(Filter.where('a', '==', 1), Filter.where('b', '==', 0)),
+            Filter.and(Filter.where('a', '==', 3), Filter.where('b', '==', 2))
+          )
+        )
+        .get(),
+      'doc1',
+      'doc3'
+    );
+
+    // a==1 && (b==0 || b==3).
+    expectDocs(
+      await collection
+        .where(
+          Filter.and(
+            Filter.where('a', '==', 1),
+            Filter.or(Filter.where('b', '==', 0), Filter.where('b', '==', 3))
+          )
+        )
+        .get(),
+      'doc1',
+      'doc4'
+    );
+
+    // (a==2 || b==2) && (a==3 || b==3)
+    expectDocs(
+      await collection
+        .where(
+          Filter.and(
+            Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 2)),
+            Filter.or(Filter.where('a', '==', 3), Filter.where('b', '==', 3))
+          )
+        )
+        .get(),
+      'doc3'
+    );
+
+    // Test with limits without orderBy (the __name__ ordering is the tie breaker).
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1))
+        )
+        .limit(1)
+        .get(),
+      'doc2'
+    );
+  });
+
+  // Skip this test if running against production because it results in a 'missing index' error.
+  // The Firestore Emulator, however, does serve these queries.
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+    'supports OR queries with composite indexes',
+    async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {a: 1, b: 0},
+        doc2: {a: 2, b: 1},
+        doc3: {a: 3, b: 2},
+        doc4: {a: 1, b: 3},
+        doc5: {a: 1, b: 1},
+      });
+
+      // with one inequality: a>2 || b==1.
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1))
+          )
+          .get(),
+        'doc5',
+        'doc2',
+        'doc3'
+      );
+
+      // Test with limits (implicit order by ASC): (a==1) || (b > 0) LIMIT 2
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0))
+          )
+          .limit(2)
+          .get(),
+        'doc1',
+        'doc2'
+      );
+
+      // Test with limits (explicit order by): (a==1) || (b > 0) LIMIT_TO_LAST 2
+      // Note: The public query API does not allow implicit ordering when limitToLast is used.
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0))
+          )
+          .limitToLast(2)
+          .orderBy('b')
+          .get(),
+        'doc3',
+        'doc4'
+      );
+
+      // Test with limits (explicit order by ASC): (a==2) || (b == 1) ORDER BY a LIMIT 1
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1))
+          )
+          .limit(1)
+          .orderBy('a')
+          .get(),
+        'doc5'
+      );
+
+      // Test with limits (explicit order by DESC): (a==2) || (b == 1) ORDER BY a LIMIT 1
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1))
+          )
+          .limit(1)
+          .orderBy('a', 'desc')
+          .get(),
+        'doc2'
+      );
+    }
+  );
+
+  it('supports OR queries on documents with missing fields', async () => {
+    const collection = await testCollectionWithDocs({
+      doc1: {a: 1, b: 0},
+      doc2: {b: 1},
+      doc3: {a: 3, b: 2},
+      doc4: {a: 1, b: 3},
+      doc5: {a: 1},
+      doc6: {a: 2},
+    });
+
+    // Query: a==1 || b==1
+    // There's no explicit nor implicit orderBy. Documents with missing 'a' or missing 'b' should be
+    // allowed if the document matches at least one disjunction term.
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1))
+        )
+        .get(),
+      'doc1',
+      'doc2',
+      'doc4',
+      'doc5'
+    );
+  });
+
+  // Skip this test if running against production because it results in a 'missing index' error.
+  // The Firestore Emulator, however, does serve these queries.
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+    'supports OR queries on documents with missing fields',
+    async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {a: 1, b: 0},
+        doc2: {b: 1},
+        doc3: {a: 3, b: 2},
+        doc4: {a: 1, b: 3},
+        doc5: {a: 1},
+        doc6: {a: 2},
+      });
+
+      // Query: a==1 || b==1 order by a.
+      // doc2 should not be included because it's missing the field 'a', and we have "orderBy a".
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1))
+          )
+          .orderBy('a')
+          .get(),
+        'doc1',
+        'doc4',
+        'doc5'
+      );
+
+      // Query: a==1 || b==1 order by b.
+      // doc5 should not be included because it's missing the field 'b', and we have "orderBy b".
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1))
+          )
+          .orderBy('b')
+          .get(),
+        'doc1',
+        'doc2',
+        'doc4'
+      );
+
+      // Query: a>2 || b==1.
+      // This query has an implicit 'order by a'.
+      // doc2 should not be included because it's missing the field 'a'.
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1))
+          )
+          .get(),
+        'doc3'
+      );
+
+      // Query: a>1 || b==1 order by a order by b.
+      // doc6 should not be included because it's missing the field 'b'.
+      // doc2 should not be included because it's missing the field 'a'.
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(Filter.where('a', '>', 1), Filter.where('b', '==', 1))
+          )
+          .orderBy('a')
+          .orderBy('b')
+          .get(),
+        'doc3'
+      );
+    }
+  );
+
+  it('supports OR queries with in', async () => {
+    const collection = await testCollectionWithDocs({
+      doc1: {a: 1, b: 0},
+      doc2: {b: 1},
+      doc3: {a: 3, b: 2},
+      doc4: {a: 1, b: 3},
+      doc5: {a: 1},
+      doc6: {a: 2},
+    });
+
+    // Query: a==2 || b in [2, 3]
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(Filter.where('a', '==', 2), Filter.where('b', 'in', [2, 3]))
+        )
+        .get(),
+      'doc3',
+      'doc4',
+      'doc6'
+    );
+  });
+
+  // Skip this test if running against production because it results in a 'missing index' error.
+  // The Firestore Emulator, however, does serve these queries.
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+    'supports OR queries with not-in',
+    async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {a: 1, b: 0},
+        doc2: {b: 1},
+        doc3: {a: 3, b: 2},
+        doc4: {a: 1, b: 3},
+        doc5: {a: 1},
+        doc6: {a: 2},
+      });
+
+      // a==2 || (b != 2 && b != 3)
+      // Has implicit "orderBy b"
+      expectDocs(
+        await collection
+          .where(
+            Filter.or(
+              Filter.where('a', '==', 2),
+              Filter.where('b', 'not-in', [2, 3])
+            )
+          )
+          .get(),
+        'doc1',
+        'doc2'
+      );
+    }
+  );
+
+  it('supports OR queries with array membership', async () => {
+    const collection = await testCollectionWithDocs({
+      doc1: {a: 1, b: [0]},
+      doc2: {b: [1]},
+      doc3: {a: 3, b: [2, 7]},
+      doc4: {a: 1, b: [3, 7]},
+      doc5: {a: 1},
+      doc6: {a: 2},
+    });
+
+    // Query: a==2 || b array-contains 7
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(
+            Filter.where('a', '==', 2),
+            Filter.where('b', 'array-contains', 7)
+          )
+        )
+        .get(),
+      'doc3',
+      'doc4',
+      'doc6'
+    );
+
+    // a==2 || b array-contains-any [0, 3]
+    // Has implicit "orderBy b"
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(
+            Filter.where('a', '==', 2),
+            Filter.where('b', 'array-contains-any', [0, 3])
+          )
+        )
+        .get(),
+      'doc1',
+      'doc4',
+      'doc6'
+    );
   });
 
   describe('watch', () => {
@@ -2134,6 +2548,2340 @@ describe('Query class', () => {
       unsubscribe();
     });
   });
+
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined
+    ? describe.skip
+    : describe)('multiple inequality', () => {
+    it('supports multiple inequality queries', async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {key: 'a', sort: 0, v: 0},
+        doc2: {key: 'b', sort: 3, v: 1},
+        doc3: {key: 'c', sort: 1, v: 3},
+        doc4: {key: 'd', sort: 2, v: 2},
+      });
+
+      // Multiple inequality fields
+      let results = await collection
+        .where('key', '!=', 'a')
+        .where('sort', '<=', 2)
+        .where('v', '>', 2)
+        .get();
+      expectDocs(results, 'doc3');
+
+      // Duplicate inequality fields
+      results = await collection
+        .where('key', '!=', 'a')
+        .where('sort', '<=', 2)
+        .where('sort', '>', 1)
+        .get();
+      expectDocs(results, 'doc4');
+
+      // With multiple IN
+      results = await collection
+        .where('key', '>=', 'a')
+        .where('sort', '<=', 2)
+        .where('v', 'in', [2, 3, 4])
+        .where('sort', 'in', [2, 3])
+        .get();
+      expectDocs(results, 'doc4');
+
+      // With NOT-IN
+      results = await collection
+        .where('key', '>=', 'a')
+        .where('sort', '<=', 2)
+        .where('v', 'not-in', [2, 4, 5])
+        .get();
+      expectDocs(results, 'doc1', 'doc3');
+
+      // With orderby
+      results = await collection
+        .where('key', '>=', 'a')
+        .where('sort', '<=', 2)
+        .orderBy('v', 'desc')
+        .get();
+      expectDocs(results, 'doc3', 'doc4', 'doc1');
+
+      // With limit
+      results = await collection
+        .where('key', '>=', 'a')
+        .where('sort', '<=', 2)
+        .orderBy('v', 'desc')
+        .limit(2)
+        .get();
+      expectDocs(results, 'doc3', 'doc4');
+
+      // With limitToLast
+      results = await collection
+        .where('key', '>=', 'a')
+        .where('sort', '<=', 2)
+        .orderBy('v', 'desc')
+        .limitToLast(2)
+        .get();
+      expectDocs(results, 'doc4', 'doc1');
+    });
+
+    it('can use on special values', async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {key: 'a', sort: 0, v: 0},
+        doc2: {key: 'b', sort: NaN, v: 1},
+        doc3: {key: 'c', sort: null, v: 3},
+        doc4: {key: 'd', v: 0},
+        doc5: {key: 'e', sort: 1},
+        doc6: {key: 'f', sort: 1, v: 1},
+      });
+
+      let results = await collection
+        .where('key', '!=', 'a')
+        .where('sort', '<=', 2)
+        .get();
+      expectDocs(results, 'doc5', 'doc6');
+
+      results = await collection
+        .where('key', '!=', 'a')
+        .where('sort', '<=', 2)
+        .where('v', '<=', 1)
+        .get();
+      expectDocs(results, 'doc6');
+    });
+
+    it('can use with array membership', async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {key: 'a', sort: 0, v: [0]},
+        doc2: {key: 'b', sort: 1, v: [0, 1, 3]},
+        doc3: {key: 'c', sort: 1, v: []},
+        doc4: {key: 'd', sort: 2, v: [1]},
+        doc5: {key: 'e', sort: 3, v: [2, 4]},
+        doc6: {key: 'f', sort: 4, v: [NaN]},
+        doc7: {key: 'g', sort: 4, v: [null]},
+      });
+
+      let results = await collection
+        .where('key', '!=', 'a')
+        .where('sort', '>=', 1)
+        .where('v', 'array-contains', 0)
+        .get();
+      expectDocs(results, 'doc2');
+
+      results = await collection
+        .where('key', '!=', 'a')
+        .where('sort', '>=', 1)
+        .where('v', 'array-contains-any', [0, 1])
+        .get();
+      expectDocs(results, 'doc2', 'doc4');
+    });
+
+    // Use cursor in following test cases to add implicit order by fields in the sdk and compare the
+    // result with the query fields normalized in the server.
+    it('can use with nested field', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const testData = (n?: number): any => {
+        n = n || 1;
+        return {
+          name: 'room ' + n,
+          metadata: {
+            createdAt: n,
+          },
+          field: 'field ' + n,
+          'field.dot': n,
+          'field\\slash': n,
+        };
+      };
+
+      const collection = await testCollectionWithDocs({
+        doc1: testData(400),
+        doc2: testData(200),
+        doc3: testData(100),
+        doc4: testData(300),
+      });
+
+      // ordered by: name asc, metadata.createdAt asc, __name__  asc
+      let query = collection
+        .where('metadata.createdAt', '<=', 500)
+        .where('metadata.createdAt', '>', 100)
+        .where('name', '!=', 'room 200')
+        .orderBy('name');
+      let docSnap = await collection.doc('doc4').get();
+      let queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc4', 'doc1');
+      expectDocs(await queryWithCursor.get(), 'doc4', 'doc1');
+
+      // ordered by: name desc, field desc, field.dot desc, field\\slash desc, __name__ desc
+      query = collection
+        .where('field', '>=', 'field 100')
+        .where(new FieldPath('field.dot'), '!=', 300)
+        .where('field\\slash', '<', 400)
+        .orderBy('name', 'desc');
+      docSnap = await collection.doc('doc2').get();
+      queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc2', 'doc3');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc3');
+    });
+
+    it('can use with nested composite filters', async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {key: 'a', sort: 0, v: 5},
+        doc2: {key: 'aa', sort: 4, v: 4},
+        doc3: {key: 'c', sort: 3, v: 3},
+        doc4: {key: 'b', sort: 2, v: 2},
+        doc5: {key: 'b', sort: 2, v: 1},
+        doc6: {key: 'b', sort: 0, v: 0},
+      });
+
+      // Implicitly ordered by: 'key' asc, 'sort' asc, 'v' asc, __name__ asc
+      let query = collection.where(
+        Filter.or(
+          Filter.and(
+            Filter.where('key', '==', 'b'),
+            Filter.where('sort', '<=', 2)
+          ),
+          Filter.and(Filter.where('key', '!=', 'b'), Filter.where('v', '>', 4))
+        )
+      );
+      let docSnap = await collection.doc('doc1').get();
+      let queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc1', 'doc6', 'doc5', 'doc4');
+      expectDocs(await queryWithCursor.get(), 'doc1', 'doc6', 'doc5', 'doc4');
+
+      // Ordered by: 'sort' desc, 'key' asc, 'v' asc, __name__ asc
+      query = collection
+        .where(
+          Filter.or(
+            Filter.and(
+              Filter.where('key', '==', 'b'),
+              Filter.where('sort', '<=', 2)
+            ),
+            Filter.and(
+              Filter.where('key', '!=', 'b'),
+              Filter.where('v', '>', 4)
+            )
+          )
+        )
+        .orderBy('sort', 'desc')
+        .orderBy('key');
+      docSnap = await collection.doc('doc5').get();
+      queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc5', 'doc4', 'doc1', 'doc6');
+      expectDocs(await queryWithCursor.get(), 'doc5', 'doc4', 'doc1', 'doc6');
+
+      // Implicitly ordered by: 'key' asc, 'sort' asc, 'v' asc, __name__ asc
+      query = collection.where(
+        Filter.and(
+          Filter.or(
+            Filter.and(
+              Filter.where('key', '==', 'b'),
+              Filter.where('sort', '<=', 4)
+            ),
+            Filter.and(
+              Filter.where('key', '!=', 'b'),
+              Filter.where('v', '>=', 4)
+            )
+          ),
+          Filter.or(
+            Filter.and(
+              Filter.where('key', '>', 'b'),
+              Filter.where('sort', '>=', 1)
+            ),
+            Filter.and(Filter.where('key', '<', 'b'), Filter.where('v', '>', 0))
+          )
+        )
+      );
+      docSnap = await collection.doc('doc1').get();
+      queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc1', 'doc2');
+      expectDocs(await queryWithCursor.get(), 'doc1', 'doc2');
+    });
+
+    it('inequality fields will be implicitly ordered lexicographically by the server', async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {key: 'a', sort: 0, v: 5},
+        doc2: {key: 'aa', sort: 4, v: 4},
+        doc3: {key: 'b', sort: 3, v: 3},
+        doc4: {key: 'b', sort: 2, v: 2},
+        doc5: {key: 'b', sort: 2, v: 1},
+        doc6: {key: 'b', sort: 0, v: 0},
+      });
+
+      const docSnap = await collection.doc('doc2').get();
+
+      // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
+      let query = collection
+        .where('key', '!=', 'a')
+        .where('sort', '>', 1)
+        .where('v', 'in', [1, 2, 3, 4]);
+      let queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc2', 'doc4', 'doc5', 'doc3');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc4', 'doc5', 'doc3');
+
+      // Changing filters order will not effect implicit order.
+      // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
+      query = collection
+        .where('sort', '>', 1)
+        .where('key', '!=', 'a')
+        .where('v', 'in', [1, 2, 3, 4]);
+      queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc2', 'doc4', 'doc5', 'doc3');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc4', 'doc5', 'doc3');
+    });
+
+    it('can use multiple explicit order by field', async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {key: 'a', sort: 5, v: 0},
+        doc2: {key: 'aa', sort: 4, v: 0},
+        doc3: {key: 'b', sort: 3, v: 1},
+        doc4: {key: 'b', sort: 2, v: 1},
+        doc5: {key: 'bb', sort: 1, v: 1},
+        doc6: {key: 'c', sort: 0, v: 2},
+      });
+
+      let docSnap = await collection.doc('doc2').get();
+
+      // Ordered by: 'v' asc, 'key' asc, 'sort' asc, __name__ asc
+      let query = collection
+        .where('key', '>', 'a')
+        .where('sort', '>=', 1)
+        .orderBy('v');
+      let queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc2', 'doc4', 'doc3', 'doc5');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc4', 'doc3', 'doc5');
+
+      // Ordered by: 'v asc, 'sort' asc, 'key' asc,  __name__ asc
+      query = collection
+        .where('key', '>', 'a')
+        .where('sort', '>=', 1)
+        .orderBy('v')
+        .orderBy('sort');
+      queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc2', 'doc5', 'doc4', 'doc3');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc5', 'doc4', 'doc3');
+
+      docSnap = await collection.doc('doc5').get();
+
+      // Implicit order by matches the direction of last explicit order by.
+      // Ordered by: 'v' desc, 'key' desc, 'sort' desc, __name__ desc
+      query = collection
+        .where('key', '>', 'a')
+        .where('sort', '>=', 1)
+        .orderBy('v', 'desc');
+      queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc5', 'doc3', 'doc4', 'doc2');
+      expectDocs(await queryWithCursor.get(), 'doc5', 'doc3', 'doc4', 'doc2');
+
+      // Ordered by: 'v desc, 'sort' asc, 'key' asc,  __name__ asc
+      query = collection
+        .where('key', '>', 'a')
+        .where('sort', '>=', 1)
+        .orderBy('v', 'desc')
+        .orderBy('sort');
+      queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc5', 'doc4', 'doc3', 'doc2');
+      expectDocs(await queryWithCursor.get(), 'doc5', 'doc4', 'doc3', 'doc2');
+    });
+
+    it('can use in aggregate query', async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {key: 'a', sort: 5, v: 0},
+        doc2: {key: 'aa', sort: 4, v: 0},
+        doc3: {key: 'b', sort: 3, v: 1},
+        doc4: {key: 'b', sort: 2, v: 1},
+        doc5: {key: 'bb', sort: 1, v: 1},
+      });
+
+      const results = await collection
+        .where('key', '>', 'a')
+        .where('sort', '>=', 1)
+        .orderBy('v')
+        .count()
+        .get();
+      expect(results.data().count).to.be.equal(4);
+      //TODO(MIEQ): Add sum and average when they are public.
+    });
+
+    it('can use document ID im multiple inequality query', async () => {
+      const collection = await testCollectionWithDocs({
+        doc1: {key: 'a', sort: 5},
+        doc2: {key: 'aa', sort: 4},
+        doc3: {key: 'b', sort: 3},
+        doc4: {key: 'b', sort: 2},
+        doc5: {key: 'bb', sort: 1},
+      });
+
+      const docSnap = await collection.doc('doc2').get();
+
+      // Document Key in inequality field will implicitly ordered to the last.
+      // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
+      let query = collection
+        .where('sort', '>=', 1)
+        .where('key', '!=', 'a')
+        .where(FieldPath.documentId(), '<', 'doc5');
+      let queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc2', 'doc4', 'doc3');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc4', 'doc3');
+
+      // Changing filters order will not effect implicit order.
+      // Implicitly ordered by: 'key' asc, 'sort' asc, __name__ asc
+      query = collection
+        .where(FieldPath.documentId(), '<', 'doc5')
+        .where('sort', '>=', 1)
+        .where('key', '!=', 'a');
+      queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc2', 'doc4', 'doc3');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc4', 'doc3');
+
+      // Ordered by: 'sort' desc,'key' desc,  __name__ desc
+      query = collection
+        .where(FieldPath.documentId(), '<', 'doc5')
+        .where('sort', '>=', 1)
+        .where('key', '!=', 'a')
+        .orderBy('sort', 'desc');
+      queryWithCursor = query.startAt(docSnap);
+      expectDocs(await query.get(), 'doc2', 'doc3', 'doc4');
+      expectDocs(await queryWithCursor.get(), 'doc2', 'doc3', 'doc4');
+    });
+  });
+});
+
+describe('count queries', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+
+  beforeEach(() => {
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  describe('Run outside Transaction', () => {
+    countTests(async (q, n) => {
+      const res = await q.get();
+      expect(res.data().count).to.equal(n);
+    });
+  });
+
+  describe('Run within Transaction', () => {
+    countTests(async (q, n) => {
+      const res = await firestore.runTransaction(f => f.get(q));
+      expect(res.data().count).to.equal(n);
+    });
+  });
+
+  function countTests(
+    runQueryAndExpectCount: (
+      query: FirebaseFirestore.AggregateQuery<{
+        count: FirebaseFirestore.AggregateField<number>;
+      }>,
+      expectedCount: number
+    ) => Promise<void>
+  ) {
+    it('counts 0 document from non-existent collection', async () => {
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 0);
+    });
+
+    it('counts 0 document from filtered empty collection', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.where('foo', '==', 'notbar').count();
+      await runQueryAndExpectCount(count, 0);
+    });
+
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 1);
+    });
+
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 1);
+    });
+
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.count();
+      await runQueryAndExpectCount(count, 1);
+    });
+
+    it('counts multiple documents with filter', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'notbar'});
+      await randomCol.doc('doc3').set({notfoo: 'bar'});
+      const count = randomCol.where('foo', '==', 'bar').count();
+      await runQueryAndExpectCount(count, 2);
+    });
+
+    it('counts up to limit', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+      await randomCol.doc('doc8').set({foo: 'bar'});
+      const count = randomCol.limit(5).count();
+      await runQueryAndExpectCount(count, 5);
+    });
+
+    it('counts with orderBy', async () => {
+      await randomCol.doc('doc1').set({foo1: 'bar1'});
+      await randomCol.doc('doc2').set({foo1: 'bar2'});
+      await randomCol.doc('doc3').set({foo1: 'bar3'});
+      await randomCol.doc('doc4').set({foo1: 'bar4'});
+      await randomCol.doc('doc5').set({foo1: 'bar5'});
+      await randomCol.doc('doc6').set({foo2: 'bar6'});
+      await randomCol.doc('doc7').set({foo2: 'bar7'});
+      await randomCol.doc('doc8').set({foo2: 'bar8'});
+
+      const count1 = randomCol.orderBy('foo2').count();
+      await runQueryAndExpectCount(count1, 3);
+
+      const count2 = randomCol.orderBy('foo3').count();
+      await runQueryAndExpectCount(count2, 0);
+    });
+
+    it('counts with startAt, endAt and offset', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+
+      const docSnap = await randomCol.doc('doc3').get();
+
+      const count1 = randomCol.startAfter(docSnap).count();
+      await runQueryAndExpectCount(count1, 4);
+
+      const count2 = randomCol.startAt(docSnap).count();
+      await runQueryAndExpectCount(count2, 5);
+
+      const count3 = randomCol.endAt(docSnap).count();
+      await runQueryAndExpectCount(count3, 3);
+
+      const count4 = randomCol.endBefore(docSnap).count();
+      await runQueryAndExpectCount(count4, 2);
+
+      const count5 = randomCol.offset(6).count();
+      await runQueryAndExpectCount(count5, 1);
+    });
+  }
+});
+
+describe('count queries using aggregate api', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+
+  beforeEach(() => {
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  describe('Run outside Transaction', () => {
+    countTests(async (q, n) => {
+      const res = await q.get();
+      expect(res.data().count).to.equal(n);
+    });
+  });
+
+  describe('Run within Transaction', () => {
+    countTests(async (q, n) => {
+      const res = await firestore.runTransaction(f => f.get(q));
+      expect(res.data().count).to.equal(n);
+    });
+  });
+
+  function countTests(
+    runQueryAndExpectCount: (
+      query: FirebaseFirestore.AggregateQuery<{
+        count: FirebaseFirestore.AggregateField<number>;
+      }>,
+      expectedCount: number
+    ) => Promise<void>
+  ) {
+    it('counts 0 document from non-existent collection', async () => {
+      const count = randomCol.aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 0);
+    });
+
+    it('counts 0 document from filtered empty collection', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol
+        .where('foo', '==', 'notbar')
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 0);
+    });
+
+    it('counts 1 document', async () => {
+      await randomCol.doc('doc').set({foo: 'bar'});
+      const count = randomCol.aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 1);
+    });
+
+    it('counts multiple documents with filter', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'notbar'});
+      await randomCol.doc('doc3').set({notfoo: 'bar'});
+      const count = randomCol
+        .where('foo', '==', 'bar')
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 2);
+    });
+
+    it('counts up to limit', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+      await randomCol.doc('doc8').set({foo: 'bar'});
+      const count = randomCol
+        .limit(5)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count, 5);
+    });
+
+    it('counts with orderBy', async () => {
+      await randomCol.doc('doc1').set({foo1: 'bar1'});
+      await randomCol.doc('doc2').set({foo1: 'bar2'});
+      await randomCol.doc('doc3').set({foo1: 'bar3'});
+      await randomCol.doc('doc4').set({foo1: 'bar4'});
+      await randomCol.doc('doc5').set({foo1: 'bar5'});
+      await randomCol.doc('doc6').set({foo2: 'bar6'});
+      await randomCol.doc('doc7').set({foo2: 'bar7'});
+      await randomCol.doc('doc8').set({foo2: 'bar8'});
+
+      const count1 = randomCol
+        .orderBy('foo2')
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count1, 3);
+
+      const count2 = randomCol
+        .orderBy('foo3')
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count2, 0);
+    });
+
+    it('counts with startAt, endAt and offset with DocumentReference cursor', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+
+      const count1 = randomCol
+        .orderBy(FieldPath.documentId())
+        .startAfter(randomCol.doc('doc3'))
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count1, 4);
+
+      const count2 = randomCol
+        .orderBy(FieldPath.documentId())
+        .startAt(randomCol.doc('doc3'))
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count2, 5);
+
+      const count3 = randomCol
+        .orderBy(FieldPath.documentId())
+        .endAt(randomCol.doc('doc3'))
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count3, 3);
+
+      const count4 = randomCol
+        .orderBy(FieldPath.documentId())
+        .endBefore(randomCol.doc('doc3'))
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count4, 2);
+
+      const count5 = randomCol
+        .offset(6)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count5, 1);
+    });
+
+    it('counts with startAt, endAt and offset with DocumentSnapshot cursor', async () => {
+      await randomCol.doc('doc1').set({foo: 'bar'});
+      await randomCol.doc('doc2').set({foo: 'bar'});
+      await randomCol.doc('doc3').set({foo: 'bar'});
+      await randomCol.doc('doc4').set({foo: 'bar'});
+      await randomCol.doc('doc5').set({foo: 'bar'});
+      await randomCol.doc('doc6').set({foo: 'bar'});
+      await randomCol.doc('doc7').set({foo: 'bar'});
+      const docSnap = await randomCol.doc('doc3').get();
+
+      const count1 = randomCol
+        .startAfter(docSnap)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count1, 4);
+
+      const count2 = randomCol
+        .startAt(docSnap)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count2, 5);
+
+      const count3 = randomCol
+        .endAt(docSnap)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count3, 3);
+
+      const count4 = randomCol
+        .endBefore(docSnap)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count4, 2);
+
+      const count5 = randomCol
+        .offset(6)
+        .aggregate({count: AggregateField.count()});
+      await runQueryAndExpectCount(count5, 1);
+    });
+  }
+});
+
+describe('Aggregation queries', () => {
+  let firestore: Firestore;
+  let col: CollectionReference;
+
+  beforeEach(() => {
+    col = getTestRoot();
+    firestore = col.firestore;
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  async function addTestDocs(docs: {
+    [key: string]: DocumentData;
+  }): Promise<Awaited<WriteResult>[]> {
+    const sets: Array<Promise<WriteResult>> = [];
+    Object.keys(docs).forEach(key => {
+      sets.push(col.doc(key).set(docs[key]));
+    });
+    return Promise.all(sets);
+  }
+
+  it('can run count query using aggregate api', async () => {
+    const testDocs = {
+      a: {author: 'authorA', title: 'titleA'},
+      b: {author: 'authorB', title: 'titleB'},
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col
+      .aggregate({
+        count: AggregateField.count(),
+      })
+      .get();
+    expect(snapshot.data().count).to.equal(2);
+  });
+
+  it('can alias aggregations using aggregate api', async () => {
+    const testDocs = {
+      a: {author: 'authorA', title: 'titleA'},
+      b: {author: 'authorB', title: 'titleB'},
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col
+      .aggregate({
+        foo: AggregateField.count(),
+        'with.dots': AggregateField.count(),
+      })
+      .get();
+    expect(snapshot.data().foo).to.equal(2);
+    expect(snapshot.data()['with.dots']).to.equal(2);
+  });
+
+  it('allows special chars in aliases when using aggregate api', async () => {
+    const testDocs = {
+      a: {author: 'authorA', title: 'titleA'},
+      b: {author: 'authorB', title: 'titleB'},
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col
+      .aggregate({
+        'with-un/su+pp[or]ted': AggregateField.count(),
+      })
+      .get();
+
+    expect(snapshot.data()['with-un/su+pp[or]ted']).to.equal(2);
+  });
+
+  it('allows backticks in aliases when using aggregate api', async () => {
+    const testDocs = {
+      a: {author: 'authorA', title: 'titleA'},
+      b: {author: 'authorB', title: 'titleB'},
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col
+      .aggregate({
+        '`with-un/su+pp[or]ted`': AggregateField.count(),
+      })
+      .get();
+
+    expect(snapshot.data()['`with-un/su+pp[or]ted`']).to.equal(2);
+  });
+
+  it('allows backslash in aliases when using aggregate api', async () => {
+    const testDocs = {
+      a: {author: 'authorA', title: 'titleA'},
+      b: {author: 'authorB', title: 'titleB'},
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col
+      .aggregate({
+        'with\\backshash\\es': AggregateField.count(),
+      })
+      .get();
+
+    expect(snapshot.data()['with\\backshash\\es']).to.equal(2);
+  });
+
+  it('can get duplicate aggregations using aggregate api', async () => {
+    const testDocs = {
+      a: {author: 'authorA', title: 'titleA'},
+      b: {author: 'authorB', title: 'titleB'},
+    };
+    await addTestDocs(testDocs);
+    const snapshot = await col
+      .aggregate({
+        count: AggregateField.count(),
+        foo: AggregateField.count(),
+      })
+      .get();
+    expect(snapshot.data().foo).to.equal(2);
+    expect(snapshot.data().count).to.equal(2);
+  });
+
+  it("aggregate() doesn't use converter", async () => {
+    const testDocs = {
+      a: {author: 'authorA', title: 'titleA'},
+      b: {author: 'authorB', title: 'titleB'},
+    };
+    const throwingConverter = {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      toFirestore(obj: never): DocumentData {
+        throw new Error('should never be called');
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      fromFirestore(snapshot: QueryDocumentSnapshot): never {
+        throw new Error('should never be called');
+      },
+    };
+    await addTestDocs(testDocs);
+    const query = col
+      .where('author', '==', 'authorA')
+      .withConverter(throwingConverter);
+    const snapshot = await query
+      .aggregate({
+        count: AggregateField.count(),
+      })
+      .get();
+    expect(snapshot.data().count).to.equal(1);
+  });
+
+  it('aggregate query supports collection groups', async () => {
+    const collectionGroupId = autoId();
+    const docPaths = [
+      `${collectionGroupId}/cg-doc1`,
+      `abc/123/${collectionGroupId}/cg-doc2`,
+      `zzz${collectionGroupId}/cg-doc3`,
+      `abc/123/zzz${collectionGroupId}/cg-doc4`,
+      `abc/123/zzz/${collectionGroupId}`,
+    ];
+    const batch = firestore.batch();
+    for (const docPath of docPaths) {
+      batch.set(firestore.doc(docPath), {x: 1});
+    }
+    await batch.commit();
+    const snapshot = await firestore
+      .collectionGroup(collectionGroupId)
+      .aggregate({
+        count: AggregateField.count(),
+      })
+      .get();
+    expect(snapshot.data().count).to.equal(2);
+  });
+
+  it('aggregate() fails if firestore is terminated', async () => {
+    await firestore.terminate();
+    await expect(
+      col.aggregate({count: AggregateField.count()}).get()
+    ).to.eventually.be.rejectedWith('The client has already been terminated');
+  });
+
+  it("terminate doesn't crash when there is aggregate query in flight", async () => {
+    col.aggregate({count: AggregateField.count()}).get();
+    await firestore.terminate();
+  });
+
+  // Only verify the error message for missing indexes when running against
+  // production, since the Firestore Emulator does not require index creation
+  // and will, therefore, never fail in this situation.
+  // eslint-disable-next-line no-restricted-properties
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+    'aggregate() error message is good if missing index',
+    async () => {
+      const query = col.where('key1', '==', 42).where('key2', '<', 42);
+      await expect(
+        query.aggregate({count: AggregateField.count()}).get()
+      ).to.be.eventually.rejectedWith(
+        /index.*https:\/\/console\.firebase\.google\.com/
+      );
+    }
+  );
+
+  describe('Aggregation queries - sum / average using aggregate() api', () => {
+    it('can run sum query', async () => {
+      const testDocs = {
+        a: {author: 'authorA', title: 'titleA', pages: 100},
+        b: {author: 'authorB', title: 'titleB', pages: 50},
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({totalPages: AggregateField.sum('pages')})
+        .get();
+      expect(snapshot.data().totalPages).to.equal(150);
+    });
+
+    it('can run average query', async () => {
+      const testDocs = {
+        a: {author: 'authorA', title: 'titleA', pages: 100},
+        b: {author: 'authorB', title: 'titleB', pages: 50},
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({averagePages: AggregateField.average('pages')})
+        .get();
+      expect(snapshot.data().averagePages).to.equal(75);
+    });
+
+    it('can get multiple aggregations', async () => {
+      const testDocs = {
+        a: {author: 'authorA', title: 'titleA', pages: 100},
+        b: {author: 'authorB', title: 'titleB', pages: 50},
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalPages: AggregateField.sum('pages'),
+          averagePages: AggregateField.average('pages'),
+          count: AggregateField.count(),
+        })
+        .get();
+      expect(snapshot.data().totalPages).to.equal(150);
+      expect(snapshot.data().averagePages).to.equal(75);
+      expect(snapshot.data().count).to.equal(2);
+    });
+
+    it('can get duplicate aggregations', async () => {
+      const testDocs = {
+        a: {author: 'authorA', title: 'titleA', pages: 100},
+        b: {author: 'authorB', title: 'titleB', pages: 50},
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalPages: AggregateField.sum('pages'),
+          averagePages: AggregateField.average('pages'),
+          totalPagesX: AggregateField.sum('pages'),
+          averagePagesY: AggregateField.average('pages'),
+        })
+        .get();
+      expect(snapshot.data().totalPages).to.equal(150);
+      expect(snapshot.data().averagePages).to.equal(75);
+      expect(snapshot.data().totalPagesX).to.equal(150);
+      expect(snapshot.data().averagePagesY).to.equal(75);
+    });
+
+    it('can perform max (5) aggregations', async () => {
+      const testDocs = {
+        a: {author: 'authorA', title: 'titleA', pages: 100},
+        b: {author: 'authorB', title: 'titleB', pages: 50},
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalPages: AggregateField.sum('pages'),
+          averagePages: AggregateField.average('pages'),
+          count: AggregateField.count(),
+          totalPagesX: AggregateField.sum('pages'),
+          averagePagesY: AggregateField.average('pages'),
+        })
+        .get();
+      expect(snapshot.data().totalPages).to.equal(150);
+      expect(snapshot.data().averagePages).to.equal(75);
+      expect(snapshot.data().count).to.equal(2);
+      expect(snapshot.data().totalPagesX).to.equal(150);
+      expect(snapshot.data().averagePagesY).to.equal(75);
+    });
+
+    it('fails when exceeding the max (5) aggregations', async () => {
+      const testDocs = {
+        a: {author: 'authorA', title: 'titleA', pages: 100},
+        b: {author: 'authorB', title: 'titleB', pages: 50},
+      };
+      await addTestDocs(testDocs);
+      const aggregateQuery = await col.aggregate({
+        totalPages: AggregateField.sum('pages'),
+        averagePages: AggregateField.average('pages'),
+        count: AggregateField.count(),
+        totalPagesX: AggregateField.sum('pages'),
+        averagePagesY: AggregateField.average('pages'),
+        countZ: AggregateField.count(),
+      });
+      await expect(aggregateQuery.get()).to.eventually.be.rejectedWith(
+        /maximum number of aggregations/
+      );
+    });
+
+    it('returns undefined when getting the result of an unrequested aggregation', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 5,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 100,
+          year: 1980,
+          rating: 3,
+        },
+        d: {
+          author: 'authorD',
+          title: 'titleD',
+          pages: 50,
+          year: 2020,
+          rating: 0,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      // @ts-expect-error expected error as 'totalPages' is not in the AggregateSpec.
+      const totalPages = snapshot.data().totalPages;
+      expect(totalPages).to.equal(undefined);
+    });
+
+    it('performs sum that results in float', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 5,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4.5,
+        },
+        c: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 150,
+          year: 2021,
+          rating: 3,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(12.5);
+    });
+
+    it('performs sum of ints and floats that results in an int', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 5,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4.5,
+        },
+        c: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 150,
+          year: 2021,
+          rating: 3.5,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(13);
+    });
+
+    it('performs sum that overflows max int', async () => {
+      // A large value that will be represented as a Long on the server, but
+      // doubling (2x) this value must overflow Long and force the result to be
+      // represented as a Double type on the server.
+      const maxLong = Math.pow(2, 63) - 1;
+
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: maxLong,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: maxLong,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(maxLong + maxLong);
+    });
+
+    it('performs sum that can overflow integer values during accumulation', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: Number.MAX_SAFE_INTEGER,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 1,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 50,
+          year: 2020,
+          rating: -101,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(
+        Number.MAX_SAFE_INTEGER - 100
+      );
+    });
+
+    it('performs sum that is negative', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: Number.MAX_SAFE_INTEGER,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: Number.MIN_SAFE_INTEGER,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 50,
+          year: 2020,
+          rating: -101,
+        },
+        d: {
+          author: 'authorD',
+          title: 'titleD',
+          pages: 50,
+          year: 2020,
+          rating: -10000,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(-10101);
+    });
+
+    it('performs sum that is positive infinity', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: Number.MAX_VALUE,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: Number.MAX_VALUE,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(Number.POSITIVE_INFINITY);
+    });
+
+    it('performs sum that is positive infinity v2', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: Number.MAX_VALUE,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 1e293,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(Number.POSITIVE_INFINITY);
+    });
+
+    it('performs sum that is negative infinity', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: -Number.MAX_VALUE,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: -Number.MAX_VALUE,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(Number.NEGATIVE_INFINITY);
+    });
+
+    it('performs sum that is valid but could overflow during aggregation', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: Number.MAX_VALUE,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: Number.MAX_VALUE,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 100,
+          year: 1980,
+          rating: -Number.MAX_VALUE,
+        },
+        d: {
+          author: 'authorD',
+          title: 'titleD',
+          pages: 50,
+          year: 2020,
+          rating: -Number.MAX_VALUE,
+        },
+        e: {
+          author: 'authorE',
+          title: 'titleE',
+          pages: 100,
+          year: 1980,
+          rating: Number.MAX_VALUE,
+        },
+        f: {
+          author: 'authorF',
+          title: 'titleF',
+          pages: 50,
+          year: 2020,
+          rating: -Number.MAX_VALUE,
+        },
+        g: {
+          author: 'authorG',
+          title: 'titleG',
+          pages: 100,
+          year: 1980,
+          rating: -Number.MAX_VALUE,
+        },
+        h: {
+          author: 'authorH',
+          title: 'titleDH',
+          pages: 50,
+          year: 2020,
+          rating: Number.MAX_VALUE,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.oneOf([
+        0,
+        Number.NEGATIVE_INFINITY,
+        Number.POSITIVE_INFINITY,
+      ]);
+    });
+
+    it('performs sum that includes NaN', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 5,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 100,
+          year: 1980,
+          rating: Number.NaN,
+        },
+        d: {
+          author: 'authorD',
+          title: 'titleD',
+          pages: 50,
+          year: 2020,
+          rating: 0,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.be.NaN;
+    });
+
+    it('performs sum over a result set of zero documents', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 4,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 100,
+          year: 1980,
+          rating: 3,
+        },
+        d: {
+          author: 'authorD',
+          title: 'titleD',
+          pages: 50,
+          year: 2020,
+          rating: 0,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .where('rating', '>', 4)
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(0);
+    });
+
+    it('performs sum only on numeric fields', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 5,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 100,
+          year: 1980,
+          rating: '3',
+        },
+        d: {
+          author: 'authorD',
+          title: 'titleD',
+          pages: 50,
+          year: 2020,
+          rating: 1,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+          countOfDocs: AggregateField.count(),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(10);
+      expect(snapshot.data().countOfDocs).to.equal(4);
+    });
+
+    it('performs sum of min IEEE754', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: Number.MIN_VALUE,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(Number.MIN_VALUE);
+    });
+
+    it('performs average of ints that results in an int', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 10,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 5,
+        },
+        c: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 150,
+          year: 2021,
+          rating: 0,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.equal(5);
+    });
+
+    it('performs average of floats that results in an int', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 10.5,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 9.5,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.equal(10);
+    });
+
+    it('performs average of floats and ints that results in an int', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 10,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 9.5,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 150,
+          year: 2021,
+          rating: 10.5,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.equal(10);
+    });
+
+    it('performs average of float that results in float', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 5.5,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4.5,
+        },
+        c: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 150,
+          year: 2021,
+          rating: 3.5,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.equal(4.5);
+    });
+
+    it('performs average of floats and ints that results in a float', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 8.6,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 9,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 150,
+          year: 2021,
+          rating: 10,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.be.approximately(9.2, 0.0000001);
+    });
+
+    it('performs average of ints that results in a float', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 10,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 9,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.equal(9.5);
+    });
+
+    it('performs average causing underflow', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: Number.MIN_VALUE,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 0,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.equal(0);
+    });
+
+    it('performs average of min IEEE754', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: Number.MIN_VALUE,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.equal(Number.MIN_VALUE);
+    });
+
+    it('performs average that overflows IEEE754 during accumulation', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: Number.MAX_VALUE,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: Number.MAX_VALUE,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.equal(Number.POSITIVE_INFINITY);
+    });
+
+    it('performs average that includes NaN', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 5,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 100,
+          year: 1980,
+          rating: Number.NaN,
+        },
+        d: {
+          author: 'authorD',
+          title: 'titleD',
+          pages: 50,
+          year: 2020,
+          rating: 0,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.be.NaN;
+    });
+
+    it('performs average over a result set of zero documents', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 4,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 100,
+          year: 1980,
+          rating: 3,
+        },
+        d: {
+          author: 'authorD',
+          title: 'titleD',
+          pages: 50,
+          year: 2020,
+          rating: 0,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .where('rating', '>', 4)
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.be.null;
+    });
+
+    it('performs average only on numeric fields', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 5,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 100,
+          year: 1980,
+          rating: '3',
+        },
+        d: {
+          author: 'authorD',
+          title: 'titleD',
+          pages: 50,
+          year: 2020,
+          rating: 6,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          averageRating: AggregateField.average('rating'),
+          countOfDocs: AggregateField.count(),
+        })
+        .get();
+      expect(snapshot.data().averageRating).to.equal(5);
+      expect(snapshot.data().countOfDocs).to.equal(4);
+    });
+
+    it('allows aliases with length greater than 1500 bytes', async () => {
+      // Alias string length is bytes of UTF-8 encoded alias + 1;
+      let longAlias = '';
+      for (let i = 0; i < 1500; i++) {
+        longAlias += '0123456789';
+      }
+
+      const longerAlias = longAlias + longAlias;
+
+      const testDocs = {
+        a: {num: 3},
+        b: {num: 5},
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          [longAlias]: AggregateField.count(),
+          [longerAlias]: AggregateField.count(),
+        })
+        .get();
+      expect(snapshot.data()[longAlias]).to.equal(2);
+      expect(snapshot.data()[longerAlias]).to.equal(2);
+    });
+
+    it('performs aggregations on nested map values', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          metadata: {pages: 100, rating: {critic: 2, user: 5}},
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          metadata: {pages: 50, rating: {critic: 4, user: 4}},
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .aggregate({
+          totalPages: AggregateField.sum('metadata.pages'),
+          averagePages: AggregateField.average('metadata.pages'),
+          count: AggregateField.count(),
+        })
+        .get();
+      expect(snapshot.data().totalPages).to.equal(150);
+      expect(snapshot.data().averagePages).to.equal(75);
+      expect(snapshot.data().count).to.equal(2);
+    });
+
+    it('performs aggregates when using `in` operator', async () => {
+      const testDocs = {
+        a: {
+          author: 'authorA',
+          title: 'titleA',
+          pages: 100,
+          year: 1980,
+          rating: 5,
+        },
+        b: {
+          author: 'authorB',
+          title: 'titleB',
+          pages: 50,
+          year: 2020,
+          rating: 4,
+        },
+        c: {
+          author: 'authorC',
+          title: 'titleC',
+          pages: 100,
+          year: 1980,
+          rating: 3,
+        },
+        d: {
+          author: 'authorD',
+          title: 'titleD',
+          pages: 50,
+          year: 2020,
+          rating: 0,
+        },
+      };
+      await addTestDocs(testDocs);
+      const snapshot = await col
+        .where('rating', 'in', [5, 3])
+        .aggregate({
+          totalRating: AggregateField.sum('rating'),
+          averageRating: AggregateField.average('rating'),
+          countOfDocs: AggregateField.count(),
+        })
+        .get();
+      expect(snapshot.data().totalRating).to.equal(8);
+      expect(snapshot.data().averageRating).to.equal(4);
+      expect(snapshot.data().countOfDocs).to.equal(2);
+    });
+  });
+
+  // Only run tests that require indexes against the emulator, because we don't
+  // have a way to dynamically create the indexes when running the tests.
+  (process.env.FIRESTORE_EMULATOR_HOST ? describe : describe.skip)(
+    'queries requiring indexes',
+    () => {
+      it('aggregate query supports collection groups', async () => {
+        const collectionGroupId = autoId();
+        const docPaths = [
+          `${collectionGroupId}/cg-doc1`,
+          `abc/123/${collectionGroupId}/cg-doc2`,
+          `zzz${collectionGroupId}/cg-doc3`,
+          `abc/123/zzz${collectionGroupId}/cg-doc4`,
+          `abc/123/zzz/${collectionGroupId}`,
+        ];
+        const batch = firestore.batch();
+        for (const docPath of docPaths) {
+          batch.set(firestore.doc(docPath), {x: 2});
+        }
+        await batch.commit();
+        const snapshot = await firestore
+          .collectionGroup(collectionGroupId)
+          .aggregate({
+            count: AggregateField.count(),
+            sum: AggregateField.sum('x'),
+            avg: AggregateField.average('x'),
+          })
+          .get();
+        expect(snapshot.data().count).to.equal(2);
+        expect(snapshot.data().sum).to.equal(4);
+        expect(snapshot.data().avg).to.equal(2);
+      });
+
+      it('performs aggregations on documents with all aggregated fields', async () => {
+        const testDocs = {
+          a: {author: 'authorA', title: 'titleA', pages: 100, year: 1980},
+          b: {author: 'authorB', title: 'titleB', pages: 50, year: 2020},
+          c: {author: 'authorC', title: 'titleC', pages: 150, year: 2021},
+          d: {author: 'authorD', title: 'titleD', pages: 50},
+        };
+        await addTestDocs(testDocs);
+        const snapshot = await col
+          .aggregate({
+            totalPages: AggregateField.sum('pages'),
+            averagePages: AggregateField.average('pages'),
+            averageYear: AggregateField.average('year'),
+            count: AggregateField.count(),
+          })
+          .get();
+        expect(snapshot.data().totalPages).to.equal(300);
+        expect(snapshot.data().averagePages).to.equal(100);
+        expect(snapshot.data().averageYear).to.equal(2007);
+        expect(snapshot.data().count).to.equal(3);
+      });
+
+      it('performs aggregates on multiple fields where one aggregate could cause short-circuit due to NaN', async () => {
+        const testDocs = {
+          a: {
+            author: 'authorA',
+            title: 'titleA',
+            pages: 100,
+            year: 1980,
+            rating: 5,
+          },
+          b: {
+            author: 'authorB',
+            title: 'titleB',
+            pages: 50,
+            year: 2020,
+            rating: 4,
+          },
+          c: {
+            author: 'authorC',
+            title: 'titleC',
+            pages: 100,
+            year: 1980,
+            rating: Number.NaN,
+          },
+          d: {
+            author: 'authorD',
+            title: 'titleD',
+            pages: 50,
+            year: 2020,
+            rating: 0,
+          },
+        };
+        await addTestDocs(testDocs);
+        const snapshot = await col
+          .aggregate({
+            totalRating: AggregateField.sum('rating'),
+            totalPages: AggregateField.sum('pages'),
+            averageYear: AggregateField.average('year'),
+          })
+          .get();
+        expect(snapshot.data().totalRating).to.be.NaN;
+        expect(snapshot.data().totalPages).to.equal(300);
+        expect(snapshot.data().averageYear).to.equal(2000);
+      });
+
+      it('performs aggregates when using `array-contains-any` operator', async () => {
+        const testDocs = {
+          a: {
+            author: 'authorA',
+            title: 'titleA',
+            pages: 100,
+            year: 1980,
+            rating: [5, 1000],
+          },
+          b: {
+            author: 'authorB',
+            title: 'titleB',
+            pages: 50,
+            year: 2020,
+            rating: [4],
+          },
+          c: {
+            author: 'authorC',
+            title: 'titleC',
+            pages: 100,
+            year: 1980,
+            rating: [2222, 3],
+          },
+          d: {
+            author: 'authorD',
+            title: 'titleD',
+            pages: 50,
+            year: 2020,
+            rating: [0],
+          },
+        };
+        await addTestDocs(testDocs);
+        const snapshot = await col
+          .where('rating', 'array-contains-any', [5, 3])
+          .aggregate({
+            totalRating: AggregateField.sum('rating'),
+            averageRating: AggregateField.average('rating'),
+            totalPages: AggregateField.sum('pages'),
+            averagePages: AggregateField.average('pages'),
+            countOfDocs: AggregateField.count(),
+          })
+          .get();
+        expect(snapshot.data().totalRating).to.equal(0);
+        expect(snapshot.data().averageRating).to.be.null;
+        expect(snapshot.data().totalPages).to.equal(200);
+        expect(snapshot.data().averagePages).to.equal(100);
+        expect(snapshot.data().countOfDocs).to.equal(2);
+      });
+    }
+  );
+
+  describe('Aggregation queries - orderBy Normalization Checks', () => {
+    async function addTwoDocs(): Promise<void> {
+      const testDocs = {
+        a: {author: 'authorA', title: 'titleA', num: 5, foo: 1},
+        b: {author: 'authorB', title: 'titleB', num: 7, foo: 2},
+      };
+      await addTestDocs(testDocs);
+    }
+
+    it('no filter, no orderBy, no cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(12);
+    });
+
+    it('equality filter, no orderBy, no cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .where('num', '==', 5)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(5);
+    });
+
+    it('inequality filter, no orderBy, no cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .where('num', '>', 5)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    it('no filter, explicit orderBy, no cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .orderBy('num')
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(12);
+    });
+
+    it('equality filter, explicit orderBy, no cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .where('num', '==', 5)
+        .orderBy('num')
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(5);
+    });
+
+    it('inequality filter, explicit orderBy, no cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .where('num', '>', 5)
+        .orderBy('num')
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    it('no filter, explicit orderBy, field value cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .orderBy('num')
+        .startAfter(5)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `__name__, num` index.
+    // SDK sends: orderBy __name__
+    it.skip('no filter, explicit orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .orderBy(FieldPath.documentId())
+        .startAfter(col.doc('a'))
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `__name__, num` index.
+    // SDK sends: orderBy __name__
+    it.skip('no filter, no orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      const snapshot = await col
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `foo, __name__, num` index.
+    // SDK sends: orderBy foo, __name__
+    it.skip('no filter, explicit orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      const snapshot = await col
+        .orderBy('foo')
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This just happens to work because the orderBy field matches the aggregation field.
+    // SDK sends: orderBy num, __name__
+    it('no filter, explicit orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      const snapshot = await col
+        .orderBy('num')
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    it('equality filter, explicit orderBy, field value cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .where('num', '==', 5)
+        .orderBy('num')
+        .startAt(5)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(5);
+    });
+
+    it('inequality filter, explicit orderBy, field value cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .where('num', '>', 5)
+        .orderBy('num')
+        .startAt(5)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `__name__, num` index.
+    // SDK sends: orderBy __name__
+    it.skip('equality filter, explicit orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .where('num', '==', 7)
+        .orderBy(FieldPath.documentId())
+        .startAfter(col.doc('a'))
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // Full orderBy is provided.
+    // SDK sends: orderBy num, __name__
+    it('inequality filter, explicit orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const snapshot = await col
+        .where('num', '>', 5)
+        .orderBy('num')
+        .orderBy(FieldPath.documentId())
+        .startAfter(5, col.doc('a'))
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `__name__, num` index.
+    // SDK sends: orderBy __name__
+    it.skip('equality filter, no orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      const snapshot = await col
+        .where('num', '==', 7)
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This just happens to work because the orderBy field matches the aggregation field.
+    // SDK sends: orderBy num, __name__
+    it('inequality filter, no orderBy, document reference cursor', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      const snapshot = await col
+        .where('num', '>', 0)
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+
+    // This is expected to fail because it requires the `foo, __name__, num` index.
+    // SDK sends: orderBy foo, __name__
+    it.skip('inequality filter, no orderBy, document reference cursor 2', async () => {
+      await addTwoDocs();
+      const docSnap = await col.doc('a').get();
+      const snapshot = await col
+        .where('foo', '>', 0)
+        .startAfter(docSnap)
+        .aggregate({sum: AggregateField.sum('num')})
+        .get();
+      expect(snapshot.data().sum).to.equal(7);
+    });
+  });
 });
 
 describe('Transaction class', () => {
@@ -2141,8 +4889,8 @@ describe('Transaction class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2341,51 +5089,64 @@ describe('Transaction class', () => {
 
     let attempts = 0;
 
-    await expect(
-      firestore.runTransaction(async transaction => {
-        ++attempts;
-        transaction.update(ref, {foo: 'b'});
-      })
-    ).to.eventually.be.rejectedWith('No document to update');
+    const promise = firestore.runTransaction(async transaction => {
+      ++attempts;
+      transaction.update(ref, {foo: 'b'});
+    });
+
+    // Validate the error message when testing against the firestore backend.
+    if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
+      await expect(promise).to.eventually.be.rejectedWith(
+        /No document to update/
+      );
+    } else {
+      // The emulator generates a different error message, do not validate the error message.
+      await expect(promise).to.eventually.be.rejected;
+    }
 
     expect(attempts).to.equal(1);
   });
 
-  it('retries transactions that fail with contention', async () => {
-    const ref = randomCol.doc('doc');
+  // Skip this test when running against the emulator because it does not work
+  // against the emulator. Contention in the emulator may behave differently.
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it.skip)(
+    'retries transactions that fail with contention',
+    async () => {
+      const ref = randomCol.doc('doc');
 
-    let attempts = 0;
+      let attempts = 0;
 
-    // Create two transactions that both read and update the same document.
-    // `contentionPromise` is used to ensure that both transactions are active
-    // on commit, which causes one of transactions to fail with Code ABORTED
-    // and be retried.
-    const contentionPromise = [new Deferred<void>(), new Deferred<void>()];
+      // Create two transactions that both read and update the same document.
+      // `contentionPromise` is used to ensure that both transactions are active
+      // on commit, which causes one of transactions to fail with Code ABORTED
+      // and be retried.
+      const contentionPromise = [new Deferred<void>(), new Deferred<void>()];
 
-    const firstTransaction = firestore.runTransaction(async transaction => {
-      ++attempts;
-      await transaction.get(ref);
-      contentionPromise[0].resolve();
-      await contentionPromise[1].promise;
-      transaction.set(ref, {first: true}, {merge: true});
-    });
+      const firstTransaction = firestore.runTransaction(async transaction => {
+        ++attempts;
+        await transaction.get(ref);
+        contentionPromise[0].resolve();
+        await contentionPromise[1].promise;
+        transaction.set(ref, {first: true}, {merge: true});
+      });
 
-    const secondTransaction = firestore.runTransaction(async transaction => {
-      ++attempts;
-      await transaction.get(ref);
-      contentionPromise[1].resolve();
-      await contentionPromise[0].promise;
-      transaction.set(ref, {second: true}, {merge: true});
-    });
+      const secondTransaction = firestore.runTransaction(async transaction => {
+        ++attempts;
+        await transaction.get(ref);
+        contentionPromise[1].resolve();
+        await contentionPromise[0].promise;
+        transaction.set(ref, {second: true}, {merge: true});
+      });
 
-    await firstTransaction;
-    await secondTransaction;
+      await firstTransaction;
+      await secondTransaction;
 
-    expect(attempts).to.equal(3);
+      expect(attempts).to.equal(3);
 
-    const finalSnapshot = await ref.get();
-    expect(finalSnapshot.data()).to.deep.equal({first: true, second: true});
-  });
+      const finalSnapshot = await ref.get();
+      expect(finalSnapshot.data()).to.deep.equal({first: true, second: true});
+    }
+  );
 
   it('supports read-only transactions', async () => {
     const ref = randomCol.doc('doc');
@@ -2409,24 +5170,29 @@ describe('Transaction class', () => {
     expect(snapshot.get('foo')).to.equal(1);
   });
 
-  it('fails read-only with writes', async () => {
-    let attempts = 0;
+  // Skip this test when running against the emulator because it does not work
+  // against the emulator. The emulator fails to enforce read-only transactions.
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it.skip)(
+    'fails read-only with writes',
+    async () => {
+      let attempts = 0;
 
-    const ref = randomCol.doc('doc');
-    try {
-      await firestore.runTransaction(
-        async updateFunction => {
-          ++attempts;
-          updateFunction.set(ref, {});
-        },
-        {readOnly: true}
-      );
-      expect.fail();
-    } catch (e) {
-      expect(attempts).to.equal(1);
-      expect(e.code).to.equal(Status.INVALID_ARGUMENT);
+      const ref = randomCol.doc('doc');
+      try {
+        await firestore.runTransaction(
+          async updateFunction => {
+            ++attempts;
+            updateFunction.set(ref, {});
+          },
+          {readOnly: true}
+        );
+        expect.fail();
+      } catch (e) {
+        expect(attempts).to.equal(1);
+        expect(e.code).to.equal(Status.INVALID_ARGUMENT);
+      }
     }
-  });
+  );
 });
 
 describe('WriteBatch class', () => {
@@ -2434,8 +5200,8 @@ describe('WriteBatch class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2578,9 +5344,9 @@ describe('QuerySnapshot class', () => {
   let querySnapshot: Promise<QuerySnapshot>;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    const randomCol = getTestRoot();
+    firestore = randomCol.firestore;
 
-    const randomCol = getTestRoot(firestore);
     const ref1 = randomCol.doc('doc1');
     const ref2 = randomCol.doc('doc2');
 
@@ -2649,9 +5415,9 @@ describe('BulkWriter class', () => {
   let writer: BulkWriter;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
     writer = firestore.bulkWriter();
-    randomCol = getTestRoot(firestore);
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2823,7 +5589,7 @@ describe('BulkWriter class', () => {
 
   it('can retry failed writes with a provided callback', async () => {
     let retryCount = 0;
-    let code: Status = -1;
+    let code: Status = -1 as Status;
     writer.onWriteError(error => {
       retryCount = error.failedAttempts;
       return error.failedAttempts < 3;
@@ -2841,93 +5607,103 @@ describe('BulkWriter class', () => {
 });
 
 describe('Client initialization', () => {
-  const ops: Array<[string, (coll: CollectionReference) => Promise<unknown>]> =
+  const ops: Array<
     [
-      ['CollectionReference.get()', randomColl => randomColl.get()],
-      ['CollectionReference.add()', randomColl => randomColl.add({})],
-      [
-        'CollectionReference.stream()',
-        randomColl => {
-          const deferred = new Deferred<void>();
-          randomColl.stream().on('finish', () => {
-            deferred.resolve();
-          });
-          return deferred.promise;
-        },
-      ],
-      [
-        'CollectionReference.listDocuments()',
-        randomColl => randomColl.listDocuments(),
-      ],
-      [
-        'CollectionReference.onSnapshot()',
-        randomColl => {
-          const deferred = new Deferred<void>();
-          const unsubscribe = randomColl.onSnapshot(() => {
-            unsubscribe();
-            deferred.resolve();
-          });
-          return deferred.promise;
-        },
-      ],
-      ['DocumentReference.get()', randomColl => randomColl.doc().get()],
-      ['DocumentReference.create()', randomColl => randomColl.doc().create({})],
-      ['DocumentReference.set()', randomColl => randomColl.doc().set({})],
-      [
-        'DocumentReference.update()',
-        async randomColl => {
-          const update = randomColl.doc().update('foo', 'bar');
+      string,
+      (coll: CollectionReference) => Promise<unknown>,
+      /* skip */ boolean?,
+    ]
+  > = [
+    ['CollectionReference.get()', randomColl => randomColl.get()],
+    ['CollectionReference.add()', randomColl => randomColl.add({})],
+    [
+      'CollectionReference.stream()',
+      randomColl => {
+        const deferred = new Deferred<void>();
+        randomColl.stream().on('finish', () => {
+          deferred.resolve();
+        });
+        return deferred.promise;
+      },
+    ],
+    [
+      'CollectionReference.listDocuments()',
+      randomColl => randomColl.listDocuments(),
+    ],
+    [
+      'CollectionReference.onSnapshot()',
+      randomColl => {
+        const deferred = new Deferred<void>();
+        const unsubscribe = randomColl.onSnapshot(() => {
+          unsubscribe();
+          deferred.resolve();
+        });
+        return deferred.promise;
+      },
+    ],
+    ['DocumentReference.get()', randomColl => randomColl.doc().get()],
+    ['DocumentReference.create()', randomColl => randomColl.doc().create({})],
+    ['DocumentReference.set()', randomColl => randomColl.doc().set({})],
+    [
+      'DocumentReference.update()',
+      async randomColl => {
+        const update = randomColl.doc().update('foo', 'bar');
+
+        // Don't validate the error message when running against the emulator.
+        // Emulator gives different error message.
+        if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
           await expect(update).to.eventually.be.rejectedWith(
             'No document to update'
           );
-        },
-      ],
-      ['DocumentReference.delete()', randomColl => randomColl.doc().delete()],
-      [
-        'DocumentReference.listCollections()',
-        randomColl => randomColl.doc().listCollections(),
-      ],
-      [
-        'DocumentReference.onSnapshot()',
-        randomColl => {
-          const deferred = new Deferred<void>();
-          const unsubscribe = randomColl.doc().onSnapshot(() => {
-            unsubscribe();
-            deferred.resolve();
-          });
-          return deferred.promise;
-        },
-      ],
-      [
-        'CollectionGroup.getPartitions()',
-        async randomColl => {
-          const partitions = randomColl.firestore
-            .collectionGroup('id')
-            .getPartitions(2);
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          for await (const _ of partitions);
-        },
-      ],
-      [
-        'Firestore.runTransaction()',
-        randomColl =>
-          randomColl.firestore.runTransaction(t => t.get(randomColl)),
-      ],
-      [
-        'Firestore.getAll()',
-        randomColl => randomColl.firestore.getAll(randomColl.doc()),
-      ],
-      [
-        'Firestore.batch()',
-        randomColl => randomColl.firestore.batch().commit(),
-      ],
-      ['Firestore.terminate()', randomColl => randomColl.firestore.terminate()],
-    ];
+        } else {
+          await expect(update).to.eventually.be.rejected;
+        }
+      },
+    ],
+    ['DocumentReference.delete()', randomColl => randomColl.doc().delete()],
+    [
+      'DocumentReference.listCollections()',
+      randomColl => randomColl.doc().listCollections(),
+    ],
+    [
+      'DocumentReference.onSnapshot()',
+      randomColl => {
+        const deferred = new Deferred<void>();
+        const unsubscribe = randomColl.doc().onSnapshot(() => {
+          unsubscribe();
+          deferred.resolve();
+        });
+        return deferred.promise;
+      },
+    ],
+    [
+      'CollectionGroup.getPartitions()',
+      async randomColl => {
+        const partitions = randomColl.firestore
+          .collectionGroup('id')
+          .getPartitions(2);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const _ of partitions);
+      },
+      // Skip this test when running against the emulator because partition queries
+      // are not supported in the emulator.
+      !!process.env.FIRESTORE_EMULATOR_HOST,
+    ],
+    [
+      'Firestore.runTransaction()',
+      randomColl => randomColl.firestore.runTransaction(t => t.get(randomColl)),
+    ],
+    [
+      'Firestore.getAll()',
+      randomColl => randomColl.firestore.getAll(randomColl.doc()),
+    ],
+    ['Firestore.batch()', randomColl => randomColl.firestore.batch().commit()],
+    ['Firestore.terminate()', randomColl => randomColl.firestore.terminate()],
+  ];
 
-  for (const [description, op] of ops) {
-    it(`succeeds for ${description}`, () => {
-      const firestore = new Firestore();
-      const randomCol = getTestRoot(firestore);
+  for (const [description, op, skip] of ops) {
+    (!skip ? it : it.skip)(`succeeds for ${description}`, () => {
+      const randomCol = getTestRoot();
       return op(randomCol);
     });
   }
@@ -2938,8 +5714,9 @@ describe('Bundle building', () => {
   let testCol: CollectionReference;
 
   beforeEach(async () => {
-    firestore = new Firestore({});
-    testCol = getTestRoot(firestore);
+    testCol = getTestRoot();
+    firestore = testCol.firestore;
+
     const ref1 = testCol.doc('doc1');
     const ref2 = testCol.doc('doc2');
     const ref3 = testCol.doc('doc3');
@@ -3133,8 +5910,8 @@ describe('Types test', () => {
   };
 
   beforeEach(async () => {
-    firestore = new Firestore({});
-    randomCol = getTestRoot(firestore);
+    randomCol = getTestRoot();
+    firestore = randomCol.firestore;
     doc = randomCol.doc();
 
     await doc.set(initialData);
@@ -3550,6 +6327,7 @@ describe('Types test', () => {
           id: string;
           foo: number;
         }
+
         const foo = new ObjectWrapper<Foo>();
         foo.withFieldValueT({id: '', foo: FieldValue.increment(1)});
         foo.withPartialFieldValueT({foo: FieldValue.increment(1)});

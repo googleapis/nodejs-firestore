@@ -312,7 +312,7 @@ export function validateUserInput(
   level?: number,
   inArray?: boolean
 ): void {
-  if (path && path.size > MAX_DEPTH) {
+  if (path && path.size - 1 > MAX_DEPTH) {
     throw new Error(
       `${invalidArgumentMessage(
         arg,

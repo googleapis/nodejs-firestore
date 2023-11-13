@@ -188,8 +188,8 @@ describe('BulkWriter', () => {
     });
   }
 
-  afterEach(() => {
-    verifyInstance(firestore);
+  afterEach(async () => {
+    await verifyInstance(firestore);
     setTimeoutHandler(setTimeout);
   });
 
@@ -949,7 +949,7 @@ describe('BulkWriter', () => {
         response: failedResponse(Status.INTERNAL),
       },
     ]);
-    let code: Status = -1;
+    let code: Status = -1 as Status;
     bulkWriter.onWriteError(error => {
       return error.failedAttempts < 3;
     });

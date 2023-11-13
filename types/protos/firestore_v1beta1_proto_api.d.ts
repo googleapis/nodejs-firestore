@@ -5111,7 +5111,7 @@ export namespace google {
 
                     /** Operator enum. */
                     type Operator =
-                        "OPERATOR_UNSPECIFIED"| "AND";
+                        "OPERATOR_UNSPECIFIED"| "AND"| "OR";
                 }
 
                 /** Properties of a FieldFilter. */

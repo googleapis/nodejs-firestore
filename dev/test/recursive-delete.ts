@@ -31,7 +31,7 @@ import {
 } from './util/helpers';
 import {
   allDescendants,
-  fieldFilters,
+  fieldFiltersQuery,
   limit,
   orderBy,
   queryEquals,
@@ -69,8 +69,8 @@ describe('recursiveDelete() method:', () => {
     setTimeoutHandler(setImmediate);
   });
 
-  afterEach(() => {
-    verifyInstance(firestore);
+  afterEach(async () => {
+    await verifyInstance(firestore);
     setTimeoutHandler(setTimeout);
     expect(batchWriteError, 'batchWrite should not have errored').to.be
       .undefined;
@@ -136,7 +136,7 @@ describe('recursiveDelete() method:', () => {
             req,
             select('__name__'),
             allDescendants(/* kindless= */ true),
-            fieldFilters(
+            fieldFiltersQuery(
               '__name__',
               'GREATER_THAN_OR_EQUAL',
               startAt('root'),
@@ -161,7 +161,7 @@ describe('recursiveDelete() method:', () => {
             'root/doc',
             select('__name__'),
             allDescendants(/* kindless= */ true),
-            fieldFilters(
+            fieldFiltersQuery(
               '__name__',
               'GREATER_THAN_OR_EQUAL',
               startAt('root/doc/nestedCol'),
@@ -218,7 +218,7 @@ describe('recursiveDelete() method:', () => {
                   `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc1',
               }),
-              fieldFilters(
+              fieldFiltersQuery(
                 '__name__',
                 'GREATER_THAN_OR_EQUAL',
                 startAt('root'),
@@ -277,7 +277,7 @@ describe('recursiveDelete() method:', () => {
               request,
               select('__name__'),
               allDescendants(/* kindless= */ true),
-              fieldFilters(
+              fieldFiltersQuery(
                 '__name__',
                 'GREATER_THAN_OR_EQUAL',
                 startAt('root'),
@@ -295,7 +295,7 @@ describe('recursiveDelete() method:', () => {
               select('__name__'),
               allDescendants(/* kindless= */ true),
               orderBy('__name__', 'ASCENDING'),
-              fieldFilters(
+              fieldFiltersQuery(
                 '__name__',
                 'GREATER_THAN_OR_EQUAL',
                 startAt('root'),

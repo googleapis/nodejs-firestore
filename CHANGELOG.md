@@ -4,6 +4,194 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.1.0](https://github.com/googleapis/nodejs-firestore/compare/v7.0.0...v7.1.0) (2023-10-11)
+
+
+### Features
+
+* Sum and Average aggregations ([#1873](https://github.com/googleapis/nodejs-firestore/issues/1873)) ([b9ea514](https://github.com/googleapis/nodejs-firestore/commit/b9ea5143f997dd217200ffa83ed481ad74f558e4))
+
+## [7.0.0](https://github.com/googleapis/nodejs-firestore/compare/v6.8.0...v7.0.0) (2023-10-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade to Node 14 ([#1900](https://github.com/googleapis/nodejs-firestore/issues/1900))
+* Fix the UpdateData incorrect parameter type issue ([#1887](https://github.com/googleapis/nodejs-firestore/issues/1887))
+
+### Features
+
+* Fix the UpdateData incorrect parameter type issue ([#1887](https://github.com/googleapis/nodejs-firestore/issues/1887)) ([0afadef](https://github.com/googleapis/nodejs-firestore/commit/0afadeff4706e7bff173d8eda7b9681498b570a8))
+
+
+### Bug Fixes
+
+* Remove DocumentReference from cursor ([#1882](https://github.com/googleapis/nodejs-firestore/issues/1882)) ([da4f8f8](https://github.com/googleapis/nodejs-firestore/commit/da4f8f8b6a35fa93aca0eddc96703d3321a998f6))
+
+
+### Miscellaneous Chores
+
+* Upgrade to Node 14 ([#1900](https://github.com/googleapis/nodejs-firestore/issues/1900)) ([1f5abb8](https://github.com/googleapis/nodejs-firestore/commit/1f5abb8fbef91e372313b2dbf4d51c7d03ce69b0))
+
+## [6.8.0](https://github.com/googleapis/nodejs-firestore/compare/v6.7.0...v6.8.0) (2023-09-26)
+
+
+### Features
+
+* Publish proto definitions for SUM/AVG in Firestore ([#1856](https://github.com/googleapis/nodejs-firestore/issues/1856)) ([ac35b37](https://github.com/googleapis/nodejs-firestore/commit/ac35b372faf32f093d83af18d487f1b3f23ee673))
+
+
+### Bug Fixes
+
+* **deps:** Use protobufjs v7.2.5 ([#1889](https://github.com/googleapis/nodejs-firestore/pull/1889))
+* Add tests for multiple inequality support ([#1878](https://github.com/googleapis/nodejs-firestore/issues/1878)) ([8e621d5](https://github.com/googleapis/nodejs-firestore/commit/8e621d580396b7e3bc7e42dad0c63f91e999411f))
+
+## [6.7.0](https://github.com/googleapis/nodejs-firestore/compare/v6.6.1...v6.7.0) (2023-07-20)
+
+
+### Features
+
+* Expose MultiDb ([#1857](https://github.com/googleapis/nodejs-firestore/issues/1857)) ([1e913db](https://github.com/googleapis/nodejs-firestore/commit/1e913dbec97a6ec9339f641e7590ac4d65c7fd17))
+
+
+### Bug Fixes
+
+* Resolving issues with MultiDb support ([#1864](https://github.com/googleapis/nodejs-firestore/issues/1864)) ([1af49c1](https://github.com/googleapis/nodejs-firestore/commit/1af49c1a852c6a89a7e21a9e749d667b3b728acf))
+
+## [6.6.1](https://github.com/googleapis/nodejs-firestore/compare/v6.6.0...v6.6.1) (2023-06-01)
+
+
+### Bug Fixes
+
+* Updated logging in the client pool and client factory to log information about the required transport and actual transport used. ([#1853](https://github.com/googleapis/nodejs-firestore/issues/1853)) ([fe03d02](https://github.com/googleapis/nodejs-firestore/commit/fe03d02efc0d8e4ca90daea97f9e3339074d415d))
+
+## [6.6.0](https://github.com/googleapis/nodejs-firestore/compare/v6.5.0...v6.6.0) (2023-05-18)
+
+
+### Features
+
+* Add ApiScope and COLLECTION_RECURSIVE query_scope for Firestore index ([#1849](https://github.com/googleapis/nodejs-firestore/issues/1849)) ([b671452](https://github.com/googleapis/nodejs-firestore/commit/b6714528956f3907b1ca4aded372592ef00d34d6))
+* Add bloom filter related proto fields ([#1843](https://github.com/googleapis/nodejs-firestore/issues/1843)) ([b64e0c1](https://github.com/googleapis/nodejs-firestore/commit/b64e0c15d0f824a688ff42a8ad940b520f87cf9b))
+* Add support for environment variable FIRESTORE_PREFER_REST ([#1848](https://github.com/googleapis/nodejs-firestore/issues/1848)) ([96b1d2a](https://github.com/googleapis/nodejs-firestore/commit/96b1d2ab3248f6c4bb70d1cf735aea827a2a13da))
+
+## [6.5.0](https://github.com/googleapis/nodejs-firestore/compare/v6.4.3...v6.5.0) (2023-03-06)
+
+
+### Features
+
+* OR Queries ([#1800](https://github.com/googleapis/nodejs-firestore/issues/1800)) ([983a477](https://github.com/googleapis/nodejs-firestore/commit/983a477a6c1a22e4efba0df07e750910028e0afb))
+
+
+### Bug Fixes
+
+* Enable REST numeric enums ([#1829](https://github.com/googleapis/nodejs-firestore/issues/1829)) ([3737696](https://github.com/googleapis/nodejs-firestore/commit/3737696791b3b77fe9b333323523d8a0abcf5f7b))
+* Update generated proto types; fix the update script ([#1825](https://github.com/googleapis/nodejs-firestore/issues/1825)) ([a7e4212](https://github.com/googleapis/nodejs-firestore/commit/a7e42123da1325f526fa5c3a62f1d3dc7a2569c3))
+
+## [6.4.3](https://github.com/googleapis/nodejs-firestore/compare/v6.4.2...v6.4.3) (2023-02-16)
+
+
+### Bug Fixes
+
+* **deps:** Use google-gax v3.5.3 ([#1818](https://github.com/googleapis/nodejs-firestore/issues/1818)) ([88981ad](https://github.com/googleapis/nodejs-firestore/commit/88981ad8749b0aa38dfe9bcdd4ca5e60d76c8776))
+* Emulator support for system tests. Run system tests against the emulator using: `yarn system-test:grpc:emulator` or `yarn system-test:rest:emulator` ([8aedc63](https://github.com/googleapis/nodejs-firestore/commit/8aedc63138827ea03a8dacae4e7bccdf048a2be7))
+* Update the depth validation used when writing documents, so that it matches the validation of the Firestore backend. ([789d9eb](https://github.com/googleapis/nodejs-firestore/commit/789d9eb7f54b5329b17ef759f29252d17da47e26))
+
+## [6.4.2](https://github.com/googleapis/nodejs-firestore/compare/v6.4.1...v6.4.2) (2023-01-09)
+
+
+### Bug Fixes
+
+* **deps:** Use google-gax v3.5.2 ([#1794](https://github.com/googleapis/nodejs-firestore/issues/1794)) ([b1a0313](https://github.com/googleapis/nodejs-firestore/commit/b1a0313498b0c3569bd74ce96fce80b8f9bee1a9))
+* Ensure that the client pool consistently uses gRPC clients after transitioning from REST ([3068361](https://github.com/googleapis/nodejs-firestore/commit/306836163ae01221aa9c0076c76093e727c74a08))
+* Fix duplicates in Query.stream() with back pressure ([#1806](https://github.com/googleapis/nodejs-firestore/issues/1806)) ([a5b680d](https://github.com/googleapis/nodejs-firestore/commit/a5b680da034d600babb9e3495fb8a7bf019d1315))
+
+## [6.4.1](https://github.com/googleapis/nodejs-firestore/compare/v6.4.0...v6.4.1) (2022-10-17)
+
+
+### Bug Fixes
+
+* Force use of http by the GAX module when using the GAX fallback and connecting to the emulator ([#1788](https://github.com/googleapis/nodejs-firestore/issues/1788)) ([50747ad](https://github.com/googleapis/nodejs-firestore/commit/50747ad52b19da9ed87282af98eadff660dffb75))
+
+## [6.4.0](https://github.com/googleapis/nodejs-firestore/compare/v6.3.0...v6.4.0) (2022-10-07)
+
+
+### Features
+
+* Add internal multi-db support ([#1761](https://github.com/googleapis/nodejs-firestore/issues/1761)) ([5ba8df0](https://github.com/googleapis/nodejs-firestore/commit/5ba8df011264b435b53499642e68afd73859f332))
+* COUNT Queries ([#1774](https://github.com/googleapis/nodejs-firestore/issues/1774)) ([bcaecb4](https://github.com/googleapis/nodejs-firestore/commit/bcaecb45b7911073bb968542df0267ba81d4462d))
+
+
+### Bug Fixes
+
+* Remove [@internal](https://github.com/internal) annotation from snapshot_ ([#1728](https://github.com/googleapis/nodejs-firestore/issues/1728)) ([983ab89](https://github.com/googleapis/nodejs-firestore/commit/983ab89387d8c5314680d1520c3bece011ee6a64))
+
+## [6.3.0](https://github.com/googleapis/nodejs-firestore/compare/v6.2.0...v6.3.0) (2022-09-22)
+
+
+### Features
+
+* Add aggregation query APIs ([#1765](https://github.com/googleapis/nodejs-firestore/issues/1765)) ([18be4d0](https://github.com/googleapis/nodejs-firestore/commit/18be4d0ca3a8e927a883ba6e41a43d19fb2af665))
+
+
+### Bug Fixes
+
+* Tests will now verify asynchronous termination of underlying steam, and fix related bug. ([#1772](https://github.com/googleapis/nodejs-firestore/issues/1772)) ([a1717ff](https://github.com/googleapis/nodejs-firestore/commit/a1717ff279f1ea9647e28b8e93539bcad9739af0))
+
+## [6.2.0](https://github.com/googleapis/nodejs-firestore/compare/v6.1.0...v6.2.0) (2022-09-13)
+
+
+### Features
+
+* Use REST ([#1698](https://github.com/googleapis/nodejs-firestore/issues/1698)) ([d85b0e9](https://github.com/googleapis/nodejs-firestore/commit/d85b0e93bcb4a5806490ee66a4443afd4a0a519a))
+
+
+### Bug Fixes
+
+* Minify proto JSON files ([#1771](https://github.com/googleapis/nodejs-firestore/issues/1771)) ([6393fe7](https://github.com/googleapis/nodejs-firestore/commit/6393fe704097a1214961fa30f01832a64dced775))
+* Remove hack in update.sh, and replace with existing pattern for protobuf dependencies. ([#1769](https://github.com/googleapis/nodejs-firestore/issues/1769)) ([6ba6751](https://github.com/googleapis/nodejs-firestore/commit/6ba67517123578a93bb3e0eeb771b610ac3ee397))
+
+## [6.1.0](https://github.com/googleapis/nodejs-firestore/compare/v6.0.0...v6.1.0) (2022-09-07)
+
+
+### Features
+
+* Accept google-gax instance as a parameter ([#1757](https://github.com/googleapis/nodejs-firestore/issues/1757)) ([ef59a22](https://github.com/googleapis/nodejs-firestore/commit/ef59a22a8abd894d4d3e8b05f075f510de26019f))
+
+
+### Bug Fixes
+
+* Better support for fallback mode ([#1756](https://github.com/googleapis/nodejs-firestore/issues/1756)) ([a029a6e](https://github.com/googleapis/nodejs-firestore/commit/a029a6e602ef5ed6553ecc7022623fcd81763c7e))
+* Don't allow serialization of firestore settings ([#1742](https://github.com/googleapis/nodejs-firestore/issues/1742)) ([fa0ad66](https://github.com/googleapis/nodejs-firestore/commit/fa0ad66bc7e4a0c46f1ae5ca10b2a6f3a528ab6f))
+* Pin Typescript to prevent new type checking. ([#1764](https://github.com/googleapis/nodejs-firestore/issues/1764)) ([dd01b27](https://github.com/googleapis/nodejs-firestore/commit/dd01b27022e35ddf6793d71451d0b86f549288fe))
+* Update GAX ([#1758](https://github.com/googleapis/nodejs-firestore/issues/1758)) ([1931415](https://github.com/googleapis/nodejs-firestore/commit/19314159a9907dfea8301b41d8050b0d2e783dd8))
+* Version 7 of protobufjs broke the update.sh script. Added path to built in protobuf. ([#1766](https://github.com/googleapis/nodejs-firestore/issues/1766)) ([40f1db3](https://github.com/googleapis/nodejs-firestore/commit/40f1db379ba01174471bbb91cdddc88f929c9b46))
+
+## [6.0.0](https://github.com/googleapis/nodejs-firestore/compare/v5.0.2...v6.0.0) (2022-07-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* update library to use Node 12 (#1725)
+
+### Features
+
+* Enable RunQueryResponse.done ([#1712](https://github.com/googleapis/nodejs-firestore/issues/1712)) ([0cc549c](https://github.com/googleapis/nodejs-firestore/commit/0cc549c69ccc59e25f8347d6b236f8b9b04dc105))
+* Support Logical Termination on RunQueryResponse ([#1741](https://github.com/googleapis/nodejs-firestore/issues/1741)) ([07de28a](https://github.com/googleapis/nodejs-firestore/commit/07de28a04cdea27c5f859091aaf30d16bd8a8c3c))
+* support regapic LRO ([#1729](https://github.com/googleapis/nodejs-firestore/issues/1729)) ([b9d8fef](https://github.com/googleapis/nodejs-firestore/commit/b9d8fefc5f927d1f064a79ec0990d256803360cd))
+* update client libraries to support Database operations ([#1676](https://github.com/googleapis/nodejs-firestore/issues/1676)) ([533aade](https://github.com/googleapis/nodejs-firestore/commit/533aade3272f07b39bbad2c32a5d9669fde6de53))
+
+
+### Bug Fixes
+
+* change REST binding for ListDocuments to support root collection ([#1695](https://github.com/googleapis/nodejs-firestore/issues/1695)) ([6185f13](https://github.com/googleapis/nodejs-firestore/commit/6185f13070ff9dda91d7128e3b8a1db7f09914a8))
+* **deps:** update dependency protobufjs to v7 ([#1747](https://github.com/googleapis/nodejs-firestore/issues/1747)) ([4e8d33c](https://github.com/googleapis/nodejs-firestore/commit/4e8d33cce418dfb004725ce2271121fd1fdbd9b2))
+* split v1 and v1beta1 protos to improve startup time ([#1664](https://github.com/googleapis/nodejs-firestore/issues/1664)) ([f3729cf](https://github.com/googleapis/nodejs-firestore/commit/f3729cf49818b9b929a556e7a8e8a5588b5f2726))
+
+
+### Build System
+
+* update library to use Node 12 ([#1725](https://github.com/googleapis/nodejs-firestore/issues/1725)) ([0abbd21](https://github.com/googleapis/nodejs-firestore/commit/0abbd215d4574f238b40630361d0836432ead3af))
+
 ### [5.0.2](https://www.github.com/googleapis/nodejs-firestore/compare/v5.0.1...v5.0.2) (2022-01-07)
 
 

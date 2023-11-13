@@ -21,12 +21,11 @@ import {
 
 import {expect} from 'chai';
 import * as extend from 'extend';
-import {grpc} from 'google-gax';
 import {JSONStreamIterator} from 'length-prefixed-json-stream';
 import {Duplex, PassThrough} from 'stream';
 import * as through2 from 'through2';
-import {firestore, google} from '../../protos/firestore_v1_proto_api';
-
+import {firestore} from '../../protos/firestore_v1_proto_api';
+import type {grpc} from 'google-gax';
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
 import {Firestore, QueryDocumentSnapshot} from '../../src';
@@ -35,7 +34,11 @@ import {GapicClient} from '../../src/types';
 
 import api = proto.google.firestore.v1;
 
-const SSL_CREDENTIALS = grpc.credentials.createInsecure();
+let SSL_CREDENTIALS: grpc.ChannelCredentials | null = null;
+if (!isPreferRest()) {
+  const grpc = require('google-gax').grpc;
+  SSL_CREDENTIALS = grpc.credentials.createInsecure();
+}
 
 export const PROJECT_ID = 'test-project';
 export const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -62,7 +65,7 @@ export function createInstance(
   firestoreSettings?: Settings
 ): Promise<Firestore> {
   const initializationOptions = {
-    ...{projectId: PROJECT_ID, sslCreds: SSL_CREDENTIALS},
+    ...{projectId: PROJECT_ID, sslCreds: SSL_CREDENTIALS!},
     ...firestoreSettings,
   };
 
@@ -76,7 +79,7 @@ export function createInstance(
       ({
         ...new v1.FirestoreClient(initializationOptions),
         ...apiOverrides,
-      } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      }) as any // eslint-disable-line @typescript-eslint/no-explicit-any
   );
 
   return Promise.resolve(firestore);
@@ -89,11 +92,23 @@ export function createInstance(
 export function verifyInstance(firestore: Firestore): Promise<void> {
   // Allow the setTimeout() call in _initializeStream to run before
   // verifying that all operations have finished executing.
-  return new Promise<void>(resolve => {
-    setTimeout(() => {
-      expect(firestore['_clientPool'].opCount).to.equal(0);
+  return new Promise<void>((resolve, reject) => {
+    if (firestore['_clientPool'].opCount === 0) {
       resolve();
-    }, 10);
+    } else {
+      setTimeout(() => {
+        const opCount = firestore['_clientPool'].opCount;
+        if (opCount === 0) {
+          resolve();
+        } else {
+          reject(
+            new Error(
+              `Firestore has ${opCount} unfinished operations executing.`
+            )
+          );
+        }
+      }, 10);
+    }
   });
 }
 
@@ -325,6 +340,22 @@ export function stream<T>(...elements: Array<T | Error>): Duplex {
   return stream;
 }
 
+export function streamWithoutEnd<T>(...elements: Array<T | Error>): Duplex {
+  const stream = through2.obj();
+
+  setImmediate(() => {
+    for (const el of elements) {
+      if (el instanceof Error) {
+        stream.destroy(el);
+        return;
+      }
+      stream.push(el);
+    }
+  });
+
+  return stream;
+}
+
 /** Creates a response as formatted by the GAPIC request methods.  */
 export function response<T>(result: T): Promise<[T, unknown, unknown]> {
   return Promise.resolve([result, undefined, undefined]);
@@ -332,7 +363,10 @@ export function response<T>(result: T): Promise<[T, unknown, unknown]> {
 
 /** Sample user object class used in tests. */
 export class Post {
-  constructor(readonly title: string, readonly author: string) {}
+  constructor(
+    readonly title: string,
+    readonly author: string
+  ) {}
   toString(): string {
     return this.title + ', by ' + this.author;
   }
@@ -381,4 +415,48 @@ export async function bundleToElementArray(
     result.push(value as firestore.IBundleElement);
   }
   return result;
+}
+
+/**
+ * Reads the elements of an AsyncIterator.
+ *
+ * Example:
+ *
+ * const query = firestore.collection('collectionId');
+ * const iterator = query.stream()[Symbol.asyncIterator]()
+ *   as AsyncIterator<QueryDocumentSnapshot>;
+ * return collect(iterator).then(snapshots => {
+ *   expect(snapshots).to.have.length(2);
+ * });
+ *
+ * @param iterator the iterator whose elements over which to iterate.
+ * @return a Promise that is fulfilled with the elements that were produced, or
+ * is rejected with the cause of the first failed iteration.
+ */
+export async function collect<T, TReturn, TNext>(
+  iterator: AsyncIterator<T, TReturn, TNext>
+): Promise<Array<T>> {
+  const values: Array<T> = [];
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const {done, value} = await iterator.next();
+    if (done) {
+      break;
+    }
+    values.push(value);
+  }
+  return values;
+}
+
+/**
+ * Returns a value indicating whether preferRest is enabled
+ * via the environment variable `FIRESTORE_PREFER_REST`.
+ *
+ * @return `true` if preferRest is enabled via the environment variable `FIRESTORE_PREFER_REST`.
+ */
+export function isPreferRest(): boolean {
+  return (
+    process.env.FIRESTORE_PREFER_REST === '1' ||
+    process.env.FIRESTORE_PREFER_REST === 'true'
+  );
 }

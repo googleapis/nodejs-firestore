@@ -35,15 +35,20 @@ import {compareArrays} from './order';
  *
  * @class CollectionGroup
  */
-export class CollectionGroup<T = firestore.DocumentData>
-  extends Query<T>
-  implements firestore.CollectionGroup<T>
+export class CollectionGroup<
+    AppModelType = firestore.DocumentData,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >
+  extends Query<AppModelType, DbModelType>
+  implements firestore.CollectionGroup<AppModelType, DbModelType>
 {
   /** @private */
   constructor(
     firestore: Firestore,
     collectionId: string,
-    converter: firestore.FirestoreDataConverter<T> | undefined
+    converter:
+      | firestore.FirestoreDataConverter<AppModelType, DbModelType>
+      | undefined
   ) {
     super(
       firestore,
@@ -74,7 +79,7 @@ export class CollectionGroup<T = firestore.DocumentData>
    */
   async *getPartitions(
     desiredPartitionCount: number
-  ): AsyncIterable<QueryPartition<T>> {
+  ): AsyncIterable<QueryPartition<AppModelType, DbModelType>> {
     validateInteger('desiredPartitionCount', desiredPartitionCount, {
       minValue: 1,
     });
@@ -96,6 +101,7 @@ export class CollectionGroup<T = firestore.DocumentData>
 
       const stream = await this.firestore.requestStream(
         'partitionQueryStream',
+        /* bidirectional= */ false,
         request,
         tag
       );
@@ -140,7 +146,8 @@ export class CollectionGroup<T = firestore.DocumentData>
    * Applies a custom data converter to this `CollectionGroup`, allowing you
    * to use your own custom model objects with Firestore. When you call get()
    * on the returned `CollectionGroup`, the provided converter will convert
-   * between Firestore data and your custom type U.
+   * between Firestore data of type `NewDbModelType` and your custom type
+   * `NewAppModelType`.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
@@ -184,17 +191,26 @@ export class CollectionGroup<T = firestore.DocumentData>
    * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
-   * @return {CollectionGroup} A `CollectionGroup<U>` that uses the provided
+   * @return {CollectionGroup} A `CollectionGroup` that uses the provided
    * converter.
    */
-  withConverter(converter: null): CollectionGroup<firestore.DocumentData>;
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U>
-  ): CollectionGroup<U>;
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U> | null
-  ): CollectionGroup<U> {
-    return new CollectionGroup<U>(
+  withConverter(converter: null): CollectionGroup;
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+  ): CollectionGroup<NewAppModelType, NewDbModelType>;
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<
+      NewAppModelType,
+      NewDbModelType
+    > | null
+  ): CollectionGroup<NewAppModelType, NewDbModelType> {
+    return new CollectionGroup<NewAppModelType, NewDbModelType>(
       this.firestore,
       this._queryOptions.collectionId,
       converter ?? defaultConverter()

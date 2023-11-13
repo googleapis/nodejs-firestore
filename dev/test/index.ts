@@ -304,6 +304,7 @@ describe('instantiation', () => {
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
     expect((firestore as any)._settings.projectId).to.equal(PROJECT_ID);
+    expect((firestore as any)._settings.databaseId).to.be.undefined;
     expect((firestore as any)._settings.foo).to.equal('bar');
     /* eslint-enable @typescript-eslint/no-explicit-any */
   });
@@ -340,6 +341,23 @@ describe('instantiation', () => {
       } as InvalidApiUsage);
     }).to.throw(
       'Value for argument "settings.projectId" is not a valid string.'
+    );
+  });
+
+  it('validates database ID is string', () => {
+    expect(() => {
+      const settings = {...DEFAULT_SETTINGS, databaseId: 1337};
+      new Firestore.Firestore(settings as InvalidApiUsage);
+    }).to.throw(
+      'Value for argument "settings.databaseId" is not a valid string.'
+    );
+
+    expect(() => {
+      new Firestore.Firestore(DEFAULT_SETTINGS).settings({
+        databaseId: 1337,
+      } as InvalidApiUsage);
+    }).to.throw(
+      'Value for argument "settings.databaseId" is not a valid string.'
     );
   });
 
@@ -548,11 +566,14 @@ describe('instantiation', () => {
     new Firestore.Firestore({maxIdleChannels: 1});
   });
 
-  it('uses project id from constructor', () => {
-    const firestore = new Firestore.Firestore({projectId: 'foo'});
+  it('uses project id and database id from constructor', () => {
+    const firestore = new Firestore.Firestore({
+      projectId: 'foo',
+      databaseId: 'bar',
+    });
 
     return expect(firestore.formattedName).to.equal(
-      'projects/foo/databases/(default)'
+      'projects/foo/databases/bar'
     );
   });
 
@@ -571,7 +592,7 @@ describe('instantiation', () => {
     });
   });
 
-  it('uses project ID from settings()', () => {
+  it('uses project ID from settings() and default database ID', () => {
     const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
     });
@@ -580,6 +601,18 @@ describe('instantiation', () => {
 
     expect(firestore.formattedName).to.equal(
       `projects/${PROJECT_ID}/databases/(default)`
+    );
+  });
+
+  it('uses database ID and database ID from settings()', () => {
+    const firestore = new Firestore.Firestore({
+      sslCreds: grpc.credentials.createInsecure(),
+    });
+
+    firestore.settings({projectId: PROJECT_ID, databaseId: 'bar'});
+
+    expect(firestore.formattedName).to.equal(
+      `projects/${PROJECT_ID}/databases/bar`
     );
   });
 
@@ -601,7 +634,65 @@ describe('instantiation', () => {
       ssl: false,
       projectId: 'foo',
     });
-    await firestore['_clientPool'].run('tag', () => Promise.resolve());
+    await firestore['_clientPool'].run('tag', /* requiresGrpc= */ false, () =>
+      Promise.resolve()
+    );
+  });
+
+  describe('preferRest configuration', () => {
+    let originalValue: string | undefined;
+
+    beforeEach(() => {
+      originalValue = process.env.FIRESTORE_PREFER_REST;
+    });
+
+    afterEach(() => {
+      if (originalValue === undefined) {
+        delete process.env.FIRESTORE_PREFER_REST;
+      } else {
+        process.env.FIRESTORE_PREFER_REST = originalValue;
+      }
+    });
+
+    it('preferRest is disabled (falsy) by default', async () => {
+      delete process.env.FIRESTORE_PREFER_REST;
+      const firestore = new Firestore.Firestore({});
+      // Convention with settings is to leave undefined settings as
+      // undefined. We could test for undefined here, but converting
+      // to boolean and testing for falsy-ness is consistent with the
+      // code that consumes settings.
+      expect(!!firestore['_settings'].preferRest).to.be.false;
+    });
+
+    it('preferRest can be enabled by setting', async () => {
+      delete process.env.FIRESTORE_PREFER_REST;
+      const firestore = new Firestore.Firestore({
+        preferRest: true,
+      });
+      expect(firestore['_settings'].preferRest).to.be.true;
+    });
+
+    it('preferRest can be enabled by environment variable', async () => {
+      process.env.FIRESTORE_PREFER_REST = 'true';
+      const firestore = new Firestore.Firestore({});
+      expect(firestore['_settings'].preferRest).to.be.true;
+    });
+
+    it('the preferRest value from settings takes precedent over the environment var - disable', async () => {
+      process.env.FIRESTORE_PREFER_REST = 'true';
+      const firestore = new Firestore.Firestore({
+        preferRest: false,
+      });
+      expect(firestore['_settings'].preferRest).to.be.false;
+    });
+
+    it('the preferRest value from settings takes precedent over the environment var - enable', async () => {
+      process.env.FIRESTORE_PREFER_REST = 'false';
+      const firestore = new Firestore.Firestore({
+        preferRest: true,
+      });
+      expect(firestore['_settings'].preferRest).to.be.true;
+    });
   });
 
   it('exports all types', () => {
@@ -782,7 +873,7 @@ describe('snapshot_() method', () => {
         '1970-01-01T00:00:05.000000006Z',
         'json'
       );
-    }).to.throw("Unable to infer type value fom '{}'.");
+    }).to.throw("Unable to infer type value from '{}'.");
 
     expect(() => {
       firestore.snapshot_(
@@ -796,7 +887,7 @@ describe('snapshot_() method', () => {
         'json'
       );
     }).to.throw(
-      'Unable to infer type value fom \'{"stringValue":"bar","integerValue":42}\'.'
+      'Unable to infer type value from \'{"stringValue":"bar","integerValue":42}\'.'
     );
 
     expect(() => {

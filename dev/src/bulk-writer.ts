@@ -16,7 +16,7 @@
 import * as firestore from '@google-cloud/firestore';
 
 import * as assert from 'assert';
-import {GoogleError} from 'google-gax';
+import type {GoogleError} from 'google-gax';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath, Firestore} from '.';
@@ -28,7 +28,6 @@ import {
   MAX_RETRY_ATTEMPTS,
 } from './backoff';
 import {RateLimiter} from './rate-limiter';
-import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
 import {
   Deferred,
@@ -285,9 +284,10 @@ class BulkCommitBatch extends WriteBatch {
         );
         this.pendingOps[i].onSuccess(new WriteResult(updateTime));
       } else {
-        const error = new (require('google-gax').GoogleError)(
-          status.message || undefined
-        );
+        const error =
+          new (require('google-gax/build/src/fallback').GoogleError)(
+            status.message || undefined
+          );
         error.code = status.code as number;
         this.pendingOps[i].onError(wrapError(error, stack));
       }
@@ -336,7 +336,8 @@ export class BulkWriterError extends Error {
     readonly message: string,
 
     /** The document reference the operation was performed on. */
-    readonly documentRef: firestore.DocumentReference<unknown>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly documentRef: firestore.DocumentReference<any, any>,
 
     /** The type of operation performed. */
     readonly operationType: 'create' | 'set' | 'update' | 'delete',
@@ -575,9 +576,9 @@ export class BulkWriter {
    * });
    * ```
    */
-  create<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.WithFieldValue<T>
+  create<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: firestore.WithFieldValue<AppModelType>
   ): Promise<WriteResult> {
     this._verifyNotClosed();
     return this._enqueue(documentRef, 'create', bulkCommitBatch =>
@@ -615,8 +616,8 @@ export class BulkWriter {
    * });
    * ```
    */
-  delete<T>(
-    documentRef: firestore.DocumentReference<T>,
+  delete<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this._verifyNotClosed();
@@ -625,14 +626,14 @@ export class BulkWriter {
     );
   }
 
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: Partial<T>,
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: Partial<AppModelType>,
     options: firestore.SetOptions
   ): Promise<WriteResult>;
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: T
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: AppModelType
   ): Promise<WriteResult>;
   /**
    * Write to the document referred to by the provided
@@ -674,9 +675,9 @@ export class BulkWriter {
    * });
    * ```
    */
-  set<T>(
-    documentRef: firestore.DocumentReference<T>,
-    data: firestore.PartialWithFieldValue<T>,
+  set<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    data: firestore.PartialWithFieldValue<AppModelType>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this._verifyNotClosed();
@@ -686,7 +687,7 @@ export class BulkWriter {
       } else {
         return bulkCommitBatch.set(
           documentRef,
-          data as firestore.WithFieldValue<T>
+          data as firestore.WithFieldValue<AppModelType>
         );
       }
     });
@@ -736,9 +737,9 @@ export class BulkWriter {
    * });
    * ```
    */
-  update<T>(
-    documentRef: firestore.DocumentReference<T>,
-    dataOrField: firestore.UpdateData<T> | string | FieldPath,
+  update<AppModelType, DbModelType extends firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    dataOrField: firestore.UpdateData<DbModelType> | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
@@ -782,7 +783,8 @@ export class BulkWriter {
    */
   onWriteResult(
     successCallback: (
-      documentRef: firestore.DocumentReference<unknown>,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      documentRef: firestore.DocumentReference<any, any>,
       result: WriteResult
     ) => void
   ): void {
@@ -941,8 +943,8 @@ export class BulkWriter {
     );
 
     // Use the write with the longest backoff duration when determining backoff.
-    const highestBackoffDuration = pendingBatch.pendingOps.reduce((prev, cur) =>
-      prev.backoffDuration > cur.backoffDuration ? prev : cur
+    const highestBackoffDuration = pendingBatch.pendingOps.reduce(
+      (prev, cur) => (prev.backoffDuration > cur.backoffDuration ? prev : cur)
     ).backoffDuration;
     const backoffMsWithJitter = BulkWriter._applyJitter(highestBackoffDuration);
     const delayedExecution = new Deferred<void>();

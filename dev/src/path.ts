@@ -308,17 +308,14 @@ export class ResourcePath extends Path<ResourcePath> {
    *
    * @private
    * @internal
-   * @param projectIdIfMissing The project ID of the current Firestore project.
-   * The project ID is only used if it's not provided as part of this
-   * ResourcePath.
+   * @param projectId The project ID of the current Firestore project.
    * @return A fully-qualified resource path pointing to the same element.
    */
-  toQualifiedResourcePath(projectIdIfMissing: string): QualifiedResourcePath {
-    return new QualifiedResourcePath(
-      projectIdIfMissing,
-      DEFAULT_DATABASE_ID,
-      ...this.segments
-    );
+  toQualifiedResourcePath(
+    projectId: string,
+    databaseId: string
+  ): QualifiedResourcePath {
+    return new QualifiedResourcePath(projectId, databaseId, ...this.segments);
   }
 }
 

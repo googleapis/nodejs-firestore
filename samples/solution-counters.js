@@ -16,7 +16,6 @@
 const {Firestore, FieldValue} = require('@google-cloud/firestore');
 
 async function main() {
-  // [START increment_counter]
   // [START firestore_solution_sharded_counter_increment]
   function incrementCounter(docRef, numShards) {
     const shardId = Math.floor(Math.random() * numShards);
@@ -24,9 +23,7 @@ async function main() {
     return shardRef.set({count: FieldValue.increment(1)}, {merge: true});
   }
   // [END firestore_solution_sharded_counter_increment]
-  // [END increment_counter]
 
-  // [START get_count]
   // [START firestore_solution_sharded_counter_get]
   async function getCount(docRef) {
     const querySnapshot = await docRef.collection('shards').get();
@@ -39,9 +36,7 @@ async function main() {
     return count;
   }
   // [END firestore_solution_sharded_counter_get]
-  // [END get_count]
 
-  // [START delete_Docs]
   // [START firestore_data_delete_doc]
   async function deleteDocs(docRef) {
     const shardsCollectionRef = docRef.collection('shards');
@@ -53,7 +48,6 @@ async function main() {
     return Promise.all(promises);
   }
   // [END firestore_data_delete_doc]
-  // [END delete_Docs]
 
   // Create a new client
   const firestore = new Firestore();

@@ -17,9 +17,10 @@
 import {DocumentData} from '@google-cloud/firestore';
 
 import {randomBytes} from 'crypto';
-import {CallSettings, ClientConfig, GoogleError} from 'google-gax';
-import {BackoffSettings} from 'google-gax/build/src/gax';
+import type {CallSettings, ClientConfig, GoogleError} from 'google-gax';
+import type {BackoffSettings} from 'google-gax/build/src/gax';
 import * as gapicConfig from './v1/firestore_client_config.json';
+import Dict = NodeJS.Dict;
 
 /**
  * A Promise implementation that supports deferred resolution.
@@ -157,11 +158,11 @@ let serviceConfig: Record<string, CallSettings> | undefined;
 /** Lazy-loads the service config when first accessed. */
 function getServiceConfig(methodName: string): CallSettings | undefined {
   if (!serviceConfig) {
-    serviceConfig = require('google-gax').constructSettings(
+    serviceConfig = require('google-gax/build/src/fallback').constructSettings(
       'google.firestore.v1.Firestore',
       gapicConfig as ClientConfig,
       {},
-      require('google-gax').Status
+      require('google-gax/build/src/status').Status
     ) as {[k: string]: CallSettings};
   }
   return serviceConfig[methodName];
@@ -185,7 +186,7 @@ export function getRetryCodes(methodName: string): number[] {
 export function getRetryParams(methodName: string): BackoffSettings {
   return (
     getServiceConfig(methodName)?.retry?.backoffSettings ??
-    require('google-gax').createDefaultBackoffSettings()
+    require('google-gax/build/src/fallback').createDefaultBackoffSettings()
   );
 }
 
@@ -216,4 +217,53 @@ export function silencePromise(promise: Promise<unknown>): Promise<void> {
 export function wrapError(err: Error, stack: string): Error {
   err.stack += '\nCaused by: ' + stack;
   return err;
+}
+
+/**
+ * Parses the value of the environment variable FIRESTORE_PREFER_REST, and
+ * returns a value indicating if the environment variable enables or disables
+ * preferRest.
+ *
+ * This function will warn to the console if the environment variable is set
+ * to an unsupported value.
+ *
+ * @return `true` if the environment variable enables `preferRest`,
+ * `false` if the environment variable disables `preferRest`, or `undefined`
+ * if the environment variable is not set or is set to an unsupported value.
+ */
+export function tryGetPreferRestEnvironmentVariable(): boolean | undefined {
+  const rawValue = process.env.FIRESTORE_PREFER_REST?.trim().toLowerCase();
+  if (rawValue === undefined) {
+    return undefined;
+  } else if (rawValue === '1' || rawValue === 'true') {
+    return true;
+  } else if (rawValue === '0' || rawValue === 'false') {
+    return false;
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `An unsupported value was specified for the environment variable FIRESTORE_PREFER_REST. Value ${rawValue} is unsupported.`
+    );
+    return undefined;
+  }
+}
+
+/**
+ * Returns an array of values that are calculated by performing the given `fn`
+ * on all keys in the given `obj` dictionary.
+ *
+ * @private
+ * @internal
+ */
+export function mapToArray<V, R>(
+  obj: Dict<V>,
+  fn: (element: V, key: string, obj: Dict<V>) => R
+): R[] {
+  const result: R[] = [];
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      result.push(fn(obj[key]!, key, obj));
+    }
+  }
+  return result;
 }

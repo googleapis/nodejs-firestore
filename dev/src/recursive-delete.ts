@@ -26,7 +26,7 @@ import Firestore, {
   QueryDocumentSnapshot,
 } from '.';
 import {Deferred, wrapError} from './util';
-import {GoogleError} from 'google-gax';
+import type {GoogleError} from 'google-gax';
 import {BulkWriterError} from './bulk-writer';
 import {QueryOptions} from './reference';
 import {StatusCode} from './status-code';
@@ -291,7 +291,7 @@ export class RecursiveDelete {
       if (this.lastError === undefined) {
         this.completionDeferred.resolve();
       } else {
-        let error = new (require('google-gax').GoogleError)(
+        let error = new (require('google-gax/build/src/fallback').GoogleError)(
           `${this.errorCount} ` +
             `${this.errorCount !== 1 ? 'deletes' : 'delete'} ` +
             'failed. The last delete failed with: '

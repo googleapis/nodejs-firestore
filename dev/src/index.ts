@@ -16,7 +16,9 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions} from 'google-gax';
+import type {CallOptions, ClientOptions} from 'google-gax';
+import type * as googleGax from 'google-gax';
+import type * as googleGaxFallback from 'google-gax/build/src/fallback';
 import {Duplex, PassThrough, Transform} from 'stream';
 
 import {URL} from 'url';
@@ -58,6 +60,7 @@ import {
   isPermanentRpcError,
   requestTag,
   wrapError,
+  tryGetPreferRestEnvironmentVariable,
 } from './util';
 import {
   validateBoolean,
@@ -91,6 +94,7 @@ export {
 export {BulkWriter} from './bulk-writer';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
+export {Filter} from './filter';
 export {WriteBatch, WriteResult} from './write-batch';
 export {Transaction} from './transaction';
 export {Timestamp} from './timestamp';
@@ -100,6 +104,7 @@ export {GeoPoint} from './geo-point';
 export {CollectionGroup};
 export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
+export {AggregateField, Aggregate} from './aggregate';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
@@ -167,7 +172,8 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
 
 /**
  * Converter used by [withConverter()]{@link Query#withConverter} to transform
- * user objects of type T into Firestore data.
+ * user objects of type `AppModelType` into Firestore data of type
+ * `DbModelType`.
  *
  * Using the converter allows you to specify generic type arguments when storing
  * and retrieving objects from Firestore.
@@ -207,10 +213,10 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *
  * ```
  * @property {Function} toFirestore Called by the Firestore SDK to convert a
- * custom model object of type T into a plain Javascript object (suitable for
- * writing directly to the Firestore database).
+ * custom model object of type `AppModelType` into a plain Javascript object
+ * (suitable for writing directly to the Firestore database).
  * @property {Function} fromFirestore Called by the Firestore SDK to convert
- * Firestore data into an object of type T.
+ * Firestore data into an object of type `AppModelType`.
  * @typedef {Object} FirestoreDataConverter
  */
 
@@ -394,6 +400,16 @@ export class Firestore implements firestore.Firestore {
   private _clientPool: ClientPool<GapicClient>;
 
   /**
+   * Preloaded instance of google-gax (full module, with gRPC support).
+   */
+  private _gax?: typeof googleGax;
+
+  /**
+   * Preloaded instance of google-gax HTTP fallback implementation (no gRPC).
+   */
+  private _gaxFallback?: typeof googleGaxFallback;
+
+  /**
    * The configuration options for the GAPIC client.
    * @private
    * @internal
@@ -431,6 +447,14 @@ export class Firestore implements firestore.Firestore {
    * @internal
    */
   private _projectId: string | undefined = undefined;
+
+  /**
+   * The database ID provided via `.settings()`.
+   *
+   * @private
+   * @internal
+   */
+  private _databaseId: string | undefined = undefined;
 
   /**
    * Count of listeners that have been registered on the client.
@@ -507,6 +531,18 @@ export class Firestore implements firestore.Firestore {
    * to `true`, these properties are skipped and not written to Firestore. If
    * set `false` or omitted, the SDK throws an exception when it encounters
    * properties of type `undefined`.
+   * @param {boolean=} settings.preferRest Whether to force the use of HTTP/1.1 REST
+   * transport until a method that requires gRPC is called. When a method requires gRPC,
+   * this Firestore client will load dependent gRPC libraries and then use gRPC transport
+   * for communication from that point forward. Currently the only operation
+   * that requires gRPC is creating a snapshot listener with the method
+   * `DocumentReference<T>.onSnapshot()`, `CollectionReference<T>.onSnapshot()`, or
+   * `Query<T>.onSnapshot()`. If specified, this setting value will take precedent over the
+   * environment variable `FIRESTORE_PREFER_REST`. If not specified, the
+   * SDK will use the value specified in the environment variable `FIRESTORE_PREFER_REST`.
+   * Valid values of `FIRESTORE_PREFER_REST` are `true` ('1') or `false` (`0`). Values are
+   * not case-sensitive. Any other value for the environment variable will be ignored and
+   * a warning will be logged to the console.
    */
   constructor(settings?: firestore.Settings) {
     const libraryHeader = {
@@ -534,22 +570,61 @@ export class Firestore implements firestore.Firestore {
     this._clientPool = new ClientPool<GapicClient>(
       MAX_CONCURRENT_REQUESTS_PER_CLIENT,
       maxIdleChannels,
-      /* clientFactory= */ () => {
+      /* clientFactory= */ (requiresGrpc: boolean) => {
         let client: GapicClient;
+
+        // Use the rest fallback if enabled and if the method does not require GRPC
+        const useFallback =
+          !this._settings.preferRest || requiresGrpc ? false : 'rest';
+
+        let gax: typeof googleGax | typeof googleGaxFallback;
+        if (useFallback) {
+          if (!this._gaxFallback) {
+            gax = this._gaxFallback = require('google-gax/build/src/fallback');
+          } else {
+            gax = this._gaxFallback;
+          }
+        } else {
+          if (!this._gax) {
+            gax = this._gax = require('google-gax');
+          } else {
+            gax = this._gax;
+          }
+        }
 
         if (this._settings.ssl === false) {
           const grpcModule = this._settings.grpc ?? require('google-gax').grpc;
           const sslCreds = grpcModule.credentials.createInsecure();
 
-          client = new module.exports.v1({
+          const settings: ClientOptions = {
             sslCreds,
             ...this._settings,
-          });
+            fallback: useFallback,
+          };
+
+          // Since `ssl === false`, if we're using the GAX fallback then
+          // also set the `protocol` option for GAX fallback to force http
+          if (useFallback) {
+            settings.protocol = 'http';
+          }
+
+          client = new module.exports.v1(settings, gax);
         } else {
-          client = new module.exports.v1(this._settings);
+          client = new module.exports.v1(
+            {
+              ...this._settings,
+              fallback: useFallback,
+            },
+            gax
+          );
         }
 
-        logger('Firestore', null, 'Initialized Firestore GAPIC Client');
+        logger(
+          'clientFactory',
+          null,
+          'Initialized Firestore GAPIC Client (useFallback: %s)',
+          useFallback
+        );
         return client;
       },
       /* clientDestructor= */ client => client.close()
@@ -571,6 +646,9 @@ export class Firestore implements firestore.Firestore {
   settings(settings: firestore.Settings): void {
     validateObject('settings', settings);
     validateString('settings.projectId', settings.projectId, {optional: true});
+    validateString('settings.databaseId', settings.databaseId, {
+      optional: true,
+    });
 
     if (this._settingsFrozen) {
       throw new Error(
@@ -591,7 +669,22 @@ export class Firestore implements firestore.Firestore {
       this._projectId = settings.projectId;
     }
 
+    if (settings.databaseId !== undefined) {
+      validateString('settings.databaseId', settings.databaseId);
+      this._databaseId = settings.databaseId;
+    }
+
     let url: URL | null = null;
+
+    // If preferRest is not specified in settings, but is set as environment variable,
+    // then use the environment variable value.
+    const preferRestEnvValue = tryGetPreferRestEnvironmentVariable();
+    if (settings.preferRest === undefined && preferRestEnvValue !== undefined) {
+      settings = {
+        ...settings,
+        preferRest: preferRestEnvValue,
+      };
+    }
 
     // If the environment variable is set, it should always take precedence
     // over any user passed in settings.
@@ -652,6 +745,13 @@ export class Firestore implements firestore.Firestore {
     }
 
     this._settings = settings;
+    this._settings.toJson = function () {
+      const temp = Object.assign({}, this);
+      if (temp.credentials) {
+        temp.credentials = {private_key: '***', client_email: '***'};
+      }
+      return temp;
+    };
     this._serializer = new Serializer(this);
   }
 
@@ -672,6 +772,16 @@ export class Firestore implements firestore.Firestore {
   }
 
   /**
+   * Returns the Database ID for this Firestore instance.
+   *
+   * @private
+   * @internal
+   */
+  get databaseId(): string {
+    return this._databaseId || DEFAULT_DATABASE_ID;
+  }
+
+  /**
    * Returns the root path of the database. Validates that
    * `initializeIfNeeded()` was called before.
    *
@@ -679,7 +789,7 @@ export class Firestore implements firestore.Firestore {
    * @internal
    */
   get formattedName(): string {
-    return `projects/${this.projectId}/databases/${DEFAULT_DATABASE_ID}`;
+    return `projects/${this.projectId}/databases/${this.databaseId}`;
   }
 
   /**
@@ -848,7 +958,6 @@ export class Firestore implements firestore.Firestore {
    * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
-   * @internal
    * @param documentOrName The Firestore 'Document' proto or the resource name
    * of a missing document.
    * @param readTime A 'Timestamp' proto indicating the time this document was
@@ -1162,11 +1271,12 @@ export class Firestore implements firestore.Firestore {
    * });
    * ```
    */
-  getAll<T>(
+  getAll<AppModelType, DbModelType extends firestore.DocumentData>(
     ...documentRefsOrReadOptions: Array<
-      firestore.DocumentReference<T> | firestore.ReadOptions
+      | firestore.DocumentReference<AppModelType, DbModelType>
+      | firestore.ReadOptions
     >
-  ): Promise<Array<DocumentSnapshot<T>>> {
+  ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
     validateMinNumberOfArguments(
       'Firestore.getAll',
       documentRefsOrReadOptions,
@@ -1276,9 +1386,10 @@ export class Firestore implements firestore.Firestore {
    * ```
    */
   recursiveDelete(
-    ref:
-      | firestore.CollectionReference<unknown>
-      | firestore.DocumentReference<unknown>,
+    ref: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | firestore.CollectionReference<any, any>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      | firestore.DocumentReference<any, any>,
     bulkWriter?: BulkWriter
   ): Promise<void> {
     return this._recursiveDelete(
@@ -1372,8 +1483,10 @@ export class Firestore implements firestore.Firestore {
 
     if (this._projectId === undefined) {
       try {
-        this._projectId = await this._clientPool.run(requestTag, gapicClient =>
-          gapicClient.getProjectId()
+        this._projectId = await this._clientPool.run(
+          requestTag,
+          /* requiresGrpc= */ false,
+          gapicClient => gapicClient.getProjectId()
         );
         logger(
           'Firestore.initializeIfNeeded',
@@ -1414,10 +1527,11 @@ export class Firestore implements firestore.Firestore {
 
     if (retryCodes) {
       const retryParams = getRetryParams(methodName);
-      callOptions.retry = new (require('google-gax').RetryOptions)(
-        retryCodes,
-        retryParams
-      );
+      callOptions.retry =
+        new (require('google-gax/build/src/fallback').RetryOptions)(
+          retryCodes,
+          retryParams
+        );
     }
 
     return callOptions;
@@ -1620,24 +1734,33 @@ export class Firestore implements firestore.Firestore {
   ): Promise<Resp> {
     const callOptions = this.createCallOptions(methodName, retryCodes);
 
-    return this._clientPool.run(requestTag, async gapicClient => {
-      try {
-        logger('Firestore.request', requestTag, 'Sending request: %j', request);
-        const [result] = await (
-          gapicClient[methodName] as UnaryMethod<Req, Resp>
-        )(request, callOptions);
-        logger(
-          'Firestore.request',
-          requestTag,
-          'Received response: %j',
-          result
-        );
-        return result;
-      } catch (err) {
-        logger('Firestore.request', requestTag, 'Received error:', err);
-        return Promise.reject(err);
+    return this._clientPool.run(
+      requestTag,
+      /* requiresGrpc= */ false,
+      async gapicClient => {
+        try {
+          logger(
+            'Firestore.request',
+            requestTag,
+            'Sending request: %j',
+            request
+          );
+          const [result] = await (
+            gapicClient[methodName] as UnaryMethod<Req, Resp>
+          )(request, callOptions);
+          logger(
+            'Firestore.request',
+            requestTag,
+            'Received response: %j',
+            result
+          );
+          return result;
+        } catch (err) {
+          logger('Firestore.request', requestTag, 'Received error:', err);
+          return Promise.reject(err);
+        }
       }
-    });
+    );
   }
 
   /**
@@ -1651,12 +1774,15 @@ export class Firestore implements firestore.Firestore {
    * @internal
    * @param methodName Name of the streaming Veneer API endpoint that
    * takes a request and GAX options.
+   * @param bidrectional Whether the request is bidirectional (true) or
+   * unidirectional (false_
    * @param request The Protobuf request to send.
    * @param requestTag A unique client-assigned identifier for this request.
    * @returns A Promise with the resulting read-only stream.
    */
   requestStream(
     methodName: FirestoreStreamingMethod,
+    bidrectional: boolean,
     request: {},
     requestTag: string
   ): Promise<Duplex> {
@@ -1667,7 +1793,7 @@ export class Firestore implements firestore.Firestore {
     return this._retry(methodName, requestTag, () => {
       const result = new Deferred<Duplex>();
 
-      this._clientPool.run(requestTag, async gapicClient => {
+      this._clientPool.run(requestTag, bidrectional, async gapicClient => {
         logger(
           'Firestore.requestStream',
           requestTag,
