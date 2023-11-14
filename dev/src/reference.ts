@@ -2650,18 +2650,30 @@ export class Query<
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
             if (!transactionId && !this._isPermanentRpcError(err, 'runQuery')) {
-              logger(
-                'Query._stream',
-                tag,
-                'Query failed with retryable stream error:',
-                err
-              );
-              // Enqueue a "no-op" write into the stream and resume the query
-              // once it is processed. This allows any enqueued results to be
-              // consumed before resuming the query so that the query resumption
-              // can start at the correct document.
-              stream.write(NOOP_MESSAGE, () => {
-                if (lastReceivedDocument) {
+              // Only streams that have received documents should be
+              // restarted to avoid rerunning long-running or high-cost
+              // queries that are not progressing to completion.
+              if (lastReceivedDocument) {
+                logger(
+                  'Query._stream',
+                  tag,
+                  'Query failed with retryable stream error:',
+                  err
+                );
+                // Enqueue a "no-op" write into the stream and resume the query
+                // once it is processed. This allows any enqueued results to be
+                // consumed before resuming the query so that the query resumption
+                // can start at the correct document.
+                stream.write(NOOP_MESSAGE, () => {
+                  // `backendStream` was unpiped at the beginning of the handler
+                  // for `backendStream.on('error', ...)`, so we don't expect
+                  // `lastReceivedDocument` to be updated during the noop write,
+                  // but a check here is included for this unexpected state.
+                  assert(
+                    lastReceivedDocument !== null,
+                    'lastReceivedDocument is unset'
+                  );
+
                   // Restart the query but use the last document we received as
                   // the query cursor. Note that we do not use backoff here. The
                   // call to `requestStream()` will backoff should the restart
@@ -2673,9 +2685,20 @@ export class Query<
                   } else {
                     request = this.startAfter(lastReceivedDocument).toProto();
                   }
-                }
-                streamActive.resolve(/* active= */ true);
-              });
+
+                  streamActive.resolve(/* active= */ true);
+                });
+              } else {
+                logger(
+                  'Query._stream',
+                  tag,
+                  'Query failed with retryable stream error however no progress was made receiving ' +
+                    'documents, so the stream is being closed. Stream error:',
+                  err
+                );
+                stream.destroy(err);
+                streamActive.resolve(/* active= */ false);
+              }
             } else {
               logger(
                 'Query._stream',

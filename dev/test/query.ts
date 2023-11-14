@@ -50,7 +50,7 @@ import {
   writeResult,
 } from './util/helpers';
 
-import {GoogleError} from 'google-gax';
+import {GoogleError, Status} from 'google-gax';
 import api = google.firestore.v1;
 import protobuf = google.protobuf;
 import {Filter} from '../src/filter';
@@ -449,6 +449,14 @@ export function result(
   }
 }
 
+export function heartbeat(count: number): api.IRunQueryResponse {
+  return {
+    document: null,
+    readTime: {seconds: 5, nanos: 6},
+    skippedResults: count,
+  };
+}
+
 describe('query interface', () => {
   let firestore: Firestore;
 
@@ -714,9 +722,11 @@ describe('query interface', () => {
   });
 
   it('handles stream exception at initialization', () => {
+    let attempts = 0;
     const query = firestore.collection('collectionId');
 
     query._stream = () => {
+      ++attempts;
       throw new Error('Expected error');
     };
 
@@ -727,12 +737,16 @@ describe('query interface', () => {
       })
       .catch(err => {
         expect(err.message).to.equal('Expected error');
+        expect(attempts).to.equal(1);
       });
   });
 
   it('handles stream exception during initialization', () => {
+    let attempts = 0;
+
     const overrides: ApiOverride = {
       runQuery: () => {
+        ++attempts;
         return stream(new Error('Expected error'));
       },
     };
@@ -747,6 +761,7 @@ describe('query interface', () => {
         })
         .catch(err => {
           expect(err.message).to.equal('Expected error');
+          expect(attempts).to.equal(5);
         });
     });
   });
@@ -769,6 +784,135 @@ describe('query interface', () => {
           expect(snap.size).to.equal(2);
           expect(snap.docs[0].id).to.equal('first');
           expect(snap.docs[1].id).to.equal('second');
+        });
+    });
+  });
+
+  it('handles stream exception after initialization and heartbeat', () => {
+    const deadlineExceededErr = new GoogleError();
+    deadlineExceededErr.code = Status.DEADLINE_EXCEEDED;
+    deadlineExceededErr.message = 'DEADLINE_EXCEEDED error message';
+
+    let attempts = 0;
+
+    const overrides: ApiOverride = {
+      runQuery: () => {
+        ++attempts;
+
+        // A heartbeat message will initialize the stream, but it is not
+        // a document, so it does not represent progress made on the stream.
+        return stream(heartbeat(1000), deadlineExceededErr);
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      return firestore
+        .collection('collectionId')
+        .get()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal('DEADLINE_EXCEEDED error message');
+
+          // The heartbeat initialized the stream before there was a stream
+          // exception, so we only expect a single attempt at streaming.
+          expect(attempts).to.equal(1);
+        });
+    });
+  });
+
+  it('handles retryable exception until progress stops (with get())', () => {
+    let attempts = 0;
+
+    // count of stream initializations that are successful
+    // and make progress (a document is received before error)
+    const initializationsWithProgress = 20;
+
+    // Receiving these error codes on a stream after the stream has received document data
+    // should result in the stream retrying indefinitely.
+    const retryableErrorCodes = [
+      Status.DEADLINE_EXCEEDED,
+      Status.UNAVAILABLE,
+      Status.INTERNAL,
+      Status.UNAVAILABLE,
+    ];
+
+    const overrides: ApiOverride = {
+      runQuery: () => {
+        ++attempts;
+
+        const streamElements = [];
+
+        // For the first X initializations, the stream will see progress.
+        // For the X+1 attempt, the stream will not see progress before
+        // the error, so we expect the stream to close.
+        if (attempts <= initializationsWithProgress) {
+          streamElements.push(result(`id-${attempts}`));
+        }
+
+        // Create an error with one of the retryable error codes
+        const googleError = new GoogleError();
+        googleError.code =
+          retryableErrorCodes[attempts % retryableErrorCodes.length];
+        googleError.message = 'test error message';
+        streamElements.push(googleError);
+
+        return stream(...streamElements);
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      return firestore
+        .collection('collectionId')
+        .get()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal('test error message');
+
+          // 20 stream initialization with data that progresses the steam
+          // followed by an error. The final X+1 initialization does not get data
+          // before the error, so we expect 5 retries at the veneer layer.
+          expect(attempts).to.equal(20 + 5);
+        });
+    });
+  });
+
+  it('handles non-retryable after recieving data (with get())', () => {
+    let attempts = 0;
+
+    const overrides: ApiOverride = {
+      runQuery: () => {
+        ++attempts;
+
+        const streamElements = [];
+        streamElements.push(result(`id-${attempts}`));
+
+        // Create an error with one of the retryable error codes
+        const googleError = new GoogleError();
+        googleError.code = Status.UNKNOWN;
+        googleError.message = 'test error message';
+        streamElements.push(googleError);
+
+        return stream(...streamElements);
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      return firestore
+        .collection('collectionId')
+        .get()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal('test error message');
+          expect(attempts).to.equal(1);
         });
     });
   });
