@@ -823,12 +823,12 @@ describe('query interface', () => {
     });
   });
 
-  it('handles retryable exception until progress stops (with get())', () => {
+  function handlesRetryableExceptionUntilProgressStops(withHeartbeat: boolean) {
     let attempts = 0;
 
     // count of stream initializations that are successful
     // and make progress (a document is received before error)
-    const initializationsWithProgress = 20;
+    const initializationsWithProgress = 10;
 
     // Receiving these error codes on a stream after the stream has received document data
     // should result in the stream retrying indefinitely.
@@ -840,10 +840,27 @@ describe('query interface', () => {
     ];
 
     const overrides: ApiOverride = {
-      runQuery: () => {
+      runQuery: x => {
         ++attempts;
 
+        // Validate that runQuery is called with cursor of the lastReceivedDocument
+        // for all attempts except but the first.
+        if (attempts > 1) {
+          const docPath =
+            x?.structuredQuery?.startAt?.values?.[0].referenceValue || '';
+          const docId = docPath.substring(docPath.lastIndexOf('/'));
+          expect(docId).to.equal(
+            `/id-${Math.min(initializationsWithProgress, attempts - 1)}`
+          );
+          expect(x?.structuredQuery?.orderBy?.length).to.equal(1);
+          expect(x?.structuredQuery?.orderBy?.[0].field?.fieldPath).to.equal(
+            '__name__'
+          );
+        }
+
         const streamElements = [];
+
+        streamElements.push(heartbeat(1000));
 
         // For the first X initializations, the stream will see progress.
         // For the X+1 attempt, the stream will not see progress before
@@ -876,10 +893,21 @@ describe('query interface', () => {
 
           // 20 stream initialization with data that progresses the steam
           // followed by an error. The final X+1 initialization does not get data
-          // before the error, so we expect 5 retries at the veneer layer.
-          expect(attempts).to.equal(20 + 5);
+          // before the error, so we may also get retries during stream initialization.
+          const initilizationRetries = withHeartbeat ? 1 : 5;
+          expect(attempts).to.equal(
+            initializationsWithProgress + initilizationRetries
+          );
         });
     });
+  }
+
+  it('handles retryable exception until progress stops with heartbeat', () => {
+    handlesRetryableExceptionUntilProgressStops(true);
+  });
+
+  it('handles retryable exception until progress stops without heartbeat', () => {
+    handlesRetryableExceptionUntilProgressStops(false);
   });
 
   it('handles non-retryable after recieving data (with get())', () => {

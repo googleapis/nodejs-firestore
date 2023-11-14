@@ -2637,6 +2637,9 @@ export class Query<
 
         let streamActive: Deferred<boolean>;
         do {
+          // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
+          lastReceivedDocument = null;
+
           streamActive = new Deferred<boolean>();
           backendStream = await this._firestore.requestStream(
             'runQuery',
