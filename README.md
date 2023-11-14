@@ -79,10 +79,6 @@ async function quickstart() {
     body: 'Hello World',
   });
   console.log('Entered new data into the document');
-  
-  // Read the document the 1st time.
-  doc = await document.get();
-  console.log('Read the document 1st time', doc);
 
   // Update an existing document.
   await document.update({
@@ -90,9 +86,9 @@ async function quickstart() {
   });
   console.log('Updated an existing document');
 
-  // Read the document the 2nd time to show the diff.
-  doc = await document.get();  
-  console.log('Read the document 2nd time', doc);
+  // Read the document.
+  const doc = await document.get();
+  console.log('Read the document');
 
   // Delete the document.
   await document.delete();
