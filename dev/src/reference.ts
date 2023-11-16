@@ -44,6 +44,7 @@ import {defaultConverter} from './types';
 import {
   autoId,
   Deferred,
+  getTotalTimeout,
   isPermanentRpcError,
   mapToArray,
   requestTag,
@@ -2569,6 +2570,10 @@ export class Query<
     return isPermanentRpcError(err, methodName);
   }
 
+  _hasRetryTimedOut(methodName: string, startTime: number): boolean {
+    return Date.now() - startTime >= getTotalTimeout(methodName);
+  }
+
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
@@ -2579,6 +2584,7 @@ export class Query<
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
     const tag = requestTag();
+    const startTime = Date.now();
 
     let lastReceivedDocument: QueryDocumentSnapshot<
       AppModelType,
@@ -2637,12 +2643,10 @@ export class Query<
 
         let streamActive: Deferred<boolean>;
         do {
-          // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
-          lastReceivedDocument = null;
-
           streamActive = new Deferred<boolean>();
+          const methodName = 'runQuery';
           backendStream = await this._firestore.requestStream(
-            'runQuery',
+            methodName,
             /* bidirectional= */ false,
             request,
             tag
@@ -2653,28 +2657,32 @@ export class Query<
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
             if (!transactionId && !this._isPermanentRpcError(err, 'runQuery')) {
-              // Only streams that have received documents should be
-              // restarted to avoid rerunning long-running or high-cost
-              // queries that are not progressing to completion.
-              if (lastReceivedDocument) {
-                logger(
-                  'Query._stream',
-                  tag,
-                  'Query failed with retryable stream error:',
-                  err
-                );
-                // Enqueue a "no-op" write into the stream and resume the query
-                // once it is processed. This allows any enqueued results to be
-                // consumed before resuming the query so that the query resumption
-                // can start at the correct document.
-                stream.write(NOOP_MESSAGE, () => {
-                  // `backendStream` was unpiped at the beginning of the handler
-                  // for `backendStream.on('error', ...)`, so we don't expect
-                  // `lastReceivedDocument` to be updated during the noop write,
-                  // but a check here is included for this unexpected state.
-                  assert(
-                    lastReceivedDocument !== null,
-                    'lastReceivedDocument is unset'
+              logger(
+                'Query._stream',
+                tag,
+                'Query failed with retryable stream error:',
+                err
+              );
+
+              // Enqueue a "no-op" write into the stream and wait for it to be
+              // read by the downstream consumer. This ensures that all enqueued
+              // results in the stream are consumed, which will give us an accurate
+              // value for `lastReceivedDocument`.
+              stream.write(NOOP_MESSAGE, () => {
+                if (this._hasRetryTimedOut(methodName, startTime)) {
+                  logger(
+                    'Query._stream',
+                    tag,
+                    'Query failed with retryable stream error but the total retry timeout has exceeded.'
+                  );
+                  stream.destroy(err);
+                  streamActive.resolve(/* active= */ false);
+                } else if (lastReceivedDocument) {
+                  logger(
+                    'Query._stream',
+                    tag,
+                    'Query failed with retryable stream error and progress was made receiving ' +
+                      'documents, so the stream is being retried.'
                   );
 
                   // Restart the query but use the last document we received as
@@ -2689,19 +2697,21 @@ export class Query<
                     request = this.startAfter(lastReceivedDocument).toProto();
                   }
 
+                  // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
+                  lastReceivedDocument = null;
+
                   streamActive.resolve(/* active= */ true);
-                });
-              } else {
-                logger(
-                  'Query._stream',
-                  tag,
-                  'Query failed with retryable stream error however no progress was made receiving ' +
-                    'documents, so the stream is being closed. Stream error:',
-                  err
-                );
-                stream.destroy(err);
-                streamActive.resolve(/* active= */ false);
-              }
+                } else {
+                  logger(
+                    'Query._stream',
+                    tag,
+                    'Query failed with retryable stream error however no progress was made receiving ' +
+                      'documents, so the stream is being closed.'
+                  );
+                  stream.destroy(err);
+                  streamActive.resolve(/* active= */ false);
+                }
+              });
             } else {
               logger(
                 'Query._stream',
@@ -3346,48 +3356,33 @@ export class AggregateQuery<
         // catch below.
         const request = this.toProto(transactionId);
 
-        let streamActive: Deferred<boolean>;
-        do {
-          streamActive = new Deferred<boolean>();
-          const backendStream = await firestore.requestStream(
-            'runAggregationQuery',
-            /* bidirectional= */ false,
-            request,
-            tag
-          );
-          stream.on('close', () => {
-            backendStream.resume();
-            backendStream.end();
-          });
-          backendStream.on('error', err => {
-            backendStream.unpipe(stream);
-            // If a non-transactional query failed, attempt to restart.
-            // Transactional queries are retried via the transaction runner.
-            if (
-              !transactionId &&
-              !isPermanentRpcError(err, 'runAggregationQuery')
-            ) {
-              logger(
-                'AggregateQuery._stream',
-                tag,
-                'AggregateQuery failed with retryable stream error:',
-                err
-              );
-              streamActive.resolve(/* active= */ true);
-            } else {
-              logger(
-                'AggregateQuery._stream',
-                tag,
-                'AggregateQuery failed with stream error:',
-                err
-              );
-              stream.destroy(err);
-              streamActive.resolve(/* active= */ false);
-            }
-          });
+        const backendStream = await firestore.requestStream(
+          'runAggregationQuery',
+          /* bidirectional= */ false,
+          request,
+          tag
+        );
+        stream.on('close', () => {
           backendStream.resume();
-          backendStream.pipe(stream);
-        } while (await streamActive.promise);
+          backendStream.end();
+        });
+        backendStream.on('error', err => {
+          // TODO(group-by) When group-by queries are supported for aggregates
+          // consider implementing retries if the stream is making progress
+          // receiving results for groups. See the use of lastReceivedDocument
+          // in the retry strategy for runQuery.
+
+          backendStream.unpipe(stream);
+          logger(
+            'AggregateQuery._stream',
+            tag,
+            'AggregateQuery failed with stream error:',
+            err
+          );
+          stream.destroy(err);
+        });
+        backendStream.resume();
+        backendStream.pipe(stream);
       })
       .catch(e => stream.destroy(e));
 
