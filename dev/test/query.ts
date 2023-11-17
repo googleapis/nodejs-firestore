@@ -823,7 +823,9 @@ describe('query interface', () => {
     });
   });
 
-  function handlesRetryableExceptionUntilProgressStops(withHeartbeat: boolean) {
+  function handlesRetryableExceptionUntilProgressStops(
+    withHeartbeat: boolean
+  ): Promise<void> {
     let attempts = 0;
 
     // count of stream initializations that are successful
@@ -860,13 +862,22 @@ describe('query interface', () => {
 
         const streamElements = [];
 
+        // A heartbeat is a message that may be received on a stream while
+        // a query is running. If the test is configured `withHeartbeat = true`
+        // then the fake stream will include a heartbeat before the first
+        // document. This heartbeat message has the side effect of initializing
+        // the stream, but it does not represent progress of streaming the results.
+        // Testing with and without heartbeats allows us to evaluate different
+        // retry logic in the SDK.
         if (withHeartbeat) {
           streamElements.push(heartbeat(1000));
         }
 
-        // For the first X initializations, the stream will see progress.
-        // For the X+1 attempt, the stream will not see progress before
-        // the error, so we expect the stream to close.
+        // For the first X initializations, the stream will make progress
+        // receiving documents in the result set.
+        // For the X+1 attempt, the stream will not make progress before
+        // the error. If a stream gets an error without progress, the
+        // retry policy will close the stream.
         if (attempts <= initializationsWithProgress) {
           streamElements.push(result(`id-${attempts}`));
         }
@@ -894,9 +905,17 @@ describe('query interface', () => {
         .catch(err => {
           expect(err.message).to.equal('test error message');
 
-          // 20 stream initialization with data that progresses the steam
-          // followed by an error. The final X+1 initialization does not get data
-          // before the error, so we may also get retries during stream initialization.
+          // Assert that runQuery was retried the expected number
+          // of times based on the test configuration.
+          //
+          // If the test is running with heartbeat messages, then
+          // the test will always validate retry logic for an
+          // initialized stream.
+          //
+          // If the test is running without heartbeat messages,
+          // then the test will validate retry logic for both
+          // initialized and uninitialized streams. Specifically,
+          // the last retry will fail with an uninitialized stream.
           const initilizationRetries = withHeartbeat ? 1 : 5;
           expect(attempts).to.equal(
             initializationsWithProgress + initilizationRetries

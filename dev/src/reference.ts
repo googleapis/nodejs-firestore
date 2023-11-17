@@ -2571,7 +2571,12 @@ export class Query<
   }
 
   _hasRetryTimedOut(methodName: string, startTime: number): boolean {
-    return Date.now() - startTime >= getTotalTimeout(methodName);
+    const totalTimeout = getTotalTimeout(methodName);
+    if (totalTimeout === 0) {
+      return false;
+    }
+
+    return Date.now() - startTime >= totalTimeout;
   }
 
   /**
