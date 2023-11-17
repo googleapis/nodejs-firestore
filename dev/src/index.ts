@@ -1637,7 +1637,7 @@ export class Firestore implements firestore.Firestore {
       function streamReady(): void {
         if (!streamInitialized) {
           streamInitialized = true;
-          logger('Firestore._initializeStream', requestTag, 'Releasing stream');
+          logger('Firestore._initializeStream', requestTag, 'Stream ready');
           resolve(resultStream);
         }
       }

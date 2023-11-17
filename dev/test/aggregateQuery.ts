@@ -126,19 +126,31 @@ describe('aggregate query interface', () => {
     });
   });
 
-  it('handles stream exception at initialization', () => {
+  it('handles stream exception at initialization', async () => {
+    let attempts = 0;
     const query = firestore.collection('collectionId').count();
 
     query._stream = () => {
+      ++attempts;
       throw new Error('Expected error');
     };
 
-    return expect(query.get()).to.eventually.rejectedWith('Expected error');
+    await query
+      .get()
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        expect(err.message).to.equal('Expected error');
+        expect(attempts).to.equal(1);
+      });
   });
 
   it('handles stream exception during initialization', async () => {
+    let attempts = 0;
     const overrides: ApiOverride = {
       runAggregationQuery: () => {
+        ++attempts;
         return stream(new Error('Expected error'));
       },
     };
@@ -152,6 +164,31 @@ describe('aggregate query interface', () => {
       })
       .catch(err => {
         expect(err.message).to.equal('Expected error');
+        expect(attempts).to.equal(5);
+      });
+  });
+
+  it('handles message without result during initialization', async () => {
+    let attempts = 0;
+    const overrides: ApiOverride = {
+      runAggregationQuery: () => {
+        ++attempts;
+        return stream({readTime: {seconds: 5, nanos: 6}});
+      },
+    };
+    firestore = await createInstance(overrides);
+
+    const query = firestore.collection('collectionId').count();
+    await query
+      .get()
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        expect(err.message).to.equal(
+          'RunAggregationQueryResponse is missing result'
+        );
+        expect(attempts).to.equal(1);
       });
   });
 });

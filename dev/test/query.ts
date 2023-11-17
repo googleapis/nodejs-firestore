@@ -50,7 +50,7 @@ import {
   writeResult,
 } from './util/helpers';
 
-import {GoogleError} from 'google-gax';
+import {GoogleError, Status} from 'google-gax';
 import api = google.firestore.v1;
 import protobuf = google.protobuf;
 import {Filter} from '../src/filter';
@@ -449,6 +449,14 @@ export function result(
   }
 }
 
+export function heartbeat(count: number): api.IRunQueryResponse {
+  return {
+    document: null,
+    readTime: {seconds: 5, nanos: 6},
+    skippedResults: count,
+  };
+}
+
 describe('query interface', () => {
   let firestore: Firestore;
 
@@ -714,9 +722,11 @@ describe('query interface', () => {
   });
 
   it('handles stream exception at initialization', () => {
+    let attempts = 0;
     const query = firestore.collection('collectionId');
 
     query._stream = () => {
+      ++attempts;
       throw new Error('Expected error');
     };
 
@@ -727,12 +737,16 @@ describe('query interface', () => {
       })
       .catch(err => {
         expect(err.message).to.equal('Expected error');
+        expect(attempts).to.equal(1);
       });
   });
 
   it('handles stream exception during initialization', () => {
+    let attempts = 0;
+
     const overrides: ApiOverride = {
       runQuery: () => {
+        ++attempts;
         return stream(new Error('Expected error'));
       },
     };
@@ -747,6 +761,7 @@ describe('query interface', () => {
         })
         .catch(err => {
           expect(err.message).to.equal('Expected error');
+          expect(attempts).to.equal(5);
         });
     });
   });
@@ -769,6 +784,228 @@ describe('query interface', () => {
           expect(snap.size).to.equal(2);
           expect(snap.docs[0].id).to.equal('first');
           expect(snap.docs[1].id).to.equal('second');
+        });
+    });
+  });
+
+  it('handles stream exception after initialization and heartbeat', () => {
+    const deadlineExceededErr = new GoogleError();
+    deadlineExceededErr.code = Status.DEADLINE_EXCEEDED;
+    deadlineExceededErr.message = 'DEADLINE_EXCEEDED error message';
+
+    let attempts = 0;
+
+    const overrides: ApiOverride = {
+      runQuery: () => {
+        ++attempts;
+
+        // A heartbeat message will initialize the stream, but it is not
+        // a document, so it does not represent progress made on the stream.
+        return stream(heartbeat(1000), deadlineExceededErr);
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      return firestore
+        .collection('collectionId')
+        .get()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal('DEADLINE_EXCEEDED error message');
+
+          // The heartbeat initialized the stream before there was a stream
+          // exception, so we only expect a single attempt at streaming.
+          expect(attempts).to.equal(1);
+        });
+    });
+  });
+
+  function handlesRetryableExceptionUntilProgressStops(
+    withHeartbeat: boolean
+  ): Promise<void> {
+    let attempts = 0;
+
+    // count of stream initializations that are successful
+    // and make progress (a document is received before error)
+    const initializationsWithProgress = 10;
+
+    // Receiving these error codes on a stream after the stream has received document data
+    // should result in the stream retrying indefinitely.
+    const retryableErrorCodes = [
+      Status.DEADLINE_EXCEEDED,
+      Status.UNAVAILABLE,
+      Status.INTERNAL,
+      Status.UNAVAILABLE,
+    ];
+
+    const overrides: ApiOverride = {
+      runQuery: x => {
+        ++attempts;
+
+        // Validate that runQuery is called with cursor of the lastReceivedDocument
+        // for all attempts except but the first.
+        if (attempts > 1) {
+          const docPath =
+            x?.structuredQuery?.startAt?.values?.[0].referenceValue || '';
+          const docId = docPath.substring(docPath.lastIndexOf('/'));
+          expect(docId).to.equal(
+            `/id-${Math.min(initializationsWithProgress, attempts - 1)}`
+          );
+          expect(x?.structuredQuery?.orderBy?.length).to.equal(1);
+          expect(x?.structuredQuery?.orderBy?.[0].field?.fieldPath).to.equal(
+            '__name__'
+          );
+        }
+
+        const streamElements = [];
+
+        // A heartbeat is a message that may be received on a stream while
+        // a query is running. If the test is configured `withHeartbeat = true`
+        // then the fake stream will include a heartbeat before the first
+        // document. This heartbeat message has the side effect of initializing
+        // the stream, but it does not represent progress of streaming the results.
+        // Testing with and without heartbeats allows us to evaluate different
+        // retry logic in the SDK.
+        if (withHeartbeat) {
+          streamElements.push(heartbeat(1000));
+        }
+
+        // For the first X initializations, the stream will make progress
+        // receiving documents in the result set.
+        // For the X+1 attempt, the stream will not make progress before
+        // the error. If a stream gets an error without progress, the
+        // retry policy will close the stream.
+        if (attempts <= initializationsWithProgress) {
+          streamElements.push(result(`id-${attempts}`));
+        }
+
+        // Create an error with one of the retryable error codes
+        const googleError = new GoogleError();
+        googleError.code =
+          retryableErrorCodes[attempts % retryableErrorCodes.length];
+        googleError.message = 'test error message';
+        streamElements.push(googleError);
+
+        return stream(...streamElements);
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      const query = firestore.collection('collectionId');
+      query._hasRetryTimedOut = () => false;
+      return query
+        .get()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal('test error message');
+
+          // Assert that runQuery was retried the expected number
+          // of times based on the test configuration.
+          //
+          // If the test is running with heartbeat messages, then
+          // the test will always validate retry logic for an
+          // initialized stream.
+          //
+          // If the test is running without heartbeat messages,
+          // then the test will validate retry logic for both
+          // initialized and uninitialized streams. Specifically,
+          // the last retry will fail with an uninitialized stream.
+          const initilizationRetries = withHeartbeat ? 1 : 5;
+          expect(attempts).to.equal(
+            initializationsWithProgress + initilizationRetries
+          );
+        });
+    });
+  }
+
+  it('handles retryable exception until progress stops with heartbeat', async () => {
+    await handlesRetryableExceptionUntilProgressStops(true);
+  });
+
+  it('handles retryable exception until progress stops without heartbeat', async () => {
+    await handlesRetryableExceptionUntilProgressStops(false);
+  });
+
+  it('handles retryable exception with progress until timeout', async () => {
+    let attempts = 0;
+
+    const overrides: ApiOverride = {
+      runQuery: () => {
+        ++attempts;
+
+        const streamElements = [];
+        streamElements.push(result(`id-${attempts}`));
+
+        // Create an error with a retryable error code
+        const googleError = new GoogleError();
+        googleError.code = Status.DEADLINE_EXCEEDED;
+        googleError.message = 'test error message';
+        streamElements.push(googleError);
+
+        return stream(...streamElements);
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      const query = firestore.collection('collectionId');
+      // Fake our timeout check to fail after 10 retry attempts
+      query._hasRetryTimedOut = (methodName, startTime) => {
+        expect(methodName).to.equal('runQuery');
+        expect(startTime).to.be.lessThanOrEqual(Date.now());
+        return attempts >= 10;
+      };
+
+      return query
+        .get()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal('test error message');
+
+          expect(attempts).to.equal(10);
+        });
+    });
+  });
+
+  it('handles non-retryable after recieving data (with get())', () => {
+    let attempts = 0;
+
+    const overrides: ApiOverride = {
+      runQuery: () => {
+        ++attempts;
+
+        const streamElements = [];
+        streamElements.push(result(`id-${attempts}`));
+
+        // Create an error with one of the retryable error codes
+        const googleError = new GoogleError();
+        googleError.code = Status.UNKNOWN;
+        googleError.message = 'test error message';
+        streamElements.push(googleError);
+
+        return stream(...streamElements);
+      },
+    };
+
+    return createInstance(overrides).then(firestoreInstance => {
+      firestore = firestoreInstance;
+      return firestore
+        .collection('collectionId')
+        .get()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal('test error message');
+          expect(attempts).to.equal(1);
         });
     });
   });
