@@ -153,9 +153,9 @@ describe('Firestore class', () => {
   });
 
   it('can profile a query', async () => {
-    await randomCol.doc('doc1').set({foo: 1});
-    await randomCol.doc('doc2').set({foo: 2});
-    await randomCol.doc('doc3').set({foo: 1});
+    await randomCol.doc('doc1').set({foo: 1, bar: 0});
+    await randomCol.doc('doc2').set({foo: 2, bar: 1});
+    await randomCol.doc('doc3').set({foo: 1, bar: 2});
     const profile = await randomCol.where('foo', '==', 1).explainAnalyze();
     expect(Object.keys(profile.plan).length).to.be.greaterThan(0);
     expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
@@ -178,7 +178,6 @@ describe('Firestore class', () => {
       .where('foo', '<', 3)
       .count()
       .explainAnalyze();
-    console.log(profile.snapshot.data());
     expect(Object.keys(profile.plan).length).to.be.greaterThan(0);
     expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
     expect(profile.snapshot.data().count).to.equal(3);
