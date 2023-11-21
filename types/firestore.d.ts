@@ -2816,13 +2816,13 @@ declare namespace FirebaseFirestore {
    */
   export interface QueryProfileInfo<T> {
     /**
-     * A Map that contains information about the query plan.
+     * An `InformationalQueryPlan` object that contains information about the query plan.
      * Contents are subject to change.
      */
     readonly plan: InformationalQueryPlan;
 
     /**
-     * A Map that contains statistics about the execution of the query.
+     * An `InformationalQueryExecutionStats` that contains statistics about the execution of the query.
      * Contents are subject to change.
      */
     readonly stats: InformationalQueryExecutionStats;

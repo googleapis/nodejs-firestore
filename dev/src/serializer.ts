@@ -18,7 +18,7 @@ import {DocumentData} from '@google-cloud/firestore';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
-import {detectGoogleProtobufValueKind, detectValueType} from './convert';
+import {detectGoogleProtobufValueType, detectValueType} from './convert';
 import {DeleteTransform, FieldTransform} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
@@ -299,7 +299,7 @@ export class Serializer {
    * @returns The converted JS type.
    */
   decodeGoogleProtobufValue(proto: IValue): unknown {
-    switch (detectGoogleProtobufValueKind(proto)) {
+    switch (detectGoogleProtobufValueType(proto)) {
       case 'nullValue': {
         return null;
       }
