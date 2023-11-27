@@ -1533,6 +1533,55 @@ declare namespace FirebaseFirestore {
     | 'not-in'
     | 'array-contains-any';
 
+  export interface IOnceFunction {
+    kind: 'onceFunction'
+  }
+
+  export type DistanceType = "L2" | "Cosine"
+  export class Functions {
+    static distance(from: string|FieldPath,
+                    to: VectorValue | [number],
+                    options: {type: DistanceType;} | null): IOnceFunction;
+  }
+
+  export class OnceQuery<T = DocumentData> {
+    // Added to support vector query and beyond
+    orderBy(
+        func: IOnceFunction,
+        directionStr?: OrderByDirection
+    ): OnceQuery<T>;
+
+    // Interfaces from `Query`
+    where(
+        fieldPath: string | FieldPath,
+        opStr: WhereFilterOp,
+        value: any
+    ): OnceQuery<T>;
+    where(filter: Filter): OnceQuery<T>;
+    orderBy(
+        fieldPath: string | FieldPath,
+        directionStr?: OrderByDirection
+    ): OnceQuery<T>;
+
+    limit(limit: number): OnceQuery<T>;
+    limitToLast(limit: number): OnceQuery<T>;
+    offset(offset: number): OnceQuery<T>;
+    select(...field: (string | FieldPath)[]): OnceQuery<DocumentData>;
+    startAt(snapshot: DocumentSnapshot<any>): OnceQuery<T>;
+    startAt(...fieldValues: any[]): OnceQuery<T>;
+    startAfter(snapshot: DocumentSnapshot<any>): OnceQuery<T>;
+    startAfter(...fieldValues: any[]): OnceQuery<T>;
+    endBefore(snapshot: DocumentSnapshot<any>): OnceQuery<T>;
+    endBefore(...fieldValues: any[]): OnceQuery<T>;
+    endAt(snapshot: DocumentSnapshot<any>): OnceQuery<T>;
+    endAt(...fieldValues: any[]): OnceQuery<T>;
+    get(): Promise<QuerySnapshot<T>>;
+    stream(): NodeJS.ReadableStream;
+    withConverter<U>(converter: FirestoreDataConverter<U>): OnceQuery<U>;
+    withConverter(converter: null): OnceQuery<DocumentData>;
+  }
+
+
   /**
    * A `Query` refers to a Query which you can read or listen to. You can also
    * construct refined `Query` objects by adding filters and ordering.

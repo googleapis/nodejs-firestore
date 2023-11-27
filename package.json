@@ -36,7 +36,7 @@
     "system-test:named-db:grpc": "FIRESTORE_NAMED_DATABASE=test-db mocha build/system-test --timeout 600000",
     "system-test:emulator:rest": "FIRESTORE_EMULATOR_HOST=localhost:8080 FIRESTORE_PREFER_REST=true mocha build/system-test --timeout 600000",
     "system-test:named-db:emulator:rest": "FIRESTORE_NAMED_DATABASE=test-db FIRESTORE_EMULATOR_HOST=localhost:8080 FIRESTORE_PREFER_REST=true mocha build/system-test --timeout 600000",
-    "system-test:emulator:grpc": "FIRESTORE_EMULATOR_HOST=localhost:8080 mocha build/system-test --timeout 600000",
+    "system-test:emulator:grpc": "npm run compile && FIRESTORE_EMULATOR_HOST=localhost:8080 mocha build/system-test --timeout 600000",
     "system-test:named-db:emulator:grpc": "FIRESTORE_NAMED_DATABASE=test-db FIRESTORE_EMULATOR_HOST=localhost:8080 mocha build/system-test --timeout 600000",
     "system-test": "npm run system-test:grpc && npm run system-test:rest && npm run system-test:named-db:grpc && npm run system-test:named-db:rest",
     "system-test:emulator": "npm run system-test:emulator:grpc && npm run system-test:emulator:rest && npm run system-test:named-db:emulator:grpc && npm run system-test:named-db:emulator:rest",
