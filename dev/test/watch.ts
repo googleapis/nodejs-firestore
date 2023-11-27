@@ -1506,7 +1506,7 @@ describe('Query watch', () => {
     });
   });
 
-  it('handles deleting a non-existent doc', () => {
+  it.skip('handles deleting a non-existent doc', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();

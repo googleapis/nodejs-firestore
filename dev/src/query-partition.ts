@@ -32,8 +32,10 @@ import api = protos.google.firestore.v1;
  *
  * @class QueryPartition
  */
-export class QueryPartition<T = firestore.DocumentData>
-  implements firestore.QueryPartition<T>
+export class QueryPartition<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> implements firestore.QueryPartition<AppModelType, DbModelType>
 {
   private readonly _serializer: Serializer;
   private _memoizedStartAt: unknown[] | undefined;
@@ -43,7 +45,10 @@ export class QueryPartition<T = firestore.DocumentData>
   constructor(
     private readonly _firestore: Firestore,
     private readonly _collectionId: string,
-    private readonly _converter: firestore.FirestoreDataConverter<T>,
+    private readonly _converter: firestore.FirestoreDataConverter<
+      AppModelType,
+      DbModelType
+    >,
     private readonly _startAt: api.IValue[] | undefined,
     private readonly _endBefore: api.IValue[] | undefined
   ) {
@@ -138,7 +143,7 @@ export class QueryPartition<T = firestore.DocumentData>
    * @return {Query<T>} A query partitioned by a {@link Query#startAt} and
    * {@link Query#endBefore} cursor.
    */
-  toQuery(): Query<T> {
+  toQuery(): Query<AppModelType, DbModelType> {
     // Since the api.Value to JavaScript type conversion can be lossy (unless
     // `useBigInt` is used), we pass the original protobuf representation to the
     // created query.

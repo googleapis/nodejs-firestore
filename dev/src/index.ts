@@ -84,7 +84,6 @@ import {
   RECURSIVE_DELETE_MIN_PENDING_OPS,
   RecursiveDelete,
 } from './recursive-delete';
-import {stringify} from 'querystring';
 
 export {
   CollectionReference,
@@ -105,6 +104,7 @@ export {GeoPoint} from './geo-point';
 export {CollectionGroup};
 export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
+export {AggregateField, Aggregate} from './aggregate';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
@@ -172,7 +172,8 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
 
 /**
  * Converter used by [withConverter()]{@link Query#withConverter} to transform
- * user objects of type T into Firestore data.
+ * user objects of type `AppModelType` into Firestore data of type
+ * `DbModelType`.
  *
  * Using the converter allows you to specify generic type arguments when storing
  * and retrieving objects from Firestore.
@@ -212,10 +213,10 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *
  * ```
  * @property {Function} toFirestore Called by the Firestore SDK to convert a
- * custom model object of type T into a plain Javascript object (suitable for
- * writing directly to the Firestore database).
+ * custom model object of type `AppModelType` into a plain Javascript object
+ * (suitable for writing directly to the Firestore database).
  * @property {Function} fromFirestore Called by the Firestore SDK to convert
- * Firestore data into an object of type T.
+ * Firestore data into an object of type `AppModelType`.
  * @typedef {Object} FirestoreDataConverter
  */
 
@@ -590,21 +591,6 @@ export class Firestore implements firestore.Firestore {
             gax = this._gax;
           }
         }
-
-        // TODO (multi-db) Revert this override of gax.routingHeader.fromParams
-        // after a permanent fix is applied. See b/292075646
-        // This override of the routingHeader.fromParams does not
-        // encode forward slash characters. This is a temporary fix for b/291780066
-        gax.routingHeader.fromParams = params => {
-          return stringify(params, undefined, undefined, {
-            encodeURIComponent: (val: string) => {
-              return val
-                .split('/')
-                .map(component => encodeURIComponent(component))
-                .join('/');
-            },
-          });
-        };
 
         if (this._settings.ssl === false) {
           const grpcModule = this._settings.grpc ?? require('google-gax').grpc;
@@ -1285,11 +1271,12 @@ export class Firestore implements firestore.Firestore {
    * });
    * ```
    */
-  getAll<T>(
+  getAll<AppModelType, DbModelType extends firestore.DocumentData>(
     ...documentRefsOrReadOptions: Array<
-      firestore.DocumentReference<T> | firestore.ReadOptions
+      | firestore.DocumentReference<AppModelType, DbModelType>
+      | firestore.ReadOptions
     >
-  ): Promise<Array<DocumentSnapshot<T>>> {
+  ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
     validateMinNumberOfArguments(
       'Firestore.getAll',
       documentRefsOrReadOptions,
@@ -1399,9 +1386,10 @@ export class Firestore implements firestore.Firestore {
    * ```
    */
   recursiveDelete(
-    ref:
-      | firestore.CollectionReference<unknown>
-      | firestore.DocumentReference<unknown>,
+    ref: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | firestore.CollectionReference<any, any>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      | firestore.DocumentReference<any, any>,
     bulkWriter?: BulkWriter
   ): Promise<void> {
     return this._recursiveDelete(
@@ -1649,7 +1637,7 @@ export class Firestore implements firestore.Firestore {
       function streamReady(): void {
         if (!streamInitialized) {
           streamInitialized = true;
-          logger('Firestore._initializeStream', requestTag, 'Releasing stream');
+          logger('Firestore._initializeStream', requestTag, 'Stream ready');
           resolve(resultStream);
         }
       }

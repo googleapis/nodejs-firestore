@@ -4,6 +4,56 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.1.1](https://github.com/googleapis/nodejs-firestore/compare/v7.1.0...v7.1.1) (2023-11-20)
+
+
+### Bug Fixes
+
+* Remove temporary header encoding workaround ([#1935](https://github.com/googleapis/nodejs-firestore/issues/1935)) ([8a4ae5b](https://github.com/googleapis/nodejs-firestore/commit/8a4ae5b07712588bd0deae917d9e17f34f1ebb60))
+* Update retry policy to not retry streams that have not made progress receiving documents ([170d05b](https://github.com/googleapis/nodejs-firestore/commit/170d05b1fa6c720d1109506ed3d3feb525c16efe))
+
+## [7.1.0](https://github.com/googleapis/nodejs-firestore/compare/v7.0.0...v7.1.0) (2023-10-11)
+
+
+### Features
+
+* Sum and Average aggregations ([#1873](https://github.com/googleapis/nodejs-firestore/issues/1873)) ([b9ea514](https://github.com/googleapis/nodejs-firestore/commit/b9ea5143f997dd217200ffa83ed481ad74f558e4))
+
+## [7.0.0](https://github.com/googleapis/nodejs-firestore/compare/v6.8.0...v7.0.0) (2023-10-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade to Node 14 ([#1900](https://github.com/googleapis/nodejs-firestore/issues/1900))
+* Fix the UpdateData incorrect parameter type issue ([#1887](https://github.com/googleapis/nodejs-firestore/issues/1887))
+
+### Features
+
+* Fix the UpdateData incorrect parameter type issue ([#1887](https://github.com/googleapis/nodejs-firestore/issues/1887)) ([0afadef](https://github.com/googleapis/nodejs-firestore/commit/0afadeff4706e7bff173d8eda7b9681498b570a8))
+
+
+### Bug Fixes
+
+* Remove DocumentReference from cursor ([#1882](https://github.com/googleapis/nodejs-firestore/issues/1882)) ([da4f8f8](https://github.com/googleapis/nodejs-firestore/commit/da4f8f8b6a35fa93aca0eddc96703d3321a998f6))
+
+
+### Miscellaneous Chores
+
+* Upgrade to Node 14 ([#1900](https://github.com/googleapis/nodejs-firestore/issues/1900)) ([1f5abb8](https://github.com/googleapis/nodejs-firestore/commit/1f5abb8fbef91e372313b2dbf4d51c7d03ce69b0))
+
+## [6.8.0](https://github.com/googleapis/nodejs-firestore/compare/v6.7.0...v6.8.0) (2023-09-26)
+
+
+### Features
+
+* Publish proto definitions for SUM/AVG in Firestore ([#1856](https://github.com/googleapis/nodejs-firestore/issues/1856)) ([ac35b37](https://github.com/googleapis/nodejs-firestore/commit/ac35b372faf32f093d83af18d487f1b3f23ee673))
+
+
+### Bug Fixes
+
+* **deps:** Use protobufjs v7.2.5 ([#1889](https://github.com/googleapis/nodejs-firestore/pull/1889))
+* Add tests for multiple inequality support ([#1878](https://github.com/googleapis/nodejs-firestore/issues/1878)) ([8e621d5](https://github.com/googleapis/nodejs-firestore/commit/8e621d580396b7e3bc7e42dad0c63f91e999411f))
+
 ## [6.7.0](https://github.com/googleapis/nodejs-firestore/compare/v6.6.1...v6.7.0) (2023-07-20)
 
 

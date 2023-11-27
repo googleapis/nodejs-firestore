@@ -15,6 +15,7 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
+import * as assert from 'assert';
 import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 import {GoogleError} from 'google-gax';
@@ -43,7 +44,9 @@ import {defaultConverter} from './types';
 import {
   autoId,
   Deferred,
+  getTotalTimeout,
   isPermanentRpcError,
+  mapToArray,
   requestTag,
   wrapError,
 } from './util';
@@ -58,6 +61,7 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
+import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -127,8 +131,13 @@ const NOOP_MESSAGE = Symbol('a noop message');
  *
  * @class DocumentReference
  */
-export class DocumentReference<T = firestore.DocumentData>
-  implements Serializable, firestore.DocumentReference<T>
+export class DocumentReference<
+    AppModelType = firestore.DocumentData,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >
+  implements
+    Serializable,
+    firestore.DocumentReference<AppModelType, DbModelType>
 {
   /**
    * @private
@@ -143,7 +152,7 @@ export class DocumentReference<T = firestore.DocumentData>
     /** @private */
     readonly _path: ResourcePath,
     /** @private */
-    readonly _converter = defaultConverter<T>()
+    readonly _converter = defaultConverter<AppModelType, DbModelType>()
   ) {}
 
   /**
@@ -249,8 +258,8 @@ export class DocumentReference<T = firestore.DocumentData>
    * }):
    * ```
    */
-  get parent(): CollectionReference<T> {
-    return new CollectionReference<T>(
+  get parent(): CollectionReference<AppModelType, DbModelType> {
+    return new CollectionReference<AppModelType, DbModelType>(
       this._firestore,
       this._path.parent()!,
       this._converter
@@ -276,7 +285,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * });
    * ```
    */
-  get(): Promise<DocumentSnapshot<T>> {
+  get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
     return this._firestore.getAll(this).then(([result]) => result);
   }
 
@@ -325,9 +334,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * });
    * ```
    */
-  listCollections(): Promise<
-    Array<CollectionReference<firestore.DocumentData>>
-  > {
+  listCollections(): Promise<Array<CollectionReference>> {
     const tag = requestTag();
     return this.firestore.initializeIfNeeded(tag).then(() => {
       const request: api.IListCollectionIdsRequest = {
@@ -344,9 +351,7 @@ export class DocumentReference<T = firestore.DocumentData>
           tag
         )
         .then(collectionIds => {
-          const collections: Array<
-            CollectionReference<firestore.DocumentData>
-          > = [];
+          const collections: Array<CollectionReference> = [];
 
           // We can just sort this list using the default comparator since it
           // will only contain collection ids.
@@ -367,7 +372,7 @@ export class DocumentReference<T = firestore.DocumentData>
    *
    * @param {DocumentData} data An object that contains the fields and data to
    * serialize as the document.
-   * @throws {Error} If the provided input is not a valid Firestore document.
+   * @throws {Error} If the provided input is not a valid Firestore document or if the document already exists.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this create.
    *
@@ -382,7 +387,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * });
    * ```
    */
-  create(data: firestore.WithFieldValue<T>): Promise<WriteResult> {
+  create(data: firestore.WithFieldValue<AppModelType>): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
       .create(this, data)
@@ -424,17 +429,18 @@ export class DocumentReference<T = firestore.DocumentData>
   }
 
   set(
-    data: firestore.PartialWithFieldValue<T>,
+    data: firestore.PartialWithFieldValue<AppModelType>,
     options: firestore.SetOptions
   ): Promise<WriteResult>;
-  set(data: firestore.WithFieldValue<T>): Promise<WriteResult>;
+  set(data: firestore.WithFieldValue<AppModelType>): Promise<WriteResult>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
    * document does not yet exist, it will be created. If you pass
    * [SetOptions]{@link SetOptions}, the provided data can be merged into an
    * existing document.
    *
-   * @param {T|Partial<T>} data A map of the fields and values for the document.
+   * @param {T|Partial<AppModelType>} data A map of the fields and values for
+   * the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge If true, set() merges the values specified
    * in its data argument. Fields omitted from this set() call remain untouched.
@@ -458,14 +464,17 @@ export class DocumentReference<T = firestore.DocumentData>
    * ```
    */
   set(
-    data: firestore.PartialWithFieldValue<T>,
+    data: firestore.PartialWithFieldValue<AppModelType>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     let writeBatch = new WriteBatch(this._firestore);
     if (options) {
       writeBatch = writeBatch.set(this, data, options);
     } else {
-      writeBatch = writeBatch.set(this, data as firestore.WithFieldValue<T>);
+      writeBatch = writeBatch.set(
+        this,
+        data as firestore.WithFieldValue<AppModelType>
+      );
     }
     return writeBatch.commit().then(([writeResult]) => writeResult);
   }
@@ -503,7 +512,10 @@ export class DocumentReference<T = firestore.DocumentData>
    * ```
    */
   update(
-    dataOrField: firestore.UpdateData<T> | string | firestore.FieldPath,
+    dataOrField:
+      | firestore.UpdateData<DbModelType>
+      | string
+      | firestore.FieldPath,
     ...preconditionOrValues: Array<
       unknown | string | firestore.FieldPath | firestore.Precondition
     >
@@ -547,16 +559,16 @@ export class DocumentReference<T = firestore.DocumentData>
    * ```
    */
   onSnapshot(
-    onNext: (snapshot: firestore.DocumentSnapshot<T>) => void,
+    onNext: (
+      snapshot: firestore.DocumentSnapshot<AppModelType, DbModelType>
+    ) => void,
     onError?: (error: Error) => void
   ): () => void {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch: DocumentWatch<T> = new (require('./watch').DocumentWatch)(
-      this.firestore,
-      this
-    );
+    const watch: DocumentWatch<AppModelType, DbModelType> =
+      new (require('./watch').DocumentWatch)(this.firestore, this);
     return watch.onSnapshot((readTime, size, docs) => {
       for (const document of docs()) {
         if (document.ref.path === this.path) {
@@ -571,7 +583,9 @@ export class DocumentReference<T = firestore.DocumentData>
         this._path,
         this._converter
       );
-      const document = new DocumentSnapshotBuilder<T>(ref);
+      const document = new DocumentSnapshotBuilder<AppModelType, DbModelType>(
+        ref
+      );
       document.readTime = readTime;
       onNext(document.build());
     }, onError || console.error);
@@ -584,7 +598,9 @@ export class DocumentReference<T = firestore.DocumentData>
    * @return {boolean} true if this `DocumentReference` is equal to the provided
    * value.
    */
-  isEqual(other: firestore.DocumentReference<T>): boolean {
+  isEqual(
+    other: firestore.DocumentReference<AppModelType, DbModelType>
+  ): boolean {
     return (
       this === other ||
       (other instanceof DocumentReference &&
@@ -604,15 +620,19 @@ export class DocumentReference<T = firestore.DocumentData>
     return {referenceValue: this.formattedName};
   }
 
-  withConverter(converter: null): DocumentReference<firestore.DocumentData>;
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U>
-  ): DocumentReference<U>;
+  withConverter(converter: null): DocumentReference;
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+  ): DocumentReference<NewAppModelType, NewDbModelType>;
   /**
    * Applies a custom data converter to this DocumentReference, allowing you to
    * use your own custom model objects with Firestore. When you call set(),
    * get(), etc. on the returned DocumentReference instance, the provided
-   * converter will convert between Firestore data and your custom type U.
+   * converter will convert between Firestore data of type `NewDbModelType` and
+   * your custom type `NewAppModelType`.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
@@ -656,12 +676,18 @@ export class DocumentReference<T = firestore.DocumentData>
    * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
-   * @return A DocumentReference<U> that uses the provided converter.
+   * @return A DocumentReference that uses the provided converter.
    */
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U> | null
-  ): DocumentReference<U> {
-    return new DocumentReference<U>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<
+      NewAppModelType,
+      NewDbModelType
+    > | null
+  ): DocumentReference<NewAppModelType, NewDbModelType> {
+    return new DocumentReference<NewAppModelType, NewDbModelType>(
       this.firestore,
       this._path,
       converter ?? defaultConverter()
@@ -895,13 +921,23 @@ class FieldFilterInternal extends FilterInternal {
  *
  * @class QuerySnapshot
  */
-export class QuerySnapshot<T = firestore.DocumentData>
-  implements firestore.QuerySnapshot<T>
+export class QuerySnapshot<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> implements firestore.QuerySnapshot<AppModelType, DbModelType>
 {
-  private _materializedDocs: Array<QueryDocumentSnapshot<T>> | null = null;
-  private _materializedChanges: Array<DocumentChange<T>> | null = null;
-  private _docs: (() => Array<QueryDocumentSnapshot<T>>) | null = null;
-  private _changes: (() => Array<DocumentChange<T>>) | null = null;
+  private _materializedDocs: Array<
+    QueryDocumentSnapshot<AppModelType, DbModelType>
+  > | null = null;
+  private _materializedChanges: Array<
+    DocumentChange<AppModelType, DbModelType>
+  > | null = null;
+  private _docs:
+    | (() => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>)
+    | null = null;
+  private _changes:
+    | (() => Array<DocumentChange<AppModelType, DbModelType>>)
+    | null = null;
 
   /**
    * @private
@@ -915,11 +951,11 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * events for this snapshot.
    */
   constructor(
-    private readonly _query: Query<T>,
+    private readonly _query: Query<AppModelType, DbModelType>,
     private readonly _readTime: Timestamp,
     private readonly _size: number,
-    docs: () => Array<QueryDocumentSnapshot<T>>,
-    changes: () => Array<DocumentChange<T>>
+    docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
   ) {
     this._docs = docs;
     this._changes = changes;
@@ -946,7 +982,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * });
    * ```
    */
-  get query(): Query<T> {
+  get query(): Query<AppModelType, DbModelType> {
     return this._query;
   }
 
@@ -969,7 +1005,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * });
    * ```
    */
-  get docs(): Array<QueryDocumentSnapshot<T>> {
+  get docs(): Array<QueryDocumentSnapshot<AppModelType, DbModelType>> {
     if (this._materializedDocs) {
       return this._materializedDocs!;
     }
@@ -1059,7 +1095,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * });
    * ```
    */
-  docChanges(): Array<DocumentChange<T>> {
+  docChanges(): Array<DocumentChange<AppModelType, DbModelType>> {
     if (this._materializedChanges) {
       return this._materializedChanges!;
     }
@@ -1090,7 +1126,9 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * ```
    */
   forEach(
-    callback: (result: firestore.QueryDocumentSnapshot<T>) => void,
+    callback: (
+      result: firestore.QueryDocumentSnapshot<AppModelType, DbModelType>
+    ) => void,
     thisArg?: unknown
   ): void {
     validateFunction('callback', callback);
@@ -1108,7 +1146,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
    * @return {boolean} true if this `QuerySnapshot` is equal to the provided
    * value.
    */
-  isEqual(other: firestore.QuerySnapshot<T>): boolean {
+  isEqual(other: firestore.QuerySnapshot<AppModelType, DbModelType>): boolean {
     // Since the read time is different on every query read, we explicitly
     // ignore all metadata in this comparison.
 
@@ -1166,11 +1204,17 @@ enum LimitType {
  * @private
  * @internal
  */
-export class QueryOptions<T> {
+export class QueryOptions<
+  AppModelType,
+  DbModelType extends firestore.DocumentData,
+> {
   constructor(
     readonly parentPath: ResourcePath,
     readonly collectionId: string,
-    readonly converter: firestore.FirestoreDataConverter<T>,
+    readonly converter: firestore.FirestoreDataConverter<
+      AppModelType,
+      DbModelType
+    >,
     readonly allDescendants: boolean,
     readonly filters: FilterInternal[],
     readonly fieldOrders: FieldOrder[],
@@ -1194,11 +1238,14 @@ export class QueryOptions<T> {
    * @private
    * @internal
    */
-  static forCollectionGroupQuery<T = firestore.DocumentData>(
+  static forCollectionGroupQuery<
+    AppModelType = firestore.DocumentData,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
     collectionId: string,
-    converter = defaultConverter<T>()
-  ): QueryOptions<T> {
-    return new QueryOptions<T>(
+    converter = defaultConverter<AppModelType, DbModelType>()
+  ): QueryOptions<AppModelType, DbModelType> {
+    return new QueryOptions<AppModelType, DbModelType>(
       /*parentPath=*/ ResourcePath.EMPTY,
       collectionId,
       converter,
@@ -1213,11 +1260,14 @@ export class QueryOptions<T> {
    * @private
    * @internal
    */
-  static forCollectionQuery<T = firestore.DocumentData>(
+  static forCollectionQuery<
+    AppModelType = firestore.DocumentData,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
     collectionRef: ResourcePath,
-    converter = defaultConverter<T>()
-  ): QueryOptions<T> {
-    return new QueryOptions<T>(
+    converter = defaultConverter<AppModelType, DbModelType>()
+  ): QueryOptions<AppModelType, DbModelType> {
+    return new QueryOptions<AppModelType, DbModelType>(
       collectionRef.parent()!,
       collectionRef.id!,
       converter,
@@ -1234,12 +1284,15 @@ export class QueryOptions<T> {
    * @private
    * @internal
    */
-  static forKindlessAllDescendants<T = firestore.DocumentData>(
+  static forKindlessAllDescendants(
     parent: ResourcePath,
     id: string,
     requireConsistency = true
-  ): QueryOptions<T> {
-    let options = new QueryOptions<T>(
+  ): QueryOptions<firestore.DocumentData, firestore.DocumentData> {
+    let options = new QueryOptions<
+      firestore.DocumentData,
+      firestore.DocumentData
+    >(
       parent,
       id,
       defaultConverter(),
@@ -1260,7 +1313,11 @@ export class QueryOptions<T> {
    * @private
    * @internal
    */
-  with(settings: Partial<Omit<QueryOptions<T>, 'converter'>>): QueryOptions<T> {
+  with(
+    settings: Partial<
+      Omit<QueryOptions<AppModelType, DbModelType>, 'converter'>
+    >
+  ): QueryOptions<AppModelType, DbModelType> {
     return new QueryOptions(
       coalesce(settings.parentPath, this.parentPath)!,
       coalesce(settings.collectionId, this.collectionId)!,
@@ -1279,10 +1336,13 @@ export class QueryOptions<T> {
     );
   }
 
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U>
-  ): QueryOptions<U> {
-    return new QueryOptions<U>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+  ): QueryOptions<NewAppModelType, NewDbModelType> {
+    return new QueryOptions<NewAppModelType, NewDbModelType>(
       this.parentPath,
       this.collectionId,
       converter,
@@ -1302,7 +1362,7 @@ export class QueryOptions<T> {
     return this.fieldOrders.length > 0;
   }
 
-  isEqual(other: QueryOptions<T>): boolean {
+  isEqual(other: QueryOptions<AppModelType, DbModelType>): boolean {
     if (this === other) {
       return true;
     }
@@ -1345,7 +1405,11 @@ export class QueryOptions<T> {
  *
  * @class Query
  */
-export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
+export class Query<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> implements firestore.Query<AppModelType, DbModelType>
+{
   private readonly _serializer: Serializer;
   /** @private */
   protected readonly _allowUndefined: boolean;
@@ -1360,7 +1424,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     /** @private */
     readonly _firestore: Firestore,
     /** @private */
-    protected readonly _queryOptions: QueryOptions<T>
+    protected readonly _queryOptions: QueryOptions<AppModelType, DbModelType>
   ) {
     this._serializer = new Serializer(_firestore);
     this._allowUndefined =
@@ -1455,10 +1519,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * ```
    */
   where(
-    fieldPath: string | firestore.FieldPath,
+    fieldPath: string | FieldPath,
     opStr: firestore.WhereFilterOp,
     value: unknown
-  ): Query<T>;
+  ): Query<AppModelType, DbModelType>;
 
   /**
    * Creates and returns a new [Query]{@link Query} with the additional filter
@@ -1482,13 +1546,13 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * });
    * ```
    */
-  where(filter: Filter): Query<T>;
+  where(filter: Filter): Query<AppModelType, DbModelType>;
 
   where(
     fieldPathOrFilter: string | firestore.FieldPath | Filter,
     opStr?: firestore.WhereFilterOp,
     value?: unknown
-  ): Query<T> {
+  ): Query<AppModelType, DbModelType> {
     let filter: Filter;
 
     if (fieldPathOrFilter instanceof Filter) {
@@ -1606,9 +1670,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * });
    * ```
    */
-  select(
-    ...fieldPaths: Array<string | FieldPath>
-  ): Query<firestore.DocumentData> {
+  select(...fieldPaths: Array<string | FieldPath>): Query {
     const fields: api.StructuredQuery.IFieldReference[] = [];
 
     if (fieldPaths.length === 0) {
@@ -1626,7 +1688,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     // `T`. We there return `Query<DocumentData>`;
     const options = this._queryOptions.with({
       projection: {fields},
-    }) as QueryOptions<firestore.DocumentData>;
+    }) as QueryOptions<firestore.DocumentData, firestore.DocumentData>;
     return new Query(this._firestore, options);
   }
 
@@ -1657,7 +1719,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   orderBy(
     fieldPath: string | firestore.FieldPath,
     directionStr?: firestore.OrderByDirection
-  ): Query<T> {
+  ): Query<AppModelType, DbModelType> {
     validateFieldPath('fieldPath', fieldPath);
     directionStr = validateQueryOrder('directionStr', directionStr);
 
@@ -1700,7 +1762,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * });
    * ```
    */
-  limit(limit: number): Query<T> {
+  limit(limit: number): Query<AppModelType, DbModelType> {
     validateInteger('limit', limit);
 
     const options = this._queryOptions.with({
@@ -1733,7 +1795,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * });
    * ```
    */
-  limitToLast(limit: number): Query<T> {
+  limitToLast(limit: number): Query<AppModelType, DbModelType> {
     validateInteger('limitToLast', limit);
 
     const options = this._queryOptions.with({limit, limitType: LimitType.Last});
@@ -1761,7 +1823,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * });
    * ```
    */
-  offset(offset: number): Query<T> {
+  offset(offset: number): Query<AppModelType, DbModelType> {
     validateInteger('offset', offset);
 
     const options = this._queryOptions.with({offset});
@@ -1785,8 +1847,52 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * `snapshot` is the `AggregateQuerySnapshot` resulting from running the
    * returned query.
    */
-  count(): AggregateQuery<{count: firestore.AggregateField<number>}> {
-    return new AggregateQuery(this, {count: {}});
+  count(): AggregateQuery<
+    {count: firestore.AggregateField<number>},
+    AppModelType,
+    DbModelType
+  > {
+    return this.aggregate({
+      count: AggregateField.count(),
+    });
+  }
+
+  /**
+   * Returns a query that can perform the given aggregations.
+   *
+   * The returned query, when executed, calculates the specified aggregations
+   * over the documents in the result set of this query, without actually
+   * downloading the documents.
+   *
+   * Using the returned query to perform aggregations is efficient because only
+   * the final aggregation values, not the documents' data, is downloaded. The
+   * returned query can even perform aggregations of the documents if the result set
+   * would be prohibitively large to download entirely (e.g. thousands of documents).
+   *
+   * @param aggregateSpec An `AggregateSpec` object that specifies the aggregates
+   * to perform over the result set. The AggregateSpec specifies aliases for each
+   * aggregate, which can be used to retrieve the aggregate result.
+   * @example
+   * ```typescript
+   * const aggregateQuery = col.aggregate(query, {
+   *   countOfDocs: count(),
+   *   totalHours: sum('hours'),
+   *   averageScore: average('score')
+   * });
+   *
+   * const aggregateSnapshot = await aggregateQuery.get();
+   * const countOfDocs: number = aggregateSnapshot.data().countOfDocs;
+   * const totalHours: number = aggregateSnapshot.data().totalHours;
+   * const averageScore: number | null = aggregateSnapshot.data().averageScore;
+   * ```
+   */
+  aggregate<T extends firestore.AggregateSpec>(
+    aggregateSpec: T
+  ): AggregateQuery<T, AppModelType, DbModelType> {
+    return new AggregateQuery<T, AppModelType, DbModelType>(
+      this,
+      aggregateSpec
+    );
   }
 
   /**
@@ -1795,7 +1901,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `Query` is equal to the provided value.
    */
-  isEqual(other: firestore.Query<T>): boolean {
+  isEqual(other: firestore.Query<AppModelType, DbModelType>): boolean {
     if (this === other) {
       return true;
     }
@@ -1834,27 +1940,16 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @returns The implicit ordering semantics.
    */
   private createImplicitOrderBy(
-    cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
+    cursorValuesOrDocumentSnapshot: Array<
+      DocumentSnapshot<AppModelType, DbModelType> | unknown
+    >
   ): FieldOrder[] {
-    // Add an implicit orderBy if the only cursor value is a DocumentSnapshot
-    // or a DocumentReference.
+    // Add an implicit orderBy if the only cursor value is a DocumentSnapshot.
     if (
       cursorValuesOrDocumentSnapshot.length !== 1 ||
-      !(
-        cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot ||
-        cursorValuesOrDocumentSnapshot[0] instanceof DocumentReference
-      )
+      !(cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot)
     ) {
       return this._queryOptions.fieldOrders;
-    }
-
-    // TODO(b/296435819): Remove this warning message.
-    if (cursorValuesOrDocumentSnapshot[0] instanceof DocumentReference) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `Warning: Passing DocumentReference into a cursor without orderBy clause is not an intended
-        behavior. Please use DocumentSnapshot or add an explicit orderBy on document key field.`
-      );
     }
 
     const fieldOrders = this._queryOptions.fieldOrders.slice();
@@ -1962,11 +2057,13 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @private
    * @internal
    */
-  private validateReference(val: unknown): DocumentReference<T> {
+  private validateReference(
+    val: unknown
+  ): DocumentReference<AppModelType, DbModelType> {
     const basePath = this._queryOptions.allDescendants
       ? this._queryOptions.parentPath
       : this._queryOptions.parentPath.append(this._queryOptions.collectionId);
-    let reference: DocumentReference<T>;
+    let reference: DocumentReference<AppModelType, DbModelType>;
 
     if (typeof val === 'string') {
       const path = basePath.append(val);
@@ -2042,10 +2139,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * ```
    */
   startAt(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
-    >
-  ): Query<T> {
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+  ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.startAt',
       fieldValuesOrDocumentSnapshot,
@@ -2088,10 +2183,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * ```
    */
   startAfter(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
-    >
-  ): Query<T> {
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+  ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.startAfter',
       fieldValuesOrDocumentSnapshot,
@@ -2133,10 +2226,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * ```
    */
   endBefore(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
-    >
-  ): Query<T> {
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+  ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.endBefore',
       fieldValuesOrDocumentSnapshot,
@@ -2178,10 +2269,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * ```
    */
   endAt(
-    ...fieldValuesOrDocumentSnapshot: Array<
-      firestore.DocumentSnapshot<unknown> | unknown
-    >
-  ): Query<T> {
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+  ): Query<AppModelType, DbModelType> {
     validateMinNumberOfArguments(
       'Query.endAt',
       fieldValuesOrDocumentSnapshot,
@@ -2219,7 +2308,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * });
    * ```
    */
-  get(): Promise<QuerySnapshot<T>> {
+  get(): Promise<QuerySnapshot<AppModelType, DbModelType>> {
     return this._get();
   }
 
@@ -2230,8 +2319,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @internal
    * @param {bytes=} transactionId A transaction ID.
    */
-  _get(transactionId?: Uint8Array): Promise<QuerySnapshot<T>> {
-    const docs: Array<QueryDocumentSnapshot<T>> = [];
+  _get(
+    transactionId?: Uint8Array
+  ): Promise<QuerySnapshot<AppModelType, DbModelType>> {
+    const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
 
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -2264,7 +2355,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
               docs.length,
               () => docs,
               () => {
-                const changes: Array<DocumentChange<T>> = [];
+                const changes: Array<
+                  DocumentChange<AppModelType, DbModelType>
+                > = [];
                 for (let i = 0; i < docs.length; ++i) {
                   changes.push(new DocumentChange('added', docs[i], -1, i));
                 }
@@ -2477,6 +2570,15 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     return isPermanentRpcError(err, methodName);
   }
 
+  _hasRetryTimedOut(methodName: string, startTime: number): boolean {
+    const totalTimeout = getTotalTimeout(methodName);
+    if (totalTimeout === 0) {
+      return false;
+    }
+
+    return Date.now() - startTime >= totalTimeout;
+  }
+
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
@@ -2487,8 +2589,12 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
     const tag = requestTag();
+    const startTime = Date.now();
 
-    let lastReceivedDocument: QueryDocumentSnapshot<T> | null = null;
+    let lastReceivedDocument: QueryDocumentSnapshot<
+      AppModelType,
+      DbModelType
+    > | null = null;
 
     let backendStream: Duplex;
     const stream = new Transform({
@@ -2504,16 +2610,20 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
             proto.document,
             proto.readTime
           );
-          const finalDoc = new DocumentSnapshotBuilder<T>(
-            document.ref.withConverter(this._queryOptions.converter)
-          );
+          const finalDoc = new DocumentSnapshotBuilder<
+            AppModelType,
+            DbModelType
+          >(document.ref.withConverter(this._queryOptions.converter));
           // Recreate the QueryDocumentSnapshot with the DocumentReference
           // containing the original converter.
           finalDoc.fieldsProto = document._fieldsProto;
           finalDoc.readTime = document.readTime;
           finalDoc.createTime = document.createTime;
           finalDoc.updateTime = document.updateTime;
-          lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<T>;
+          lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<
+            AppModelType,
+            DbModelType
+          >;
           callback(undefined, {document: lastReceivedDocument, readTime});
           if (proto.done) {
             logger('Query._stream', tag, 'Trigger Logical Termination.');
@@ -2539,8 +2649,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
         let streamActive: Deferred<boolean>;
         do {
           streamActive = new Deferred<boolean>();
+          const methodName = 'runQuery';
           backendStream = await this._firestore.requestStream(
-            'runQuery',
+            methodName,
             /* bidirectional= */ false,
             request,
             tag
@@ -2557,12 +2668,28 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
                 'Query failed with retryable stream error:',
                 err
               );
-              // Enqueue a "no-op" write into the stream and resume the query
-              // once it is processed. This allows any enqueued results to be
-              // consumed before resuming the query so that the query resumption
-              // can start at the correct document.
+
+              // Enqueue a "no-op" write into the stream and wait for it to be
+              // read by the downstream consumer. This ensures that all enqueued
+              // results in the stream are consumed, which will give us an accurate
+              // value for `lastReceivedDocument`.
               stream.write(NOOP_MESSAGE, () => {
-                if (lastReceivedDocument) {
+                if (this._hasRetryTimedOut(methodName, startTime)) {
+                  logger(
+                    'Query._stream',
+                    tag,
+                    'Query failed with retryable stream error but the total retry timeout has exceeded.'
+                  );
+                  stream.destroy(err);
+                  streamActive.resolve(/* active= */ false);
+                } else if (lastReceivedDocument) {
+                  logger(
+                    'Query._stream',
+                    tag,
+                    'Query failed with retryable stream error and progress was made receiving ' +
+                      'documents, so the stream is being retried.'
+                  );
+
                   // Restart the query but use the last document we received as
                   // the query cursor. Note that we do not use backoff here. The
                   // call to `requestStream()` will backoff should the restart
@@ -2574,8 +2701,21 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
                   } else {
                     request = this.startAfter(lastReceivedDocument).toProto();
                   }
+
+                  // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
+                  lastReceivedDocument = null;
+
+                  streamActive.resolve(/* active= */ true);
+                } else {
+                  logger(
+                    'Query._stream',
+                    tag,
+                    'Query failed with retryable stream error however no progress was made receiving ' +
+                      'documents, so the stream is being closed.'
+                  );
+                  stream.destroy(err);
+                  streamActive.resolve(/* active= */ false);
                 }
-                streamActive.resolve(/* active= */ true);
               });
             } else {
               logger(
@@ -2626,17 +2766,18 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * ```
    */
   onSnapshot(
-    onNext: (snapshot: firestore.QuerySnapshot<T>) => void,
+    onNext: (snapshot: QuerySnapshot<AppModelType, DbModelType>) => void,
     onError?: (error: Error) => void
   ): () => void {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch: QueryWatch<T> = new (require('./watch').QueryWatch)(
-      this.firestore,
-      this,
-      this._queryOptions.converter
-    );
+    const watch: QueryWatch<AppModelType, DbModelType> =
+      new (require('./watch').QueryWatch)(
+        this.firestore,
+        this,
+        this._queryOptions.converter
+      );
 
     return watch.onSnapshot((readTime, size, docs, changes) => {
       onNext(new QuerySnapshot(this, readTime, size, docs, changes));
@@ -2651,8 +2792,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @internal
    */
   comparator(): (
-    s1: QueryDocumentSnapshot<T>,
-    s2: QueryDocumentSnapshot<T>
+    s1: QueryDocumentSnapshot<AppModelType, DbModelType>,
+    s2: QueryDocumentSnapshot<AppModelType, DbModelType>
   ) => number {
     return (doc1, doc2) => {
       // Add implicit sorting by name, using the last specified direction.
@@ -2692,13 +2833,18 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     };
   }
 
-  withConverter(converter: null): Query<firestore.DocumentData>;
-  withConverter<U>(converter: firestore.FirestoreDataConverter<U>): Query<U>;
+  withConverter(converter: null): Query;
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+  ): Query<NewAppModelType, NewDbModelType>;
   /**
    * Applies a custom data converter to this Query, allowing you to use your
    * own custom model objects with Firestore. When you call get() on the
    * returned Query, the provided converter will convert between Firestore
-   * data and your custom type U.
+   * data of type `NewDbModelType` and your custom type `NewAppModelType`.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
@@ -2742,12 +2888,18 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
-   * @return A Query<U> that uses the provided converter.
+   * @return A Query that uses the provided converter.
    */
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U> | null
-  ): Query<U> {
-    return new Query<U>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<
+      NewAppModelType,
+      NewDbModelType
+    > | null
+  ): Query<NewAppModelType, NewDbModelType> {
+    return new Query<NewAppModelType, NewDbModelType>(
       this.firestore,
       this._queryOptions.withConverter(converter ?? defaultConverter())
     );
@@ -2762,9 +2914,12 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
  * @class CollectionReference
  * @extends Query
  */
-export class CollectionReference<T = firestore.DocumentData>
-  extends Query<T>
-  implements firestore.CollectionReference<T>
+export class CollectionReference<
+    AppModelType = firestore.DocumentData,
+    DbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >
+  extends Query<AppModelType, DbModelType>
+  implements firestore.CollectionReference<AppModelType, DbModelType>
 {
   /**
    * @private
@@ -2775,7 +2930,7 @@ export class CollectionReference<T = firestore.DocumentData>
   constructor(
     firestore: Firestore,
     path: ResourcePath,
-    converter?: firestore.FirestoreDataConverter<T>
+    converter?: firestore.FirestoreDataConverter<AppModelType, DbModelType>
   ) {
     super(firestore, QueryOptions.forCollectionQuery(path, converter));
   }
@@ -2823,7 +2978,7 @@ export class CollectionReference<T = firestore.DocumentData>
    * console.log(`Parent name: ${documentRef.path}`);
    * ```
    */
-  get parent(): DocumentReference<firestore.DocumentData> | null {
+  get parent(): DocumentReference | null {
     if (this._queryOptions.parentPath.isDocument) {
       return new DocumentReference(
         this.firestore,
@@ -2881,7 +3036,9 @@ export class CollectionReference<T = firestore.DocumentData>
    * });
    * ```
    */
-  listDocuments(): Promise<Array<DocumentReference<T>>> {
+  listDocuments(): Promise<
+    Array<DocumentReference<AppModelType, DbModelType>>
+  > {
     const tag = requestTag();
     return this.firestore.initializeIfNeeded(tag).then(() => {
       const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
@@ -2919,8 +3076,8 @@ export class CollectionReference<T = firestore.DocumentData>
     });
   }
 
-  doc(): DocumentReference<T>;
-  doc(documentPath: string): DocumentReference<T>;
+  doc(): DocumentReference<AppModelType, DbModelType>;
+  doc(documentPath: string): DocumentReference<AppModelType, DbModelType>;
   /**
    * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path. If no path is specified, an
@@ -2940,7 +3097,7 @@ export class CollectionReference<T = firestore.DocumentData>
    * console.log(`Reference with auto-id: ${documentRefWithAutoId.path}`);
    * ```
    */
-  doc(documentPath?: string): DocumentReference<T> {
+  doc(documentPath?: string): DocumentReference<AppModelType, DbModelType> {
     if (arguments.length === 0) {
       documentPath = autoId();
     } else {
@@ -2980,7 +3137,9 @@ export class CollectionReference<T = firestore.DocumentData>
    * });
    * ```
    */
-  add(data: firestore.WithFieldValue<T>): Promise<DocumentReference<T>> {
+  add(
+    data: firestore.WithFieldValue<AppModelType>
+  ): Promise<DocumentReference<AppModelType, DbModelType>> {
     const firestoreData = this._queryOptions.converter.toFirestore(data);
     validateDocumentData(
       'data',
@@ -3000,22 +3159,28 @@ export class CollectionReference<T = firestore.DocumentData>
    * @return {boolean} true if this `CollectionReference` is equal to the
    * provided value.
    */
-  isEqual(other: firestore.CollectionReference<T>): boolean {
+  isEqual(
+    other: firestore.CollectionReference<AppModelType, DbModelType>
+  ): boolean {
     return (
       this === other ||
       (other instanceof CollectionReference && super.isEqual(other))
     );
   }
 
-  withConverter(converter: null): CollectionReference<firestore.DocumentData>;
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U>
-  ): CollectionReference<U>;
+  withConverter(converter: null): CollectionReference;
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+  ): CollectionReference<NewAppModelType, NewDbModelType>;
   /**
    * Applies a custom data converter to this CollectionReference, allowing you
    * to use your own custom model objects with Firestore. When you call add() on
    * the returned CollectionReference instance, the provided converter will
-   * convert between Firestore data and your custom type U.
+   * convert between Firestore data of type `NewDbModelType` and your custom
+   * type `NewAppModelType`.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
@@ -3059,12 +3224,18 @@ export class CollectionReference<T = firestore.DocumentData>
    * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
-   * @return A CollectionReference<U> that uses the provided converter.
+   * @return A CollectionReference that uses the provided converter.
    */
-  withConverter<U>(
-    converter: firestore.FirestoreDataConverter<U> | null
-  ): CollectionReference<U> {
-    return new CollectionReference<U>(
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<
+      NewAppModelType,
+      NewDbModelType
+    > | null
+  ): CollectionReference<NewAppModelType, NewDbModelType> {
+    return new CollectionReference<NewAppModelType, NewDbModelType>(
       this.firestore,
       this._resourcePath,
       converter ?? defaultConverter()
@@ -3075,9 +3246,16 @@ export class CollectionReference<T = firestore.DocumentData>
 /**
  * A query that calculates aggregations over an underlying query.
  */
-export class AggregateQuery<T extends firestore.AggregateSpec>
-  implements firestore.AggregateQuery<T>
+export class AggregateQuery<
+  AggregateSpecType extends AggregateSpec,
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> implements
+    firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
 {
+  private readonly clientAliasToServerAliasMap: Record<string, string> = {};
+  private readonly serverAliasToClientAliasMap: Record<string, string> = {};
+
   /**
    * @private
    * @internal
@@ -3088,12 +3266,24 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    */
   constructor(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private readonly _query: Query<any>,
-    private readonly _aggregates: T
-  ) {}
+    private readonly _query: Query<AppModelType, DbModelType>,
+    private readonly _aggregates: AggregateSpecType
+  ) {
+    // Client-side aliases may be too long and exceed the 1500-byte string size limit.
+    // Such long strings do not need to be transferred over the wire either.
+    // The client maps the user's alias to a short form alias and send that to the server.
+    let aggregationNum = 0;
+    for (const clientAlias in this._aggregates) {
+      if (Object.prototype.hasOwnProperty.call(this._aggregates, clientAlias)) {
+        const serverAlias = `aggregate_${aggregationNum++}`;
+        this.clientAliasToServerAliasMap[clientAlias] = serverAlias;
+        this.serverAliasToClientAliasMap[serverAlias] = clientAlias;
+      }
+    }
+  }
 
   /** The query whose aggregations will be calculated by this object. */
-  get query(): firestore.Query<unknown> {
+  get query(): Query<AppModelType, DbModelType> {
     return this._query;
   }
 
@@ -3102,7 +3292,9 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    *
    * @return A promise that will be resolved with the results of the query.
    */
-  get(): Promise<AggregateQuerySnapshot<T>> {
+  get(): Promise<
+    AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+  > {
     return this._get();
   }
 
@@ -3113,7 +3305,11 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    * @internal
    * @param {bytes=} transactionId A transaction ID.
    */
-  _get(transactionId?: Uint8Array): Promise<AggregateQuerySnapshot<T>> {
+  _get(
+    transactionId?: Uint8Array
+  ): Promise<
+    AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+  > {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
@@ -3150,10 +3346,7 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
         if (proto.result) {
           const readTime = Timestamp.fromProto(proto.readTime!);
           const data = this.decodeResult(proto.result);
-          callback(
-            undefined,
-            new AggregateQuerySnapshot<T>(this, readTime, data)
-          );
+          callback(undefined, new AggregateQuerySnapshot(this, readTime, data));
         } else {
           callback(Error('RunAggregationQueryResponse is missing result'));
         }
@@ -3168,48 +3361,33 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
         // catch below.
         const request = this.toProto(transactionId);
 
-        let streamActive: Deferred<boolean>;
-        do {
-          streamActive = new Deferred<boolean>();
-          const backendStream = await firestore.requestStream(
-            'runAggregationQuery',
-            /* bidirectional= */ false,
-            request,
-            tag
-          );
-          stream.on('close', () => {
-            backendStream.resume();
-            backendStream.end();
-          });
-          backendStream.on('error', err => {
-            backendStream.unpipe(stream);
-            // If a non-transactional query failed, attempt to restart.
-            // Transactional queries are retried via the transaction runner.
-            if (
-              !transactionId &&
-              !isPermanentRpcError(err, 'runAggregationQuery')
-            ) {
-              logger(
-                'AggregateQuery._stream',
-                tag,
-                'AggregateQuery failed with retryable stream error:',
-                err
-              );
-              streamActive.resolve(/* active= */ true);
-            } else {
-              logger(
-                'AggregateQuery._stream',
-                tag,
-                'AggregateQuery failed with stream error:',
-                err
-              );
-              stream.destroy(err);
-              streamActive.resolve(/* active= */ false);
-            }
-          });
+        const backendStream = await firestore.requestStream(
+          'runAggregationQuery',
+          /* bidirectional= */ false,
+          request,
+          tag
+        );
+        stream.on('close', () => {
           backendStream.resume();
-          backendStream.pipe(stream);
-        } while (await streamActive.promise);
+          backendStream.end();
+        });
+        backendStream.on('error', err => {
+          // TODO(group-by) When group-by queries are supported for aggregates
+          // consider implementing retries if the stream is making progress
+          // receiving results for groups. See the use of lastReceivedDocument
+          // in the retry strategy for runQuery.
+
+          backendStream.unpipe(stream);
+          logger(
+            'AggregateQuery._stream',
+            tag,
+            'AggregateQuery failed with stream error:',
+            err
+          );
+          stream.destroy(err);
+        });
+        backendStream.resume();
+        backendStream.pipe(stream);
       })
       .catch(e => stream.destroy(e));
 
@@ -3222,19 +3400,24 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    */
   private decodeResult(
     proto: api.IAggregationResult
-  ): firestore.AggregateSpecData<T> {
+  ): firestore.AggregateSpecData<AggregateSpecType> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {};
     const fields = proto.aggregateFields;
     if (fields) {
       const serializer = this._query.firestore._serializer!;
       for (const prop of Object.keys(fields)) {
-        if (this._aggregates[prop] === undefined) {
+        const alias = this.serverAliasToClientAliasMap[prop];
+        assert(
+          alias !== null && alias !== undefined,
+          `'${prop}' not present in server-client alias mapping.`
+        );
+        if (this._aggregates[alias] === undefined) {
           throw new Error(
             `Unexpected alias [${prop}] in result aggregate result`
           );
         }
-        data[prop] = serializer.decodeValue(fields[prop]);
+        data[alias] = serializer.decodeValue(fields[prop]);
       }
     }
     return data;
@@ -3250,18 +3433,22 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    */
   toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
-    //TODO(tomandersen) inspect _query to build request - this is just hard
-    // coded count right now.
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
       structuredAggregationQuery: {
         structuredQuery: queryProto.structuredQuery,
-        aggregations: [
-          {
-            alias: 'count',
-            count: {},
-          },
-        ],
+        aggregations: mapToArray(this._aggregates, (aggregate, clientAlias) => {
+          const serverAlias = this.clientAliasToServerAliasMap[clientAlias];
+          assert(
+            serverAlias !== null && serverAlias !== undefined,
+            `'${clientAlias}' not present in client-server alias mapping.`
+          );
+          return new Aggregate(
+            serverAlias,
+            aggregate.aggregateType,
+            aggregate._field
+          ).toProto();
+        }),
       },
     };
 
@@ -3284,7 +3471,13 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
    * @return `true` if this object is "equal" to the given object, as
    * defined above, or `false` otherwise.
    */
-  isEqual(other: firestore.AggregateQuery<T>): boolean {
+  isEqual(
+    other: firestore.AggregateQuery<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >
+  ): boolean {
     if (this === other) {
       return true;
     }
@@ -3301,8 +3494,16 @@ export class AggregateQuery<T extends firestore.AggregateSpec>
 /**
  * The results of executing an aggregation query.
  */
-export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
-  implements firestore.AggregateQuerySnapshot<T>
+export class AggregateQuerySnapshot<
+  AggregateSpecType extends firestore.AggregateSpec,
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> implements
+    firestore.AggregateQuerySnapshot<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >
 {
   /**
    * @private
@@ -3314,18 +3515,22 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
    * query.
    */
   constructor(
-    private readonly _query: AggregateQuery<T>,
+    private readonly _query: AggregateQuery<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >,
     private readonly _readTime: Timestamp,
-    private readonly _data: firestore.AggregateSpecData<T>
+    private readonly _data: firestore.AggregateSpecData<AggregateSpecType>
   ) {}
 
   /** The query that was executed to produce this result. */
-  get query(): firestore.AggregateQuery<T> {
+  get query(): AggregateQuery<AggregateSpecType, AppModelType, DbModelType> {
     return this._query;
   }
 
   /** The time this snapshot was read. */
-  get readTime(): firestore.Timestamp {
+  get readTime(): Timestamp {
     return this._readTime;
   }
 
@@ -3340,7 +3545,7 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
    * @returns The results of the aggregations performed over the underlying
    * query.
    */
-  data(): firestore.AggregateSpecData<T> {
+  data(): firestore.AggregateSpecData<AggregateSpecType> {
     return this._data;
   }
 
@@ -3355,7 +3560,13 @@ export class AggregateQuerySnapshot<T extends firestore.AggregateSpec>
    * @return `true` if this object is "equal" to the given object, as
    * defined above, or `false` otherwise.
    */
-  isEqual(other: firestore.AggregateQuerySnapshot<T>): boolean {
+  isEqual(
+    other: firestore.AggregateQuerySnapshot<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >
+  ): boolean {
     if (this === other) {
       return true;
     }
@@ -3447,10 +3658,13 @@ export function validateQueryOperator(
  * @param value The argument to validate.
  * @return the DocumentReference if valid
  */
-export function validateDocumentReference(
+export function validateDocumentReference<
+  AppModelType,
+  DbModelType extends firestore.DocumentData,
+>(
   arg: string | number,
-  value: unknown
-): DocumentReference {
+  value: firestore.DocumentReference<AppModelType, DbModelType>
+): DocumentReference<AppModelType, DbModelType> {
   if (!(value instanceof DocumentReference)) {
     throw new Error(invalidArgumentMessage(arg, 'DocumentReference'));
   }

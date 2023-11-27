@@ -33,6 +33,7 @@ import {defaultConverter, RBTree} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
+import {DocumentData} from '@google-cloud/firestore';
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -53,7 +54,8 @@ export const WATCH_IDLE_TIMEOUT_MS = 120 * 1000;
 /*!
  * Sentinel value for a document remove.
  */
-const REMOVED = {} as DocumentSnapshotBuilder<unknown>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const REMOVED = {} as DocumentSnapshotBuilder<any, any>;
 
 /*!
  * The change type for document change events.
@@ -69,9 +71,12 @@ const ChangeType: {[k: string]: DocumentChangeType} = {
  * The comparator used for document watches (which should always get called with
  * the same document).
  */
-const DOCUMENT_WATCH_COMPARATOR: <T>(
-  doc1: QueryDocumentSnapshot<T>,
-  doc2: QueryDocumentSnapshot<T>
+const DOCUMENT_WATCH_COMPARATOR: <
+  AppModelType,
+  DbModelType extends DocumentData,
+>(
+  doc1: QueryDocumentSnapshot<AppModelType, DbModelType>,
+  doc2: QueryDocumentSnapshot<AppModelType, DbModelType>
 ) => number = (doc1, doc2) => {
   assert(doc1 === doc2, 'Document watches only support one document.');
   return 0;
@@ -109,15 +114,21 @@ const EMPTY_FUNCTION: () => void = () => {};
  * changed documents since the last snapshot delivered for this watch.
  */
 
-type DocumentComparator<T> = (
-  l: QueryDocumentSnapshot<T>,
-  r: QueryDocumentSnapshot<T>
+type DocumentComparator<
+  AppModelType,
+  DbModelType extends firestore.DocumentData,
+> = (
+  l: QueryDocumentSnapshot<AppModelType, DbModelType>,
+  r: QueryDocumentSnapshot<AppModelType, DbModelType>
 ) => number;
 
-interface DocumentChangeSet<T = firestore.DocumentData> {
+interface DocumentChangeSet<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> {
   deletes: string[];
-  adds: Array<QueryDocumentSnapshot<T>>;
-  updates: Array<QueryDocumentSnapshot<T>>;
+  adds: Array<QueryDocumentSnapshot<AppModelType, DbModelType>>;
+  updates: Array<QueryDocumentSnapshot<AppModelType, DbModelType>>;
 }
 
 /**
@@ -128,7 +139,10 @@ interface DocumentChangeSet<T = firestore.DocumentData> {
  * @private
  * @internal
  */
-abstract class Watch<T = firestore.DocumentData> {
+abstract class Watch<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> {
   protected readonly firestore: Firestore;
   private readonly backoff: ExponentialBackoff;
   private readonly requestTag: string;
@@ -160,7 +174,10 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private docMap = new Map<string, QueryDocumentSnapshot<T>>();
+  private docMap = new Map<
+    string,
+    QueryDocumentSnapshot<AppModelType, DbModelType>
+  >();
 
   /**
    * The accumulated map of document changes (keyed by document name) for the
@@ -168,7 +185,10 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private changeMap = new Map<string, DocumentSnapshotBuilder<T>>();
+  private changeMap = new Map<
+    string,
+    DocumentSnapshotBuilder<AppModelType, DbModelType>
+  >();
 
   /**
    * The current state of the query results. *
@@ -203,8 +223,8 @@ abstract class Watch<T = firestore.DocumentData> {
   private onNext: (
     readTime: Timestamp,
     size: number,
-    docs: () => Array<QueryDocumentSnapshot<T>>,
-    changes: () => Array<DocumentChange<T>>
+    docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
   ) => void;
 
   private onError: (error: Error) => void;
@@ -217,7 +237,7 @@ abstract class Watch<T = firestore.DocumentData> {
    */
   constructor(
     firestore: Firestore,
-    readonly _converter = defaultConverter<T>()
+    readonly _converter = defaultConverter<AppModelType, DbModelType>()
   ) {
     this.firestore = firestore;
     this.backoff = new ExponentialBackoff();
@@ -233,7 +253,10 @@ abstract class Watch<T = firestore.DocumentData> {
    * Returns a comparator for QueryDocumentSnapshots that is used to order the
    * document snapshots returned by this watch.
    */
-  protected abstract getComparator(): DocumentComparator<T>;
+  protected abstract getComparator(): DocumentComparator<
+    AppModelType,
+    DbModelType
+  >;
 
   /**
    * Starts a watch and attaches a listener for document change events.
@@ -252,8 +275,8 @@ abstract class Watch<T = firestore.DocumentData> {
     onNext: (
       readTime: Timestamp,
       size: number,
-      docs: () => Array<QueryDocumentSnapshot<T>>,
-      changes: () => Array<DocumentChange<T>>
+      docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
+      changes: () => Array<DocumentChange<AppModelType, DbModelType>>
     ) => void,
     onError: (error: Error) => void
   ): () => void {
@@ -302,10 +325,12 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private extractCurrentChanges(readTime: Timestamp): DocumentChangeSet<T> {
+  private extractCurrentChanges(
+    readTime: Timestamp
+  ): DocumentChangeSet<AppModelType, DbModelType> {
     const deletes: string[] = [];
-    const adds: Array<QueryDocumentSnapshot<T>> = [];
-    const updates: Array<QueryDocumentSnapshot<T>> = [];
+    const adds: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
+    const updates: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
 
     this.changeMap.forEach((value, name) => {
       if (value === REMOVED) {
@@ -314,10 +339,14 @@ abstract class Watch<T = firestore.DocumentData> {
         }
       } else if (this.docMap.has(name)) {
         value.readTime = readTime;
-        updates.push(value.build() as QueryDocumentSnapshot<T>);
+        updates.push(
+          value.build() as QueryDocumentSnapshot<AppModelType, DbModelType>
+        );
       } else {
         value.readTime = readTime;
-        adds.push(value.build() as QueryDocumentSnapshot<T>);
+        adds.push(
+          value.build() as QueryDocumentSnapshot<AppModelType, DbModelType>
+        );
       }
     });
 
@@ -339,7 +368,7 @@ abstract class Watch<T = firestore.DocumentData> {
       // will be send again by the server.
       this.changeMap.set(
         snapshot.ref.path,
-        REMOVED as DocumentSnapshotBuilder<T>
+        REMOVED as DocumentSnapshotBuilder<AppModelType, DbModelType>
       );
     });
 
@@ -577,7 +606,7 @@ abstract class Watch<T = firestore.DocumentData> {
       if (changed) {
         logger('Watch.onData', this.requestTag, 'Received document change');
         const ref = this.firestore.doc(relativeName);
-        const snapshot = new DocumentSnapshotBuilder(
+        const snapshot = new DocumentSnapshotBuilder<AppModelType, DbModelType>(
           ref.withConverter(this._converter)
         );
         snapshot.fieldsProto = document.fields || {};
@@ -586,14 +615,20 @@ abstract class Watch<T = firestore.DocumentData> {
         this.changeMap.set(relativeName, snapshot);
       } else if (removed) {
         logger('Watch.onData', this.requestTag, 'Received document remove');
-        this.changeMap.set(relativeName, REMOVED as DocumentSnapshotBuilder<T>);
+        this.changeMap.set(
+          relativeName,
+          REMOVED as DocumentSnapshotBuilder<AppModelType, DbModelType>
+        );
       }
     } else if (proto.documentDelete || proto.documentRemove) {
       logger('Watch.onData', this.requestTag, 'Processing remove event');
       const name = (proto.documentDelete || proto.documentRemove)!.document!;
       const relativeName =
         QualifiedResourcePath.fromSlashSeparatedString(name).relativeName;
-      this.changeMap.set(relativeName, REMOVED as DocumentSnapshotBuilder<T>);
+      this.changeMap.set(
+        relativeName,
+        REMOVED as DocumentSnapshotBuilder<AppModelType, DbModelType>
+      );
     } else if (proto.filter) {
       logger('Watch.onData', this.requestTag, 'Processing filter update');
       if (proto.filter.count !== this.currentSize()) {
@@ -673,7 +708,7 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private deleteDoc(name: string): DocumentChange<T> {
+  private deleteDoc(name: string): DocumentChange<AppModelType, DbModelType> {
     assert(this.docMap.has(name), 'Document to delete does not exist');
     const oldDocument = this.docMap.get(name)!;
     const existing = this.docTree.find(oldDocument);
@@ -689,7 +724,9 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private addDoc(newDocument: QueryDocumentSnapshot<T>): DocumentChange<T> {
+  private addDoc(
+    newDocument: QueryDocumentSnapshot<AppModelType, DbModelType>
+  ): DocumentChange<AppModelType, DbModelType> {
     const name = newDocument.ref.path;
     assert(!this.docMap.has(name), 'Document to add already exists');
     this.docTree = this.docTree.insert(newDocument, null);
@@ -705,8 +742,8 @@ abstract class Watch<T = firestore.DocumentData> {
    * @internal
    */
   private modifyDoc(
-    newDocument: QueryDocumentSnapshot<T>
-  ): DocumentChange<T> | null {
+    newDocument: QueryDocumentSnapshot<AppModelType, DbModelType>
+  ): DocumentChange<AppModelType, DbModelType> | null {
     const name = newDocument.ref.path;
     assert(this.docMap.has(name), 'Document to modify does not exist');
     const oldDocument = this.docMap.get(name)!;
@@ -730,9 +767,11 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    * @internal
    */
-  private computeSnapshot(readTime: Timestamp): Array<DocumentChange<T>> {
+  private computeSnapshot(
+    readTime: Timestamp
+  ): Array<DocumentChange<AppModelType, DbModelType>> {
     const changeSet = this.extractCurrentChanges(readTime);
-    const appliedChanges: Array<DocumentChange<T>> = [];
+    const appliedChanges: Array<DocumentChange<AppModelType, DbModelType>> = [];
 
     // Process the sorted changes in the order that is expected by our clients
     // (removals, additions, and then modifications). We also need to sort the
@@ -843,15 +882,18 @@ abstract class Watch<T = firestore.DocumentData> {
  * @private
  * @internal
  */
-export class DocumentWatch<T = firestore.DocumentData> extends Watch<T> {
+export class DocumentWatch<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> extends Watch<AppModelType, DbModelType> {
   constructor(
     firestore: Firestore,
-    private readonly ref: DocumentReference<T>
+    private readonly ref: DocumentReference<AppModelType, DbModelType>
   ) {
     super(firestore, ref._converter);
   }
 
-  getComparator(): DocumentComparator<T> {
+  getComparator(): DocumentComparator<AppModelType, DbModelType> {
     return DOCUMENT_WATCH_COMPARATOR;
   }
 
@@ -873,19 +915,22 @@ export class DocumentWatch<T = firestore.DocumentData> extends Watch<T> {
  * @private
  * @internal
  */
-export class QueryWatch<T = firestore.DocumentData> extends Watch<T> {
-  private comparator: DocumentComparator<T>;
+export class QueryWatch<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> extends Watch<AppModelType, DbModelType> {
+  private comparator: DocumentComparator<AppModelType, DbModelType>;
 
   constructor(
     firestore: Firestore,
-    private readonly query: Query<T>,
-    converter?: firestore.FirestoreDataConverter<T>
+    private readonly query: Query<AppModelType, DbModelType>,
+    converter?: firestore.FirestoreDataConverter<AppModelType, DbModelType>
   ) {
     super(firestore, converter);
     this.comparator = query.comparator();
   }
 
-  getComparator(): DocumentComparator<T> {
+  getComparator(): DocumentComparator<AppModelType, DbModelType> {
     return this.query.comparator();
   }
 

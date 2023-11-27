@@ -20,6 +20,7 @@ import {randomBytes} from 'crypto';
 import type {CallSettings, ClientConfig, GoogleError} from 'google-gax';
 import type {BackoffSettings} from 'google-gax/build/src/gax';
 import * as gapicConfig from './v1/firestore_client_config.json';
+import Dict = NodeJS.Dict;
 
 /**
  * A Promise implementation that supports deferred resolution.
@@ -178,6 +179,21 @@ export function getRetryCodes(methodName: string): number[] {
 }
 
 /**
+ * Gets the total timeout in milliseconds from the retry settings in
+ * the service config for the given RPC. If the total timeout is not
+ * set, then `0` is returned.
+ *
+ * @private
+ * @internal
+ */
+export function getTotalTimeout(methodName: string): number {
+  return (
+    getServiceConfig(methodName)?.retry?.backoffSettings?.totalTimeoutMillis ??
+    0
+  );
+}
+
+/**
  * Returns the backoff setting from the service configuration.
  * @private
  * @internal
@@ -245,4 +261,24 @@ export function tryGetPreferRestEnvironmentVariable(): boolean | undefined {
     );
     return undefined;
   }
+}
+
+/**
+ * Returns an array of values that are calculated by performing the given `fn`
+ * on all keys in the given `obj` dictionary.
+ *
+ * @private
+ * @internal
+ */
+export function mapToArray<V, R>(
+  obj: Dict<V>,
+  fn: (element: V, key: string, obj: Dict<V>) => R
+): R[] {
+  const result: R[] = [];
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      result.push(fn(obj[key]!, key, obj));
+    }
+  }
+  return result;
 }
