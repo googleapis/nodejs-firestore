@@ -625,6 +625,7 @@ export class Firestore implements firestore.Firestore {
           'Initialized Firestore GAPIC Client (useFallback: %s)',
           useFallback
         );
+        logger("client", "init", `${JSON.stringify((client as any)._opts.servicePath)}`);
         return client;
       },
       /* clientDestructor= */ client => client.close()

@@ -62,6 +62,8 @@ use(chaiAsPromised);
 
 const version = require('../../package.json').version;
 
+setLogFunction(console.log);
+
 class DeferredPromise<T> {
   resolve: Function;
   reject: Function;
@@ -103,6 +105,8 @@ function getTestRoot(settings: Settings = {}): CollectionReference {
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }
+
+  settings.host = "test-firestore.sandbox.googleapis.com";
 
   const firestore = new Firestore({
     ...internalSettings,
@@ -1018,15 +1022,30 @@ describe('DocumentReference class', () => {
     return promise;
   });
 
-  it('can write and read vector embeddings', async () => {
+  it.only('can write and read vector embeddings', async () => {
     const ref = randomCol.doc();
     await ref.create({
       vectorEmpty: FieldValue.vector(),
       vector1: FieldValue.vector([1, 2, 3.99]),
     });
+    await ref.set({
+      vectorEmpty: FieldValue.vector(),
+      vector1: FieldValue.vector([1, 2, 3.99]),
+      vector2: FieldValue.vector([0, 0, 0]),
+    })
+    await ref.update({
+      vector3: FieldValue.vector([-1, -200, -999]),
+    })
+    // ref.onSnapshot(snap1 => {
+    //   expect(snap1.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    //   expect(snap1.get('vector1')).to.deep.equal(FieldValue.vector([1, 2, 3.99]));
+    // });
+
     const snap1 = await ref.get();
     expect(snap1.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
     expect(snap1.get('vector1')).to.deep.equal(FieldValue.vector([1, 2, 3.99]));
+    expect(snap1.get('vector2')).to.deep.equal(FieldValue.vector([0, 0, 0]));
+    expect(snap1.get('vector3')).to.deep.equal(FieldValue.vector([-1, -200, -999]));
   });
 
   describe('watch', () => {
