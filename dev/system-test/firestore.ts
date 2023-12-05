@@ -106,7 +106,7 @@ function getTestRoot(settings: Settings = {}): CollectionReference {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }
 
-  settings.host = "test-firestore.sandbox.googleapis.com";
+  settings.host = 'test-firestore.sandbox.googleapis.com';
 
   const firestore = new Firestore({
     ...internalSettings,
@@ -1032,20 +1032,18 @@ describe('DocumentReference class', () => {
       vectorEmpty: FieldValue.vector(),
       vector1: FieldValue.vector([1, 2, 3.99]),
       vector2: FieldValue.vector([0, 0, 0]),
-    })
+    });
     await ref.update({
       vector3: FieldValue.vector([-1, -200, -999]),
-    })
-    // ref.onSnapshot(snap1 => {
-    //   expect(snap1.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
-    //   expect(snap1.get('vector1')).to.deep.equal(FieldValue.vector([1, 2, 3.99]));
-    // });
+    });
 
     const snap1 = await ref.get();
     expect(snap1.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
     expect(snap1.get('vector1')).to.deep.equal(FieldValue.vector([1, 2, 3.99]));
     expect(snap1.get('vector2')).to.deep.equal(FieldValue.vector([0, 0, 0]));
-    expect(snap1.get('vector3')).to.deep.equal(FieldValue.vector([-1, -200, -999]));
+    expect(snap1.get('vector3')).to.deep.equal(
+      FieldValue.vector([-1, -200, -999])
+    );
   });
 
   describe('watch', () => {
@@ -1340,6 +1338,91 @@ describe('DocumentReference class', () => {
     await ref2.set([1, 2, 3]);
     const result2 = await ref2.get();
     expect(result2.data()).to.deep.equal([1, 2, 3]);
+  });
+
+  it.only('can listen to documents with vectors', async () => {
+    const ref = randomCol.doc();
+    const initialDeferred = new Deferred<void>();
+    const createDeferred = new Deferred<void>();
+    const setDeferred = new Deferred<void>();
+    const updateDeferred = new Deferred<void>();
+    const deleteDeferred = new Deferred<void>();
+
+    const expected = [
+      initialDeferred,
+      createDeferred,
+      setDeferred,
+      updateDeferred,
+      deleteDeferred,
+    ];
+    let idx = 0;
+    let document: DocumentSnapshot | null = null;
+
+    const unlisten = randomCol
+      .where('purpose', '==', 'vector tests')
+      .onSnapshot(snap => {
+        expected[idx].resolve();
+        idx += 1;
+        if (snap.docs.length > 0) {
+          document = snap.docs[0];
+        } else {
+          document = null;
+        }
+      });
+
+    await initialDeferred.promise;
+    expect(document).to.be.null;
+
+    await ref.create({
+      purpose: 'vector tests',
+      vectorEmpty: FieldValue.vector(),
+      vector1: FieldValue.vector([1, 2, 3.99]),
+    });
+
+    await createDeferred.promise;
+    expect(document).to.be.not.null;
+    expect(document!.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(document!.get('vector1')).to.deep.equal(
+      FieldValue.vector([1, 2, 3.99])
+    );
+
+    await ref.set({
+      purpose: 'vector tests',
+      vectorEmpty: FieldValue.vector(),
+      vector1: FieldValue.vector([1, 2, 3.99]),
+      vector2: FieldValue.vector([0, 0, 0]),
+    });
+    await setDeferred.promise;
+    expect(document).to.be.not.null;
+    expect(document!.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(document!.get('vector1')).to.deep.equal(
+      FieldValue.vector([1, 2, 3.99])
+    );
+    expect(document!.get('vector2')).to.deep.equal(
+      FieldValue.vector([0, 0, 0])
+    );
+
+    await ref.update({
+      vector3: FieldValue.vector([-1, -200, -999]),
+    });
+    await updateDeferred.promise;
+    expect(document).to.be.not.null;
+    expect(document!.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(document!.get('vector1')).to.deep.equal(
+      FieldValue.vector([1, 2, 3.99])
+    );
+    expect(document!.get('vector2')).to.deep.equal(
+      FieldValue.vector([0, 0, 0])
+    );
+    expect(document!.get('vector3')).to.deep.equal(
+      FieldValue.vector([-1, -200, -999])
+    );
+
+    await ref.delete();
+    await deleteDeferred.promise;
+    expect(document).to.be.null;
+
+    unlisten();
   });
 });
 
