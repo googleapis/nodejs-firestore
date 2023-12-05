@@ -1533,21 +1533,30 @@ declare namespace FirebaseFirestore {
     | 'not-in'
     | 'array-contains-any';
 
-  export interface IOnceFunction {
-    kind: 'onceFunction'
+  export interface OnceFunction {
+    once: true
+  }
+
+  export interface Function {
+    streaming: true
+  }
+
+  export class DistanceFunction implements OnceFunction, Function {
+    once: true
+    streaming: true
   }
 
   export type DistanceType = "L2" | "Cosine"
   export class Functions {
     static distance(from: string|FieldPath,
                     to: VectorValue | [number],
-                    options: {type: DistanceType;} | null): IOnceFunction;
+                    options: {type: DistanceType;} | null): DistanceFunction;
   }
 
   export class OnceQuery<T = DocumentData> {
     // Added to support vector query and beyond
     orderBy(
-        func: IOnceFunction,
+        func: OnceFunction | Function,
         directionStr?: OrderByDirection
     ): OnceQuery<T>;
 
@@ -2404,6 +2413,14 @@ declare namespace FirebaseFirestore {
         DbModelType
       >
     ): boolean;
+  }
+
+  export class VectorValue {
+    constructor(values: number[] | undefined);
+
+    toArray(): number[];
+
+    isEqual(other: VectorValue): boolean;
   }
 
   /**

@@ -30,7 +30,7 @@ import {
 
 import api = proto.google.firestore.v1;
 
-export class VectorValue {
+export class VectorValue implements firestore.VectorValue{
   private readonly values: number[];
   constructor(values: number[] | undefined) {
     this.values = values || [];
@@ -65,11 +65,8 @@ export class VectorValue {
     return new VectorValue(values);
   }
 
-  /**
-   * @private
-   */
-  isEqual(other: VectorValue): boolean {
-    return this.values === other.values;
+  isEqual(other: firestore.VectorValue): boolean {
+    return this.values === other.toArray();
   }
 }
 
