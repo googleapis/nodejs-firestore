@@ -85,7 +85,13 @@ declare namespace FirebaseFirestore {
   export type NestedUpdateFields<T extends Record<string, unknown>> =
     UnionToIntersection<
       {
-        [K in keyof T & string]: ChildUpdateFields<K, T[K]>;
+        // If `string extends K`, this is an index signature like
+        // `{[key: string]: { foo: bool }}`. We map these properties to
+        // `never`, which prevents prefixing a nested key with `[string]`.
+        // We don't want to generate a field like `[string].foo: bool`.
+        [K in keyof T & string]: string extends K
+          ? never
+          : ChildUpdateFields<K, T[K]>;
       }[keyof T & string] // Also include the generated prefix-string keys.
     >;
 
@@ -103,7 +109,7 @@ declare namespace FirebaseFirestore {
     // Only allow nesting for map values
     V extends Record<string, unknown>
       ? // Recurse into the map and add the prefix in front of each key
-        // (e.g. Prefix 'bar.' to create: 'bar.baz' and 'bar.qux'.
+        // (e.g. Prefix 'bar.' to create: 'bar.baz' and 'bar.qux').
         AddPrefixToKeys<K, UpdateData<V>>
       : // UpdateData is always a map of values.
         never;
@@ -117,7 +123,20 @@ declare namespace FirebaseFirestore {
     T extends Record<string, unknown>,
   > =
     // Remap K => Prefix.K. See https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
-    {[K in keyof T & string as `${Prefix}.${K}`]+?: T[K]};
+
+    // `string extends K : ...` is used to detect index signatures
+    // like `{[key: string]: bool}`. We map these properties to type `any`
+    // because a field path like `foo.[string]` will match `foo.bar` or a
+    // sub-path `foo.bar.baz`. Because it matches a sub-path, we have to
+    // make this type `any` to allow for any types of the sub-path property.
+    // This is a significant downside to using index signatures in types for `T`
+    // for `UpdateData<T>`.
+
+    {
+      [K in keyof T & string as `${Prefix}.${K}`]+?: string extends K
+        ? any
+        : T[K];
+    };
 
   /**
    * Given a union type `U = T1 | T2 | ...`, returns an intersected type
