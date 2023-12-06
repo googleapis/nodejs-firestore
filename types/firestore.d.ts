@@ -109,7 +109,7 @@ declare namespace FirebaseFirestore {
     // Only allow nesting for map values
     V extends Record<string, unknown>
       ? // Recurse into the map and add the prefix in front of each key
-        // (e.g. Prefix 'bar.' to create: 'bar.baz' and 'bar.qux').
+        // (for example prefix 'bar.' to create: 'bar.baz' and 'bar.qux').
         AddPrefixToKeys<K, UpdateData<V>>
       : // UpdateData is always a map of values.
         never;
