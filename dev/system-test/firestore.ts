@@ -1313,51 +1313,41 @@ describe('DocumentReference class', () => {
   });
 });
 
-describe('large query', () => {
+describe('runs query on a large collection', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
+
+    const promises: Array<Promise<DocumentReference<DocumentData>>> = [];
+    for (let i = 0; i < 1000; i++) {
+      promises.push(randomCol.add({foo: 'a'}));
+    }
+    await Promise.all(promises);
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('large query get()', () => {
-    const promises: Array<Promise<DocumentReference<DocumentData>>> = [];
-    for (let i = 0; i < 1000; i++) {
-      promises.push(randomCol.add({foo: 'a'}));
-    }
-
-    return Promise.all(promises)
-      .then(() => {
-        return randomCol.get();
-      })
-      .then(res => {
-        expect(res.size).to.equal(1000);
-      });
+  it('can get()', () => {
+    return randomCol.get().then(res => {
+      expect(res.size).to.equal(1000);
+    });
   });
 
-  it('large query stream()', done => {
+  it('can stream()', done => {
     let received = 0;
-    const promises: Array<Promise<DocumentReference<DocumentData>>> = [];
-    for (let i = 0; i < 1000; i++) {
-      promises.push(randomCol.add({foo: 'a'}));
-    }
-
-    Promise.all(promises).then(() => {
-      return randomCol
-        .stream()
-        .on('data', d => {
-          expect(d).to.be.an.instanceOf(DocumentSnapshot);
-          ++received;
-        })
-        .on('end', () => {
-          expect(received).to.equal(1000);
-          done();
-        });
-    });
+    return randomCol
+      .stream()
+      .on('data', d => {
+        expect(d).to.be.an.instanceOf(DocumentSnapshot);
+        ++received;
+      })
+      .on('end', () => {
+        expect(received).to.equal(1000);
+        done();
+      });
   });
 });
 
@@ -1695,27 +1685,26 @@ describe('Query class', () => {
       });
   });
 
-  it('query no result', async () => {
-    const res = await randomCol.get();
-    expect(res.empty);
-  });
-
-  it('query no result on stream()', done => {
-    let received = 0;
-    Promise.all([]).then(() => {
-      return randomCol
-        .stream()
-        .on('data', () => {
-          ++received;
-        })
-        .on('end', () => {
-          expect(received).to.equal(0);
-          done();
-        });
+  it.only('can run get() on empty collection', async () => {
+    return randomCol.get().then(res => {
+      return expect(res.empty);
     });
   });
 
-  it('has limit() method', async () => {
+  it('can run stream() on empty collection', done => {
+    let received = 0;
+    return randomCol
+      .stream()
+      .on('data', () => {
+        ++received;
+      })
+      .on('end', () => {
+        expect(received).to.equal(0);
+        done();
+      });
+  });
+
+  it('has limit() method on get()', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').limit(1).get();
     expectDocs(res, {foo: 'a'});
@@ -1739,13 +1728,13 @@ describe('Query class', () => {
     });
   });
 
-  it('has larger limit() method', async () => {
+  it('can run limit(num), where num is larger than the collection size on get()', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').limit(3).get();
     expectDocs(res, {foo: 'a'}, {foo: 'b'});
   });
 
-  it('has larger limit() method on stream()', done => {
+  it('can run limit(num), where num is larger than the collection size on stream()', done => {
     let received = 0;
     Promise.all([addDocs({foo: 'a'}, {foo: 'b'})]).then(() => {
       return randomCol
@@ -1779,7 +1768,7 @@ describe('Query class', () => {
     expectDocs(res, {doc: 2}, {doc: 3}, {doc: 4});
   });
 
-  it('has offset() method', async () => {
+  it('has offset() method on get()', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').offset(1).get();
     expectDocs(res, {foo: 'b'});
@@ -1803,13 +1792,13 @@ describe('Query class', () => {
     });
   });
 
-  it('has larger offset() method', async () => {
+  it('can run offset(num), where num is larger than the collection size on get()', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').offset(3).get();
     expect(res.empty);
   });
 
-  it('has larger offset() method on stream()', done => {
+  it('can run offset(num), where num is larger than the collection size on stream()', done => {
     let received = 0;
     Promise.all([addDocs({foo: 'a'}, {foo: 'b'})]).then(() => {
       return randomCol
@@ -5761,7 +5750,7 @@ describe('Client initialization', () => {
     [
       string,
       (coll: CollectionReference) => Promise<unknown>,
-      /* skip */ boolean?,
+      /* skip */ boolean?
     ]
   > = [
     ['CollectionReference.get()', randomColl => randomColl.get()],
