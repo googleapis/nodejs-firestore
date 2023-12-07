@@ -71,8 +71,27 @@ declare namespace FirebaseFirestore {
   export type UpdateData<T> = T extends Primitive
     ? T
     : T extends {}
-    ? {[K in keyof T]?: UpdateData<T[K]> | FieldValue} & NestedUpdateFields<T>
+    ? {
+        // If `string extends K`, this is an index signature like
+        // `{[key: string]: { foo: bool }}`. In the generated UpdateData
+        // indexed properties can match their type or any child types.
+        [K in keyof T]?: string extends K
+          ? PartialWithFieldValue<ChildTypes<T[K]>>
+          : UpdateData<T[K]> | FieldValue;
+      } & NestedUpdateFields<T>
     : Partial<T>;
+
+  /**
+   * For the given type, return a union type of T
+   * and the types of all child properties of T.
+   */
+  export type ChildTypes<T> = T extends Record<string, unknown>
+    ?
+        | {
+            [K in keyof T & string]: ChildTypes<T[K]>;
+          }[keyof T & string]
+        | T
+    : T;
 
   /** Primitive types. */
   export type Primitive = string | number | boolean | undefined | null;
@@ -128,13 +147,13 @@ declare namespace FirebaseFirestore {
     // like `{[key: string]: bool}`. We map these properties to type `any`
     // because a field path like `foo.[string]` will match `foo.bar` or a
     // sub-path `foo.bar.baz`. Because it matches a sub-path, we have to
-    // make this type `any` to allow for any types of the sub-path property.
+    // make this type a union to including all types of the sub-path properties.
     // This is a significant downside to using index signatures in types for `T`
     // for `UpdateData<T>`.
 
     {
       [K in keyof T & string as `${Prefix}.${K}`]+?: string extends K
-        ? any
+        ? ChildTypes<T[K]>
         : T[K];
     };
 

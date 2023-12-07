@@ -193,14 +193,18 @@ describe('FirestoreTypeConverter', () => {
 type MyUnionType = string | number;
 
 // An object type for testing
-interface MyObjectType {
+type MyObjectType = {
   booleanProperty: boolean;
   stringProperty: string;
   numberProperty: number;
   nullProperty: null;
   undefinedProperty: undefined;
   unionProperty: MyUnionType;
-}
+  objectProperty: {
+    booleanProperty: boolean;
+    stringProperty: string;
+  };
+};
 
 describe('UpdateData type', () => {
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -587,12 +591,19 @@ describe('UpdateData type', () => {
       // with dot notation
       _ = {
         'indexed.bar': {
-          booleanProperty: 1,
+          booleanProperty: true,
           numberProperty: 1,
         },
         'indexed.baz': {
           booleanProperty: true,
         },
+      };
+
+      // preserves properties of nested objects referenced
+      // with dot notation
+      _ = {
+        // @ts-expect-error Unsupported type
+        'indexed.bar': null,
       };
 
       expect(true).to.be.true;
@@ -616,35 +627,93 @@ describe('UpdateData type', () => {
     });
 
     it('supports object type for T', () => {
-      let _: UpdateData<Record<string, MyObjectType>>;
+      let _: UpdateData<Record<string, Omit<MyObjectType, 'nullProperty'>>>;
+
+      _ = {};
 
       _ = {
-        objectProperty: {},
+        indexedProperty: {},
       };
 
       _ = {
-        objectProperty: {
+        indexedProperty: {
           numberProperty: 1,
           booleanProperty: true,
         },
       };
 
       _ = {
-        objectProperty: {
+        indexedProperty: {
+          objectProperty: {},
+        },
+      };
+
+      _ = {
+        indexedProperty: {
+          objectProperty: {
+            booleanProperty: true,
+          },
+        },
+      };
+
+      _ = {
+        indexedProperty: {
+          stringProperty: 'string',
+        },
+      };
+
+      _ = {
+        indexedProperty: {
           numberProperty: 1,
           booleanProperty: true,
           stringProperty: 'string',
+          // @ts-expect-error Unsupported type
           nullProperty: null,
           undefinedProperty: undefined,
           unionProperty: 1,
+          objectProperty: {
+            stringProperty: 'string',
+            booleanProperty: true,
+          },
         },
       };
 
+      // It allows any child property type
+      // when the property is indexed.
       _ = {
-        // @ts-expect-error Unsupported type
-        objectProperty: false,
+        indexedProperty: false,
       };
 
+      // It allows any child property type
+      // when the property is indexed.
+      _ = {
+        indexedProperty: 'string',
+      };
+
+      // It prevents types that are not a
+      // child property type.
+      _ = {
+        // @ts-expect-error Unsupported type
+        indexedProperty: null,
+      };
+
+      // It allows dot notation to set nested properties
+      _ = {
+        'indexedProperty.stringProperty': 'string',
+      };
+
+      // It allows dot notation to set nested properties,
+      // but only enforces types to any of the child properties
+      // of the indexed property.
+      _ = {
+        'indexedProperty.stringProperty': true,
+        'indexedProperty.booleanProperty': 'string',
+        // @ts-expect-error Unsupported type
+        'indexedProperty.undefinedProperty': null,
+      };
+
+      // But still enforces property types
+      // when the child type is object
       _ = {
         objectProperty: {
           // @ts-expect-error Unsupported type
@@ -656,6 +725,135 @@ describe('UpdateData type', () => {
         objectProperty: {
           // @ts-expect-error Unsupported type
           unknownProperty: false,
+        },
+      };
+
+      expect(true).to.be.true;
+    });
+
+    it('supports object with nested index for T', () => {
+      let _: UpdateData<
+        Record<
+          string,
+          {
+            objectWithIndexProperty: {
+              [key: string]: boolean;
+            };
+            deepObjectWithIndexProperty: {
+              [key: string]: {
+                stringProperty: string;
+                numberProperty: number;
+              };
+            };
+          }
+        >
+      >;
+
+      _ = {};
+
+      _ = {
+        indexedProperty: {},
+      };
+
+      _ = {
+        indexedProperty: {
+          objectWithIndexProperty: {},
+          deepObjectWithIndexProperty: {},
+        },
+      };
+
+      _ = {
+        indexedProperty: {
+          objectWithIndexProperty: {},
+        },
+      };
+
+      _ = {
+        indexedProperty: {
+          objectWithIndexProperty: {
+            indexedProperty: true,
+          },
+        },
+      };
+
+      _ = {
+        indexedProperty: {
+          deepObjectWithIndexProperty: {
+            indexedProperty: {},
+          },
+        },
+      };
+
+      _ = {
+        indexedProperty: {
+          deepObjectWithIndexProperty: {
+            indexedProperty: {
+              stringProperty: 'string',
+            },
+          },
+        },
+      };
+
+      _ = {
+        indexedProperty: {
+          stringProperty: 'string',
+        },
+      };
+
+      _ = {
+        indexedProperty: {
+          objectWithIndexProperty: {
+            indexedProperty: true,
+          },
+          deepObjectWithIndexProperty: {
+            indexedProperty: {
+              stringProperty: 'string',
+              numberProperty: 1,
+            },
+          },
+        },
+      };
+
+      // It allows any child property type
+      // when the property is indexed.
+      _ = {
+        indexedProperty: false,
+      };
+
+      // It allows any child property type
+      // when the property is indexed.
+      _ = {
+        indexedProperty: 'string',
+      };
+
+      // It prevents types that are not a
+      // child property type.
+      _ = {
+        // @ts-expect-error Unsupported type
+        indexedProperty: null,
+      };
+
+      // It allows dot notation to set nested properties
+      _ = {
+        'indexedProperty.stringProperty': 'string',
+      };
+
+      // It allows dot notation to set nested properties,
+      // but only enforces types to any of the child properties
+      // of the indexed property.
+      _ = {
+        'indexedProperty.stringProperty': true,
+        'indexedProperty.booleanProperty': 'string',
+        // @ts-expect-error Unsupported type
+        'indexedProperty.undefinedProperty': null,
+      };
+
+      // But still enforces property types
+      // when the child type is object
+      _ = {
+        indexedProperty: {
+          // @ts-expect-error Unsupported type
+          numberProperty: null,
         },
       };
 
@@ -713,17 +911,23 @@ describe('UpdateData type', () => {
           'indexed.bar.numberProperty': 1,
         };
 
-        // does not enforce type
+        // does not enforce type on indexed properties
         _ = {
-          'indexed.bar.booleanProperty': 'string value is not rejected',
+          'indexed.bar.booleanProperty': 3, // not enforced since number is a child type of `indexed.[string]`
         };
 
         _ = {
-          'indexed.bar.numberProperty': 'string value is not rejected',
+          'indexed.bar.numberProperty': false,
         };
 
         _ = {
-          'indexed.bar.unknown': 'string value is not rejected',
+          'indexed.bar.unknown': true,
+        };
+
+        // string value is not allowed because string is not a child type of `indexed.[string]`
+        _ = {
+          // @ts-expect-error Unsupported type
+          'indexed.bar.numberProperty': 'string',
         };
 
         expect(true).to.be.true;
@@ -741,12 +945,12 @@ describe('UpdateData type', () => {
 
         // allows the property, but does not enforce type
         _ = {
-          'layer.indexed.bar.booleanProperty': 'string value is not rejected',
+          'layer.indexed.bar.booleanProperty': 4,
         };
 
         // Allows unknown properties in sub types
         _ = {
-          'layer.indexed.bar.unknownProperty': 'This just allows anything',
+          'layer.indexed.bar.unknownProperty': 4,
         };
 
         expect(true).to.be.true;
