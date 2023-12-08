@@ -1685,7 +1685,7 @@ describe('Query class', () => {
       });
   });
 
-  it.only('can run get() on empty collection', async () => {
+  it('can run get() on empty collection', async () => {
     return randomCol.get().then(res => {
       return expect(res.empty);
     });
