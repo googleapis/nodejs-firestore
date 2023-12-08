@@ -22,6 +22,7 @@ import {
   FirestoreDataConverter,
   SetOptions,
   UpdateData,
+  Firestore,
 } from '@google-cloud/firestore';
 describe('FirestoreTypeConverter', () => {
   it('converter has the minimal typing information', () => {
@@ -974,6 +975,8 @@ describe('UpdateData type', () => {
           [`foo.${key}.bar`]: 'test',
         });
       }
+
+      expect(true).to.be.true;
     });
 
     it('fixes issues/1745#issuecomment-1804130587', () => {
@@ -986,6 +989,34 @@ describe('UpdateData type', () => {
       };
 
       update.prop = value;
+
+      expect(true).to.be.true;
+    });
+
+    it('fixes issues/1890', () => {
+      interface MyDoc {
+        nestedA: Record<string, number>;
+        nestedB: Record<string, string>;
+      }
+
+      function _(db: Firestore, docRef: DocumentReference) {
+        const goodKey = 'nestedA.test';
+        const badKey = 'nestedA.' + 'test';
+
+        db.runTransaction(async t => {
+          t.update(docRef, {
+            [goodKey]: 3,
+          });
+        });
+
+        db.runTransaction(async t => {
+          t.update(docRef, {
+            [badKey]: 3,
+          });
+        });
+      }
+
+      expect(true).to.be.true;
     });
   });
 
