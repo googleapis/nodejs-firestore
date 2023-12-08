@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
+import * as firestore from "@google-cloud/firestore";
 
-import {google} from '../protos/firestore_v1_proto_api';
-import {validateInteger} from './validate';
-
+import { google } from "../protos/firestore_v1_proto_api";
+import { validateInteger } from "./validate";
 import api = google.firestore.v1;
 
 /*!
@@ -309,10 +308,23 @@ export class Timestamp implements firestore.Timestamp {
     return formattedSeconds + '.' + formattedNanoseconds;
   }
 
-  /**
-   * Returns a value to use when encoding this object into JSON.
-   */
-  toJSON(): string {
-    return this.toDate().toISOString();
+  static reviver(this: any, key: string, value: any): any {
+    if (key === '') {
+      const match = value.match(/(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d)\.(\d+)([+-][0-2]\d:[0-5]\d|Z)/);
+      return new Timestamp(
+        Math.floor(Date.parse(match[1] + 'Z') / 1000),
+        Number(match[2].padEnd(9, '0'))
+      );
+    }
+  }
+
+  static replacer(this: any, key: string, value: any): any {
+    if (key === '') {
+      const t: Timestamp = value;
+      const isoDateSeconds: string = new Date(t._seconds * 1000)
+        .toISOString()
+        .split('.')[0];
+      return `${isoDateSeconds}.${String(t._nanoseconds).padStart(9, '0')}Z`;
+    }
   }
 }

@@ -12,19 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {describe, it} from 'mocha';
-import {expect} from 'chai';
-import * as through2 from 'through2';
+import { describe, it } from "mocha";
+import { expect } from "chai";
+import * as through2 from "through2";
 
-import {google} from '../protos/firestore_v1_proto_api';
+import { google } from "../protos/firestore_v1_proto_api";
 
-import * as Firestore from '../src/index';
-import {
-  ApiOverride,
-  createInstance as createInstanceHelper,
-  document,
-} from '../test/util/helpers';
-
+import * as Firestore from "../src/index";
+import { ApiOverride, createInstance as createInstanceHelper, document } from "../test/util/helpers";
 import api = google.firestore.v1;
 
 function createInstance(opts: {}, document: api.IDocument) {
@@ -54,7 +49,7 @@ const DOCUMENT_WITH_EMPTY_TIMESTAMP = document('documentId', 'moonLanding', {
   timestampValue: {},
 });
 
-describe('timestamps', () => {
+describe.only('timestamps', () => {
   it('returned by default', () => {
     return createInstance({}, DOCUMENT_WITH_TIMESTAMP).then(firestore => {
       const expected = new Firestore.Timestamp(-14182920, 123000123);
@@ -224,16 +219,39 @@ describe('timestamps', () => {
 
   it('JSON.stringify() on the smallest Timestamp object', () => {
     const timestamp = new Firestore.Timestamp(-62135596800, 0);
-    expect(JSON.stringify(timestamp)).to.equal('"0001-01-01T00:00:00.000Z"');
+    const writeResult = new Firestore.WriteResult(timestamp);
+    expect(JSON.stringify(timestamp, Firestore.Timestamp.replacer)).to.equal('"0001-01-01T00:00:00.000000000Z"');
+    expect(JSON.stringify(writeResult, Firestore.WriteResult.replacer)).to.equal('{"writeTime":"\\"0001-01-01T00:00:00.000000000Z\\""}');
+  });
+
+  it('JSON.parse() on the smallest Timestamp object', () => {
+    const timestamp = new Firestore.Timestamp(-62135596800, 0);
+    expect(JSON.parse('"0001-01-01T00:00:00.000000000Z"', Firestore.Timestamp.reviver)).to.deep.equal(timestamp);
   });
 
   it('JSON.stringify() on the largest Timestamp object', () => {
     const timestamp = new Firestore.Timestamp(253402300799, 999999999);
-    expect(JSON.stringify(timestamp)).to.equal('"9999-12-31T23:59:59.999Z"');
+    expect(JSON.parse('"9999-12-31T23:59:59.999999999Z"', Firestore.Timestamp.reviver)).to.deep.equal(timestamp);
+  });
+
+  it('JSON.parse() on the largest Timestamp object', () => {
+    const timestamp = new Firestore.Timestamp(253402300799, 999999999);
+    expect(JSON.stringify(timestamp, Firestore.Timestamp.replacer)).to.equal('"9999-12-31T23:59:59.999999999Z"');
   });
 
   it('JSON.stringify() on a Timestamp object whose date is in 2023', () => {
     const timestamp = new Firestore.Timestamp(1680272000, 840000000);
-    expect(JSON.stringify(timestamp)).to.equal('"2023-03-31T14:13:20.840Z"');
+    expect(JSON.parse('"2023-03-31T14:13:20.840000000Z"', Firestore.Timestamp.reviver)).to.deep.equal(timestamp);
+  });
+
+  it('JSON.parse() on a Timestamp object whose date is in 2023', () => {
+    const timestamp = new Firestore.Timestamp(1680272000, 840000000);
+    expect(JSON.stringify(timestamp, Firestore.Timestamp.replacer)).to.equal('"2023-03-31T14:13:20.840000000Z"');
+  });
+
+  it.only('JSON.stringify() on the smallest Timestamp object', () => {
+    const timestamp = new Firestore.Timestamp(-62135596800, 0);
+    const writeResult = new Firestore.WriteResult(timestamp);
+    expect(JSON.stringify(writeResult, Firestore.WriteResult.replacer)).to.equal('{"writeTime":"\\"0001-01-01T00:00:00.000000000Z\\""}');
   });
 });

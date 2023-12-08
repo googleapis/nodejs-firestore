@@ -1206,6 +1206,9 @@ declare namespace FirebaseFirestore {
   export class WriteResult {
     private constructor();
 
+    static reviver(this: any, key: string, value: any): any;
+    static replacer(this: any, key: string, value: any): any;
+
     /**
      * The write time as set by the Firestore servers.
      */
