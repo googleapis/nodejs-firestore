@@ -1709,15 +1709,15 @@ describe('Query class', () => {
 
   it('has limit() method on stream()', async () => {
     let received = 0;
-    await addDocs({foo: 'a'}, {foo: 'b'}).then(async () => {
-      const stream = randomCol.orderBy('foo').limit(1).stream();
-      for await (const doc of stream) {
-        expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
-        ++received;
-      }
+    await addDocs({foo: 'a'}, {foo: 'b'});
 
-      expect(received).to.equal(1);
-    });
+    const stream = randomCol.orderBy('foo').limit(1).stream();
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
+      ++received;
+    }
+
+    expect(received).to.equal(1);
   });
 
   it('can run limit(num), where num is larger than the collection size on get()', async () => {
@@ -1728,14 +1728,15 @@ describe('Query class', () => {
 
   it('can run limit(num), where num is larger than the collection size on stream()', async () => {
     let received = 0;
-    await addDocs({foo: 'a'}, {foo: 'b'}).then(async () => {
-      const stream = randomCol.orderBy('foo').limit(3).stream();
-      for await (const doc of stream) {
-        expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
-        ++received;
-      }
-      expect(received).to.equal(2);
-    });
+    await addDocs({foo: 'a'}, {foo: 'b'});
+
+    const stream = randomCol.orderBy('foo').limit(3).stream();
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
+      ++received;
+    }
+
+    expect(received).to.equal(2);
   });
 
   it('has limitToLast() method', async () => {
@@ -1763,15 +1764,15 @@ describe('Query class', () => {
 
   it('can use offset() method with stream()', async () => {
     let received = 0;
-    await addDocs({foo: 'a'}, {foo: 'b'}).then(async () => {
-      const stream = randomCol.orderBy('foo').offset(1).stream();
-      for await (const doc of stream) {
-        expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
-        ++received;
-      }
+    await addDocs({foo: 'a'}, {foo: 'b'});
 
-      expect(received).to.equal(1);
-    });
+    const stream = randomCol.orderBy('foo').offset(1).stream();
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
+      ++received;
+    }
+
+    expect(received).to.equal(1);
   });
 
   it('can run offset(num), where num is larger than the collection size on get()', async () => {
