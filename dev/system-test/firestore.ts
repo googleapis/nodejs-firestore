@@ -3067,15 +3067,14 @@ describe('count queries', () => {
       const count5 = randomCol.offset(6).count();
       await runQueryAndExpectCount(count5, 1);
     });
+  }
 
-    it.only('count query error message is good if missing index', () => {
+  it('count query error message contains console link if missing index', () => {
     const query = randomCol.where('key1', '==', 42).where('key2', '<', 42);
-    expect(query.count().get()).to.be.eventually.rejectedWith(
+    return expect(query.count().get()).to.be.eventually.rejectedWith(
       /index.*https:\/\/console\.firebase\.google\.com/
     );
   });
-
-  }
 });
 
 describe('count queries using aggregate api', () => {
