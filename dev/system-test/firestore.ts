@@ -3069,12 +3069,27 @@ describe('count queries', () => {
     });
   }
 
-  it('count query error message contains console link if missing index', () => {
-    const query = randomCol.where('key1', '==', 42).where('key2', '<', 42);
-    return expect(query.count().get()).to.be.eventually.rejectedWith(
-      /index.*https:\/\/console\.firebase\.google\.com/
-    );
-  });
+  // Only verify the error message for missing indexes when running against
+  // production, since the Firestore Emulator does not require index creation
+  // and will, therefore, never fail in this situation.
+  // eslint-disable-next-line no-restricted-properties
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it.skip)(
+    'count query error message contains console link if missing index',
+    () => {
+      const query = randomCol.where('key1', '==', 42).where('key2', '<', 42);
+      const countQuery = query.count();
+      const databaseId = query.firestore._settings.databaseId ?? '(default)';
+      // TODO(b/316359394) Remove this check for the default databases once
+      //  cl/582465034 is rolled out to production.
+      if (databaseId === '(default)') {
+        return expect(countQuery.get()).to.be.eventually.rejectedWith(
+          /index.*https:\/\/console\.firebase\.google\.com/
+        );
+      } else {
+        return expect(countQuery.get()).to.be.eventually.rejectedWith(/index/);
+      }
+    }
+  );
 });
 
 describe('count queries using aggregate api', () => {
