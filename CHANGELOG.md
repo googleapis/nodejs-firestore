@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.1.1](https://github.com/googleapis/nodejs-firestore/compare/v7.1.0...v7.1.1) (2023-11-20)
+
+
+### Bug Fixes
+
+* Remove temporary header encoding workaround ([#1935](https://github.com/googleapis/nodejs-firestore/issues/1935)) ([8a4ae5b](https://github.com/googleapis/nodejs-firestore/commit/8a4ae5b07712588bd0deae917d9e17f34f1ebb60))
+* Update retry policy to not retry streams that have not made progress receiving documents ([170d05b](https://github.com/googleapis/nodejs-firestore/commit/170d05b1fa6c720d1109506ed3d3feb525c16efe))
+
 ## [7.1.0](https://github.com/googleapis/nodejs-firestore/compare/v7.0.0...v7.1.0) (2023-10-11)
 
 
