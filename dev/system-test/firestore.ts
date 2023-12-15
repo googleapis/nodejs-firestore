@@ -3446,15 +3446,27 @@ describe('Aggregation queries', () => {
   // production, since the Firestore Emulator does not require index creation
   // and will, therefore, never fail in this situation.
   // eslint-disable-next-line no-restricted-properties
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
-    'aggregate() error message is good if missing index',
-    async () => {
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it.skip)(
+    'aggregate query error message contains console link if missing index',
+    () => {
       const query = col.where('key1', '==', 42).where('key2', '<', 42);
-      await expect(
-        query.aggregate({count: AggregateField.count()}).get()
-      ).to.be.eventually.rejectedWith(
-        /index.*https:\/\/console\.firebase\.google\.com/
-      );
+      const aggregateQuery = query.aggregate({
+        count: AggregateField.count(),
+        sum: AggregateField.sum('pages'),
+        average: AggregateField.average('pages'),
+      });
+      const databaseId = query.firestore._settings.databaseId ?? '(default)';
+      // TODO(b/316359394) Remove this check for the default databases once
+      //  cl/582465034 is rolled out to production.
+      if (databaseId === '(default)') {
+        return expect(aggregateQuery.get()).to.be.eventually.rejectedWith(
+          /index.*https:\/\/console\.firebase\.google\.com/
+        );
+      } else {
+        return expect(aggregateQuery.get()).to.be.eventually.rejectedWith(
+          /index/
+        );
+      }
     }
   );
 
