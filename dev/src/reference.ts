@@ -729,6 +729,32 @@ export class FieldOrder {
   }
 }
 
+export class FunctionOrder {
+  constructor(
+    readonly field: firestore.OnceFunction | firestore.Function,
+    readonly direction: api.StructuredQuery.Direction = 'ASCENDING'
+  ) {}
+
+  /**
+   * Generates the proto representation for this field order.
+   * @private
+   * @internal
+   */
+  toProto(): api.StructuredQuery.IOrder {
+    return {
+      // TODO(wuandy): Build the right order by
+      // field: {
+      //   fieldPath: this.field.formattedName,
+      // },
+      direction: this.direction,
+    };
+  }
+}
+
+type Order =
+  | {type: 'field'; order: FieldOrder}
+  | {type: 'function'; order: FunctionOrder};
+
 abstract class FilterInternal {
   /** Returns a list of all field filters that are contained within this filter */
   abstract getFlattenedFilters(): FieldFilterInternal[];
@@ -1217,7 +1243,7 @@ export class QueryOptions<
     >,
     readonly allDescendants: boolean,
     readonly filters: FilterInternal[],
-    readonly fieldOrders: FieldOrder[],
+    readonly fieldOrders: Order[],
     readonly startAt?: QueryCursor,
     readonly endAt?: QueryCursor,
     readonly limit?: number,
@@ -1736,7 +1762,10 @@ export class Query<
     );
 
     const options = this._queryOptions.with({
-      fieldOrders: this._queryOptions.fieldOrders.concat(newOrder),
+      fieldOrders: this._queryOptions.fieldOrders.concat({
+        type: 'field',
+        order: newOrder,
+      }),
     });
     return new Query(this._firestore, options);
   }
@@ -1949,19 +1978,19 @@ export class Query<
       cursorValuesOrDocumentSnapshot.length !== 1 ||
       !(cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot)
     ) {
-      return this._queryOptions.fieldOrders;
+      return this._queryOptions.fieldOrders.map(o => o.order as FieldOrder);
     }
 
     const fieldOrders = this._queryOptions.fieldOrders.slice();
     const fieldsNormalized = new Set([
-      ...fieldOrders.map(item => item.field.toString()),
+      ...fieldOrders.map(item => (item.order as FieldOrder).field.toString()),
     ]);
 
     /** The order of the implicit ordering always matches the last explicit order by. */
     const lastDirection =
       fieldOrders.length === 0
         ? directionOperators.ASC
-        : fieldOrders[fieldOrders.length - 1].direction;
+        : (fieldOrders[fieldOrders.length - 1].order as FieldOrder).direction;
 
     /**
      * Any inequality fields not explicitly ordered should be implicitly ordered in a
@@ -1976,17 +2005,23 @@ export class Query<
         !fieldsNormalized.has(field.toString()) &&
         !field.isEqual(FieldPath.documentId())
       ) {
-        fieldOrders.push(new FieldOrder(field, lastDirection));
+        fieldOrders.push({
+          type: 'field',
+          order: new FieldOrder(field, lastDirection),
+        });
         fieldsNormalized.add(field.toString());
       }
     }
 
     // Add the document key field to the last if it is not explicitly ordered.
     if (!fieldsNormalized.has(FieldPath.documentId().toString())) {
-      fieldOrders.push(new FieldOrder(FieldPath.documentId(), lastDirection));
+      fieldOrders.push({
+        type: 'field',
+        order: new FieldOrder(FieldPath.documentId(), lastDirection),
+      });
     }
 
-    return fieldOrders;
+    return fieldOrders.map(o => o.order as FieldOrder);
   }
 
   /**
@@ -2147,15 +2182,16 @@ export class Query<
       1
     );
 
-    const fieldOrders = this.createImplicitOrderBy(
-      fieldValuesOrDocumentSnapshot
-    );
+    const orders = this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
     const startAt = this.createCursor(
-      fieldOrders,
+      orders,
       fieldValuesOrDocumentSnapshot,
       true
     );
 
+    const fieldOrders: Order[] = orders.map(fo => {
+      return {type: 'field', order: fo};
+    });
     const options = this._queryOptions.with({fieldOrders, startAt});
     return new Query(this._firestore, options);
   }
@@ -2200,7 +2236,12 @@ export class Query<
       false
     );
 
-    const options = this._queryOptions.with({fieldOrders, startAt});
+    const options = this._queryOptions.with({
+      fieldOrders: fieldOrders.map(fo => {
+        return {type: 'field', order: fo};
+      }),
+      startAt,
+    });
     return new Query(this._firestore, options);
   }
 
@@ -2243,7 +2284,12 @@ export class Query<
       true
     );
 
-    const options = this._queryOptions.with({fieldOrders, endAt});
+    const options = this._queryOptions.with({
+      fieldOrders: fieldOrders.map(fo => {
+        return {type: 'field', order: fo};
+      }),
+      endAt,
+    });
     return new Query(this._firestore, options);
   }
 
@@ -2286,7 +2332,12 @@ export class Query<
       false
     );
 
-    const options = this._queryOptions.with({fieldOrders, endAt});
+    const options = this._queryOptions.with({
+      fieldOrders: fieldOrders.map(fo => {
+        return {type: 'field', order: fo};
+      }),
+      endAt,
+    });
     return new Query(this._firestore, options);
   }
 
@@ -2462,8 +2513,8 @@ export class Query<
       structuredQuery.orderBy = this._queryOptions.fieldOrders!.map(order => {
         // Flip the orderBy directions since we want the last results
         const dir =
-          order.direction === 'DESCENDING' ? 'ASCENDING' : 'DESCENDING';
-        return new FieldOrder(order.field, dir).toProto();
+          order.order.direction === 'DESCENDING' ? 'ASCENDING' : 'DESCENDING';
+        return new FieldOrder((order.order as FieldOrder).field, dir).toProto();
       });
 
       // Swap the cursors to match the now-flipped query ordering.
@@ -2548,7 +2599,7 @@ export class Query<
 
     if (this._queryOptions.hasFieldOrders()) {
       structuredQuery.orderBy = this._queryOptions.fieldOrders.map(o =>
-        o.toProto()
+        o.order.toProto()
       );
     }
 
@@ -2800,19 +2851,22 @@ export class Query<
       const lastDirection = this._queryOptions.hasFieldOrders()
         ? this._queryOptions.fieldOrders[
             this._queryOptions.fieldOrders.length - 1
-          ].direction
+          ].order.direction
         : 'ASCENDING';
-      const orderBys = this._queryOptions.fieldOrders.concat(
-        new FieldOrder(FieldPath.documentId(), lastDirection)
-      );
+      const orderBys = this._queryOptions.fieldOrders.concat({
+        type: 'field',
+        order: new FieldOrder(FieldPath.documentId(), lastDirection),
+      });
 
       for (const orderBy of orderBys) {
         let comp;
-        if (FieldPath.documentId().isEqual(orderBy.field)) {
+        if (
+          FieldPath.documentId().isEqual((orderBy.order as FieldOrder).field)
+        ) {
           comp = doc1.ref._path.compareTo(doc2.ref._path);
         } else {
-          const v1 = doc1.protoField(orderBy.field);
-          const v2 = doc2.protoField(orderBy.field);
+          const v1 = doc1.protoField((orderBy.order as FieldOrder).field);
+          const v2 = doc2.protoField((orderBy.order as FieldOrder).field);
           if (v1 === undefined || v2 === undefined) {
             throw new Error(
               'Trying to compare documents on fields that ' +
@@ -2824,7 +2878,7 @@ export class Query<
         }
 
         if (comp !== 0) {
-          const direction = orderBy.direction === 'ASCENDING' ? 1 : -1;
+          const direction = orderBy.order.direction === 'ASCENDING' ? 1 : -1;
           return direction * comp;
         }
       }
@@ -3240,6 +3294,10 @@ export class CollectionReference<
       this._resourcePath,
       converter ?? defaultConverter()
     );
+  }
+
+  serverOnceQuery(): FirebaseFirestore.OnceQuery {
+    return {} as FirebaseFirestore.OnceQuery;
   }
 }
 
@@ -3725,4 +3783,1508 @@ function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
  */
 function coalesce<T>(...values: Array<T | undefined>): T | undefined {
   return values.find(value => value !== undefined);
+}
+
+export class OnceQuery<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> implements firestore.OnceQuery<AppModelType, DbModelType>
+{
+  private readonly _serializer: Serializer;
+  /** @private */
+  protected readonly _allowUndefined: boolean;
+
+  /**
+   * @private
+   *
+   * @param _firestore The Firestore Database client.
+   * @param _queryOptions Options that define the query.
+   */
+  constructor(
+    /** @private */
+    readonly _firestore: Firestore,
+    /** @private */
+    protected readonly _queryOptions: QueryOptions<AppModelType, DbModelType>
+  ) {
+    this._serializer = new Serializer(_firestore);
+    this._allowUndefined =
+      !!this._firestore._settings.ignoreUndefinedProperties;
+  }
+
+  /**
+   * Extracts field values from the DocumentSnapshot based on the provided
+   * field order.
+   *
+   * @private
+   * @internal
+   * @param documentSnapshot The document to extract the fields from.
+   * @param fieldOrders The field order that defines what fields we should
+   * extract.
+   * @return {Array.<*>} The field values to use.
+   * @private
+   * @internal
+   */
+  static _extractFieldValues(
+    documentSnapshot: DocumentSnapshot,
+    fieldOrders: FieldOrder[]
+  ): unknown[] {
+    const fieldValues: unknown[] = [];
+
+    for (const fieldOrder of fieldOrders) {
+      if (FieldPath.documentId().isEqual(fieldOrder.field)) {
+        fieldValues.push(documentSnapshot.ref);
+      } else {
+        const fieldValue = documentSnapshot.get(fieldOrder.field);
+        if (fieldValue === undefined) {
+          throw new Error(
+            `Field "${fieldOrder.field}" is missing in the provided DocumentSnapshot. ` +
+              'Please provide a document that contains values for all specified ' +
+              'orderBy() and where() constraints.'
+          );
+        } else {
+          fieldValues.push(fieldValue);
+        }
+      }
+    }
+    return fieldValues;
+  }
+
+  /**
+   * The [Firestore]{@link Firestore} instance for the Firestore
+   * database (useful for performing transactions, etc.).
+   *
+   * @type {Firestore}
+   * @name Query#firestore
+   * @readonly
+   *
+   * @example
+   * ```
+   * let collectionRef = firestore.collection('col');
+   *
+   * collectionRef.add({foo: 'bar'}).then(documentReference => {
+   *   let firestore = documentReference.firestore;
+   *   console.log(`Root location for document is ${firestore.formattedName}`);
+   * });
+   * ```
+   */
+  get firestore(): Firestore {
+    return this._firestore;
+  }
+
+  /**
+   * Creates and returns a new [Query]{@link Query} with the additional filter
+   * that documents must contain the specified field and that its value should
+   * satisfy the relation constraint provided.
+   *
+   * This function returns a new (immutable) instance of the Query (rather than
+   * modify the existing instance) to impose the filter.
+   *
+   * @param {string|FieldPath} fieldPath The name of a property value to compare.
+   * @param {string} opStr A comparison operation in the form of a string.
+   * Acceptable operator strings are "<", "<=", "==", "!=", ">=", ">", "array-contains",
+   * "in", "not-in", and "array-contains-any".
+   * @param {*} value The value to which to compare the field for inclusion in
+   * a query.
+   * @returns {Query} The created Query.
+   *
+   * @example
+   * ```
+   * let collectionRef = firestore.collection('col');
+   *
+   * collectionRef.where('foo', '==', 'bar').get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  where(
+    fieldPath: string | FieldPath,
+    opStr: firestore.WhereFilterOp,
+    value: unknown
+  ): OnceQuery<AppModelType, DbModelType>;
+
+  /**
+   * Creates and returns a new [Query]{@link Query} with the additional filter
+   * that documents should satisfy the relation constraint(s) provided.
+   *
+   * This function returns a new (immutable) instance of the Query (rather than
+   * modify the existing instance) to impose the filter.
+   *
+   * @param {Filter} filter A unary or composite filter to apply to the Query.
+   * @returns {Query} The created Query.
+   *
+   * @example
+   * ```
+   * let collectionRef = firestore.collection('col');
+   *
+   * collectionRef.where(Filter.and(Filter.where('foo', '==', 'bar'), Filter.where('foo', '!=', 'baz'))).get()
+   *   .then(querySnapshot => {
+   *     querySnapshot.forEach(documentSnapshot => {
+   *       console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *     });
+   * });
+   * ```
+   */
+  where(filter: Filter): OnceQuery<AppModelType, DbModelType>;
+
+  where(
+    fieldPathOrFilter: string | firestore.FieldPath | Filter,
+    opStr?: firestore.WhereFilterOp,
+    value?: unknown
+  ): OnceQuery<AppModelType, DbModelType> {
+    let filter: Filter;
+
+    if (fieldPathOrFilter instanceof Filter) {
+      filter = fieldPathOrFilter;
+    } else {
+      filter = Filter.where(fieldPathOrFilter, opStr!, value);
+    }
+
+    if (this._queryOptions.startAt || this._queryOptions.endAt) {
+      throw new Error(
+        'Cannot specify a where() filter after calling startAt(), ' +
+          'startAfter(), endBefore() or endAt().'
+      );
+    }
+
+    const parsedFilter = this._parseFilter(filter);
+
+    if (parsedFilter.getFilters().length === 0) {
+      // Return the existing query if not adding any more filters (e.g. an empty composite filter).
+      return this;
+    }
+
+    const options = this._queryOptions.with({
+      filters: this._queryOptions.filters.concat(parsedFilter),
+    });
+    return new OnceQuery(this._firestore, options);
+  }
+
+  _parseFilter(filter: Filter): FilterInternal {
+    if (filter instanceof UnaryFilter) {
+      return this._parseFieldFilter(filter);
+    }
+    return this._parseCompositeFilter(filter as CompositeFilter);
+  }
+
+  _parseFieldFilter(fieldFilterData: UnaryFilter): FieldFilterInternal {
+    let value = fieldFilterData._getValue();
+    let operator = fieldFilterData._getOperator();
+    const fieldPath = fieldFilterData._getField();
+
+    validateFieldPath('fieldPath', fieldPath);
+
+    operator = validateQueryOperator('opStr', operator, value);
+    validateQueryValue('value', value, this._allowUndefined);
+
+    const path = FieldPath.fromArgument(fieldPath);
+
+    if (FieldPath.documentId().isEqual(path)) {
+      if (operator === 'array-contains' || operator === 'array-contains-any') {
+        throw new Error(
+          `Invalid Query. You can't perform '${operator}' ` +
+            'queries on FieldPath.documentId().'
+        );
+      } else if (operator === 'in' || operator === 'not-in') {
+        if (!Array.isArray(value) || value.length === 0) {
+          throw new Error(
+            `Invalid Query. A non-empty array is required for '${operator}' filters.`
+          );
+        }
+        value = value.map(el => this.validateReference(el));
+      } else {
+        value = this.validateReference(value);
+      }
+    }
+
+    return new FieldFilterInternal(
+      this._serializer,
+      path,
+      comparisonOperators[operator],
+      value
+    );
+  }
+
+  _parseCompositeFilter(compositeFilterData: CompositeFilter): FilterInternal {
+    const parsedFilters = compositeFilterData
+      ._getFilters()
+      .map(filter => this._parseFilter(filter))
+      .filter(parsedFilter => parsedFilter.getFilters().length > 0);
+
+    // For composite filters containing 1 filter, return the only filter.
+    // For example: AND(FieldFilter1) == FieldFilter1
+    if (parsedFilters.length === 1) {
+      return parsedFilters[0];
+    }
+    return new CompositeFilterInternal(
+      parsedFilters,
+      compositeFilterData._getOperator() === 'AND' ? 'AND' : 'OR'
+    );
+  }
+
+  /**
+   * Creates and returns a new [Query]{@link Query} instance that applies a
+   * field mask to the result and returns only the specified subset of fields.
+   * You can specify a list of field paths to return, or use an empty list to
+   * only return the references of matching documents.
+   *
+   * Queries that contain field masks cannot be listened to via `onSnapshot()`
+   * listeners.
+   *
+   * This function returns a new (immutable) instance of the Query (rather than
+   * modify the existing instance) to impose the field mask.
+   *
+   * @param {...(string|FieldPath)} fieldPaths The field paths to return.
+   * @returns {Query} The created Query.
+   *
+   * @example
+   * ```
+   * let collectionRef = firestore.collection('col');
+   * let documentRef = collectionRef.doc('doc');
+   *
+   * return documentRef.set({x:10, y:5}).then(() => {
+   *   return collectionRef.where('x', '>', 5).select('y').get();
+   * }).then((res) => {
+   *   console.log(`y is ${res.docs[0].get('y')}.`);
+   * });
+   * ```
+   */
+  select(...fieldPaths: Array<string | FieldPath>): OnceQuery {
+    const fields: api.StructuredQuery.IFieldReference[] = [];
+
+    if (fieldPaths.length === 0) {
+      fields.push({fieldPath: FieldPath.documentId().formattedName});
+    } else {
+      for (let i = 0; i < fieldPaths.length; ++i) {
+        validateFieldPath(i, fieldPaths[i]);
+        fields.push({
+          fieldPath: FieldPath.fromArgument(fieldPaths[i]).formattedName,
+        });
+      }
+    }
+
+    // By specifying a field mask, the query result no longer conforms to type
+    // `T`. We there return `Query<DocumentData>`;
+    const options = this._queryOptions.with({
+      projection: {fields},
+    }) as QueryOptions<firestore.DocumentData, firestore.DocumentData>;
+    return new OnceQuery(this._firestore, options);
+  }
+
+  /**
+   * Creates and returns a new [Query]{@link Query} that's additionally sorted
+   * by the specified field, optionally in descending order instead of
+   * ascending.
+   *
+   * This function returns a new (immutable) instance of the Query (rather than
+   * modify the existing instance) to impose the field mask.
+   *
+   * @param {string|FieldPath} fieldPath The field to sort by.
+   * @param {string=} directionStr Optional direction to sort by ('asc' or
+   * 'desc'). If not specified, order will be ascending.
+   * @returns {Query} The created Query.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col').where('foo', '>', 42);
+   *
+   * query.orderBy('foo', 'desc').get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  orderBy(
+    fieldPath: firestore.OnceFunction | string | firestore.FieldPath,
+    directionStr?: firestore.OrderByDirection
+  ): OnceQuery<AppModelType, DbModelType> {
+    validateFieldPath('fieldPath', fieldPath);
+    directionStr = validateQueryOrder('directionStr', directionStr);
+
+    if (this._queryOptions.startAt || this._queryOptions.endAt) {
+      throw new Error(
+        'Cannot specify an orderBy() constraint after calling ' +
+          'startAt(), startAfter(), endBefore() or endAt().'
+      );
+    }
+
+    let newOrder: Order;
+
+    if (fieldPath instanceof FieldPath || typeof fieldPath === 'string') {
+      newOrder = {
+        type: 'field',
+        order: new FieldOrder(
+          FieldPath.fromArgument(fieldPath),
+          directionOperators[directionStr || 'asc']
+        ),
+      };
+    } else {
+      newOrder = {
+        type: 'function',
+        order: new FunctionOrder(
+          fieldPath as firestore.OnceFunction,
+          directionOperators[directionStr || 'asc']
+        ),
+      };
+    }
+
+    const options = this._queryOptions.with({
+      fieldOrders: this._queryOptions.fieldOrders.concat(newOrder),
+    });
+    return new OnceQuery(this._firestore, options);
+  }
+
+  /**
+   * Creates and returns a new [Query]{@link Query} that only returns the
+   * first matching documents.
+   *
+   * This function returns a new (immutable) instance of the Query (rather than
+   * modify the existing instance) to impose the limit.
+   *
+   * @param {number} limit The maximum number of items to return.
+   * @returns {Query} The created Query.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col').where('foo', '>', 42);
+   *
+   * query.limit(1).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  limit(limit: number): OnceQuery<AppModelType, DbModelType> {
+    validateInteger('limit', limit);
+
+    const options = this._queryOptions.with({
+      limit,
+      limitType: LimitType.First,
+    });
+    return new OnceQuery(this._firestore, options);
+  }
+
+  /**
+   * Creates and returns a new [Query]{@link Query} that only returns the
+   * last matching documents.
+   *
+   * You must specify at least one orderBy clause for limitToLast queries,
+   * otherwise an exception will be thrown during execution.
+   *
+   * Results for limitToLast queries cannot be streamed via the `stream()` API.
+   *
+   * @param limit The maximum number of items to return.
+   * @return The created Query.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col').where('foo', '>', 42);
+   *
+   * query.limitToLast(1).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Last matching document is ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  limitToLast(limit: number): OnceQuery<AppModelType, DbModelType> {
+    validateInteger('limitToLast', limit);
+
+    const options = this._queryOptions.with({limit, limitType: LimitType.Last});
+    return new OnceQuery(this._firestore, options);
+  }
+
+  /**
+   * Specifies the offset of the returned results.
+   *
+   * This function returns a new (immutable) instance of the
+   * [Query]{@link Query} (rather than modify the existing instance)
+   * to impose the offset.
+   *
+   * @param {number} offset The offset to apply to the Query results
+   * @returns {Query} The created Query.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col').where('foo', '>', 42);
+   *
+   * query.limit(10).offset(20).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  offset(offset: number): OnceQuery<AppModelType, DbModelType> {
+    validateInteger('offset', offset);
+
+    const options = this._queryOptions.with({offset});
+    return new OnceQuery(this._firestore, options);
+  }
+
+  /**
+   * Returns a query that counts the documents in the result set of this
+   * query.
+   *
+   * The returned query, when executed, counts the documents in the result set
+   * of this query without actually downloading the documents.
+   *
+   * Using the returned query to count the documents is efficient because only
+   * the final count, not the documents' data, is downloaded. The returned
+   * query can even count the documents if the result set would be
+   * prohibitively large to download entirely (e.g. thousands of documents).
+   *
+   * @return a query that counts the documents in the result set of this
+   * query. The count can be retrieved from `snapshot.data().count`, where
+   * `snapshot` is the `AggregateQuerySnapshot` resulting from running the
+   * returned query.
+   */
+  count(): AggregateQuery<
+    {count: firestore.AggregateField<number>},
+    AppModelType,
+    DbModelType
+  > {
+    return this.aggregate({
+      count: AggregateField.count(),
+    });
+  }
+
+  /**
+   * Returns a query that can perform the given aggregations.
+   *
+   * The returned query, when executed, calculates the specified aggregations
+   * over the documents in the result set of this query, without actually
+   * downloading the documents.
+   *
+   * Using the returned query to perform aggregations is efficient because only
+   * the final aggregation values, not the documents' data, is downloaded. The
+   * returned query can even perform aggregations of the documents if the result set
+   * would be prohibitively large to download entirely (e.g. thousands of documents).
+   *
+   * @param aggregateSpec An `AggregateSpec` object that specifies the aggregates
+   * to perform over the result set. The AggregateSpec specifies aliases for each
+   * aggregate, which can be used to retrieve the aggregate result.
+   * @example
+   * ```typescript
+   * const aggregateQuery = col.aggregate(query, {
+   *   countOfDocs: count(),
+   *   totalHours: sum('hours'),
+   *   averageScore: average('score')
+   * });
+   *
+   * const aggregateSnapshot = await aggregateQuery.get();
+   * const countOfDocs: number = aggregateSnapshot.data().countOfDocs;
+   * const totalHours: number = aggregateSnapshot.data().totalHours;
+   * const averageScore: number | null = aggregateSnapshot.data().averageScore;
+   * ```
+   */
+  aggregate<T extends firestore.AggregateSpec>(
+    aggregateSpec: T
+  ): AggregateQuery<T, AppModelType, DbModelType> {
+    return new AggregateQuery<T, AppModelType, DbModelType>(
+      // TODO(wuandy): Fix this hack
+      this as any as Query<AppModelType, DbModelType>,
+      aggregateSpec
+    );
+  }
+
+  /**
+   * Returns true if this `Query` is equal to the provided value.
+   *
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `Query` is equal to the provided value.
+   */
+  isEqual(other: firestore.OnceQuery<AppModelType, DbModelType>): boolean {
+    if (this === other) {
+      return true;
+    }
+
+    return (
+      other instanceof OnceQuery &&
+      this._queryOptions.isEqual(other._queryOptions)
+    );
+  }
+
+  /**
+   * Returns the sorted array of inequality filter fields used in this query.
+   *
+   * @return An array of inequality filter fields sorted lexicographically by FieldPath.
+   */
+  private getInequalityFilterFields(): FieldPath[] {
+    const inequalityFields: FieldPath[] = [];
+
+    for (const filter of this._queryOptions.filters) {
+      for (const subFilter of filter.getFlattenedFilters()) {
+        if (subFilter.isInequalityFilter()) {
+          inequalityFields.push(subFilter.field);
+        }
+      }
+    }
+
+    return inequalityFields.sort((a, b) => a.compareTo(b));
+  }
+
+  /**
+   * Computes the backend ordering semantics for DocumentSnapshot cursors.
+   *
+   * @private
+   * @internal
+   * @param cursorValuesOrDocumentSnapshot The snapshot of the document or the
+   * set of field values to use as the boundary.
+   * @returns The implicit ordering semantics.
+   */
+  private createImplicitOrderBy(
+    cursorValuesOrDocumentSnapshot: Array<
+      DocumentSnapshot<AppModelType, DbModelType> | unknown
+    >
+  ): FieldOrder[] {
+    // Add an implicit orderBy if the only cursor value is a DocumentSnapshot.
+    if (
+      cursorValuesOrDocumentSnapshot.length !== 1 ||
+      !(cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot)
+    ) {
+      return this._queryOptions.fieldOrders.map(o => o.order as FieldOrder);
+    }
+
+    const fieldOrders = this._queryOptions.fieldOrders.slice();
+    const fieldsNormalized = new Set([
+      ...fieldOrders.map(item => (item.order as FieldOrder).field.toString()),
+    ]);
+
+    /** The order of the implicit ordering always matches the last explicit order by. */
+    const lastDirection =
+      fieldOrders.length === 0
+        ? directionOperators.ASC
+        : fieldOrders[fieldOrders.length - 1].order.direction;
+
+    /**
+     * Any inequality fields not explicitly ordered should be implicitly ordered in a
+     * lexicographical order. When there are multiple inequality filters on the same field, the
+     * field should be added only once.
+     * Note: getInequalityFilterFields function sorts the key field before
+     * other fields. However, we want the key field to be sorted last.
+     */
+    const inequalityFields = this.getInequalityFilterFields();
+    for (const field of inequalityFields) {
+      if (
+        !fieldsNormalized.has(field.toString()) &&
+        !field.isEqual(FieldPath.documentId())
+      ) {
+        fieldOrders.push({
+          type: 'field',
+          order: new FieldOrder(field, lastDirection),
+        });
+        fieldsNormalized.add(field.toString());
+      }
+    }
+
+    // Add the document key field to the last if it is not explicitly ordered.
+    if (!fieldsNormalized.has(FieldPath.documentId().toString())) {
+      fieldOrders.push({
+        type: 'field',
+        order: new FieldOrder(FieldPath.documentId(), lastDirection),
+      });
+    }
+
+    return fieldOrders.map(o => o.order as FieldOrder);
+  }
+
+  /**
+   * Builds a Firestore 'Position' proto message.
+   *
+   * @private
+   * @internal
+   * @param {Array.<FieldOrder>} fieldOrders The field orders to use for this
+   * cursor.
+   * @param {Array.<DocumentSnapshot|*>} cursorValuesOrDocumentSnapshot The
+   * snapshot of the document or the set of field values to use as the boundary.
+   * @param before Whether the query boundary lies just before or after the
+   * provided data.
+   * @returns {Object} The proto message.
+   */
+  private createCursor(
+    fieldOrders: FieldOrder[],
+    cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot | unknown>,
+    before: boolean
+  ): QueryCursor {
+    let fieldValues;
+
+    if (
+      cursorValuesOrDocumentSnapshot.length === 1 &&
+      cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot
+    ) {
+      fieldValues = Query._extractFieldValues(
+        cursorValuesOrDocumentSnapshot[0] as DocumentSnapshot,
+        fieldOrders
+      );
+    } else {
+      fieldValues = cursorValuesOrDocumentSnapshot;
+    }
+
+    if (fieldValues.length > fieldOrders.length) {
+      throw new Error(
+        'Too many cursor values specified. The specified ' +
+          'values must match the orderBy() constraints of the query.'
+      );
+    }
+
+    const options: QueryCursor = {values: [], before};
+
+    for (let i = 0; i < fieldValues.length; ++i) {
+      let fieldValue = fieldValues[i];
+
+      if (FieldPath.documentId().isEqual(fieldOrders[i].field)) {
+        fieldValue = this.validateReference(fieldValue);
+      }
+
+      validateQueryValue(i, fieldValue, this._allowUndefined);
+      options.values!.push(this._serializer.encodeValue(fieldValue)!);
+    }
+
+    return options;
+  }
+
+  /**
+   * Validates that a value used with FieldValue.documentId() is either a
+   * string or a DocumentReference that is part of the query`s result set.
+   * Throws a validation error or returns a DocumentReference that can
+   * directly be used in the Query.
+   *
+   * @param val The value to validate.
+   * @throws If the value cannot be used for this query.
+   * @return If valid, returns a DocumentReference that can be used with the
+   * query.
+   * @private
+   * @internal
+   */
+  private validateReference(
+    val: unknown
+  ): DocumentReference<AppModelType, DbModelType> {
+    const basePath = this._queryOptions.allDescendants
+      ? this._queryOptions.parentPath
+      : this._queryOptions.parentPath.append(this._queryOptions.collectionId);
+    let reference: DocumentReference<AppModelType, DbModelType>;
+
+    if (typeof val === 'string') {
+      const path = basePath.append(val);
+
+      if (this._queryOptions.allDescendants) {
+        if (!path.isDocument) {
+          throw new Error(
+            'When querying a collection group and ordering by ' +
+              'FieldPath.documentId(), the corresponding value must result in ' +
+              `a valid document path, but '${val}' is not because it ` +
+              'contains an odd number of segments.'
+          );
+        }
+      } else if (val.indexOf('/') !== -1) {
+        throw new Error(
+          'When querying a collection and ordering by FieldPath.documentId(), ' +
+            `the corresponding value must be a plain document ID, but '${val}' ` +
+            'contains a slash.'
+        );
+      }
+
+      reference = new DocumentReference(
+        this._firestore,
+        basePath.append(val),
+        this._queryOptions.converter
+      );
+    } else if (val instanceof DocumentReference) {
+      reference = val;
+      if (!basePath.isPrefixOf(reference._path)) {
+        throw new Error(
+          `"${reference.path}" is not part of the query result set and ` +
+            'cannot be used as a query boundary.'
+        );
+      }
+    } else {
+      throw new Error(
+        'The corresponding value for FieldPath.documentId() must be a ' +
+          `string or a DocumentReference, but was "${val}".`
+      );
+    }
+
+    if (
+      !this._queryOptions.allDescendants &&
+      reference._path.parent()!.compareTo(basePath) !== 0
+    ) {
+      throw new Error(
+        'Only a direct child can be used as a query boundary. ' +
+          `Found: "${reference.path}".`
+      );
+    }
+    return reference;
+  }
+
+  /**
+   * Creates and returns a new [Query]{@link Query} that starts at the provided
+   * set of field values relative to the order of the query. The order of the
+   * provided values must match the order of the order by clauses of the query.
+   *
+   * @param {...*|DocumentSnapshot} fieldValuesOrDocumentSnapshot The snapshot
+   * of the document the query results should start at or the field values to
+   * start this query at, in order of the query's order by.
+   * @returns {Query} A query with the new starting point.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col');
+   *
+   * query.orderBy('foo').startAt(42).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  startAt(
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+  ): OnceQuery<AppModelType, DbModelType> {
+    validateMinNumberOfArguments(
+      'Query.startAt',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
+
+    const fieldOrders = this.createImplicitOrderBy(
+      fieldValuesOrDocumentSnapshot
+    );
+    const startAt = this.createCursor(
+      fieldOrders,
+      fieldValuesOrDocumentSnapshot,
+      true
+    );
+
+    const options = this._queryOptions.with({
+      fieldOrders: fieldOrders.map(fo => {
+        return {type: 'field', order: fo};
+      }),
+      startAt,
+    });
+    return new OnceQuery(this._firestore, options);
+  }
+
+  /**
+   * Creates and returns a new [Query]{@link Query} that starts after the
+   * provided set of field values relative to the order of the query. The order
+   * of the provided values must match the order of the order by clauses of the
+   * query.
+   *
+   * @param {...*|DocumentSnapshot} fieldValuesOrDocumentSnapshot The snapshot
+   * of the document the query results should start after or the field values to
+   * start this query after, in order of the query's order by.
+   * @returns {Query} A query with the new starting point.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col');
+   *
+   * query.orderBy('foo').startAfter(42).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  startAfter(
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+  ): OnceQuery<AppModelType, DbModelType> {
+    validateMinNumberOfArguments(
+      'Query.startAfter',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
+
+    const fieldOrders = this.createImplicitOrderBy(
+      fieldValuesOrDocumentSnapshot
+    );
+    const startAt = this.createCursor(
+      fieldOrders,
+      fieldValuesOrDocumentSnapshot,
+      false
+    );
+
+    const options = this._queryOptions.with({
+      fieldOrders: fieldOrders.map(fo => {
+        return {type: 'field', order: fo};
+      }),
+      startAt,
+    });
+    return new OnceQuery(this._firestore, options);
+  }
+
+  /**
+   * Creates and returns a new [Query]{@link Query} that ends before the set of
+   * field values relative to the order of the query. The order of the provided
+   * values must match the order of the order by clauses of the query.
+   *
+   * @param {...*|DocumentSnapshot} fieldValuesOrDocumentSnapshot The snapshot
+   * of the document the query results should end before or the field values to
+   * end this query before, in order of the query's order by.
+   * @returns {Query} A query with the new ending point.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col');
+   *
+   * query.orderBy('foo').endBefore(42).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  endBefore(
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+  ): OnceQuery<AppModelType, DbModelType> {
+    validateMinNumberOfArguments(
+      'Query.endBefore',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
+
+    const fieldOrders = this.createImplicitOrderBy(
+      fieldValuesOrDocumentSnapshot
+    );
+    const endAt = this.createCursor(
+      fieldOrders,
+      fieldValuesOrDocumentSnapshot,
+      true
+    );
+
+    const options = this._queryOptions.with({
+      fieldOrders: fieldOrders.map(fo => {
+        return {type: 'field', order: fo};
+      }),
+      endAt,
+    });
+    return new OnceQuery(this._firestore, options);
+  }
+
+  /**
+   * Creates and returns a new [Query]{@link Query} that ends at the provided
+   * set of field values relative to the order of the query. The order of the
+   * provided values must match the order of the order by clauses of the query.
+   *
+   * @param {...*|DocumentSnapshot} fieldValuesOrDocumentSnapshot The snapshot
+   * of the document the query results should end at or the field values to end
+   * this query at, in order of the query's order by.
+   * @returns {Query} A query with the new ending point.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col');
+   *
+   * query.orderBy('foo').endAt(42).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  endAt(
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+  ): OnceQuery<AppModelType, DbModelType> {
+    validateMinNumberOfArguments(
+      'Query.endAt',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
+
+    const fieldOrders = this.createImplicitOrderBy(
+      fieldValuesOrDocumentSnapshot
+    );
+    const endAt = this.createCursor(
+      fieldOrders,
+      fieldValuesOrDocumentSnapshot,
+      false
+    );
+
+    const options = this._queryOptions.with({
+      fieldOrders: fieldOrders.map(fo => {
+        return {type: 'field', order: fo};
+      }),
+      endAt,
+    });
+    return new OnceQuery(this._firestore, options);
+  }
+
+  /**
+   * Executes the query and returns the results as a
+   * [QuerySnapshot]{@link QuerySnapshot}.
+   *
+   * @returns {Promise.<QuerySnapshot>} A Promise that resolves with the results
+   * of the Query.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   *
+   * query.get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Found document at ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  get(): Promise<QuerySnapshot<AppModelType, DbModelType>> {
+    return this._get();
+  }
+
+  /**
+   * Internal get() method that accepts an optional transaction id.
+   *
+   * @private
+   * @internal
+   * @param {bytes=} transactionId A transaction ID.
+   */
+  _get(
+    transactionId?: Uint8Array
+  ): Promise<QuerySnapshot<AppModelType, DbModelType>> {
+    const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
+
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    return new Promise((resolve, reject) => {
+      let readTime: Timestamp;
+
+      this._stream(transactionId)
+        .on('error', err => {
+          reject(wrapError(err, stack));
+        })
+        .on('data', result => {
+          readTime = result.readTime;
+          if (result.document) {
+            docs.push(result.document);
+          }
+        })
+        .on('end', () => {
+          if (this._queryOptions.limitType === LimitType.Last) {
+            // The results for limitToLast queries need to be flipped since
+            // we reversed the ordering constraints before sending the query
+            // to the backend.
+            docs.reverse();
+          }
+
+          resolve(
+            new QuerySnapshot(
+              // TODO(wuandy): Fix this hack
+              this as unknown as Query<AppModelType, DbModelType>,
+              readTime,
+              docs.length,
+              () => docs,
+              () => {
+                const changes: Array<
+                  DocumentChange<AppModelType, DbModelType>
+                > = [];
+                for (let i = 0; i < docs.length; ++i) {
+                  changes.push(new DocumentChange('added', docs[i], -1, i));
+                }
+                return changes;
+              }
+            )
+          );
+        });
+    });
+  }
+
+  /**
+   * Executes the query and streams the results as
+   * [QueryDocumentSnapshots]{@link QueryDocumentSnapshot}.
+   *
+   * @returns {Stream.<QueryDocumentSnapshot>} A stream of
+   * QueryDocumentSnapshots.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   *
+   * let count = 0;
+   *
+   * query.stream().on('data', (documentSnapshot) => {
+   *   console.log(`Found document with name '${documentSnapshot.id}'`);
+   *   ++count;
+   * }).on('end', () => {
+   *   console.log(`Total count is ${count}`);
+   * });
+   * ```
+   */
+  stream(): NodeJS.ReadableStream {
+    if (this._queryOptions.limitType === LimitType.Last) {
+      throw new Error(
+        'Query results for queries that include limitToLast() ' +
+          'constraints cannot be streamed. Use Query.get() instead.'
+      );
+    }
+
+    const responseStream = this._stream();
+    const transform = new Transform({
+      objectMode: true,
+      transform(chunk, encoding, callback) {
+        callback(undefined, chunk.document);
+      },
+    });
+
+    responseStream.pipe(transform);
+    responseStream.on('error', e => transform.destroy(e));
+    return transform;
+  }
+
+  /**
+   * Converts a QueryCursor to its proto representation.
+   *
+   * @param cursor The original cursor value
+   * @private
+   * @internal
+   */
+  private toCursor(cursor: QueryCursor | undefined): api.ICursor | undefined {
+    if (cursor) {
+      return cursor.before
+        ? {before: true, values: cursor.values}
+        : {values: cursor.values};
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Internal method for serializing a query to its RunQuery proto
+   * representation with an optional transaction id or read time.
+   *
+   * @param transactionIdOrReadTime A transaction ID or the read time at which
+   * to execute the query.
+   * @private
+   * @internal
+   * @returns Serialized JSON for the query.
+   */
+  toProto(
+    transactionIdOrReadTime?: Uint8Array | Timestamp
+  ): api.IRunQueryRequest {
+    const projectId = this.firestore.projectId;
+    const databaseId = this.firestore.databaseId;
+    const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
+      projectId,
+      databaseId
+    );
+
+    const structuredQuery = this.toStructuredQuery();
+
+    // For limitToLast queries, the structured query has to be translated to a version with
+    // reversed ordered, and flipped startAt/endAt to work properly.
+    if (this._queryOptions.limitType === LimitType.Last) {
+      if (!this._queryOptions.hasFieldOrders()) {
+        throw new Error(
+          'limitToLast() queries require specifying at least one orderBy() clause.'
+        );
+      }
+
+      structuredQuery.orderBy = this._queryOptions.fieldOrders!.map(order => {
+        // Flip the orderBy directions since we want the last results
+        const dir =
+          order.order.direction === 'DESCENDING' ? 'ASCENDING' : 'DESCENDING';
+        return new FieldOrder((order.order as FieldOrder).field, dir).toProto();
+      });
+
+      // Swap the cursors to match the now-flipped query ordering.
+      structuredQuery.startAt = this._queryOptions.endAt
+        ? this.toCursor({
+            values: this._queryOptions.endAt.values,
+            before: !this._queryOptions.endAt.before,
+          })
+        : undefined;
+      structuredQuery.endAt = this._queryOptions.startAt
+        ? this.toCursor({
+            values: this._queryOptions.startAt.values,
+            before: !this._queryOptions.startAt.before,
+          })
+        : undefined;
+    }
+
+    const runQueryRequest: api.IRunQueryRequest = {
+      parent: parentPath.formattedName,
+      structuredQuery,
+    };
+
+    if (transactionIdOrReadTime instanceof Uint8Array) {
+      runQueryRequest.transaction = transactionIdOrReadTime;
+    } else if (transactionIdOrReadTime instanceof Timestamp) {
+      runQueryRequest.readTime =
+        transactionIdOrReadTime.toProto().timestampValue;
+    }
+
+    return runQueryRequest;
+  }
+
+  /**
+   * Converts current Query to an IBundledQuery.
+   *
+   * @private
+   * @internal
+   */
+  _toBundledQuery(): protos.firestore.IBundledQuery {
+    const projectId = this.firestore.projectId;
+    const databaseId = this.firestore.databaseId;
+    const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
+      projectId,
+      databaseId
+    );
+    const structuredQuery = this.toStructuredQuery();
+
+    const bundledQuery: protos.firestore.IBundledQuery = {
+      parent: parentPath.formattedName,
+      structuredQuery,
+    };
+    if (this._queryOptions.limitType === LimitType.First) {
+      bundledQuery.limitType = 'FIRST';
+    } else if (this._queryOptions.limitType === LimitType.Last) {
+      bundledQuery.limitType = 'LAST';
+    }
+
+    return bundledQuery;
+  }
+
+  private toStructuredQuery(): api.IStructuredQuery {
+    const structuredQuery: api.IStructuredQuery = {
+      from: [{}],
+    };
+
+    if (this._queryOptions.allDescendants) {
+      structuredQuery.from![0].allDescendants = true;
+    }
+
+    // Kindless queries select all descendant documents, so we remove the
+    // collectionId field.
+    if (!this._queryOptions.kindless) {
+      structuredQuery.from![0].collectionId = this._queryOptions.collectionId;
+    }
+
+    if (this._queryOptions.filters.length >= 1) {
+      structuredQuery.where = new CompositeFilterInternal(
+        this._queryOptions.filters,
+        'AND'
+      ).toProto();
+    }
+
+    if (this._queryOptions.hasFieldOrders()) {
+      structuredQuery.orderBy = this._queryOptions.fieldOrders.map(o =>
+        o.order.toProto()
+      );
+    }
+
+    structuredQuery.startAt = this.toCursor(this._queryOptions.startAt);
+    structuredQuery.endAt = this.toCursor(this._queryOptions.endAt);
+
+    if (this._queryOptions.limit) {
+      structuredQuery.limit = {value: this._queryOptions.limit};
+    }
+
+    structuredQuery.offset = this._queryOptions.offset;
+    structuredQuery.select = this._queryOptions.projection;
+
+    return structuredQuery;
+  }
+
+  // This method exists solely to enable unit tests to mock it.
+  _isPermanentRpcError(err: GoogleError, methodName: string): boolean {
+    return isPermanentRpcError(err, methodName);
+  }
+
+  _hasRetryTimedOut(methodName: string, startTime: number): boolean {
+    const totalTimeout = getTotalTimeout(methodName);
+    if (totalTimeout === 0) {
+      return false;
+    }
+
+    return Date.now() - startTime >= totalTimeout;
+  }
+
+  /**
+   * Internal streaming method that accepts an optional transaction ID.
+   *
+   * @param transactionId A transaction ID.
+   * @private
+   * @internal
+   * @returns A stream of document results.
+   */
+  _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
+    const tag = requestTag();
+    const startTime = Date.now();
+
+    let lastReceivedDocument: QueryDocumentSnapshot<
+      AppModelType,
+      DbModelType
+    > | null = null;
+
+    let backendStream: Duplex;
+    const stream = new Transform({
+      objectMode: true,
+      transform: (proto, enc, callback) => {
+        if (proto === NOOP_MESSAGE) {
+          callback(undefined);
+          return;
+        }
+        const readTime = Timestamp.fromProto(proto.readTime);
+        if (proto.document) {
+          const document = this.firestore.snapshot_(
+            proto.document,
+            proto.readTime
+          );
+          const finalDoc = new DocumentSnapshotBuilder<
+            AppModelType,
+            DbModelType
+          >(document.ref.withConverter(this._queryOptions.converter));
+          // Recreate the QueryDocumentSnapshot with the DocumentReference
+          // containing the original converter.
+          finalDoc.fieldsProto = document._fieldsProto;
+          finalDoc.readTime = document.readTime;
+          finalDoc.createTime = document.createTime;
+          finalDoc.updateTime = document.updateTime;
+          lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<
+            AppModelType,
+            DbModelType
+          >;
+          callback(undefined, {document: lastReceivedDocument, readTime});
+          if (proto.done) {
+            logger('Query._stream', tag, 'Trigger Logical Termination.');
+            backendStream.unpipe(stream);
+            backendStream.resume();
+            backendStream.end();
+            stream.end();
+          }
+        } else {
+          callback(undefined, {readTime});
+        }
+      },
+    });
+
+    this.firestore
+      .initializeIfNeeded(tag)
+      .then(async () => {
+        // `toProto()` might throw an exception. We rely on the behavior of an
+        // async function to convert this exception into the rejected Promise we
+        // catch below.
+        let request = this.toProto(transactionId);
+
+        let streamActive: Deferred<boolean>;
+        do {
+          streamActive = new Deferred<boolean>();
+          const methodName = 'runQuery';
+          backendStream = await this._firestore.requestStream(
+            methodName,
+            /* bidirectional= */ false,
+            request,
+            tag
+          );
+          backendStream.on('error', err => {
+            backendStream.unpipe(stream);
+
+            // If a non-transactional query failed, attempt to restart.
+            // Transactional queries are retried via the transaction runner.
+            if (!transactionId && !this._isPermanentRpcError(err, 'runQuery')) {
+              logger(
+                'Query._stream',
+                tag,
+                'Query failed with retryable stream error:',
+                err
+              );
+
+              // Enqueue a "no-op" write into the stream and wait for it to be
+              // read by the downstream consumer. This ensures that all enqueued
+              // results in the stream are consumed, which will give us an accurate
+              // value for `lastReceivedDocument`.
+              stream.write(NOOP_MESSAGE, () => {
+                if (this._hasRetryTimedOut(methodName, startTime)) {
+                  logger(
+                    'Query._stream',
+                    tag,
+                    'Query failed with retryable stream error but the total retry timeout has exceeded.'
+                  );
+                  stream.destroy(err);
+                  streamActive.resolve(/* active= */ false);
+                } else if (lastReceivedDocument) {
+                  logger(
+                    'Query._stream',
+                    tag,
+                    'Query failed with retryable stream error and progress was made receiving ' +
+                      'documents, so the stream is being retried.'
+                  );
+
+                  // Restart the query but use the last document we received as
+                  // the query cursor. Note that we do not use backoff here. The
+                  // call to `requestStream()` will backoff should the restart
+                  // fail before delivering any results.
+                  if (this._queryOptions.requireConsistency) {
+                    request = this.startAfter(lastReceivedDocument).toProto(
+                      lastReceivedDocument.readTime
+                    );
+                  } else {
+                    request = this.startAfter(lastReceivedDocument).toProto();
+                  }
+
+                  // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
+                  lastReceivedDocument = null;
+
+                  streamActive.resolve(/* active= */ true);
+                } else {
+                  logger(
+                    'Query._stream',
+                    tag,
+                    'Query failed with retryable stream error however no progress was made receiving ' +
+                      'documents, so the stream is being closed.'
+                  );
+                  stream.destroy(err);
+                  streamActive.resolve(/* active= */ false);
+                }
+              });
+            } else {
+              logger(
+                'Query._stream',
+                tag,
+                'Query failed with stream error:',
+                err
+              );
+              stream.destroy(err);
+              streamActive.resolve(/* active= */ false);
+            }
+          });
+          backendStream.on('end', () => {
+            streamActive.resolve(/* active= */ false);
+          });
+          backendStream.resume();
+          backendStream.pipe(stream);
+        } while (await streamActive.promise);
+      })
+      .catch(e => stream.destroy(e));
+
+    return stream;
+  }
+
+  /**
+   * Returns a function that can be used to sort QueryDocumentSnapshots
+   * according to the sort criteria of this query.
+   *
+   * @private
+   * @internal
+   */
+  comparator(): (
+    s1: QueryDocumentSnapshot<AppModelType, DbModelType>,
+    s2: QueryDocumentSnapshot<AppModelType, DbModelType>
+  ) => number {
+    return (doc1, doc2) => {
+      // Add implicit sorting by name, using the last specified direction.
+      const lastDirection = this._queryOptions.hasFieldOrders()
+        ? this._queryOptions.fieldOrders[
+            this._queryOptions.fieldOrders.length - 1
+          ].order.direction
+        : 'ASCENDING';
+      const orderBys = this._queryOptions.fieldOrders.concat({
+        type: 'field',
+        order: new FieldOrder(FieldPath.documentId(), lastDirection),
+      });
+
+      for (const orderBy of orderBys) {
+        let comp;
+        if (
+          FieldPath.documentId().isEqual((orderBy.order as FieldOrder).field)
+        ) {
+          comp = doc1.ref._path.compareTo(doc2.ref._path);
+        } else {
+          const v1 = doc1.protoField((orderBy.order as FieldOrder).field);
+          const v2 = doc2.protoField((orderBy.order as FieldOrder).field);
+          if (v1 === undefined || v2 === undefined) {
+            throw new Error(
+              'Trying to compare documents on fields that ' +
+                "don't exist. Please include the fields you are ordering on " +
+                'in your select() call.'
+            );
+          }
+          comp = compare(v1, v2);
+        }
+
+        if (comp !== 0) {
+          const direction = orderBy.order.direction === 'ASCENDING' ? 1 : -1;
+          return direction * comp;
+        }
+      }
+
+      return 0;
+    };
+  }
+
+  withConverter(converter: null): OnceQuery;
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+  ): OnceQuery<NewAppModelType, NewDbModelType>;
+  /**
+   * Applies a custom data converter to this Query, allowing you to use your
+   * own custom model objects with Firestore. When you call get() on the
+   * returned Query, the provided converter will convert between Firestore
+   * data of type `NewDbModelType` and your custom type `NewAppModelType`.
+   *
+   * Using the converter allows you to specify generic type arguments when
+   * storing and retrieving objects from Firestore.
+   *
+   * Passing in `null` as the converter parameter removes the current
+   * converter.
+   *
+   * @example
+   * ```
+   * class Post {
+   *   constructor(readonly title: string, readonly author: string) {}
+   *
+   *   toString(): string {
+   *     return this.title + ', by ' + this.author;
+   *   }
+   * }
+   *
+   * const postConverter = {
+   *   toFirestore(post: Post): FirebaseFirestore.DocumentData {
+   *     return {title: post.title, author: post.author};
+   *   },
+   *   fromFirestore(
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
+   *   ): Post {
+   *     const data = snapshot.data();
+   *     return new Post(data.title, data.author);
+   *   }
+   * };
+   *
+   * const postSnap = await Firestore()
+   *   .collection('posts')
+   *   .withConverter(postConverter)
+   *   .doc().get();
+   * const post = postSnap.data();
+   * if (post !== undefined) {
+   *   post.title; // string
+   *   post.toString(); // Should be defined
+   *   post.someNonExistentProperty; // TS error
+   * }
+   *
+   * ```
+   * @param {FirestoreDataConverter | null} converter Converts objects to and
+   * from Firestore. Passing in `null` removes the current converter.
+   * @return A Query that uses the provided converter.
+   */
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestoreDataConverter<
+      NewAppModelType,
+      NewDbModelType
+    > | null
+  ): OnceQuery<NewAppModelType, NewDbModelType> {
+    return new OnceQuery<NewAppModelType, NewDbModelType>(
+      this.firestore,
+      this._queryOptions.withConverter(converter ?? defaultConverter())
+    );
+  }
 }

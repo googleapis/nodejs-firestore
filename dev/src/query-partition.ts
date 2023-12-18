@@ -152,7 +152,9 @@ export class QueryPartition<
       this._converter
     );
     queryOptions = queryOptions.with({
-      fieldOrders: [new FieldOrder(FieldPath.documentId())],
+      fieldOrders: [
+        {type: 'field', order: new FieldOrder(FieldPath.documentId())},
+      ],
     });
     if (this._startAt !== undefined) {
       queryOptions = queryOptions.with({

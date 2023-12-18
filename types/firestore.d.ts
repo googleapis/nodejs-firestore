@@ -1534,62 +1534,75 @@ declare namespace FirebaseFirestore {
     | 'array-contains-any';
 
   export interface OnceFunction {
-    once: true
+    once: true;
   }
 
   export interface Function {
-    streaming: true
+    streaming: true;
   }
 
-  export class DistanceFunction implements OnceFunction, Function {
-    once: true
-    streaming: true
+  export class DistanceFunction implements OnceFunction {
+    once: true;
+    streaming: false;
   }
 
-  export type DistanceType = "L2" | "Cosine"
+  export type DistanceType = 'L2' | 'Cosine';
   export class Functions {
-    static distance(from: string|FieldPath,
-                    to: VectorValue | [number],
-                    options: {type: DistanceType;} | null): DistanceFunction;
+    static distance(
+      from: string | FieldPath,
+      to: VectorValue | [number],
+      options: {type: DistanceType}
+    ): DistanceFunction;
   }
 
-  export class OnceQuery<T = DocumentData> {
+  export class OnceQuery<
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData,
+  > {
     // Added to support vector query and beyond
     orderBy(
-        func: OnceFunction | Function,
-        directionStr?: OrderByDirection
-    ): OnceQuery<T>;
+      func: OnceFunction | string | FieldPath,
+      directionStr?: OrderByDirection
+    ): OnceQuery<AppModelType, DbModelType>;
 
     // Interfaces from `Query`
     where(
-        fieldPath: string | FieldPath,
-        opStr: WhereFilterOp,
-        value: any
-    ): OnceQuery<T>;
-    where(filter: Filter): OnceQuery<T>;
-    orderBy(
-        fieldPath: string | FieldPath,
-        directionStr?: OrderByDirection
-    ): OnceQuery<T>;
+      fieldPath: string | FieldPath,
+      opStr: WhereFilterOp,
+      value: any
+    ): OnceQuery<AppModelType, DbModelType>;
+    where(filter: Filter): OnceQuery<AppModelType, DbModelType>;
 
-    limit(limit: number): OnceQuery<T>;
-    limitToLast(limit: number): OnceQuery<T>;
-    offset(offset: number): OnceQuery<T>;
+    limit(limit: number): OnceQuery<AppModelType, DbModelType>;
+    limitToLast(limit: number): OnceQuery<AppModelType, DbModelType>;
+    offset(offset: number): OnceQuery<AppModelType, DbModelType>;
     select(...field: (string | FieldPath)[]): OnceQuery<DocumentData>;
-    startAt(snapshot: DocumentSnapshot<any>): OnceQuery<T>;
-    startAt(...fieldValues: any[]): OnceQuery<T>;
-    startAfter(snapshot: DocumentSnapshot<any>): OnceQuery<T>;
-    startAfter(...fieldValues: any[]): OnceQuery<T>;
-    endBefore(snapshot: DocumentSnapshot<any>): OnceQuery<T>;
-    endBefore(...fieldValues: any[]): OnceQuery<T>;
-    endAt(snapshot: DocumentSnapshot<any>): OnceQuery<T>;
-    endAt(...fieldValues: any[]): OnceQuery<T>;
-    get(): Promise<QuerySnapshot<T>>;
+    startAt(
+      snapshot: DocumentSnapshot<any>
+    ): OnceQuery<AppModelType, DbModelType>;
+    startAt(...fieldValues: any[]): OnceQuery<AppModelType, DbModelType>;
+    startAfter(
+      snapshot: DocumentSnapshot<any>
+    ): OnceQuery<AppModelType, DbModelType>;
+    startAfter(...fieldValues: any[]): OnceQuery<AppModelType, DbModelType>;
+    endBefore(
+      snapshot: DocumentSnapshot<any>
+    ): OnceQuery<AppModelType, DbModelType>;
+    endBefore(...fieldValues: any[]): OnceQuery<AppModelType, DbModelType>;
+    endAt(
+      snapshot: DocumentSnapshot<any>
+    ): OnceQuery<AppModelType, DbModelType>;
+    endAt(...fieldValues: any[]): OnceQuery<AppModelType, DbModelType>;
+    get(): Promise<QuerySnapshot<AppModelType, DbModelType>>;
     stream(): NodeJS.ReadableStream;
-    withConverter<U>(converter: FirestoreDataConverter<U>): OnceQuery<U>;
-    withConverter(converter: null): OnceQuery<DocumentData>;
+    withConverter<
+      NewAppModelType,
+      NewDbModelType extends DocumentData = DocumentData,
+    >(
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
+    ): OnceQuery<NewAppModelType, NewDbModelType>;
+    withConverter(converter: null): OnceQuery;
   }
-
 
   /**
    * A `Query` refers to a Query which you can read or listen to. You can also
@@ -2066,6 +2079,8 @@ declare namespace FirebaseFirestore {
     listDocuments(): Promise<
       Array<DocumentReference<AppModelType, DbModelType>>
     >;
+
+    serverOnceQuery(): OnceQuery;
 
     /**
      * Get a `DocumentReference` for a randomly-named document within this

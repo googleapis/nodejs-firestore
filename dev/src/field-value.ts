@@ -30,7 +30,7 @@ import {
 
 import api = proto.google.firestore.v1;
 
-export class VectorValue implements firestore.VectorValue{
+export class VectorValue implements firestore.VectorValue {
   private readonly values: number[];
   constructor(values: number[] | undefined) {
     this.values = values || [];
