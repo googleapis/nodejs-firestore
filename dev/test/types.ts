@@ -224,19 +224,19 @@ describe('UpdateData type', () => {
     // nested objects
     nested: {
       bar: {
-        booleanProperty: boolean;
-        stringProperty: string;
-        anotherLayer: {
-          booleanProperty: boolean;
-          stringProperty: string;
+        barBooleanProperty: boolean;
+        barStringProperty: string;
+        barAnotherLayer: {
+          baralBooleanProperty: boolean;
+          baralStringProperty: string;
         };
       };
       baz: {
-        booleanProperty: boolean;
-        stringProperty: string;
-        anotherLayer: {
-          booleanProperty: boolean;
-          stringProperty: string;
+        bazBooleanProperty: boolean;
+        bazStringProperty: string;
+        bazAnotherLayer: {
+          bazalBooleanProperty: boolean;
+          bazalStringProperty: string;
         };
       };
     };
@@ -244,8 +244,8 @@ describe('UpdateData type', () => {
     // index signatures nested 1 layer deep
     indexed: {
       [name: string]: {
-        booleanProperty: boolean;
-        numberProperty: number;
+        nameBooleanProperty: boolean;
+        nameNumberProperty: number;
       };
     };
 
@@ -339,7 +339,7 @@ describe('UpdateData type', () => {
 
     it('does not allow matching a sub-string|path', () => {
       const _: UpdateData<MyServerType> = {
-        // @ts-expect-error Unsupported type
+        // @ts-expect-error Unsupported name
         'property.with': true,
       };
 
@@ -364,11 +364,11 @@ describe('UpdateData type', () => {
       _ = {
         nested: {
           bar: {
-            booleanProperty: true,
-            stringProperty: 'string',
+            barBooleanProperty: true,
+            barStringProperty: 'string',
           },
           baz: {
-            stringProperty: 'string',
+            bazStringProperty: 'string',
           },
         },
       };
@@ -376,11 +376,11 @@ describe('UpdateData type', () => {
       _ = {
         nested: {
           bar: {
-            booleanProperty: true,
-            stringProperty: 'string',
-            anotherLayer: {
-              booleanProperty: false,
-              stringProperty: 'another string',
+            barBooleanProperty: true,
+            barStringProperty: 'string',
+            barAnotherLayer: {
+              baralBooleanProperty: false,
+              baralStringProperty: 'another string',
             },
           },
         },
@@ -400,14 +400,15 @@ describe('UpdateData type', () => {
         nested: {
           bar: {
             // @ts-expect-error Unsupported type
-            stringProperty: true,
+            barStringProperty: true,
             // @ts-expect-error Unsupported type
-            anotherLayer: true,
+            barAnotherLayer: true,
+            x: true,
           },
           baz: {
-            anotherLayer: {
+            bazAnotherLayer: {
               // @ts-expect-error Unsupported type
-              booleanProperty: 'string value',
+              bazalBooleanProperty: 'string value',
             },
           },
         },
@@ -419,7 +420,7 @@ describe('UpdateData type', () => {
     it('does not allow properties that were not on the original type', () => {
       let _: UpdateData<MyServerType>;
       _ = {
-        // @ts-expect-error Unsupported type
+        // @ts-expect-error Unsupported name
         unknown: true,
       };
 
@@ -448,15 +449,15 @@ describe('UpdateData type', () => {
       // with dot notation
       _ = {
         'nested.bar': {
-          booleanProperty: true,
-          stringProperty: 'string',
-          anotherLayer: {
-            booleanProperty: false,
-            stringProperty: 'string',
+          barBooleanProperty: true,
+          barStringProperty: 'string',
+          barAnotherLayer: {
+            baralBooleanProperty: false,
+            baralStringProperty: 'string',
           },
         },
         'nested.baz': {
-          booleanProperty: true,
+          bazBooleanProperty: true,
         },
       };
 
@@ -472,7 +473,7 @@ describe('UpdateData type', () => {
       _ = {
         'nested.bar': {
           // @ts-expect-error Unsupported type
-          booleanProperty: 'string',
+          barBooleanProperty: 'string',
         },
       };
 
@@ -480,31 +481,31 @@ describe('UpdateData type', () => {
 
       // preserves type
       _ = {
-        'nested.bar.booleanProperty': true,
-        'nested.bar.anotherLayer': {},
+        'nested.bar.barBooleanProperty': true,
+        'nested.bar.barAnotherLayer': {},
       };
 
       // preserves properties of nested objects
       _ = {
-        'nested.bar.anotherLayer': {
-          booleanProperty: false,
-          stringProperty: 'string',
+        'nested.bar.barAnotherLayer': {
+          baralBooleanProperty: false,
+          baralStringProperty: 'string',
         },
       };
 
       // preserves type - failure
       _ = {
         // @ts-expect-error Unsupported type
-        'nested.bar.anotherLayer': true,
+        'nested.bar.barAnotherLayer': true,
         // @ts-expect-error Unsupported type
-        'nested.baz.anotherLayer': 'string',
+        'nested.baz.bazAnotherLayer': 'string',
       };
 
       // preserves properties of nested objects - failure
       _ = {
-        'nested.bar.anotherLayer': {
+        'nested.bar.barAnotherLayer': {
           // @ts-expect-error Unsupported type
-          booleanProperty: 'string',
+          baralBooleanProperty: 'string',
         },
       };
 
@@ -529,10 +530,10 @@ describe('UpdateData type', () => {
       _ = {
         indexed: {
           bar: {
-            booleanProperty: true,
+            nameBooleanProperty: true,
           },
           baz: {
-            numberProperty: 1,
+            nameNumberProperty: 1,
           },
         },
       };
@@ -549,9 +550,9 @@ describe('UpdateData type', () => {
 
       _ = {
         indexed: {
-          bar: {
+          anyRandomName: {
             // @ts-expect-error Unsupported type
-            stringProperty: true,
+            nameStringProperty: true,
           },
         },
       };
@@ -563,12 +564,12 @@ describe('UpdateData type', () => {
       const _: UpdateData<MyServerType> = {
         indexed: {
           foo: {
-            // @ts-expect-error Unsupported type
+            // @ts-expect-error Unsupported name
             unknown: 1,
           },
           bar: {
-            numberProperty: 2,
-            // @ts-expect-error Unsupported type
+            nameNumberProperty: 2,
+            // @ts-expect-error Unsupported name
             something: 'string val',
           },
         },
@@ -592,11 +593,11 @@ describe('UpdateData type', () => {
       // with dot notation
       _ = {
         'indexed.bar': {
-          booleanProperty: true,
-          numberProperty: 1,
+          nameBooleanProperty: true,
+          nameNumberProperty: 1,
         },
         'indexed.baz': {
-          booleanProperty: true,
+          nameBooleanProperty: true,
         },
       };
 
