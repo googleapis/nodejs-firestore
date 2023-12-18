@@ -1000,7 +1000,7 @@ describe('UpdateData type', () => {
         nestedB: Record<string, string>;
       }
 
-      function _(db: Firestore, docRef: DocumentReference) {
+      function _(db: Firestore, docRef: DocumentReference<MyDoc>) {
         const goodKey = 'nestedA.test';
         const badKey = 'nestedA.' + 'test';
 
