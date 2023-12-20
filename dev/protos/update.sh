@@ -36,48 +36,48 @@ trap cleanup EXIT
 # Capture location of pbjs / pbts before we pushd.
 PBJS="$(npm bin)/pbjs"
 PBTS="$(npm bin)/pbts"
-
-# Enter work dir
-pushd "$WORK_DIR"
-
-# Clone necessary git repos.
-git clone --depth 1 https://github.com/googleapis/googleapis.git
-git clone --depth 1 https://github.com/google/protobuf.git
-
-# Copy necessary protos.
-mkdir -p "${PROTOS_DIR}/google/api"
-cp googleapis/google/api/{annotations,client,field_behavior,http,launch_stage,resource}.proto \
-   "${PROTOS_DIR}/google/api/"
-
-mkdir -p "${PROTOS_DIR}/google/firestore/v1"
-cp googleapis/google/firestore/v1/*.proto \
-   "${PROTOS_DIR}/google/firestore/v1/"
-
-mkdir -p "${PROTOS_DIR}/google/firestore/v1beta1"
-cp googleapis/google/firestore/v1beta1/*.proto \
-   "${PROTOS_DIR}/google/firestore/v1beta1/"
-
-mkdir -p "${PROTOS_DIR}/google/firestore/admin/v1"
-cp googleapis/google/firestore/admin/v1/*.proto \
-   "${PROTOS_DIR}/google/firestore/admin/v1/"
-
-mkdir -p "${PROTOS_DIR}/google/longrunning"
-cp googleapis/google/longrunning/operations.proto \
-   "${PROTOS_DIR}/google/longrunning/"
-
-mkdir -p "${PROTOS_DIR}/google/rpc"
-cp googleapis/google/rpc/status.proto \
-   "${PROTOS_DIR}/google/rpc/"
-
-mkdir -p "${PROTOS_DIR}/google/type"
-cp googleapis/google/type/latlng.proto \
-   "${PROTOS_DIR}/google/type/"
-
-mkdir -p "${PROTOS_DIR}/google/protobuf"
-cp protobuf/src/google/protobuf/{any,descriptor,empty,field_mask,struct,timestamp,wrappers}.proto \
-   "${PROTOS_DIR}/google/protobuf/"
-
-popd
+#
+## Enter work dir
+#pushd "$WORK_DIR"
+#
+## Clone necessary git repos.
+#git clone --depth 1 https://github.com/googleapis/googleapis.git
+#git clone --depth 1 https://github.com/google/protobuf.git
+#
+## Copy necessary protos.
+#mkdir -p "${PROTOS_DIR}/google/api"
+#cp googleapis/google/api/{annotations,client,field_behavior,http,launch_stage,resource}.proto \
+#   "${PROTOS_DIR}/google/api/"
+#
+#mkdir -p "${PROTOS_DIR}/google/firestore/v1"
+#cp googleapis/google/firestore/v1/*.proto \
+#   "${PROTOS_DIR}/google/firestore/v1/"
+#
+#mkdir -p "${PROTOS_DIR}/google/firestore/v1beta1"
+#cp googleapis/google/firestore/v1beta1/*.proto \
+#   "${PROTOS_DIR}/google/firestore/v1beta1/"
+#
+#mkdir -p "${PROTOS_DIR}/google/firestore/admin/v1"
+#cp googleapis/google/firestore/admin/v1/*.proto \
+#   "${PROTOS_DIR}/google/firestore/admin/v1/"
+#
+#mkdir -p "${PROTOS_DIR}/google/longrunning"
+#cp googleapis/google/longrunning/operations.proto \
+#   "${PROTOS_DIR}/google/longrunning/"
+#
+#mkdir -p "${PROTOS_DIR}/google/rpc"
+#cp googleapis/google/rpc/status.proto \
+#   "${PROTOS_DIR}/google/rpc/"
+#
+#mkdir -p "${PROTOS_DIR}/google/type"
+#cp googleapis/google/type/latlng.proto \
+#   "${PROTOS_DIR}/google/type/"
+#
+#mkdir -p "${PROTOS_DIR}/google/protobuf"
+#cp protobuf/src/google/protobuf/{any,descriptor,empty,field_mask,struct,timestamp,wrappers}.proto \
+#   "${PROTOS_DIR}/google/protobuf/"
+#
+#popd
 
 # Generate the Protobuf typings
 PBJS_ARGS=( --proto_path=. \

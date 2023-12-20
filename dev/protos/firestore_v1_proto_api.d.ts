@@ -3712,6 +3712,174 @@ export namespace google {
                 public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
+            /** Properties of an Expression. */
+            interface IExpression {
+
+                /** Expression fieldExpression */
+                fieldExpression?: (string|null);
+
+                /** Expression constantExpression */
+                constantExpression?: (google.firestore.v1.IValue|null);
+
+                /** Expression functionExpression */
+                functionExpression?: (google.firestore.v1.IFunctionExpression|null);
+            }
+
+            /** Represents an Expression. */
+            class Expression implements IExpression {
+
+                /**
+                 * Constructs a new Expression.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IExpression);
+
+                /** Expression fieldExpression. */
+                public fieldExpression?: (string|null);
+
+                /** Expression constantExpression. */
+                public constantExpression?: (google.firestore.v1.IValue|null);
+
+                /** Expression functionExpression. */
+                public functionExpression?: (google.firestore.v1.IFunctionExpression|null);
+
+                /** Expression type. */
+                public type?: ("fieldExpression"|"constantExpression"|"functionExpression");
+
+                /**
+                 * Creates an Expression message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Expression
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Expression;
+
+                /**
+                 * Creates a plain object from an Expression message. Also converts values to other types if specified.
+                 * @param message Expression
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.Expression, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Expression to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Expression
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a FunctionExpression. */
+            interface IFunctionExpression {
+
+                /** FunctionExpression name */
+                name?: (string|null);
+
+                /** FunctionExpression argumentList */
+                argumentList?: (google.firestore.v1.IExpressionList|null);
+            }
+
+            /** Represents a FunctionExpression. */
+            class FunctionExpression implements IFunctionExpression {
+
+                /**
+                 * Constructs a new FunctionExpression.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IFunctionExpression);
+
+                /** FunctionExpression name. */
+                public name: string;
+
+                /** FunctionExpression argumentList. */
+                public argumentList?: (google.firestore.v1.IExpressionList|null);
+
+                /** FunctionExpression arguments. */
+                public arguments_?: "argumentList";
+
+                /**
+                 * Creates a FunctionExpression message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns FunctionExpression
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.FunctionExpression;
+
+                /**
+                 * Creates a plain object from a FunctionExpression message. Also converts values to other types if specified.
+                 * @param message FunctionExpression
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.FunctionExpression, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this FunctionExpression to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for FunctionExpression
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of an ExpressionList. */
+            interface IExpressionList {
+
+                /** ExpressionList expressions */
+                expressions?: (google.firestore.v1.IExpression[]|null);
+            }
+
+            /** Represents an ExpressionList. */
+            class ExpressionList implements IExpressionList {
+
+                /**
+                 * Constructs a new ExpressionList.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IExpressionList);
+
+                /** ExpressionList expressions. */
+                public expressions: google.firestore.v1.IExpression[];
+
+                /**
+                 * Creates an ExpressionList message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExpressionList
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ExpressionList;
+
+                /**
+                 * Creates a plain object from an ExpressionList message. Also converts values to other types if specified.
+                 * @param message ExpressionList
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ExpressionList, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExpressionList to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExpressionList
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
             /** Represents a Firestore */
             class Firestore extends $protobuf.rpc.Service {
 
@@ -6586,6 +6754,9 @@ export namespace google {
 
                     /** FieldReference fieldPath */
                     fieldPath?: (string|null);
+
+                    /** FieldReference expression */
+                    expression?: (google.firestore.v1.IExpression|null);
                 }
 
                 /** Represents a FieldReference. */
@@ -6599,6 +6770,9 @@ export namespace google {
 
                     /** FieldReference fieldPath. */
                     public fieldPath: string;
+
+                    /** FieldReference expression. */
+                    public expression?: (google.firestore.v1.IExpression|null);
 
                     /**
                      * Creates a FieldReference message from a plain object. Also converts values to their respective internal types.

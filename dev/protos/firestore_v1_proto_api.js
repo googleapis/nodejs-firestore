@@ -9044,6 +9044,398 @@
                     return MapValue;
                 })();
     
+                v1.Expression = (function() {
+    
+                    /**
+                     * Properties of an Expression.
+                     * @memberof google.firestore.v1
+                     * @interface IExpression
+                     * @property {string|null} [fieldExpression] Expression fieldExpression
+                     * @property {google.firestore.v1.IValue|null} [constantExpression] Expression constantExpression
+                     * @property {google.firestore.v1.IFunctionExpression|null} [functionExpression] Expression functionExpression
+                     */
+    
+                    /**
+                     * Constructs a new Expression.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents an Expression.
+                     * @implements IExpression
+                     * @constructor
+                     * @param {google.firestore.v1.IExpression=} [properties] Properties to set
+                     */
+                    function Expression(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * Expression fieldExpression.
+                     * @member {string|null|undefined} fieldExpression
+                     * @memberof google.firestore.v1.Expression
+                     * @instance
+                     */
+                    Expression.prototype.fieldExpression = null;
+    
+                    /**
+                     * Expression constantExpression.
+                     * @member {google.firestore.v1.IValue|null|undefined} constantExpression
+                     * @memberof google.firestore.v1.Expression
+                     * @instance
+                     */
+                    Expression.prototype.constantExpression = null;
+    
+                    /**
+                     * Expression functionExpression.
+                     * @member {google.firestore.v1.IFunctionExpression|null|undefined} functionExpression
+                     * @memberof google.firestore.v1.Expression
+                     * @instance
+                     */
+                    Expression.prototype.functionExpression = null;
+    
+                    // OneOf field names bound to virtual getters and setters
+                    var $oneOfFields;
+    
+                    /**
+                     * Expression type.
+                     * @member {"fieldExpression"|"constantExpression"|"functionExpression"|undefined} type
+                     * @memberof google.firestore.v1.Expression
+                     * @instance
+                     */
+                    Object.defineProperty(Expression.prototype, "type", {
+                        get: $util.oneOfGetter($oneOfFields = ["fieldExpression", "constantExpression", "functionExpression"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
+                     * Creates an Expression message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.Expression
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.Expression} Expression
+                     */
+                    Expression.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.Expression)
+                            return object;
+                        var message = new $root.google.firestore.v1.Expression();
+                        if (object.fieldExpression != null)
+                            message.fieldExpression = String(object.fieldExpression);
+                        if (object.constantExpression != null) {
+                            if (typeof object.constantExpression !== "object")
+                                throw TypeError(".google.firestore.v1.Expression.constantExpression: object expected");
+                            message.constantExpression = $root.google.firestore.v1.Value.fromObject(object.constantExpression);
+                        }
+                        if (object.functionExpression != null) {
+                            if (typeof object.functionExpression !== "object")
+                                throw TypeError(".google.firestore.v1.Expression.functionExpression: object expected");
+                            message.functionExpression = $root.google.firestore.v1.FunctionExpression.fromObject(object.functionExpression);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an Expression message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.Expression
+                     * @static
+                     * @param {google.firestore.v1.Expression} message Expression
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Expression.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (message.fieldExpression != null && message.hasOwnProperty("fieldExpression")) {
+                            object.fieldExpression = message.fieldExpression;
+                            if (options.oneofs)
+                                object.type = "fieldExpression";
+                        }
+                        if (message.constantExpression != null && message.hasOwnProperty("constantExpression")) {
+                            object.constantExpression = $root.google.firestore.v1.Value.toObject(message.constantExpression, options);
+                            if (options.oneofs)
+                                object.type = "constantExpression";
+                        }
+                        if (message.functionExpression != null && message.hasOwnProperty("functionExpression")) {
+                            object.functionExpression = $root.google.firestore.v1.FunctionExpression.toObject(message.functionExpression, options);
+                            if (options.oneofs)
+                                object.type = "functionExpression";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Expression to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.Expression
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Expression.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for Expression
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.Expression
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    Expression.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.Expression";
+                    };
+    
+                    return Expression;
+                })();
+    
+                v1.FunctionExpression = (function() {
+    
+                    /**
+                     * Properties of a FunctionExpression.
+                     * @memberof google.firestore.v1
+                     * @interface IFunctionExpression
+                     * @property {string|null} [name] FunctionExpression name
+                     * @property {google.firestore.v1.IExpressionList|null} [argumentList] FunctionExpression argumentList
+                     */
+    
+                    /**
+                     * Constructs a new FunctionExpression.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a FunctionExpression.
+                     * @implements IFunctionExpression
+                     * @constructor
+                     * @param {google.firestore.v1.IFunctionExpression=} [properties] Properties to set
+                     */
+                    function FunctionExpression(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * FunctionExpression name.
+                     * @member {string} name
+                     * @memberof google.firestore.v1.FunctionExpression
+                     * @instance
+                     */
+                    FunctionExpression.prototype.name = "";
+    
+                    /**
+                     * FunctionExpression argumentList.
+                     * @member {google.firestore.v1.IExpressionList|null|undefined} argumentList
+                     * @memberof google.firestore.v1.FunctionExpression
+                     * @instance
+                     */
+                    FunctionExpression.prototype.argumentList = null;
+    
+                    // OneOf field names bound to virtual getters and setters
+                    var $oneOfFields;
+    
+                    /**
+                     * FunctionExpression arguments.
+                     * @member {"argumentList"|undefined} arguments_
+                     * @memberof google.firestore.v1.FunctionExpression
+                     * @instance
+                     */
+                    Object.defineProperty(FunctionExpression.prototype, "arguments", {
+                        get: $util.oneOfGetter($oneOfFields = ["argumentList"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
+                     * Creates a FunctionExpression message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.FunctionExpression
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.FunctionExpression} FunctionExpression
+                     */
+                    FunctionExpression.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.FunctionExpression)
+                            return object;
+                        var message = new $root.google.firestore.v1.FunctionExpression();
+                        if (object.name != null)
+                            message.name = String(object.name);
+                        if (object.argumentList != null) {
+                            if (typeof object.argumentList !== "object")
+                                throw TypeError(".google.firestore.v1.FunctionExpression.argumentList: object expected");
+                            message.argumentList = $root.google.firestore.v1.ExpressionList.fromObject(object.argumentList);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a FunctionExpression message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.FunctionExpression
+                     * @static
+                     * @param {google.firestore.v1.FunctionExpression} message FunctionExpression
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    FunctionExpression.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults)
+                            object.name = "";
+                        if (message.name != null && message.hasOwnProperty("name"))
+                            object.name = message.name;
+                        if (message.argumentList != null && message.hasOwnProperty("argumentList")) {
+                            object.argumentList = $root.google.firestore.v1.ExpressionList.toObject(message.argumentList, options);
+                            if (options.oneofs)
+                                object["arguments"] = "argumentList";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this FunctionExpression to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.FunctionExpression
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    FunctionExpression.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for FunctionExpression
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.FunctionExpression
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    FunctionExpression.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.FunctionExpression";
+                    };
+    
+                    return FunctionExpression;
+                })();
+    
+                v1.ExpressionList = (function() {
+    
+                    /**
+                     * Properties of an ExpressionList.
+                     * @memberof google.firestore.v1
+                     * @interface IExpressionList
+                     * @property {Array.<google.firestore.v1.IExpression>|null} [expressions] ExpressionList expressions
+                     */
+    
+                    /**
+                     * Constructs a new ExpressionList.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents an ExpressionList.
+                     * @implements IExpressionList
+                     * @constructor
+                     * @param {google.firestore.v1.IExpressionList=} [properties] Properties to set
+                     */
+                    function ExpressionList(properties) {
+                        this.expressions = [];
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * ExpressionList expressions.
+                     * @member {Array.<google.firestore.v1.IExpression>} expressions
+                     * @memberof google.firestore.v1.ExpressionList
+                     * @instance
+                     */
+                    ExpressionList.prototype.expressions = $util.emptyArray;
+    
+                    /**
+                     * Creates an ExpressionList message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ExpressionList
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ExpressionList} ExpressionList
+                     */
+                    ExpressionList.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ExpressionList)
+                            return object;
+                        var message = new $root.google.firestore.v1.ExpressionList();
+                        if (object.expressions) {
+                            if (!Array.isArray(object.expressions))
+                                throw TypeError(".google.firestore.v1.ExpressionList.expressions: array expected");
+                            message.expressions = [];
+                            for (var i = 0; i < object.expressions.length; ++i) {
+                                if (typeof object.expressions[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.ExpressionList.expressions: object expected");
+                                message.expressions[i] = $root.google.firestore.v1.Expression.fromObject(object.expressions[i]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an ExpressionList message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ExpressionList
+                     * @static
+                     * @param {google.firestore.v1.ExpressionList} message ExpressionList
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ExpressionList.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.expressions = [];
+                        if (message.expressions && message.expressions.length) {
+                            object.expressions = [];
+                            for (var j = 0; j < message.expressions.length; ++j)
+                                object.expressions[j] = $root.google.firestore.v1.Expression.toObject(message.expressions[j], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ExpressionList to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ExpressionList
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ExpressionList.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for ExpressionList
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.ExpressionList
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    ExpressionList.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.ExpressionList";
+                    };
+    
+                    return ExpressionList;
+                })();
+    
                 v1.Firestore = (function() {
     
                     /**
@@ -15822,6 +16214,7 @@
                          * @memberof google.firestore.v1.StructuredQuery
                          * @interface IFieldReference
                          * @property {string|null} [fieldPath] FieldReference fieldPath
+                         * @property {google.firestore.v1.IExpression|null} [expression] FieldReference expression
                          */
     
                         /**
@@ -15848,6 +16241,14 @@
                         FieldReference.prototype.fieldPath = "";
     
                         /**
+                         * FieldReference expression.
+                         * @member {google.firestore.v1.IExpression|null|undefined} expression
+                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
+                         * @instance
+                         */
+                        FieldReference.prototype.expression = null;
+    
+                        /**
                          * Creates a FieldReference message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.v1.StructuredQuery.FieldReference
@@ -15861,6 +16262,11 @@
                             var message = new $root.google.firestore.v1.StructuredQuery.FieldReference();
                             if (object.fieldPath != null)
                                 message.fieldPath = String(object.fieldPath);
+                            if (object.expression != null) {
+                                if (typeof object.expression !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.FieldReference.expression: object expected");
+                                message.expression = $root.google.firestore.v1.Expression.fromObject(object.expression);
+                            }
                             return message;
                         };
     
@@ -15877,10 +16283,14 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.defaults)
+                            if (options.defaults) {
                                 object.fieldPath = "";
+                                object.expression = null;
+                            }
                             if (message.fieldPath != null && message.hasOwnProperty("fieldPath"))
                                 object.fieldPath = message.fieldPath;
+                            if (message.expression != null && message.hasOwnProperty("expression"))
+                                object.expression = $root.google.firestore.v1.Expression.toObject(message.expression, options);
                             return object;
                         };
     

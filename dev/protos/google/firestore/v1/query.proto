@@ -18,6 +18,7 @@ package google.firestore.v1;
 
 import "google/api/field_behavior.proto";
 import "google/firestore/v1/document.proto";
+import "google/firestore/v1/expression.proto";
 import "google/protobuf/wrappers.proto";
 
 option csharp_namespace = "Google.Cloud.Firestore.V1";
@@ -243,6 +244,24 @@ message StructuredQuery {
     // * Conform to [document field name][google.firestore.v1.Document.fields]
     // limitations.
     string field_path = 2;
+
+
+    // A reference to the result of a expression evaluation.
+    //
+    // This is a more complex version of `field_path` which allows representing
+    // computation on top of fields. Representing a reference to the field
+    // `foo.bar` can use an expression like:
+    //
+    // ```
+    // expression { field_reference { field_path: "foo.bar" } }
+    // ```
+    //
+    // but this is logically equivalent to its simplified form of:
+    //
+    // ```
+    // field_path: "foo.bar"
+    // ```
+    Expression expression = 3;
   }
 
   // The projection of document's fields to return.

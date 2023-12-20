@@ -1,0 +1,116 @@
+
+syntax = "proto3";
+package google.firestore.v1;
+import "google/api/field_behavior.proto";
+import "google/firestore/v1/document.proto";
+option csharp_namespace = "Google.Cloud.Firestore.V1";
+option php_namespace = "Google\\Cloud\\Firestore\\V1";
+option ruby_package = "Google::Cloud::Firestore::V1";
+option java_multiple_files = true;
+option java_package = "com.google.firestore.v1";
+option java_outer_classname = "ExpressionProto";
+option objc_class_prefix = "GCFS";
+// A generic expression used in queries.
+message Expression {
+  oneof type {
+    // An expression that evaluates to the value that the field references.
+    //
+    // Must Conform to existing [field reference][FieldReference.field_path]
+    // limitations.
+    string field_expression = 1;
+    // An expression that always evaluates to the specified constant.
+    Value constant_expression = 2;
+    // An expression that executes a specified function.
+    FunctionExpression function_expression = 3;
+  }
+}
+// Represents an expression that evaluates a function.
+//
+// All functions take a series of defined arguments & types and have a concrete
+// output type. Functions will generate an error if they are provided an
+// unsupported type.
+//
+// Example Function:
+//
+// `foo(a: Int, b: String) -> String`
+//
+// **Parameters:**
+//
+// - a: An expression that evaluates to an Int
+// - b: An expression that evaluates to a String
+//
+// **Returns:** A String
+//
+// A selection clause of `WHERE foo(myValue, 'Hello') = 'World'` would be
+// represented as:
+//
+// ```
+// where {
+//   field_filter {
+//     field {
+//       expression {
+//         name: "foo"
+//         argument_list: {
+//           expressions: [
+//             {
+//               field_expression: { "myValue" }
+//             },
+//             {
+//               constant_expression: { string_value: "Hello" }
+//             }
+//           ]
+//         }
+//       }
+//     }
+//     op: EQUAL
+//     value { string_value: "World" }
+//   }
+// }
+// ```
+//
+// This additionally allows ordering based on the output of a function.
+//
+// With an example Function:
+//
+// `bar(a: String) -> Int`
+//
+// A selection clause of `ORDER BY bar(myValue) ASC` would be represented as:
+//
+// ```
+// order_by {
+//   field {
+//     expression {
+//       function {
+//         name: "bar"
+//         argument_list {
+//           expressions { field_expression: "myValue" }
+//         }
+//       }
+//     }
+//   }
+//   direction: ASCENDING
+// }
+// ```
+//
+// (-- api-linter: core::0123::resource-annotation=disabled
+//     aip.dev/not-precedent: this is not a One Platform API resource. --)
+message FunctionExpression {
+  // The name of the function to evaluate.
+  //
+  // REQUIRES:
+  //
+  // - must be in snake case (lower case with underscore separator).
+  //
+  string name = 1;
+  // (-- This is a oneof to support adding 'named arguments' in the future.
+  // https://google.aip.dev/180#moving-into-oneofs --)
+  oneof arguments {
+    // Argument expressions that match the order of the function definition.
+    ExpressionList argument_list = 2;
+  }
+}
+// List of expressions.
+message ExpressionList {
+  // Unnamed expressions that match the order of the function definition.
+  repeated Expression expressions = 1;
+}

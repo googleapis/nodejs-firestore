@@ -1150,6 +1150,59 @@
                     }
                   }
                 },
+                "Expression": {
+                  "oneofs": {
+                    "type": {
+                      "oneof": [
+                        "fieldExpression",
+                        "constantExpression",
+                        "functionExpression"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "fieldExpression": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "constantExpression": {
+                      "type": "Value",
+                      "id": 2
+                    },
+                    "functionExpression": {
+                      "type": "FunctionExpression",
+                      "id": 3
+                    }
+                  }
+                },
+                "FunctionExpression": {
+                  "oneofs": {
+                    "arguments": {
+                      "oneof": [
+                        "argumentList"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "name": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "argumentList": {
+                      "type": "ExpressionList",
+                      "id": 2
+                    }
+                  }
+                },
+                "ExpressionList": {
+                  "fields": {
+                    "expressions": {
+                      "rule": "repeated",
+                      "type": "Expression",
+                      "id": 1
+                    }
+                  }
+                },
                 "Firestore": {
                   "options": {
                     "(google.api.default_host)": "firestore.googleapis.com",
@@ -2467,6 +2520,10 @@
                         "fieldPath": {
                           "type": "string",
                           "id": 2
+                        },
+                        "expression": {
+                          "type": "Expression",
+                          "id": 3
                         }
                       }
                     },
