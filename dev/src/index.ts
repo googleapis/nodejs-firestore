@@ -758,6 +758,9 @@ export class Firestore implements firestore.Firestore {
   /**
    * Returns the Project ID for this Firestore instance. Validates that
    * `initializeIfNeeded()` was called before.
+   *
+   * @private
+   * @internal
    */
   get projectId(): string {
     if (this._projectId === undefined) {
