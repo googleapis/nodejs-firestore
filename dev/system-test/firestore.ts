@@ -35,6 +35,7 @@ import {
   FieldPath,
   FieldValue,
   Firestore,
+  Functions,
   GeoPoint,
   Query,
   QueryDocumentSnapshot,
@@ -1022,14 +1023,14 @@ describe('DocumentReference class', () => {
     return promise;
   });
 
-  it.only('can write and read vector embeddings', async () => {
+  it('can write and read vector embeddings', async () => {
     const ref = randomCol.doc();
     await ref.create({
-      vectorEmpty: FieldValue.vector(),
+      vector0: FieldValue.vector([0.0]),
       vector1: FieldValue.vector([1, 2, 3.99]),
     });
     await ref.set({
-      vectorEmpty: FieldValue.vector(),
+      vector0: FieldValue.vector([0.0]),
       vector1: FieldValue.vector([1, 2, 3.99]),
       vector2: FieldValue.vector([0, 0, 0]),
     });
@@ -1038,7 +1039,7 @@ describe('DocumentReference class', () => {
     });
 
     const snap1 = await ref.get();
-    expect(snap1.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(snap1.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
     expect(snap1.get('vector1')).to.deep.equal(FieldValue.vector([1, 2, 3.99]));
     expect(snap1.get('vector2')).to.deep.equal(FieldValue.vector([0, 0, 0]));
     expect(snap1.get('vector3')).to.deep.equal(
@@ -1340,7 +1341,7 @@ describe('DocumentReference class', () => {
     expect(result2.data()).to.deep.equal([1, 2, 3]);
   });
 
-  it.only('can listen to documents with vectors', async () => {
+  it('can listen to documents with vectors', async () => {
     const ref = randomCol.doc();
     const initialDeferred = new Deferred<void>();
     const createDeferred = new Deferred<void>();
@@ -1375,26 +1376,26 @@ describe('DocumentReference class', () => {
 
     await ref.create({
       purpose: 'vector tests',
-      vectorEmpty: FieldValue.vector(),
+      vector0: FieldValue.vector([0.0]),
       vector1: FieldValue.vector([1, 2, 3.99]),
     });
 
     await createDeferred.promise;
     expect(document).to.be.not.null;
-    expect(document!.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(document!.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
     expect(document!.get('vector1')).to.deep.equal(
       FieldValue.vector([1, 2, 3.99])
     );
 
     await ref.set({
       purpose: 'vector tests',
-      vectorEmpty: FieldValue.vector(),
+      vector0: FieldValue.vector([0.0]),
       vector1: FieldValue.vector([1, 2, 3.99]),
       vector2: FieldValue.vector([0, 0, 0]),
     });
     await setDeferred.promise;
     expect(document).to.be.not.null;
-    expect(document!.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(document!.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
     expect(document!.get('vector1')).to.deep.equal(
       FieldValue.vector([1, 2, 3.99])
     );
@@ -1407,7 +1408,7 @@ describe('DocumentReference class', () => {
     });
     await updateDeferred.promise;
     expect(document).to.be.not.null;
-    expect(document!.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(document!.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
     expect(document!.get('vector1')).to.deep.equal(
       FieldValue.vector([1, 2, 3.99])
     );
@@ -1573,6 +1574,26 @@ describe('Query class', () => {
       randomCol.add({foo: []}),
     ])
       .then(() => randomCol.where('foo', 'array-contains', 'bar').get())
+      .then(res => {
+        expect(res.size).to.equal(1);
+        expect(res.docs[0].get('foo')).to.deep.equal(['bar']);
+      });
+  });
+
+  it.only('supports order by vector distance', () => {
+    return Promise.all([
+      randomCol.add({foo: ['bar']}),
+      randomCol.add({foo: []}),
+    ])
+      .then(() =>
+        randomCol
+          .onceQuery()
+          .where('foo', 'array-contains', 'bar')
+          .orderBy(
+            Functions.vector_distance('embedding', [1.0], {type: 'cosine'})
+          )
+          .get()
+      )
       .then(res => {
         expect(res.size).to.equal(1);
         expect(res.docs[0].get('foo')).to.deep.equal(['bar']);

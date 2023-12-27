@@ -1535,20 +1535,23 @@ declare namespace FirebaseFirestore {
 
   export interface OnceFunction {
     once: true;
+    name: string;
   }
 
   export interface Function {
     streaming: true;
+    name: string;
   }
 
   export class DistanceFunction implements OnceFunction {
     once: true;
-    streaming: false;
+    name: string;
   }
 
-  export type DistanceType = 'L2' | 'Cosine';
+  export type DistanceType = 'euclidean' | 'cosine' | 'dotproduct';
   export class Functions {
-    static distance(
+    private constructor();
+    static vector_distance(
       from: string | FieldPath,
       to: VectorValue | [number],
       options: {type: DistanceType}
@@ -2080,7 +2083,7 @@ declare namespace FirebaseFirestore {
       Array<DocumentReference<AppModelType, DbModelType>>
     >;
 
-    serverOnceQuery(): OnceQuery;
+    onceQuery(): OnceQuery<AppModelType, DbModelType>;
 
     /**
      * Get a `DocumentReference` for a randomly-named document within this

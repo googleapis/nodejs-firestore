@@ -471,7 +471,9 @@ export class WriteBatch implements firestore.WriteBatch {
             // qualified API name in the error message.
             validateMinNumberOfArguments('update', fieldOrValues, i + 1);
 
-            const fieldPath = FieldPath.fromArgument(maybeFieldPath);
+            const fieldPath = FieldPath.fromArgument(
+              maybeFieldPath as string | FieldPath
+            );
             validateFieldValue(
               i + argumentOffset,
               fieldOrValues[i + 1],

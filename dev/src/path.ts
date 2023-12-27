@@ -676,6 +676,10 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
   }
 }
 
+function isOnceFunction(f: unknown): f is firestore.OnceFunction {
+  return true;
+}
+
 /**
  * Validates that the provided value can be used as a field path argument.
  *
@@ -689,6 +693,11 @@ export function validateFieldPath(
   arg: string | number,
   fieldPath: unknown
 ): asserts fieldPath is string | FieldPath {
+  // TODO(wuandy): remove this hack!
+  if (isOnceFunction(fieldPath)) {
+    return;
+  }
+
   if (fieldPath instanceof FieldPath) {
     return;
   }
