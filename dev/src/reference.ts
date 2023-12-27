@@ -19,6 +19,7 @@ import * as assert from 'assert';
 import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 import {GoogleError} from 'google-gax';
+import {google} from '../protos/firestore_v1_proto_api';
 
 import * as protos from '../protos/firestore_v1_proto_api';
 
@@ -28,6 +29,7 @@ import {
   QueryDocumentSnapshot,
 } from './document';
 import {DocumentChange} from './document-change';
+import {VectorValue} from './field-value';
 import {Firestore} from './index';
 import {logger} from './logger';
 import {compare} from './order';
@@ -62,6 +64,8 @@ import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
+import IFunctionExpression = google.firestore.v1.IFunctionExpression;
+import IArrayValue = google.firestore.v1.IArrayValue;
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -741,11 +745,27 @@ export class FunctionOrder {
    * @internal
    */
   toProto(): api.StructuredQuery.IOrder {
+    let funcExpr: IFunctionExpression | null = null;
+    if (this.field.name === 'vector_distance') {
+      const distanceFunc: DistanceFunction = this.field as DistanceFunction;
+      // vector_distance(“cosine|euclidean|dotproduct”, queryVector, “product_embedding”)
+      funcExpr = {
+        name: this.field.name,
+        argumentList: {
+          expressions: [
+            {constantExpression: {stringValue: distanceFunc.distanceType()}},
+            {constantExpression: {arrayValue: distanceFunc.targetVector()}},
+            {fieldExpression: distanceFunc.fieldName()},
+          ],
+        },
+      };
+    }
     return {
-      // TODO(wuandy): Build the right order by
-      // field: {
-      //   fieldPath: this.field.formattedName,
-      // },
+      field: {
+        expression: {
+          functionExpression: funcExpr,
+        },
+      },
       direction: this.direction,
     };
   }
@@ -3296,8 +3316,11 @@ export class CollectionReference<
     );
   }
 
-  serverOnceQuery(): FirebaseFirestore.OnceQuery {
-    return {} as FirebaseFirestore.OnceQuery;
+  onceQuery(): FirebaseFirestore.OnceQuery<AppModelType, DbModelType> {
+    return new OnceQuery<AppModelType, DbModelType>(
+      this._firestore,
+      this._queryOptions
+    );
   }
 }
 
@@ -3785,6 +3808,56 @@ function coalesce<T>(...values: Array<T | undefined>): T | undefined {
   return values.find(value => value !== undefined);
 }
 
+export class Functions implements firestore.Functions {
+  static vector_distance(
+    from: string | FieldPath,
+    to: VectorValue | [number],
+    options: {type: firestore.DistanceType}
+  ): firestore.DistanceFunction {
+    return new DistanceFunction(from, to, options);
+  }
+}
+
+export class DistanceFunction implements firestore.OnceFunction {
+  once = true as const;
+  name = 'vector_distance' as const;
+
+  constructor(
+    private from: string | FieldPath,
+    private to: VectorValue | [number],
+    private options: {
+      type: FirebaseFirestore.DistanceType;
+    }
+  ) {}
+
+  fieldName(): string {
+    if (typeof this.from === 'string') {
+      return this.from as string;
+    }
+
+    return (this.from as FieldPath).toString();
+  }
+
+  targetVector(): IArrayValue {
+    let values: number[];
+    if (Array.isArray(this.to)) {
+      values = this.to as number[];
+    } else {
+      values = (this.to as VectorValue).toArray();
+    }
+
+    return {
+      values: values.map(v => {
+        return {doubleValue: v};
+      }),
+    };
+  }
+
+  distanceType(): string {
+    return this.options.type;
+  }
+}
+
 export class OnceQuery<
   AppModelType = firestore.DocumentData,
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
@@ -4121,12 +4194,10 @@ export class OnceQuery<
         ),
       };
     } else {
+      const f: firestore.OnceFunction = fieldPath;
       newOrder = {
         type: 'function',
-        order: new FunctionOrder(
-          fieldPath as firestore.OnceFunction,
-          directionOperators[directionStr || 'asc']
-        ),
+        order: new FunctionOrder(f, directionOperators[directionStr || 'asc']),
       };
     }
 

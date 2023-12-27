@@ -35,6 +35,7 @@ import {
   FieldPath,
   FieldValue,
   Firestore,
+  Functions,
   GeoPoint,
   Query,
   QueryDocumentSnapshot,
@@ -1573,6 +1574,26 @@ describe('Query class', () => {
       randomCol.add({foo: []}),
     ])
       .then(() => randomCol.where('foo', 'array-contains', 'bar').get())
+      .then(res => {
+        expect(res.size).to.equal(1);
+        expect(res.docs[0].get('foo')).to.deep.equal(['bar']);
+      });
+  });
+
+  it.only('supports order by vector distance', () => {
+    return Promise.all([
+      randomCol.add({foo: ['bar']}),
+      randomCol.add({foo: []}),
+    ])
+      .then(() =>
+        randomCol
+          .onceQuery()
+          .where('foo', 'array-contains', 'bar')
+          .orderBy(
+            Functions.vector_distance('embedding', [1.0], {type: 'Cosine'})
+          )
+          .get()
+      )
       .then(res => {
         expect(res.size).to.equal(1);
         expect(res.docs[0].get('foo')).to.deep.equal(['bar']);
