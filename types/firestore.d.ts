@@ -1553,7 +1553,7 @@ declare namespace FirebaseFirestore {
     private constructor();
     static vector_distance(
       from: string | FieldPath,
-      to: VectorValue | [number],
+      to: VectorValue | Array<number>,
       options: {type: DistanceType}
     ): DistanceFunction;
   }

@@ -3814,7 +3814,7 @@ function coalesce<T>(...values: Array<T | undefined>): T | undefined {
 export class Functions implements firestore.Functions {
   static vector_distance(
     from: string | FieldPath,
-    to: VectorValue | [number],
+    to: VectorValue | Array<number>,
     options: {type: firestore.DistanceType}
   ): firestore.DistanceFunction {
     return new DistanceFunction(from, to, options);
@@ -3827,7 +3827,7 @@ export class DistanceFunction implements firestore.OnceFunction {
 
   constructor(
     private from: string | FieldPath,
-    private to: VectorValue | [number],
+    private to: VectorValue | Array<number>,
     private options: {
       type: FirebaseFirestore.DistanceType;
     }
