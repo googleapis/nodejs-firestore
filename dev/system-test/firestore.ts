@@ -1583,14 +1583,15 @@ describe('Query class', () => {
   it.only('supports order by vector distance', () => {
     return Promise.all([
       randomCol.add({foo: ['bar']}),
-      randomCol.add({foo: []}),
+      randomCol.add({foo: ['bar'], embedding: FieldValue.vector([0, 0])}),
+      randomCol.add({foo: ['bar'], embedding: FieldValue.vector([10, 10])}),
     ])
       .then(() =>
         randomCol
           .onceQuery()
           .where('foo', 'array-contains', 'bar')
           .orderBy(
-            Functions.vector_distance('embedding', [1.0], {type: 'cosine'})
+            Functions.vector_distance('embedding', [1.0, 1.0], {type: 'COSINE'})
           )
           .get()
       )

@@ -1548,7 +1548,7 @@ declare namespace FirebaseFirestore {
     name: string;
   }
 
-  export type DistanceType = 'euclidean' | 'cosine' | 'dotproduct';
+  export type DistanceType = 'COSINE' | 'SQUARED_L2' | 'DOT_PRODUCT';
   export class Functions {
     private constructor();
     static vector_distance(

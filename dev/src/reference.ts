@@ -745,7 +745,7 @@ export class FunctionOrder {
    */
   toProto(): api.StructuredQuery.IOrder {
     let funcExpr: api.IFunctionExpression | null = null;
-    if (this.field.name === 'vector_distance') {
+    if (this.field.name === 'vector_search') {
       const distanceFunc: DistanceFunction = this.field as DistanceFunction;
       // vector_distance(“cosine|euclidean|dotproduct”, queryVector, “product_embedding”)
       funcExpr = {
@@ -753,12 +753,12 @@ export class FunctionOrder {
         argumentList: {
           expressions: [
             {constantExpression: {stringValue: distanceFunc.distanceType()}},
+            {fieldExpression: distanceFunc.fieldName()},
             {
               constantExpression: this.serializer.encodeVector(
                 distanceFunc.targetVector()
               ),
             },
-            {fieldExpression: distanceFunc.fieldName()},
           ],
         },
       };
@@ -3823,7 +3823,7 @@ export class Functions implements firestore.Functions {
 
 export class DistanceFunction implements firestore.OnceFunction {
   once = true as const;
-  name = 'vector_distance' as const;
+  name = 'vector_search' as const;
 
   constructor(
     private from: string | FieldPath,
