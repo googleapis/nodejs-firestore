@@ -481,7 +481,20 @@ export class Transaction implements firestore.Transaction {
       transaction: this._transactionId,
     };
 
-    return this._firestore.request('rollback', request, this._requestTag);
+    const promise: Promise<void> = this._firestore.request(
+      'rollback',
+      request,
+      this._requestTag
+    );
+
+    return promise.catch(reason => {
+      logger(
+        'Firestore.runTransaction',
+        this._requestTag,
+        'Best effort to rollback failed with error:',
+        reason
+      );
+    });
   }
 
   /**
