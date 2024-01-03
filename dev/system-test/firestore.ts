@@ -1582,22 +1582,28 @@ describe('Query class', () => {
 
   it.only('supports order by vector distance', () => {
     return Promise.all([
-      randomCol.add({foo: ['bar']}),
-      randomCol.add({foo: ['bar'], embedding: FieldValue.vector([0, 0])}),
-      randomCol.add({foo: ['bar'], embedding: FieldValue.vector([10, 10])}),
+      randomCol.add({foo: 'bar'}),
+      randomCol.add({foo: 'xxx', embedding: FieldValue.vector([10, 10])}),
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([5, 5])}),
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([9, 9])}),
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([50, 50])}),
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([100, 100])}),
     ])
       .then(() =>
         randomCol
           .onceQuery()
-          .where('foo', 'array-contains', 'bar')
+          .where('foo', '==', 'bar')
           .orderBy(
-            Functions.vector_distance('embedding', [1.0, 1.0], {type: 'COSINE'})
+            Functions.vector_distance('embedding', [10, 10], {type: 'SQUARED_L2'})
           )
+          .limit(3)
           .get()
       )
       .then(res => {
-        expect(res.size).to.equal(1);
-        expect(res.docs[0].get('foo')).to.deep.equal(['bar']);
+        expect(res.size).to.equal(3);
+        expect(res.docs[0].get('embedding')).to.deep.equal(FieldValue.vector([9, 9]));
+        expect(res.docs[1].get('embedding')).to.deep.equal(FieldValue.vector([5, 5]));
+        expect(res.docs[2].get('embedding')).to.deep.equal(FieldValue.vector([50, 50]));
       });
   });
 
