@@ -322,15 +322,7 @@ export class Serializer {
         return array;
       }
       case 'structValue': {
-        const obj: DocumentData = {};
-        const fields = proto.structValue?.fields;
-        if (fields) {
-          for (const prop of Object.keys(fields)) {
-            obj[prop] = this.decodeGoogleProtobufValue(fields[prop]);
-          }
-        }
-
-        return obj;
+        return this.decodeGoogleProtobufStruct(proto.structValue!);
       }
       default: {
         throw new Error(
@@ -349,9 +341,9 @@ export class Serializer {
    * @param proto A Google Protobuf 'Struct'.
    * @returns The converted JS type.
    */
-  decodeGoogleProtobufStruct(proto: IStruct): Record<string, unknown> {
+  decodeGoogleProtobufStruct(proto: IStruct | null): Record<string, unknown> {
     const result: Record<string, unknown> = {};
-    if (proto.fields) {
+    if (proto !== null && proto.fields) {
       for (const prop of Object.keys(proto.fields)) {
         result[prop] = this.decodeGoogleProtobufValue(proto.fields[prop]);
       }

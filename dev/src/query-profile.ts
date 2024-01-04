@@ -17,9 +17,9 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-export class QueryProfileInfo<T> implements firestore.QueryProfileInfo<T> {
+export class QueryProfile<T> implements firestore.QueryProfile<T> {
   constructor(
-    readonly plan: FirebaseFirestore.InformationalQueryPlan,
+    readonly plan: FirebaseFirestore.QueryPlan,
     readonly stats: FirebaseFirestore.InformationalQueryExecutionStats,
     readonly snapshot: T
   ) {}

@@ -99,7 +99,9 @@ if (process.env.NODE_ENV === 'DEBUG') {
 }
 
 function getTestRoot(settings: Settings = {}): CollectionReference {
-  const internalSettings: Settings = {};
+  const internalSettings: Settings = {
+    host: 'test-firestore.sandbox.googleapis.com'
+  };
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }
@@ -149,7 +151,7 @@ describe('Firestore class', () => {
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
     const plan = await randomCol.where('foo', '>', 1).explain();
-    expect(Object.keys(plan).length).to.be.greaterThan(0);
+    expect(Object.keys(plan.planInfo).length).to.be.greaterThan(0);
   });
 
   it('can profile a query', async () => {
@@ -157,7 +159,7 @@ describe('Firestore class', () => {
     await randomCol.doc('doc2').set({foo: 2, bar: 1});
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
     const profile = await randomCol.where('foo', '==', 1).explainAnalyze();
-    expect(Object.keys(profile.plan).length).to.be.greaterThan(0);
+    expect(Object.keys(profile.plan.planInfo).length).to.be.greaterThan(0);
     expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
     expect(profile.snapshot.size).to.equal(2);
   });
@@ -167,7 +169,7 @@ describe('Firestore class', () => {
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
     const plan = await randomCol.where('foo', '>', 0).count().explain();
-    expect(Object.keys(plan).length).to.be.greaterThan(0);
+    expect(Object.keys(plan.planInfo).length).to.be.greaterThan(0);
   });
 
   it('can profile an aggregate query', async () => {
@@ -178,7 +180,7 @@ describe('Firestore class', () => {
       .where('foo', '<', 3)
       .count()
       .explainAnalyze();
-    expect(Object.keys(profile.plan).length).to.be.greaterThan(0);
+    expect(Object.keys(profile.plan.planInfo).length).to.be.greaterThan(0);
     expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
     expect(profile.snapshot.data().count).to.equal(3);
   });

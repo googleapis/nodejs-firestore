@@ -1535,13 +1535,18 @@ declare namespace FirebaseFirestore {
 
   /**
    * InformationalQueryPlan contains information about the query plan.
-   * Contents are subject to change.
+   * This should be inspected or logged, because the contents are intended to be
+   * human-readable. Contents are subject to change, and it is advised to not
+   * program against this object.
    */
   export type InformationalQueryPlan = Record<string, unknown>;
 
   /**
    * InformationalQueryExecutionStats contains statistics about the
-   * execution of the query. Contents are subject to change.
+   * execution of the query.
+   * This should be inspected or logged, because the contents are intended to be
+   * human-readable. Contents are subject to change, and it is advised to not
+   * program against this object.
    */
   export type InformationalQueryExecutionStats = Record<string, unknown>;
 
@@ -1779,7 +1784,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the results of the query
      * planning information.
      */
-    explain(): Promise<InformationalQueryPlan>;
+    explain(): Promise<QueryPlan>;
 
     /**
      * Plans and executes this query. Returns a Promise that will be resolved
@@ -1789,11 +1794,15 @@ declare namespace FirebaseFirestore {
      * Note: the information included in the output of this function is subject
      * to change.
      *
+     * Note: `explainAnalyze()` will get query results like the `get()` function,
+     * however, `explainAnalyze()` uses a different retry strategy than `get()`,
+     * so it is recommended to only use `get()` in production code.
+     *
      * @return A Promise that will be resolved with the planning information,
      * statistics from the query execution, and the query results.
      */
     explainAnalyze(): Promise<
-      QueryProfileInfo<QuerySnapshot<AppModelType, DbModelType>>
+      QueryProfile<QuerySnapshot<AppModelType, DbModelType>>
     >;
 
     /*
@@ -2338,7 +2347,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the results of the query
      * planning information.
      */
-    explain(): Promise<InformationalQueryPlan>;
+    explain(): Promise<QueryPlan>;
 
     /**
      * Plans and executes this query. Returns a Promise that will be resolved
@@ -2352,7 +2361,7 @@ declare namespace FirebaseFirestore {
      * statistics from the query execution, and the query results.
      */
     explainAnalyze(): Promise<
-      QueryProfileInfo<
+      QueryProfile<
         AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
       >
     >;
@@ -2811,19 +2820,33 @@ declare namespace FirebaseFirestore {
   }
 
   /**
-   * A QueryProfileInfo contains information about planning, execution, and results of a query.
-   * All informational content are subject to change.
+   * A QueryPlan contains information about the planning stage of a query.
+   * All informational content are subject to change, and it is advised to not
+   * program against them.
    */
-  export interface QueryProfileInfo<T> {
+  export interface QueryPlan {
     /**
-     * An `InformationalQueryPlan` object that contains information about the query plan.
-     * Contents are subject to change.
+     * An `InformationalQueryPlan` object that contains information about the
+     * query plan. Contents are subject to change.
      */
-    readonly plan: InformationalQueryPlan;
+    readonly planInfo: InformationalQueryPlan;
+  }
+
+  /**
+   * A QueryProfile contains information about planning, execution, and results
+   * of a query.
+   * All informational content are subject to change, and it is advised to not
+   * program against them.
+   */
+  export interface QueryProfile<T> {
+    /**
+     * A `QueryPlan` object that contains information about the query plan.
+     */
+    readonly plan: QueryPlan;
 
     /**
-     * An `InformationalQueryExecutionStats` that contains statistics about the execution of the query.
-     * Contents are subject to change.
+     * An `InformationalQueryExecutionStats` that contains statistics about the
+     * execution of the query. Contents are subject to change.
      */
     readonly stats: InformationalQueryExecutionStats;
 
