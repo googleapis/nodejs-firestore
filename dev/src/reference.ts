@@ -65,10 +65,6 @@ import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 import {google} from '../protos/firestore_v1_proto_api';
 import QueryMode = google.firestore.v1.QueryMode;
 import {QueryProfile} from './query-profile';
-import {
-  InformationalQueryExecutionStats,
-  InformationalQueryPlan,
-} from '@google-cloud/firestore';
 import {QueryPlan} from './query-plan';
 
 /**
@@ -2799,7 +2795,7 @@ export class Query<
     let readTime: Timestamp;
     const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
     let queryPlan: QueryPlan = {planInfo: {}};
-    let executionStats: InformationalQueryExecutionStats = {};
+    let executionStats: firestore.InformationalQueryExecutionStats = {};
 
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -3505,7 +3501,7 @@ export class AggregateQuery<
       DbModelType
     >;
     let planInfo: QueryPlan = {planInfo: {}};
-    let executionStats: InformationalQueryExecutionStats = {};
+    let executionStats: firestore.InformationalQueryExecutionStats = {};
 
     return new Promise((resolve, reject) => {
       const tag = requestTag();

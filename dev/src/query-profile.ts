@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import * as firestore from '@google-cloud/firestore';
 
 export class QueryProfile<T> implements firestore.QueryProfile<T> {
   constructor(
-    readonly plan: FirebaseFirestore.QueryPlan,
-    readonly stats: FirebaseFirestore.InformationalQueryExecutionStats,
+    readonly plan: firestore.QueryPlan,
+    readonly stats: firestore.InformationalQueryExecutionStats,
     readonly snapshot: T
   ) {}
 }
