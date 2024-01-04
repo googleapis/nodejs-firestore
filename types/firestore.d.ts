@@ -151,40 +151,163 @@ declare namespace FirebaseFirestore {
    * storing and retrieving objects from Firestore.
    *
    * @example
-   * class Post {
-   *   constructor(readonly title: string, readonly author: string) {}
    *
-   *   toString(): string {
-   *     return this.title + ', by ' + this.author;
-   *   }
-   * }
+   * Simple Example
    *
-   * interface PostDbModel {
-   *   title: string;
-   *   author: string;
-   * }
-   *
-   * const postConverter = {
-   *   toFirestore(post: Post): PostDbModel {
-   *     return {title: post.title, author: post.author};
-   *   },
-   *   fromFirestore(
-   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
-   *   ): Post {
-   *     const data = snapshot.data() as PostDbModel;
-   *     return new Post(data.title, data.author);
-   *   }
+   * const numberConverter = {
+   *     toFirestore(value: WithFieldValue<number>) {
+   *         return { value };
+   *     },
+   *     fromFirestore(snapshot: QueryDocumentSnapshot) {
+   *         return snapshot.data().value as number;
+   *     }
    * };
    *
-   * const postSnap = await Firestore()
-   *   .collection('posts')
-   *   .withConverter(postConverter)
-   *   .doc().get();
-   * const post = postSnap.data();
-   * if (post !== undefined) {
-   *   post.title; // string
-   *   post.toString(); // Should be defined
-   *   post.someNonExistentProperty; // TS error
+   * async function simpleDemo(db: Firestore): Promise<void> {
+   *     const documentRef = db.doc('values/value123').withConverter(numberConverter);
+   *
+   *     // converters are used with `setDoc`, `addDoc`, and `getDoc`
+   *     await documentRef.set(42);
+   *     const snapshot1 = await documentRef.get();
+   *     assertEqual(snapshot1.data(), 42);
+   *
+   *     // converters are not used when writing data with `updateDoc`
+   *     await documentRef.update({ value: 999 });
+   *     const snapshot2 = await documentRef.get();
+   *     assertEqual(snapshot2.data(), 999);
+   * }
+   *
+   * Advanced Example
+   *
+   * // The Post class is a model that is used by our application.
+   * // This class may have properties and methods that are specific
+   * // to our application execution, which do not need to be persisted
+   * // to Firestore.
+   * class Post {
+   *     constructor(
+   *         readonly title: string,
+   *         readonly author: string,
+   *         readonly lastUpdatedMillis: number
+   *     ) {}
+   *     toString(): string {
+   *         return `${this.title} by ${this.author}`;
+   *     }
+   * }
+   *
+   * // The PostDbModel represents how we want our posts to be stored
+   * // in Firestore. This DbModel has different properties (`ttl`,
+   * // `aut`, and `lut`) from the Post class we use in our application.
+   * interface PostDbModel {
+   *     ttl: string;
+   *     aut: { firstName: string; lastName: string };
+   *     lut: Timestamp;
+   * }
+   *
+   * // The `PostConverter` implements `FirestoreDataConverter` and specifies
+   * // how the Firestore SDK can convert `Post` objects to `PostDbModel`
+   * // objects and vice versa.
+   * class PostConverter implements FirestoreDataConverter<Post, PostDbModel> {
+   *     toFirestore(post: WithFieldValue<Post>): WithFieldValue<PostDbModel> {
+   *         return {
+   *             ttl: post.title,
+   *             aut: this._autFromAuthor(post.author),
+   *             lut: this._lutFromLastUpdatedMillis(post.lastUpdatedMillis)
+   *         };
+   *     }
+   *
+   *     fromFirestore(snapshot: QueryDocumentSnapshot): Post {
+   *         const data = snapshot.data() as PostDbModel;
+   *         const author = `${data.aut.firstName} ${data.aut.lastName}`;
+   *         return new Post(data.ttl, author, data.lut.toMillis());
+   *     }
+   *
+   *     _autFromAuthor(
+   *         author: string | FieldValue
+   *     ): { firstName: string; lastName: string } | FieldValue {
+   *         if (typeof author !== 'string') {
+   *             // `author` is a FieldValue, so just return it.
+   *             return author;
+   *         }
+   *         const [firstName, lastName] = author.split(' ');
+   *         return {firstName, lastName};
+   *     }
+   *
+   *     _lutFromLastUpdatedMillis(
+   *         lastUpdatedMillis: number | FieldValue
+   *     ): Timestamp | FieldValue {
+   *         if (typeof lastUpdatedMillis !== 'number') {
+   *             // `lastUpdatedMillis` must be a FieldValue, so just return it.
+   *             return lastUpdatedMillis;
+   *         }
+   *         return Timestamp.fromMillis(lastUpdatedMillis);
+   *     }
+   * }
+   *
+   * async function advancedDemo(db: Firestore): Promise<void> {
+   *     // Create a `DocumentReference` with a `FirestoreDataConverter`.
+   *     const documentRef = db.doc('posts/post123').withConverter(new PostConverter());
+   *
+   *     // The `data` argument specified to `DocumentReference.set()` is type
+   *     // checked by the TypeScript compiler to be compatible with `Post`. Since
+   *     // the `data` argument is typed as `WithFieldValue<Post>` rather than just
+   *     // `Post`, this allows properties of the `data` argument to also be special
+   *     // Firestore values that perform server-side mutations, such as
+   *     // `FieldValue.arrayRemove()`, `FieldValue.delete()`, and
+   *     // `FieldValue.serverTimestamp()`.
+   *     await documentRef.set({
+   *         title: 'My Life',
+   *         author: 'Foo Bar',
+   *         lastUpdatedMillis: FieldValue.serverTimestamp()
+   *     });
+   *
+   *     // The TypeScript compiler will fail to compile if the `data` argument
+   *     // to `DocumentReference.set()` is _not_ compatible with
+   *     // `WithFieldValue<Post>`. This type checking prevents the caller from
+   *     // specifying objects with incorrect properties or property values.
+   *     // @ts-expect-error "Argument of type { ttl: string; } is not assignable
+   *     // to parameter of type WithFieldValue<Post>"
+   *     await documentRef.set(documentRef, { ttl: 'The Title' });
+   *
+   *     // When retrieving a document with `DocumentReference.get()` the
+   *     // `DocumentSnapshot` object's `data()` method returns a `Post`, rather
+   *     // than a generic object, which would have been returned if the
+   *     // `DocumentReference` did _not_ have a `FirestoreDataConverter`
+   *     // attached to it.
+   *     const snapshot1: DocumentSnapshot<Post> = await documentRef.get();
+   *     const post1: Post = snapshot1.data()!;
+   *     if (post1) {
+   *         assertEqual(post1.title, 'My Life');
+   *         assertEqual(post1.author, 'Foo Bar');
+   *     }
+   *
+   *     // The `data` argument specified to `DocumentReference.update()` is type
+   *     // checked by the TypeScript compiler to be compatible with
+   *     // `PostDbModel`. Note that unlike `DocumentReference.set()`, whose
+   *     // `data` argument must be compatible with `Post`, the `data` argument
+   *     // to `update()` must be compatible with `PostDbModel`. Similar to
+   *     // `set()`, since the `data` argument is typed as
+   *     // `WithFieldValue<PostDbModel>` rather than just `PostDbModel`, this
+   *     // allows properties of the `data` argument to also be those special
+   *     // Firestore values, like `FieldValue.arrayRemove()`,
+   *     // `FieldValue.delete()`, and `FieldValue.serverTimestamp()`.
+   *     await documentRef.update({
+   *         'aut.firstName': 'NewFirstName',
+   *         lut: FieldValue.serverTimestamp()
+   *     });
+   *
+   *     // The TypeScript compiler will fail to compile if the `data` argument
+   *     // to `DocumentReference.update()` is _not_ compatible with
+   *     // `WithFieldValue<PostDbModel>`. This type checking prevents the caller
+   *     // from specifying objects with incorrect properties or property values.
+   *     // @ts-expect-error "Argument of type { title: string; } is not
+   *     // assignable to parameter of type WithFieldValue<PostDbModel>"
+   *     await documentRef.update({ title: 'New Title' });
+   *     const snapshot2: DocumentSnapshot<Post> = await documentRef.get();
+   *     const post2: Post = snapshot2.data()!;
+   *     if (post2) {
+   *         assertEqual(post2.title, 'My Life');
+   *         assertEqual(post2.author, 'NewFirstName Bar');
+   *     }
    * }
    */
   export interface FirestoreDataConverter<
@@ -1273,7 +1396,7 @@ declare namespace FirebaseFirestore {
      * provided object values. The write fails if the document already exists
      *
      * @param data The object data to serialize as the document.
-     * @throws Error If the provided input is not a valid Firestore document.
+     * @throws {Error} If the provided input is not a valid Firestore document or if the document already exists.
      * @return A Promise resolved with the write time of this create.
      */
     create(data: WithFieldValue<AppModelType>): Promise<WriteResult>;
