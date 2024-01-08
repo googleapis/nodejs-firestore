@@ -3194,16 +3194,9 @@ describe('count queries', () => {
     () => {
       const query = randomCol.where('key1', '==', 42).where('key2', '<', 42);
       const countQuery = query.count();
-      const databaseId = query.firestore._settings.databaseId ?? '(default)';
-      // TODO(b/316359394) Remove this check for the default databases once
-      //  cl/582465034 is rolled out to production.
-      if (databaseId === '(default)') {
-        return expect(countQuery.get()).to.be.eventually.rejectedWith(
-          /index.*https:\/\/console\.firebase\.google\.com/
-        );
-      } else {
-        return expect(countQuery.get()).to.be.eventually.rejectedWith(/index/);
-      }
+      return expect(countQuery.get()).to.be.eventually.rejectedWith(
+        /index.*https:\/\/console\.firebase\.google\.com/
+      );
     }
   );
 });
@@ -3571,18 +3564,9 @@ describe('Aggregation queries', () => {
         sum: AggregateField.sum('pages'),
         average: AggregateField.average('pages'),
       });
-      const databaseId = query.firestore._settings.databaseId ?? '(default)';
-      // TODO(b/316359394) Remove this check for the default databases once
-      //  cl/582465034 is rolled out to production.
-      if (databaseId === '(default)') {
-        return expect(aggregateQuery.get()).to.be.eventually.rejectedWith(
-          /index.*https:\/\/console\.firebase\.google\.com/
-        );
-      } else {
-        return expect(aggregateQuery.get()).to.be.eventually.rejectedWith(
-          /index/
-        );
-      }
+      return expect(aggregateQuery.get()).to.be.eventually.rejectedWith(
+        /index.*https:\/\/console\.firebase\.google\.com/
+      );
     }
   );
 
