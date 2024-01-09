@@ -181,7 +181,7 @@ if staging.is_dir():
     os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
 
     os.chdir("dev")
-    node.compile_protos_hermetic()
+    node.compile_protos()
     os.chdir("protos")
     os.unlink('protos.js')
     os.unlink('protos.d.ts')
