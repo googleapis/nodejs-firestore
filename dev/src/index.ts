@@ -773,9 +773,6 @@ export class Firestore implements firestore.Firestore {
 
   /**
    * Returns the Database ID for this Firestore instance.
-   *
-   * @private
-   * @internal
    */
   get databaseId(): string {
     return this._databaseId || DEFAULT_DATABASE_ID;
