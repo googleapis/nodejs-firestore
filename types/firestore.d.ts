@@ -1834,11 +1834,14 @@ declare namespace FirebaseFirestore {
       aggregateSpec: T
     ): AggregateQuery<T, AppModelType, DbModelType>;
 
-    findNearest(vectorField: string | FieldPath,
-                queryVector: VectorValue | Array<number>,
-                optioins: {limit: number,
-                  distanceMeasure: 'SQUARED_L2' | 'COSINE' | 'DOT_PRODUCT'
-                }): VectorQuery<AppModelType, DbModelType>;
+    findNearest(
+      vectorField: string | FieldPath,
+      queryVector: VectorValue | Array<number>,
+      optioins: {
+        limit: number;
+        distanceMeasure: 'SQUARED_L2' | 'COSINE';
+      }
+    ): VectorQuery<AppModelType, DbModelType>;
 
     /**
      * Returns true if this `Query` is equal to the provided one.
@@ -1927,6 +1930,61 @@ declare namespace FirebaseFirestore {
      * @return true if this `QuerySnapshot` is equal to the provided one.
      */
     isEqual(other: QuerySnapshot<AppModelType, DbModelType>): boolean;
+  }
+
+  export class VectorQuerySnapshot<
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData,
+  > {
+    private constructor();
+
+    /**
+     * The query on which you called `get` or `onSnapshot` in order to get this
+     * `QuerySnapshot`.
+     */
+    readonly query: VectorQuery<AppModelType, DbModelType>;
+
+    /** An array of all the documents in the QuerySnapshot. */
+    readonly docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>>;
+
+    /** The number of documents in the QuerySnapshot. */
+    readonly size: number;
+
+    /** True if there are no documents in the QuerySnapshot. */
+    readonly empty: boolean;
+
+    /** The time this query snapshot was obtained. */
+    readonly readTime: Timestamp;
+
+    /**
+     * Returns an array of the documents changes since the last snapshot. If
+     * this is the first snapshot, all documents will be in the list as added
+     * changes.
+     */
+    docChanges(): DocumentChange<AppModelType, DbModelType>[];
+
+    /**
+     * Enumerates all of the documents in the QuerySnapshot.
+     *
+     * @param callback A callback to be called with a `DocumentSnapshot` for
+     * each document in the snapshot.
+     * @param thisArg The `this` binding for the callback.
+     */
+    forEach(
+      callback: (
+        result: QueryDocumentSnapshot<AppModelType, DbModelType>
+      ) => void,
+      thisArg?: any
+    ): void;
+
+    /**
+     * Returns true if the document data in this `QuerySnapshot` is equal to the
+     * provided one.
+     *
+     * @param other The `QuerySnapshot` to compare against.
+     * @return true if this `QuerySnapshot` is equal to the provided one.
+     */
+    isEqual(other: VectorQuerySnapshot<AppModelType, DbModelType>): boolean;
   }
 
   /**
@@ -2364,8 +2422,8 @@ declare namespace FirebaseFirestore {
   }
 
   export class VectorQuery<
-      AppModelType = DocumentData,
-      DbModelType extends DocumentData = DocumentData,
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData,
   > {
     private constructor();
 
@@ -2377,9 +2435,9 @@ declare namespace FirebaseFirestore {
      *
      * @return A promise that will be resolved with the results of the query.
      */
-    get(): Promise<
-        QuerySnapshot<AppModelType, DbModelType>
-    >;
+    get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>>;
+
+    stream(): NodeJS.ReadableStream;
 
     /**
      * Compares this object with the given object for equality.
@@ -2393,9 +2451,7 @@ declare namespace FirebaseFirestore {
      * @return `true` if this object is "equal" to the given object, as
      * defined above, or `false` otherwise.
      */
-    isEqual(
-        other: VectorQuery<AppModelType, DbModelType>
-    ): boolean;
+    isEqual(other: VectorQuery<AppModelType, DbModelType>): boolean;
   }
 
   export class VectorValue {
