@@ -40,8 +40,8 @@ function addLicenses(dirNameReads) {
   }
 }
 function iterateThroughFiles(dirNameRead) {
-  console.log(dirNameRead)
-
+    console.log(dirNameRead)
+    if (!fs.existsSync(dirNameRead)) {
     const files = fs.readdirSync(dirNameRead);
     files.forEach(file => {
       const fileName = file.toString();
@@ -56,5 +56,6 @@ function iterateThroughFiles(dirNameRead) {
       }
     });
   }
+}
 
 addLicenses(process.argv.slice(2));
