@@ -1839,8 +1839,8 @@ export class Query<
    *
    * Using the returned query to count the documents is efficient because only
    * the final count, not the documents' data, is downloaded. The returned
-   * query can even count the documents if the result set would be
-   * prohibitively large to download entirely (e.g. thousands of documents).
+   * query can count the documents if the result set would be prohibitively
+   * large to download entirely (thousands of documents).
    *
    * @return a query that counts the documents in the result set of this
    * query. The count can be retrieved from `snapshot.data().count`, where
@@ -1861,13 +1861,13 @@ export class Query<
    * Returns a query that can perform the given aggregations.
    *
    * The returned query, when executed, calculates the specified aggregations
-   * over the documents in the result set of this query, without actually
+   * over the documents in the result set of this query without actually
    * downloading the documents.
    *
    * Using the returned query to perform aggregations is efficient because only
    * the final aggregation values, not the documents' data, is downloaded. The
-   * returned query can even perform aggregations of the documents if the result set
-   * would be prohibitively large to download entirely (e.g. thousands of documents).
+   * returned query can perform aggregations of the documents if the result set
+   * would be prohibitively large to download entirely (thousands of documents).
    *
    * @param aggregateSpec An `AggregateSpec` object that specifies the aggregates
    * to perform over the result set. The AggregateSpec specifies aliases for each
