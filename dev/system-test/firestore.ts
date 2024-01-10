@@ -1018,7 +1018,7 @@ describe('DocumentReference class', () => {
     return promise;
   });
 
-  it.only('can write and read vector embeddings', async () => {
+  it('can write and read vector embeddings', async () => {
     const ref = randomCol.doc();
     await ref.create({
       vectorEmpty: FieldValue.vector(),
@@ -1336,7 +1336,7 @@ describe('DocumentReference class', () => {
     expect(result2.data()).to.deep.equal([1, 2, 3]);
   });
 
-  it.only('can listen to documents with vectors', async () => {
+  it('can listen to documents with vectors', async () => {
     const ref = randomCol.doc();
     const initialDeferred = new Deferred<void>();
     const createDeferred = new Deferred<void>();
