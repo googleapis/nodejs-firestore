@@ -725,7 +725,7 @@ describe('query interface', () => {
     let attempts = 0;
     const query = firestore.collection('collectionId');
 
-    query._stream = () => {
+    query._queryUtil._stream = () => {
       ++attempts;
       throw new Error('Expected error');
     };
@@ -896,7 +896,7 @@ describe('query interface', () => {
     return createInstance(overrides).then(firestoreInstance => {
       firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
-      query._hasRetryTimedOut = () => false;
+      query._queryUtil._hasRetryTimedOut = () => false;
       return query
         .get()
         .then(() => {
@@ -956,7 +956,7 @@ describe('query interface', () => {
       firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
       // Fake our timeout check to fail after 10 retry attempts
-      query._hasRetryTimedOut = (methodName, startTime) => {
+      query._queryUtil._hasRetryTimedOut = (methodName, startTime) => {
         expect(methodName).to.equal('runQuery');
         expect(startTime).to.be.lessThanOrEqual(Date.now());
         return attempts >= 10;
@@ -3664,7 +3664,7 @@ describe('query resumption', () => {
     // the async iterator into an array.
     firestore = await createInstance(overrides);
     const query = firestore.collection('collectionId');
-    query._isPermanentRpcError = mockIsPermanentRpcError;
+    query._queryUtil._isPermanentRpcError = mockIsPermanentRpcError;
     const iterator = query
       .stream()
       [Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;

@@ -1594,16 +1594,24 @@ describe('Query class', () => {
           .onceQuery()
           .where('foo', '==', 'bar')
           .orderBy(
-            Functions.vector_distance('embedding', [10, 10], {type: 'SQUARED_L2'})
+            Functions.vector_distance('embedding', [10, 10], {
+              type: 'SQUARED_L2',
+            })
           )
           .limit(3)
           .get()
       )
       .then(res => {
         expect(res.size).to.equal(3);
-        expect(res.docs[0].get('embedding')).to.deep.equal(FieldValue.vector([9, 9]));
-        expect(res.docs[1].get('embedding')).to.deep.equal(FieldValue.vector([5, 5]));
-        expect(res.docs[2].get('embedding')).to.deep.equal(FieldValue.vector([50, 50]));
+        expect(res.docs[0].get('embedding')).to.deep.equal(
+          FieldValue.vector([9, 9])
+        );
+        expect(res.docs[1].get('embedding')).to.deep.equal(
+          FieldValue.vector([5, 5])
+        );
+        expect(res.docs[2].get('embedding')).to.deep.equal(
+          FieldValue.vector([50, 50])
+        );
       });
   });
 

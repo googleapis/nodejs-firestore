@@ -88,7 +88,6 @@ import {
 export {
   CollectionReference,
   DocumentReference,
-  Functions,
   QuerySnapshot,
   Query,
 } from './reference';
