@@ -1,19 +1,3 @@
-/*!
- * Copyright 2022 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /*eslint-disable block-scoped-var, id-length, no-control-regex, no-magic-numbers, no-prototype-builtins, no-redeclare, no-shadow, no-var, sort-vars*/
 (function(global, factory) { /* global define, require, module */
 
@@ -4294,6 +4278,10 @@
                             case "NON_EMPTY_DEFAULT":
                             case 7:
                                 message[".google.api.fieldBehavior"][i] = 7;
+                                break;
+                            case "IDENTIFIER":
+                            case 8:
+                                message[".google.api.fieldBehavior"][i] = 8;
                                 break;
                             }
                     }
@@ -11572,6 +11560,7 @@
                      * @property {Uint8Array|null} [transaction] RunQueryRequest transaction
                      * @property {google.firestore.v1.ITransactionOptions|null} [newTransaction] RunQueryRequest newTransaction
                      * @property {google.protobuf.ITimestamp|null} [readTime] RunQueryRequest readTime
+                     * @property {google.firestore.v1.QueryMode|null} [mode] RunQueryRequest mode
                      */
     
                     /**
@@ -11628,6 +11617,14 @@
                      * @instance
                      */
                     RunQueryRequest.prototype.readTime = null;
+    
+                    /**
+                     * RunQueryRequest mode.
+                     * @member {google.firestore.v1.QueryMode} mode
+                     * @memberof google.firestore.v1.RunQueryRequest
+                     * @instance
+                     */
+                    RunQueryRequest.prototype.mode = 0;
     
                     // OneOf field names bound to virtual getters and setters
                     var $oneOfFields;
@@ -11688,6 +11685,26 @@
                                 throw TypeError(".google.firestore.v1.RunQueryRequest.readTime: object expected");
                             message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
                         }
+                        switch (object.mode) {
+                        default:
+                            if (typeof object.mode === "number") {
+                                message.mode = object.mode;
+                                break;
+                            }
+                            break;
+                        case "NORMAL":
+                        case 0:
+                            message.mode = 0;
+                            break;
+                        case "PLAN":
+                        case 1:
+                            message.mode = 1;
+                            break;
+                        case "PROFILE":
+                        case 2:
+                            message.mode = 2;
+                            break;
+                        }
                         return message;
                     };
     
@@ -11704,8 +11721,10 @@
                         if (!options)
                             options = {};
                         var object = {};
-                        if (options.defaults)
+                        if (options.defaults) {
                             object.parent = "";
+                            object.mode = options.enums === String ? "NORMAL" : 0;
+                        }
                         if (message.parent != null && message.hasOwnProperty("parent"))
                             object.parent = message.parent;
                         if (message.structuredQuery != null && message.hasOwnProperty("structuredQuery")) {
@@ -11728,6 +11747,8 @@
                             if (options.oneofs)
                                 object.consistencySelector = "readTime";
                         }
+                        if (message.mode != null && message.hasOwnProperty("mode"))
+                            object.mode = options.enums === String ? $root.google.firestore.v1.QueryMode[message.mode] === undefined ? message.mode : $root.google.firestore.v1.QueryMode[message.mode] : message.mode;
                         return object;
                     };
     
@@ -11771,6 +11792,7 @@
                      * @property {google.protobuf.ITimestamp|null} [readTime] RunQueryResponse readTime
                      * @property {number|null} [skippedResults] RunQueryResponse skippedResults
                      * @property {boolean|null} [done] RunQueryResponse done
+                     * @property {google.firestore.v1.IResultSetStats|null} [stats] RunQueryResponse stats
                      */
     
                     /**
@@ -11828,6 +11850,14 @@
                      */
                     RunQueryResponse.prototype.done = null;
     
+                    /**
+                     * RunQueryResponse stats.
+                     * @member {google.firestore.v1.IResultSetStats|null|undefined} stats
+                     * @memberof google.firestore.v1.RunQueryResponse
+                     * @instance
+                     */
+                    RunQueryResponse.prototype.stats = null;
+    
                     // OneOf field names bound to virtual getters and setters
                     var $oneOfFields;
     
@@ -11873,6 +11903,11 @@
                             message.skippedResults = object.skippedResults | 0;
                         if (object.done != null)
                             message.done = Boolean(object.done);
+                        if (object.stats != null) {
+                            if (typeof object.stats !== "object")
+                                throw TypeError(".google.firestore.v1.RunQueryResponse.stats: object expected");
+                            message.stats = $root.google.firestore.v1.ResultSetStats.fromObject(object.stats);
+                        }
                         return message;
                     };
     
@@ -11900,6 +11935,7 @@
                             }
                             object.readTime = null;
                             object.skippedResults = 0;
+                            object.stats = null;
                         }
                         if (message.document != null && message.hasOwnProperty("document"))
                             object.document = $root.google.firestore.v1.Document.toObject(message.document, options);
@@ -11914,6 +11950,8 @@
                             if (options.oneofs)
                                 object.continuationSelector = "done";
                         }
+                        if (message.stats != null && message.hasOwnProperty("stats"))
+                            object.stats = $root.google.firestore.v1.ResultSetStats.toObject(message.stats, options);
                         return object;
                     };
     
@@ -11957,6 +11995,7 @@
                      * @property {Uint8Array|null} [transaction] RunAggregationQueryRequest transaction
                      * @property {google.firestore.v1.ITransactionOptions|null} [newTransaction] RunAggregationQueryRequest newTransaction
                      * @property {google.protobuf.ITimestamp|null} [readTime] RunAggregationQueryRequest readTime
+                     * @property {google.firestore.v1.QueryMode|null} [mode] RunAggregationQueryRequest mode
                      */
     
                     /**
@@ -12013,6 +12052,14 @@
                      * @instance
                      */
                     RunAggregationQueryRequest.prototype.readTime = null;
+    
+                    /**
+                     * RunAggregationQueryRequest mode.
+                     * @member {google.firestore.v1.QueryMode} mode
+                     * @memberof google.firestore.v1.RunAggregationQueryRequest
+                     * @instance
+                     */
+                    RunAggregationQueryRequest.prototype.mode = 0;
     
                     // OneOf field names bound to virtual getters and setters
                     var $oneOfFields;
@@ -12073,6 +12120,26 @@
                                 throw TypeError(".google.firestore.v1.RunAggregationQueryRequest.readTime: object expected");
                             message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
                         }
+                        switch (object.mode) {
+                        default:
+                            if (typeof object.mode === "number") {
+                                message.mode = object.mode;
+                                break;
+                            }
+                            break;
+                        case "NORMAL":
+                        case 0:
+                            message.mode = 0;
+                            break;
+                        case "PLAN":
+                        case 1:
+                            message.mode = 1;
+                            break;
+                        case "PROFILE":
+                        case 2:
+                            message.mode = 2;
+                            break;
+                        }
                         return message;
                     };
     
@@ -12089,8 +12156,10 @@
                         if (!options)
                             options = {};
                         var object = {};
-                        if (options.defaults)
+                        if (options.defaults) {
                             object.parent = "";
+                            object.mode = options.enums === String ? "NORMAL" : 0;
+                        }
                         if (message.parent != null && message.hasOwnProperty("parent"))
                             object.parent = message.parent;
                         if (message.structuredAggregationQuery != null && message.hasOwnProperty("structuredAggregationQuery")) {
@@ -12113,6 +12182,8 @@
                             if (options.oneofs)
                                 object.consistencySelector = "readTime";
                         }
+                        if (message.mode != null && message.hasOwnProperty("mode"))
+                            object.mode = options.enums === String ? $root.google.firestore.v1.QueryMode[message.mode] === undefined ? message.mode : $root.google.firestore.v1.QueryMode[message.mode] : message.mode;
                         return object;
                     };
     
@@ -12154,6 +12225,7 @@
                      * @property {google.firestore.v1.IAggregationResult|null} [result] RunAggregationQueryResponse result
                      * @property {Uint8Array|null} [transaction] RunAggregationQueryResponse transaction
                      * @property {google.protobuf.ITimestamp|null} [readTime] RunAggregationQueryResponse readTime
+                     * @property {google.firestore.v1.IResultSetStats|null} [stats] RunAggregationQueryResponse stats
                      */
     
                     /**
@@ -12196,6 +12268,14 @@
                     RunAggregationQueryResponse.prototype.readTime = null;
     
                     /**
+                     * RunAggregationQueryResponse stats.
+                     * @member {google.firestore.v1.IResultSetStats|null|undefined} stats
+                     * @memberof google.firestore.v1.RunAggregationQueryResponse
+                     * @instance
+                     */
+                    RunAggregationQueryResponse.prototype.stats = null;
+    
+                    /**
                      * Creates a RunAggregationQueryResponse message from a plain object. Also converts values to their respective internal types.
                      * @function fromObject
                      * @memberof google.firestore.v1.RunAggregationQueryResponse
@@ -12221,6 +12301,11 @@
                             if (typeof object.readTime !== "object")
                                 throw TypeError(".google.firestore.v1.RunAggregationQueryResponse.readTime: object expected");
                             message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        if (object.stats != null) {
+                            if (typeof object.stats !== "object")
+                                throw TypeError(".google.firestore.v1.RunAggregationQueryResponse.stats: object expected");
+                            message.stats = $root.google.firestore.v1.ResultSetStats.fromObject(object.stats);
                         }
                         return message;
                     };
@@ -12248,6 +12333,7 @@
                                     object.transaction = $util.newBuffer(object.transaction);
                             }
                             object.readTime = null;
+                            object.stats = null;
                         }
                         if (message.result != null && message.hasOwnProperty("result"))
                             object.result = $root.google.firestore.v1.AggregationResult.toObject(message.result, options);
@@ -12255,6 +12341,8 @@
                             object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
                         if (message.readTime != null && message.hasOwnProperty("readTime"))
                             object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                        if (message.stats != null && message.hasOwnProperty("stats"))
+                            object.stats = $root.google.firestore.v1.ResultSetStats.toObject(message.stats, options);
                         return object;
                     };
     
@@ -14610,6 +14698,242 @@
                     };
     
                     return BatchWriteResponse;
+                })();
+    
+                /**
+                 * QueryMode enum.
+                 * @name google.firestore.v1.QueryMode
+                 * @enum {string}
+                 * @property {string} NORMAL=NORMAL NORMAL value
+                 * @property {string} PLAN=PLAN PLAN value
+                 * @property {string} PROFILE=PROFILE PROFILE value
+                 */
+                v1.QueryMode = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "NORMAL"] = "NORMAL";
+                    values[valuesById[1] = "PLAN"] = "PLAN";
+                    values[valuesById[2] = "PROFILE"] = "PROFILE";
+                    return values;
+                })();
+    
+                v1.QueryPlan = (function() {
+    
+                    /**
+                     * Properties of a QueryPlan.
+                     * @memberof google.firestore.v1
+                     * @interface IQueryPlan
+                     * @property {google.protobuf.IStruct|null} [planInfo] QueryPlan planInfo
+                     */
+    
+                    /**
+                     * Constructs a new QueryPlan.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a QueryPlan.
+                     * @implements IQueryPlan
+                     * @constructor
+                     * @param {google.firestore.v1.IQueryPlan=} [properties] Properties to set
+                     */
+                    function QueryPlan(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * QueryPlan planInfo.
+                     * @member {google.protobuf.IStruct|null|undefined} planInfo
+                     * @memberof google.firestore.v1.QueryPlan
+                     * @instance
+                     */
+                    QueryPlan.prototype.planInfo = null;
+    
+                    /**
+                     * Creates a QueryPlan message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.QueryPlan
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.QueryPlan} QueryPlan
+                     */
+                    QueryPlan.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.QueryPlan)
+                            return object;
+                        var message = new $root.google.firestore.v1.QueryPlan();
+                        if (object.planInfo != null) {
+                            if (typeof object.planInfo !== "object")
+                                throw TypeError(".google.firestore.v1.QueryPlan.planInfo: object expected");
+                            message.planInfo = $root.google.protobuf.Struct.fromObject(object.planInfo);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a QueryPlan message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.QueryPlan
+                     * @static
+                     * @param {google.firestore.v1.QueryPlan} message QueryPlan
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    QueryPlan.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults)
+                            object.planInfo = null;
+                        if (message.planInfo != null && message.hasOwnProperty("planInfo"))
+                            object.planInfo = $root.google.protobuf.Struct.toObject(message.planInfo, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this QueryPlan to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.QueryPlan
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    QueryPlan.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for QueryPlan
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.QueryPlan
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    QueryPlan.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.QueryPlan";
+                    };
+    
+                    return QueryPlan;
+                })();
+    
+                v1.ResultSetStats = (function() {
+    
+                    /**
+                     * Properties of a ResultSetStats.
+                     * @memberof google.firestore.v1
+                     * @interface IResultSetStats
+                     * @property {google.firestore.v1.IQueryPlan|null} [queryPlan] ResultSetStats queryPlan
+                     * @property {google.protobuf.IStruct|null} [queryStats] ResultSetStats queryStats
+                     */
+    
+                    /**
+                     * Constructs a new ResultSetStats.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a ResultSetStats.
+                     * @implements IResultSetStats
+                     * @constructor
+                     * @param {google.firestore.v1.IResultSetStats=} [properties] Properties to set
+                     */
+                    function ResultSetStats(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * ResultSetStats queryPlan.
+                     * @member {google.firestore.v1.IQueryPlan|null|undefined} queryPlan
+                     * @memberof google.firestore.v1.ResultSetStats
+                     * @instance
+                     */
+                    ResultSetStats.prototype.queryPlan = null;
+    
+                    /**
+                     * ResultSetStats queryStats.
+                     * @member {google.protobuf.IStruct|null|undefined} queryStats
+                     * @memberof google.firestore.v1.ResultSetStats
+                     * @instance
+                     */
+                    ResultSetStats.prototype.queryStats = null;
+    
+                    /**
+                     * Creates a ResultSetStats message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ResultSetStats
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ResultSetStats} ResultSetStats
+                     */
+                    ResultSetStats.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ResultSetStats)
+                            return object;
+                        var message = new $root.google.firestore.v1.ResultSetStats();
+                        if (object.queryPlan != null) {
+                            if (typeof object.queryPlan !== "object")
+                                throw TypeError(".google.firestore.v1.ResultSetStats.queryPlan: object expected");
+                            message.queryPlan = $root.google.firestore.v1.QueryPlan.fromObject(object.queryPlan);
+                        }
+                        if (object.queryStats != null) {
+                            if (typeof object.queryStats !== "object")
+                                throw TypeError(".google.firestore.v1.ResultSetStats.queryStats: object expected");
+                            message.queryStats = $root.google.protobuf.Struct.fromObject(object.queryStats);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a ResultSetStats message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ResultSetStats
+                     * @static
+                     * @param {google.firestore.v1.ResultSetStats} message ResultSetStats
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ResultSetStats.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.queryPlan = null;
+                            object.queryStats = null;
+                        }
+                        if (message.queryPlan != null && message.hasOwnProperty("queryPlan"))
+                            object.queryPlan = $root.google.firestore.v1.QueryPlan.toObject(message.queryPlan, options);
+                        if (message.queryStats != null && message.hasOwnProperty("queryStats"))
+                            object.queryStats = $root.google.protobuf.Struct.toObject(message.queryStats, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ResultSetStats to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ResultSetStats
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ResultSetStats.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for ResultSetStats
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.ResultSetStats
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    ResultSetStats.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.ResultSetStats";
+                    };
+    
+                    return ResultSetStats;
                 })();
     
                 v1.StructuredQuery = (function() {
@@ -20249,6 +20573,7 @@
                  * @interface IMethodSettings
                  * @property {string|null} [selector] MethodSettings selector
                  * @property {google.api.MethodSettings.ILongRunning|null} [longRunning] MethodSettings longRunning
+                 * @property {Array.<string>|null} [autoPopulatedFields] MethodSettings autoPopulatedFields
                  */
     
                 /**
@@ -20260,6 +20585,7 @@
                  * @param {google.api.IMethodSettings=} [properties] Properties to set
                  */
                 function MethodSettings(properties) {
+                    this.autoPopulatedFields = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -20283,6 +20609,14 @@
                 MethodSettings.prototype.longRunning = null;
     
                 /**
+                 * MethodSettings autoPopulatedFields.
+                 * @member {Array.<string>} autoPopulatedFields
+                 * @memberof google.api.MethodSettings
+                 * @instance
+                 */
+                MethodSettings.prototype.autoPopulatedFields = $util.emptyArray;
+    
+                /**
                  * Creates a MethodSettings message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.MethodSettings
@@ -20301,6 +20635,13 @@
                             throw TypeError(".google.api.MethodSettings.longRunning: object expected");
                         message.longRunning = $root.google.api.MethodSettings.LongRunning.fromObject(object.longRunning);
                     }
+                    if (object.autoPopulatedFields) {
+                        if (!Array.isArray(object.autoPopulatedFields))
+                            throw TypeError(".google.api.MethodSettings.autoPopulatedFields: array expected");
+                        message.autoPopulatedFields = [];
+                        for (var i = 0; i < object.autoPopulatedFields.length; ++i)
+                            message.autoPopulatedFields[i] = String(object.autoPopulatedFields[i]);
+                    }
                     return message;
                 };
     
@@ -20317,6 +20658,8 @@
                     if (!options)
                         options = {};
                     var object = {};
+                    if (options.arrays || options.defaults)
+                        object.autoPopulatedFields = [];
                     if (options.defaults) {
                         object.selector = "";
                         object.longRunning = null;
@@ -20325,6 +20668,11 @@
                         object.selector = message.selector;
                     if (message.longRunning != null && message.hasOwnProperty("longRunning"))
                         object.longRunning = $root.google.api.MethodSettings.LongRunning.toObject(message.longRunning, options);
+                    if (message.autoPopulatedFields && message.autoPopulatedFields.length) {
+                        object.autoPopulatedFields = [];
+                        for (var j = 0; j < message.autoPopulatedFields.length; ++j)
+                            object.autoPopulatedFields[j] = message.autoPopulatedFields[j];
+                    }
                     return object;
                 };
     
@@ -20561,6 +20909,7 @@
              * @property {string} IMMUTABLE=IMMUTABLE IMMUTABLE value
              * @property {string} UNORDERED_LIST=UNORDERED_LIST UNORDERED_LIST value
              * @property {string} NON_EMPTY_DEFAULT=NON_EMPTY_DEFAULT NON_EMPTY_DEFAULT value
+             * @property {string} IDENTIFIER=IDENTIFIER IDENTIFIER value
              */
             api.FieldBehavior = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
@@ -20572,6 +20921,7 @@
                 values[valuesById[5] = "IMMUTABLE"] = "IMMUTABLE";
                 values[valuesById[6] = "UNORDERED_LIST"] = "UNORDERED_LIST";
                 values[valuesById[7] = "NON_EMPTY_DEFAULT"] = "NON_EMPTY_DEFAULT";
+                values[valuesById[8] = "IDENTIFIER"] = "IDENTIFIER";
                 return values;
             })();
     

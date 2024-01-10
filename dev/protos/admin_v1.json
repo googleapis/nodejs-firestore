@@ -31,6 +31,27 @@
                           "type": "string",
                           "id": 1
                         },
+                        "uid": {
+                          "type": "string",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "createTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 5,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "updateTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 6,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
                         "locationId": {
                           "type": "string",
                           "id": 9
@@ -43,6 +64,24 @@
                           "type": "ConcurrencyMode",
                           "id": 15
                         },
+                        "versionRetentionPeriod": {
+                          "type": "google.protobuf.Duration",
+                          "id": 17,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "earliestVersionTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 18,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "pointInTimeRecoveryEnablement": {
+                          "type": "PointInTimeRecoveryEnablement",
+                          "id": 21
+                        },
                         "appEngineIntegrationMode": {
                           "type": "AppEngineIntegrationMode",
                           "id": 19
@@ -53,6 +92,10 @@
                           "options": {
                             "(google.api.field_behavior)": "OUTPUT_ONLY"
                           }
+                        },
+                        "deleteProtectionState": {
+                          "type": "DeleteProtectionState",
+                          "id": 22
                         },
                         "etag": {
                           "type": "string",
@@ -75,11 +118,25 @@
                             "OPTIMISTIC_WITH_ENTITY_GROUPS": 3
                           }
                         },
+                        "PointInTimeRecoveryEnablement": {
+                          "values": {
+                            "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED": 0,
+                            "POINT_IN_TIME_RECOVERY_ENABLED": 1,
+                            "POINT_IN_TIME_RECOVERY_DISABLED": 2
+                          }
+                        },
                         "AppEngineIntegrationMode": {
                           "values": {
                             "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED": 0,
                             "ENABLED": 1,
                             "DISABLED": 2
+                          }
+                        },
+                        "DeleteProtectionState": {
+                          "values": {
+                            "DELETE_PROTECTION_STATE_UNSPECIFIED": 0,
+                            "DELETE_PROTECTION_DISABLED": 1,
+                            "DELETE_PROTECTION_ENABLED": 2
                           }
                         }
                       }
@@ -450,6 +507,32 @@
                               }
                             }
                           ]
+                        },
+                        "DeleteDatabase": {
+                          "requestType": "DeleteDatabaseRequest",
+                          "responseType": "google.longrunning.Operation",
+                          "options": {
+                            "(google.api.http).delete": "/v1/{name=projects/*/databases/*}",
+                            "(google.api.method_signature)": "name",
+                            "(google.longrunning.operation_info).response_type": "Database",
+                            "(google.longrunning.operation_info).metadata_type": "DeleteDatabaseMetadata"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "delete": "/v1/{name=projects/*/databases/*}"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            },
+                            {
+                              "(google.longrunning.operation_info)": {
+                                "response_type": "Database",
+                                "metadata_type": "DeleteDatabaseMetadata"
+                              }
+                            }
+                          ]
                         }
                       }
                     },
@@ -500,6 +583,11 @@
                           "rule": "repeated",
                           "type": "Database",
                           "id": 1
+                        },
+                        "unreachable": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 3
                         }
                       }
                     },
@@ -531,6 +619,25 @@
                       }
                     },
                     "UpdateDatabaseMetadata": {
+                      "fields": {}
+                    },
+                    "DeleteDatabaseRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Database"
+                          }
+                        },
+                        "etag": {
+                          "type": "string",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "DeleteDatabaseMetadata": {
                       "fields": {}
                     },
                     "CreateIndexRequest": {
@@ -695,6 +802,15 @@
                         "outputUriPrefix": {
                           "type": "string",
                           "id": 3
+                        },
+                        "namespaceIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 4
+                        },
+                        "snapshotTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 5
                         }
                       }
                     },
@@ -716,6 +832,11 @@
                         "inputUriPrefix": {
                           "type": "string",
                           "id": 3
+                        },
+                        "namespaceIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 4
                         }
                       }
                     },
@@ -949,6 +1070,15 @@
                         "outputUriPrefix": {
                           "type": "string",
                           "id": 7
+                        },
+                        "namespaceIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 8
+                        },
+                        "snapshotTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 9
                         }
                       }
                     },
@@ -982,6 +1112,11 @@
                         "inputUriPrefix": {
                           "type": "string",
                           "id": 7
+                        },
+                        "namespaceIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 8
                         }
                       }
                     },
@@ -1346,6 +1481,11 @@
                 "longRunning": {
                   "type": "LongRunning",
                   "id": 2
+                },
+                "autoPopulatedFields": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 3
                 }
               },
               "nested": {
@@ -1405,7 +1545,8 @@
                 "INPUT_ONLY": 4,
                 "IMMUTABLE": 5,
                 "UNORDERED_LIST": 6,
-                "NON_EMPTY_DEFAULT": 7
+                "NON_EMPTY_DEFAULT": 7,
+                "IDENTIFIER": 8
               }
             },
             "LaunchStage": {

@@ -1,19 +1,3 @@
-/*!
- * Copyright 2022 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as $protobuf from "protobufjs";
 import Long = require("long");
 /** Namespace firestore. */
@@ -4914,6 +4898,9 @@ export namespace google {
 
                 /** RunQueryRequest readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunQueryRequest mode */
+                mode?: (google.firestore.v1.QueryMode|null);
             }
 
             /** Represents a RunQueryRequest. */
@@ -4939,6 +4926,9 @@ export namespace google {
 
                 /** RunQueryRequest readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunQueryRequest mode. */
+                public mode: google.firestore.v1.QueryMode;
 
                 /** RunQueryRequest queryType. */
                 public queryType?: "structuredQuery";
@@ -4992,6 +4982,9 @@ export namespace google {
 
                 /** RunQueryResponse done */
                 done?: (boolean|null);
+
+                /** RunQueryResponse stats */
+                stats?: (google.firestore.v1.IResultSetStats|null);
             }
 
             /** Represents a RunQueryResponse. */
@@ -5017,6 +5010,9 @@ export namespace google {
 
                 /** RunQueryResponse done. */
                 public done?: (boolean|null);
+
+                /** RunQueryResponse stats. */
+                public stats?: (google.firestore.v1.IResultSetStats|null);
 
                 /** RunQueryResponse continuationSelector. */
                 public continuationSelector?: "done";
@@ -5067,6 +5063,9 @@ export namespace google {
 
                 /** RunAggregationQueryRequest readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunAggregationQueryRequest mode */
+                mode?: (google.firestore.v1.QueryMode|null);
             }
 
             /** Represents a RunAggregationQueryRequest. */
@@ -5092,6 +5091,9 @@ export namespace google {
 
                 /** RunAggregationQueryRequest readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunAggregationQueryRequest mode. */
+                public mode: google.firestore.v1.QueryMode;
 
                 /** RunAggregationQueryRequest queryType. */
                 public queryType?: "structuredAggregationQuery";
@@ -5139,6 +5141,9 @@ export namespace google {
 
                 /** RunAggregationQueryResponse readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunAggregationQueryResponse stats */
+                stats?: (google.firestore.v1.IResultSetStats|null);
             }
 
             /** Represents a RunAggregationQueryResponse. */
@@ -5158,6 +5163,9 @@ export namespace google {
 
                 /** RunAggregationQueryResponse readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunAggregationQueryResponse stats. */
+                public stats?: (google.firestore.v1.IResultSetStats|null);
 
                 /**
                  * Creates a RunAggregationQueryResponse message from a plain object. Also converts values to their respective internal types.
@@ -6116,6 +6124,112 @@ export namespace google {
 
                 /**
                  * Gets the default type url for BatchWriteResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** QueryMode enum. */
+            type QueryMode =
+                "NORMAL"| "PLAN"| "PROFILE";
+
+            /** Properties of a QueryPlan. */
+            interface IQueryPlan {
+
+                /** QueryPlan planInfo */
+                planInfo?: (google.protobuf.IStruct|null);
+            }
+
+            /** Represents a QueryPlan. */
+            class QueryPlan implements IQueryPlan {
+
+                /**
+                 * Constructs a new QueryPlan.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IQueryPlan);
+
+                /** QueryPlan planInfo. */
+                public planInfo?: (google.protobuf.IStruct|null);
+
+                /**
+                 * Creates a QueryPlan message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns QueryPlan
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.QueryPlan;
+
+                /**
+                 * Creates a plain object from a QueryPlan message. Also converts values to other types if specified.
+                 * @param message QueryPlan
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.QueryPlan, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this QueryPlan to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for QueryPlan
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a ResultSetStats. */
+            interface IResultSetStats {
+
+                /** ResultSetStats queryPlan */
+                queryPlan?: (google.firestore.v1.IQueryPlan|null);
+
+                /** ResultSetStats queryStats */
+                queryStats?: (google.protobuf.IStruct|null);
+            }
+
+            /** Represents a ResultSetStats. */
+            class ResultSetStats implements IResultSetStats {
+
+                /**
+                 * Constructs a new ResultSetStats.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IResultSetStats);
+
+                /** ResultSetStats queryPlan. */
+                public queryPlan?: (google.firestore.v1.IQueryPlan|null);
+
+                /** ResultSetStats queryStats. */
+                public queryStats?: (google.protobuf.IStruct|null);
+
+                /**
+                 * Creates a ResultSetStats message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ResultSetStats
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ResultSetStats;
+
+                /**
+                 * Creates a plain object from a ResultSetStats message. Also converts values to other types if specified.
+                 * @param message ResultSetStats
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ResultSetStats, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ResultSetStats to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ResultSetStats
                  * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                  * @returns The default type url
                  */
@@ -8438,6 +8552,9 @@ export namespace google {
 
             /** MethodSettings longRunning */
             longRunning?: (google.api.MethodSettings.ILongRunning|null);
+
+            /** MethodSettings autoPopulatedFields */
+            autoPopulatedFields?: (string[]|null);
         }
 
         /** Represents a MethodSettings. */
@@ -8454,6 +8571,9 @@ export namespace google {
 
             /** MethodSettings longRunning. */
             public longRunning?: (google.api.MethodSettings.ILongRunning|null);
+
+            /** MethodSettings autoPopulatedFields. */
+            public autoPopulatedFields: string[];
 
             /**
              * Creates a MethodSettings message from a plain object. Also converts values to their respective internal types.
@@ -8563,7 +8683,7 @@ export namespace google {
 
         /** FieldBehavior enum. */
         type FieldBehavior =
-            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE"| "UNORDERED_LIST"| "NON_EMPTY_DEFAULT";
+            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE"| "UNORDERED_LIST"| "NON_EMPTY_DEFAULT"| "IDENTIFIER";
 
         /** LaunchStage enum. */
         type LaunchStage =

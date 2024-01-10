@@ -36,12 +36,12 @@ const LICENSE_HEADER = `/*!
 
 function addLicenses(dirNameReads) {
   for (const dirNameRead of dirNameReads) {
-    iterateThroughFiles(dirNameRead)
+    iterateThroughFiles(dirNameRead);
   }
 }
 function iterateThroughFiles(dirNameRead) {
-    console.log(dirNameRead)
-    if (!fs.existsSync(dirNameRead)) {
+  console.log(dirNameRead);
+  if (!fs.existsSync(dirNameRead)) {
     const files = fs.readdirSync(dirNameRead);
     files.forEach(file => {
       const fileName = file.toString();
