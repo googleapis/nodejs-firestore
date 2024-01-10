@@ -37,11 +37,6 @@ trap cleanup EXIT
 PBJS="$(npm root)/.bin/pbjs"
 PBTS="$(npm root)/.bin/pbts"
 
-echo $(npm root)/.bin/pbjs
-
-echo "check here"
-echo "$PBJS"
-echo "$PBTS"
 # Enter work dir
 pushd "$WORK_DIR"
 

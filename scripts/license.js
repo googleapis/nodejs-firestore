@@ -15,6 +15,7 @@
  */
 
 const fs = require('fs');
+const path = require('path');
 
 const LICENSE_HEADER = `/*!
  * Copyright 2022 Google LLC
@@ -33,27 +34,26 @@ const LICENSE_HEADER = `/*!
  */
 `;
 
-// for (const dir of process.argv.slice(2)) {
-//   const files = fs.readdirSync(dir)
-//   const content = fs.readFileSync(file, 'utf-8');
-//   fs.writeFileSync(file, `${LICENSE_HEADER}\n${content.trim()}\n`);
-// }
-
-function addLicenses (dirNameReads) {
+function addLicenses(dirNameReads) {
   for (const dirNameRead of dirNameReads) {
+    iterateThroughFiles(dirNameRead)
+  }
+}
+function iterateThroughFiles(dirNameRead) {
+  console.log(dirNameRead)
+
     const files = fs.readdirSync(dirNameRead);
     files.forEach(file => {
-      const fileName = file.toString()
+      const fileName = file.toString();
       const readName = path.join(dirNameRead, fileName);
       if (fs.statSync(readName).isDirectory()) {
-        readAllFiles(readName);
+        iterateThroughFiles(readName);
       } else {
-        if (!(fs.readFileSync(fileName).includes('Copyright'))) {
+        if (!fs.readFileSync(fileName).includes('Copyright') && !fileName.endsWith('.json')) {
           fs.writeFileSync(writeName, `${LICENSE_HEADER}\n${content.trim()}\n`);
         }
       }
     });
   }
-};
 
-addLicenses(process.argv.slice(2))
+addLicenses(process.argv.slice(2));
