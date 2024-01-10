@@ -1834,6 +1834,12 @@ declare namespace FirebaseFirestore {
       aggregateSpec: T
     ): AggregateQuery<T, AppModelType, DbModelType>;
 
+    findNearest(vectorField: string | FieldPath,
+                queryVector: VectorValue | Array<number>,
+                optioins: {limit: number,
+                  distanceMeasure: 'SQUARED_L2' | 'COSINE' | 'DOT_PRODUCT'
+                }): VectorQuery<AppModelType, DbModelType>;
+
     /**
      * Returns true if this `Query` is equal to the provided one.
      *
@@ -2355,6 +2361,49 @@ declare namespace FirebaseFirestore {
         DbModelType
       >
     ): boolean;
+  }
+
+  export class VectorQuery<
+      AppModelType = DocumentData,
+      DbModelType extends DocumentData = DocumentData,
+  > {
+    private constructor();
+
+    /** The query whose aggregations will be calculated by this object. */
+    readonly query: Query<AppModelType, DbModelType>;
+
+    /**
+     * Executes this query.
+     *
+     * @return A promise that will be resolved with the results of the query.
+     */
+    get(): Promise<
+        QuerySnapshot<AppModelType, DbModelType>
+    >;
+
+    /**
+     * Compares this object with the given object for equality.
+     *
+     * This object is considered "equal" to the other object if and only if
+     * `other` performs the same aggregations as this `AggregateQuery` and
+     * the underlying Query of `other` compares equal to that of this object
+     * using `Query.isEqual()`.
+     *
+     * @param other The object to compare to this object for equality.
+     * @return `true` if this object is "equal" to the given object, as
+     * defined above, or `false` otherwise.
+     */
+    isEqual(
+        other: VectorQuery<AppModelType, DbModelType>
+    ): boolean;
+  }
+
+  export class VectorValue {
+    constructor(values: number[] | undefined);
+
+    toArray(): number[];
+
+    isEqual(other: VectorValue): boolean;
   }
 
   /**
