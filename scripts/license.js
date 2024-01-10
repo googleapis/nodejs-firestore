@@ -49,8 +49,9 @@ function iterateThroughFiles(dirNameRead) {
       if (fs.statSync(readName).isDirectory()) {
         iterateThroughFiles(readName);
       } else {
-        if (!fs.readFileSync(fileName).includes('Copyright') && !fileName.endsWith('.json')) {
-          fs.writeFileSync(writeName, `${LICENSE_HEADER}\n${content.trim()}\n`);
+        const content = fs.readFileSync(file, 'utf-8');
+        if (!content.includes('Copyright') && !fileName.endsWith('.json')) {
+          fs.writeFileSync(readName, `${LICENSE_HEADER}\n${content.trim()}\n`);
         }
       }
     });
