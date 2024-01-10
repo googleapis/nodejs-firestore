@@ -139,4 +139,4 @@ perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
 
 echo "Finished running update.sh"
 
-node  ../../scripts/license.js ../../build
+node  ../../scripts/license.js ../../build ../protos
