@@ -123,8 +123,7 @@ export class FirestoreAdminClient {
    *     API remote host.
    * @param {gax.ClientConfig} [options.clientConfig] - Client configuration override.
    *     Follows the structure of {@link gapicConfig}.
-   * @param {boolean | "rest"} [options.fallback] - Use HTTP fallback mode.
-   *     Pass "rest" to use HTTP/1.1 REST API instead of gRPC.
+   * @param {boolean} [options.fallback] - Use HTTP/1.1 REST mode.
    *     For more information, please check the
    *     {@link https://github.com/googleapis/gax-nodejs/blob/main/client-libraries.md#http11-rest-api-mode documentation}.
    * @param {gax} [gaxInstance]: loaded instance of `google-gax`. Useful if you
@@ -132,7 +131,7 @@ export class FirestoreAdminClient {
    *     HTTP implementation. Load only fallback version and pass it to the constructor:
    *     ```
    *     const gax = require('google-gax/build/src/fallback'); // avoids loading google-gax with gRPC
-   *     const client = new FirestoreAdminClient({fallback: 'rest'}, gax);
+   *     const client = new FirestoreAdminClient({fallback: true}, gax);
    *     ```
    */
   constructor(
@@ -202,7 +201,7 @@ export class FirestoreAdminClient {
     }
     if (!opts.fallback) {
       clientHeader.push(`grpc/${this._gaxGrpc.grpcVersion}`);
-    } else if (opts.fallback === 'rest') {
+    } else {
       clientHeader.push(`rest/${this._gaxGrpc.grpcVersion}`);
     }
     if (opts.libName && opts.libVersion) {
@@ -256,7 +255,7 @@ export class FirestoreAdminClient {
       auth: this.auth,
       grpc: 'grpc' in this._gaxGrpc ? this._gaxGrpc.grpc : undefined,
     };
-    if (opts.fallback === 'rest') {
+    if (opts.fallback) {
       lroOptions.protoJson = protoFilesRoot;
       lroOptions.httpRules = [
         {
@@ -317,6 +316,12 @@ export class FirestoreAdminClient {
     const updateDatabaseMetadata = protoFilesRoot.lookup(
       '.google.firestore.admin.v1.UpdateDatabaseMetadata'
     ) as gax.protobuf.Type;
+    const deleteDatabaseResponse = protoFilesRoot.lookup(
+      '.google.firestore.admin.v1.Database'
+    ) as gax.protobuf.Type;
+    const deleteDatabaseMetadata = protoFilesRoot.lookup(
+      '.google.firestore.admin.v1.DeleteDatabaseMetadata'
+    ) as gax.protobuf.Type;
 
     this.descriptors.longrunning = {
       createIndex: new this._gaxModule.LongrunningDescriptor(
@@ -348,6 +353,11 @@ export class FirestoreAdminClient {
         this.operationsClient,
         updateDatabaseResponse.decode.bind(updateDatabaseResponse),
         updateDatabaseMetadata.decode.bind(updateDatabaseMetadata)
+      ),
+      deleteDatabase: new this._gaxModule.LongrunningDescriptor(
+        this.operationsClient,
+        deleteDatabaseResponse.decode.bind(deleteDatabaseResponse),
+        deleteDatabaseMetadata.decode.bind(deleteDatabaseMetadata)
       ),
     };
 
@@ -414,6 +424,7 @@ export class FirestoreAdminClient {
       'getDatabase',
       'listDatabases',
       'updateDatabase',
+      'deleteDatabase',
     ];
     for (const methodName of firestoreAdminStubMethods) {
       const callPromise = this.firestoreAdminStub.then(
@@ -1251,6 +1262,21 @@ export class FirestoreAdminClient {
    *   guidelines: https://cloud.google.com/storage/docs/naming.
    *   If the URI is a bucket (without a namespace path), a prefix will be
    *   generated based on the start time.
+   * @param {string[]} request.namespaceIds
+   *   An empty list represents all namespaces. This is the preferred
+   *   usage for databases that don't use namespaces.
+   *
+   *   An empty string element represents the default namespace. This should be
+   *   used if the database has data in non-default namespaces, but doesn't want
+   *   to include them. Each namespace in this list must be unique.
+   * @param {google.protobuf.Timestamp} request.snapshotTime
+   *   The timestamp that corresponds to the version of the database to be
+   *   exported. The timestamp must be in the past, rounded to the minute and not
+   *   older than
+   *   {@link protos.google.firestore.admin.v1.Database.earliest_version_time|earliestVersionTime}.
+   *   If specified, then the exported documents will represent a consistent view
+   *   of the database at the provided time. Otherwise, there are no guarantees
+   *   about the consistency of the exported documents.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1401,6 +1427,13 @@ export class FirestoreAdminClient {
    *   an export that has completed successfully.
    *   See:
    *   {@link protos.google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix|google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix}.
+   * @param {string[]} request.namespaceIds
+   *   An empty list represents all namespaces. This is the preferred
+   *   usage for databases that don't use namespaces.
+   *
+   *   An empty string element represents the default namespace. This should be
+   *   used if the database has data in non-default namespaces, but doesn't want
+   *   to include them. Each namespace in this list must be unique.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1544,7 +1577,11 @@ export class FirestoreAdminClient {
    *   Required. The ID to use for the database, which will become the final
    *   component of the database's resource name.
    *
-   *   The value must be set to "(default)".
+   *   This value should be 4-63 characters. Valid characters are /{@link protos.0-9|a-z}-/
+   *   with first character a letter and the last a letter or a number. Must not
+   *   be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+   *
+   *   "(default)" database id is also valid.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1813,6 +1850,147 @@ export class FirestoreAdminClient {
     >;
   }
   /**
+   * Deletes a database.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. A name of the form
+   *   `projects/{project_id}/databases/{database_id}`
+   * @param {string} request.etag
+   *   The current etag of the Database.
+   *   If an etag is provided and does not match the current etag of the database,
+   *   deletion will be blocked and a FAILED_PRECONDITION error will be returned.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing
+   *   a long running operation. Its `promise()` method returns a promise
+   *   you can `await` for.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.delete_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_DeleteDatabase_async
+   */
+  deleteDatabase(
+    request?: protos.google.firestore.admin.v1.IDeleteDatabaseRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IDeleteDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | undefined,
+      {} | undefined,
+    ]
+  >;
+  deleteDatabase(
+    request: protos.google.firestore.admin.v1.IDeleteDatabaseRequest,
+    options: CallOptions,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IDeleteDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  deleteDatabase(
+    request: protos.google.firestore.admin.v1.IDeleteDatabaseRequest,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IDeleteDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  deleteDatabase(
+    request?: protos.google.firestore.admin.v1.IDeleteDatabaseRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          LROperation<
+            protos.google.firestore.admin.v1.IDatabase,
+            protos.google.firestore.admin.v1.IDeleteDatabaseMetadata
+          >,
+          protos.google.longrunning.IOperation | null | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IDeleteDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IDeleteDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.deleteDatabase(request, options, callback);
+  }
+  /**
+   * Check the status of the long running operation returned by `deleteDatabase()`.
+   * @param {String} name
+   *   The operation name that will be passed.
+   * @returns {Promise} - The promise which resolves to an object.
+   *   The decoded operation object has result and metadata field to get information from.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.delete_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_DeleteDatabase_async
+   */
+  async checkDeleteDatabaseProgress(
+    name: string
+  ): Promise<
+    LROperation<
+      protos.google.firestore.admin.v1.Database,
+      protos.google.firestore.admin.v1.DeleteDatabaseMetadata
+    >
+  > {
+    const request =
+      new this._gaxModule.operationsProtos.google.longrunning.GetOperationRequest(
+        {name}
+      );
+    const [operation] = await this.operationsClient.getOperation(request);
+    const decodeOperation = new this._gaxModule.Operation(
+      operation,
+      this.descriptors.longrunning.deleteDatabase,
+      this._gaxModule.createDefaultBackoffSettings()
+    );
+    return decodeOperation as LROperation<
+      protos.google.firestore.admin.v1.Database,
+      protos.google.firestore.admin.v1.DeleteDatabaseMetadata
+    >;
+  }
+  /**
    * Lists composite indexes.
    *
    * @param {Object} request
@@ -2015,7 +2193,8 @@ export class FirestoreAdminClient {
    * only supports listing fields that have been explicitly overridden. To issue
    * this query, call
    * {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
-   * with the filter set to `indexConfig.usesAncestorConfig:false` .
+   * with the filter set to `indexConfig.usesAncestorConfig:false or
+   * `ttlConfig:*`.
    *
    * @param {Object} request
    *   The request object that will be sent.
