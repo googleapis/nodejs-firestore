@@ -574,7 +574,6 @@ describe('failed transactions', () => {
           begin({transactionId: 'foo1'}),
           commit('foo1', /* writes=*/ undefined, serverError),
           rollback('foo1', serverError),
-          rollback('foo1'),
           backoff(),
           begin({
             transactionId: 'foo2',
