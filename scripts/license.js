@@ -41,7 +41,7 @@ function addLicenses(dirNameReads) {
 }
 function iterateThroughFiles(dirNameRead) {
   console.log(dirNameRead);
-  if (!fs.existsSync(dirNameRead)) {
+  if (!fs.existsSync(path.resolve(dirNameRead))) {
     const files = fs.readdirSync(dirNameRead);
     files.forEach(file => {
       const fileName = file.toString();
