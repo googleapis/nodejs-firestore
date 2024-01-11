@@ -2367,6 +2367,13 @@
                     "limit": {
                       "type": "google.protobuf.Int32Value",
                       "id": 5
+                    },
+                    "findNearest": {
+                      "type": "FindNearest",
+                      "id": 9,
+                      "options": {
+                        "(google.api.field_behavior)": "OPTIONAL"
+                      }
                     }
                   },
                   "nested": {
@@ -2525,6 +2532,48 @@
                           "rule": "repeated",
                           "type": "FieldReference",
                           "id": 2
+                        }
+                      }
+                    },
+                    "FindNearest": {
+                      "fields": {
+                        "vectorField": {
+                          "type": "FieldReference",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "queryVector": {
+                          "type": "Value",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "distanceMeasure": {
+                          "type": "DistanceMeasure",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "limit": {
+                          "type": "google.protobuf.Int32Value",
+                          "id": 4,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        }
+                      },
+                      "nested": {
+                        "DistanceMeasure": {
+                          "values": {
+                            "DISTANCE_MEASURE_UNSPECIFIED": 0,
+                            "SQUARED_L2": 1,
+                            "COSINE": 2,
+                            "DOT_PRODUCT": 3
+                          }
                         }
                       }
                     }

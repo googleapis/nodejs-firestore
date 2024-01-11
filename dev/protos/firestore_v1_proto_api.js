@@ -14966,6 +14966,7 @@
                      * @property {google.firestore.v1.ICursor|null} [endAt] StructuredQuery endAt
                      * @property {number|null} [offset] StructuredQuery offset
                      * @property {google.protobuf.IInt32Value|null} [limit] StructuredQuery limit
+                     * @property {google.firestore.v1.StructuredQuery.IFindNearest|null} [findNearest] StructuredQuery findNearest
                      */
     
                     /**
@@ -15050,6 +15051,14 @@
                     StructuredQuery.prototype.limit = null;
     
                     /**
+                     * StructuredQuery findNearest.
+                     * @member {google.firestore.v1.StructuredQuery.IFindNearest|null|undefined} findNearest
+                     * @memberof google.firestore.v1.StructuredQuery
+                     * @instance
+                     */
+                    StructuredQuery.prototype.findNearest = null;
+    
+                    /**
                      * Creates a StructuredQuery message from a plain object. Also converts values to their respective internal types.
                      * @function fromObject
                      * @memberof google.firestore.v1.StructuredQuery
@@ -15108,6 +15117,11 @@
                                 throw TypeError(".google.firestore.v1.StructuredQuery.limit: object expected");
                             message.limit = $root.google.protobuf.Int32Value.fromObject(object.limit);
                         }
+                        if (object.findNearest != null) {
+                            if (typeof object.findNearest !== "object")
+                                throw TypeError(".google.firestore.v1.StructuredQuery.findNearest: object expected");
+                            message.findNearest = $root.google.firestore.v1.StructuredQuery.FindNearest.fromObject(object.findNearest);
+                        }
                         return message;
                     };
     
@@ -15135,6 +15149,7 @@
                             object.offset = 0;
                             object.startAt = null;
                             object.endAt = null;
+                            object.findNearest = null;
                         }
                         if (message.select != null && message.hasOwnProperty("select"))
                             object.select = $root.google.firestore.v1.StructuredQuery.Projection.toObject(message.select, options);
@@ -15158,6 +15173,8 @@
                             object.startAt = $root.google.firestore.v1.Cursor.toObject(message.startAt, options);
                         if (message.endAt != null && message.hasOwnProperty("endAt"))
                             object.endAt = $root.google.firestore.v1.Cursor.toObject(message.endAt, options);
+                        if (message.findNearest != null && message.hasOwnProperty("findNearest"))
+                            object.findNearest = $root.google.firestore.v1.StructuredQuery.FindNearest.toObject(message.findNearest, options);
                         return object;
                     };
     
@@ -16361,6 +16378,196 @@
                         };
     
                         return Projection;
+                    })();
+    
+                    StructuredQuery.FindNearest = (function() {
+    
+                        /**
+                         * Properties of a FindNearest.
+                         * @memberof google.firestore.v1.StructuredQuery
+                         * @interface IFindNearest
+                         * @property {google.firestore.v1.StructuredQuery.IFieldReference|null} [vectorField] FindNearest vectorField
+                         * @property {google.firestore.v1.IValue|null} [queryVector] FindNearest queryVector
+                         * @property {google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure|null} [distanceMeasure] FindNearest distanceMeasure
+                         * @property {google.protobuf.IInt32Value|null} [limit] FindNearest limit
+                         */
+    
+                        /**
+                         * Constructs a new FindNearest.
+                         * @memberof google.firestore.v1.StructuredQuery
+                         * @classdesc Represents a FindNearest.
+                         * @implements IFindNearest
+                         * @constructor
+                         * @param {google.firestore.v1.StructuredQuery.IFindNearest=} [properties] Properties to set
+                         */
+                        function FindNearest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * FindNearest vectorField.
+                         * @member {google.firestore.v1.StructuredQuery.IFieldReference|null|undefined} vectorField
+                         * @memberof google.firestore.v1.StructuredQuery.FindNearest
+                         * @instance
+                         */
+                        FindNearest.prototype.vectorField = null;
+    
+                        /**
+                         * FindNearest queryVector.
+                         * @member {google.firestore.v1.IValue|null|undefined} queryVector
+                         * @memberof google.firestore.v1.StructuredQuery.FindNearest
+                         * @instance
+                         */
+                        FindNearest.prototype.queryVector = null;
+    
+                        /**
+                         * FindNearest distanceMeasure.
+                         * @member {google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure} distanceMeasure
+                         * @memberof google.firestore.v1.StructuredQuery.FindNearest
+                         * @instance
+                         */
+                        FindNearest.prototype.distanceMeasure = 0;
+    
+                        /**
+                         * FindNearest limit.
+                         * @member {google.protobuf.IInt32Value|null|undefined} limit
+                         * @memberof google.firestore.v1.StructuredQuery.FindNearest
+                         * @instance
+                         */
+                        FindNearest.prototype.limit = null;
+    
+                        /**
+                         * Creates a FindNearest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.FindNearest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.FindNearest} FindNearest
+                         */
+                        FindNearest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.FindNearest)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.FindNearest();
+                            if (object.vectorField != null) {
+                                if (typeof object.vectorField !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.FindNearest.vectorField: object expected");
+                                message.vectorField = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.vectorField);
+                            }
+                            if (object.queryVector != null) {
+                                if (typeof object.queryVector !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.FindNearest.queryVector: object expected");
+                                message.queryVector = $root.google.firestore.v1.Value.fromObject(object.queryVector);
+                            }
+                            switch (object.distanceMeasure) {
+                            default:
+                                if (typeof object.distanceMeasure === "number") {
+                                    message.distanceMeasure = object.distanceMeasure;
+                                    break;
+                                }
+                                break;
+                            case "DISTANCE_MEASURE_UNSPECIFIED":
+                            case 0:
+                                message.distanceMeasure = 0;
+                                break;
+                            case "SQUARED_L2":
+                            case 1:
+                                message.distanceMeasure = 1;
+                                break;
+                            case "COSINE":
+                            case 2:
+                                message.distanceMeasure = 2;
+                                break;
+                            case "DOT_PRODUCT":
+                            case 3:
+                                message.distanceMeasure = 3;
+                                break;
+                            }
+                            if (object.limit != null) {
+                                if (typeof object.limit !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.FindNearest.limit: object expected");
+                                message.limit = $root.google.protobuf.Int32Value.fromObject(object.limit);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a FindNearest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.FindNearest
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.FindNearest} message FindNearest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        FindNearest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.vectorField = null;
+                                object.queryVector = null;
+                                object.distanceMeasure = options.enums === String ? "DISTANCE_MEASURE_UNSPECIFIED" : 0;
+                                object.limit = null;
+                            }
+                            if (message.vectorField != null && message.hasOwnProperty("vectorField"))
+                                object.vectorField = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.vectorField, options);
+                            if (message.queryVector != null && message.hasOwnProperty("queryVector"))
+                                object.queryVector = $root.google.firestore.v1.Value.toObject(message.queryVector, options);
+                            if (message.distanceMeasure != null && message.hasOwnProperty("distanceMeasure"))
+                                object.distanceMeasure = options.enums === String ? $root.google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure[message.distanceMeasure] === undefined ? message.distanceMeasure : $root.google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure[message.distanceMeasure] : message.distanceMeasure;
+                            if (message.limit != null && message.hasOwnProperty("limit"))
+                                object.limit = $root.google.protobuf.Int32Value.toObject(message.limit, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this FindNearest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.FindNearest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        FindNearest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for FindNearest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.v1.StructuredQuery.FindNearest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        FindNearest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.v1.StructuredQuery.FindNearest";
+                        };
+    
+                        /**
+                         * DistanceMeasure enum.
+                         * @name google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure
+                         * @enum {string}
+                         * @property {string} DISTANCE_MEASURE_UNSPECIFIED=DISTANCE_MEASURE_UNSPECIFIED DISTANCE_MEASURE_UNSPECIFIED value
+                         * @property {string} SQUARED_L2=SQUARED_L2 SQUARED_L2 value
+                         * @property {string} COSINE=COSINE COSINE value
+                         * @property {string} DOT_PRODUCT=DOT_PRODUCT DOT_PRODUCT value
+                         */
+                        FindNearest.DistanceMeasure = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "DISTANCE_MEASURE_UNSPECIFIED"] = "DISTANCE_MEASURE_UNSPECIFIED";
+                            values[valuesById[1] = "SQUARED_L2"] = "SQUARED_L2";
+                            values[valuesById[2] = "COSINE"] = "COSINE";
+                            values[valuesById[3] = "DOT_PRODUCT"] = "DOT_PRODUCT";
+                            return values;
+                        })();
+    
+                        return FindNearest;
                     })();
     
                     return StructuredQuery;
