@@ -1025,11 +1025,11 @@ describe('DocumentReference class', () => {
   it('can write and read vector embeddings', async () => {
     const ref = randomCol.doc();
     await ref.create({
-      vectorEmpty: FieldValue.vector(),
+      vector0: FieldValue.vector([0.0]),
       vector1: FieldValue.vector([1, 2, 3.99]),
     });
     await ref.set({
-      vectorEmpty: FieldValue.vector(),
+      vector0: FieldValue.vector([0.0]),
       vector1: FieldValue.vector([1, 2, 3.99]),
       vector2: FieldValue.vector([0, 0, 0]),
     });
@@ -1038,7 +1038,7 @@ describe('DocumentReference class', () => {
     });
 
     const snap1 = await ref.get();
-    expect(snap1.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(snap1.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
     expect(snap1.get('vector1')).to.deep.equal(FieldValue.vector([1, 2, 3.99]));
     expect(snap1.get('vector2')).to.deep.equal(FieldValue.vector([0, 0, 0]));
     expect(snap1.get('vector3')).to.deep.equal(
@@ -1375,26 +1375,26 @@ describe('DocumentReference class', () => {
 
     await ref.create({
       purpose: 'vector tests',
-      vectorEmpty: FieldValue.vector(),
+      vector0: FieldValue.vector([0.0]),
       vector1: FieldValue.vector([1, 2, 3.99]),
     });
 
     await createDeferred.promise;
     expect(document).to.be.not.null;
-    expect(document!.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(document!.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
     expect(document!.get('vector1')).to.deep.equal(
       FieldValue.vector([1, 2, 3.99])
     );
 
     await ref.set({
       purpose: 'vector tests',
-      vectorEmpty: FieldValue.vector(),
+      vector0: FieldValue.vector([0.0]),
       vector1: FieldValue.vector([1, 2, 3.99]),
       vector2: FieldValue.vector([0, 0, 0]),
     });
     await setDeferred.promise;
     expect(document).to.be.not.null;
-    expect(document!.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(document!.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
     expect(document!.get('vector1')).to.deep.equal(
       FieldValue.vector([1, 2, 3.99])
     );
@@ -1407,7 +1407,7 @@ describe('DocumentReference class', () => {
     });
     await updateDeferred.promise;
     expect(document).to.be.not.null;
-    expect(document!.get('vectorEmpty')).to.deep.equal(FieldValue.vector());
+    expect(document!.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
     expect(document!.get('vector1')).to.deep.equal(
       FieldValue.vector([1, 2, 3.99])
     );
@@ -1576,6 +1576,38 @@ describe('Query class', () => {
       .then(res => {
         expect(res.size).to.equal(1);
         expect(res.docs[0].get('foo')).to.deep.equal(['bar']);
+      });
+  });
+
+  it.only('supports findNearest by vector distance', () => {
+    return Promise.all([
+      randomCol.add({foo: 'bar'}),
+      randomCol.add({foo: 'xxx', embedding: FieldValue.vector([10, 10])}),
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([5, 5])}),
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([9, 9])}),
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([50, 50])}),
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([100, 100])}),
+    ])
+      .then(() =>
+        randomCol
+          .where('foo', '==', 'bar')
+          .findNearest('embedding', [10, 10], {
+            limit: 3,
+            distanceMeasure: 'SQUARED_L2',
+          })
+          .get()
+      )
+      .then(res => {
+        expect(res.size).to.equal(3);
+        expect(res.docs[0].get('embedding')).to.deep.equal(
+          FieldValue.vector([9, 9])
+        );
+        expect(res.docs[1].get('embedding')).to.deep.equal(
+          FieldValue.vector([5, 5])
+        );
+        expect(res.docs[2].get('embedding')).to.deep.equal(
+          FieldValue.vector([50, 50])
+        );
       });
   });
 
