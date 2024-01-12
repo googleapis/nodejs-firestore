@@ -1961,7 +1961,7 @@ declare namespace FirebaseFirestore {
     findNearest(
       vectorField: string | FieldPath,
       queryVector: VectorValue | Array<number>,
-      optioins: {
+      options: {
         limit: number;
         distanceMeasure: 'SQUARED_L2' | 'COSINE';
       }

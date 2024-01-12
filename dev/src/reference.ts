@@ -28,6 +28,7 @@ import {
   QueryDocumentSnapshot,
 } from './document';
 import {DocumentChange} from './document-change';
+import {VectorValue} from './field-value';
 import {Firestore} from './index';
 import {logger} from './logger';
 import {compare} from './order';
@@ -1929,7 +1930,7 @@ export class Query<
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
 > implements firestore.Query<AppModelType, DbModelType>
 {
-  private readonly _serializer: Serializer;
+  readonly _serializer: Serializer;
   /** @private */
   protected readonly _allowUndefined: boolean;
   readonly _queryUtil: QueryUtil<
@@ -2426,14 +2427,33 @@ export class Query<
   }
 
   findNearest(
-    vectorField: string | FirebaseFirestore.FieldPath,
-    queryVector: FirebaseFirestore.VectorValue | Array<number>,
-    optioins: {
+    vectorField: string | firestore.FieldPath,
+    queryVector: firestore.VectorValue | Array<number>,
+    options: {
       limit: number;
-      distanceMeasure: 'SQUARED_L2' | 'COSINE' | 'DOT_PRODUCT';
+      distanceMeasure: 'SQUARED_L2' | 'COSINE';
     }
   ): VectorQuery<AppModelType, DbModelType> {
-    return new VectorQuery<AppModelType, DbModelType>(this);
+    validateFieldPath('vectorField', vectorField);
+
+    if (options.limit <= 0) {
+      throw invalidArgumentMessage('options', 'positive limit number');
+    }
+
+    if (
+      (Array.isArray(queryVector)
+        ? queryVector.length
+        : queryVector.toArray().length) === 0
+    ) {
+      throw invalidArgumentMessage('queryVector', 'vector size larger than 0');
+    }
+
+    return new VectorQuery<AppModelType, DbModelType>(
+      this,
+      vectorField,
+      queryVector,
+      options
+    );
   }
 
   /**
@@ -3931,17 +3951,23 @@ export class VectorQuery<
     DbModelType,
     VectorQuery<AppModelType, DbModelType>
   >;
+
   /**
    * @private
    * @internal
    *
    * @param _query The query whose aggregations will be calculated by this
    * object.
-   * @param _aggregates The aggregations that will be performed by this query.
    */
   constructor(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private readonly _query: Query<AppModelType, DbModelType>
+    private readonly _query: Query<AppModelType, DbModelType>,
+    private readonly vectorField: string | firestore.FieldPath,
+    private readonly queryVector: firestore.VectorValue | Array<number>,
+    private readonly options: {
+      limit: number;
+      distanceMeasure: 'SQUARED_L2' | 'COSINE';
+    }
   ) {
     this._queryUtil = new QueryUtil<
       AppModelType,
@@ -3961,7 +3987,9 @@ export class VectorQuery<
    * @return A promise that will be resolved with the results of the query.
    */
   get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
-    return this._queryUtil._get(this) as Promise<VectorQuerySnapshot<AppModelType, DbModelType>>;
+    return this._queryUtil._get(this) as Promise<
+      VectorQuerySnapshot<AppModelType, DbModelType>
+    >;
   }
 
   stream(): NodeJS.ReadableStream {
@@ -3979,10 +4007,20 @@ export class VectorQuery<
   toProto(
     transactionIdOrReadTime?: Uint8Array | Timestamp
   ): api.IRunQueryRequest {
-    // TODO(wuandy): convert to run query request with vector stuff
-    const queryProto = this._query.toProto();
+    const queryProto = this._query.toProto(transactionIdOrReadTime);
 
-    // queryProto.structuredQuery.findNearest = ???
+    const queryVector = Array.isArray(this.queryVector)
+      ? new VectorValue(this.queryVector)
+      : (this.queryVector as VectorValue);
+
+    queryProto.structuredQuery!.findNearest = {
+      limit: {value: this.options.limit},
+      distanceMeasure: this.options.distanceMeasure,
+      vectorField: {
+        fieldPath: FieldPath.fromArgument(this.vectorField).formattedName,
+      },
+      queryVector: queryVector.toProto(this._query._serializer),
+    };
     return queryProto;
   }
 
@@ -4012,7 +4050,10 @@ export class VectorQuery<
     ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): VectorQuery<AppModelType, DbModelType> {
     return new VectorQuery<AppModelType, DbModelType>(
-      this._query.startAfter(...fieldValuesOrDocumentSnapshot)
+      this._query.startAfter(...fieldValuesOrDocumentSnapshot),
+      this.vectorField,
+      this.queryVector,
+      this.options
     );
   }
 
