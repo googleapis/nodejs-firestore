@@ -16472,7 +16472,7 @@
                             case 0:
                                 message.distanceMeasure = 0;
                                 break;
-                            case "SQUARED_L2":
+                            case "EUCLIDEAN":
                             case 1:
                                 message.distanceMeasure = 1;
                                 break;
@@ -16554,14 +16554,14 @@
                          * @name google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure
                          * @enum {string}
                          * @property {string} DISTANCE_MEASURE_UNSPECIFIED=DISTANCE_MEASURE_UNSPECIFIED DISTANCE_MEASURE_UNSPECIFIED value
-                         * @property {string} SQUARED_L2=SQUARED_L2 SQUARED_L2 value
+                         * @property {string} EUCLIDEAN=EUCLIDEAN EUCLIDEAN value
                          * @property {string} COSINE=COSINE COSINE value
                          * @property {string} DOT_PRODUCT=DOT_PRODUCT DOT_PRODUCT value
                          */
                         FindNearest.DistanceMeasure = (function() {
                             var valuesById = {}, values = Object.create(valuesById);
                             values[valuesById[0] = "DISTANCE_MEASURE_UNSPECIFIED"] = "DISTANCE_MEASURE_UNSPECIFIED";
-                            values[valuesById[1] = "SQUARED_L2"] = "SQUARED_L2";
+                            values[valuesById[1] = "EUCLIDEAN"] = "EUCLIDEAN";
                             values[valuesById[2] = "COSINE"] = "COSINE";
                             values[valuesById[3] = "DOT_PRODUCT"] = "DOT_PRODUCT";
                             return values;

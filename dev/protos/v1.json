@@ -2570,7 +2570,7 @@
                         "DistanceMeasure": {
                           "values": {
                             "DISTANCE_MEASURE_UNSPECIFIED": 0,
-                            "SQUARED_L2": 1,
+                            "EUCLIDEAN": 1,
                             "COSINE": 2,
                             "DOT_PRODUCT": 3
                           }
