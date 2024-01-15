@@ -6753,7 +6753,7 @@ export namespace google {
 
                     /** DistanceMeasure enum. */
                     type DistanceMeasure =
-                        "DISTANCE_MEASURE_UNSPECIFIED"| "SQUARED_L2"| "COSINE"| "DOT_PRODUCT";
+                        "DISTANCE_MEASURE_UNSPECIFIED"| "EUCLIDEAN"| "COSINE"| "DOT_PRODUCT";
                 }
             }
 

@@ -2430,7 +2430,7 @@ export class Query<
     queryVector: firestore.VectorValue | Array<number>,
     options: {
       limit: number;
-      distanceMeasure: 'SQUARED_L2' | 'COSINE';
+      distanceMeasure: 'EUCLIDEAN' | 'COSINE';
     }
   ): VectorQuery<AppModelType, DbModelType> {
     validateFieldPath('vectorField', vectorField);
@@ -3965,7 +3965,7 @@ export class VectorQuery<
     private readonly queryVector: firestore.VectorValue | Array<number>,
     private readonly options: {
       limit: number;
-      distanceMeasure: 'SQUARED_L2' | 'COSINE';
+      distanceMeasure: 'EUCLIDEAN' | 'COSINE';
     }
   ) {
     this._queryUtil = new QueryUtil<

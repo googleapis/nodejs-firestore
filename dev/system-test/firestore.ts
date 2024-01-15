@@ -1593,7 +1593,7 @@ describe('Query class', () => {
           .where('foo', '==', 'bar')
           .findNearest('embedding', [10, 10], {
             limit: 3,
-            distanceMeasure: 'SQUARED_L2',
+            distanceMeasure: 'EUCLIDEAN',
           })
           .get()
       )
