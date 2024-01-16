@@ -2437,7 +2437,7 @@ export class Query<
     validateFieldPath('vectorField', vectorField);
 
     if (options.limit <= 0) {
-      throw invalidArgumentMessage('options', 'positive limit number');
+      throw invalidArgumentMessage('options.limit', 'positive limit number');
     }
 
     if (
@@ -2452,7 +2452,7 @@ export class Query<
       this,
       vectorField,
       queryVector,
-      options
+      new VectorQueryOptions(options.limit, options.distanceMeasure)
     );
   }
 
@@ -3938,6 +3938,27 @@ export class AggregateQuerySnapshot<
   }
 }
 
+class VectorQueryOptions {
+  constructor(
+    readonly limit: number,
+    readonly distanceMeasure: 'EUCLIDEAN' | 'COSINE'
+  ) {}
+
+  isEqual(other: VectorQueryOptions): boolean {
+    if (this === other) {
+      return true;
+    }
+    if (!(other instanceof VectorQueryOptions)) {
+      return false;
+    }
+
+    return (
+      this.limit === other.limit &&
+      this.distanceMeasure === other.distanceMeasure
+    );
+  }
+}
+
 /**
  * A query that calculates aggregations over an underlying query.
  */
@@ -3955,19 +3976,12 @@ export class VectorQuery<
   /**
    * @private
    * @internal
-   *
-   * @param _query The query whose aggregations will be calculated by this
-   * object.
    */
   constructor(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _query: Query<AppModelType, DbModelType>,
     private readonly vectorField: string | firestore.FieldPath,
     private readonly queryVector: firestore.VectorValue | Array<number>,
-    private readonly options: {
-      limit: number;
-      distanceMeasure: 'EUCLIDEAN' | 'COSINE';
-    }
+    private readonly options: VectorQueryOptions
   ) {
     this._queryUtil = new QueryUtil<
       AppModelType,
@@ -3979,6 +3993,18 @@ export class VectorQuery<
   /** The query whose aggregations will be calculated by this object. */
   get query(): Query<AppModelType, DbModelType> {
     return this._query;
+  }
+
+  private get _rawVectorField(): string {
+    return typeof this.vectorField === 'string'
+      ? this.vectorField
+      : this.vectorField.toString();
+  }
+
+  private get _rawQueryVector(): Array<number> {
+    return Array.isArray(this.queryVector)
+      ? this.queryVector
+      : this.queryVector.toArray();
   }
 
   /**
@@ -3994,6 +4020,18 @@ export class VectorQuery<
 
   stream(): NodeJS.ReadableStream {
     return this._queryUtil.stream(this);
+  }
+
+  /**
+   * Internal streaming method that accepts an optional transaction ID.
+   *
+   * @param transactionId A transaction ID.
+   * @private
+   * @internal
+   * @returns A stream of document results.
+   */
+  _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
+    return this._queryUtil._stream(this, transactionId);
   }
 
   /**
@@ -4079,8 +4117,11 @@ export class VectorQuery<
     if (!this.query.isEqual(other.query)) {
       return false;
     }
-    // TODO(wuandy): Compare vector parameters.
-    return true;
+    return (
+      this._rawVectorField === other._rawVectorField &&
+      isPrimitiveArrayEqual(this._rawQueryVector, other._rawQueryVector) &&
+      this.options.isEqual(other.options)
+    );
   }
 }
 
@@ -4211,6 +4252,23 @@ function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
 
   for (let i = 0; i < left.length; ++i) {
     if (!left[i].isEqual(right[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function isPrimitiveArrayEqual<T extends number | string>(
+  left: T[],
+  right: T[]
+): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  for (let i = 0; i < left.length; ++i) {
+    if (left[i] !== right[i]) {
       return false;
     }
   }

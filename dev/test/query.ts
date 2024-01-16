@@ -725,7 +725,7 @@ describe('query interface', () => {
     let attempts = 0;
     const query = firestore.collection('collectionId');
 
-    query._stream = () => {
+    query._queryUtil._stream = () => {
       ++attempts;
       throw new Error('Expected error');
     };

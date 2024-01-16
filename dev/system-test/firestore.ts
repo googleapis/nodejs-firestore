@@ -1656,27 +1656,27 @@ describe('Query class', () => {
       randomCol.add({foo: 'bar', embedding: FieldValue.vector([50, 50])}),
       randomCol.add({foo: 'bar', embedding: FieldValue.vector([100, 100])}),
     ])
-        .then(() =>
-            randomCol
-                .where('foo', '==', 'bar')
-                .findNearest('embedding', [10, 10], {
-                  limit: 3,
-                  distanceMeasure: 'EUCLIDEAN',
-                })
-                .get()
-        )
-        .then(res => {
-          expect(res.size).to.equal(3);
-          expect(res.docs[0].get('embedding')).to.deep.equal(
-              FieldValue.vector([9, 9])
-          );
-          expect(res.docs[1].get('embedding')).to.deep.equal(
-              FieldValue.vector([50, 50])
-          );
-          expect(res.docs[2].get('embedding')).to.deep.equal(
-              FieldValue.vector([100, 100])
-          );
-        });
+      .then(() =>
+        randomCol
+          .where('foo', '==', 'bar')
+          .findNearest('embedding', [10, 10], {
+            limit: 3,
+            distanceMeasure: 'EUCLIDEAN',
+          })
+          .get()
+      )
+      .then(res => {
+        expect(res.size).to.equal(3);
+        expect(res.docs[0].get('embedding')).to.deep.equal(
+          FieldValue.vector([9, 9])
+        );
+        expect(res.docs[1].get('embedding')).to.deep.equal(
+          FieldValue.vector([50, 50])
+        );
+        expect(res.docs[2].get('embedding')).to.deep.equal(
+          FieldValue.vector([100, 100])
+        );
+      });
   });
 
   it.only('supports findNearest erroring out with mismatching dimentions', async () => {
@@ -1684,22 +1684,24 @@ describe('Query class', () => {
       await Promise.all([
         randomCol.add({foo: 'bar'}),
         // This is the culprit of failed queries
-        randomCol.add({foo: 'bar', embedding: FieldValue.vector([1000, 1000, 1000])}),
+        randomCol.add({
+          foo: 'bar',
+          embedding: FieldValue.vector([1000, 1000, 1000]),
+        }),
 
         // Actual vector values
         randomCol.add({foo: 'bar', embedding: FieldValue.vector([9, 9])}),
         randomCol.add({foo: 'bar', embedding: FieldValue.vector([50, 50])}),
         randomCol.add({foo: 'bar', embedding: FieldValue.vector([100, 100])}),
-      ])
-          .then(() =>
-              randomCol
-                  .where('foo', '==', 'bar')
-                  .findNearest('embedding', [10, 10], {
-                    limit: 3,
-                    distanceMeasure: 'EUCLIDEAN',
-                  })
-                  .get()
-          );
+      ]).then(() =>
+        randomCol
+          .where('foo', '==', 'bar')
+          .findNearest('embedding', [10, 10], {
+            limit: 3,
+            distanceMeasure: 'EUCLIDEAN',
+          })
+          .get()
+      );
       expect.fail();
     } catch (e) {
       expect(e.code).to.equal(Status.INTERNAL);
@@ -1713,22 +1715,22 @@ describe('Query class', () => {
       randomCol.add({foo: 'bar', otherField: 'not actually a vector'}),
       randomCol.add({foo: 'bar', otherField: null}),
     ])
-        .then(() =>
-            randomCol
-                .where('foo', '==', 'bar')
-                // .orderBy('otherField')
-                .findNearest('embedding', [10, 10], {
-                  limit: 3,
-                  distanceMeasure: 'EUCLIDEAN',
-                })
-                .get()
-        )
-        .then(res => {
-          expect(res.size).to.equal(0);
-          // expect(res.docs[0].get('otherField')).to.be.null;
-          // expect(res.docs[1].get('otherField')).to.equal('not actually a vector');
-          // expect(res.docs[2].get('otherField')).to.equal([10, 10]);
-        });
+      .then(() =>
+        randomCol
+          .where('foo', '==', 'bar')
+          // .orderBy('otherField')
+          .findNearest('embedding', [10, 10], {
+            limit: 3,
+            distanceMeasure: 'EUCLIDEAN',
+          })
+          .get()
+      )
+      .then(res => {
+        expect(res.size).to.equal(0);
+        // expect(res.docs[0].get('otherField')).to.be.null;
+        // expect(res.docs[1].get('otherField')).to.equal('not actually a vector');
+        // expect(res.docs[2].get('otherField')).to.equal([10, 10]);
+      });
   });
 
   it('supports !=', async () => {
