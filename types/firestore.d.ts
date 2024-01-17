@@ -2486,14 +2486,6 @@ declare namespace FirebaseFirestore {
     isEqual(other: VectorQuery<AppModelType, DbModelType>): boolean;
   }
 
-  export class VectorValue {
-    constructor(values: number[] | undefined);
-
-    toArray(): number[];
-
-    isEqual(other: VectorValue): boolean;
-  }
-
   /**
    * Represent a vector type in Firestore documents.
    */
