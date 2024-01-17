@@ -1834,6 +1834,30 @@ declare namespace FirebaseFirestore {
       aggregateSpec: T
     ): AggregateQuery<T, AppModelType, DbModelType>;
 
+    /**
+     * Returns a query that can perform vector distance (similarity) search with given parameters.
+     *
+     * The returned query, when executed, performs a distance (similarity) search on the specified
+     * `vectorField` against the given `queryVector` and returns the top documents that are closest
+     * to the `queryVector`.
+     *
+     * Only documents whose `vectorField` field is a `VectorValue` of the same dimension as `queryVector`
+     * participate in the query, all other documents are ignored.
+     *
+     * @example
+     * ```typescript
+     * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
+     * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
+     *
+     * const querySnapshot = await aggregateQuery.get();
+     * querySnapshot.forEach(...);
+     * ```
+     *
+     * @param vectorField The field path this vector query executes on.
+     * @param queryVector The vector value used to measure the distance from `vectorField` values in the documents.
+     * @param options Options control the vector query. `limit` specifies the upper bound of documents to return, must
+     * be a positive integer. `distanceMeasure` specifies what type of distance is calculated when performing the query.
+     */
     findNearest(
       vectorField: string | FieldPath,
       queryVector: VectorValue | Array<number>,
@@ -1932,6 +1956,13 @@ declare namespace FirebaseFirestore {
     isEqual(other: QuerySnapshot<AppModelType, DbModelType>): boolean;
   }
 
+  /**
+   * A `VectorQuerySnapshot` contains zero or more `QueryDocumentSnapshot` objects
+   * representing the results of a query. The documents can be accessed as an
+   * array via the `docs` property or enumerated using the `forEach` method. The
+   * number of documents can be determined via the `empty` and `size`
+   * properties.
+   */
   export class VectorQuerySnapshot<
     AppModelType = DocumentData,
     DbModelType extends DocumentData = DocumentData,
@@ -1939,8 +1970,8 @@ declare namespace FirebaseFirestore {
     private constructor();
 
     /**
-     * The query on which you called `get` or `onSnapshot` in order to get this
-     * `QuerySnapshot`.
+     * The query on which you called `get` in order to get this
+     * `VectorQuerySnapshot`.
      */
     readonly query: VectorQuery<AppModelType, DbModelType>;
 
@@ -1978,11 +2009,11 @@ declare namespace FirebaseFirestore {
     ): void;
 
     /**
-     * Returns true if the document data in this `QuerySnapshot` is equal to the
+     * Returns true if the document data in this `VectorQuerySnapshot` is equal to the
      * provided one.
      *
-     * @param other The `QuerySnapshot` to compare against.
-     * @return true if this `QuerySnapshot` is equal to the provided one.
+     * @param other The `VectorQuerySnapshot` to compare against.
+     * @return true if this `VectorQuerySnapshot` is equal to the provided one.
      */
     isEqual(other: VectorQuerySnapshot<AppModelType, DbModelType>): boolean;
   }
@@ -2421,13 +2452,16 @@ declare namespace FirebaseFirestore {
     ): boolean;
   }
 
+  /**
+   * A query that finds the document whose vector fields are closest to a certain vector.
+   */
   export class VectorQuery<
     AppModelType = DocumentData,
     DbModelType extends DocumentData = DocumentData,
   > {
     private constructor();
 
-    /** The query whose aggregations will be calculated by this object. */
+    /** The query whose results participants in the distance search. */
     readonly query: Query<AppModelType, DbModelType>;
 
     /**
@@ -2437,13 +2471,11 @@ declare namespace FirebaseFirestore {
      */
     get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>>;
 
-    stream(): NodeJS.ReadableStream;
-
     /**
      * Compares this object with the given object for equality.
      *
      * This object is considered "equal" to the other object if and only if
-     * `other` performs the same aggregations as this `AggregateQuery` and
+     * `other` performs the same vector distance search as this `VectorQuery` and
      * the underlying Query of `other` compares equal to that of this object
      * using `Query.isEqual()`.
      *
