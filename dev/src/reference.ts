@@ -2426,6 +2426,30 @@ export class Query<
     );
   }
 
+  /**
+   * Returns a query that can perform vector distance (similarity) search with given parameters.
+   *
+   * The returned query, when executed, performs a distance (similarity) search on the specified
+   * `vectorField` against the given `queryVector` and returns the top documents that are closest
+   * to the `queryVector`.
+   *
+   * Only documents whose `vectorField` field is a `VectorValue` of the same dimension as `queryVector`
+   * participate in the query, all other documents are ignored.
+   *
+   * @example
+   * ```typescript
+   * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
+   * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
+   *
+   * const querySnapshot = await aggregateQuery.get();
+   * querySnapshot.forEach(...);
+   * ```
+   *
+   * @param vectorField The field path this vector query executes on.
+   * @param queryVector The vector value used to measure the distance from `vectorField` values in the documents.
+   * @param options Options control the vector query. `limit` specifies the upper bound of documents to return, must
+   * be a positive integer. `distanceMeasure` specifies what type of distance is calculated when performing the query.
+   */
   findNearest(
     vectorField: string | firestore.FieldPath,
     queryVector: firestore.VectorValue | Array<number>,
@@ -3244,6 +3268,12 @@ export class Query<
     );
   }
 
+  /**
+   * Construct the resulting snapshot for this query with given documents.
+   *
+   * @private
+   * @internal
+   */
   _createSnapshot(
     readTime: Timestamp,
     size: number,
@@ -3960,7 +3990,7 @@ class VectorQueryOptions {
 }
 
 /**
- * A query that calculates aggregations over an underlying query.
+ * A query that finds the document whose vector fields are closest to a certain vector.
  */
 export class VectorQuery<
   AppModelType = firestore.DocumentData,
@@ -3990,7 +4020,7 @@ export class VectorQuery<
     >(_query._firestore, _query._queryOptions);
   }
 
-  /** The query whose aggregations will be calculated by this object. */
+  /** The query whose results participants in the distance search. */
   get query(): Query<AppModelType, DbModelType> {
     return this._query;
   }
@@ -4016,10 +4046,6 @@ export class VectorQuery<
     return this._queryUtil._get(this) as Promise<
       VectorQuerySnapshot<AppModelType, DbModelType>
     >;
-  }
-
-  stream(): NodeJS.ReadableStream {
-    return this._queryUtil.stream(this);
   }
 
   /**
@@ -4062,6 +4088,12 @@ export class VectorQuery<
     return queryProto;
   }
 
+  /**
+   * Construct the resulting snapshot for this query with given documents.
+   *
+   * @private
+   * @internal
+   */
   _createSnapshot(
     readTime: Timestamp,
     size: number,
@@ -4078,7 +4110,7 @@ export class VectorQuery<
   }
 
   /**
-   * To support stream()
+   * Construct a new query whose result will start after To support stream()
    *
    * @private
    * @internal
@@ -4087,11 +4119,8 @@ export class VectorQuery<
   startAfter(
     ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): VectorQuery<AppModelType, DbModelType> {
-    return new VectorQuery<AppModelType, DbModelType>(
-      this._query.startAfter(...fieldValuesOrDocumentSnapshot),
-      this.vectorField,
-      this.queryVector,
-      this.options
+    throw new Error(
+      'Unimplemented: Vector query does not support stream() yet.'
     );
   }
 
@@ -4099,7 +4128,7 @@ export class VectorQuery<
    * Compares this object with the given object for equality.
    *
    * This object is considered "equal" to the other object if and only if
-   * `other` performs the same aggregations as this `AggregateQuery` and
+   * `other` performs the same vector distance search as this `VectorQuery` and
    * the underlying Query of `other` compares equal to that of this object
    * using `Query.isEqual()`.
    *

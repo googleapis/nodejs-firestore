@@ -325,39 +325,4 @@ describe('Vector(findNearest) query interface', () => {
         });
     });
   });
-
-  it('streams results', callback => {
-    const overrides: ApiOverride = {
-      runQuery: request => {
-        queryEquals(
-          request,
-          findNearestQuery('embedding', [3, 4, 5], 100, 'COSINE')
-        );
-        return stream(result('first'), result('second'));
-      },
-    };
-
-    createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const query = firestore
-        .collection('collectionId')
-        .findNearest('embedding', [3, 4, 5], {
-          limit: 100,
-          distanceMeasure: 'COSINE',
-        });
-      let received = 0;
-
-      query
-        .stream()
-        .on('data', doc => {
-          console.log(`${JSON.stringify(doc)}`);
-          expect(doc).to.be.an.instanceOf(DocumentSnapshot);
-          ++received;
-        })
-        .on('end', () => {
-          expect(received).to.equal(2);
-          callback();
-        });
-    });
-  });
 });

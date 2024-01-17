@@ -1643,6 +1643,44 @@ describe('Query class', () => {
       });
   });
 
+  it.only('findNearest works with converters', () => {
+    class FooDistance {
+      constructor(
+        readonly foo: string,
+        readonly embedding: Array<number>
+      ) {}
+    }
+
+    const fooConverter = {
+      toFirestore(d: FooDistance): DocumentData {
+        return {title: d.foo, embedding: FieldValue.vector(d.embedding)};
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot): FooDistance {
+        const data = snapshot.data();
+        return new FooDistance(data.foo, data.embedding.toArray());
+      },
+    };
+
+    return Promise.all([
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([5, 5])}),
+    ])
+      .then(() =>
+        randomCol
+          .withConverter(fooConverter)
+          .where('foo', '==', 'bar')
+          .findNearest('embedding', [10, 10], {
+            limit: 3,
+            distanceMeasure: 'EUCLIDEAN',
+          })
+          .get()
+      )
+      .then(res => {
+        expect(res.size).to.equal(1);
+        expect(res.docs[0].data().foo).to.equal('bar');
+        expect(res.docs[0].data().embedding).to.equal([5, 5]);
+      });
+  });
+
   it.only('supports findNearest skipping fields of wrong types', () => {
     return Promise.all([
       randomCol.add({foo: 'bar'}),
@@ -1679,21 +1717,20 @@ describe('Query class', () => {
       });
   });
 
-  it.only('supports findNearest erroring out with mismatching dimentions', async () => {
-    try {
-      await Promise.all([
-        randomCol.add({foo: 'bar'}),
-        // This is the culprit of failed queries
-        randomCol.add({
-          foo: 'bar',
-          embedding: FieldValue.vector([1000, 1000, 1000]),
-        }),
+  it.only('findNearest ignores mismatching dimensions', async () => {
+    await Promise.all([
+      randomCol.add({foo: 'bar'}),
+      // This document is ignored.
+      randomCol.add({
+        foo: 'bar',
+        embedding: FieldValue.vector([10]),
+      }),
 
-        // Actual vector values
-        randomCol.add({foo: 'bar', embedding: FieldValue.vector([9, 9])}),
-        randomCol.add({foo: 'bar', embedding: FieldValue.vector([50, 50])}),
-        randomCol.add({foo: 'bar', embedding: FieldValue.vector([100, 100])}),
-      ]).then(() =>
+      // Actual vector values
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([9, 9])}),
+      randomCol.add({foo: 'bar', embedding: FieldValue.vector([50, 50])}),
+    ])
+      .then(() =>
         randomCol
           .where('foo', '==', 'bar')
           .findNearest('embedding', [10, 10], {
@@ -1701,11 +1738,16 @@ describe('Query class', () => {
             distanceMeasure: 'EUCLIDEAN',
           })
           .get()
-      );
-      expect.fail();
-    } catch (e) {
-      expect(e.code).to.equal(Status.INTERNAL);
-    }
+      )
+      .then(res => {
+        expect(res.size).to.equal(2);
+        expect(res.docs[0].get('embedding')).to.deep.equal(
+          FieldValue.vector([9, 9])
+        );
+        expect(res.docs[1].get('embedding')).to.deep.equal(
+          FieldValue.vector([50, 50])
+        );
+      });
   });
 
   it.only('supports findNearest on non-existent field', () => {
@@ -1727,9 +1769,6 @@ describe('Query class', () => {
       )
       .then(res => {
         expect(res.size).to.equal(0);
-        // expect(res.docs[0].get('otherField')).to.be.null;
-        // expect(res.docs[1].get('otherField')).to.equal('not actually a vector');
-        // expect(res.docs[2].get('otherField')).to.equal([10, 10]);
       });
   });
 
