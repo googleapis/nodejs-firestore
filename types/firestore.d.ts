@@ -2358,6 +2358,23 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * Represent a vector type in Firestore documents.
+   */
+  export class VectorValue {
+    private constructor(values: number[] | undefined);
+
+    /**
+     * Returns the raw number array form of the vector.
+     */
+    toArray(): number[];
+
+    /**
+     * Returns true if the two `VectorValue` has the same raw number arrays, returns false otherwise.
+     */
+    isEqual(other: VectorValue): boolean;
+  }
+
+  /**
    * Sentinel values that can be used when writing document fields with set(),
    * create() or update().
    */
@@ -2426,6 +2443,11 @@ declare namespace FirebaseFirestore {
      * update().
      */
     static arrayRemove(...elements: any[]): FieldValue;
+
+    /**
+     * @return A new `VectorValue` constructed with the given array of number.
+     */
+    static vector(values?: number[]): VectorValue;
 
     /**
      * Returns true if this `FieldValue` is equal to the provided one.
