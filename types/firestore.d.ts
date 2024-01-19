@@ -20,6 +20,8 @@
 
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
+import {DocumentChange, QueryDocumentSnapshot, QuerySnapshot, Timestamp} from "../dev/src";
+
 declare namespace FirebaseFirestore {
   /** Alias for `any` but used where a Firestore field value would be provided. */
   export type DocumentFieldValue = any;
@@ -1892,6 +1894,34 @@ declare namespace FirebaseFirestore {
       converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
     ): Query<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): Query;
+
+    /**
+     * @private
+     * @internal
+     */
+    _createSnapshot(
+        readTime: Timestamp,
+        size: number,
+        docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
+        changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+    ): QuerySnapshot<
+      AppModelType,
+      DbModelType,
+      IQuery<AppModelType, DbModelType>
+    >;
+  }
+
+  export interface IQuery<
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData,
+  > {
+    isEqual(other: unknown): boolean;
+    _createSnapshot(
+      readTime: Timestamp,
+      size: number,
+      docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
+      changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+    ): QuerySnapshot<AppModelType, DbModelType, IQuery<AppModelType, DbModelType>>;
   }
 
   /**
@@ -1904,6 +1934,7 @@ declare namespace FirebaseFirestore {
   export class QuerySnapshot<
     AppModelType = DocumentData,
     DbModelType extends DocumentData = DocumentData,
+    QueryType extends IQuery<AppModelType, DbModelType> = Query<AppModelType, DbModelType>,
   > {
     private constructor();
 
@@ -1911,7 +1942,7 @@ declare namespace FirebaseFirestore {
      * The query on which you called `get` or `onSnapshot` in order to get this
      * `QuerySnapshot`.
      */
-    readonly query: Query<AppModelType, DbModelType>;
+    readonly query: QueryType;
 
     /** An array of all the documents in the QuerySnapshot. */
     readonly docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>>;
@@ -1953,69 +1984,9 @@ declare namespace FirebaseFirestore {
      * @param other The `QuerySnapshot` to compare against.
      * @return true if this `QuerySnapshot` is equal to the provided one.
      */
-    isEqual(other: QuerySnapshot<AppModelType, DbModelType>): boolean;
-  }
-
-  /**
-   * A `VectorQuerySnapshot` contains zero or more `QueryDocumentSnapshot` objects
-   * representing the results of a query. The documents can be accessed as an
-   * array via the `docs` property or enumerated using the `forEach` method. The
-   * number of documents can be determined via the `empty` and `size`
-   * properties.
-   */
-  export class VectorQuerySnapshot<
-    AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData,
-  > {
-    private constructor();
-
-    /**
-     * The query on which you called `get` in order to get this
-     * `VectorQuerySnapshot`.
-     */
-    readonly query: VectorQuery<AppModelType, DbModelType>;
-
-    /** An array of all the documents in the QuerySnapshot. */
-    readonly docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>>;
-
-    /** The number of documents in the QuerySnapshot. */
-    readonly size: number;
-
-    /** True if there are no documents in the QuerySnapshot. */
-    readonly empty: boolean;
-
-    /** The time this query snapshot was obtained. */
-    readonly readTime: Timestamp;
-
-    /**
-     * Returns an array of the documents changes since the last snapshot. If
-     * this is the first snapshot, all documents will be in the list as added
-     * changes.
-     */
-    docChanges(): DocumentChange<AppModelType, DbModelType>[];
-
-    /**
-     * Enumerates all of the documents in the QuerySnapshot.
-     *
-     * @param callback A callback to be called with a `DocumentSnapshot` for
-     * each document in the snapshot.
-     * @param thisArg The `this` binding for the callback.
-     */
-    forEach(
-      callback: (
-        result: QueryDocumentSnapshot<AppModelType, DbModelType>
-      ) => void,
-      thisArg?: any
-    ): void;
-
-    /**
-     * Returns true if the document data in this `VectorQuerySnapshot` is equal to the
-     * provided one.
-     *
-     * @param other The `VectorQuerySnapshot` to compare against.
-     * @return true if this `VectorQuerySnapshot` is equal to the provided one.
-     */
-    isEqual(other: VectorQuerySnapshot<AppModelType, DbModelType>): boolean;
+    isEqual(
+      other: QuerySnapshot<AppModelType, DbModelType, QueryType>
+    ): boolean;
   }
 
   /**
@@ -2469,7 +2440,7 @@ declare namespace FirebaseFirestore {
      *
      * @return A promise that will be resolved with the results of the query.
      */
-    get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>>;
+    get(): Promise<QuerySnapshot<AppModelType, DbModelType, VectorQuery<AppModelType, DbModelType>>>;
 
     /**
      * Compares this object with the given object for equality.
@@ -2484,6 +2455,21 @@ declare namespace FirebaseFirestore {
      * defined above, or `false` otherwise.
      */
     isEqual(other: VectorQuery<AppModelType, DbModelType>): boolean;
+
+    /**
+     * @private
+     * @internal
+     */
+    _createSnapshot(
+        readTime: Timestamp,
+        size: number,
+        docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
+        changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+    ): QuerySnapshot<
+        AppModelType,
+        DbModelType,
+        IQuery<AppModelType, DbModelType>
+    >;
   }
 
   /**

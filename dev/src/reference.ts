@@ -925,7 +925,8 @@ class FieldFilterInternal extends FilterInternal {
 export class QuerySnapshot<
   AppModelType = firestore.DocumentData,
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
-> implements firestore.QuerySnapshot<AppModelType, DbModelType>
+  QueryType extends firestore.IQuery = Query<AppModelType, DbModelType>,
+> implements firestore.QuerySnapshot<AppModelType, DbModelType, QueryType>
 {
   private _materializedDocs: Array<
     QueryDocumentSnapshot<AppModelType, DbModelType>
@@ -952,7 +953,7 @@ export class QuerySnapshot<
    * events for this snapshot.
    */
   constructor(
-    private readonly _query: Query<AppModelType, DbModelType>,
+    private readonly _query: QueryType,
     private readonly _readTime: Timestamp,
     private readonly _size: number,
     docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
@@ -983,268 +984,7 @@ export class QuerySnapshot<
    * });
    * ```
    */
-  get query(): Query<AppModelType, DbModelType> {
-    return this._query;
-  }
-
-  /**
-   * An array of all the documents in this QuerySnapshot.
-   *
-   * @type {Array.<QueryDocumentSnapshot>}
-   * @name QuerySnapshot#docs
-   * @readonly
-   *
-   * @example
-   * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   *
-   * query.get().then(querySnapshot => {
-   *   let docs = querySnapshot.docs;
-   *   for (let doc of docs) {
-   *     console.log(`Document found at path: ${doc.ref.path}`);
-   *   }
-   * });
-   * ```
-   */
-  get docs(): Array<QueryDocumentSnapshot<AppModelType, DbModelType>> {
-    if (this._materializedDocs) {
-      return this._materializedDocs!;
-    }
-    this._materializedDocs = this._docs!();
-    this._docs = null;
-    return this._materializedDocs!;
-  }
-
-  /**
-   * True if there are no documents in the QuerySnapshot.
-   *
-   * @type {boolean}
-   * @name QuerySnapshot#empty
-   * @readonly
-   *
-   * @example
-   * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   *
-   * query.get().then(querySnapshot => {
-   *   if (querySnapshot.empty) {
-   *     console.log('No documents found.');
-   *   }
-   * });
-   * ```
-   */
-  get empty(): boolean {
-    return this._size === 0;
-  }
-
-  /**
-   * The number of documents in the QuerySnapshot.
-   *
-   * @type {number}
-   * @name QuerySnapshot#size
-   * @readonly
-   *
-   * @example
-   * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   *
-   * query.get().then(querySnapshot => {
-   *   console.log(`Found ${querySnapshot.size} documents.`);
-   * });
-   * ```
-   */
-  get size(): number {
-    return this._size;
-  }
-
-  /**
-   * The time this query snapshot was obtained.
-   *
-   * @type {Timestamp}
-   * @name QuerySnapshot#readTime
-   *
-   * @example
-   * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   *
-   * query.get().then((querySnapshot) => {
-   *   let readTime = querySnapshot.readTime;
-   *   console.log(`Query results returned at '${readTime.toDate()}'`);
-   * });
-   * ```
-   */
-  get readTime(): Timestamp {
-    return this._readTime;
-  }
-
-  /**
-   * Returns an array of the documents changes since the last snapshot. If
-   * this is the first snapshot, all documents will be in the list as added
-   * changes.
-   *
-   * @return {Array.<DocumentChange>}
-   *
-   * @example
-   * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   *
-   * query.onSnapshot(querySnapshot => {
-   *   let changes = querySnapshot.docChanges();
-   *   for (let change of changes) {
-   *     console.log(`A document was ${change.type}.`);
-   *   }
-   * });
-   * ```
-   */
-  docChanges(): Array<DocumentChange<AppModelType, DbModelType>> {
-    if (this._materializedChanges) {
-      return this._materializedChanges!;
-    }
-    this._materializedChanges = this._changes!();
-    this._changes = null;
-    return this._materializedChanges!;
-  }
-
-  /**
-   * Enumerates all of the documents in the QuerySnapshot. This is a convenience
-   * method for running the same callback on each {@link QueryDocumentSnapshot}
-   * that is returned.
-   *
-   * @param {function} callback A callback to be called with a
-   * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} for each document in
-   * the snapshot.
-   * @param {*=} thisArg The `this` binding for the callback..
-   *
-   * @example
-   * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   *
-   * query.get().then(querySnapshot => {
-   *   querySnapshot.forEach(documentSnapshot => {
-   *     console.log(`Document found at path: ${documentSnapshot.ref.path}`);
-   *   });
-   * });
-   * ```
-   */
-  forEach(
-    callback: (
-      result: firestore.QueryDocumentSnapshot<AppModelType, DbModelType>
-    ) => void,
-    thisArg?: unknown
-  ): void {
-    validateFunction('callback', callback);
-
-    for (const doc of this.docs) {
-      callback.call(thisArg, doc);
-    }
-  }
-
-  /**
-   * Returns true if the document data in this `QuerySnapshot` is equal to the
-   * provided value.
-   *
-   * @param {*} other The value to compare against.
-   * @return {boolean} true if this `QuerySnapshot` is equal to the provided
-   * value.
-   */
-  isEqual(other: firestore.QuerySnapshot<AppModelType, DbModelType>): boolean {
-    // Since the read time is different on every query read, we explicitly
-    // ignore all metadata in this comparison.
-
-    if (this === other) {
-      return true;
-    }
-
-    if (!(other instanceof QuerySnapshot)) {
-      return false;
-    }
-
-    if (this._size !== other._size) {
-      return false;
-    }
-
-    if (!this._query.isEqual(other._query)) {
-      return false;
-    }
-
-    if (this._materializedDocs && !this._materializedChanges) {
-      // If we have only materialized the documents, we compare them first.
-      return (
-        isArrayEqual(this.docs, other.docs) &&
-        isArrayEqual(this.docChanges(), other.docChanges())
-      );
-    }
-
-    // Otherwise, we compare the changes first as we expect there to be fewer.
-    return (
-      isArrayEqual(this.docChanges(), other.docChanges()) &&
-      isArrayEqual(this.docs, other.docs)
-    );
-  }
-}
-
-export class VectorQuerySnapshot<
-  AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
-> implements firestore.VectorQuerySnapshot<AppModelType, DbModelType>
-{
-  private _materializedDocs: Array<
-    QueryDocumentSnapshot<AppModelType, DbModelType>
-  > | null = null;
-  private _materializedChanges: Array<
-    DocumentChange<AppModelType, DbModelType>
-  > | null = null;
-  private _docs:
-    | (() => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>)
-    | null = null;
-  private _changes:
-    | (() => Array<DocumentChange<AppModelType, DbModelType>>)
-    | null = null;
-
-  /**
-   * @private
-   *
-   * @param _query The originating query.
-   * @param _readTime The time when this query snapshot was obtained.
-   * @param _size The number of documents in the result set.
-   * @param docs A callback returning a sorted array of documents matching
-   * this query
-   * @param changes A callback returning a sorted array of document change
-   * events for this snapshot.
-   */
-  constructor(
-    private readonly _query: VectorQuery<AppModelType, DbModelType>,
-    private readonly _readTime: Timestamp,
-    private readonly _size: number,
-    docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
-    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
-  ) {
-    this._docs = docs;
-    this._changes = changes;
-  }
-
-  /**
-   * The query on which you called get() or onSnapshot() in order to get this
-   * QuerySnapshot.
-   *
-   * @type {Query}
-   * @name QuerySnapshot#query
-   * @readonly
-   *
-   * @example
-   * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   *
-   * query.limit(10).get().then(querySnapshot => {
-   *   console.log(`Returned first batch of results`);
-   *   let query = querySnapshot.query;
-   *   return query.offset(10).get();
-   * }).then(() => {
-   *   console.log(`Returned second batch of results`);
-   * });
-   * ```
-   */
-  get query(): VectorQuery<AppModelType, DbModelType> {
+  get query(): QueryType {
     return this._query;
   }
 
@@ -1409,7 +1149,7 @@ export class VectorQuerySnapshot<
    * value.
    */
   isEqual(
-    other: firestore.VectorQuerySnapshot<AppModelType, DbModelType>
+    other: firestore.QuerySnapshot<AppModelType, DbModelType, QueryType>
   ): boolean {
     // Since the read time is different on every query read, we explicitly
     // ignore all metadata in this comparison.
@@ -1418,7 +1158,7 @@ export class VectorQuerySnapshot<
       return true;
     }
 
-    if (!(other instanceof VectorQuerySnapshot)) {
+    if (!(other instanceof QuerySnapshot)) {
       return false;
     }
 
@@ -1666,7 +1406,7 @@ export class QueryOptions<
 class QueryUtil<
   AppModelType,
   DbModelType extends firestore.DocumentData,
-  Template extends
+  QueryType extends
     | Query<AppModelType, DbModelType>
     | VectorQuery<AppModelType, DbModelType>,
 > {
@@ -1678,12 +1418,9 @@ class QueryUtil<
   ) {}
 
   _get(
-    query: Template,
+    query: QueryType,
     transactionId?: Uint8Array
-  ): Promise<
-    | QuerySnapshot<AppModelType, DbModelType>
-    | VectorQuerySnapshot<AppModelType, DbModelType>
-  > {
+  ): Promise<QuerySnapshot<AppModelType, DbModelType, QueryType>> {
     const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
 
     // Capture the error stack to preserve stack tracing across async calls.
@@ -1709,23 +1446,23 @@ class QueryUtil<
             // to the backend.
             docs.reverse();
           }
+          const x =
+              query._createSnapshot(
+                  readTime,
+                  docs.length,
+                  () => docs,
+                  () => {
+                    const changes: Array<
+                        DocumentChange<AppModelType, DbModelType>
+                    > = [];
+              for (let i = 0; i < docs.length; ++i) {
+                      changes.push(new DocumentChange('added', docs[i], -1, i));
+                    }
+                    return changes;
+            }
+              ) as QueryType;
 
-          resolve(
-            query._createSnapshot(
-              readTime,
-              docs.length,
-              () => docs,
-              () => {
-                const changes: Array<
-                  DocumentChange<AppModelType, DbModelType>
-                > = [];
-                for (let i = 0; i < docs.length; ++i) {
-                  changes.push(new DocumentChange('added', docs[i], -1, i));
-                }
-                return changes;
-              }
-            )
-          );
+          resolve(x);
         });
     });
   }
@@ -1744,7 +1481,7 @@ class QueryUtil<
     return Date.now() - startTime >= totalTimeout;
   }
 
-  stream(query: Template): NodeJS.ReadableStream {
+  stream(query: QueryType): NodeJS.ReadableStream {
     if (this._queryOptions.limitType === LimitType.Last) {
       throw new Error(
         'Query results for queries that include limitToLast() ' +
@@ -1765,7 +1502,7 @@ class QueryUtil<
     return transform;
   }
 
-  _stream(query: Template, transactionId?: Uint8Array): NodeJS.ReadableStream {
+  _stream(query: QueryType, transactionId?: Uint8Array): NodeJS.ReadableStream {
     const tag = requestTag();
     const startTime = Date.now();
 
@@ -4041,9 +3778,9 @@ export class VectorQuery<
    *
    * @return A promise that will be resolved with the results of the query.
    */
-  get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
+  get(): Promise<QuerySnapshot<AppModelType, DbModelType, VectorQuery<AppModelType, DbModelType>>> {
     return this._queryUtil._get(this) as Promise<
-      VectorQuerySnapshot<AppModelType, DbModelType>
+      QuerySnapshot<AppModelType, DbModelType, VectorQuery<AppModelType, DbModelType>>
     >;
   }
 
@@ -4098,8 +3835,8 @@ export class VectorQuery<
     size: number,
     docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
     changes: () => Array<DocumentChange<AppModelType, DbModelType>>
-  ): VectorQuerySnapshot<AppModelType, DbModelType> {
-    return new VectorQuerySnapshot<AppModelType, DbModelType>(
+  ): QuerySnapshot<AppModelType, DbModelType, VectorQuery<AppModelType, DbModelType>> {
+    return new QuerySnapshot<AppModelType, DbModelType, VectorQuery<AppModelType, DbModelType>>(
       this,
       readTime,
       size,
