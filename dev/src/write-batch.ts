@@ -660,13 +660,8 @@ export class WriteBatch implements firestore.WriteBatch {
  * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The object to validate
- * @param allowExists Whether to allow the 'exists' preconditions.
  */
-function validatePrecondition(
-  arg: string | number,
-  value: unknown,
-  allowExists: boolean
-): void {
+function validatePrecondition(arg: string | number, value: unknown): void {
   if (typeof value !== 'object' || value === null) {
     throw new Error('Input is not an object.');
   }
@@ -677,14 +672,6 @@ function validatePrecondition(
 
   if (precondition.exists !== undefined) {
     ++conditions;
-    if (!allowExists) {
-      throw new Error(
-        `${invalidArgumentMessage(
-          arg,
-          'precondition'
-        )} "exists" is not an allowed precondition.`
-      );
-    }
     if (typeof precondition.exists !== 'boolean') {
       throw new Error(
         `${invalidArgumentMessage(
@@ -733,7 +720,7 @@ function validateUpdatePrecondition(
   options?: RequiredArgumentOptions
 ): asserts value is {lastUpdateTime?: Timestamp} {
   if (!validateOptional(value, options)) {
-    validatePrecondition(arg, value, /* allowExists= */ false);
+    validatePrecondition(arg, value);
   }
 }
 
@@ -753,7 +740,7 @@ function validateDeletePrecondition(
   options?: RequiredArgumentOptions
 ): void {
   if (!validateOptional(value, options)) {
-    validatePrecondition(arg, value, /* allowExists= */ true);
+    validatePrecondition(arg, value);
   }
 }
 
