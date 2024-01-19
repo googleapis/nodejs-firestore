@@ -2089,6 +2089,12 @@ describe('update document', () => {
 
   it("doesn't accept argument after precondition", () => {
     expect(() => {
+      firestore.doc('collectionId/documentId').update('foo', 'bar', {
+        exists: false,
+      });
+    }).to.throw(INVALID_ARGUMENTS_TO_UPDATE);
+
+    expect(() => {
       firestore
         .doc('collectionId/documentId')
         .update({foo: 'bar'}, {exists: true}, 'foo');
