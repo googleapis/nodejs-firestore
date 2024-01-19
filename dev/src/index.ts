@@ -745,7 +745,7 @@ export class Firestore implements firestore.Firestore {
     }
 
     this._settings = settings;
-    this._settings.toJson = function () {
+    this._settings.toJSON = function () {
       const temp = Object.assign({}, this);
       if (temp.credentials) {
         temp.credentials = {private_key: '***', client_email: '***'};
