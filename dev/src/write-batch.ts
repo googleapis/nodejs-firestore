@@ -690,7 +690,7 @@ function validatePrecondition(
       options.allowedExistsValues.indexOf(precondition.exists) < 0
     ) {
       throw new Error(
-        `${invalidArgumentMessage(arg, 'precondition')}` +
+        `${invalidArgumentMessage(arg, 'precondition')} ` +
           `"exists" is not allowed to have the value ${precondition.exists} ` +
           `(allowed values: ${options.allowedExistsValues.join(', ')})`
       );
