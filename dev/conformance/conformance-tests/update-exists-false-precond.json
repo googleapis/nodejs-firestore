@@ -1,23 +1,15 @@
 {
   "tests": [
     {
-      "description": "update-paths: Exists precondition is valid",
-      "comment": "The Update method supports an explicit exists precondition.",
-      "updatePaths": {
+      "description": "update: Exists=false precondition is valid",
+      "comment": "The Update method supports an explicit exists=false precondition.",
+      "update": {
         "docRefPath": "projects/projectID/databases/(default)/documents/C/d",
         "precondition": {
-          "exists": true
+          "exists": false
         },
-        "fieldPaths": [
-          {
-            "field": [
-              "a"
-            ]
-          }
-        ],
-        "jsonValues": [
-          "1"
-        ],
+        "jsonData": "{\"a\": 1}",
+        "isError": true,
         "request": {
           "database": "projects/projectID/databases/(default)",
           "writes": [
@@ -36,7 +28,7 @@
                 ]
               },
               "currentDocument": {
-                "exists": true
+                "exists": false
               }
             }
           ]

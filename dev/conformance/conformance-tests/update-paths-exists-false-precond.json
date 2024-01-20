@@ -1,0 +1,48 @@
+{
+  "tests": [
+    {
+      "description": "update-paths: Exists=false precondition is valid",
+      "comment": "The Update method supports an explicit exists=false precondition.",
+      "updatePaths": {
+        "docRefPath": "projects/projectID/databases/(default)/documents/C/d",
+        "precondition": {
+          "exists": false
+        },
+        "fieldPaths": [
+          {
+            "field": [
+              "a"
+            ]
+          }
+        ],
+        "jsonValues": [
+          "1"
+        ],
+        "isError": true,
+        "request": {
+          "database": "projects/projectID/databases/(default)",
+          "writes": [
+            {
+              "update": {
+                "name": "projects/projectID/databases/(default)/documents/C/d",
+                "fields": {
+                  "a": {
+                    "integerValue": "1"
+                  }
+                }
+              },
+              "updateMask": {
+                "fieldPaths": [
+                  "a"
+                ]
+              },
+              "currentDocument": {
+                "exists": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
