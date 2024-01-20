@@ -1901,18 +1901,10 @@ declare namespace FirebaseFirestore {
    * number of documents can be determined via the `empty` and `size`
    * properties.
    */
-  export class QuerySnapshot<
+  export abstract class QuerySnapshotBase<
     AppModelType = DocumentData,
     DbModelType extends DocumentData = DocumentData,
   > {
-    private constructor();
-
-    /**
-     * The query on which you called `get` or `onSnapshot` in order to get this
-     * `QuerySnapshot`.
-     */
-    readonly query: Query<AppModelType, DbModelType>;
-
     /** An array of all the documents in the QuerySnapshot. */
     readonly docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>>;
 
@@ -1953,7 +1945,31 @@ declare namespace FirebaseFirestore {
      * @param other The `QuerySnapshot` to compare against.
      * @return true if this `QuerySnapshot` is equal to the provided one.
      */
-    isEqual(other: QuerySnapshot<AppModelType, DbModelType>): boolean;
+    abstract isEqual(
+      other: QuerySnapshotBase<AppModelType, DbModelType>
+    ): boolean;
+  }
+
+  export class QuerySnapshot<
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData,
+  > extends QuerySnapshotBase<AppModelType, DbModelType> {
+    private constructor();
+
+    /**
+     * The query on which you called `get` or `onSnapshot` in order to get this
+     * `QuerySnapshot`.
+     */
+    readonly query: Query<AppModelType, DbModelType>;
+
+    /**
+     * Returns true if the document data in this `QuerySnapshot` is equal to the
+     * provided one.
+     *
+     * @param other The `QuerySnapshot` to compare against.
+     * @return true if this `QuerySnapshot` is equal to the provided one.
+     */
+    isEqual(other: QuerySnapshotBase<AppModelType, DbModelType>): boolean;
   }
 
   /**
@@ -1966,7 +1982,7 @@ declare namespace FirebaseFirestore {
   export class VectorQuerySnapshot<
     AppModelType = DocumentData,
     DbModelType extends DocumentData = DocumentData,
-  > {
+  > extends QuerySnapshotBase<AppModelType, DbModelType> {
     private constructor();
 
     /**
@@ -1975,47 +1991,14 @@ declare namespace FirebaseFirestore {
      */
     readonly query: VectorQuery<AppModelType, DbModelType>;
 
-    /** An array of all the documents in the QuerySnapshot. */
-    readonly docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>>;
-
-    /** The number of documents in the QuerySnapshot. */
-    readonly size: number;
-
-    /** True if there are no documents in the QuerySnapshot. */
-    readonly empty: boolean;
-
-    /** The time this query snapshot was obtained. */
-    readonly readTime: Timestamp;
-
     /**
-     * Returns an array of the documents changes since the last snapshot. If
-     * this is the first snapshot, all documents will be in the list as added
-     * changes.
-     */
-    docChanges(): DocumentChange<AppModelType, DbModelType>[];
-
-    /**
-     * Enumerates all of the documents in the QuerySnapshot.
-     *
-     * @param callback A callback to be called with a `DocumentSnapshot` for
-     * each document in the snapshot.
-     * @param thisArg The `this` binding for the callback.
-     */
-    forEach(
-      callback: (
-        result: QueryDocumentSnapshot<AppModelType, DbModelType>
-      ) => void,
-      thisArg?: any
-    ): void;
-
-    /**
-     * Returns true if the document data in this `VectorQuerySnapshot` is equal to the
+     * Returns true if the document data in this `QuerySnapshot` is equal to the
      * provided one.
      *
-     * @param other The `VectorQuerySnapshot` to compare against.
-     * @return true if this `VectorQuerySnapshot` is equal to the provided one.
+     * @param other The `QuerySnapshot` to compare against.
+     * @return true if this `QuerySnapshot` is equal to the provided one.
      */
-    isEqual(other: VectorQuerySnapshot<AppModelType, DbModelType>): boolean;
+    isEqual(other: QuerySnapshotBase<AppModelType, DbModelType>): boolean;
   }
 
   /**
