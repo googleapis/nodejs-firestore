@@ -9,30 +9,7 @@
           "exists": false
         },
         "jsonData": "{\"a\": 1}",
-        "isError": true,
-        "request": {
-          "database": "projects/projectID/databases/(default)",
-          "writes": [
-            {
-              "update": {
-                "name": "projects/projectID/databases/(default)/documents/C/d",
-                "fields": {
-                  "a": {
-                    "integerValue": "1"
-                  }
-                }
-              },
-              "updateMask": {
-                "fieldPaths": [
-                  "a"
-                ]
-              },
-              "currentDocument": {
-                "exists": false
-              }
-            }
-          ]
-        }
+        "isError": true
       }
     }
   ]
