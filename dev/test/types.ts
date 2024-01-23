@@ -120,7 +120,7 @@ describe('FirestoreTypeConverter', () => {
       await newDocRef.set({stringProperty: 'foo', numberProperty: 42});
       await newDocRef.update({a: 'newFoo', b: 43});
       const snapshot = await newDocRef.get();
-      const data: MyModelType = snapshot.data()!;
+      const data = snapshot.data()!;
       expect(data.stringProperty).to.equal('newFoo');
       expect(data.numberProperty).to.equal(43);
     }
