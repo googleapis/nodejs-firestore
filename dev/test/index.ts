@@ -1374,7 +1374,7 @@ describe('getAll() method', () => {
 });
 
 describe('toJSON', () => {
-  it('Serializing settings hides credentials', () => {
+  it('Serializing Firestore settings redacts credentials', () => {
     const firestore = new Firestore.Firestore({
       projectId: 'myProjectId',
       credentials: {client_email: 'foo@bar', private_key: 'asdf1234'},
