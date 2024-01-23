@@ -31,28 +31,21 @@ import {
 import api = proto.google.firestore.v1;
 
 export class VectorValue implements firestore.VectorValue {
-  private readonly values: number[];
+  private readonly _values: number[];
   constructor(values: number[] | undefined) {
-    this.values = values || [];
+    // Making a copy of the parameter.
+    this._values = (values || []).map(n => n);
   }
 
   public toArray(): number[] {
-    return this.values;
+    return this._values.map(n => n);
   }
 
   /**
    * @private
    */
   toProto(serializer: Serializer): api.IValue {
-    return serializer.encodeVector({
-      arrayValue: {
-        values: this.values.map(value => {
-          return {
-            doubleValue: value,
-          };
-        }),
-      },
-    });
+    return serializer.encodeVector(this._values);
   }
 
   /**
@@ -69,7 +62,7 @@ export class VectorValue implements firestore.VectorValue {
    * @private
    */
   isEqual(other: VectorValue): boolean {
-    return this.values === other.values;
+    return this._values === other._values;
   }
 }
 

@@ -62,8 +62,6 @@ use(chaiAsPromised);
 
 const version = require('../../package.json').version;
 
-setLogFunction(console.log);
-
 class DeferredPromise<T> {
   resolve: Function;
   reject: Function;
@@ -105,8 +103,6 @@ function getTestRoot(settings: Settings = {}): CollectionReference {
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }
-
-  settings.host = 'test-firestore.sandbox.googleapis.com';
 
   const firestore = new Firestore({
     ...internalSettings,

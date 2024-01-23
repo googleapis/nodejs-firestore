@@ -40,7 +40,7 @@ const MAX_DEPTH = 20;
 
 const RESERVED_MAP_KEY = '__type__';
 const RESERVED_MAP_KEY_VECTOR_VALUE = '__vector__';
-const RESERVED_VECTOR_MAP_VECTORS_KEY = 'value';
+const VECTOR_MAP_VECTORS_KEY = 'value';
 
 /**
  * An interface for Firestore types that can be serialized to Protobuf.
@@ -228,14 +228,23 @@ export class Serializer {
   /**
    * @private
    */
-  encodeVector(vectorValue: api.IValue): api.IValue {
+  encodeVector(rawVector: number[]): api.IValue {
+    // A Firestore Vector is a map with reserved key/value pairs.
     return {
       mapValue: {
         fields: {
           [RESERVED_MAP_KEY]: {
             stringValue: RESERVED_MAP_KEY_VECTOR_VALUE,
           },
-          [RESERVED_VECTOR_MAP_VECTORS_KEY]: vectorValue,
+          [VECTOR_MAP_VECTORS_KEY]: {
+            arrayValue: {
+              values: rawVector.map(value => {
+                return {
+                  doubleValue: value,
+                };
+              }),
+            },
+          },
         },
       },
     };
@@ -295,9 +304,7 @@ export class Serializer {
             this.decodeValue(fields[RESERVED_MAP_KEY]) ===
               RESERVED_MAP_KEY_VECTOR_VALUE
           ) {
-            return VectorValue.fromProto(
-              fields[RESERVED_VECTOR_MAP_VECTORS_KEY]
-            );
+            return VectorValue.fromProto(fields[VECTOR_MAP_VECTORS_KEY]);
           } else {
             const obj: DocumentData = {};
             for (const prop of Object.keys(fields)) {

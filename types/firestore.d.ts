@@ -2364,7 +2364,7 @@ declare namespace FirebaseFirestore {
     private constructor(values: number[] | undefined);
 
     /**
-     * Returns the raw number array form of the vector.
+     * Returns a copy of the raw number array form of the vector.
      */
     toArray(): number[];
 
@@ -2445,7 +2445,7 @@ declare namespace FirebaseFirestore {
     static arrayRemove(...elements: any[]): FieldValue;
 
     /**
-     * @return A new `VectorValue` constructed with the given array of number.
+     * @return A new `VectorValue` constructed with a copy of the given array of number.
      */
     static vector(values?: number[]): VectorValue;
 
