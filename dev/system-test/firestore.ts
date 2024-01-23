@@ -1034,12 +1034,13 @@ describe('DocumentReference class', () => {
     });
 
     const snap1 = await ref.get();
-    expect(snap1.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
-    expect(snap1.get('vector1')).to.deep.equal(FieldValue.vector([1, 2, 3.99]));
-    expect(snap1.get('vector2')).to.deep.equal(FieldValue.vector([0, 0, 0]));
-    expect(snap1.get('vector3')).to.deep.equal(
-      FieldValue.vector([-1, -200, -999])
-    );
+    expect(snap1.get('vector0').isEqual(FieldValue.vector([0.0]))).to.be.true;
+    expect(snap1.get('vector1').isEqual(FieldValue.vector([1, 2, 3.99]))).to.be
+      .true;
+    expect(snap1.get('vector2').isEqual(FieldValue.vector([0, 0, 0]))).to.be
+      .true;
+    expect(snap1.get('vector3').isEqual(FieldValue.vector([-1, -200, -999]))).to
+      .be.true;
   });
 
   describe('watch', () => {
@@ -1377,10 +1378,10 @@ describe('DocumentReference class', () => {
 
     await createDeferred.promise;
     expect(document).to.be.not.null;
-    expect(document!.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
-    expect(document!.get('vector1')).to.deep.equal(
-      FieldValue.vector([1, 2, 3.99])
-    );
+    expect(document!.get('vector0').isEqual(FieldValue.vector([0.0]))).to.be
+      .true;
+    expect(document!.get('vector1').isEqual(FieldValue.vector([1, 2, 3.99]))).to
+      .be.true;
 
     await ref.set({
       purpose: 'vector tests',
@@ -1390,29 +1391,27 @@ describe('DocumentReference class', () => {
     });
     await setDeferred.promise;
     expect(document).to.be.not.null;
-    expect(document!.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
-    expect(document!.get('vector1')).to.deep.equal(
-      FieldValue.vector([1, 2, 3.99])
-    );
-    expect(document!.get('vector2')).to.deep.equal(
-      FieldValue.vector([0, 0, 0])
-    );
+    expect(document!.get('vector0').isEqual(FieldValue.vector([0.0]))).to.be
+      .true;
+    expect(document!.get('vector1').isEqual(FieldValue.vector([1, 2, 3.99]))).to
+      .be.true;
+    expect(document!.get('vector2').isEqual(FieldValue.vector([0, 0, 0]))).to.be
+      .true;
 
     await ref.update({
       vector3: FieldValue.vector([-1, -200, -999]),
     });
     await updateDeferred.promise;
     expect(document).to.be.not.null;
-    expect(document!.get('vector0')).to.deep.equal(FieldValue.vector([0.0]));
-    expect(document!.get('vector1')).to.deep.equal(
-      FieldValue.vector([1, 2, 3.99])
-    );
-    expect(document!.get('vector2')).to.deep.equal(
-      FieldValue.vector([0, 0, 0])
-    );
-    expect(document!.get('vector3')).to.deep.equal(
-      FieldValue.vector([-1, -200, -999])
-    );
+    expect(document!.get('vector0').isEqual(FieldValue.vector([0.0]))).to.be
+      .true;
+    expect(document!.get('vector1').isEqual(FieldValue.vector([1, 2, 3.99]))).to
+      .be.true;
+    expect(document!.get('vector2').isEqual(FieldValue.vector([0, 0, 0]))).to.be
+      .true;
+    expect(
+      document!.get('vector3').isEqual(FieldValue.vector([-1, -200, -999]))
+    ).to.be.true;
 
     await ref.delete();
     await deleteDeferred.promise;
@@ -1631,15 +1630,13 @@ describe('Query class', () => {
       )
       .then(res => {
         expect(res.size).to.equal(3);
-        expect(res.docs[0].get('embedding')).to.deep.equal(
-          FieldValue.vector([9, 9])
-        );
-        expect(res.docs[1].get('embedding')).to.deep.equal(
-          FieldValue.vector([5, 5])
-        );
-        expect(res.docs[2].get('embedding')).to.deep.equal(
-          FieldValue.vector([50, 50])
-        );
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([9, 9])))
+          .to.be.true;
+        expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([5, 5])))
+          .to.be.true;
+        expect(
+          res.docs[2].get('embedding').isEqual(FieldValue.vector([50, 50]))
+        ).to.be.true;
       });
   });
 
@@ -1698,22 +1695,21 @@ describe('Query class', () => {
         randomCol
           .where('foo', '==', 'bar')
           .findNearest('embedding', [10, 10], {
-            limit: 3,
+            limit: 100, // Intentionally large to get all matches.
             distanceMeasure: 'EUCLIDEAN',
           })
           .get()
       )
       .then(res => {
         expect(res.size).to.equal(3);
-        expect(res.docs[0].get('embedding')).to.deep.equal(
-          FieldValue.vector([9, 9])
-        );
-        expect(res.docs[1].get('embedding')).to.deep.equal(
-          FieldValue.vector([50, 50])
-        );
-        expect(res.docs[2].get('embedding')).to.deep.equal(
-          FieldValue.vector([100, 100])
-        );
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([9, 9])))
+          .to.be.true;
+        expect(
+          res.docs[1].get('embedding').isEqual(FieldValue.vector([50, 50]))
+        ).to.be.true;
+        expect(
+          res.docs[2].get('embedding').isEqual(FieldValue.vector([100, 100]))
+        ).to.be.true;
       });
   });
 
@@ -1741,12 +1737,11 @@ describe('Query class', () => {
       )
       .then(res => {
         expect(res.size).to.equal(2);
-        expect(res.docs[0].get('embedding')).to.deep.equal(
-          FieldValue.vector([9, 9])
-        );
-        expect(res.docs[1].get('embedding')).to.deep.equal(
-          FieldValue.vector([50, 50])
-        );
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([9, 9])))
+          .to.be.true;
+        expect(
+          res.docs[1].get('embedding').isEqual(FieldValue.vector([50, 50]))
+        ).to.be.true;
       });
   });
 

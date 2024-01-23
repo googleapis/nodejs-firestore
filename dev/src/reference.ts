@@ -1228,20 +1228,21 @@ export class VectorQuerySnapshot<
    * QuerySnapshot.
    *
    * @type {Query}
-   * @name QuerySnapshot#query
+   * @name VectorQuerySnapshot#query
    * @readonly
    *
    * @example
    * ```
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
-   * query.limit(10).get().then(querySnapshot => {
-   *   console.log(`Returned first batch of results`);
-   *   let query = querySnapshot.query;
-   *   return query.offset(10).get();
-   * }).then(() => {
+   * query.findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"})
+   *   .get().then(querySnapshot => {
+   *     console.log(`Returned first batch of results`);
+   *     let query = querySnapshot.query;
+   *     return query.offset(10).get();
+   *   }).then(() => {
    *   console.log(`Returned second batch of results`);
-   * });
+   *   });
    * ```
    */
   get query(): VectorQuery<AppModelType, DbModelType> {
@@ -1252,12 +1253,13 @@ export class VectorQuerySnapshot<
    * An array of all the documents in this QuerySnapshot.
    *
    * @type {Array.<QueryDocumentSnapshot>}
-   * @name QuerySnapshot#docs
+   * @name VectorQuerySnapshot#docs
    * @readonly
    *
    * @example
    * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
    *
    * query.get().then(querySnapshot => {
    *   let docs = querySnapshot.docs;
@@ -1277,15 +1279,16 @@ export class VectorQuerySnapshot<
   }
 
   /**
-   * True if there are no documents in the QuerySnapshot.
+   * True if there are no documents in the VectorQuerySnapshot.
    *
    * @type {boolean}
-   * @name QuerySnapshot#empty
+   * @name VectorQuerySnapshot#empty
    * @readonly
    *
    * @example
    * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
    *
    * query.get().then(querySnapshot => {
    *   if (querySnapshot.empty) {
@@ -1299,15 +1302,16 @@ export class VectorQuerySnapshot<
   }
 
   /**
-   * The number of documents in the QuerySnapshot.
+   * The number of documents in the VectorQuerySnapshot.
    *
    * @type {number}
-   * @name QuerySnapshot#size
+   * @name VectorQuerySnapshot#size
    * @readonly
    *
    * @example
    * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
    *
    * query.get().then(querySnapshot => {
    *   console.log(`Found ${querySnapshot.size} documents.`);
@@ -1322,11 +1326,12 @@ export class VectorQuerySnapshot<
    * The time this query snapshot was obtained.
    *
    * @type {Timestamp}
-   * @name QuerySnapshot#readTime
+   * @name VectorQuerySnapshot#readTime
    *
    * @example
    * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
    *
    * query.get().then((querySnapshot) => {
    *   let readTime = querySnapshot.readTime;
@@ -1347,9 +1352,10 @@ export class VectorQuerySnapshot<
    *
    * @example
    * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
    *
-   * query.onSnapshot(querySnapshot => {
+   * query.get().then(querySnapshot => {
    *   let changes = querySnapshot.docChanges();
    *   for (let change of changes) {
    *     console.log(`A document was ${change.type}.`);
@@ -1378,7 +1384,8 @@ export class VectorQuerySnapshot<
    *
    * @example
    * ```
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
    *
    * query.get().then(querySnapshot => {
    *   querySnapshot.forEach(documentSnapshot => {
@@ -1401,11 +1408,11 @@ export class VectorQuerySnapshot<
   }
 
   /**
-   * Returns true if the document data in this `QuerySnapshot` is equal to the
+   * Returns true if the document data in this `VectorQuerySnapshot` is equal to the
    * provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `QuerySnapshot` is equal to the provided
+   * @return {boolean} true if this `VectorQuerySnapshot` is equal to the provided
    * value.
    */
   isEqual(
@@ -2469,7 +2476,10 @@ export class Query<
         ? queryVector.length
         : queryVector.toArray().length) === 0
     ) {
-      throw invalidArgumentMessage('queryVector', 'vector size larger than 0');
+      throw invalidArgumentMessage(
+        'queryVector',
+        'vector size must be larger than 0'
+      );
     }
 
     return new VectorQuery<AppModelType, DbModelType>(
@@ -4120,7 +4130,7 @@ export class VectorQuery<
     ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): VectorQuery<AppModelType, DbModelType> {
     throw new Error(
-      'Unimplemented: Vector query does not support stream() yet.'
+      'Unimplemented: Vector query does not support cursors yet.'
     );
   }
 
