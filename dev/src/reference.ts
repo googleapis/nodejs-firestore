@@ -4099,7 +4099,7 @@ export class VectorQuery<
   }
 
   /**
-   * Construct the resulting snapshot for this query with given documents.
+   * Construct the resulting vector snapshot for this query with given documents.
    *
    * @private
    * @internal
@@ -4120,7 +4120,8 @@ export class VectorQuery<
   }
 
   /**
-   * Construct a new query whose result will start after To support stream()
+   * Construct a new vector query whose result will start after To support stream().
+   * This now throws an exception because cursors are not supported from the backend for vector queries yet.
    *
    * @private
    * @internal
