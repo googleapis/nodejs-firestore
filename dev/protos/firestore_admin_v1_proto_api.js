@@ -1,5 +1,5 @@
 /*!
- * Copyright 2022 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,11 +75,18 @@
                          * @memberof google.firestore.admin.v1
                          * @interface IDatabase
                          * @property {string|null} [name] Database name
+                         * @property {string|null} [uid] Database uid
+                         * @property {google.protobuf.ITimestamp|null} [createTime] Database createTime
+                         * @property {google.protobuf.ITimestamp|null} [updateTime] Database updateTime
                          * @property {string|null} [locationId] Database locationId
                          * @property {google.firestore.admin.v1.Database.DatabaseType|null} [type] Database type
                          * @property {google.firestore.admin.v1.Database.ConcurrencyMode|null} [concurrencyMode] Database concurrencyMode
+                         * @property {google.protobuf.IDuration|null} [versionRetentionPeriod] Database versionRetentionPeriod
+                         * @property {google.protobuf.ITimestamp|null} [earliestVersionTime] Database earliestVersionTime
+                         * @property {google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement|null} [pointInTimeRecoveryEnablement] Database pointInTimeRecoveryEnablement
                          * @property {google.firestore.admin.v1.Database.AppEngineIntegrationMode|null} [appEngineIntegrationMode] Database appEngineIntegrationMode
                          * @property {string|null} [keyPrefix] Database keyPrefix
+                         * @property {google.firestore.admin.v1.Database.DeleteProtectionState|null} [deleteProtectionState] Database deleteProtectionState
                          * @property {string|null} [etag] Database etag
                          */
     
@@ -107,6 +114,30 @@
                         Database.prototype.name = "";
     
                         /**
+                         * Database uid.
+                         * @member {string} uid
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.uid = "";
+    
+                        /**
+                         * Database createTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} createTime
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.createTime = null;
+    
+                        /**
+                         * Database updateTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} updateTime
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.updateTime = null;
+    
+                        /**
                          * Database locationId.
                          * @member {string} locationId
                          * @memberof google.firestore.admin.v1.Database
@@ -131,6 +162,30 @@
                         Database.prototype.concurrencyMode = 0;
     
                         /**
+                         * Database versionRetentionPeriod.
+                         * @member {google.protobuf.IDuration|null|undefined} versionRetentionPeriod
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.versionRetentionPeriod = null;
+    
+                        /**
+                         * Database earliestVersionTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} earliestVersionTime
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.earliestVersionTime = null;
+    
+                        /**
+                         * Database pointInTimeRecoveryEnablement.
+                         * @member {google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement} pointInTimeRecoveryEnablement
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.pointInTimeRecoveryEnablement = 0;
+    
+                        /**
                          * Database appEngineIntegrationMode.
                          * @member {google.firestore.admin.v1.Database.AppEngineIntegrationMode} appEngineIntegrationMode
                          * @memberof google.firestore.admin.v1.Database
@@ -145,6 +200,14 @@
                          * @instance
                          */
                         Database.prototype.keyPrefix = "";
+    
+                        /**
+                         * Database deleteProtectionState.
+                         * @member {google.firestore.admin.v1.Database.DeleteProtectionState} deleteProtectionState
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.deleteProtectionState = 0;
     
                         /**
                          * Database etag.
@@ -168,6 +231,18 @@
                             var message = new $root.google.firestore.admin.v1.Database();
                             if (object.name != null)
                                 message.name = String(object.name);
+                            if (object.uid != null)
+                                message.uid = String(object.uid);
+                            if (object.createTime != null) {
+                                if (typeof object.createTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.createTime: object expected");
+                                message.createTime = $root.google.protobuf.Timestamp.fromObject(object.createTime);
+                            }
+                            if (object.updateTime != null) {
+                                if (typeof object.updateTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.updateTime: object expected");
+                                message.updateTime = $root.google.protobuf.Timestamp.fromObject(object.updateTime);
+                            }
                             if (object.locationId != null)
                                 message.locationId = String(object.locationId);
                             switch (object.type) {
@@ -214,6 +289,36 @@
                                 message.concurrencyMode = 3;
                                 break;
                             }
+                            if (object.versionRetentionPeriod != null) {
+                                if (typeof object.versionRetentionPeriod !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.versionRetentionPeriod: object expected");
+                                message.versionRetentionPeriod = $root.google.protobuf.Duration.fromObject(object.versionRetentionPeriod);
+                            }
+                            if (object.earliestVersionTime != null) {
+                                if (typeof object.earliestVersionTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.earliestVersionTime: object expected");
+                                message.earliestVersionTime = $root.google.protobuf.Timestamp.fromObject(object.earliestVersionTime);
+                            }
+                            switch (object.pointInTimeRecoveryEnablement) {
+                            default:
+                                if (typeof object.pointInTimeRecoveryEnablement === "number") {
+                                    message.pointInTimeRecoveryEnablement = object.pointInTimeRecoveryEnablement;
+                                    break;
+                                }
+                                break;
+                            case "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED":
+                            case 0:
+                                message.pointInTimeRecoveryEnablement = 0;
+                                break;
+                            case "POINT_IN_TIME_RECOVERY_ENABLED":
+                            case 1:
+                                message.pointInTimeRecoveryEnablement = 1;
+                                break;
+                            case "POINT_IN_TIME_RECOVERY_DISABLED":
+                            case 2:
+                                message.pointInTimeRecoveryEnablement = 2;
+                                break;
+                            }
                             switch (object.appEngineIntegrationMode) {
                             default:
                                 if (typeof object.appEngineIntegrationMode === "number") {
@@ -236,6 +341,26 @@
                             }
                             if (object.keyPrefix != null)
                                 message.keyPrefix = String(object.keyPrefix);
+                            switch (object.deleteProtectionState) {
+                            default:
+                                if (typeof object.deleteProtectionState === "number") {
+                                    message.deleteProtectionState = object.deleteProtectionState;
+                                    break;
+                                }
+                                break;
+                            case "DELETE_PROTECTION_STATE_UNSPECIFIED":
+                            case 0:
+                                message.deleteProtectionState = 0;
+                                break;
+                            case "DELETE_PROTECTION_DISABLED":
+                            case 1:
+                                message.deleteProtectionState = 1;
+                                break;
+                            case "DELETE_PROTECTION_ENABLED":
+                            case 2:
+                                message.deleteProtectionState = 2;
+                                break;
+                            }
                             if (object.etag != null)
                                 message.etag = String(object.etag);
                             return message;
@@ -256,25 +381,46 @@
                             var object = {};
                             if (options.defaults) {
                                 object.name = "";
+                                object.uid = "";
+                                object.createTime = null;
+                                object.updateTime = null;
                                 object.locationId = "";
                                 object.type = options.enums === String ? "DATABASE_TYPE_UNSPECIFIED" : 0;
                                 object.concurrencyMode = options.enums === String ? "CONCURRENCY_MODE_UNSPECIFIED" : 0;
+                                object.versionRetentionPeriod = null;
+                                object.earliestVersionTime = null;
                                 object.appEngineIntegrationMode = options.enums === String ? "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED" : 0;
                                 object.keyPrefix = "";
+                                object.pointInTimeRecoveryEnablement = options.enums === String ? "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED" : 0;
+                                object.deleteProtectionState = options.enums === String ? "DELETE_PROTECTION_STATE_UNSPECIFIED" : 0;
                                 object.etag = "";
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
+                            if (message.uid != null && message.hasOwnProperty("uid"))
+                                object.uid = message.uid;
+                            if (message.createTime != null && message.hasOwnProperty("createTime"))
+                                object.createTime = $root.google.protobuf.Timestamp.toObject(message.createTime, options);
+                            if (message.updateTime != null && message.hasOwnProperty("updateTime"))
+                                object.updateTime = $root.google.protobuf.Timestamp.toObject(message.updateTime, options);
                             if (message.locationId != null && message.hasOwnProperty("locationId"))
                                 object.locationId = message.locationId;
                             if (message.type != null && message.hasOwnProperty("type"))
                                 object.type = options.enums === String ? $root.google.firestore.admin.v1.Database.DatabaseType[message.type] === undefined ? message.type : $root.google.firestore.admin.v1.Database.DatabaseType[message.type] : message.type;
                             if (message.concurrencyMode != null && message.hasOwnProperty("concurrencyMode"))
                                 object.concurrencyMode = options.enums === String ? $root.google.firestore.admin.v1.Database.ConcurrencyMode[message.concurrencyMode] === undefined ? message.concurrencyMode : $root.google.firestore.admin.v1.Database.ConcurrencyMode[message.concurrencyMode] : message.concurrencyMode;
+                            if (message.versionRetentionPeriod != null && message.hasOwnProperty("versionRetentionPeriod"))
+                                object.versionRetentionPeriod = $root.google.protobuf.Duration.toObject(message.versionRetentionPeriod, options);
+                            if (message.earliestVersionTime != null && message.hasOwnProperty("earliestVersionTime"))
+                                object.earliestVersionTime = $root.google.protobuf.Timestamp.toObject(message.earliestVersionTime, options);
                             if (message.appEngineIntegrationMode != null && message.hasOwnProperty("appEngineIntegrationMode"))
                                 object.appEngineIntegrationMode = options.enums === String ? $root.google.firestore.admin.v1.Database.AppEngineIntegrationMode[message.appEngineIntegrationMode] === undefined ? message.appEngineIntegrationMode : $root.google.firestore.admin.v1.Database.AppEngineIntegrationMode[message.appEngineIntegrationMode] : message.appEngineIntegrationMode;
                             if (message.keyPrefix != null && message.hasOwnProperty("keyPrefix"))
                                 object.keyPrefix = message.keyPrefix;
+                            if (message.pointInTimeRecoveryEnablement != null && message.hasOwnProperty("pointInTimeRecoveryEnablement"))
+                                object.pointInTimeRecoveryEnablement = options.enums === String ? $root.google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement[message.pointInTimeRecoveryEnablement] === undefined ? message.pointInTimeRecoveryEnablement : $root.google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement[message.pointInTimeRecoveryEnablement] : message.pointInTimeRecoveryEnablement;
+                            if (message.deleteProtectionState != null && message.hasOwnProperty("deleteProtectionState"))
+                                object.deleteProtectionState = options.enums === String ? $root.google.firestore.admin.v1.Database.DeleteProtectionState[message.deleteProtectionState] === undefined ? message.deleteProtectionState : $root.google.firestore.admin.v1.Database.DeleteProtectionState[message.deleteProtectionState] : message.deleteProtectionState;
                             if (message.etag != null && message.hasOwnProperty("etag"))
                                 object.etag = message.etag;
                             return object;
@@ -341,6 +487,22 @@
                         })();
     
                         /**
+                         * PointInTimeRecoveryEnablement enum.
+                         * @name google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement
+                         * @enum {string}
+                         * @property {string} POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED=POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED value
+                         * @property {string} POINT_IN_TIME_RECOVERY_ENABLED=POINT_IN_TIME_RECOVERY_ENABLED POINT_IN_TIME_RECOVERY_ENABLED value
+                         * @property {string} POINT_IN_TIME_RECOVERY_DISABLED=POINT_IN_TIME_RECOVERY_DISABLED POINT_IN_TIME_RECOVERY_DISABLED value
+                         */
+                        Database.PointInTimeRecoveryEnablement = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED"] = "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED";
+                            values[valuesById[1] = "POINT_IN_TIME_RECOVERY_ENABLED"] = "POINT_IN_TIME_RECOVERY_ENABLED";
+                            values[valuesById[2] = "POINT_IN_TIME_RECOVERY_DISABLED"] = "POINT_IN_TIME_RECOVERY_DISABLED";
+                            return values;
+                        })();
+    
+                        /**
                          * AppEngineIntegrationMode enum.
                          * @name google.firestore.admin.v1.Database.AppEngineIntegrationMode
                          * @enum {string}
@@ -353,6 +515,22 @@
                             values[valuesById[0] = "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED"] = "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED";
                             values[valuesById[1] = "ENABLED"] = "ENABLED";
                             values[valuesById[2] = "DISABLED"] = "DISABLED";
+                            return values;
+                        })();
+    
+                        /**
+                         * DeleteProtectionState enum.
+                         * @name google.firestore.admin.v1.Database.DeleteProtectionState
+                         * @enum {string}
+                         * @property {string} DELETE_PROTECTION_STATE_UNSPECIFIED=DELETE_PROTECTION_STATE_UNSPECIFIED DELETE_PROTECTION_STATE_UNSPECIFIED value
+                         * @property {string} DELETE_PROTECTION_DISABLED=DELETE_PROTECTION_DISABLED DELETE_PROTECTION_DISABLED value
+                         * @property {string} DELETE_PROTECTION_ENABLED=DELETE_PROTECTION_ENABLED DELETE_PROTECTION_ENABLED value
+                         */
+                        Database.DeleteProtectionState = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "DELETE_PROTECTION_STATE_UNSPECIFIED"] = "DELETE_PROTECTION_STATE_UNSPECIFIED";
+                            values[valuesById[1] = "DELETE_PROTECTION_DISABLED"] = "DELETE_PROTECTION_DISABLED";
+                            values[valuesById[2] = "DELETE_PROTECTION_ENABLED"] = "DELETE_PROTECTION_ENABLED";
                             return values;
                         })();
     
@@ -1231,6 +1409,39 @@
                          * @variation 2
                          */
     
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteDatabase}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef DeleteDatabaseCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.longrunning.Operation} [response] Operation
+                         */
+    
+                        /**
+                         * Calls DeleteDatabase.
+                         * @function deleteDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteDatabaseRequest} request DeleteDatabaseRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.DeleteDatabaseCallback} callback Node-style callback called with the error, if any, and Operation
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.deleteDatabase = function deleteDatabase(request, callback) {
+                            return this.rpcCall(deleteDatabase, $root.google.firestore.admin.v1.DeleteDatabaseRequest, $root.google.longrunning.Operation, request, callback);
+                        }, "name", { value: "DeleteDatabase" });
+    
+                        /**
+                         * Calls DeleteDatabase.
+                         * @function deleteDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteDatabaseRequest} request DeleteDatabaseRequest message or plain object
+                         * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
                         return FirestoreAdmin;
                     })();
     
@@ -1548,6 +1759,7 @@
                          * @memberof google.firestore.admin.v1
                          * @interface IListDatabasesResponse
                          * @property {Array.<google.firestore.admin.v1.IDatabase>|null} [databases] ListDatabasesResponse databases
+                         * @property {Array.<string>|null} [unreachable] ListDatabasesResponse unreachable
                          */
     
                         /**
@@ -1560,6 +1772,7 @@
                          */
                         function ListDatabasesResponse(properties) {
                             this.databases = [];
+                            this.unreachable = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -1573,6 +1786,14 @@
                          * @instance
                          */
                         ListDatabasesResponse.prototype.databases = $util.emptyArray;
+    
+                        /**
+                         * ListDatabasesResponse unreachable.
+                         * @member {Array.<string>} unreachable
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @instance
+                         */
+                        ListDatabasesResponse.prototype.unreachable = $util.emptyArray;
     
                         /**
                          * Creates a ListDatabasesResponse message from a plain object. Also converts values to their respective internal types.
@@ -1596,6 +1817,13 @@
                                     message.databases[i] = $root.google.firestore.admin.v1.Database.fromObject(object.databases[i]);
                                 }
                             }
+                            if (object.unreachable) {
+                                if (!Array.isArray(object.unreachable))
+                                    throw TypeError(".google.firestore.admin.v1.ListDatabasesResponse.unreachable: array expected");
+                                message.unreachable = [];
+                                for (var i = 0; i < object.unreachable.length; ++i)
+                                    message.unreachable[i] = String(object.unreachable[i]);
+                            }
                             return message;
                         };
     
@@ -1612,12 +1840,19 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
+                            if (options.arrays || options.defaults) {
                                 object.databases = [];
+                                object.unreachable = [];
+                            }
                             if (message.databases && message.databases.length) {
                                 object.databases = [];
                                 for (var j = 0; j < message.databases.length; ++j)
                                     object.databases[j] = $root.google.firestore.admin.v1.Database.toObject(message.databases[j], options);
+                            }
+                            if (message.unreachable && message.unreachable.length) {
+                                object.unreachable = [];
+                                for (var j = 0; j < message.unreachable.length; ++j)
+                                    object.unreachable[j] = message.unreachable[j];
                             }
                             return object;
                         };
@@ -1945,6 +2180,198 @@
                         };
     
                         return UpdateDatabaseMetadata;
+                    })();
+    
+                    v1.DeleteDatabaseRequest = (function() {
+    
+                        /**
+                         * Properties of a DeleteDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDeleteDatabaseRequest
+                         * @property {string|null} [name] DeleteDatabaseRequest name
+                         * @property {string|null} [etag] DeleteDatabaseRequest etag
+                         */
+    
+                        /**
+                         * Constructs a new DeleteDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DeleteDatabaseRequest.
+                         * @implements IDeleteDatabaseRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDeleteDatabaseRequest=} [properties] Properties to set
+                         */
+                        function DeleteDatabaseRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * DeleteDatabaseRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @instance
+                         */
+                        DeleteDatabaseRequest.prototype.name = "";
+    
+                        /**
+                         * DeleteDatabaseRequest etag.
+                         * @member {string} etag
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @instance
+                         */
+                        DeleteDatabaseRequest.prototype.etag = "";
+    
+                        /**
+                         * Creates a DeleteDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DeleteDatabaseRequest} DeleteDatabaseRequest
+                         */
+                        DeleteDatabaseRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DeleteDatabaseRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.DeleteDatabaseRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            if (object.etag != null)
+                                message.etag = String(object.etag);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a DeleteDatabaseRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.DeleteDatabaseRequest} message DeleteDatabaseRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DeleteDatabaseRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.name = "";
+                                object.etag = "";
+                            }
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.etag != null && message.hasOwnProperty("etag"))
+                                object.etag = message.etag;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this DeleteDatabaseRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DeleteDatabaseRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DeleteDatabaseRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DeleteDatabaseRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DeleteDatabaseRequest";
+                        };
+    
+                        return DeleteDatabaseRequest;
+                    })();
+    
+                    v1.DeleteDatabaseMetadata = (function() {
+    
+                        /**
+                         * Properties of a DeleteDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDeleteDatabaseMetadata
+                         */
+    
+                        /**
+                         * Constructs a new DeleteDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DeleteDatabaseMetadata.
+                         * @implements IDeleteDatabaseMetadata
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDeleteDatabaseMetadata=} [properties] Properties to set
+                         */
+                        function DeleteDatabaseMetadata(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Creates a DeleteDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseMetadata
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DeleteDatabaseMetadata} DeleteDatabaseMetadata
+                         */
+                        DeleteDatabaseMetadata.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DeleteDatabaseMetadata)
+                                return object;
+                            return new $root.google.firestore.admin.v1.DeleteDatabaseMetadata();
+                        };
+    
+                        /**
+                         * Creates a plain object from a DeleteDatabaseMetadata message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.DeleteDatabaseMetadata} message DeleteDatabaseMetadata
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DeleteDatabaseMetadata.toObject = function toObject() {
+                            return {};
+                        };
+    
+                        /**
+                         * Converts this DeleteDatabaseMetadata to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseMetadata
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DeleteDatabaseMetadata.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DeleteDatabaseMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DeleteDatabaseMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DeleteDatabaseMetadata";
+                        };
+    
+                        return DeleteDatabaseMetadata;
                     })();
     
                     v1.CreateIndexRequest = (function() {
@@ -3017,6 +3444,8 @@
                          * @property {string|null} [name] ExportDocumentsRequest name
                          * @property {Array.<string>|null} [collectionIds] ExportDocumentsRequest collectionIds
                          * @property {string|null} [outputUriPrefix] ExportDocumentsRequest outputUriPrefix
+                         * @property {Array.<string>|null} [namespaceIds] ExportDocumentsRequest namespaceIds
+                         * @property {google.protobuf.ITimestamp|null} [snapshotTime] ExportDocumentsRequest snapshotTime
                          */
     
                         /**
@@ -3029,6 +3458,7 @@
                          */
                         function ExportDocumentsRequest(properties) {
                             this.collectionIds = [];
+                            this.namespaceIds = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -3060,6 +3490,22 @@
                         ExportDocumentsRequest.prototype.outputUriPrefix = "";
     
                         /**
+                         * ExportDocumentsRequest namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.ExportDocumentsRequest
+                         * @instance
+                         */
+                        ExportDocumentsRequest.prototype.namespaceIds = $util.emptyArray;
+    
+                        /**
+                         * ExportDocumentsRequest snapshotTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} snapshotTime
+                         * @memberof google.firestore.admin.v1.ExportDocumentsRequest
+                         * @instance
+                         */
+                        ExportDocumentsRequest.prototype.snapshotTime = null;
+    
+                        /**
                          * Creates an ExportDocumentsRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.ExportDocumentsRequest
@@ -3082,6 +3528,18 @@
                             }
                             if (object.outputUriPrefix != null)
                                 message.outputUriPrefix = String(object.outputUriPrefix);
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.ExportDocumentsRequest.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
+                            if (object.snapshotTime != null) {
+                                if (typeof object.snapshotTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.ExportDocumentsRequest.snapshotTime: object expected");
+                                message.snapshotTime = $root.google.protobuf.Timestamp.fromObject(object.snapshotTime);
+                            }
                             return message;
                         };
     
@@ -3098,11 +3556,14 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
+                            if (options.arrays || options.defaults) {
                                 object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
                             if (options.defaults) {
                                 object.name = "";
                                 object.outputUriPrefix = "";
+                                object.snapshotTime = null;
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
@@ -3113,6 +3574,13 @@
                             }
                             if (message.outputUriPrefix != null && message.hasOwnProperty("outputUriPrefix"))
                                 object.outputUriPrefix = message.outputUriPrefix;
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
+                            if (message.snapshotTime != null && message.hasOwnProperty("snapshotTime"))
+                                object.snapshotTime = $root.google.protobuf.Timestamp.toObject(message.snapshotTime, options);
                             return object;
                         };
     
@@ -3154,6 +3622,7 @@
                          * @property {string|null} [name] ImportDocumentsRequest name
                          * @property {Array.<string>|null} [collectionIds] ImportDocumentsRequest collectionIds
                          * @property {string|null} [inputUriPrefix] ImportDocumentsRequest inputUriPrefix
+                         * @property {Array.<string>|null} [namespaceIds] ImportDocumentsRequest namespaceIds
                          */
     
                         /**
@@ -3166,6 +3635,7 @@
                          */
                         function ImportDocumentsRequest(properties) {
                             this.collectionIds = [];
+                            this.namespaceIds = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -3197,6 +3667,14 @@
                         ImportDocumentsRequest.prototype.inputUriPrefix = "";
     
                         /**
+                         * ImportDocumentsRequest namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.ImportDocumentsRequest
+                         * @instance
+                         */
+                        ImportDocumentsRequest.prototype.namespaceIds = $util.emptyArray;
+    
+                        /**
                          * Creates an ImportDocumentsRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.ImportDocumentsRequest
@@ -3219,6 +3697,13 @@
                             }
                             if (object.inputUriPrefix != null)
                                 message.inputUriPrefix = String(object.inputUriPrefix);
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.ImportDocumentsRequest.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
                             return message;
                         };
     
@@ -3235,8 +3720,10 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
+                            if (options.arrays || options.defaults) {
                                 object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
                             if (options.defaults) {
                                 object.name = "";
                                 object.inputUriPrefix = "";
@@ -3250,6 +3737,11 @@
                             }
                             if (message.inputUriPrefix != null && message.hasOwnProperty("inputUriPrefix"))
                                 object.inputUriPrefix = message.inputUriPrefix;
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
                             return object;
                         };
     
@@ -4620,6 +5112,8 @@
                          * @property {google.firestore.admin.v1.IProgress|null} [progressBytes] ExportDocumentsMetadata progressBytes
                          * @property {Array.<string>|null} [collectionIds] ExportDocumentsMetadata collectionIds
                          * @property {string|null} [outputUriPrefix] ExportDocumentsMetadata outputUriPrefix
+                         * @property {Array.<string>|null} [namespaceIds] ExportDocumentsMetadata namespaceIds
+                         * @property {google.protobuf.ITimestamp|null} [snapshotTime] ExportDocumentsMetadata snapshotTime
                          */
     
                         /**
@@ -4632,6 +5126,7 @@
                          */
                         function ExportDocumentsMetadata(properties) {
                             this.collectionIds = [];
+                            this.namespaceIds = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -4693,6 +5188,22 @@
                          * @instance
                          */
                         ExportDocumentsMetadata.prototype.outputUriPrefix = "";
+    
+                        /**
+                         * ExportDocumentsMetadata namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.ExportDocumentsMetadata
+                         * @instance
+                         */
+                        ExportDocumentsMetadata.prototype.namespaceIds = $util.emptyArray;
+    
+                        /**
+                         * ExportDocumentsMetadata snapshotTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} snapshotTime
+                         * @memberof google.firestore.admin.v1.ExportDocumentsMetadata
+                         * @instance
+                         */
+                        ExportDocumentsMetadata.prototype.snapshotTime = null;
     
                         /**
                          * Creates an ExportDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
@@ -4775,6 +5286,18 @@
                             }
                             if (object.outputUriPrefix != null)
                                 message.outputUriPrefix = String(object.outputUriPrefix);
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.ExportDocumentsMetadata.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
+                            if (object.snapshotTime != null) {
+                                if (typeof object.snapshotTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.ExportDocumentsMetadata.snapshotTime: object expected");
+                                message.snapshotTime = $root.google.protobuf.Timestamp.fromObject(object.snapshotTime);
+                            }
                             return message;
                         };
     
@@ -4791,8 +5314,10 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
+                            if (options.arrays || options.defaults) {
                                 object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
                             if (options.defaults) {
                                 object.startTime = null;
                                 object.endTime = null;
@@ -4800,6 +5325,7 @@
                                 object.progressDocuments = null;
                                 object.progressBytes = null;
                                 object.outputUriPrefix = "";
+                                object.snapshotTime = null;
                             }
                             if (message.startTime != null && message.hasOwnProperty("startTime"))
                                 object.startTime = $root.google.protobuf.Timestamp.toObject(message.startTime, options);
@@ -4818,6 +5344,13 @@
                             }
                             if (message.outputUriPrefix != null && message.hasOwnProperty("outputUriPrefix"))
                                 object.outputUriPrefix = message.outputUriPrefix;
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
+                            if (message.snapshotTime != null && message.hasOwnProperty("snapshotTime"))
+                                object.snapshotTime = $root.google.protobuf.Timestamp.toObject(message.snapshotTime, options);
                             return object;
                         };
     
@@ -4863,6 +5396,7 @@
                          * @property {google.firestore.admin.v1.IProgress|null} [progressBytes] ImportDocumentsMetadata progressBytes
                          * @property {Array.<string>|null} [collectionIds] ImportDocumentsMetadata collectionIds
                          * @property {string|null} [inputUriPrefix] ImportDocumentsMetadata inputUriPrefix
+                         * @property {Array.<string>|null} [namespaceIds] ImportDocumentsMetadata namespaceIds
                          */
     
                         /**
@@ -4875,6 +5409,7 @@
                          */
                         function ImportDocumentsMetadata(properties) {
                             this.collectionIds = [];
+                            this.namespaceIds = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -4936,6 +5471,14 @@
                          * @instance
                          */
                         ImportDocumentsMetadata.prototype.inputUriPrefix = "";
+    
+                        /**
+                         * ImportDocumentsMetadata namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.ImportDocumentsMetadata
+                         * @instance
+                         */
+                        ImportDocumentsMetadata.prototype.namespaceIds = $util.emptyArray;
     
                         /**
                          * Creates an ImportDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
@@ -5018,6 +5561,13 @@
                             }
                             if (object.inputUriPrefix != null)
                                 message.inputUriPrefix = String(object.inputUriPrefix);
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.ImportDocumentsMetadata.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
                             return message;
                         };
     
@@ -5034,8 +5584,10 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
+                            if (options.arrays || options.defaults) {
                                 object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
                             if (options.defaults) {
                                 object.startTime = null;
                                 object.endTime = null;
@@ -5061,6 +5613,11 @@
                             }
                             if (message.inputUriPrefix != null && message.hasOwnProperty("inputUriPrefix"))
                                 object.inputUriPrefix = message.inputUriPrefix;
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
                             return object;
                         };
     
@@ -7567,6 +8124,7 @@
                  * @interface IMethodSettings
                  * @property {string|null} [selector] MethodSettings selector
                  * @property {google.api.MethodSettings.ILongRunning|null} [longRunning] MethodSettings longRunning
+                 * @property {Array.<string>|null} [autoPopulatedFields] MethodSettings autoPopulatedFields
                  */
     
                 /**
@@ -7578,6 +8136,7 @@
                  * @param {google.api.IMethodSettings=} [properties] Properties to set
                  */
                 function MethodSettings(properties) {
+                    this.autoPopulatedFields = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -7601,6 +8160,14 @@
                 MethodSettings.prototype.longRunning = null;
     
                 /**
+                 * MethodSettings autoPopulatedFields.
+                 * @member {Array.<string>} autoPopulatedFields
+                 * @memberof google.api.MethodSettings
+                 * @instance
+                 */
+                MethodSettings.prototype.autoPopulatedFields = $util.emptyArray;
+    
+                /**
                  * Creates a MethodSettings message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.MethodSettings
@@ -7619,6 +8186,13 @@
                             throw TypeError(".google.api.MethodSettings.longRunning: object expected");
                         message.longRunning = $root.google.api.MethodSettings.LongRunning.fromObject(object.longRunning);
                     }
+                    if (object.autoPopulatedFields) {
+                        if (!Array.isArray(object.autoPopulatedFields))
+                            throw TypeError(".google.api.MethodSettings.autoPopulatedFields: array expected");
+                        message.autoPopulatedFields = [];
+                        for (var i = 0; i < object.autoPopulatedFields.length; ++i)
+                            message.autoPopulatedFields[i] = String(object.autoPopulatedFields[i]);
+                    }
                     return message;
                 };
     
@@ -7635,6 +8209,8 @@
                     if (!options)
                         options = {};
                     var object = {};
+                    if (options.arrays || options.defaults)
+                        object.autoPopulatedFields = [];
                     if (options.defaults) {
                         object.selector = "";
                         object.longRunning = null;
@@ -7643,6 +8219,11 @@
                         object.selector = message.selector;
                     if (message.longRunning != null && message.hasOwnProperty("longRunning"))
                         object.longRunning = $root.google.api.MethodSettings.LongRunning.toObject(message.longRunning, options);
+                    if (message.autoPopulatedFields && message.autoPopulatedFields.length) {
+                        object.autoPopulatedFields = [];
+                        for (var j = 0; j < message.autoPopulatedFields.length; ++j)
+                            object.autoPopulatedFields[j] = message.autoPopulatedFields[j];
+                    }
                     return object;
                 };
     
@@ -7879,6 +8460,7 @@
              * @property {string} IMMUTABLE=IMMUTABLE IMMUTABLE value
              * @property {string} UNORDERED_LIST=UNORDERED_LIST UNORDERED_LIST value
              * @property {string} NON_EMPTY_DEFAULT=NON_EMPTY_DEFAULT NON_EMPTY_DEFAULT value
+             * @property {string} IDENTIFIER=IDENTIFIER IDENTIFIER value
              */
             api.FieldBehavior = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
@@ -7890,6 +8472,7 @@
                 values[valuesById[5] = "IMMUTABLE"] = "IMMUTABLE";
                 values[valuesById[6] = "UNORDERED_LIST"] = "UNORDERED_LIST";
                 values[valuesById[7] = "NON_EMPTY_DEFAULT"] = "NON_EMPTY_DEFAULT";
+                values[valuesById[8] = "IDENTIFIER"] = "IDENTIFIER";
                 return values;
             })();
     
@@ -11166,6 +11749,10 @@
                             case "NON_EMPTY_DEFAULT":
                             case 7:
                                 message[".google.api.fieldBehavior"][i] = 7;
+                                break;
+                            case "IDENTIFIER":
+                            case 8:
+                                message[".google.api.fieldBehavior"][i] = 8;
                                 break;
                             }
                     }

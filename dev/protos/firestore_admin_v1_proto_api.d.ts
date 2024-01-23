@@ -1,5 +1,5 @@
 /*!
- * Copyright 2022 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,15 @@ export namespace google {
                     /** Database name */
                     name?: (string|null);
 
+                    /** Database uid */
+                    uid?: (string|null);
+
+                    /** Database createTime */
+                    createTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Database updateTime */
+                    updateTime?: (google.protobuf.ITimestamp|null);
+
                     /** Database locationId */
                     locationId?: (string|null);
 
@@ -43,11 +52,23 @@ export namespace google {
                     /** Database concurrencyMode */
                     concurrencyMode?: (google.firestore.admin.v1.Database.ConcurrencyMode|null);
 
+                    /** Database versionRetentionPeriod */
+                    versionRetentionPeriod?: (google.protobuf.IDuration|null);
+
+                    /** Database earliestVersionTime */
+                    earliestVersionTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Database pointInTimeRecoveryEnablement */
+                    pointInTimeRecoveryEnablement?: (google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement|null);
+
                     /** Database appEngineIntegrationMode */
                     appEngineIntegrationMode?: (google.firestore.admin.v1.Database.AppEngineIntegrationMode|null);
 
                     /** Database keyPrefix */
                     keyPrefix?: (string|null);
+
+                    /** Database deleteProtectionState */
+                    deleteProtectionState?: (google.firestore.admin.v1.Database.DeleteProtectionState|null);
 
                     /** Database etag */
                     etag?: (string|null);
@@ -65,6 +86,15 @@ export namespace google {
                     /** Database name. */
                     public name: string;
 
+                    /** Database uid. */
+                    public uid: string;
+
+                    /** Database createTime. */
+                    public createTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Database updateTime. */
+                    public updateTime?: (google.protobuf.ITimestamp|null);
+
                     /** Database locationId. */
                     public locationId: string;
 
@@ -74,11 +104,23 @@ export namespace google {
                     /** Database concurrencyMode. */
                     public concurrencyMode: google.firestore.admin.v1.Database.ConcurrencyMode;
 
+                    /** Database versionRetentionPeriod. */
+                    public versionRetentionPeriod?: (google.protobuf.IDuration|null);
+
+                    /** Database earliestVersionTime. */
+                    public earliestVersionTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Database pointInTimeRecoveryEnablement. */
+                    public pointInTimeRecoveryEnablement: google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement;
+
                     /** Database appEngineIntegrationMode. */
                     public appEngineIntegrationMode: google.firestore.admin.v1.Database.AppEngineIntegrationMode;
 
                     /** Database keyPrefix. */
                     public keyPrefix: string;
+
+                    /** Database deleteProtectionState. */
+                    public deleteProtectionState: google.firestore.admin.v1.Database.DeleteProtectionState;
 
                     /** Database etag. */
                     public etag: string;
@@ -122,9 +164,17 @@ export namespace google {
                     type ConcurrencyMode =
                         "CONCURRENCY_MODE_UNSPECIFIED"| "OPTIMISTIC"| "PESSIMISTIC"| "OPTIMISTIC_WITH_ENTITY_GROUPS";
 
+                    /** PointInTimeRecoveryEnablement enum. */
+                    type PointInTimeRecoveryEnablement =
+                        "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED"| "POINT_IN_TIME_RECOVERY_ENABLED"| "POINT_IN_TIME_RECOVERY_DISABLED";
+
                     /** AppEngineIntegrationMode enum. */
                     type AppEngineIntegrationMode =
                         "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED"| "ENABLED"| "DISABLED";
+
+                    /** DeleteProtectionState enum. */
+                    type DeleteProtectionState =
+                        "DELETE_PROTECTION_STATE_UNSPECIFIED"| "DELETE_PROTECTION_DISABLED"| "DELETE_PROTECTION_ENABLED";
                 }
 
                 /** Properties of a Field. */
@@ -503,6 +553,20 @@ export namespace google {
                      * @returns Promise
                      */
                     public updateDatabase(request: google.firestore.admin.v1.IUpdateDatabaseRequest): Promise<google.longrunning.Operation>;
+
+                    /**
+                     * Calls DeleteDatabase.
+                     * @param request DeleteDatabaseRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public deleteDatabase(request: google.firestore.admin.v1.IDeleteDatabaseRequest, callback: google.firestore.admin.v1.FirestoreAdmin.DeleteDatabaseCallback): void;
+
+                    /**
+                     * Calls DeleteDatabase.
+                     * @param request DeleteDatabaseRequest message or plain object
+                     * @returns Promise
+                     */
+                    public deleteDatabase(request: google.firestore.admin.v1.IDeleteDatabaseRequest): Promise<google.longrunning.Operation>;
                 }
 
                 namespace FirestoreAdmin {
@@ -597,6 +661,13 @@ export namespace google {
                      * @param [response] Operation
                      */
                     type UpdateDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteDatabase}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type DeleteDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
                 }
 
                 /** Properties of a ListDatabasesRequest. */
@@ -754,6 +825,9 @@ export namespace google {
 
                     /** ListDatabasesResponse databases */
                     databases?: (google.firestore.admin.v1.IDatabase[]|null);
+
+                    /** ListDatabasesResponse unreachable */
+                    unreachable?: (string[]|null);
                 }
 
                 /** Represents a ListDatabasesResponse. */
@@ -767,6 +841,9 @@ export namespace google {
 
                     /** ListDatabasesResponse databases. */
                     public databases: google.firestore.admin.v1.IDatabase[];
+
+                    /** ListDatabasesResponse unreachable. */
+                    public unreachable: string[];
 
                     /**
                      * Creates a ListDatabasesResponse message from a plain object. Also converts values to their respective internal types.
@@ -935,6 +1012,102 @@ export namespace google {
 
                     /**
                      * Gets the default type url for UpdateDatabaseMetadata
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a DeleteDatabaseRequest. */
+                interface IDeleteDatabaseRequest {
+
+                    /** DeleteDatabaseRequest name */
+                    name?: (string|null);
+
+                    /** DeleteDatabaseRequest etag */
+                    etag?: (string|null);
+                }
+
+                /** Represents a DeleteDatabaseRequest. */
+                class DeleteDatabaseRequest implements IDeleteDatabaseRequest {
+
+                    /**
+                     * Constructs a new DeleteDatabaseRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDeleteDatabaseRequest);
+
+                    /** DeleteDatabaseRequest name. */
+                    public name: string;
+
+                    /** DeleteDatabaseRequest etag. */
+                    public etag: string;
+
+                    /**
+                     * Creates a DeleteDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns DeleteDatabaseRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.DeleteDatabaseRequest;
+
+                    /**
+                     * Creates a plain object from a DeleteDatabaseRequest message. Also converts values to other types if specified.
+                     * @param message DeleteDatabaseRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.DeleteDatabaseRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this DeleteDatabaseRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for DeleteDatabaseRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a DeleteDatabaseMetadata. */
+                interface IDeleteDatabaseMetadata {
+                }
+
+                /** Represents a DeleteDatabaseMetadata. */
+                class DeleteDatabaseMetadata implements IDeleteDatabaseMetadata {
+
+                    /**
+                     * Constructs a new DeleteDatabaseMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDeleteDatabaseMetadata);
+
+                    /**
+                     * Creates a DeleteDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns DeleteDatabaseMetadata
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.DeleteDatabaseMetadata;
+
+                    /**
+                     * Creates a plain object from a DeleteDatabaseMetadata message. Also converts values to other types if specified.
+                     * @param message DeleteDatabaseMetadata
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.DeleteDatabaseMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this DeleteDatabaseMetadata to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for DeleteDatabaseMetadata
                      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                      * @returns The default type url
                      */
@@ -1444,6 +1617,12 @@ export namespace google {
 
                     /** ExportDocumentsRequest outputUriPrefix */
                     outputUriPrefix?: (string|null);
+
+                    /** ExportDocumentsRequest namespaceIds */
+                    namespaceIds?: (string[]|null);
+
+                    /** ExportDocumentsRequest snapshotTime */
+                    snapshotTime?: (google.protobuf.ITimestamp|null);
                 }
 
                 /** Represents an ExportDocumentsRequest. */
@@ -1463,6 +1642,12 @@ export namespace google {
 
                     /** ExportDocumentsRequest outputUriPrefix. */
                     public outputUriPrefix: string;
+
+                    /** ExportDocumentsRequest namespaceIds. */
+                    public namespaceIds: string[];
+
+                    /** ExportDocumentsRequest snapshotTime. */
+                    public snapshotTime?: (google.protobuf.ITimestamp|null);
 
                     /**
                      * Creates an ExportDocumentsRequest message from a plain object. Also converts values to their respective internal types.
@@ -1504,6 +1689,9 @@ export namespace google {
 
                     /** ImportDocumentsRequest inputUriPrefix */
                     inputUriPrefix?: (string|null);
+
+                    /** ImportDocumentsRequest namespaceIds */
+                    namespaceIds?: (string[]|null);
                 }
 
                 /** Represents an ImportDocumentsRequest. */
@@ -1523,6 +1711,9 @@ export namespace google {
 
                     /** ImportDocumentsRequest inputUriPrefix. */
                     public inputUriPrefix: string;
+
+                    /** ImportDocumentsRequest namespaceIds. */
+                    public namespaceIds: string[];
 
                     /**
                      * Creates an ImportDocumentsRequest message from a plain object. Also converts values to their respective internal types.
@@ -2066,6 +2257,12 @@ export namespace google {
 
                     /** ExportDocumentsMetadata outputUriPrefix */
                     outputUriPrefix?: (string|null);
+
+                    /** ExportDocumentsMetadata namespaceIds */
+                    namespaceIds?: (string[]|null);
+
+                    /** ExportDocumentsMetadata snapshotTime */
+                    snapshotTime?: (google.protobuf.ITimestamp|null);
                 }
 
                 /** Represents an ExportDocumentsMetadata. */
@@ -2097,6 +2294,12 @@ export namespace google {
 
                     /** ExportDocumentsMetadata outputUriPrefix. */
                     public outputUriPrefix: string;
+
+                    /** ExportDocumentsMetadata namespaceIds. */
+                    public namespaceIds: string[];
+
+                    /** ExportDocumentsMetadata snapshotTime. */
+                    public snapshotTime?: (google.protobuf.ITimestamp|null);
 
                     /**
                      * Creates an ExportDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
@@ -2150,6 +2353,9 @@ export namespace google {
 
                     /** ImportDocumentsMetadata inputUriPrefix */
                     inputUriPrefix?: (string|null);
+
+                    /** ImportDocumentsMetadata namespaceIds */
+                    namespaceIds?: (string[]|null);
                 }
 
                 /** Represents an ImportDocumentsMetadata. */
@@ -2181,6 +2387,9 @@ export namespace google {
 
                     /** ImportDocumentsMetadata inputUriPrefix. */
                     public inputUriPrefix: string;
+
+                    /** ImportDocumentsMetadata namespaceIds. */
+                    public namespaceIds: string[];
 
                     /**
                      * Creates an ImportDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
@@ -3222,6 +3431,9 @@ export namespace google {
 
             /** MethodSettings longRunning */
             longRunning?: (google.api.MethodSettings.ILongRunning|null);
+
+            /** MethodSettings autoPopulatedFields */
+            autoPopulatedFields?: (string[]|null);
         }
 
         /** Represents a MethodSettings. */
@@ -3238,6 +3450,9 @@ export namespace google {
 
             /** MethodSettings longRunning. */
             public longRunning?: (google.api.MethodSettings.ILongRunning|null);
+
+            /** MethodSettings autoPopulatedFields. */
+            public autoPopulatedFields: string[];
 
             /**
              * Creates a MethodSettings message from a plain object. Also converts values to their respective internal types.
@@ -3347,7 +3562,7 @@ export namespace google {
 
         /** FieldBehavior enum. */
         type FieldBehavior =
-            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE"| "UNORDERED_LIST"| "NON_EMPTY_DEFAULT";
+            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE"| "UNORDERED_LIST"| "NON_EMPTY_DEFAULT"| "IDENTIFIER";
 
         /** LaunchStage enum. */
         type LaunchStage =

@@ -4,6 +4,19 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.2.0](https://github.com/googleapis/nodejs-firestore/compare/v7.1.1...v7.2.0) (2024-01-16)
+
+
+### Features
+
+* Add new types QueryMode, QueryPlan, ResultSetStats ([#1911](https://github.com/googleapis/nodejs-firestore/issues/1911)) ([8f77b68](https://github.com/googleapis/nodejs-firestore/commit/8f77b68bf70b04a66e982067aa246de0596e4ea2))
+* Expose databaseId and projectId getter on Firestore class ([#1937](https://github.com/googleapis/nodejs-firestore/issues/1937)) ([d9c867f](https://github.com/googleapis/nodejs-firestore/commit/d9c867fc5048748e5af378fd8465303224668781)), closes [#1936](https://github.com/googleapis/nodejs-firestore/issues/1936)
+
+
+### Bug Fixes
+
+* Make transaction rollback best effort. ([#1967](https://github.com/googleapis/nodejs-firestore/issues/1967)) ([1d76546](https://github.com/googleapis/nodejs-firestore/commit/1d76546a781527ef5b9085fc9f189c024355ae9f))
+
 ## [7.1.1](https://github.com/googleapis/nodejs-firestore/compare/v7.1.0...v7.1.1) (2023-11-20)
 
 

@@ -18,7 +18,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 echo "Running update.sh"
-
+echo $(npm --version)
 # Variables
 PROTOS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 WORK_DIR=`mktemp -d`
@@ -34,8 +34,8 @@ function cleanup {
 trap cleanup EXIT
 
 # Capture location of pbjs / pbts before we pushd.
-PBJS="$(npm bin)/pbjs"
-PBTS="$(npm bin)/pbts"
+PBJS="$(npm root)/.bin/pbjs"
+PBTS="$(npm root)/.bin/pbts"
 
 # Enter work dir
 pushd "$WORK_DIR"
@@ -137,4 +137,6 @@ perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
 
-node  ../../scripts/license.js *.d.ts *.js ../../build/src/v1beta1/*.d.ts ../../build/src/v1/*.d.ts
+echo "Finished running update.sh"
+
+node  ../../scripts/license.js ../../build ../protos
