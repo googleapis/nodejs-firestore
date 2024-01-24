@@ -64,8 +64,7 @@ import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 import {google} from '../protos/firestore_v1_proto_api';
 import QueryMode = google.firestore.v1.QueryMode;
-import {QueryProfile} from './query-profile';
-import {QueryPlan} from './query-plan';
+import {ResultSetStats} from "./result-set-stats";
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -942,6 +941,7 @@ export class QuerySnapshot<
   private _changes:
     | (() => Array<DocumentChange<AppModelType, DbModelType>>)
     | null = null;
+  private readonly _stats : firestore.ResultSetStats | null = null;
 
   /**
    * @private
@@ -959,10 +959,14 @@ export class QuerySnapshot<
     private readonly _readTime: Timestamp,
     private readonly _size: number,
     docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
-    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>,
+    stats?: firestore.ResultSetStats | null
   ) {
     this._docs = docs;
     this._changes = changes;
+    if (stats) {
+      this._stats = stats;
+    }
   }
 
   /**
@@ -1078,6 +1082,10 @@ export class QuerySnapshot<
    */
   get readTime(): Timestamp {
     return this._readTime;
+  }
+
+  get stats(): firestore.ResultSetStats | null {
+    return this._stats;
   }
 
   /**
@@ -2328,8 +2336,8 @@ export class Query<
    * @return A Promise that will be resolved with the results of the query
    * planning information.
    */
-  explain(): Promise<firestore.QueryPlan> {
-    return this._getQueryProfileInfo('PLAN').then(info => info.plan);
+  explain(): Promise<firestore.QuerySnapshot<AppModelType, DbModelType>> {
+    return this._getQueryProfileInfo('PLAN');
   }
 
   /**
@@ -2344,7 +2352,7 @@ export class Query<
    * statistics from the query execution, and the query results.
    */
   explainAnalyze(): Promise<
-    firestore.QueryProfile<QuerySnapshot<AppModelType, DbModelType>>
+    firestore.QuerySnapshot<AppModelType, DbModelType>
   > {
     return this._getQueryProfileInfo('PROFILE');
   }
@@ -2792,11 +2800,10 @@ export class Query<
    */
   _getQueryProfileInfo(
     queryMode: QueryMode
-  ): Promise<firestore.QueryProfile<QuerySnapshot<AppModelType, DbModelType>>> {
+  ): Promise<firestore.QuerySnapshot<AppModelType, DbModelType>> {
     let readTime: Timestamp;
     const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
-    let queryPlan: QueryPlan = {planInfo: {}};
-    let executionStats: firestore.InformationalQueryExecutionStats = {};
+    let stats : ResultSetStats | null = null;
 
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -2836,19 +2843,7 @@ export class Query<
                 );
               }
               if (response.stats) {
-                if (response.stats.queryPlan) {
-                  queryPlan = new QueryPlan(
-                    this.firestore._serializer!.decodeGoogleProtobufStruct(
-                      response.stats.queryPlan.planInfo
-                    )
-                  );
-                }
-                if (response.stats.queryStats) {
-                  executionStats =
-                    this.firestore._serializer!.decodeGoogleProtobufStruct(
-                      response.stats.queryStats
-                    );
-                }
+                stats = new ResultSetStats(this.firestore, response.stats);
               }
               if (response.done) {
                 stream.end();
@@ -2861,27 +2856,23 @@ export class Query<
                 // to the backend.
                 docs.reverse();
               }
-              const querySnapshot = new QuerySnapshot(
-                this,
-                readTime,
-                docs.length,
-                () => docs,
-                () => {
-                  const changes: Array<
-                    DocumentChange<AppModelType, DbModelType>
-                  > = [];
-                  for (let i = 0; i < docs.length; ++i) {
-                    changes.push(new DocumentChange('added', docs[i], -1, i));
-                  }
-                  return changes;
-                }
-              );
               resolve(
-                new QueryProfile<QuerySnapshot<AppModelType, DbModelType>>(
-                  queryPlan,
-                  executionStats,
-                  querySnapshot
-                )
+                  new QuerySnapshot(
+                      this,
+                      readTime,
+                      docs.length,
+                      () => docs,
+                      () => {
+                        const changes: Array<
+                            DocumentChange<AppModelType, DbModelType>
+                        > = [];
+                        for (let i = 0; i < docs.length; ++i) {
+                          changes.push(new DocumentChange('added', docs[i], -1, i));
+                        }
+                        return changes;
+                      },
+                      stats
+                  )
               );
             });
             stream.resume();
@@ -3489,9 +3480,7 @@ export class AggregateQuery<
   _getQueryProfileInfo(
     queryMode: QueryMode
   ): Promise<
-    QueryProfile<
-      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-    >
+      firestore.AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -3501,8 +3490,9 @@ export class AggregateQuery<
       AppModelType,
       DbModelType
     >;
-    let planInfo: QueryPlan = {planInfo: {}};
-    let executionStats: firestore.InformationalQueryExecutionStats = {};
+    let readTime : Timestamp;
+    let data :  firestore.AggregateSpecData<AggregateSpecType>;
+    let stats : firestore.ResultSetStats | null = null;
 
     return new Promise((resolve, reject) => {
       const tag = requestTag();
@@ -3522,40 +3512,15 @@ export class AggregateQuery<
             });
             stream.on('data', response => {
               if (response.result) {
-                const readTime = Timestamp.fromProto(response.readTime!);
-                const data = this.decodeResult(response.result);
-                aggregationResult = new AggregateQuerySnapshot(
-                  this,
-                  readTime,
-                  data
-                );
+                readTime = Timestamp.fromProto(response.readTime!);
+                data = this.decodeResult(response.result);
               }
               if (response.stats) {
-                if (response.stats.queryPlan) {
-                  planInfo = new QueryPlan(
-                    this._query.firestore._serializer!.decodeGoogleProtobufStruct(
-                      response.stats.queryPlan.planInfo
-                    )
-                  );
-                }
-                if (response.stats.queryStats) {
-                  executionStats =
-                    this._query.firestore._serializer!.decodeGoogleProtobufStruct(
-                      response.stats.queryStats
-                    );
-                }
+                stats = new ResultSetStats(firestore, response.stats);
               }
             });
             stream.on('end', () => {
-              resolve(
-                new QueryProfile<
-                  AggregateQuerySnapshot<
-                    AggregateSpecType,
-                    AppModelType,
-                    DbModelType
-                  >
-                >(planInfo, executionStats, aggregationResult)
-              );
+              resolve(new AggregateQuerySnapshot(this, readTime, data, stats));
             });
             stream.resume();
           });
@@ -3732,14 +3697,14 @@ export class AggregateQuery<
     return deepEqual(this._aggregates, other._aggregates);
   }
 
-  explain(): Promise<firestore.QueryPlan> {
-    return this._getQueryProfileInfo('PLAN').then(info => info.plan);
+  explain(): Promise<
+      firestore.AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+  > {
+    return this._getQueryProfileInfo('PLAN');
   }
 
   explainAnalyze(): Promise<
-    firestore.QueryProfile<
-      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-    >
+    firestore.AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
     return this._getQueryProfileInfo('PROFILE');
   }
@@ -3759,6 +3724,8 @@ export class AggregateQuerySnapshot<
       DbModelType
     >
 {
+  private readonly _stats: firestore.ResultSetStats | null = null;
+
   /**
    * @private
    * @internal
@@ -3775,8 +3742,13 @@ export class AggregateQuerySnapshot<
       DbModelType
     >,
     private readonly _readTime: Timestamp,
-    private readonly _data: firestore.AggregateSpecData<AggregateSpecType>
-  ) {}
+    private readonly _data: firestore.AggregateSpecData<AggregateSpecType>,
+    stats?: firestore.ResultSetStats | null
+  ) {
+    if (stats) {
+      this._stats = stats;
+    }
+  }
 
   /** The query that was executed to produce this result. */
   get query(): AggregateQuery<AggregateSpecType, AppModelType, DbModelType> {
@@ -3786,6 +3758,11 @@ export class AggregateQuerySnapshot<
   /** The time this snapshot was read. */
   get readTime(): Timestamp {
     return this._readTime;
+  }
+
+  /** The time this snapshot was read. */
+  get stats(): firestore.ResultSetStats | null {
+    return this._stats;
   }
 
   /**

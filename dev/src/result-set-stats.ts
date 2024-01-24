@@ -16,16 +16,21 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
-import Firestore from "./index";
 import {google} from "../protos/firestore_v1_proto_api";
-import IQueryPlan = google.firestore.v1.IQueryPlan;
+import IResultSetStats = google.firestore.v1.IResultSetStats;
+import {QueryPlan} from "./query-plan";
+import Firestore from "./index";
 
-export class QueryPlan implements firestore.QueryPlan {
-  readonly planInfo: firestore.InformationalQueryPlan | null = null;
+export class ResultSetStats implements firestore.ResultSetStats {
+    readonly queryPlan: firestore.QueryPlan | null = null;
+    readonly queryStats: firestore.InformationalQueryExecutionStats | null = null;
+    constructor(firestore: Firestore, proto : IResultSetStats)  {
+        if (proto.queryPlan) {
+          this.queryPlan = new QueryPlan(firestore, proto.queryPlan);
+        }
 
-  constructor(firestore: Firestore, proto: IQueryPlan) {
-    if (proto.planInfo) {
-      this.planInfo = firestore._serializer!.decodeGoogleProtobufStruct(proto.planInfo);
+        if (proto.queryStats) {
+          this.queryStats = firestore._serializer!.decodeGoogleProtobufStruct(proto.queryStats);
+        }
     }
-  }
 }

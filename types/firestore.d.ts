@@ -1898,35 +1898,28 @@ declare namespace FirebaseFirestore {
 
     /**
      * Performs the planning stage of this query, without actually executing the
-     * query. Returns a Promise that will be resolved with the result of the
-     * query planning information.
+     * query. Returns a Promise that will be resolved with the QuerySnapshot that
+     * contains the planning information.
      *
-     * Note: the information included in the output of this function is subject
-     * to change.
-     *
-     * @return A Promise that will be resolved with the results of the query
-     * planning information.
+     * @return A Promise that will be resolved with a `QuerySnapshot` object
+     * that contains query planning information.
      */
-    explain(): Promise<QueryPlan>;
+    explain(): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
     /**
      * Plans and executes this query. Returns a Promise that will be resolved
-     * with the planning information, statistics from the query execution, and
-     * the query results.
-     *
-     * Note: the information included in the output of this function is subject
-     * to change.
+     * with the `QuerySnapshot` that contains planning information, statistics
+     * from the query execution, and the query results.
      *
      * Note: `explainAnalyze()` will get query results like the `get()` function,
      * however, `explainAnalyze()` uses a different retry strategy than `get()`,
      * so it is recommended to only use `get()` in production code.
      *
-     * @return A Promise that will be resolved with the planning information,
-     * statistics from the query execution, and the query results.
+     * @return A Promise that will be resolved with a `QuerySnapshot` object
+     * that contains the planning information, statistics from the query execution,
+     * and the query results.
      */
-    explainAnalyze(): Promise<
-      QueryProfile<QuerySnapshot<AppModelType, DbModelType>>
-    >;
+    explainAnalyze(): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
     /*
      * Executes the query and returns the results as Node Stream.
@@ -2064,6 +2057,12 @@ declare namespace FirebaseFirestore {
 
     /** The time this query snapshot was obtained. */
     readonly readTime: Timestamp;
+
+    /**
+     * Stats related to the planning and/or execution of this query. It is only
+     * populated when the snapshot is obtained by calling `explain()`.
+     */
+    readonly stats: ResultSetStats | null;
 
     /**
      * Returns an array of the documents changes since the last snapshot. If
@@ -2471,7 +2470,9 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the results of the query
      * planning information.
      */
-    explain(): Promise<QueryPlan>;
+    explain(): Promise<
+        AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >;
 
     /**
      * Plans and executes this query. Returns a Promise that will be resolved
@@ -2485,9 +2486,7 @@ declare namespace FirebaseFirestore {
      * statistics from the query execution, and the query results.
      */
     explainAnalyze(): Promise<
-      QueryProfile<
         AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-      >
     >;
 
     /**
@@ -2526,6 +2525,12 @@ declare namespace FirebaseFirestore {
 
     /** The time this snapshot was read. */
     readonly readTime: Timestamp;
+
+    /**
+     * Stats related to the planning and/or execution of this query. It is only
+     * populated when the snapshot is obtained by calling `explain()`.
+     */
+    readonly stats: ResultSetStats | null;
 
     /**
      * Returns the results of the aggregations performed over the underlying
@@ -2953,31 +2958,25 @@ declare namespace FirebaseFirestore {
      * An `InformationalQueryPlan` object that contains information about the
      * query plan. Contents are subject to change.
      */
-    readonly planInfo: InformationalQueryPlan;
+    readonly planInfo: InformationalQueryPlan | null;
   }
 
   /**
-   * A QueryProfile contains information about planning, execution, and results
-   * of a query.
+   * ResultSetStats contains information about planning and/or execution of a query.
    * All informational content are subject to change, and it is advised to not
    * program against them.
    */
-  export interface QueryProfile<T> {
+  export interface ResultSetStats {
     /**
      * A `QueryPlan` object that contains information about the query plan.
      */
-    readonly plan: QueryPlan;
+    readonly queryPlan: QueryPlan | null;
 
     /**
      * An `InformationalQueryExecutionStats` that contains statistics about the
      * execution of the query. Contents are subject to change.
      */
-    readonly stats: InformationalQueryExecutionStats;
-
-    /**
-     * The snapshot that contains the results of executing the query.
-     */
-    readonly snapshot: T;
+    readonly queryStats: InformationalQueryExecutionStats | null;
   }
 }
 

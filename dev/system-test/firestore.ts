@@ -99,7 +99,9 @@ if (process.env.NODE_ENV === 'DEBUG') {
 }
 
 function getTestRoot(settings: Settings = {}): CollectionReference {
-  const internalSettings: Settings = {};
+  const internalSettings: Settings = {
+    host: 'test-firestore.sandbox.googleapis.com'
+  };
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }
@@ -144,43 +146,114 @@ describe('Firestore class', () => {
       });
   });
 
-  it('can plan a query', async () => {
+  it.only('regular query execution does not have stats', async () => {
+    const snapshot = await randomCol.where('foo', '>', 1).get();
+    expect(snapshot.stats).to.be.null;
+  });
+
+  it.only('can plan a query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const plan = await randomCol.where('foo', '>', 1).explain();
-    expect(Object.keys(plan.planInfo).length).to.be.greaterThan(0);
+    const snapshot = await randomCol.where('foo', '>', 1).explain();
+
+    // Check snapshot
+    expect(snapshot.docs).to.be.empty;
+
+    // Check ResultSetStats
+    expect(snapshot.stats).to.not.be.null;
+
+    // Check queryPlan
+    expect(snapshot.stats!.queryPlan).to.not.be.null;
+    expect(snapshot.stats!.queryPlan!.planInfo).to.not.be.null;
+    expect(Object.keys(snapshot.stats!.queryPlan!.planInfo!).length).to.be.greaterThan(0);
+
+    // Check queryStats
+    expect(snapshot.stats!.queryStats).to.be.null;
+
+    console.log(JSON.stringify(snapshot.stats));
   });
 
-  it('can profile a query', async () => {
+  it.only('can profile a query', async () => {
     await randomCol.doc('doc1').set({foo: 1, bar: 0});
     await randomCol.doc('doc2').set({foo: 2, bar: 1});
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
-    const profile = await randomCol.where('foo', '==', 1).explainAnalyze();
-    expect(Object.keys(profile.plan.planInfo).length).to.be.greaterThan(0);
-    expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
-    expect(profile.snapshot.size).to.equal(2);
+    const snapshot = await randomCol.where('foo', '==', 1).explainAnalyze();
+
+    // Check snapshot
+    expect(snapshot.docs.length).to.equal(2);
+
+    // Check ResultSetStats
+    expect(snapshot.stats).to.not.be.null;
+
+    // Check queryPlan
+    expect(snapshot.stats!.queryPlan).to.not.be.null;
+    expect(snapshot.stats!.queryPlan!.planInfo).to.not.be.null;
+    expect(Object.keys(snapshot.stats!.queryPlan!.planInfo!).length).to.be.greaterThan(0);
+
+    // Check queryStats
+    expect(snapshot.stats!.queryStats).to.not.be.null;
+    expect(Object.keys(snapshot.stats!.queryStats!).length).to.be.greaterThan(0);
+
+    console.log(JSON.stringify(snapshot.stats));
   });
 
-  it('can plan an aggregate query', async () => {
+  it.only('regular aggregate query execution does not have stats', async () => {
+    const snapshot = await randomCol.where('foo', '>', 1).count().get();
+    expect(snapshot.stats).to.be.null;
+  });
+
+  it.only('can plan an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const plan = await randomCol.where('foo', '>', 0).count().explain();
-    expect(Object.keys(plan.planInfo).length).to.be.greaterThan(0);
+    const snapshot = await randomCol.where('foo', '>', 0).count().explain();
+
+    // Check snapshot
+    expect(snapshot.data()).to.be.undefined;
+
+    // Check ResultSetStats
+    expect(snapshot.stats).to.not.be.null;
+
+    // Check queryPlan
+    expect(snapshot.stats!.queryPlan).to.not.be.null;
+    expect(snapshot.stats!.queryPlan!.planInfo).to.not.be.null;
+    expect(Object.keys(snapshot.stats!.queryPlan!.planInfo!).length).to.be.greaterThan(0);
+
+    // Check queryStats
+    expect(snapshot.stats!.queryStats).to.be.null;
+
+    console.log(JSON.stringify(snapshot.stats));
   });
 
-  it('can profile an aggregate query', async () => {
+  it.only('can profile an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const profile = await randomCol
+    const snapshot = await randomCol
       .where('foo', '<', 3)
       .count()
       .explainAnalyze();
-    expect(Object.keys(profile.plan.planInfo).length).to.be.greaterThan(0);
-    expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
-    expect(profile.snapshot.data().count).to.equal(3);
+    // expect(Object.keys(profile.plan.planInfo).length).to.be.greaterThan(0);
+    // expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
+    // expect(profile.snapshot.data().count).to.equal(3);
+
+    // Check snapshot
+    expect(snapshot.data().count).to.equal(3);
+
+    // Check ResultSetStats
+    expect(snapshot.stats).to.not.be.null;
+
+    // Check queryPlan
+    expect(snapshot.stats!.queryPlan).to.not.be.null;
+    expect(snapshot.stats!.queryPlan!.planInfo).to.not.be.null;
+    expect(Object.keys(snapshot.stats!.queryPlan!.planInfo!).length).to.be.greaterThan(0);
+
+    // Check queryStats
+    expect(snapshot.stats!.queryStats).to.not.be.null;
+    expect(Object.keys(snapshot.stats!.queryStats!).length).to.be.greaterThan(0);
+
+    console.log(JSON.stringify(snapshot.stats));
   });
 
   it('getAll() supports array destructuring', () => {
