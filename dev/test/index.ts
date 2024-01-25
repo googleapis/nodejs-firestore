@@ -1372,3 +1372,38 @@ describe('getAll() method', () => {
     });
   });
 });
+
+describe('toJSON', () => {
+  it('Serializing Firestore settings redacts credentials', () => {
+    const firestore = new Firestore.Firestore({
+      projectId: 'myProjectId',
+      credentials: {client_email: 'foo@bar', private_key: 'asdf1234'},
+    });
+
+    const serializedSettings = JSON.stringify(firestore._settings);
+
+    // Instead of validating the serialized string for redacted credentials,
+    // parse the settings and check the credential values.
+    const parsedSettings = JSON.parse(serializedSettings);
+    expect(parsedSettings.credentials.client_email).to.equal('***');
+    expect(parsedSettings.credentials.private_key).to.equal('***');
+  });
+
+  it('Serializing Firestore instance', () => {
+    const firestore = new Firestore.Firestore({
+      projectId: 'myProjectId',
+      credentials: {client_email: 'foo@bar', private_key: 'asdf1234'},
+    });
+
+    const serializedFirestore = JSON.stringify(firestore);
+
+    // Instead of validating the serialized string,
+    // parse the JSON back to an object and check the properties.
+    const expectedParsedFirestore = {
+      projectId: 'myProjectId',
+    };
+
+    const parsedFirestore = JSON.parse(serializedFirestore);
+    expect(parsedFirestore).to.deep.equal(expectedParsedFirestore);
+  });
+});
