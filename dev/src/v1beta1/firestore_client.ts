@@ -208,19 +208,23 @@ export class FirestoreClient {
     this.descriptors.stream = {
       batchGetDocuments: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ true
       ),
       runQuery: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ true
       ),
       write: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.BIDI_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ true
       ),
       listen: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.BIDI_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ true
       ),
     };
 
