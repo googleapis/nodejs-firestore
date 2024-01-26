@@ -234,9 +234,6 @@ describe('Firestore class', () => {
       .where('foo', '<', 3)
       .count()
       .explainAnalyze();
-    // expect(Object.keys(profile.plan.planInfo).length).to.be.greaterThan(0);
-    // expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
-    // expect(profile.snapshot.data().count).to.equal(3);
 
     // Check snapshot
     expect(snapshot.data().count).to.equal(3);
