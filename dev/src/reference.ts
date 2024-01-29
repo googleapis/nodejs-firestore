@@ -1686,7 +1686,8 @@ class QueryUtil<
 
   _get(
     query: Template,
-    transactionId?: Uint8Array
+    transactionId?: Uint8Array,
+    retryWithCursor = true
   ): Promise<
     | QuerySnapshot<AppModelType, DbModelType>
     | VectorQuerySnapshot<AppModelType, DbModelType>
@@ -1699,7 +1700,7 @@ class QueryUtil<
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
 
-      this._stream(query, transactionId)
+      this._stream(query, transactionId, retryWithCursor)
         .on('error', err => {
           reject(wrapError(err, stack));
         })
@@ -1772,7 +1773,11 @@ class QueryUtil<
     return transform;
   }
 
-  _stream(query: Template, transactionId?: Uint8Array): NodeJS.ReadableStream {
+  _stream(
+    query: Template,
+    transactionId?: Uint8Array,
+    retryWithCursor = true
+  ): NodeJS.ReadableStream {
     const tag = requestTag();
     const startTime = Date.now();
 
@@ -1867,7 +1872,7 @@ class QueryUtil<
                   );
                   stream.destroy(err);
                   streamActive.resolve(/* active= */ false);
-                } else if (lastReceivedDocument) {
+                } else if (lastReceivedDocument && retryWithCursor) {
                   logger(
                     'Query._stream',
                     tag,
@@ -1895,8 +1900,8 @@ class QueryUtil<
                   logger(
                     'Query._stream',
                     tag,
-                    'Query failed with retryable stream error however no progress was made receiving ' +
-                      'documents, so the stream is being closed.'
+                    `Query failed with retryable stream error however either retryWithCursor="${retryWithCursor}", or ` +
+                      'no progress was made receiving documents, so the stream is being closed.'
                   );
                   stream.destroy(err);
                   streamActive.resolve(/* active= */ false);
@@ -4053,9 +4058,12 @@ export class VectorQuery<
    * @return A promise that will be resolved with the results of the query.
    */
   get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
-    return this._queryUtil._get(this) as Promise<
-      VectorQuerySnapshot<AppModelType, DbModelType>
-    >;
+    return this._queryUtil._get(
+      this,
+      /*transactionId*/ undefined,
+      // VectorQuery cannot be retried with cursors as they do not support cursors yet.
+      /*retryWithCursor*/ false
+    ) as Promise<VectorQuerySnapshot<AppModelType, DbModelType>>;
   }
 
   /**
@@ -4067,7 +4075,11 @@ export class VectorQuery<
    * @returns A stream of document results.
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
-    return this._queryUtil._stream(this, transactionId);
+    return this._queryUtil._stream(
+      this,
+      transactionId,
+      /*retryWithCursor*/ false
+    );
   }
 
   /**
