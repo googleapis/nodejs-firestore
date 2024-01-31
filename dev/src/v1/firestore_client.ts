@@ -212,23 +212,28 @@ export class FirestoreClient {
     this.descriptors.stream = {
       batchGetDocuments: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ true
       ),
       runQuery: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ true
       ),
       runAggregationQuery: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ true
       ),
       write: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.BIDI_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ true
       ),
       listen: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.BIDI_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ true
       ),
     };
 
@@ -1230,10 +1235,6 @@ export class FirestoreClient {
    *   This must be a microsecond precision timestamp within the past one hour,
    *   or if Point-in-Time Recovery is enabled, can additionally be a whole
    *   minute timestamp within the past 7 days.
-   * @param {google.firestore.v1.QueryMode} [request.mode]
-   *   Optional. The mode in which the query request is processed. This field is
-   *   optional, and when not provided, it defaults to `NORMAL` mode where no
-   *   additional statistics will be returned with the query results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1300,10 +1301,6 @@ export class FirestoreClient {
    *   This must be a microsecond precision timestamp within the past one hour,
    *   or if Point-in-Time Recovery is enabled, can additionally be a whole
    *   minute timestamp within the past 7 days.
-   * @param {google.firestore.v1.QueryMode} [request.mode]
-   *   Optional. The mode in which the query request is processed. This field is
-   *   optional, and when not provided, it defaults to `NORMAL` mode where no
-   *   additional statistics will be returned with the query results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
