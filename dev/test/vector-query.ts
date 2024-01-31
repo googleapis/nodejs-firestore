@@ -198,7 +198,7 @@ describe('Vector(findNearest) query interface', () => {
         limit: 10,
         distanceMeasure: 'EUCLIDEAN',
       });
-    }).to.throw('not a valid vector size larger than 0');
+    }).to.throw('not a valid vector size');
     expect(() => {
       query.findNearest('embedding', [10, 1000], {
         limit: 0,
