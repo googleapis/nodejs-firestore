@@ -22,6 +22,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 
 import {FieldPath} from './path';
 import {Serializer, validateUserInput} from './serializer';
+import {isPrimitiveArrayEqual} from './util';
 import {
   invalidArgumentMessage,
   validateMinNumberOfArguments,
@@ -62,7 +63,7 @@ export class VectorValue implements firestore.VectorValue {
    * @private
    */
   isEqual(other: VectorValue): boolean {
-    return this._values === other._values;
+    return isPrimitiveArrayEqual(this._values, other._values);
   }
 }
 

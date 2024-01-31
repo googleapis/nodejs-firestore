@@ -16,11 +16,12 @@
 
 import * as firestore from '@google-cloud/firestore';
 import * as assert from 'assert';
-import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 import {GoogleError} from 'google-gax';
+import {Duplex, Readable, Transform} from 'stream';
 
 import * as protos from '../protos/firestore_v1_proto_api';
+import {Aggregate, AggregateField, AggregateSpec} from './aggregate';
 
 import {
   DocumentSnapshot,
@@ -29,6 +30,7 @@ import {
 } from './document';
 import {DocumentChange} from './document-change';
 import {VectorValue} from './field-value';
+import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {Firestore} from './index';
 import {logger} from './logger';
 import {compare} from './order';
@@ -46,7 +48,9 @@ import {
   autoId,
   Deferred,
   getTotalTimeout,
+  isArrayEqual,
   isPermanentRpcError,
+  isPrimitiveArrayEqual,
   mapToArray,
   requestTag,
   wrapError,
@@ -61,8 +65,6 @@ import {
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
-import {CompositeFilter, Filter, UnaryFilter} from './filter';
-import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -4283,49 +4285,6 @@ function validateQueryValue(
     allowTransforms: false,
     allowUndefined,
   });
-}
-
-/**
- * Verifies equality for an array of objects using the `isEqual` interface.
- *
- * @private
- * @internal
- * @param left Array of objects supporting `isEqual`.
- * @param right Array of objects supporting `isEqual`.
- * @return True if arrays are equal.
- */
-function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
-  left: T[],
-  right: T[]
-): boolean {
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  for (let i = 0; i < left.length; ++i) {
-    if (!left[i].isEqual(right[i])) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function isPrimitiveArrayEqual<T extends number | string>(
-  left: T[],
-  right: T[]
-): boolean {
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  for (let i = 0; i < left.length; ++i) {
-    if (left[i] !== right[i]) {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 /**

@@ -1674,7 +1674,7 @@ describe('Query class', () => {
       .then(res => {
         expect(res.size).to.equal(1);
         expect(res.docs[0].data().foo).to.equal('bar');
-        expect(res.docs[0].data().embedding).to.equal([5, 5]);
+        expect(res.docs[0].data().embedding).to.deep.equal([5, 5]);
       });
   });
 
