@@ -1313,6 +1313,42 @@ describe('DocumentReference class', () => {
   });
 });
 
+describe('runs query on a large collection', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+
+  beforeEach(async () => {
+    firestore = new Firestore({});
+    randomCol = getTestRoot(firestore);
+
+    const promises: Array<Promise<DocumentReference<DocumentData>>> = [];
+    for (let i = 0; i < 1000; i++) {
+      promises.push(randomCol.add({foo: 'a'}));
+    }
+    await Promise.all(promises);
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('can get()', () => {
+    return randomCol.get().then(res => {
+      expect(res.size).to.equal(1000);
+    });
+  });
+
+  it('can stream()', async () => {
+    let received = 0;
+    const stream = randomCol.stream();
+
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
+      ++received;
+    }
+
+    expect(received).to.equal(1000);
+  });
+});
+
 describe('Query class', () => {
   interface PaginatedResults {
     pages: number;
@@ -1647,10 +1683,60 @@ describe('Query class', () => {
       });
   });
 
-  it('has limit() method', async () => {
+  it('can run get() on empty collection', async () => {
+    return randomCol.get().then(res => {
+      return expect(res.empty);
+    });
+  });
+
+  it('can run stream() on empty collection', async () => {
+    let received = 0;
+    const stream = randomCol.stream();
+
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
+      ++received;
+    }
+
+    expect(received).to.equal(0);
+  });
+
+  it('has limit() method on get()', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').limit(1).get();
     expectDocs(res, {foo: 'a'});
+  });
+
+  it('has limit() method on stream()', async () => {
+    let received = 0;
+    await addDocs({foo: 'a'}, {foo: 'b'});
+
+    const stream = randomCol.orderBy('foo').limit(1).stream();
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
+      ++received;
+    }
+
+    expect(received).to.equal(1);
+  });
+
+  it('can run limit(num), where num is larger than the collection size on get()', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol.orderBy('foo').limit(3).get();
+    expectDocs(res, {foo: 'a'}, {foo: 'b'});
+  });
+
+  it('can run limit(num), where num is larger than the collection size on stream()', async () => {
+    let received = 0;
+    await addDocs({foo: 'a'}, {foo: 'b'});
+
+    const stream = randomCol.orderBy('foo').limit(3).stream();
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
+      ++received;
+    }
+
+    expect(received).to.equal(2);
   });
 
   it('has limitToLast() method', async () => {
@@ -1670,10 +1756,40 @@ describe('Query class', () => {
     expectDocs(res, {doc: 2}, {doc: 3}, {doc: 4});
   });
 
-  it('has offset() method', async () => {
+  it('can use offset() method with get()', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').offset(1).get();
     expectDocs(res, {foo: 'b'});
+  });
+
+  it('can use offset() method with stream()', async () => {
+    let received = 0;
+    await addDocs({foo: 'a'}, {foo: 'b'});
+
+    const stream = randomCol.orderBy('foo').offset(1).stream();
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
+      ++received;
+    }
+
+    expect(received).to.equal(1);
+  });
+
+  it('can run offset(num), where num is larger than the collection size on get()', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol.orderBy('foo').offset(3).get();
+    expect(res.empty);
+  });
+
+  it('can run offset(num), where num is larger than the collection size on stream()', async () => {
+    let received = 0;
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const stream = randomCol.orderBy('foo').offset(3).stream();
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
+      ++received;
+    }
+    expect(received).to.equal(0);
   });
 
   it('supports Unicode in document names', async () => {
@@ -3068,6 +3184,28 @@ describe('count queries', () => {
       await runQueryAndExpectCount(count5, 1);
     });
   }
+
+  // Only verify the error message for missing indexes when running against
+  // production, since the Firestore Emulator does not require index creation
+  // and will, therefore, never fail in this situation.
+  // eslint-disable-next-line no-restricted-properties
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it.skip)(
+    'count query error message contains console link if missing index',
+    () => {
+      const query = randomCol.where('key1', '==', 42).where('key2', '<', 42);
+      const countQuery = query.count();
+      const databaseId = query.firestore._settings.databaseId ?? '(default)';
+      // TODO(b/316359394) Remove this check for the default databases once
+      //  cl/582465034 is rolled out to production.
+      if (databaseId === '(default)') {
+        return expect(countQuery.get()).to.be.eventually.rejectedWith(
+          /index.*https:\/\/console\.firebase\.google\.com/
+        );
+      } else {
+        return expect(countQuery.get()).to.be.eventually.rejectedWith(/index/);
+      }
+    }
+  );
 });
 
 describe('count queries using aggregate api', () => {
@@ -3424,15 +3562,27 @@ describe('Aggregation queries', () => {
   // production, since the Firestore Emulator does not require index creation
   // and will, therefore, never fail in this situation.
   // eslint-disable-next-line no-restricted-properties
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
-    'aggregate() error message is good if missing index',
-    async () => {
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it.skip)(
+    'aggregate query error message contains console link if missing index',
+    () => {
       const query = col.where('key1', '==', 42).where('key2', '<', 42);
-      await expect(
-        query.aggregate({count: AggregateField.count()}).get()
-      ).to.be.eventually.rejectedWith(
-        /index.*https:\/\/console\.firebase\.google\.com/
-      );
+      const aggregateQuery = query.aggregate({
+        count: AggregateField.count(),
+        sum: AggregateField.sum('pages'),
+        average: AggregateField.average('pages'),
+      });
+      const databaseId = query.firestore._settings.databaseId ?? '(default)';
+      // TODO(b/316359394) Remove this check for the default databases once
+      //  cl/582465034 is rolled out to production.
+      if (databaseId === '(default)') {
+        return expect(aggregateQuery.get()).to.be.eventually.rejectedWith(
+          /index.*https:\/\/console\.firebase\.google\.com/
+        );
+      } else {
+        return expect(aggregateQuery.get()).to.be.eventually.rejectedWith(
+          /index/
+        );
+      }
     }
   );
 

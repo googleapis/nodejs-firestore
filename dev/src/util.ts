@@ -179,6 +179,21 @@ export function getRetryCodes(methodName: string): number[] {
 }
 
 /**
+ * Gets the total timeout in milliseconds from the retry settings in
+ * the service config for the given RPC. If the total timeout is not
+ * set, then `0` is returned.
+ *
+ * @private
+ * @internal
+ */
+export function getTotalTimeout(methodName: string): number {
+  return (
+    getServiceConfig(methodName)?.retry?.backoffSettings?.totalTimeoutMillis ??
+    0
+  );
+}
+
+/**
  * Returns the backoff setting from the service configuration.
  * @private
  * @internal

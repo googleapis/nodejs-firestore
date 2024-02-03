@@ -15,9 +15,10 @@
  */
 
 const fs = require('fs');
+const path = require('path');
 
 const LICENSE_HEADER = `/*!
- * Copyright 2022 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +34,28 @@ const LICENSE_HEADER = `/*!
  */
 `;
 
-for (const file of process.argv.slice(2)) {
-  const content = fs.readFileSync(file, 'utf-8');
-  fs.writeFileSync(file, `${LICENSE_HEADER}\n${content.trim()}\n`);
+function addLicenses(dirNameReads) {
+  for (const dirNameRead of dirNameReads) {
+    iterateThroughFiles(dirNameRead);
+  }
 }
+function iterateThroughFiles(dirNameRead) {
+  console.log(dirNameRead);
+  if (fs.existsSync(path.join(dirNameRead))) {
+    const files = fs.readdirSync(dirNameRead);
+    files.forEach(file => {
+      const fileName = file.toString();
+      const readName = path.join(dirNameRead, fileName);
+      if (fs.statSync(readName).isDirectory()) {
+        iterateThroughFiles(readName);
+      } else {
+        const content = fs.readFileSync(readName, 'utf-8');
+        if (!content.includes('Copyright') && !fileName.endsWith('.json')) {
+          fs.writeFileSync(readName, `${LICENSE_HEADER}\n${content.trim()}\n`);
+        }
+      }
+    });
+  }
+}
+
+addLicenses(process.argv.slice(2));

@@ -1829,6 +1829,13 @@
                     "readTime": {
                       "type": "google.protobuf.Timestamp",
                       "id": 7
+                    },
+                    "mode": {
+                      "type": "QueryMode",
+                      "id": 9,
+                      "options": {
+                        "(google.api.field_behavior)": "OPTIONAL"
+                      }
                     }
                   }
                 },
@@ -1860,6 +1867,10 @@
                     "done": {
                       "type": "bool",
                       "id": 6
+                    },
+                    "stats": {
+                      "type": "ResultSetStats",
+                      "id": 7
                     }
                   }
                 },
@@ -1901,6 +1912,13 @@
                     "readTime": {
                       "type": "google.protobuf.Timestamp",
                       "id": 6
+                    },
+                    "mode": {
+                      "type": "QueryMode",
+                      "id": 7,
+                      "options": {
+                        "(google.api.field_behavior)": "OPTIONAL"
+                      }
                     }
                   }
                 },
@@ -1917,6 +1935,10 @@
                     "readTime": {
                       "type": "google.protobuf.Timestamp",
                       "id": 3
+                    },
+                    "stats": {
+                      "type": "ResultSetStats",
+                      "id": 6
                     }
                   }
                 },
@@ -2279,6 +2301,33 @@
                     "status": {
                       "rule": "repeated",
                       "type": "google.rpc.Status",
+                      "id": 2
+                    }
+                  }
+                },
+                "QueryMode": {
+                  "values": {
+                    "NORMAL": 0,
+                    "PLAN": 1,
+                    "PROFILE": 2
+                  }
+                },
+                "QueryPlan": {
+                  "fields": {
+                    "planInfo": {
+                      "type": "google.protobuf.Struct",
+                      "id": 1
+                    }
+                  }
+                },
+                "ResultSetStats": {
+                  "fields": {
+                    "queryPlan": {
+                      "type": "QueryPlan",
+                      "id": 1
+                    },
+                    "queryStats": {
+                      "type": "google.protobuf.Struct",
                       "id": 2
                     }
                   }
@@ -3093,6 +3142,11 @@
                 "longRunning": {
                   "type": "LongRunning",
                   "id": 2
+                },
+                "autoPopulatedFields": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 3
                 }
               },
               "nested": {
@@ -3152,7 +3206,8 @@
                 "INPUT_ONLY": 4,
                 "IMMUTABLE": 5,
                 "UNORDERED_LIST": 6,
-                "NON_EMPTY_DEFAULT": 7
+                "NON_EMPTY_DEFAULT": 7,
+                "IDENTIFIER": 8
               }
             },
             "LaunchStage": {

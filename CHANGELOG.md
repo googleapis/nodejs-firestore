@@ -4,6 +4,42 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.3.0](https://github.com/googleapis/nodejs-firestore/compare/v7.2.0...v7.3.0) (2024-01-31)
+
+
+### Features
+
+* Expose the undeliverable_first_gen_event.proto ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+
+
+### Bug Fixes
+
+* Allow an explicit MustExist precondition for update ([#1985](https://github.com/googleapis/nodejs-firestore/issues/1985)) ([99d60a6](https://github.com/googleapis/nodejs-firestore/commit/99d60a6f87b70c942ac2bd9464cc6d64323f9dfb))
+* Fix redaction of credentials in Firestore settings ([#1989](https://github.com/googleapis/nodejs-firestore/issues/1989)) ([98e668b](https://github.com/googleapis/nodejs-firestore/commit/98e668bb9ce7feb090f65fc61d92af433bc23094))
+* Improve retry logic for streaming API calls ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+* Removed unsupported QueryMode, QueryPlan, and ResultSetStats protos ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+
+## [7.2.0](https://github.com/googleapis/nodejs-firestore/compare/v7.1.1...v7.2.0) (2024-01-16)
+
+
+### Features
+
+* Add new types QueryMode, QueryPlan, ResultSetStats ([#1911](https://github.com/googleapis/nodejs-firestore/issues/1911)) ([8f77b68](https://github.com/googleapis/nodejs-firestore/commit/8f77b68bf70b04a66e982067aa246de0596e4ea2))
+* Expose databaseId and projectId getter on Firestore class ([#1937](https://github.com/googleapis/nodejs-firestore/issues/1937)) ([d9c867f](https://github.com/googleapis/nodejs-firestore/commit/d9c867fc5048748e5af378fd8465303224668781)), closes [#1936](https://github.com/googleapis/nodejs-firestore/issues/1936)
+
+
+### Bug Fixes
+
+* Make transaction rollback best effort. ([#1967](https://github.com/googleapis/nodejs-firestore/issues/1967)) ([1d76546](https://github.com/googleapis/nodejs-firestore/commit/1d76546a781527ef5b9085fc9f189c024355ae9f))
+
+## [7.1.1](https://github.com/googleapis/nodejs-firestore/compare/v7.1.0...v7.1.1) (2023-11-20)
+
+
+### Bug Fixes
+
+* Remove temporary header encoding workaround ([#1935](https://github.com/googleapis/nodejs-firestore/issues/1935)) ([8a4ae5b](https://github.com/googleapis/nodejs-firestore/commit/8a4ae5b07712588bd0deae917d9e17f34f1ebb60))
+* Update retry policy to not retry streams that have not made progress receiving documents ([170d05b](https://github.com/googleapis/nodejs-firestore/commit/170d05b1fa6c720d1109506ed3d3feb525c16efe))
+
 ## [7.1.0](https://github.com/googleapis/nodejs-firestore/compare/v7.0.0...v7.1.0) (2023-10-11)
 
 

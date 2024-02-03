@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -1426,7 +1426,13 @@ describe('v1beta1.FirestoreClient', () => {
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
-      const stream = client.batchGetDocuments(request);
+      const stream = client.batchGetDocuments(request, {
+        retry: {
+          shouldRetryFn: () => {
+            return false;
+          },
+        },
+      });
       const promise = new Promise((resolve, reject) => {
         stream.on(
           'data',
@@ -1547,7 +1553,13 @@ describe('v1beta1.FirestoreClient', () => {
       request.parent = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       client.close();
-      const stream = client.runQuery(request);
+      const stream = client.runQuery(request, {
+        retry: {
+          shouldRetryFn: () => {
+            return false;
+          },
+        },
+      });
       const promise = new Promise((resolve, reject) => {
         stream.on(
           'data',
