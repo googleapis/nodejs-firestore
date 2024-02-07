@@ -65,6 +65,7 @@ import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 import {google} from '../protos/firestore_v1_proto_api';
 import QueryMode = google.firestore.v1.QueryMode;
 import {ResultSetStats} from "./result-set-stats";
+import RunAggregationQueryResponse = google.firestore.v1.RunAggregationQueryResponse;
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2336,8 +2337,8 @@ export class Query<
    * @return A Promise that will be resolved with the results of the query
    * planning information.
    */
-  explain(): Promise<firestore.QuerySnapshot<AppModelType, DbModelType>> {
-    return this._getQueryProfileInfo('PLAN');
+  explain(): firestore.Query<AppModelType, DbModelType> {
+    //return this._getQueryProfileInfo('PLAN');
   }
 
   /**
@@ -2351,10 +2352,8 @@ export class Query<
    * @return A Promise that will be resolved with the planning information,
    * statistics from the query execution, and the query results.
    */
-  explainAnalyze(): Promise<
-    firestore.QuerySnapshot<AppModelType, DbModelType>
-  > {
-    return this._getQueryProfileInfo('PROFILE');
+  explainAnalyze(): firestore.Query<AppModelType, DbModelType> {
+    //return this._getQueryProfileInfo('PROFILE');
   }
 
   /**
@@ -3408,7 +3407,8 @@ export class AggregateQuery<
   constructor(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _query: Query<AppModelType, DbModelType>,
-    private readonly _aggregates: AggregateSpecType
+    private readonly _aggregates: AggregateSpecType,
+    private readonly _mode: QueryMode
   ) {
     // Client-side aliases may be too long and exceed the 1500-byte string size limit.
     // Such long strings do not need to be transferred over the wire either.
@@ -3453,77 +3453,39 @@ export class AggregateQuery<
   > {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
+    let readTime = new Timestamp(0, 0);
+    let data = {} as firestore.AggregateSpecData<AggregateSpecType>;
+    let stats: ResultSetStats | null = null;
 
     return new Promise((resolve, reject) => {
       const stream = this._stream(transactionId);
+
       stream.on('error', err => {
         reject(wrapError(err, stack));
       });
-      stream.once('data', result => {
-        stream.destroy();
-        resolve(result);
+
+      stream.on('data', (proto : RunAggregationQueryResponse) => {
+        if (proto.result) {
+          readTime = Timestamp.fromProto(proto.readTime!);
+          data = this.decodeResult(proto.result);
+        }
+
+        if (proto.stats) {
+          stats = new ResultSetStats(this._query.firestore, proto.stats);
+        }
+
       });
+
       stream.on('end', () => {
-        reject('No AggregateQuery results');
-      });
-    });
-  }
+        stream.destroy();
 
-  /**
-   * Internal streaming method for aggregate query profiling.
-   *
-   * @param queryMode The query profiling mode.
-   * @private
-   * @internal
-   * @returns A QueryProfile object containing the results of the profiling.
-   */
-  _getQueryProfileInfo(
-    queryMode: QueryMode
-  ): Promise<
-      firestore.AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-  > {
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
+        // Non-normal execution modes can have no data. For example, when using
+        // explain to only get the query plan, there will be no data.
+        if (this._mode === "NORMAL" && data === null) {
+          reject('No AggregateQuery results');
+        }
 
-    let aggregationResult: AggregateQuerySnapshot<
-      AggregateSpecType,
-      AppModelType,
-      DbModelType
-    >;
-    let readTime : Timestamp;
-    let data :  firestore.AggregateSpecData<AggregateSpecType>;
-    let stats : firestore.ResultSetStats | null = null;
-
-    return new Promise((resolve, reject) => {
-      const tag = requestTag();
-      const firestore = this._query.firestore;
-      firestore.initializeIfNeeded(tag).then(() => {
-        const request = this.toProto(/* transactionId */ undefined, queryMode);
-        firestore
-          .requestStream(
-            'runAggregationQuery',
-            /* bidirectional= */ false,
-            request,
-            tag
-          )
-          .then(stream => {
-            stream.on('error', err => {
-              reject(wrapError(err, stack));
-            });
-            stream.on('data', response => {
-              if (response.result) {
-                readTime = Timestamp.fromProto(response.readTime!);
-                data = this.decodeResult(response.result);
-              }
-              if (response.stats) {
-                stats = new ResultSetStats(firestore, response.stats);
-              }
-            });
-            stream.on('end', () => {
-              resolve(new AggregateQuerySnapshot(this, readTime, data, stats));
-            });
-            stream.resume();
-          });
+        resolve(new AggregateQuerySnapshot(this, readTime, data, stats));
       });
     });
   }
@@ -3543,13 +3505,7 @@ export class AggregateQuery<
     const stream: Transform = new Transform({
       objectMode: true,
       transform: (proto: api.IRunAggregationQueryResponse, enc, callback) => {
-        if (proto.result) {
-          const readTime = Timestamp.fromProto(proto.readTime!);
-          const data = this.decodeResult(proto.result);
-          callback(undefined, new AggregateQuerySnapshot(this, readTime, data));
-        } else {
-          callback(Error('RunAggregationQueryResponse is missing result'));
-        }
+        callback(undefined, proto);
       },
     });
 
@@ -3697,16 +3653,12 @@ export class AggregateQuery<
     return deepEqual(this._aggregates, other._aggregates);
   }
 
-  explain(): Promise<
-      firestore.AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-  > {
-    return this._getQueryProfileInfo('PLAN');
+  explain(): firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType> {
+    return new AggregateQuery(this._query, this._aggregates, "PLAN");
   }
 
-  explainAnalyze(): Promise<
-    firestore.AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-  > {
-    return this._getQueryProfileInfo('PROFILE');
+  explainAnalyze(): firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType> {
+    return new AggregateQuery(this._query, this._aggregates, "PROFILE");
   }
 }
 

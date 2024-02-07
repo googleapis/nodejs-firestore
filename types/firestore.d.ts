@@ -1897,6 +1897,7 @@ declare namespace FirebaseFirestore {
     get(): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
     /**
+     * TODO(ehsan): Update the comments.
      * Performs the planning stage of this query, without actually executing the
      * query. Returns a Promise that will be resolved with the QuerySnapshot that
      * contains the planning information.
@@ -1904,9 +1905,10 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with a `QuerySnapshot` object
      * that contains query planning information.
      */
-    explain(): Promise<QuerySnapshot<AppModelType, DbModelType>>;
+    explain(): Query<AppModelType, DbModelType>;
 
     /**
+     * TODO(ehsan): Update the comments.
      * Plans and executes this query. Returns a Promise that will be resolved
      * with the `QuerySnapshot` that contains planning information, statistics
      * from the query execution, and the query results.
@@ -1919,7 +1921,7 @@ declare namespace FirebaseFirestore {
      * that contains the planning information, statistics from the query execution,
      * and the query results.
      */
-    explainAnalyze(): Promise<QuerySnapshot<AppModelType, DbModelType>>;
+    explainAnalyze(): Query<AppModelType, DbModelType>;
 
     /*
      * Executes the query and returns the results as Node Stream.
@@ -2460,6 +2462,7 @@ declare namespace FirebaseFirestore {
     >;
 
     /**
+     * TODO(ehsan): Update the comments.
      * Performs the planning stage of this query, without actually executing the
      * query. Returns a Promise that will be resolved with the result of the
      * query planning information.
@@ -2470,11 +2473,10 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the results of the query
      * planning information.
      */
-    explain(): Promise<
-        AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-    >;
+    explain(): AggregateQuery<AggregateSpecType, AppModelType, DbModelType>;
 
     /**
+     * TODO(ehsan): Update the comments.
      * Plans and executes this query. Returns a Promise that will be resolved
      * with the planning information, statistics from the query execution, and
      * the query results.
@@ -2485,9 +2487,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the planning information,
      * statistics from the query execution, and the query results.
      */
-    explainAnalyze(): Promise<
-        AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-    >;
+    explainAnalyze(): AggregateQuery<AggregateSpecType, AppModelType, DbModelType>;
 
     /**
      * Compares this object with the given object for equality.
