@@ -64,8 +64,7 @@ import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 import {google} from '../protos/firestore_v1_proto_api';
 import QueryMode = google.firestore.v1.QueryMode;
-import {QueryProfile} from './query-profile';
-import {QueryPlan} from './query-plan';
+import {ExecutionStats, ExplainResults, Plan} from './query-profile';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2318,35 +2317,112 @@ export class Query<
   }
 
   /**
-   * Performs the planning stage of this query, without actually executing the
-   * query. Returns a Promise that will be resolved with the result of the
-   * query planning information.
+   * Plans and optionally executes this query. Returns an ApiFuture that will be
+   * resolved with the planner information, statistics from the query execution (if any),
+   * and the query results (if any).
    *
-   * Note: the information included in the output of this function is subject
-   * to change.
-   *
-   * @return A Promise that will be resolved with the results of the query
-   * planning information.
+   * @return An ApiFuture that will be resolved with the planner information, statistics
+   *  from the query execution (if any), and the query results (if any).
    */
-  explain(): Promise<firestore.QueryPlan> {
-    return this._getQueryProfileInfo('PLAN').then(info => info.plan);
-  }
+  explain(
+    options: firestore.ExplainOptions
+  ): Promise<ExplainResults<QuerySnapshot<AppModelType, DbModelType>>> {
+    let readTime: Timestamp;
+    const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
+    let queryPlan: Plan = {indexesUsed: {}};
+    let executionStats: ExecutionStats | null = null;
 
-  /**
-   * Plans and executes this query. Returns a Promise that will be resolved
-   * with the planning information, statistics from the query execution, and
-   * the query results.
-   *
-   * Note: the information included in the output of this function is subject
-   * to change.
-   *
-   * @return A Promise that will be resolved with the planning information,
-   * statistics from the query execution, and the query results.
-   */
-  explainAnalyze(): Promise<
-    firestore.QueryProfile<QuerySnapshot<AppModelType, DbModelType>>
-  > {
-    return this._getQueryProfileInfo('PROFILE');
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    return new Promise((resolve, reject) => {
+      const tag = requestTag();
+      this.firestore.initializeIfNeeded(tag).then(() => {
+        const request = this.toProto(/* transactionId */ undefined, 'PROFILE');
+        this._firestore
+          .requestStream('runQuery', /* bidirectional= */ false, request, tag)
+          .then(stream => {
+            stream.on('error', err => {
+              reject(wrapError(err, stack));
+            });
+            stream.on('data', response => {
+              if (response.document) {
+                readTime = Timestamp.fromProto(response.readTime);
+                const document = this.firestore.snapshot_(
+                  response.document,
+                  response.readTime
+                );
+                const finalDoc = new DocumentSnapshotBuilder<
+                  AppModelType,
+                  DbModelType
+                >(document.ref.withConverter(this._queryOptions.converter));
+                // Recreate the QueryDocumentSnapshot with the DocumentReference
+                // containing the original converter.
+                finalDoc.fieldsProto = document._fieldsProto;
+                finalDoc.readTime = document.readTime;
+                finalDoc.createTime = document.createTime;
+                finalDoc.updateTime = document.updateTime;
+                docs.push(
+                  finalDoc.build() as QueryDocumentSnapshot<
+                    AppModelType,
+                    DbModelType
+                  >
+                );
+              }
+              if (response.stats) {
+                if (response.stats.queryPlan) {
+                  queryPlan = Plan.fromProto();
+                  // queryPlan = new Plan(
+                  //   this.firestore._serializer!.decodeGoogleProtobufStruct(
+                  //     response.stats.queryPlan.planInfo
+                  //   )
+                  // );
+                }
+                if (response.stats.queryStats) {
+                  executionStats = ExecutionStats.fromProto();
+                  // this.firestore._serializer!.decodeGoogleProtobufStruct(
+                  //   response.stats.queryStats
+                  // );
+                }
+              }
+              if (response.done) {
+                stream.end();
+              }
+            });
+            stream.on('end', () => {
+              if (this._queryOptions.limitType === LimitType.Last) {
+                // The results for limitToLast queries need to be flipped since
+                // we reversed the ordering constraints before sending the query
+                // to the backend.
+                docs.reverse();
+              }
+              const querySnapshot = new QuerySnapshot(
+                this,
+                readTime,
+                docs.length,
+                () => docs,
+                () => {
+                  const changes: Array<
+                    DocumentChange<AppModelType, DbModelType>
+                  > = [];
+                  for (let i = 0; i < docs.length; ++i) {
+                    changes.push(new DocumentChange('added', docs[i], -1, i));
+                  }
+                  return changes;
+                }
+              );
+              resolve(
+                new ExplainResults<QuerySnapshot<AppModelType, DbModelType>>(
+                  queryPlan,
+                  executionStats,
+                  querySnapshot
+                )
+              );
+            });
+            stream.resume();
+          });
+      });
+    });
   }
 
   /**
@@ -2428,6 +2504,28 @@ export class Query<
    * ```
    */
   stream(): NodeJS.ReadableStream {
+    if (this._queryOptions.limitType === LimitType.Last) {
+      throw new Error(
+        'Query results for queries that include limitToLast() ' +
+          'constraints cannot be streamed. Use Query.get() instead.'
+      );
+    }
+
+    const responseStream = this._stream();
+    const transform = new Transform({
+      objectMode: true,
+      transform(chunk, encoding, callback) {
+        callback(undefined, chunk.document);
+      },
+    });
+
+    responseStream.pipe(transform);
+    responseStream.on('error', e => transform.destroy(e));
+    return transform;
+  }
+
+  // TODO.
+  explainStream(): NodeJS.ReadableStream {
     if (this._queryOptions.limitType === LimitType.Last) {
       throw new Error(
         'Query results for queries that include limitToLast() ' +
@@ -2780,114 +2878,6 @@ export class Query<
       .catch(e => stream.destroy(e));
 
     return stream;
-  }
-
-  /**
-   * Internal streaming method for query profiling.
-   *
-   * @param queryMode The query profiling mode.
-   * @private
-   * @internal
-   * @returns A QueryProfile object containing the results of the profiling.
-   */
-  _getQueryProfileInfo(
-    queryMode: QueryMode
-  ): Promise<firestore.QueryProfile<QuerySnapshot<AppModelType, DbModelType>>> {
-    let readTime: Timestamp;
-    const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
-    let queryPlan: QueryPlan = {planInfo: {}};
-    let executionStats: firestore.InformationalQueryExecutionStats = {};
-
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    return new Promise((resolve, reject) => {
-      const tag = requestTag();
-      this.firestore.initializeIfNeeded(tag).then(() => {
-        const request = this.toProto(/* transactionId */ undefined, queryMode);
-        this._firestore
-          .requestStream('runQuery', /* bidirectional= */ false, request, tag)
-          .then(stream => {
-            stream.on('error', err => {
-              reject(wrapError(err, stack));
-            });
-            stream.on('data', response => {
-              if (response.document) {
-                readTime = Timestamp.fromProto(response.readTime);
-                const document = this.firestore.snapshot_(
-                  response.document,
-                  response.readTime
-                );
-                const finalDoc = new DocumentSnapshotBuilder<
-                  AppModelType,
-                  DbModelType
-                >(document.ref.withConverter(this._queryOptions.converter));
-                // Recreate the QueryDocumentSnapshot with the DocumentReference
-                // containing the original converter.
-                finalDoc.fieldsProto = document._fieldsProto;
-                finalDoc.readTime = document.readTime;
-                finalDoc.createTime = document.createTime;
-                finalDoc.updateTime = document.updateTime;
-                docs.push(
-                  finalDoc.build() as QueryDocumentSnapshot<
-                    AppModelType,
-                    DbModelType
-                  >
-                );
-              }
-              if (response.stats) {
-                if (response.stats.queryPlan) {
-                  queryPlan = new QueryPlan(
-                    this.firestore._serializer!.decodeGoogleProtobufStruct(
-                      response.stats.queryPlan.planInfo
-                    )
-                  );
-                }
-                if (response.stats.queryStats) {
-                  executionStats =
-                    this.firestore._serializer!.decodeGoogleProtobufStruct(
-                      response.stats.queryStats
-                    );
-                }
-              }
-              if (response.done) {
-                stream.end();
-              }
-            });
-            stream.on('end', () => {
-              if (this._queryOptions.limitType === LimitType.Last) {
-                // The results for limitToLast queries need to be flipped since
-                // we reversed the ordering constraints before sending the query
-                // to the backend.
-                docs.reverse();
-              }
-              const querySnapshot = new QuerySnapshot(
-                this,
-                readTime,
-                docs.length,
-                () => docs,
-                () => {
-                  const changes: Array<
-                    DocumentChange<AppModelType, DbModelType>
-                  > = [];
-                  for (let i = 0; i < docs.length; ++i) {
-                    changes.push(new DocumentChange('added', docs[i], -1, i));
-                  }
-                  return changes;
-                }
-              );
-              resolve(
-                new QueryProfile<QuerySnapshot<AppModelType, DbModelType>>(
-                  queryPlan,
-                  executionStats,
-                  querySnapshot
-                )
-              );
-            });
-            stream.resume();
-          });
-      });
-    });
   }
 
   /**
@@ -3479,91 +3469,6 @@ export class AggregateQuery<
   }
 
   /**
-   * Internal streaming method for aggregate query profiling.
-   *
-   * @param queryMode The query profiling mode.
-   * @private
-   * @internal
-   * @returns A QueryProfile object containing the results of the profiling.
-   */
-  _getQueryProfileInfo(
-    queryMode: QueryMode
-  ): Promise<
-    QueryProfile<
-      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-    >
-  > {
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    let aggregationResult: AggregateQuerySnapshot<
-      AggregateSpecType,
-      AppModelType,
-      DbModelType
-    >;
-    let planInfo: QueryPlan = {planInfo: {}};
-    let executionStats: firestore.InformationalQueryExecutionStats = {};
-
-    return new Promise((resolve, reject) => {
-      const tag = requestTag();
-      const firestore = this._query.firestore;
-      firestore.initializeIfNeeded(tag).then(() => {
-        const request = this.toProto(/* transactionId */ undefined, queryMode);
-        firestore
-          .requestStream(
-            'runAggregationQuery',
-            /* bidirectional= */ false,
-            request,
-            tag
-          )
-          .then(stream => {
-            stream.on('error', err => {
-              reject(wrapError(err, stack));
-            });
-            stream.on('data', response => {
-              if (response.result) {
-                const readTime = Timestamp.fromProto(response.readTime!);
-                const data = this.decodeResult(response.result);
-                aggregationResult = new AggregateQuerySnapshot(
-                  this,
-                  readTime,
-                  data
-                );
-              }
-              if (response.stats) {
-                if (response.stats.queryPlan) {
-                  planInfo = new QueryPlan(
-                    this._query.firestore._serializer!.decodeGoogleProtobufStruct(
-                      response.stats.queryPlan.planInfo
-                    )
-                  );
-                }
-                if (response.stats.queryStats) {
-                  executionStats =
-                    this._query.firestore._serializer!.decodeGoogleProtobufStruct(
-                      response.stats.queryStats
-                    );
-                }
-              }
-            });
-            stream.on('end', () => {
-              resolve(
-                new QueryProfile<
-                  AggregateQuerySnapshot<
-                    AggregateSpecType,
-                    AppModelType,
-                    DbModelType
-                  >
-                >(planInfo, executionStats, aggregationResult)
-              );
-            });
-            stream.resume();
-          });
-      });
-    });
-  }
-
-  /**
    * Internal streaming method that accepts an optional transaction ID.
    *
    * @private
@@ -3732,16 +3637,91 @@ export class AggregateQuery<
     return deepEqual(this._aggregates, other._aggregates);
   }
 
-  explain(): Promise<firestore.QueryPlan> {
-    return this._getQueryProfileInfo('PLAN').then(info => info.plan);
-  }
-
-  explainAnalyze(): Promise<
-    firestore.QueryProfile<
+  /**
+   * Plans and optionally executes this query. Returns an ApiFuture that will be
+   * resolved with the planner information, statistics from the query execution (if any),
+   * and the query results (if any).
+   *
+   * @return An ApiFuture that will be resolved with the planner information, statistics
+   *  from the query execution (if any), and the query results (if any).
+   */
+  explain(
+    options: firestore.ExplainOptions
+  ): Promise<
+    ExplainResults<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
     >
   > {
-    return this._getQueryProfileInfo('PROFILE');
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    let aggregationResult: AggregateQuerySnapshot<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >;
+    let plan: Plan;
+    let executionStats: ExecutionStats | null = null;
+
+    return new Promise((resolve, reject) => {
+      const tag = requestTag();
+      const firestore = this._query.firestore;
+      firestore.initializeIfNeeded(tag).then(() => {
+        const request = this.toProto(/* transactionId */ undefined, 'PROFILE');
+        firestore
+          .requestStream(
+            'runAggregationQuery',
+            /* bidirectional= */ false,
+            request,
+            tag
+          )
+          .then(stream => {
+            stream.on('error', err => {
+              reject(wrapError(err, stack));
+            });
+            stream.on('data', response => {
+              if (response.result) {
+                const readTime = Timestamp.fromProto(response.readTime!);
+                const data = this.decodeResult(response.result);
+                aggregationResult = new AggregateQuerySnapshot(
+                  this,
+                  readTime,
+                  data
+                );
+              }
+              if (response.stats) {
+                if (response.stats.queryPlan) {
+                  plan = Plan.fromProto();
+                  // planInfo = new Plan(
+                  //   this._query.firestore._serializer!.decodeGoogleProtobufStruct(
+                  //     response.stats.queryPlan.planInfo
+                  //   )
+                  // );
+                }
+                if (response.stats.queryStats) {
+                  executionStats = ExecutionStats.fromProto();
+                  // executionStats =
+                  //   this._query.firestore._serializer!.decodeGoogleProtobufStruct(
+                  //     response.stats.queryStats
+                  //   );
+                }
+              }
+            });
+            stream.on('end', () => {
+              resolve(
+                new ExplainResults<
+                  AggregateQuerySnapshot<
+                    AggregateSpecType,
+                    AppModelType,
+                    DbModelType
+                  >
+                >(plan, executionStats, aggregationResult)
+              );
+            });
+            stream.resume();
+          });
+      });
+    });
   }
 }
 

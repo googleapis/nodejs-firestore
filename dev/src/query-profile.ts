@@ -17,10 +17,40 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-export class QueryProfile<T> implements firestore.QueryProfile<T> {
+/**
+ * Plan contains information about the planning stage of a query.
+ */
+export class Plan implements firestore.Plan {
+  constructor(readonly indexesUsed: Record<string, unknown>) {}
+
+  static fromProto(): Plan {
+    return new Plan({});
+  }
+}
+
+/** ExecutionStats contains information about the execution of a query. */
+export class ExecutionStats implements firestore.ExecutionStats {
   constructor(
-    readonly plan: firestore.QueryPlan,
-    readonly stats: firestore.InformationalQueryExecutionStats,
-    readonly snapshot: T
+    readonly resultsReturned: number,
+    readonly bytesReturned: number,
+    readonly executionDuration: firestore.Duration,
+    readonly readOperations: number,
+    readonly debugStats: Record<string, unknown>
+  ) {}
+
+  static fromProto(): ExecutionStats {
+    return new ExecutionStats(0, 0, {seconds: 0, nanoseconds: 0}, 0, {});
+  }
+}
+
+/**
+ * ExplainResults contains information about planning, execution, and results
+ * of a query.
+ */
+export class ExplainResults<T> implements firestore.ExplainResults<T> {
+  constructor(
+    readonly plan: Plan,
+    readonly executionStats: ExecutionStats | null,
+    readonly snapshot: T | null
   ) {}
 }

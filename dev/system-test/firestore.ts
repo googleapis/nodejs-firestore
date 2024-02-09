@@ -148,39 +148,61 @@ describe('Firestore class', () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const plan = await randomCol.where('foo', '>', 1).explain();
-    expect(Object.keys(plan.planInfo).length).to.be.greaterThan(0);
+    const explainResults = await randomCol.where('foo', '>', 1).explain({analyze: false});
+
+    const plan = explainResults.plan;
+    expect(explainResults.plan).to.not.be.null;
+    expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
+
+    expect(explainResults.executionStats).to.be.null;
+    expect(explainResults.snapshot).to.be.null;
   });
 
   it('can profile a query', async () => {
     await randomCol.doc('doc1').set({foo: 1, bar: 0});
     await randomCol.doc('doc2').set({foo: 2, bar: 1});
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
-    const profile = await randomCol.where('foo', '==', 1).explainAnalyze();
-    expect(Object.keys(profile.plan.planInfo).length).to.be.greaterThan(0);
-    expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
-    expect(profile.snapshot.size).to.equal(2);
+    const explainResults = await randomCol.where('foo', '==', 1).explain({analyze: true});
+
+    expect(explainResults.plan).to.not.be.null;
+    expect(explainResults.executionStats).to.not.be.null;
+    expect(explainResults.snapshot).to.not.be.null;
+
+    expect(Object.keys(explainResults.plan.indexesUsed).length).to.be.greaterThan(0);
+    expect(Object.keys(explainResults.executionStats!).length).to.be.greaterThan(0);
+    expect(explainResults.snapshot!.size).to.equal(2);
   });
 
   it('can plan an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const plan = await randomCol.where('foo', '>', 0).count().explain();
-    expect(Object.keys(plan.planInfo).length).to.be.greaterThan(0);
+    const explainResults = await randomCol.where('foo', '>', 0).count().explain({analyze: false});
+
+    expect(explainResults.plan).to.not.be.null;
+    const plan = explainResults.plan;
+    expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
+
+    expect(explainResults.executionStats).to.be.null;
+    expect(explainResults.snapshot).to.be.null;
   });
 
   it('can profile an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const profile = await randomCol
+    const explainResults = await randomCol
       .where('foo', '<', 3)
       .count()
-      .explainAnalyze();
-    expect(Object.keys(profile.plan.planInfo).length).to.be.greaterThan(0);
-    expect(Object.keys(profile.stats).length).to.be.greaterThan(0);
-    expect(profile.snapshot.data().count).to.equal(3);
+      .explain({analyze: true});
+
+    expect(explainResults.plan).to.not.be.null;
+    expect(explainResults.executionStats).to.not.be.null;
+    expect(explainResults.snapshot).to.not.be.null;
+
+    expect(Object.keys(explainResults.plan.indexesUsed).length).to.be.greaterThan(0);
+    expect(Object.keys(explainResults.executionStats!).length).to.be.greaterThan(0);
+    expect(explainResults.snapshot!.data().count).to.equal(3);
   });
 
   it('getAll() supports array destructuring', () => {
