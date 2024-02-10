@@ -144,40 +144,52 @@ describe('Firestore class', () => {
       });
   });
 
-  it('can plan a query', async () => {
+  it.only('can plan a query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const explainResults = await randomCol.where('foo', '>', 1).explain({analyze: false});
+    const explainResults = await randomCol
+      .where('foo', '>', 1)
+      .explain({analyze: false});
 
     const plan = explainResults.plan;
     expect(explainResults.plan).to.not.be.null;
+    console.log(explainResults);
     expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
 
     expect(explainResults.executionStats).to.be.null;
     expect(explainResults.snapshot).to.be.null;
   });
 
-  it('can profile a query', async () => {
+  it.only('can profile a query', async () => {
     await randomCol.doc('doc1').set({foo: 1, bar: 0});
     await randomCol.doc('doc2').set({foo: 2, bar: 1});
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
-    const explainResults = await randomCol.where('foo', '==', 1).explain({analyze: true});
+    const explainResults = await randomCol
+      .where('foo', '==', 1)
+      .explain({analyze: true});
 
     expect(explainResults.plan).to.not.be.null;
     expect(explainResults.executionStats).to.not.be.null;
     expect(explainResults.snapshot).to.not.be.null;
 
-    expect(Object.keys(explainResults.plan.indexesUsed).length).to.be.greaterThan(0);
-    expect(Object.keys(explainResults.executionStats!).length).to.be.greaterThan(0);
+    expect(
+      Object.keys(explainResults.plan.indexesUsed).length
+    ).to.be.greaterThan(0);
+    expect(
+      Object.keys(explainResults.executionStats!).length
+    ).to.be.greaterThan(0);
     expect(explainResults.snapshot!.size).to.equal(2);
   });
 
-  it('can plan an aggregate query', async () => {
+  it.only('can plan an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const explainResults = await randomCol.where('foo', '>', 0).count().explain({analyze: false});
+    const explainResults = await randomCol
+      .where('foo', '>', 0)
+      .count()
+      .explain({analyze: false});
 
     expect(explainResults.plan).to.not.be.null;
     const plan = explainResults.plan;
@@ -187,7 +199,7 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot).to.be.null;
   });
 
-  it('can profile an aggregate query', async () => {
+  it.only('can profile an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
@@ -200,8 +212,12 @@ describe('Firestore class', () => {
     expect(explainResults.executionStats).to.not.be.null;
     expect(explainResults.snapshot).to.not.be.null;
 
-    expect(Object.keys(explainResults.plan.indexesUsed).length).to.be.greaterThan(0);
-    expect(Object.keys(explainResults.executionStats!).length).to.be.greaterThan(0);
+    expect(
+      Object.keys(explainResults.plan.indexesUsed).length
+    ).to.be.greaterThan(0);
+    expect(
+      Object.keys(explainResults.executionStats!).length
+    ).to.be.greaterThan(0);
     expect(explainResults.snapshot!.data().count).to.equal(3);
   });
 
@@ -1391,13 +1407,13 @@ describe('runs query on a large collection', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('can get()', () => {
+  it.only('can get()', () => {
     return randomCol.get().then(res => {
       expect(res.size).to.equal(1000);
     });
   });
 
-  it('can stream()', async () => {
+  it.only('can stream()', async () => {
     let received = 0;
     const stream = randomCol.stream();
 

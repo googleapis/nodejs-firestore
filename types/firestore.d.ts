@@ -1922,7 +1922,7 @@ declare namespace FirebaseFirestore {
      *  may be no ExecutionStats or QueryDocumentSnapshot objects depending on explain
      *  options.
      */
-    explainStream(): NodeJS.ReadableStream;
+    explainStream(options: ExplainOptions): NodeJS.ReadableStream;
 
     /**
      * Attaches a listener for `QuerySnapshot `events.
