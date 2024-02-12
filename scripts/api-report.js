@@ -20,76 +20,77 @@ const path = require('path');
 const {join} = path;
 
 async function apiReport(opts) {
-    // Location of the created API report file.
-    // This file should be checked in.
-    const outputDir = join(opts.cwd, 'api-report');
-    await fs.ensureDir(outputDir);
+  // Location of the created API report file.
+  // This file should be checked in.
+  const outputDir = join(opts.cwd, 'api-report');
+  await fs.ensureDir(outputDir);
 
-    // Create API Extractor config file for the package.
-    // This config extends the API Extractor config file
-    // used by Cloud RAD, to ensure the base configuration
-    // is the sme.
-    const apiExtractorConfig = {
-        extends: join(opts.cloudRadApiExtractorConfigPath),
-        mainEntryPointFilePath: join(opts.cwd, 'build', 'src', 'index.d.ts'),
-        projectFolder: opts.cwd,
-        docModel: {
-            enabled: false
+  // Create API Extractor config file for the package.
+  // This config extends the API Extractor config file
+  // used by Cloud RAD, to ensure the base configuration
+  // is the sme.
+  const apiExtractorConfig = {
+    extends: join(opts.cloudRadApiExtractorConfigPath),
+    mainEntryPointFilePath: join(opts.cwd, 'build', 'src', 'index.d.ts'),
+    projectFolder: opts.cwd,
+    docModel: {
+      enabled: false,
+    },
+    apiReport: {
+      enabled: true,
+    },
+    dtsRollup: {
+      enabled: false,
+    },
+    messages: {
+      extractorMessageReporting: {
+        'ae-forgotten-export': {
+          logLevel: 'warning',
         },
-        apiReport: {
-            enabled: true
-        },
-        dtsRollup: {
-            enabled: false
-        },
-        messages: {
-            extractorMessageReporting: {
-                'ae-forgotten-export': {
-                    logLevel: "warning"
-                }
-            },
-        }
-    };
-    const apiExtractorConfigPath = join(opts.cwd, 'api-extractor.json');
-    await fs.writeFile(
-        apiExtractorConfigPath,
-        JSON.stringify(apiExtractorConfig, null, 2)
-    );
+      },
+    },
+  };
+  const apiExtractorConfigPath = join(opts.cwd, 'api-extractor.json');
+  await fs.writeFile(
+    apiExtractorConfigPath,
+    JSON.stringify(apiExtractorConfig, null, 2)
+  );
 
-    // Run API Extractor
-    const apiExtractorCmd = join(
-        process.cwd(),
-        'node_modules',
-        '.bin',
-        'api-extractor'
-    );
-    await withLogs(execaNode)(apiExtractorCmd, ['run', '--local'], outputDir);
-    
-    // Cleanup
-    await fs.remove(apiExtractorConfigPath);
+  // Run API Extractor
+  const apiExtractorCmd = join(
+    process.cwd(),
+    'node_modules',
+    '.bin',
+    'api-extractor'
+  );
+  await withLogs(execaNode)(apiExtractorCmd, ['run', '--local'], outputDir);
 
-    return outputDir;
+  // Cleanup
+  await fs.remove(apiExtractorConfigPath);
+
+  return outputDir;
 }
 
 function withLogs(execaFn) {
-    return async function (cmd, args, cwd) {
-        const opts = {cwd};
+  return async function (cmd, args, cwd) {
+    const opts = {cwd};
 
-        opts.stdout = process.stdout;
-        opts.stderr = process.stderr;
+    opts.stdout = process.stdout;
+    opts.stderr = process.stderr;
 
-        return execaFn(cmd, args, opts);
-    };
+    return execaFn(cmd, args, opts);
+  };
 }
 
-
 apiReport({
-    cloudRadApiExtractorConfigPath: require.resolve('@google-cloud/cloud-rad/api-extractor.json'),
-    cwd: process.cwd()
+  cloudRadApiExtractorConfigPath: require.resolve(
+    '@google-cloud/cloud-rad/api-extractor.json'
+  ),
+  cwd: process.cwd(),
 })
-    .then((outputDir) => {
-        console.log(`SUCCESS: API Report written to ${outputDir}`)
-    })
-    .catch(err => {
-        console.log(`FAILED: ${err}`)
-    });
+  .then(outputDir => {
+    console.log(`SUCCESS: API Report written to ${outputDir}`);
+  })
+  .catch(err => {
+    console.log(`FAILED: ${err}`);
+  });
