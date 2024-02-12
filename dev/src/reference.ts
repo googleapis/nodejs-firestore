@@ -1416,19 +1416,29 @@ export class Query<
 > implements firestore.Query<AppModelType, DbModelType>
 {
   private readonly _serializer: Serializer;
-  /** @private */
+  /**
+   * @internal
+   * @private
+   **/
   protected readonly _allowUndefined: boolean;
 
   /**
+   * @internal
    * @private
    *
    * @param _firestore The Firestore Database client.
    * @param _queryOptions Options that define the query.
    */
   constructor(
-    /** @private */
+    /**
+     * @internal
+     * @private
+     **/
     readonly _firestore: Firestore,
-    /** @private */
+    /**
+     * @internal
+     * @private
+     **/
     protected readonly _queryOptions: QueryOptions<AppModelType, DbModelType>
   ) {
     this._serializer = new Serializer(_firestore);
@@ -1446,8 +1456,6 @@ export class Query<
    * @param fieldOrders The field order that defines what fields we should
    * extract.
    * @return {Array.<*>} The field values to use.
-   * @private
-   * @internal
    */
   static _extractFieldValues(
     documentSnapshot: DocumentSnapshot,
@@ -1586,6 +1594,9 @@ export class Query<
     return new Query(this._firestore, options);
   }
 
+  /**
+   * @internal
+   */
   _parseFilter(filter: Filter): FilterInternal {
     if (filter instanceof UnaryFilter) {
       return this._parseFieldFilter(filter);
@@ -1593,6 +1604,9 @@ export class Query<
     return this._parseCompositeFilter(filter as CompositeFilter);
   }
 
+  /**
+   * @internal
+   */
   _parseFieldFilter(fieldFilterData: UnaryFilter): FieldFilterInternal {
     let value = fieldFilterData._getValue();
     let operator = fieldFilterData._getOperator();
@@ -1631,6 +1645,9 @@ export class Query<
     );
   }
 
+  /**
+   * @internal
+   */
   _parseCompositeFilter(compositeFilterData: CompositeFilter): FilterInternal {
     const parsedFilters = compositeFilterData
       ._getFilters()
@@ -2571,11 +2588,17 @@ export class Query<
     return structuredQuery;
   }
 
-  // This method exists solely to enable unit tests to mock it.
+  /**
+   * @internal
+   * This method exists solely to enable unit tests to mock it.
+   */
   _isPermanentRpcError(err: GoogleError, methodName: string): boolean {
     return isPermanentRpcError(err, methodName);
   }
 
+  /**
+   * @internal
+   */
   _hasRetryTimedOut(methodName: string, startTime: number): boolean {
     const totalTimeout = getTotalTimeout(methodName);
     if (totalTimeout === 0) {

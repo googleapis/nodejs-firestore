@@ -132,6 +132,7 @@ export class WriteBatch implements firestore.WriteBatch {
   /**
    * The number of writes in this batch.
    * @private
+   * @internal
    */
   get _opCount(): number {
     return this._ops.length;
