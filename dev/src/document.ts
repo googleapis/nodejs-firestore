@@ -121,6 +121,7 @@ export class DocumentSnapshot<
 
   /**
    * @private
+   * @internal
    *
    * @param ref The reference to the document.
    * @param _fieldsProto The fields of the Firestore `Document` Protobuf backing
@@ -134,7 +135,10 @@ export class DocumentSnapshot<
    */
   constructor(
     ref: DocumentReference<AppModelType, DbModelType>,
-    /** @private */
+    /**
+     * @internal
+     * @private
+     **/
     readonly _fieldsProto?: ApiMapValue,
     readTime?: Timestamp,
     createTime?: Timestamp,

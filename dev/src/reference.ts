@@ -141,17 +141,22 @@ export class DocumentReference<
 {
   /**
    * @private
-   *
-   * @private
+   * @internal
    * @param _firestore The Firestore Database client.
    * @param _path The Path of this reference.
    * @param _converter The converter to use when serializing data.
    */
   constructor(
     private readonly _firestore: Firestore,
-    /** @private */
+    /**
+     * @private
+     * @internal
+     **/
     readonly _path: ResourcePath,
-    /** @private */
+    /**
+     * @internal
+     * @private
+     **/
     readonly _converter = defaultConverter<AppModelType, DbModelType>()
   ) {}
 
