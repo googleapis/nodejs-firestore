@@ -20,10 +20,14 @@ const path = require('path');
 const {join} = path;
 
 async function apiReport(opts) {
+  const cwd = opts.cwd;
+
   // Location of the created API report file.
   // This file should be checked in.
-  const outputDir = join(opts.cwd, 'api-report');
+  const outputDir = join(cwd, 'api-report');
   await fs.ensureDir(outputDir);
+
+  console.log(outputDir);
 
   // Create API Extractor config file for the package.
   // This config extends the API Extractor config file
@@ -31,13 +35,14 @@ async function apiReport(opts) {
   // is the sme.
   const apiExtractorConfig = {
     extends: join(opts.cloudRadApiExtractorConfigPath),
-    mainEntryPointFilePath: join(opts.cwd, 'build', 'src', 'index.d.ts'),
-    projectFolder: opts.cwd,
+    mainEntryPointFilePath: join(cwd, 'build', 'src', 'index.d.ts'),
+    projectFolder: cwd,
     docModel: {
       enabled: false,
     },
     apiReport: {
       enabled: true,
+      reportFolder: outputDir,
     },
     dtsRollup: {
       enabled: false,
@@ -50,7 +55,7 @@ async function apiReport(opts) {
       },
     },
   };
-  const apiExtractorConfigPath = join(opts.cwd, 'api-extractor.json');
+  const apiExtractorConfigPath = join(cwd, 'api-extractor.json');
   await fs.writeFile(
     apiExtractorConfigPath,
     JSON.stringify(apiExtractorConfig, null, 2)
@@ -63,7 +68,7 @@ async function apiReport(opts) {
     '.bin',
     'api-extractor'
   );
-  await withLogs(execaNode)(apiExtractorCmd, ['run', '--local'], outputDir);
+  await withLogs(execaNode)(apiExtractorCmd, ['run', '--local']);
 
   // Cleanup
   await fs.remove(apiExtractorConfigPath);
