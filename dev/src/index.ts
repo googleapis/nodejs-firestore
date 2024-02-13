@@ -86,25 +86,34 @@ import {
 } from './recursive-delete';
 
 export {
+  AggregateQuery,
+  AggregateQuerySnapshot,
   CollectionReference,
   DocumentReference,
   QuerySnapshot,
   Query,
 } from './reference';
-export {BulkWriter} from './bulk-writer';
+export {BulkWriter, BulkWriterError} from './bulk-writer';
+export {BundleBuilder} from './bundle';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
 export {Filter} from './filter';
 export {WriteBatch, WriteResult} from './write-batch';
 export {Transaction} from './transaction';
 export {Timestamp} from './timestamp';
-export {DocumentChange} from './document-change';
+export {DocumentChange, DocumentChangeType} from './document-change';
 export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {CollectionGroup};
 export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
-export {AggregateField, Aggregate} from './aggregate';
+export {
+  Aggregate,
+  AggregateField,
+  AggregateFieldType,
+  AggregateSpec,
+  AggregateType,
+} from './aggregate';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
