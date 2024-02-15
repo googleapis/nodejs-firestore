@@ -3286,9 +3286,7 @@ export class AggregateQuery<
   private readonly serverAliasToClientAliasMap: Record<string, string> = {};
 
   /**
-   * @private
    * @internal
-   *
    * @param _query The query whose aggregations will be calculated by this
    * object.
    * @param _aggregates The aggregations that will be performed by this query.
@@ -3535,7 +3533,6 @@ export class AggregateQuerySnapshot<
     >
 {
   /**
-   * @private
    * @internal
    *
    * @param _query The query that was executed to produce this result.

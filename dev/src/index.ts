@@ -86,22 +86,26 @@ import {
 } from './recursive-delete';
 
 export {
-  AggregateQuery,
-  AggregateQuerySnapshot,
   CollectionReference,
   DocumentReference,
   QuerySnapshot,
   Query,
 } from './reference';
-export {BulkWriter, BulkWriterError} from './bulk-writer';
-export {BundleBuilder} from './bundle';
+export type {
+  AggregateQuery,
+  AggregateQuerySnapshot
+} from './reference';
+export {BulkWriter} from './bulk-writer';
+export type {BulkWriterError} from './bulk-writer';
+export type {BundleBuilder} from './bundle';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
 export {Filter} from './filter';
 export {WriteBatch, WriteResult} from './write-batch';
 export {Transaction} from './transaction';
 export {Timestamp} from './timestamp';
-export {DocumentChange, DocumentChangeType} from './document-change';
+export {DocumentChange} from './document-change';
+export type {DocumentChangeType} from './document-change';
 export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {CollectionGroup};
@@ -109,7 +113,9 @@ export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
 export {
   Aggregate,
-  AggregateField,
+  AggregateField
+} from './aggregate';
+export type {
   AggregateFieldType,
   AggregateSpec,
   AggregateType,
