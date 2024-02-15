@@ -162,14 +162,60 @@ function stubAsyncIterationCall<ResponseType>(
 
 describe('v1.FirestoreClient', () => {
   describe('Common methods', () => {
-    it('has servicePath', () => {
-      const servicePath = firestoreModule.FirestoreClient.servicePath;
-      assert(servicePath);
+    it('has apiEndpoint', () => {
+      const client = new firestoreModule.FirestoreClient();
+      const apiEndpoint = client.apiEndpoint;
+      assert.strictEqual(apiEndpoint, 'firestore.googleapis.com');
     });
 
-    it('has apiEndpoint', () => {
-      const apiEndpoint = firestoreModule.FirestoreClient.apiEndpoint;
-      assert(apiEndpoint);
+    it('has universeDomain', () => {
+      const client = new firestoreModule.FirestoreClient();
+      const universeDomain = client.universeDomain;
+      assert.strictEqual(universeDomain, 'googleapis.com');
+    });
+
+    if (
+      typeof process !== 'undefined' &&
+      typeof process.emitWarning === 'function'
+    ) {
+      it('throws DeprecationWarning if static servicePath is used', () => {
+        const stub = sinon.stub(process, 'emitWarning');
+        const servicePath = firestoreModule.FirestoreClient.servicePath;
+        assert.strictEqual(servicePath, 'firestore.googleapis.com');
+        assert(stub.called);
+        stub.restore();
+      });
+
+      it('throws DeprecationWarning if static apiEndpoint is used', () => {
+        const stub = sinon.stub(process, 'emitWarning');
+        const apiEndpoint = firestoreModule.FirestoreClient.apiEndpoint;
+        assert.strictEqual(apiEndpoint, 'firestore.googleapis.com');
+        assert(stub.called);
+        stub.restore();
+      });
+    }
+    it('sets apiEndpoint according to universe domain camelCase', () => {
+      const client = new firestoreModule.FirestoreClient({
+        universeDomain: 'example.com',
+      });
+      const servicePath = client.apiEndpoint;
+      assert.strictEqual(servicePath, 'firestore.example.com');
+    });
+
+    it('sets apiEndpoint according to universe domain snakeCase', () => {
+      const client = new firestoreModule.FirestoreClient({
+        universe_domain: 'example.com',
+      });
+      const servicePath = client.apiEndpoint;
+      assert.strictEqual(servicePath, 'firestore.example.com');
+    });
+    it('does not allow setting both universeDomain and universe_domain', () => {
+      assert.throws(() => {
+        new firestoreModule.FirestoreClient({
+          universe_domain: 'example.com',
+          universeDomain: 'example.net',
+        });
+      });
     });
 
     it('has port', () => {
@@ -1421,11 +1467,7 @@ describe('v1.FirestoreClient', () => {
       const expectedError = new Error('The client has already been closed.');
       client.close();
       const stream = client.batchGetDocuments(request, {
-        retry: {
-          shouldRetryFn: () => {
-            return false;
-          },
-        },
+        retryRequestOptions: {noResponseRetries: 0},
       });
       const promise = new Promise((resolve, reject) => {
         stream.on(
@@ -1546,11 +1588,7 @@ describe('v1.FirestoreClient', () => {
       const expectedError = new Error('The client has already been closed.');
       client.close();
       const stream = client.runQuery(request, {
-        retry: {
-          shouldRetryFn: () => {
-            return false;
-          },
-        },
+        retryRequestOptions: {noResponseRetries: 0},
       });
       const promise = new Promise((resolve, reject) => {
         stream.on(
@@ -1676,11 +1714,7 @@ describe('v1.FirestoreClient', () => {
       const expectedError = new Error('The client has already been closed.');
       client.close();
       const stream = client.runAggregationQuery(request, {
-        retry: {
-          shouldRetryFn: () => {
-            return false;
-          },
-        },
+        retryRequestOptions: {noResponseRetries: 0},
       });
       const promise = new Promise((resolve, reject) => {
         stream.on(
