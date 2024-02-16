@@ -511,6 +511,11 @@ declare namespace FirebaseFirestore {
     settings(settings: Settings): void;
 
     /**
+     * Returns the Database ID for this Firestore instance.
+     */
+    get databaseId(): string;
+
+    /**
      * Gets a `CollectionReference` instance that refers to the collection at
      * the specified path.
      *
