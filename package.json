@@ -28,6 +28,8 @@
     "firestore"
   ],
   "scripts": {
+    "precloud-rad": "npm run compile",
+    "cloud-rad": "NO_UPLOAD=1 npx @google-cloud/cloud-rad",
     "preapi-report": "npm run compile",
     "api-report": "node scripts/api-report.js",
     "predocs": "npm run compile",
