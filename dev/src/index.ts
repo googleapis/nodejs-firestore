@@ -91,10 +91,7 @@ export {
   QuerySnapshot,
   Query,
 } from './reference';
-export type {
-  AggregateQuery,
-  AggregateQuerySnapshot
-} from './reference';
+export type {AggregateQuery, AggregateQuerySnapshot} from './reference';
 export {BulkWriter} from './bulk-writer';
 export type {BulkWriterError} from './bulk-writer';
 export type {BundleBuilder} from './bundle';
@@ -111,10 +108,7 @@ export {GeoPoint} from './geo-point';
 export {CollectionGroup};
 export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
-export {
-  Aggregate,
-  AggregateField
-} from './aggregate';
+export {Aggregate, AggregateField} from './aggregate';
 export type {
   AggregateFieldType,
   AggregateSpec,
