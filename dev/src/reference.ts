@@ -1596,6 +1596,7 @@ export class Query<
 
   /**
    * @internal
+   * @private
    */
   _parseFilter(filter: Filter): FilterInternal {
     if (filter instanceof UnaryFilter) {
@@ -1606,6 +1607,7 @@ export class Query<
 
   /**
    * @internal
+   * @private
    */
   _parseFieldFilter(fieldFilterData: UnaryFilter): FieldFilterInternal {
     let value = fieldFilterData._getValue();
@@ -1647,6 +1649,7 @@ export class Query<
 
   /**
    * @internal
+   * @private
    */
   _parseCompositeFilter(compositeFilterData: CompositeFilter): FilterInternal {
     const parsedFilters = compositeFilterData
@@ -2590,6 +2593,7 @@ export class Query<
 
   /**
    * @internal
+   * @private
    * This method exists solely to enable unit tests to mock it.
    */
   _isPermanentRpcError(err: GoogleError, methodName: string): boolean {
@@ -2598,6 +2602,7 @@ export class Query<
 
   /**
    * @internal
+   * @private
    */
   _hasRetryTimedOut(methodName: string, startTime: number): boolean {
     const totalTimeout = getTotalTimeout(methodName);

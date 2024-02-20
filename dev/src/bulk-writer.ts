@@ -327,6 +327,10 @@ class BufferedOperation {
  * @class BulkWriterError
  */
 export class BulkWriterError extends Error {
+  /**
+   * @private
+   * @internal
+   */
   constructor(
     /** The status code of the error. */
     readonly code: GrpcStatus,
