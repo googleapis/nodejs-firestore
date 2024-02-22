@@ -28,6 +28,10 @@
     "firestore"
   ],
   "scripts": {
+    "precloud-rad": "npm run compile",
+    "cloud-rad": "NO_UPLOAD=1 npx @google-cloud/cloud-rad",
+    "preapi-report": "npm run compile",
+    "api-report": "node scripts/api-report.js",
     "predocs": "npm run compile",
     "docs": "jsdoc -c .jsdoc.js",
     "system-test:rest": "FIRESTORE_PREFER_REST=true mocha build/system-test --timeout 600000",
@@ -65,6 +69,7 @@
     "protobufjs": "^7.2.5"
   },
   "devDependencies": {
+    "@google-cloud/cloud-rad": "^0.4.0",
     "@types/assert": "^1.4.0",
     "@types/chai": "^4.2.7",
     "@types/chai-as-promised": "^7.1.2",

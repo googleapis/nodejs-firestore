@@ -91,7 +91,10 @@ export {
   QuerySnapshot,
   Query,
 } from './reference';
+export type {AggregateQuery, AggregateQuerySnapshot} from './reference';
 export {BulkWriter} from './bulk-writer';
+export type {BulkWriterError} from './bulk-writer';
+export type {BundleBuilder} from './bundle';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
 export {Filter} from './filter';
@@ -99,12 +102,18 @@ export {WriteBatch, WriteResult} from './write-batch';
 export {Transaction} from './transaction';
 export {Timestamp} from './timestamp';
 export {DocumentChange} from './document-change';
+export type {DocumentChangeType} from './document-change';
 export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {CollectionGroup};
 export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
-export {AggregateField, Aggregate} from './aggregate';
+export {Aggregate, AggregateField} from './aggregate';
+export type {
+  AggregateFieldType,
+  AggregateSpec,
+  AggregateType,
+} from './aggregate';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);

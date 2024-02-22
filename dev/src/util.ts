@@ -155,7 +155,11 @@ export function isPermanentRpcError(
 
 let serviceConfig: Record<string, CallSettings> | undefined;
 
-/** Lazy-loads the service config when first accessed. */
+/**
+ * Lazy-loads the service config when first accessed.
+ * @private
+ * @internal
+ **/
 function getServiceConfig(methodName: string): CallSettings | undefined {
   if (!serviceConfig) {
     serviceConfig = require('google-gax/build/src/fallback').constructSettings(
@@ -245,6 +249,9 @@ export function wrapError(err: Error, stack: string): Error {
  * @return `true` if the environment variable enables `preferRest`,
  * `false` if the environment variable disables `preferRest`, or `undefined`
  * if the environment variable is not set or is set to an unsupported value.
+ *
+ * @internal
+ * @private
  */
 export function tryGetPreferRestEnvironmentVariable(): boolean | undefined {
   const rawValue = process.env.FIRESTORE_PREFER_REST?.trim().toLowerCase();
