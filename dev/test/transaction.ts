@@ -773,6 +773,37 @@ describe('transaction operations', () => {
     );
   });
 
+  it('enforce read-only cannot write', () => {
+    return expect(
+      runTransaction(
+        /* transactionOptions= */ {readOnly: true},
+        async (transaction, docRef) => {
+          transaction.set(docRef, {foo: 'bar'});
+        },
+        begin({readOnly: {}}),
+        rollback()
+      )
+    ).to.eventually.be.rejectedWith(
+      'Firestore read-only transactions cannot execute writes.'
+    );
+  });
+
+  it('enforce read-only with readTime cannot write', () => {
+    return expect(
+      runTransaction(
+        /* transactionOptions= */ {
+          readOnly: true,
+          readTime: Timestamp.fromMillis(3)
+        },
+        async (transaction, docRef) => {
+          transaction.set(docRef, {foo: 'bar'});
+        },
+      )
+    ).to.eventually.be.rejectedWith(
+      'Firestore read-only transactions cannot execute writes.'
+    );
+  });
+
   it('support get with query', () => {
     return runTransaction(
       /* transactionOptions= */ {},
