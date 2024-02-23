@@ -793,11 +793,11 @@ describe('transaction operations', () => {
       runTransaction(
         /* transactionOptions= */ {
           readOnly: true,
-          readTime: Timestamp.fromMillis(3)
+          readTime: Timestamp.fromMillis(3),
         },
         async (transaction, docRef) => {
           transaction.set(docRef, {foo: 'bar'});
-        },
+        }
       )
     ).to.eventually.be.rejectedWith(
       'Firestore read-only transactions cannot execute writes.'
