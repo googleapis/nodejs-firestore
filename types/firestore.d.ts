@@ -1683,6 +1683,23 @@ declare namespace FirebaseFirestore {
     | 'array-contains-any';
 
   /**
+   * InformationalQueryPlan contains information about the query plan.
+   * This should be inspected or logged, because the contents are intended to be
+   * human-readable. Contents are subject to change, and it is advised to not
+   * program against this object.
+   */
+  export type InformationalQueryPlan = Record<string, unknown>;
+
+  /**
+   * InformationalQueryExecutionStats contains statistics about the
+   * execution of the query.
+   * This should be inspected or logged, because the contents are intended to be
+   * human-readable. Contents are subject to change, and it is advised to not
+   * program against this object.
+   */
+  export type InformationalQueryExecutionStats = Record<string, unknown>;
+
+  /**
    * A `Query` refers to a Query which you can read or listen to. You can also
    * construct refined `Query` objects by adding filters and ordering.
    */
@@ -1904,6 +1921,38 @@ declare namespace FirebaseFirestore {
      * @return A Promise that will be resolved with the results of the Query.
      */
     get(): Promise<QuerySnapshot<AppModelType, DbModelType>>;
+
+    /**
+     * Performs the planning stage of this query, without actually executing the
+     * query. Returns a Promise that will be resolved with the result of the
+     * query planning information.
+     *
+     * Note: the information included in the output of this function is subject
+     * to change.
+     *
+     * @return A Promise that will be resolved with the results of the query
+     * planning information.
+     */
+    explain(): Promise<QueryPlan>;
+
+    /**
+     * Plans and executes this query. Returns a Promise that will be resolved
+     * with the planning information, statistics from the query execution, and
+     * the query results.
+     *
+     * Note: the information included in the output of this function is subject
+     * to change.
+     *
+     * Note: `explainAnalyze()` will get query results like the `get()` function,
+     * however, `explainAnalyze()` uses a different retry strategy than `get()`,
+     * so it is recommended to only use `get()` in production code.
+     *
+     * @return A Promise that will be resolved with the planning information,
+     * statistics from the query execution, and the query results.
+     */
+    explainAnalyze(): Promise<
+      QueryProfile<QuerySnapshot<AppModelType, DbModelType>>
+    >;
 
     /*
      * Executes the query and returns the results as Node Stream.
@@ -2438,6 +2487,36 @@ declare namespace FirebaseFirestore {
     >;
 
     /**
+     * Performs the planning stage of this query, without actually executing the
+     * query. Returns a Promise that will be resolved with the result of the
+     * query planning information.
+     *
+     * Note: the information included in the output of this function is subject
+     * to change.
+     *
+     * @return A Promise that will be resolved with the results of the query
+     * planning information.
+     */
+    explain(): Promise<QueryPlan>;
+
+    /**
+     * Plans and executes this query. Returns a Promise that will be resolved
+     * with the planning information, statistics from the query execution, and
+     * the query results.
+     *
+     * Note: the information included in the output of this function is subject
+     * to change.
+     *
+     * @return A Promise that will be resolved with the planning information,
+     * statistics from the query execution, and the query results.
+     */
+    explainAnalyze(): Promise<
+      QueryProfile<
+        AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+      >
+    >;
+
+    /**
      * Compares this object with the given object for equality.
      *
      * This object is considered "equal" to the other object if and only if
@@ -2888,6 +2967,43 @@ declare namespace FirebaseFirestore {
      * ```
      */
     static and(...filters: Filter[]): Filter;
+  }
+
+  /**
+   * A QueryPlan contains information about the planning stage of a query.
+   * All informational content are subject to change, and it is advised to not
+   * program against them.
+   */
+  export interface QueryPlan {
+    /**
+     * An `InformationalQueryPlan` object that contains information about the
+     * query plan. Contents are subject to change.
+     */
+    readonly planInfo: InformationalQueryPlan;
+  }
+
+  /**
+   * A QueryProfile contains information about planning, execution, and results
+   * of a query.
+   * All informational content are subject to change, and it is advised to not
+   * program against them.
+   */
+  export interface QueryProfile<T> {
+    /**
+     * A `QueryPlan` object that contains information about the query plan.
+     */
+    readonly plan: QueryPlan;
+
+    /**
+     * An `InformationalQueryExecutionStats` that contains statistics about the
+     * execution of the query. Contents are subject to change.
+     */
+    readonly stats: InformationalQueryExecutionStats;
+
+    /**
+     * The snapshot that contains the results of executing the query.
+     */
+    readonly snapshot: T;
   }
 }
 

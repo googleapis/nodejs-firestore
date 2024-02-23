@@ -62,6 +62,10 @@ import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
+import {google} from '../protos/firestore_v1_proto_api';
+import QueryMode = google.firestore.v1.QueryMode;
+import {QueryProfile} from './query-profile';
+import {QueryPlan} from './query-plan';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2339,6 +2343,38 @@ export class Query<
   }
 
   /**
+   * Performs the planning stage of this query, without actually executing the
+   * query. Returns a Promise that will be resolved with the result of the
+   * query planning information.
+   *
+   * Note: the information included in the output of this function is subject
+   * to change.
+   *
+   * @return A Promise that will be resolved with the results of the query
+   * planning information.
+   */
+  explain(): Promise<firestore.QueryPlan> {
+    return this._getQueryProfileInfo('PLAN').then(info => info.plan);
+  }
+
+  /**
+   * Plans and executes this query. Returns a Promise that will be resolved
+   * with the planning information, statistics from the query execution, and
+   * the query results.
+   *
+   * Note: the information included in the output of this function is subject
+   * to change.
+   *
+   * @return A Promise that will be resolved with the planning information,
+   * statistics from the query execution, and the query results.
+   */
+  explainAnalyze(): Promise<
+    firestore.QueryProfile<QuerySnapshot<AppModelType, DbModelType>>
+  > {
+    return this._getQueryProfileInfo('PROFILE');
+  }
+
+  /**
    * Internal get() method that accepts an optional transaction id.
    *
    * @private
@@ -2465,7 +2501,8 @@ export class Query<
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionIdOrReadTime?: Uint8Array | Timestamp
+    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    queryMode?: QueryMode
   ): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
     const databaseId = this.firestore.databaseId;
@@ -2517,6 +2554,10 @@ export class Query<
     } else if (transactionIdOrReadTime instanceof Timestamp) {
       runQueryRequest.readTime =
         transactionIdOrReadTime.toProto().timestampValue;
+    }
+
+    if (queryMode) {
+      runQueryRequest.mode = queryMode;
     }
 
     return runQueryRequest;
@@ -2772,6 +2813,114 @@ export class Query<
       .catch(e => stream.destroy(e));
 
     return stream;
+  }
+
+  /**
+   * Internal streaming method for query profiling.
+   *
+   * @param queryMode The query profiling mode.
+   * @private
+   * @internal
+   * @returns A QueryProfile object containing the results of the profiling.
+   */
+  _getQueryProfileInfo(
+    queryMode: QueryMode
+  ): Promise<firestore.QueryProfile<QuerySnapshot<AppModelType, DbModelType>>> {
+    let readTime: Timestamp;
+    const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
+    let queryPlan: QueryPlan = {planInfo: {}};
+    let executionStats: firestore.InformationalQueryExecutionStats = {};
+
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    return new Promise((resolve, reject) => {
+      const tag = requestTag();
+      this.firestore.initializeIfNeeded(tag).then(() => {
+        const request = this.toProto(/* transactionId */ undefined, queryMode);
+        this._firestore
+          .requestStream('runQuery', /* bidirectional= */ false, request, tag)
+          .then(stream => {
+            stream.on('error', err => {
+              reject(wrapError(err, stack));
+            });
+            stream.on('data', response => {
+              if (response.document) {
+                readTime = Timestamp.fromProto(response.readTime);
+                const document = this.firestore.snapshot_(
+                  response.document,
+                  response.readTime
+                );
+                const finalDoc = new DocumentSnapshotBuilder<
+                  AppModelType,
+                  DbModelType
+                >(document.ref.withConverter(this._queryOptions.converter));
+                // Recreate the QueryDocumentSnapshot with the DocumentReference
+                // containing the original converter.
+                finalDoc.fieldsProto = document._fieldsProto;
+                finalDoc.readTime = document.readTime;
+                finalDoc.createTime = document.createTime;
+                finalDoc.updateTime = document.updateTime;
+                docs.push(
+                  finalDoc.build() as QueryDocumentSnapshot<
+                    AppModelType,
+                    DbModelType
+                  >
+                );
+              }
+              if (response.stats) {
+                if (response.stats.queryPlan) {
+                  queryPlan = new QueryPlan(
+                    this.firestore._serializer!.decodeGoogleProtobufStruct(
+                      response.stats.queryPlan.planInfo
+                    )
+                  );
+                }
+                if (response.stats.queryStats) {
+                  executionStats =
+                    this.firestore._serializer!.decodeGoogleProtobufStruct(
+                      response.stats.queryStats
+                    );
+                }
+              }
+              if (response.done) {
+                stream.end();
+              }
+            });
+            stream.on('end', () => {
+              if (this._queryOptions.limitType === LimitType.Last) {
+                // The results for limitToLast queries need to be flipped since
+                // we reversed the ordering constraints before sending the query
+                // to the backend.
+                docs.reverse();
+              }
+              const querySnapshot = new QuerySnapshot(
+                this,
+                readTime,
+                docs.length,
+                () => docs,
+                () => {
+                  const changes: Array<
+                    DocumentChange<AppModelType, DbModelType>
+                  > = [];
+                  for (let i = 0; i < docs.length; ++i) {
+                    changes.push(new DocumentChange('added', docs[i], -1, i));
+                  }
+                  return changes;
+                }
+              );
+              resolve(
+                new QueryProfile<QuerySnapshot<AppModelType, DbModelType>>(
+                  queryPlan,
+                  executionStats,
+                  querySnapshot
+                )
+              );
+            });
+            stream.resume();
+          });
+      });
+    });
   }
 
   /**
@@ -3361,6 +3510,91 @@ export class AggregateQuery<
   }
 
   /**
+   * Internal streaming method for aggregate query profiling.
+   *
+   * @param queryMode The query profiling mode.
+   * @private
+   * @internal
+   * @returns A QueryProfile object containing the results of the profiling.
+   */
+  _getQueryProfileInfo(
+    queryMode: QueryMode
+  ): Promise<
+    QueryProfile<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >
+  > {
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    let aggregationResult: AggregateQuerySnapshot<
+      AggregateSpecType,
+      AppModelType,
+      DbModelType
+    >;
+    let planInfo: QueryPlan = {planInfo: {}};
+    let executionStats: firestore.InformationalQueryExecutionStats = {};
+
+    return new Promise((resolve, reject) => {
+      const tag = requestTag();
+      const firestore = this._query.firestore;
+      firestore.initializeIfNeeded(tag).then(() => {
+        const request = this.toProto(/* transactionId */ undefined, queryMode);
+        firestore
+          .requestStream(
+            'runAggregationQuery',
+            /* bidirectional= */ false,
+            request,
+            tag
+          )
+          .then(stream => {
+            stream.on('error', err => {
+              reject(wrapError(err, stack));
+            });
+            stream.on('data', response => {
+              if (response.result) {
+                const readTime = Timestamp.fromProto(response.readTime!);
+                const data = this.decodeResult(response.result);
+                aggregationResult = new AggregateQuerySnapshot(
+                  this,
+                  readTime,
+                  data
+                );
+              }
+              if (response.stats) {
+                if (response.stats.queryPlan) {
+                  planInfo = new QueryPlan(
+                    this._query.firestore._serializer!.decodeGoogleProtobufStruct(
+                      response.stats.queryPlan.planInfo
+                    )
+                  );
+                }
+                if (response.stats.queryStats) {
+                  executionStats =
+                    this._query.firestore._serializer!.decodeGoogleProtobufStruct(
+                      response.stats.queryStats
+                    );
+                }
+              }
+            });
+            stream.on('end', () => {
+              resolve(
+                new QueryProfile<
+                  AggregateQuerySnapshot<
+                    AggregateSpecType,
+                    AppModelType,
+                    DbModelType
+                  >
+                >(planInfo, executionStats, aggregationResult)
+              );
+            });
+            stream.resume();
+          });
+      });
+    });
+  }
+
+  /**
    * Internal streaming method that accepts an optional transaction ID.
    *
    * @private
@@ -3463,7 +3697,10 @@ export class AggregateQuery<
    * @internal
    * @returns Serialized JSON for the query.
    */
-  toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
+  toProto(
+    transactionId?: Uint8Array,
+    queryMode?: QueryMode
+  ): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
@@ -3486,6 +3723,10 @@ export class AggregateQuery<
 
     if (transactionId instanceof Uint8Array) {
       runQueryRequest.transaction = transactionId;
+    }
+
+    if (queryMode) {
+      runQueryRequest.mode = queryMode;
     }
 
     return runQueryRequest;
@@ -3520,6 +3761,18 @@ export class AggregateQuery<
       return false;
     }
     return deepEqual(this._aggregates, other._aggregates);
+  }
+
+  explain(): Promise<firestore.QueryPlan> {
+    return this._getQueryProfileInfo('PLAN').then(info => info.plan);
+  }
+
+  explainAnalyze(): Promise<
+    firestore.QueryProfile<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >
+  > {
+    return this._getQueryProfileInfo('PROFILE');
   }
 }
 
