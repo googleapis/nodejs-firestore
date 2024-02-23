@@ -79,6 +79,7 @@ export class Transaction implements firestore.Transaction {
    * @param firestore The Firestore Database client.
    * @param requestTag A unique client-assigned identifier for the scope of
    * this transaction.
+   * @param transactionOptions The user-defined options for this transaction.
    */
   constructor(
     firestore: Firestore,
@@ -536,9 +537,6 @@ export class Transaction implements firestore.Transaction {
    * @internal
    * @param updateFunction The user function to execute within the transaction
    * context.
-   * @param requestTag A unique client-assigned identifier for the scope of
-   * this transaction.
-   * @param options The user-defined options for this transaction.
    */
   async runTransaction<T>(
     updateFunction: (transaction: Transaction) => Promise<T>
@@ -583,6 +581,15 @@ export class Transaction implements firestore.Transaction {
     return Promise.reject(lastError);
   }
 
+  /**
+   * Make single attempt to execute `updateFunction()` and commit the
+   * transaction. Will rollback upon error.
+   *
+   * @private
+   * @internal
+   * @param updateFunction The user function to execute within the transaction
+   * context.
+   */
   async runTransactionOnce<T>(
     updateFunction: (transaction: Transaction) => Promise<T>
   ): Promise<T> {

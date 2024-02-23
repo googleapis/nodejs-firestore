@@ -231,7 +231,7 @@ function query(
   transactionIdOrReadTime?: Uint8Array | Timestamp | string,
   error?: Error
 ): TransactionStep {
-  const request: any = {
+  const request: api.IRunQueryRequest = {
     parent: `${DATABASE_ROOT}/documents`,
     structuredQuery: {
       from: [
