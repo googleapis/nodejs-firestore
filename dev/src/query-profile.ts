@@ -48,7 +48,7 @@ export class ExecutionStats implements firestore.ExecutionStats {
  */
 export class ExplainMetrics implements firestore.ExplainMetrics {
   constructor(
-    readonly plan: PlanSummary,
+    readonly planSummary: PlanSummary,
     readonly executionStats: ExecutionStats | null
   ) {}
 }

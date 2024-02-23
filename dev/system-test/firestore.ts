@@ -55,8 +55,8 @@ import {BulkWriter} from '../src/bulk-writer';
 import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
-import IBundleElement = firestore.IBundleElement;
 import {Filter} from '../src/filter';
+import IBundleElement = firestore.IBundleElement;
 
 use(chaiAsPromised);
 
@@ -144,7 +144,6 @@ describe('Firestore class', () => {
       });
   });
 
-  /*
   it.only('can plan a query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
@@ -153,12 +152,18 @@ describe('Firestore class', () => {
       .where('foo', '>', 1)
       .explain({analyze: false});
 
-    const plan = explainResults.plan;
-    expect(explainResults.plan).to.not.be.null;
+    // Should have metrics.
+    const metrics = explainResults.metrics;
+    expect(metrics).to.not.be.null;
+
+    // Should have query plan.
+    const plan = metrics.planSummary;
+    expect(plan).to.not.be.null;
     console.log(explainResults);
     expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
 
-    expect(explainResults.executionStats).to.be.null;
+    // No execution stats and no snapshot.
+    expect(metrics.executionStats).to.be.null;
     expect(explainResults.snapshot).to.be.null;
   });
 
@@ -170,17 +175,52 @@ describe('Firestore class', () => {
       .where('foo', '==', 1)
       .explain({analyze: true});
 
-    expect(explainResults.plan).to.not.be.null;
-    expect(explainResults.executionStats).to.not.be.null;
+    const metrics = explainResults.metrics;
+
+    expect(metrics.planSummary).to.not.be.null;
+    expect(metrics.executionStats).to.not.be.null;
     expect(explainResults.snapshot).to.not.be.null;
 
     expect(
-      Object.keys(explainResults.plan.indexesUsed).length
+      Object.keys(metrics.planSummary.indexesUsed).length
     ).to.be.greaterThan(0);
-    expect(
-      Object.keys(explainResults.executionStats!).length
-    ).to.be.greaterThan(0);
+
+    let stats = metrics.executionStats!;
+    expect(stats.bytesReturned).to.be.greaterThan(0);
+    expect(stats.readOperations).to.be.greaterThan(0);
+    expect(stats.resultsReturned).to.be.equal(2);
+    expect(stats.executionDuration.nanoseconds > 0 || stats.executionDuration.seconds > 0).to.be.true;
+    expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
+
     expect(explainResults.snapshot!.size).to.equal(2);
+  });
+
+  it.only('can profile a query that does not match any docs', async () => {
+    await randomCol.doc('doc1').set({foo: 1, bar: 0});
+    await randomCol.doc('doc2').set({foo: 2, bar: 1});
+    await randomCol.doc('doc3').set({foo: 1, bar: 2});
+    const explainResults = await randomCol
+      .where('foo', '==', 12345)
+      .explain({analyze: true});
+
+    const metrics = explainResults.metrics;
+
+    expect(metrics.planSummary).to.not.be.null;
+    expect(metrics.executionStats).to.not.be.null;
+    expect(explainResults.snapshot).to.not.be.null;
+
+    expect(
+      Object.keys(metrics.planSummary.indexesUsed).length
+    ).to.be.greaterThan(0);
+
+    let stats = metrics.executionStats!;
+    expect(stats.bytesReturned).to.be.greaterThan(0);
+    expect(stats.readOperations).to.be.greaterThan(0);
+    expect(stats.resultsReturned).to.be.equal(0);
+    expect(stats.executionDuration.nanoseconds > 0 || stats.executionDuration.seconds > 0).to.be.true;
+    expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
+
+    expect(explainResults.snapshot!.size).to.equal(0);
   });
 
   it.only('can plan an aggregate query', async () => {
@@ -192,11 +232,13 @@ describe('Firestore class', () => {
       .count()
       .explain({analyze: false});
 
-    expect(explainResults.plan).to.not.be.null;
-    const plan = explainResults.plan;
+    const metrics = explainResults.metrics;
+
+    const plan = metrics.planSummary;
+    expect(plan).to.not.be.null;
     expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
 
-    expect(explainResults.executionStats).to.be.null;
+    expect(metrics.executionStats).to.be.null;
     expect(explainResults.snapshot).to.be.null;
   });
 
@@ -209,19 +251,23 @@ describe('Firestore class', () => {
       .count()
       .explain({analyze: true});
 
-    expect(explainResults.plan).to.not.be.null;
-    expect(explainResults.executionStats).to.not.be.null;
-    expect(explainResults.snapshot).to.not.be.null;
+    const metrics = explainResults.metrics;
+    expect(metrics.planSummary).to.not.be.null;
+    expect(
+        Object.keys(metrics.planSummary.indexesUsed).length
+    ).to.be.greaterThan(0);
 
-    expect(
-      Object.keys(explainResults.plan.indexesUsed).length
-    ).to.be.greaterThan(0);
-    expect(
-      Object.keys(explainResults.executionStats!).length
-    ).to.be.greaterThan(0);
+    expect(metrics.executionStats).to.not.be.null;
+    let stats = metrics.executionStats!;
+    expect(stats.bytesReturned).to.be.greaterThan(0);
+    expect(stats.readOperations).to.be.greaterThan(0);
+    expect(stats.resultsReturned).to.be.equal(1);
+    expect(stats.executionDuration.nanoseconds > 0 || stats.executionDuration.seconds > 0).to.be.true;
+    expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
+
+    expect(explainResults.snapshot).to.not.be.null;
     expect(explainResults.snapshot!.data().count).to.equal(3);
   });
-  */
 
   it('getAll() supports array destructuring', () => {
     const ref1 = randomCol.doc('doc1');

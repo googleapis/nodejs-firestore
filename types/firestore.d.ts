@@ -2982,7 +2982,7 @@ declare namespace FirebaseFirestore {
     /**
      * Information about the query plan.
      */
-    readonly plan: PlanSummary;
+    readonly planSummary: PlanSummary;
 
     /**
      * Information about the execution of the query, or null if the query was
