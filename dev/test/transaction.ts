@@ -144,9 +144,7 @@ function begin(options?: {
 
   if (options?.readOnly) {
     proto.options = {
-      readOnly: {
-        readTime: options.readOnly.readTime,
-      },
+      readOnly: options.readOnly,
     };
   } else if (options?.readWrite?.prevTransactionId) {
     proto.options = {
@@ -171,14 +169,18 @@ function begin(options?: {
 function getAll(
   docs: string[],
   fieldMask?: string[],
-  transaction?: Uint8Array | string,
+  transactionOrReadTime?: Uint8Array | Timestamp | string,
   error?: Error
 ): TransactionStep {
   const request: api.IBatchGetDocumentsRequest = {
     database: DATABASE_ROOT,
     documents: [],
-    transaction: transactionId(transaction),
   };
+  if (transactionOrReadTime instanceof Timestamp) {
+    request.readTime = transactionOrReadTime.toProto().timestampValue;
+  } else {
+    request.transaction = transactionId(transactionOrReadTime);
+  }
 
   if (fieldMask) {
     request.mask = {fieldPaths: fieldMask};
@@ -219,17 +221,17 @@ function getAll(
 }
 
 function getDocument(
-  transaction?: Uint8Array | string,
+  transactionOrReadTime?: Uint8Array | Timestamp | string,
   error?: Error
 ): TransactionStep {
-  return getAll([DOCUMENT_ID], undefined, transaction, error);
+  return getAll([DOCUMENT_ID], undefined, transactionOrReadTime, error);
 }
 
 function query(
-  transaction?: Uint8Array | string,
+  transactionIdOrReadTime?: Uint8Array | Timestamp | string,
   error?: Error
 ): TransactionStep {
-  const request = {
+  const request: any = {
     parent: `${DATABASE_ROOT}/documents`,
     structuredQuery: {
       from: [
@@ -249,8 +251,12 @@ function query(
         },
       },
     },
-    transaction: transactionId(transaction),
   };
+  if (transactionIdOrReadTime instanceof Timestamp) {
+    request.readTime = transactionIdOrReadTime.toProto().timestampValue;
+  } else {
+    request.transaction = transactionId(transactionIdOrReadTime);
+  }
 
   const stream = through2.obj();
 
@@ -792,16 +798,30 @@ describe('transaction operations', () => {
     );
   });
 
-  it('supports read-only transactions with read time', () => {
+  it('supports get read-only transactions with read time', () => {
     return runTransaction(
       {
         readOnly: true,
         readTime: Timestamp.fromMillis(1),
       },
       (transaction, docRef) => transaction.get(docRef),
-      begin({readOnly: {readTime: {nanos: 1000000}}}),
-      getDocument(),
-      commit()
+      getDocument(Timestamp.fromMillis(1))
+    );
+  });
+
+  it('support query read-only transactions with read time', () => {
+    return runTransaction(
+      {
+        readOnly: true,
+        readTime: Timestamp.fromMillis(2),
+      },
+      (transaction, docRef) => {
+        const query = docRef.parent.where('foo', '==', 'bar');
+        return transaction.get(query).then(results => {
+          expect(results.docs[0].id).to.equal('documentId');
+        });
+      },
+      query(Timestamp.fromMillis(2))
     );
   });
 

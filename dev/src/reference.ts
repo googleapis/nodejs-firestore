@@ -2343,10 +2343,11 @@ export class Query<
    *
    * @private
    * @internal
-   * @param {bytes=} transactionId A transaction ID.
+   * @param transactionIdOrReadTime A transaction ID or the read time at which
+   * to execute the query.
    */
   _get(
-    transactionId?: Uint8Array
+    transactionIdOrReadTime?: Uint8Array | Timestamp
   ): Promise<QuerySnapshot<AppModelType, DbModelType>> {
     const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
 
@@ -2356,7 +2357,7 @@ export class Query<
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
 
-      this._stream(transactionId)
+      this._stream(transactionIdOrReadTime)
         .on('error', err => {
           reject(wrapError(err, stack));
         })
@@ -2616,12 +2617,15 @@ export class Query<
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
-   * @param transactionId A transaction ID.
+   * @param transactionIdOrReadTime A transaction ID or the read time at which
+   * to execute the query.
    * @private
    * @internal
    * @returns A stream of document results.
    */
-  _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
+  _stream(
+    transactionIdOrReadTime?: Uint8Array | Timestamp
+  ): NodeJS.ReadableStream {
     const tag = requestTag();
     const startTime = Date.now();
 
@@ -2678,7 +2682,7 @@ export class Query<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        let request = this.toProto(transactionId);
+        let request = this.toProto(transactionIdOrReadTime);
 
         let streamActive: Deferred<boolean>;
         do {
@@ -2695,7 +2699,10 @@ export class Query<
 
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
-            if (!transactionId && !this._isPermanentRpcError(err, 'runQuery')) {
+            if (
+              !transactionIdOrReadTime &&
+              !this._isPermanentRpcError(err, 'runQuery')
+            ) {
               logger(
                 'Query._stream',
                 tag,
@@ -3338,7 +3345,7 @@ export class AggregateQuery<
    * @param {bytes=} transactionId A transaction ID.
    */
   _get(
-    transactionId?: Uint8Array
+    transactionIdOrReadTime?: Uint8Array | Timestamp
   ): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
@@ -3346,7 +3353,7 @@ export class AggregateQuery<
     const stack = Error().stack!;
 
     return new Promise((resolve, reject) => {
-      const stream = this._stream(transactionId);
+      const stream = this._stream(transactionIdOrReadTime);
       stream.on('error', err => {
         reject(wrapError(err, stack));
       });
@@ -3368,7 +3375,7 @@ export class AggregateQuery<
    * @param transactionId A transaction ID.
    * @returns A stream of document results.
    */
-  _stream(transactionId?: Uint8Array): Readable {
+  _stream(transactionIdOrReadTime?: Uint8Array | Timestamp): Readable {
     const tag = requestTag();
     const firestore = this._query.firestore;
 
@@ -3391,7 +3398,7 @@ export class AggregateQuery<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = this.toProto(transactionId);
+        const request = this.toProto(transactionIdOrReadTime);
 
         const backendStream = await firestore.requestStream(
           'runAggregationQuery',
@@ -3463,7 +3470,9 @@ export class AggregateQuery<
    * @internal
    * @returns Serialized JSON for the query.
    */
-  toProto(transactionId?: Uint8Array): api.IRunAggregationQueryRequest {
+  toProto(
+    transactionIdOrReadTime?: Uint8Array | Timestamp
+  ): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
@@ -3484,8 +3493,10 @@ export class AggregateQuery<
       },
     };
 
-    if (transactionId instanceof Uint8Array) {
-      runQueryRequest.transaction = transactionId;
+    if (transactionIdOrReadTime instanceof Uint8Array) {
+      runQueryRequest.transaction = transactionIdOrReadTime;
+    } else if (transactionIdOrReadTime instanceof Timestamp) {
+      runQueryRequest.readTime = transactionIdOrReadTime;
     }
 
     return runQueryRequest;

@@ -21,6 +21,7 @@ import {isPermanentRpcError} from './util';
 import {google} from '../protos/firestore_v1_proto_api';
 import {logger} from './logger';
 import {Firestore} from './index';
+import {Timestamp} from './timestamp';
 import {DocumentData} from '@google-cloud/firestore';
 import api = google.firestore.v1;
 
@@ -36,6 +37,8 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
   fieldMask?: FieldPath[];
   /** An optional transaction ID to use for this read. */
   transactionId?: Uint8Array;
+  /** An optional readTime to use for this read. */
+  readTime?: Timestamp;
 
   private outstandingDocuments = new Set<string>();
   private retrievedDocuments = new Map<string, DocumentSnapshot>();
@@ -99,9 +102,13 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
 
     const request: api.IBatchGetDocumentsRequest = {
       database: this.firestore.formattedName,
-      transaction: this.transactionId,
       documents: Array.from(this.outstandingDocuments),
     };
+    if (this.transactionId) {
+      request.transaction = this.transactionId;
+    } else if (this.readTime) {
+      request.readTime = this.readTime.toProto().timestampValue;
+    }
 
     if (this.fieldMask) {
       const fieldPaths = this.fieldMask.map(
