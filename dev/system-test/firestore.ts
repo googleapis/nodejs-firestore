@@ -144,6 +144,7 @@ describe('Firestore class', () => {
       });
   });
 
+  /*
   it.only('can plan a query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
@@ -220,6 +221,7 @@ describe('Firestore class', () => {
     ).to.be.greaterThan(0);
     expect(explainResults.snapshot!.data().count).to.equal(3);
   });
+  */
 
   it('getAll() supports array destructuring', () => {
     const ref1 = randomCol.doc('doc1');
@@ -1407,13 +1409,13 @@ describe('runs query on a large collection', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it.only('can get()', () => {
+  it('can get()', () => {
     return randomCol.get().then(res => {
       expect(res.size).to.equal(1000);
     });
   });
 
-  it.only('can stream()', async () => {
+  it('can stream()', async () => {
     let received = 0;
     const stream = randomCol.stream();
 

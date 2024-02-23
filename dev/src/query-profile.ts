@@ -20,11 +20,11 @@ import * as firestore from '@google-cloud/firestore';
 /**
  * Plan contains information about the planning stage of a query.
  */
-export class Plan implements firestore.Plan {
+export class PlanSummary implements firestore.PlanSummary {
   constructor(readonly indexesUsed: Record<string, unknown>) {}
 
-  static fromProto(): Plan {
-    return new Plan({});
+  static fromProto(): PlanSummary {
+    return new PlanSummary({});
   }
 }
 
@@ -44,13 +44,22 @@ export class ExecutionStats implements firestore.ExecutionStats {
 }
 
 /**
+ * ExplainMetrics contains information about planning and execution of a query.
+ */
+export class ExplainMetrics implements firestore.ExplainMetrics {
+  constructor(
+    readonly plan: PlanSummary,
+    readonly executionStats: ExecutionStats | null
+  ) {}
+}
+
+/**
  * ExplainResults contains information about planning, execution, and results
  * of a query.
  */
 export class ExplainResults<T> implements firestore.ExplainResults<T> {
   constructor(
-    readonly plan: Plan,
-    readonly executionStats: ExecutionStats | null,
+    readonly metrics: ExplainMetrics,
     readonly snapshot: T | null
   ) {}
 }

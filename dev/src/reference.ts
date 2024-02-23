@@ -64,7 +64,12 @@ import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 import {google} from '../protos/firestore_v1_proto_api';
 import QueryMode = google.firestore.v1.QueryMode;
-import {ExecutionStats, ExplainResults, Plan} from './query-profile';
+import {
+  ExecutionStats,
+  ExplainMetrics,
+  ExplainResults,
+  PlanSummary,
+} from './query-profile';
 import {ExplainOptions} from '@google-cloud/firestore';
 
 /**
@@ -2333,9 +2338,9 @@ export class Query<
 
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
-      const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
-      let queryPlan: Plan = {indexesUsed: {}};
-      let executionStats: ExecutionStats | null = null;
+      let docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> | null =
+        null;
+      let metrics: ExplainMetrics | null = null;
 
       this._stream(undefined, options)
         .on('error', err => {
@@ -2346,37 +2351,48 @@ export class Query<
             readTime = data.readTime;
           }
           if (data.document) {
+            if (docs === null) {
+              docs = [];
+            }
             docs.push(data.document);
           }
-          if (data.explainResults) {
-            queryPlan = data.explainResults.plan;
-            executionStats = data.explainResults.executionStats;
+          if (data.explainMetrics) {
+            metrics = data.explainMetrics;
           }
         })
         .on('end', () => {
-          if (this._queryOptions.limitType === LimitType.Last) {
-            // The results for limitToLast queries need to be flipped since
-            // we reversed the ordering constraints before sending the query
-            // to the backend.
-            docs.reverse();
+          if (metrics === null) {
+            reject('No explain results.');
           }
 
-          const snapshot = new QuerySnapshot(
-            this,
-            readTime,
-            docs.length,
-            () => docs,
-            () => {
-              const changes: Array<DocumentChange<AppModelType, DbModelType>> =
-                [];
-              for (let i = 0; i < docs.length; ++i) {
-                changes.push(new DocumentChange('added', docs[i], -1, i));
-              }
-              return changes;
+          // Some explain queries will not have a snapshot associated with them.
+          let snapshot: QuerySnapshot<AppModelType, DbModelType> | null = null;
+          if (docs !== null) {
+            if (this._queryOptions.limitType === LimitType.Last) {
+              // The results for limitToLast queries need to be flipped since
+              // we reversed the ordering constraints before sending the query
+              // to the backend.
+              docs.reverse();
             }
-          );
 
-          resolve(new ExplainResults(queryPlan, executionStats, snapshot));
+            snapshot = new QuerySnapshot(
+              this,
+              readTime,
+              docs.length,
+              () => docs!,
+              () => {
+                const changes: Array<
+                  DocumentChange<AppModelType, DbModelType>
+                > = [];
+                for (let i = 0; i < docs!.length; ++i) {
+                  changes.push(new DocumentChange('added', docs![i], -1, i));
+                }
+                return changes;
+              }
+            );
+          }
+
+          resolve(new ExplainResults(metrics!, snapshot));
         });
     });
   }
@@ -2496,7 +2512,7 @@ export class Query<
         if (chunk.document) {
           this.push(chunk.document);
         }
-        if (chunk.explainResults) {
+        if (chunk.explainMetrics) {
           this.push(chunk.document);
         }
         callback();
@@ -2684,7 +2700,7 @@ export class Query<
    * Internal streaming method that accepts an optional transaction ID.
    *
    * @param transactionId A transaction ID.
-   * @param explainOptions options for explain queries (if any).
+   * @param explainOptions Options to use for explaining the query (if any).
    * @private
    * @internal
    * @returns A stream of document results.
@@ -2714,7 +2730,7 @@ export class Query<
         const output: {
           readTime?: Timestamp;
           document?: QueryDocumentSnapshot<AppModelType, DbModelType>;
-          explainResults?: ExplainResults<null>;
+          explainMetrics?: ExplainMetrics;
         } = {};
 
         const readTime = Timestamp.fromProto(proto.readTime);
@@ -2748,7 +2764,7 @@ export class Query<
           //     response.stats.queryPlan.planInfo
           //   )
           // );
-          const plan = Plan.fromProto();
+          const plan = PlanSummary.fromProto();
 
           // Sometimes plan comes with execution stats, and sometimes not.
           let stats: ExecutionStats | null = null;
@@ -2759,7 +2775,7 @@ export class Query<
             stats = ExecutionStats.fromProto();
           }
 
-          output.explainResults = new ExplainResults(plan, stats, null);
+          output.explainMetrics = new ExplainMetrics(plan, stats);
         }
 
         callback(undefined, output);
@@ -3485,6 +3501,7 @@ export class AggregateQuery<
    * @private
    * @internal
    * @param transactionId A transaction ID.
+   * @param explainOptions Options to use for explaining the query (if any).
    * @returns A stream of document results.
    */
   _stream(
@@ -3503,7 +3520,7 @@ export class AggregateQuery<
             AppModelType,
             DbModelType
           >;
-          explainResults?: ExplainResults<null>;
+          explainMetrics?: ExplainMetrics;
         } = {};
 
         if (proto.result) {
@@ -3517,10 +3534,10 @@ export class AggregateQuery<
         }
 
         if (proto.stats) {
-          let plan: Plan;
+          let plan: PlanSummary;
           let executionStats: ExecutionStats | null = null;
           if (proto.stats.queryPlan) {
-            plan = Plan.fromProto();
+            plan = PlanSummary.fromProto();
             // planInfo = new Plan(
             //   this._query.firestore._serializer!.decodeGoogleProtobufStruct(
             //     proto.stats.queryPlan.planInfo
@@ -3534,11 +3551,7 @@ export class AggregateQuery<
             //     proto.stats.queryStats
             //   );
           }
-          output.explainResults = new ExplainResults(
-            plan!,
-            executionStats,
-            null
-          );
+          output.explainMetrics = new ExplainMetrics(plan!, executionStats);
         }
 
         callback(undefined, output);
@@ -3707,8 +3720,7 @@ export class AggregateQuery<
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    let plan: Plan | null = null;
-    let executionStats: ExecutionStats | null = null;
+    let metrics: ExplainMetrics | null = null;
     let aggregationResult: AggregateQuerySnapshot<
       AggregateSpecType,
       AppModelType,
@@ -3725,20 +3737,19 @@ export class AggregateQuery<
           aggregationResult = data.aggregationResult;
         }
 
-        if (data.explainResults) {
-          plan = data.explainResults.plan;
-          executionStats = data.explainResults.executionStats;
+        if (data.explainMetrics) {
+          metrics = data.explainMetrics;
         }
       });
       stream.on('end', () => {
         stream.destroy();
-        if (plan === null) {
-          reject('No explain results');
+        if (metrics === null) {
+          reject('No explain results.');
         }
         resolve(
           new ExplainResults<
             AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-          >(plan!, executionStats, aggregationResult)
+          >(metrics!, aggregationResult)
         );
       });
     });

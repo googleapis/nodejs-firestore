@@ -2946,7 +2946,7 @@ declare namespace FirebaseFirestore {
   /**
    * Plan contains information about the planning stage of a query.
    */
-  export interface Plan {
+  export interface PlanSummary {
     /**
      * Information about the indexes that were used to serve the query.
      * Note: This content is subject to change.
@@ -2976,20 +2976,30 @@ declare namespace FirebaseFirestore {
   }
 
   /**
-   * ExplainResults contains information about planning, execution, and results
-   * of a query.
+   * ExplainMetrics contains information about planning and execution of a query.
    */
-  export interface ExplainResults<T> {
+  export interface ExplainMetrics {
     /**
      * Information about the query plan.
      */
-    readonly plan: Plan;
+    readonly plan: PlanSummary;
 
     /**
      * Information about the execution of the query, or null if the query was
      * not executed.
      */
     readonly executionStats: ExecutionStats | null;
+  }
+
+  /**
+   * ExplainResults contains information about planning, execution, and results
+   * of a query.
+   */
+  export interface ExplainResults<T> {
+    /**
+     * Information about planning and execution of the query.
+     */
+    readonly metrics: ExplainMetrics;
 
     /**
      * The snapshot that contains the results of executing the query, or null
