@@ -1189,10 +1189,6 @@ export class Firestore implements firestore.Firestore {
 
     const tag = requestTag();
 
-    let maxAttempts = DEFAULT_MAX_TRANSACTION_ATTEMPTS;
-    let readOnly = false;
-    let readTime: Timestamp | undefined;
-
     if (transactionOptions) {
       validateObject('transactionOptions', transactionOptions);
       validateBoolean(
@@ -1207,29 +1203,18 @@ export class Firestore implements firestore.Firestore {
           transactionOptions.readTime,
           {optional: true}
         );
-
-        readOnly = true;
-        readTime = transactionOptions.readTime as Timestamp | undefined;
-        maxAttempts = 1;
       } else {
         validateInteger(
           'transactionOptions.maxAttempts',
           transactionOptions.maxAttempts,
           {optional: true, minValue: 1}
         );
-
-        maxAttempts =
-          transactionOptions.maxAttempts || DEFAULT_MAX_TRANSACTION_ATTEMPTS;
       }
     }
 
-    const transaction = new Transaction(this, tag);
+    const transaction = new Transaction(this, tag, transactionOptions);
     return this.initializeIfNeeded(tag).then(() =>
-      transaction.runTransaction(updateFunction, {
-        maxAttempts,
-        readOnly,
-        readTime,
-      })
+      transaction.runTransaction(updateFunction)
     );
   }
 
