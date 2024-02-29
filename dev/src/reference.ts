@@ -4142,6 +4142,7 @@ export class VectorQuery<
    * @returns Serialized JSON for the query.
    */
   startAfter(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): VectorQuery<AppModelType, DbModelType> {
     throw new Error(

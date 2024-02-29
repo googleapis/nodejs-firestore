@@ -207,44 +207,51 @@ describe('Vector(findNearest) query interface', () => {
     }).to.throw('not a valid positive limit number');
   });
 
-  it('returns results', async () => {
-    const overrides: ApiOverride = {
-      runQuery: request => {
-        queryEquals(
-          request,
-          findNearestQuery('embedding', [1], 2, 'EUCLIDEAN')
-        );
-        return stream(result('first'), result('second'));
-      },
-    };
+  const distanceMeasure: ('EUCLIDEAN' | 'DOT_PRODUCT' | 'COSINE')[] = [
+    'EUCLIDEAN',
+    'DOT_PRODUCT',
+    'COSINE',
+  ];
+  distanceMeasure.forEach(distanceMeasure => {
+    it(`returns results when distanceMeasure is ${distanceMeasure}`, async () => {
+      const overrides: ApiOverride = {
+        runQuery: request => {
+          queryEquals(
+            request,
+            findNearestQuery('embedding', [1], 2, distanceMeasure)
+          );
+          return stream(result('first'), result('second'));
+        },
+      };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const query = firestore
-        .collection('collectionId')
-        .findNearest('embedding', [1], {
-          limit: 2,
-          distanceMeasure: 'EUCLIDEAN',
+      return createInstance(overrides).then(firestoreInstance => {
+        firestore = firestoreInstance;
+        const query = firestore
+          .collection('collectionId')
+          .findNearest('embedding', [1], {
+            limit: 2,
+            distanceMeasure: distanceMeasure,
+          });
+        return query.get().then(results => {
+          expect(results.size).to.equal(2);
+          expect(results.empty).to.be.false;
+          expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
+          expect(results.docs[0].id).to.equal('first');
+          expect(results.docs[1].id).to.equal('second');
+          expect(results.docChanges()).to.have.length(2);
+
+          let count = 0;
+
+          results.forEach(doc => {
+            expect(doc instanceof DocumentSnapshot).to.be.true;
+            expect(doc.createTime.isEqual(new Timestamp(1, 2))).to.be.true;
+            expect(doc.updateTime.isEqual(new Timestamp(3, 4))).to.be.true;
+            expect(doc.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
+            ++count;
+          });
+
+          expect(2).to.equal(count);
         });
-      return query.get().then(results => {
-        expect(results.size).to.equal(2);
-        expect(results.empty).to.be.false;
-        expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
-        expect(results.docs[0].id).to.equal('first');
-        expect(results.docs[1].id).to.equal('second');
-        expect(results.docChanges()).to.have.length(2);
-
-        let count = 0;
-
-        results.forEach(doc => {
-          expect(doc instanceof DocumentSnapshot).to.be.true;
-          expect(doc.createTime.isEqual(new Timestamp(1, 2))).to.be.true;
-          expect(doc.updateTime.isEqual(new Timestamp(3, 4))).to.be.true;
-          expect(doc.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
-          ++count;
-        });
-
-        expect(2).to.equal(count);
       });
     });
   });
