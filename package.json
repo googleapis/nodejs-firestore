@@ -85,7 +85,7 @@
     "codecov": "^3.6.1",
     "duplexify": "^4.0.0",
     "extend": "^3.0.2",
-    "gapic-tools": "^0.3.0",
+    "gapic-tools": "^0.4.0",
     "gts": "^5.0.1",
     "jsdoc": "^4.0.0",
     "jsdoc-fresh": "^3.0.0",
