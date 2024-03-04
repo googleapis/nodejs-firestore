@@ -2469,7 +2469,7 @@ export class Query<
     queryVector: firestore.VectorValue | Array<number>,
     options: {
       limit: number;
-      distanceMeasure: 'EUCLIDEAN' | 'COSINE';
+      distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
     }
   ): VectorQuery<AppModelType, DbModelType> {
     validateFieldPath('vectorField', vectorField);
@@ -3988,7 +3988,7 @@ export class AggregateQuerySnapshot<
 class VectorQueryOptions {
   constructor(
     readonly limit: number,
-    readonly distanceMeasure: 'EUCLIDEAN' | 'COSINE'
+    readonly distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT'
   ) {}
 
   isEqual(other: VectorQueryOptions): boolean {

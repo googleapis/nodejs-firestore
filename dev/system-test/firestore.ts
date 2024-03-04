@@ -1611,15 +1611,15 @@ describe('Query class', () => {
       });
   });
 
-  it('supports findNearest by vector distance', async () => {
+  it('supports findNearest by EUCLIDEAN distance', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const collectionReference = await indexTestHelper.createTestDocs([
       {foo: 'bar'},
       {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
-      {foo: 'bar', embedding: FieldValue.vector([5, 5])},
-      {foo: 'bar', embedding: FieldValue.vector([9, 9])},
-      {foo: 'bar', embedding: FieldValue.vector([50, 50])},
+      {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+      {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([20, 0])},
       {foo: 'bar', embedding: FieldValue.vector([100, 100])},
     ]);
 
@@ -1633,11 +1633,85 @@ describe('Query class', () => {
 
     const res = await vectorQuery.get();
     expect(res.size).to.equal(3);
-    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([9, 9]))).to
+    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([10, 0]))).to
       .be.true;
-    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([5, 5]))).to
+    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 1]))).to
       .be.true;
-    expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([50, 50]))).to
+    expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0]))).to
+      .be.true;
+  });
+
+  it('supports findNearest by COSINE distance', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionReference = await indexTestHelper.setTestDocs({
+      '1': {foo: 'bar'},
+      '2': {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
+      '3': {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+      '4': {foo: 'bar', embedding: FieldValue.vector([20, 0])},
+      '5': {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+      '6': {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+    });
+
+    const vectorQuery = indexTestHelper
+      .query(collectionReference)
+      .where('foo', '==', 'bar')
+      .findNearest('embedding', [10, 10], {
+        limit: 3,
+        distanceMeasure: 'COSINE',
+      });
+
+    const res = await vectorQuery.get();
+    res.docs.forEach(d => console.log(d.id));
+
+    expect(res.size).to.equal(3);
+    console.log(JSON.stringify(res.docs[0]));
+
+    if (res.docs[0].get('embedding').isEqual(FieldValue.vector([1, 1]))) {
+      expect(
+        res.docs[1].get('embedding').isEqual(FieldValue.vector([100, 100]))
+      ).to.be.true;
+    } else {
+      expect(
+        res.docs[0].get('embedding').isEqual(FieldValue.vector([100, 100]))
+      ).to.be.true;
+      expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 1]))).to
+        .be.true;
+    }
+
+    expect(
+      res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0])) ||
+        res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0]))
+    ).to.be.true;
+  });
+
+  it('supports findNearest by DOT_PRODUCT distance', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionReference = await indexTestHelper.createTestDocs([
+      {foo: 'bar'},
+      {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
+      {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+      {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([20, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionReference)
+      .where('foo', '==', 'bar')
+      .findNearest('embedding', [10, 10], {
+        limit: 3,
+        distanceMeasure: 'DOT_PRODUCT',
+      });
+
+    const res = await vectorQuery.get();
+    expect(res.size).to.equal(3);
+    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([100, 100])))
+      .to.be.true;
+    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([20, 0]))).to
+      .be.true;
+    expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([10, 0]))).to
       .be.true;
   });
 
