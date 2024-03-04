@@ -4,6 +4,21 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.3.0](https://github.com/googleapis/nodejs-firestore/compare/v7.2.0...v7.3.0) (2024-01-31)
+
+
+### Features
+
+* Expose the undeliverable_first_gen_event.proto ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+
+
+### Bug Fixes
+
+* Allow an explicit MustExist precondition for update ([#1985](https://github.com/googleapis/nodejs-firestore/issues/1985)) ([99d60a6](https://github.com/googleapis/nodejs-firestore/commit/99d60a6f87b70c942ac2bd9464cc6d64323f9dfb))
+* Fix redaction of credentials in Firestore settings ([#1989](https://github.com/googleapis/nodejs-firestore/issues/1989)) ([98e668b](https://github.com/googleapis/nodejs-firestore/commit/98e668bb9ce7feb090f65fc61d92af433bc23094))
+* Improve retry logic for streaming API calls ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+* Removed unsupported QueryMode, QueryPlan, and ResultSetStats protos ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+
 ## [7.2.0](https://github.com/googleapis/nodejs-firestore/compare/v7.1.1...v7.2.0) (2024-01-16)
 
 

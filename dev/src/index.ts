@@ -91,7 +91,10 @@ export {
   QuerySnapshot,
   Query,
 } from './reference';
+export type {AggregateQuery, AggregateQuerySnapshot} from './reference';
 export {BulkWriter} from './bulk-writer';
+export type {BulkWriterError} from './bulk-writer';
+export type {BundleBuilder} from './bundle';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
 export {Filter} from './filter';
@@ -99,12 +102,18 @@ export {WriteBatch, WriteResult} from './write-batch';
 export {Transaction} from './transaction';
 export {Timestamp} from './timestamp';
 export {DocumentChange} from './document-change';
+export type {DocumentChangeType} from './document-change';
 export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {CollectionGroup};
 export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
-export {AggregateField, Aggregate} from './aggregate';
+export {Aggregate, AggregateField} from './aggregate';
+export type {
+  AggregateFieldType,
+  AggregateSpec,
+  AggregateType,
+} from './aggregate';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
@@ -745,6 +754,13 @@ export class Firestore implements firestore.Firestore {
     }
 
     this._settings = settings;
+    this._settings.toJSON = function () {
+      const temp = Object.assign({}, this);
+      if (temp.credentials) {
+        temp.credentials = {private_key: '***', client_email: '***'};
+      }
+      return temp;
+    };
     this._serializer = new Serializer(this);
   }
 
@@ -1173,10 +1189,6 @@ export class Firestore implements firestore.Firestore {
 
     const tag = requestTag();
 
-    let maxAttempts = DEFAULT_MAX_TRANSACTION_ATTEMPTS;
-    let readOnly = false;
-    let readTime: Timestamp | undefined;
-
     if (transactionOptions) {
       validateObject('transactionOptions', transactionOptions);
       validateBoolean(
@@ -1191,29 +1203,18 @@ export class Firestore implements firestore.Firestore {
           transactionOptions.readTime,
           {optional: true}
         );
-
-        readOnly = true;
-        readTime = transactionOptions.readTime as Timestamp | undefined;
-        maxAttempts = 1;
       } else {
         validateInteger(
           'transactionOptions.maxAttempts',
           transactionOptions.maxAttempts,
           {optional: true, minValue: 1}
         );
-
-        maxAttempts =
-          transactionOptions.maxAttempts || DEFAULT_MAX_TRANSACTION_ATTEMPTS;
       }
     }
 
-    const transaction = new Transaction(this, tag);
+    const transaction = new Transaction(this, tag, transactionOptions);
     return this.initializeIfNeeded(tag).then(() =>
-      transaction.runTransaction(updateFunction, {
-        maxAttempts,
-        readOnly,
-        readTime,
-      })
+      transaction.runTransaction(updateFunction)
     );
   }
 
