@@ -509,7 +509,7 @@ export class Transaction implements firestore.Transaction {
    * @internal
    */
   async rollback(): Promise<void> {
-    if (!this._transactionId) {
+    if (!this._transactionId || this._readOnly) {
       return;
     }
 
@@ -605,7 +605,7 @@ export class Transaction implements firestore.Transaction {
         );
       }
       const result = await promise;
-      if (!this._readTime) {
+      if (!this._readOnly) {
         await this.commit();
       }
       return result;
