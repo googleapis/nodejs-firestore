@@ -1858,7 +1858,10 @@ class QueryUtil<
 
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
-            if (!transactionIdOrReadTime && !this._isPermanentRpcError(err, 'runQuery')) {
+            if (
+              !transactionIdOrReadTime &&
+              !this._isPermanentRpcError(err, 'runQuery')
+            ) {
               logger(
                 'Query._stream',
                 tag,
@@ -3147,7 +3150,9 @@ export class Query<
    * @internal
    * @returns A stream of document results.
    */
-  _stream(transactionIdOrReadTime?: Uint8Array | Timestamp): NodeJS.ReadableStream {
+  _stream(
+    transactionIdOrReadTime?: Uint8Array | Timestamp
+  ): NodeJS.ReadableStream {
     return this._queryUtil._stream(this, transactionIdOrReadTime);
   }
 
