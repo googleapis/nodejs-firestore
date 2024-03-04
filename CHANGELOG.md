@@ -4,6 +4,16 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.3.1](https://github.com/googleapis/nodejs-firestore/compare/v7.3.0...v7.3.1) (2024-03-04)
+
+
+### Bug Fixes
+
+* Add client library version to headers ([#2003](https://github.com/googleapis/nodejs-firestore/issues/2003)) ([8799032](https://github.com/googleapis/nodejs-firestore/commit/8799032d8cc39adc774fe21b7eb70f96a3a18fda))
+* Add missing type for exposed database id ([#1996](https://github.com/googleapis/nodejs-firestore/issues/1996)) ([e967279](https://github.com/googleapis/nodejs-firestore/commit/e967279cfe532ae3375ae9dcb94f4a65af5ffb42))
+* Optimize Transaction PITR ([#2002](https://github.com/googleapis/nodejs-firestore/issues/2002)) ([2f08612](https://github.com/googleapis/nodejs-firestore/commit/2f0861296151f7b0094501e4a9ff6fc4154d52a4))
+* Revert changes to streaming retries ([d964a13](https://github.com/googleapis/nodejs-firestore/commit/d964a13818e6bc4be6547e88ffbe16be1a6ceeeb))
+
 ## [7.3.0](https://github.com/googleapis/nodejs-firestore/compare/v7.2.0...v7.3.0) (2024-01-31)
 
 
