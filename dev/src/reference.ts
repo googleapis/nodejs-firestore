@@ -1190,6 +1190,13 @@ export class QuerySnapshot<
   }
 }
 
+/**
+ * A `VectorQuerySnapshot` contains zero or more `QueryDocumentSnapshot` objects
+ * representing the results of a query. The documents can be accessed as an
+ * array via the `docs` property or enumerated using the `forEach` method. The
+ * number of documents can be determined via the `empty` and `size`
+ * properties.
+ */
 export class VectorQuerySnapshot<
   AppModelType = firestore.DocumentData,
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
@@ -1418,7 +1425,7 @@ export class VectorQuerySnapshot<
    * Returns true if the document data in this `VectorQuerySnapshot` is equal to the
    * provided value.
    *
-   * @param {*} other The value to compare against.
+   * @param {firestore.VectorQuerySnapshot} other The value to compare against.
    * @return {boolean} true if this `VectorQuerySnapshot` is equal to the provided
    * value.
    */
@@ -1838,10 +1845,10 @@ class QueryUtil<
     this._firestore
       .initializeIfNeeded(tag)
       .then(async () => {
-        // `toProto()` might throw an exception. We rely on the behavior of an
+        // `_toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        let request = query.toProto(transactionIdOrReadTime);
+        let request = query._toProto(transactionIdOrReadTime);
 
         let streamActive: Deferred<boolean>;
         do {
@@ -1897,9 +1904,9 @@ class QueryUtil<
                   if (this._queryOptions.requireConsistency) {
                     request = query
                       .startAfter(lastReceivedDocument)
-                      .toProto(lastReceivedDocument.readTime);
+                      ._toProto(lastReceivedDocument.readTime);
                   } else {
-                    request = query.startAfter(lastReceivedDocument).toProto();
+                    request = query.startAfter(lastReceivedDocument)._toProto();
                   }
 
                   // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
@@ -3014,7 +3021,7 @@ export class Query<
    * @internal
    * @returns Serialized JSON for the query.
    */
-  toProto(
+  _toProto(
     transactionIdOrReadTime?: Uint8Array | Timestamp
   ): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
@@ -3791,7 +3798,7 @@ export class AggregateQuery<
     firestore
       .initializeIfNeeded(tag)
       .then(async () => {
-        // `toProto()` might throw an exception. We rely on the behavior of an
+        // `_toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
         const request = this.toProto(transactionIdOrReadTime);
@@ -3869,7 +3876,7 @@ export class AggregateQuery<
   toProto(
     transactionIdOrReadTime?: Uint8Array | Timestamp
   ): api.IRunAggregationQueryRequest {
-    const queryProto = this._query.toProto();
+    const queryProto = this._query._toProto();
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
       structuredAggregationQuery: {
@@ -4079,12 +4086,20 @@ export class VectorQuery<
     return this._query;
   }
 
+  /**
+   * @private
+   * @internal
+   */
   private get _rawVectorField(): string {
     return typeof this.vectorField === 'string'
       ? this.vectorField
       : this.vectorField.toString();
   }
 
+  /**
+   * @private
+   * @internal
+   */
   private get _rawQueryVector(): Array<number> {
     return Array.isArray(this.queryVector)
       ? this.queryVector
@@ -4129,10 +4144,10 @@ export class VectorQuery<
    * @internal
    * @returns Serialized JSON for the query.
    */
-  toProto(
+  _toProto(
     transactionIdOrReadTime?: Uint8Array | Timestamp
   ): api.IRunQueryRequest {
-    const queryProto = this._query.toProto(transactionIdOrReadTime);
+    const queryProto = this._query._toProto(transactionIdOrReadTime);
 
     const queryVector = Array.isArray(this.queryVector)
       ? new VectorValue(this.queryVector)
@@ -4144,7 +4159,7 @@ export class VectorQuery<
       vectorField: {
         fieldPath: FieldPath.fromArgument(this.vectorField).formattedName,
       },
-      queryVector: queryVector.toProto(this._query._serializer),
+      queryVector: queryVector._toProto(this._query._serializer),
     };
     return queryProto;
   }

@@ -31,6 +31,9 @@ import {
 
 import api = proto.google.firestore.v1;
 
+/**
+ * Represent a vector type in Firestore documents.
+ */
 export class VectorValue implements firestore.VectorValue {
   private readonly _values: number[];
   constructor(values: number[] | undefined) {
@@ -38,21 +41,26 @@ export class VectorValue implements firestore.VectorValue {
     this._values = (values || []).map(n => n);
   }
 
+  /**
+   * Returns a copy of the raw number array form of the vector.
+   */
   public toArray(): number[] {
     return this._values.map(n => n);
   }
 
   /**
    * @private
+   * @internal
    */
-  toProto(serializer: Serializer): api.IValue {
+  _toProto(serializer: Serializer): api.IValue {
     return serializer.encodeVector(this._values);
   }
 
   /**
    * @private
+   * @internal
    */
-  static fromProto(valueArray: api.IValue): VectorValue {
+  static _fromProto(valueArray: api.IValue): VectorValue {
     const values = valueArray.arrayValue?.values?.map(v => {
       return v.doubleValue!;
     });
@@ -60,7 +68,7 @@ export class VectorValue implements firestore.VectorValue {
   }
 
   /**
-   * @private
+   * Returns `true` if the two VectorValue has the same raw number arrays, returns `false` otherwise.
    */
   isEqual(other: VectorValue): boolean {
     return isPrimitiveArrayEqual(this._values, other._values);
@@ -77,6 +85,13 @@ export class FieldValue implements firestore.FieldValue {
   /** @private */
   constructor() {}
 
+  /**
+   * Creates a new `VectorValue` constructed with a copy of the given array of numbers.
+   *
+   * @param values {[Array.<number>]} Create a `VectorValue` instance with a copy of this array of numbers.
+   *
+   * @returns {VectorValue} A new `VectorValue` constructed with a copy of the given array of numbers.
+   */
   static vector(values?: number[]): VectorValue {
     return new VectorValue(values);
   }
@@ -261,7 +276,7 @@ export class FieldValue implements firestore.FieldValue {
  * An internal interface shared by all field transforms.
  *
  * A 'FieldTransform` subclass should implement '.includeInDocumentMask',
- * '.includeInDocumentTransform' and 'toProto' (if '.includeInDocumentTransform'
+ * '.includeInDocumentTransform' and '_toProto' (if '.includeInDocumentTransform'
  * is 'true').
  *
  * @private

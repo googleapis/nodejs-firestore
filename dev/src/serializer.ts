@@ -173,7 +173,7 @@ export class Serializer {
     }
 
     if (val instanceof VectorValue) {
-      return val.toProto(this);
+      return val._toProto(this);
     }
 
     if (isObject(val)) {
@@ -304,7 +304,7 @@ export class Serializer {
             this.decodeValue(fields[RESERVED_MAP_KEY]) ===
               RESERVED_MAP_KEY_VECTOR_VALUE
           ) {
-            return VectorValue.fromProto(fields[VECTOR_MAP_VECTORS_KEY]);
+            return VectorValue._fromProto(fields[VECTOR_MAP_VECTORS_KEY]);
           } else {
             const obj: DocumentData = {};
             for (const prop of Object.keys(fields)) {

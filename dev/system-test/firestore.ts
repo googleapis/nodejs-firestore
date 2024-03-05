@@ -6221,13 +6221,13 @@ describe('Bundle building', () => {
     expect(namedQuery).to.deep.equal({
       name: 'query',
       readTime: snap.readTime.toProto().timestampValue,
-      // TODO(wuandy): Fix query.toProto to skip undefined fields, so we can stop using `extend` here.
+      // TODO(wuandy): Fix query._toProto to skip undefined fields, so we can stop using `extend` here.
       bundledQuery: extend(
         true,
         {},
         {
-          parent: query.toProto().parent,
-          structuredQuery: query.toProto().structuredQuery,
+          parent: query._toProto().parent,
+          structuredQuery: query._toProto().structuredQuery,
         }
       ),
     });
@@ -6289,8 +6289,8 @@ describe('Bundle building', () => {
         true,
         {},
         {
-          parent: limitQuery.toProto().parent,
-          structuredQuery: limitQuery.toProto().structuredQuery,
+          parent: limitQuery._toProto().parent,
+          structuredQuery: limitQuery._toProto().structuredQuery,
           limitType: 'FIRST',
         }
       ),
@@ -6307,8 +6307,8 @@ describe('Bundle building', () => {
         true,
         {},
         {
-          parent: q.toProto().parent,
-          structuredQuery: q.toProto().structuredQuery,
+          parent: q._toProto().parent,
+          structuredQuery: q._toProto().structuredQuery,
           limitType: 'LAST',
         }
       ),
