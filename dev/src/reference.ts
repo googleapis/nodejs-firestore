@@ -1218,12 +1218,12 @@ export class VectorQuerySnapshot<
   /**
    * @private
    *
-   * @param _query The originating query.
-   * @param _readTime The time when this query snapshot was obtained.
-   * @param _size The number of documents in the result set.
-   * @param docs A callback returning a sorted array of documents matching
+   * @param _query - The originating query.
+   * @param _readTime - The time when this query snapshot was obtained.
+   * @param _size - The number of documents in the result set.
+   * @param docs - A callback returning a sorted array of documents matching
    * this query
-   * @param changes A callback returning a sorted array of document change
+   * @param changes - A callback returning a sorted array of document change
    * events for this snapshot.
    */
   constructor(
@@ -1362,7 +1362,7 @@ export class VectorQuerySnapshot<
    * this is the first snapshot, all documents will be in the list as added
    * changes.
    *
-   * @return {Array.<DocumentChange>}
+   * @returns An array of the documents changes since the last snapshot.
    *
    * @example
    * ```
@@ -1391,10 +1391,10 @@ export class VectorQuerySnapshot<
    * method for running the same callback on each {@link QueryDocumentSnapshot}
    * that is returned.
    *
-   * @param {function} callback A callback to be called with a
+   * @param callback - A callback to be called with a
    * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} for each document in
    * the snapshot.
-   * @param {*=} thisArg The `this` binding for the callback..
+   * @param thisArg - The `this` binding for the callback..
    *
    * @example
    * ```
@@ -1425,8 +1425,8 @@ export class VectorQuerySnapshot<
    * Returns true if the document data in this `VectorQuerySnapshot` is equal to the
    * provided value.
    *
-   * @param {firestore.VectorQuerySnapshot} other The value to compare against.
-   * @return {boolean} true if this `VectorQuerySnapshot` is equal to the provided
+   * @param other - The value to compare against.
+   * @returns true if this `VectorQuerySnapshot` is equal to the provided
    * value.
    */
   isEqual(
@@ -2498,9 +2498,9 @@ export class Query<
    * querySnapshot.forEach(...);
    * ```
    *
-   * @param vectorField The field path this vector query executes on.
-   * @param queryVector The vector value used to measure the distance from `vectorField` values in the documents.
-   * @param options Options control the vector query. `limit` specifies the upper bound of documents to return, must
+   * @param vectorField - The field path this vector query executes on.
+   * @param queryVector - The vector value used to measure the distance from `vectorField` values in the documents.
+   * @param options - Options control the vector query. `limit` specifies the upper bound of documents to return, must
    * be a positive integer. `distanceMeasure` specifies what type of distance is calculated when performing the query.
    */
   findNearest(
@@ -4109,7 +4109,7 @@ export class VectorQuery<
   /**
    * Executes this query.
    *
-   * @return A promise that will be resolved with the results of the query.
+   * @returns A promise that will be resolved with the results of the query.
    */
   get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
     return this._queryUtil._get(
@@ -4123,7 +4123,7 @@ export class VectorQuery<
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
-   * @param transactionId A transaction ID.
+   * @param transactionId - A transaction ID.
    * @private
    * @internal
    * @returns A stream of document results.
@@ -4210,8 +4210,8 @@ export class VectorQuery<
    * the underlying Query of `other` compares equal to that of this object
    * using `Query.isEqual()`.
    *
-   * @param other The object to compare to this object for equality.
-   * @return `true` if this object is "equal" to the given object, as
+   * @param other - The object to compare to this object for equality.
+   * @returns `true` if this object is "equal" to the given object, as
    * defined above, or `false` otherwise.
    */
   isEqual(other: firestore.VectorQuery<AppModelType, DbModelType>): boolean {

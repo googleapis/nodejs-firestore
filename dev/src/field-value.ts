@@ -88,9 +88,9 @@ export class FieldValue implements firestore.FieldValue {
   /**
    * Creates a new `VectorValue` constructed with a copy of the given array of numbers.
    *
-   * @param values {[Array.<number>]} Create a `VectorValue` instance with a copy of this array of numbers.
+   * @param values - Create a `VectorValue` instance with a copy of this array of numbers.
    *
-   * @returns {VectorValue} A new `VectorValue` constructed with a copy of the given array of numbers.
+   * @returns A new `VectorValue` constructed with a copy of the given array of numbers.
    */
   static vector(values?: number[]): VectorValue {
     return new VectorValue(values);
