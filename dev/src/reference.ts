@@ -1217,6 +1217,7 @@ export class VectorQuerySnapshot<
 
   /**
    * @private
+   * @internal
    *
    * @param _query - The originating query.
    * @param _readTime - The time when this query snapshot was obtained.
@@ -1238,11 +1239,9 @@ export class VectorQuerySnapshot<
   }
 
   /**
-   * The query on which you called get() or onSnapshot() in order to get this
-   * QuerySnapshot.
+   * The `VectorQuery` on which you called get() in order to get this
+   * `VectorQuerySnapshot`.
    *
-   * @type {Query}
-   * @name VectorQuerySnapshot#query
    * @readonly
    *
    * @example
@@ -1264,10 +1263,8 @@ export class VectorQuerySnapshot<
   }
 
   /**
-   * An array of all the documents in this QuerySnapshot.
+   * An array of all the documents in this `VectorQuerySnapshot`.
    *
-   * @type {Array.<QueryDocumentSnapshot>}
-   * @name VectorQuerySnapshot#docs
    * @readonly
    *
    * @example
@@ -1293,10 +1290,8 @@ export class VectorQuerySnapshot<
   }
 
   /**
-   * True if there are no documents in the VectorQuerySnapshot.
+   * `true` if there are no documents in the `VectorQuerySnapshot`.
    *
-   * @type {boolean}
-   * @name VectorQuerySnapshot#empty
    * @readonly
    *
    * @example
@@ -1316,10 +1311,8 @@ export class VectorQuerySnapshot<
   }
 
   /**
-   * The number of documents in the VectorQuerySnapshot.
+   * The number of documents in the `VectorQuerySnapshot`.
    *
-   * @type {number}
-   * @name VectorQuerySnapshot#size
    * @readonly
    *
    * @example
@@ -1337,10 +1330,7 @@ export class VectorQuerySnapshot<
   }
 
   /**
-   * The time this query snapshot was obtained.
-   *
-   * @type {Timestamp}
-   * @name VectorQuerySnapshot#readTime
+   * The time this `VectorQuerySnapshot` was obtained.
    *
    * @example
    * ```
@@ -1387,12 +1377,12 @@ export class VectorQuerySnapshot<
   }
 
   /**
-   * Enumerates all of the documents in the QuerySnapshot. This is a convenience
+   * Enumerates all of the documents in the `VectorQuerySnapshot`. This is a convenience
    * method for running the same callback on each {@link QueryDocumentSnapshot}
    * that is returned.
    *
    * @param callback - A callback to be called with a
-   * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} for each document in
+   * {@link QueryDocumentSnapshot} for each document in
    * the snapshot.
    * @param thisArg - The `this` binding for the callback..
    *
@@ -1969,6 +1959,10 @@ export class Query<
    * @private
    **/
   protected readonly _allowUndefined: boolean;
+  /**
+   * @internal
+   * @private
+   **/
   readonly _queryUtil: QueryUtil<
     AppModelType,
     DbModelType,
@@ -2486,11 +2480,11 @@ export class Query<
    * `vectorField` against the given `queryVector` and returns the top documents that are closest
    * to the `queryVector`.
    *
-   * Only documents whose `vectorField` field is a `VectorValue` of the same dimension as `queryVector`
+   * Only documents whose `vectorField` field is a {@link VectorValue} of the same dimension as `queryVector`
    * participate in the query, all other documents are ignored.
    *
    * @example
-   * ```typescript
+   * ```
    * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
    * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
    *
@@ -2498,8 +2492,8 @@ export class Query<
    * querySnapshot.forEach(...);
    * ```
    *
-   * @param vectorField - The field path this vector query executes on.
-   * @param queryVector - The vector value used to measure the distance from `vectorField` values in the documents.
+   * @param vectorField - A string or {@link FieldPath} specifying the vector field to search on.
+   * @param queryVector - The {@link VectorValue} used to measure the distance from `vectorField` values in the documents.
    * @param options - Options control the vector query. `limit` specifies the upper bound of documents to return, must
    * be a positive integer. `distanceMeasure` specifies what type of distance is calculated when performing the query.
    */
@@ -4051,13 +4045,18 @@ class VectorQueryOptions {
 }
 
 /**
- * A query that finds the document whose vector fields are closest to a certain vector.
+ * A query that finds the documents whose vector fields are closest to a certain query vector.
+ * Create an instance of `VectorQuery` with {@link Query.findNearest}.
  */
 export class VectorQuery<
   AppModelType = firestore.DocumentData,
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
 > implements firestore.VectorQuery<AppModelType, DbModelType>
 {
+  /**
+   * @internal
+   * @private
+   **/
   readonly _queryUtil: QueryUtil<
     AppModelType,
     DbModelType,
@@ -4081,7 +4080,9 @@ export class VectorQuery<
     >(_query._firestore, _query._queryOptions);
   }
 
-  /** The query whose results participants in the distance search. */
+  /** The query whose results participants in the vector search. Filtering
+   * performed by the query will apply before the vector search.
+   **/
   get query(): Query<AppModelType, DbModelType> {
     return this._query;
   }
@@ -4107,7 +4108,7 @@ export class VectorQuery<
   }
 
   /**
-   * Executes this query.
+   * Executes this vector search query.
    *
    * @returns A promise that will be resolved with the results of the query.
    */
