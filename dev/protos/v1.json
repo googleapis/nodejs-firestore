@@ -1830,9 +1830,9 @@
                       "type": "google.protobuf.Timestamp",
                       "id": 7
                     },
-                    "mode": {
-                      "type": "QueryMode",
-                      "id": 9,
+                    "explainOptions": {
+                      "type": "ExplainOptions",
+                      "id": 10,
                       "options": {
                         "(google.api.field_behavior)": "OPTIONAL"
                       }
@@ -1868,9 +1868,9 @@
                       "type": "bool",
                       "id": 6
                     },
-                    "stats": {
-                      "type": "ResultSetStats",
-                      "id": 7
+                    "explainMetrics": {
+                      "type": "ExplainMetrics",
+                      "id": 11
                     }
                   }
                 },
@@ -1913,9 +1913,9 @@
                       "type": "google.protobuf.Timestamp",
                       "id": 6
                     },
-                    "mode": {
-                      "type": "QueryMode",
-                      "id": 7,
+                    "explainOptions": {
+                      "type": "ExplainOptions",
+                      "id": 8,
                       "options": {
                         "(google.api.field_behavior)": "OPTIONAL"
                       }
@@ -1936,9 +1936,9 @@
                       "type": "google.protobuf.Timestamp",
                       "id": 3
                     },
-                    "stats": {
-                      "type": "ResultSetStats",
-                      "id": 6
+                    "explainMetrics": {
+                      "type": "ExplainMetrics",
+                      "id": 10
                     }
                   }
                 },
@@ -2305,33 +2305,6 @@
                     }
                   }
                 },
-                "QueryMode": {
-                  "values": {
-                    "NORMAL": 0,
-                    "PLAN": 1,
-                    "PROFILE": 2
-                  }
-                },
-                "QueryPlan": {
-                  "fields": {
-                    "planInfo": {
-                      "type": "google.protobuf.Struct",
-                      "id": 1
-                    }
-                  }
-                },
-                "ResultSetStats": {
-                  "fields": {
-                    "queryPlan": {
-                      "type": "QueryPlan",
-                      "id": 1
-                    },
-                    "queryStats": {
-                      "type": "google.protobuf.Struct",
-                      "id": 2
-                    }
-                  }
-                },
                 "StructuredQuery": {
                   "fields": {
                     "select": {
@@ -2626,6 +2599,62 @@
                     "before": {
                       "type": "bool",
                       "id": 2
+                    }
+                  }
+                },
+                "ExplainOptions": {
+                  "fields": {
+                    "analyze": {
+                      "type": "bool",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "OPTIONAL"
+                      }
+                    }
+                  }
+                },
+                "ExplainMetrics": {
+                  "fields": {
+                    "planSummary": {
+                      "type": "PlanSummary",
+                      "id": 1
+                    },
+                    "executionStats": {
+                      "type": "ExecutionStats",
+                      "id": 2
+                    }
+                  }
+                },
+                "PlanSummary": {
+                  "fields": {
+                    "indexesUsed": {
+                      "rule": "repeated",
+                      "type": "google.protobuf.Struct",
+                      "id": 1
+                    }
+                  }
+                },
+                "ExecutionStats": {
+                  "fields": {
+                    "resultsReturned": {
+                      "type": "int64",
+                      "id": 1
+                    },
+                    "bytesReturned": {
+                      "type": "int64",
+                      "id": 2
+                    },
+                    "executionDuration": {
+                      "type": "google.protobuf.Duration",
+                      "id": 3
+                    },
+                    "readOperations": {
+                      "type": "int64",
+                      "id": 4
+                    },
+                    "debugStats": {
+                      "type": "google.protobuf.Struct",
+                      "id": 5
                     }
                   }
                 },
