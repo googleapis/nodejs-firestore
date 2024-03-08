@@ -99,7 +99,9 @@ if (process.env.NODE_ENV === 'DEBUG') {
 }
 
 function getTestRoot(settings: Settings = {}): CollectionReference {
-  const internalSettings: Settings = {};
+  const internalSettings: Settings = {
+    host: 'test-firestore.sandbox.googleapis.com'
+  };
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }
@@ -185,11 +187,14 @@ describe('Firestore class', () => {
       Object.keys(metrics.planSummary.indexesUsed).length
     ).to.be.greaterThan(0);
 
-    let stats = metrics.executionStats!;
+    const stats = metrics.executionStats!;
     expect(stats.bytesReturned).to.be.greaterThan(0);
     expect(stats.readOperations).to.be.greaterThan(0);
     expect(stats.resultsReturned).to.be.equal(2);
-    expect(stats.executionDuration.nanoseconds > 0 || stats.executionDuration.seconds > 0).to.be.true;
+    expect(
+      stats.executionDuration.nanoseconds > 0 ||
+        stats.executionDuration.seconds > 0
+    ).to.be.true;
     expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
 
     expect(explainResults.snapshot!.size).to.equal(2);
@@ -213,11 +218,14 @@ describe('Firestore class', () => {
       Object.keys(metrics.planSummary.indexesUsed).length
     ).to.be.greaterThan(0);
 
-    let stats = metrics.executionStats!;
+    const stats = metrics.executionStats!;
     expect(stats.bytesReturned).to.be.greaterThan(0);
     expect(stats.readOperations).to.be.greaterThan(0);
     expect(stats.resultsReturned).to.be.equal(0);
-    expect(stats.executionDuration.nanoseconds > 0 || stats.executionDuration.seconds > 0).to.be.true;
+    expect(
+      stats.executionDuration.nanoseconds > 0 ||
+        stats.executionDuration.seconds > 0
+    ).to.be.true;
     expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
 
     expect(explainResults.snapshot!.size).to.equal(0);
@@ -254,15 +262,18 @@ describe('Firestore class', () => {
     const metrics = explainResults.metrics;
     expect(metrics.planSummary).to.not.be.null;
     expect(
-        Object.keys(metrics.planSummary.indexesUsed).length
+      Object.keys(metrics.planSummary.indexesUsed).length
     ).to.be.greaterThan(0);
 
     expect(metrics.executionStats).to.not.be.null;
-    let stats = metrics.executionStats!;
+    const stats = metrics.executionStats!;
     expect(stats.bytesReturned).to.be.greaterThan(0);
     expect(stats.readOperations).to.be.greaterThan(0);
     expect(stats.resultsReturned).to.be.equal(1);
-    expect(stats.executionDuration.nanoseconds > 0 || stats.executionDuration.seconds > 0).to.be.true;
+    expect(
+      stats.executionDuration.nanoseconds > 0 ||
+        stats.executionDuration.seconds > 0
+    ).to.be.true;
     expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
 
     expect(explainResults.snapshot).to.not.be.null;

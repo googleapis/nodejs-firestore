@@ -341,9 +341,11 @@ export class Serializer {
    * @param proto A Google Protobuf 'Struct'.
    * @returns The converted JS type.
    */
-  decodeGoogleProtobufStruct(proto: IStruct | null): Record<string, unknown> {
+  decodeGoogleProtobufStruct(
+    proto: IStruct | null | undefined
+  ): Record<string, unknown> {
     const result: Record<string, unknown> = {};
-    if (proto !== null && proto.fields) {
+    if (proto && proto.fields) {
       for (const prop of Object.keys(proto.fields)) {
         result[prop] = this.decodeGoogleProtobufValue(proto.fields[prop]);
       }

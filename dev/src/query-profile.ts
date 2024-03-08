@@ -16,15 +16,29 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
+import {google} from '../protos/firestore_v1_proto_api';
+import IPlanSummary = google.firestore.v1.IPlanSummary;
+import {Serializer} from './serializer';
+import IExecutionStats = google.firestore.v1.IExecutionStats;
+import IExplainMetrics = google.firestore.v1.IExplainMetrics;
 
 /**
  * Plan contains information about the planning stage of a query.
  */
 export class PlanSummary implements firestore.PlanSummary {
-  constructor(readonly indexesUsed: Record<string, unknown>) {}
+  constructor(readonly indexesUsed: Record<string, unknown>[]) {}
 
-  static fromProto(): PlanSummary {
-    return new PlanSummary({});
+  static fromProto(
+    plan: IPlanSummary | null | undefined,
+    serializer: Serializer
+  ): PlanSummary {
+    const indexes: Record<string, unknown>[] = [];
+    if (plan && plan.indexesUsed) {
+      for (const index of plan.indexesUsed) {
+        indexes.push(serializer.decodeGoogleProtobufStruct(index));
+      }
+    }
+    return new PlanSummary(indexes);
   }
 }
 
@@ -38,8 +52,23 @@ export class ExecutionStats implements firestore.ExecutionStats {
     readonly debugStats: Record<string, unknown>
   ) {}
 
-  static fromProto(): ExecutionStats {
-    return new ExecutionStats(0, 0, {seconds: 0, nanoseconds: 0}, 0, {});
+  static fromProto(
+    stats: IExecutionStats | null | undefined,
+    serializer: Serializer
+  ): ExecutionStats | null {
+    if (stats) {
+      return new ExecutionStats(
+        Number(stats.resultsReturned),
+        Number(stats.bytesReturned),
+        {
+          seconds: Number(stats.executionDuration?.seconds),
+          nanoseconds: Number(stats.executionDuration?.nanos),
+        },
+        Number(stats.readOperations),
+        serializer.decodeGoogleProtobufStruct(stats.debugStats)
+      );
+    }
+    return null;
   }
 }
 
@@ -51,6 +80,16 @@ export class ExplainMetrics implements firestore.ExplainMetrics {
     readonly planSummary: PlanSummary,
     readonly executionStats: ExecutionStats | null
   ) {}
+
+  static fromProto(
+    metrics: IExplainMetrics,
+    serializer: Serializer
+  ): ExplainMetrics {
+    return new ExplainMetrics(
+      PlanSummary.fromProto(metrics.planSummary, serializer),
+      ExecutionStats.fromProto(metrics.executionStats, serializer)
+    );
+  }
 }
 
 /**

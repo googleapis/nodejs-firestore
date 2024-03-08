@@ -62,15 +62,7 @@ import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
 import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
-import {google} from '../protos/firestore_v1_proto_api';
-import QueryMode = google.firestore.v1.QueryMode;
-import {
-  ExecutionStats,
-  ExplainMetrics,
-  ExplainResults,
-  PlanSummary,
-} from './query-profile';
-import {ExplainOptions} from '@google-cloud/firestore';
+import {ExplainMetrics, ExplainResults} from './query-profile';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2323,11 +2315,11 @@ export class Query<
   }
 
   /**
-   * Plans and optionally executes this query. Returns an ApiFuture that will be
+   * Plans and optionally executes this query. Returns a Promise that will be
    * resolved with the planner information, statistics from the query execution (if any),
    * and the query results (if any).
    *
-   * @return An ApiFuture that will be resolved with the planner information, statistics
+   * @return A Promise that will be resolved with the planner information, statistics
    *  from the query execution (if any), and the query results (if any).
    */
   explain(
@@ -2496,8 +2488,37 @@ export class Query<
     return transform;
   }
 
-  // TODO (ehsann)
-  explainStream(explainOptions: ExplainOptions): NodeJS.ReadableStream {
+  /**
+   * Executes the query and streams the results as the following object:
+   * {document?: DocumentSnapshot, metrics?: ExplainMetrics}
+   *
+   * The stream surfaces documents one at a time as they are received from the
+   * server, and at the end, it will surface the metrics associated with
+   * executing the query.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   *
+   * let count = 0;
+   *
+   * query.explainStream().on('data', (data) => {
+   *   if (data.document) {
+   *     // Use data.document which is a DocumentSnapshot instance.
+   *     console.log(`Found document with name '${data.document.id}'`);
+   *     ++count;
+   *   }
+   *   if (data.metrics) {
+   *     // Use data.metrics which is an ExplainMetrics instance.
+   *   }
+   * }).on('end', () => {
+   *   console.log(`Received ${count} documents as well as metrics.`);
+   * });
+   * ```
+   */
+  explainStream(
+    explainOptions: firestore.ExplainOptions
+  ): NodeJS.ReadableStream {
     if (this._queryOptions.limitType === LimitType.Last) {
       throw new Error(
         'Query results for queries that include limitToLast() ' +
@@ -2509,13 +2530,7 @@ export class Query<
     const transform = new Transform({
       objectMode: true,
       transform(chunk, encoding, callback) {
-        if (chunk.document) {
-          this.push(chunk.document);
-        }
-        if (chunk.explainMetrics) {
-          this.push(chunk.document);
-        }
-        callback();
+        callback(undefined, {document: chunk.document, metrics: chunk.metrics});
       },
     });
     responseStream.pipe(transform);
@@ -2546,13 +2561,14 @@ export class Query<
    *
    * @param transactionIdOrReadTime A transaction ID or the read time at which
    * to execute the query.
+   * @param explainOptions Options to use for explaining the query (if any).
    * @private
    * @internal
    * @returns Serialized JSON for the query.
    */
   toProto(
     transactionIdOrReadTime?: Uint8Array | Timestamp,
-    queryMode?: QueryMode
+    explainOptions?: firestore.ExplainOptions
   ): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
     const databaseId = this.firestore.databaseId;
@@ -2606,8 +2622,8 @@ export class Query<
         transactionIdOrReadTime.toProto().timestampValue;
     }
 
-    if (queryMode) {
-      runQueryRequest.mode = queryMode;
+    if (explainOptions) {
+      runQueryRequest.explainOptions = explainOptions;
     }
 
     return runQueryRequest;
@@ -2707,7 +2723,7 @@ export class Query<
    */
   _stream(
     transactionId?: Uint8Array,
-    explainOptions?: ExplainOptions
+    explainOptions?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
     const tag = requestTag();
     const startTime = Date.now();
@@ -2733,9 +2749,6 @@ export class Query<
           explainMetrics?: ExplainMetrics;
         } = {};
 
-        const readTime = Timestamp.fromProto(proto.readTime);
-        output.readTime = readTime;
-
         if (proto.document) {
           const document = this.firestore.snapshot_(
             proto.document,
@@ -2756,26 +2769,14 @@ export class Query<
             DbModelType
           >;
           output.document = lastReceivedDocument;
+          output.readTime = Timestamp.fromProto(proto.readTime);
         }
 
-        if (proto.plan) {
-          // queryPlan = new Plan(
-          //   this.firestore._serializer!.decodeGoogleProtobufStruct(
-          //     response.stats.queryPlan.planInfo
-          //   )
-          // );
-          const plan = PlanSummary.fromProto();
-
-          // Sometimes plan comes with execution stats, and sometimes not.
-          let stats: ExecutionStats | null = null;
-          if (proto.executionStats) {
-            // this.firestore._serializer!.decodeGoogleProtobufStruct(
-            //   response.stats.queryStats
-            // );
-            stats = ExecutionStats.fromProto();
-          }
-
-          output.explainMetrics = new ExplainMetrics(plan, stats);
+        if (proto.explainMetrics) {
+          output.explainMetrics = ExplainMetrics.fromProto(
+            proto.explainMetrics,
+            this._serializer
+          );
         }
 
         callback(undefined, output);
@@ -2796,7 +2797,7 @@ export class Query<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        let request = this.toProto(transactionId);
+        let request = this.toProto(transactionId, explainOptions);
 
         let streamActive: Deferred<boolean>;
         do {
@@ -2813,6 +2814,8 @@ export class Query<
 
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
+            // Explain queries are not retried with a cursor. That would produce
+            // incorrect/partial profiling results.
             if (
               !isExplain &&
               !transactionId &&
@@ -3506,7 +3509,7 @@ export class AggregateQuery<
    */
   _stream(
     transactionId?: Uint8Array,
-    explainOptions?: ExplainOptions
+    explainOptions?: firestore.ExplainOptions
   ): Readable {
     const tag = requestTag();
     const firestore = this._query.firestore;
@@ -3533,25 +3536,11 @@ export class AggregateQuery<
           );
         }
 
-        if (proto.stats) {
-          let plan: PlanSummary;
-          let executionStats: ExecutionStats | null = null;
-          if (proto.stats.queryPlan) {
-            plan = PlanSummary.fromProto();
-            // planInfo = new Plan(
-            //   this._query.firestore._serializer!.decodeGoogleProtobufStruct(
-            //     proto.stats.queryPlan.planInfo
-            //   )
-            // );
-          }
-          if (proto.stats.queryStats) {
-            executionStats = ExecutionStats.fromProto();
-            // executionStats =
-            //   this._query.firestore._serializer!.decodeGoogleProtobufStruct(
-            //     proto.stats.queryStats
-            //   );
-          }
-          output.explainMetrics = new ExplainMetrics(plan!, executionStats);
+        if (proto.explainMetrics) {
+          output.explainMetrics = ExplainMetrics.fromProto(
+            proto.explainMetrics,
+            firestore._serializer!
+          );
         }
 
         callback(undefined, output);
@@ -3564,7 +3553,7 @@ export class AggregateQuery<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = this.toProto(transactionId);
+        const request = this.toProto(transactionId, explainOptions);
 
         const backendStream = await firestore.requestStream(
           'runAggregationQuery',
@@ -3581,6 +3570,7 @@ export class AggregateQuery<
           // consider implementing retries if the stream is making progress
           // receiving results for groups. See the use of lastReceivedDocument
           // in the retry strategy for runQuery.
+          // Also note that explain queries should not be retried.
 
           backendStream.unpipe(stream);
           logger(
@@ -3638,7 +3628,7 @@ export class AggregateQuery<
    */
   toProto(
     transactionId?: Uint8Array,
-    queryMode?: QueryMode
+    explainOptions?: firestore.ExplainOptions
   ): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
     const runQueryRequest: api.IRunAggregationQueryRequest = {
@@ -3664,8 +3654,8 @@ export class AggregateQuery<
       runQueryRequest.transaction = transactionId;
     }
 
-    if (queryMode) {
-      runQueryRequest.mode = queryMode;
+    if (explainOptions) {
+      runQueryRequest.explainOptions = explainOptions;
     }
 
     return runQueryRequest;
@@ -3703,12 +3693,12 @@ export class AggregateQuery<
   }
 
   /**
-   * Plans and optionally executes this query. Returns an ApiFuture that will be
-   * resolved with the planner information, statistics from the query execution (if any),
-   * and the query results (if any).
+   * Plans and optionally executes this query. Returns a Promise that will be
+   * resolved with the planner information, statistics from the query
+   * execution (if any), and the query results (if any).
    *
-   * @return An ApiFuture that will be resolved with the planner information, statistics
-   *  from the query execution (if any), and the query results (if any).
+   * @return A Promise that will be resolved with the planner information,
+   * statistics from the query execution (if any), and the query results (if any).
    */
   explain(
     options: firestore.ExplainOptions

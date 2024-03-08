@@ -2951,7 +2951,7 @@ declare namespace FirebaseFirestore {
      * Information about the indexes that were used to serve the query.
      * Note: This content is subject to change.
      */
-    readonly indexesUsed: Record<string, unknown>;
+    readonly indexesUsed: Record<string, unknown>[];
   }
 
   /** ExecutionStats contains information about the execution of a query. */
