@@ -2755,6 +2755,10 @@ export class Query<
           explainMetrics?: ExplainMetrics;
         } = {};
 
+        if (proto.readTime) {
+          output.readTime = Timestamp.fromProto(proto.readTime);
+        }
+
         if (proto.document) {
           const document = this.firestore.snapshot_(
             proto.document,
@@ -2775,7 +2779,6 @@ export class Query<
             DbModelType
           >;
           output.document = lastReceivedDocument;
-          output.readTime = Timestamp.fromProto(proto.readTime);
         }
 
         if (proto.explainMetrics) {
