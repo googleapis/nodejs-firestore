@@ -146,7 +146,7 @@ describe('Firestore class', () => {
       });
   });
 
-  it.only('can plan a query', async () => {
+  it('can plan a query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
@@ -169,7 +169,7 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot).to.be.null;
   });
 
-  it.only('can profile a query', async () => {
+  it('can profile a query', async () => {
     await randomCol.doc('doc1').set({foo: 1, bar: 0});
     await randomCol.doc('doc2').set({foo: 2, bar: 1});
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
@@ -200,7 +200,7 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot!.size).to.equal(2);
   });
 
-  it.only('can profile a query that does not match any docs', async () => {
+  it('can profile a query that does not match any docs', async () => {
     await randomCol.doc('doc1').set({foo: 1, bar: 0});
     await randomCol.doc('doc2').set({foo: 2, bar: 1});
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
@@ -219,7 +219,7 @@ describe('Firestore class', () => {
     ).to.be.greaterThan(0);
 
     const stats = metrics.executionStats!;
-    expect(stats.bytesReturned).to.be.greaterThan(0);
+    expect(stats.bytesReturned).to.be.equal(0);
     expect(stats.readOperations).to.be.greaterThan(0);
     expect(stats.resultsReturned).to.be.equal(0);
     expect(
@@ -231,7 +231,7 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot!.size).to.equal(0);
   });
 
-  it.only('can plan an aggregate query', async () => {
+  it('can plan an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
@@ -250,7 +250,7 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot).to.be.null;
   });
 
-  it.only('can profile an aggregate query', async () => {
+  it('can profile an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});

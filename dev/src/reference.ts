@@ -2350,6 +2350,12 @@ export class Query<
           }
           if (data.explainMetrics) {
             metrics = data.explainMetrics;
+
+            if (docs === null && metrics?.executionStats !== null) {
+              // This indicates that the query was executed, but no documents
+              // had matched the query.
+              docs = [];
+            }
           }
         })
         .on('end', () => {
