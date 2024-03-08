@@ -204,6 +204,11 @@ describe('Firestore class', () => {
     await randomCol.doc('doc1').set({foo: 1, bar: 0});
     await randomCol.doc('doc2').set({foo: 2, bar: 1});
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
+    const results = await randomCol.where('foo', '==', 12345).get();
+    expect(results.empty).to.be.true;
+    expect(results.docs.length).to.equal(0);
+    expect(results.readTime.toMillis()).to.be.greaterThan(0);
+
     const explainResults = await randomCol
       .where('foo', '==', 12345)
       .explain({analyze: true});
