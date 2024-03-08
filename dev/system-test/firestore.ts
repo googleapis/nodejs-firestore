@@ -14,6 +14,7 @@
 
 import {
   DocumentData,
+  ExplainMetrics,
   PartialWithFieldValue,
   QuerySnapshot,
   SetOptions,
@@ -25,7 +26,7 @@ import {afterEach, before, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
-import {firestore} from '../protos/firestore_v1_proto_api';
+import {firestore, google} from '../protos/firestore_v1_proto_api';
 
 import {
   AggregateField,
@@ -1487,6 +1488,39 @@ describe('runs query on a large collection', () => {
     }
 
     expect(received).to.equal(1000);
+  });
+
+  it('can stream explain results', async () => {
+    let totalResponses = 0;
+    let totalDocuments = 0;
+    let metrics: ExplainMetrics | null = null;
+    const stream = randomCol.explainStream({analyze: true});
+    const promise = new Promise<boolean>((resolve, reject) => {
+      stream.on('data', data => {
+        ++totalResponses;
+        if (data.document) {
+          ++totalDocuments;
+        }
+        if (data.metrics) {
+          metrics = data.metrics;
+        }
+      });
+      stream.on('end', () => {
+        expect(totalResponses).to.equal(1000);
+        expect(totalDocuments).to.equal(1000);
+        expect(metrics).to.not.be.null;
+        expect(metrics!.planSummary.indexesUsed.length).to.be.greaterThan(0);
+        expect(metrics!.executionStats).to.not.be.null;
+        expect(metrics!.executionStats!.resultsReturned).to.equal(1000);
+        resolve(true);
+      });
+      stream.on('error', (error: Error) => {
+        reject(error);
+      });
+    });
+
+    const success: boolean = await promise;
+    expect(success).to.be.true;
   });
 });
 

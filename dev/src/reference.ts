@@ -2536,7 +2536,10 @@ export class Query<
     const transform = new Transform({
       objectMode: true,
       transform(chunk, encoding, callback) {
-        callback(undefined, {document: chunk.document, metrics: chunk.metrics});
+        callback(undefined, {
+          document: chunk.document,
+          metrics: chunk.explainMetrics,
+        });
       },
     });
     responseStream.pipe(transform);
