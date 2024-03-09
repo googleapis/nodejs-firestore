@@ -101,7 +101,7 @@ if (process.env.NODE_ENV === 'DEBUG') {
 
 function getTestRoot(settings: Settings = {}): CollectionReference {
   const internalSettings: Settings = {
-    host: 'test-firestore.sandbox.googleapis.com'
+    host: 'test-firestore.sandbox.googleapis.com',
   };
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
