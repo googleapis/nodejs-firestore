@@ -20,7 +20,7 @@ import {ApiMapValue, ProtobufJsValue} from './types';
 import {validateObject} from './validate';
 
 import api = google.firestore.v1;
-import {RESERVED_MAP_KEY, RESERVED_MAP_KEY_VECTOR_VALUE} from "./map-type";
+import {RESERVED_MAP_KEY, RESERVED_MAP_KEY_VECTOR_VALUE} from './map-type';
 
 /*!
  * @module firestore/convert
@@ -117,9 +117,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
 
   if (proto.valueType) {
     valueType = proto.valueType;
-  }
-  else {
-
+  } else {
     const detectedValues: string[] = [];
 
     if (proto.stringValue !== undefined) {
@@ -158,7 +156,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
 
     if (detectedValues.length !== 1) {
       throw new Error(
-          `Unable to infer type value from '${JSON.stringify(proto)}'.`
+        `Unable to infer type value from '${JSON.stringify(proto)}'.`
       );
     }
 
@@ -166,16 +164,16 @@ export function detectValueType(proto: ProtobufJsValue): string {
   }
 
   // Special handling of mapValues used to represent other data types
-  if (valueType === "mapValue") {
+  if (valueType === 'mapValue') {
     const fields = proto.mapValue?.fields;
     if (fields) {
       const props = Object.keys(fields);
       if (
-          props.indexOf(RESERVED_MAP_KEY) !== -1 &&
-          detectValueType(fields[RESERVED_MAP_KEY]) === "stringValue" &&
-          fields[RESERVED_MAP_KEY].stringValue === RESERVED_MAP_KEY_VECTOR_VALUE
+        props.indexOf(RESERVED_MAP_KEY) !== -1 &&
+        detectValueType(fields[RESERVED_MAP_KEY]) === 'stringValue' &&
+        fields[RESERVED_MAP_KEY].stringValue === RESERVED_MAP_KEY_VECTOR_VALUE
       ) {
-        valueType = "vectorValue";
+        valueType = 'vectorValue';
       }
     }
   }
@@ -221,7 +219,7 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
         },
       };
     }
-    case 'mapValue':{
+    case 'mapValue': {
       const mapValue: ApiMapValue = {};
       const fields = fieldValue.mapValue!.fields;
       if (fields) {

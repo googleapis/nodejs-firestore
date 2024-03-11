@@ -1662,10 +1662,8 @@ describe('Query class', () => {
       });
 
     const res = await vectorQuery.get();
-    res.docs.forEach(d => console.log(d.id));
 
     expect(res.size).to.equal(3);
-    console.log(JSON.stringify(res.docs[0]));
 
     if (res.docs[0].get('embedding').isEqual(FieldValue.vector([1, 1]))) {
       expect(
@@ -3006,41 +3004,58 @@ describe('Query class', () => {
       unsubscribe();
     });
 
-    it.only('orders vector field correctly', async () => {
-      await randomCol.add({"embedding": {"HELLO": "WORLD"}});
-      await randomCol.add({"embedding": {"hello": "world"}});
-      await randomCol.add({"embedding": FieldValue.vector([1, 2, 3])});
-      await randomCol.add({"embedding": FieldValue.vector([1, 2])});
-      await randomCol.add({"embedding": FieldValue.vector([2, 2])});
-      await randomCol.add({"embedding": FieldValue.vector([100, 2, 3, 4, 5])});
-      await randomCol.add({"embedding": FieldValue.vector([1, 2, 3, 4, 5])});
-      await randomCol.add({"embedding": FieldValue.vector([1, 2, 100, 4, 5])});
-      await randomCol.add({"embedding": FieldValue.vector([1, 2, 3, 4])});
+    it('orders vector field correctly', async () => {
+      const docsInOrder = [
+        {embedding: [1, 2, 3, 4, 5, 6]},
+        {embedding: [100]},
+        {embedding: FieldValue.vector([Number.NEGATIVE_INFINITY])},
+        {embedding: FieldValue.vector([-100])},
+        {embedding: FieldValue.vector([100])},
+        {embedding: FieldValue.vector([Number.POSITIVE_INFINITY])},
+        {embedding: FieldValue.vector([1, 2])},
+        {embedding: FieldValue.vector([2, 2])},
+        {embedding: FieldValue.vector([1, 2, 3])},
+        {embedding: FieldValue.vector([1, 2, 3, 4])},
+        {embedding: FieldValue.vector([1, 2, 3, 4, 5])},
+        {embedding: FieldValue.vector([1, 2, 100, 4, 4])},
+        {embedding: FieldValue.vector([100, 2, 3, 4, 5])},
+        {embedding: {HELLO: 'WORLD'}},
+        {embedding: {hello: 'world'}},
+      ];
 
-      const orderedQuery = randomCol.orderBy("embedding");
+      const expectedSnapshots = [];
+      const expectedChanges = [];
+
+      for (let i = 0; i < docsInOrder.length; i++) {
+        const dr = await randomCol.add(docsInOrder[i]);
+        expectedSnapshots.push(snapshot(dr.id, docsInOrder[i]));
+        expectedChanges.push(added(dr.id, docsInOrder[i]));
+      }
+
+      const orderedQuery = randomCol.orderBy('embedding');
 
       const unsubscribe = orderedQuery.onSnapshot(
-          snapshot => {
-            currentDeferred.resolve(snapshot);
-          },
-          err => {
-            currentDeferred.reject!(err);
-          }
+        snapshot => {
+          currentDeferred.resolve(snapshot);
+        },
+        err => {
+          currentDeferred.reject!(err);
+        }
       );
 
       const watchSnapshot = await waitForSnapshot();
       unsubscribe();
+
       const getSnapshot = await orderedQuery.get();
-
-      console.log("---- watch snapshot ----")
-      watchSnapshot.docs.forEach(ds => console.log(ds.get("embedding")));
-
-      console.log("---- get snapshot ----")
-      getSnapshot.docs.forEach(ds => console.log(ds.get("embedding")));
 
       snapshotsEqual(watchSnapshot, {
         docs: getSnapshot.docs,
-        docChanges: getSnapshot.docChanges()
+        docChanges: getSnapshot.docChanges(),
+      });
+
+      snapshotsEqual(watchSnapshot, {
+        docs: expectedSnapshots,
+        docChanges: expectedChanges,
       });
     });
   });

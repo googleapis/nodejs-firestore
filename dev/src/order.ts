@@ -234,10 +234,13 @@ function compareObjects(left: ApiMapValue, right: ApiMapValue): number {
  */
 function compareVectors(left: ApiMapValue, right: ApiMapValue): number {
   // The vector is a map, but only vector value is compared.
-  const leftArray = left?.["value"]?.arrayValue?.values ?? [];
-  const rightArray = right?.["value"]?.arrayValue?.values ?? [];
+  const leftArray = left?.['value']?.arrayValue?.values ?? [];
+  const rightArray = right?.['value']?.arrayValue?.values ?? [];
 
-  const lengthCompare = primitiveComparator(leftArray.length, rightArray.length);
+  const lengthCompare = primitiveComparator(
+    leftArray.length,
+    rightArray.length
+  );
   if (lengthCompare !== 0) {
     return lengthCompare;
   }
@@ -284,13 +287,13 @@ export function compare(left: api.IValue, right: api.IValue): number {
       );
     case TypeOrder.OBJECT:
       return compareObjects(
-          left.mapValue!.fields || {},
-          right.mapValue!.fields || {}
+        left.mapValue!.fields || {},
+        right.mapValue!.fields || {}
       );
     case TypeOrder.VECTOR:
       return compareVectors(
-          left.mapValue!.fields || {},
-          right.mapValue!.fields || {}
+        left.mapValue!.fields || {},
+        right.mapValue!.fields || {}
       );
     default:
       throw new Error(`Encountered unknown type order: ${leftType}`);

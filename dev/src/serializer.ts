@@ -23,13 +23,17 @@ import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {ApiMapValue, ProtobufJsValue, ValidationOptions} from './types';
+import {ApiMapValue, ValidationOptions} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;
-import {detectValueType} from "./convert";
-import {RESERVED_MAP_KEY, RESERVED_MAP_KEY_VECTOR_VALUE, VECTOR_MAP_VECTORS_KEY} from "./map-type";
+import {detectValueType} from './convert';
+import {
+  RESERVED_MAP_KEY,
+  RESERVED_MAP_KEY_VECTOR_VALUE,
+  VECTOR_MAP_VECTORS_KEY,
+} from './map-type';
 
 /**
  * The maximum depth of a Firestore object.
