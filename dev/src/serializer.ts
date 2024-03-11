@@ -18,17 +18,18 @@ import {DocumentData} from '@google-cloud/firestore';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
-import {detectValueType} from './convert';
 import {DeleteTransform, FieldTransform, VectorValue} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {ApiMapValue, ValidationOptions} from './types';
+import {ApiMapValue, ProtobufJsValue, ValidationOptions} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;
+import {detectValueType} from "./convert";
+import {RESERVED_MAP_KEY, RESERVED_MAP_KEY_VECTOR_VALUE, VECTOR_MAP_VECTORS_KEY} from "./map-type";
 
 /**
  * The maximum depth of a Firestore object.
@@ -37,10 +38,6 @@ import api = proto.google.firestore.v1;
  * @internal
  */
 const MAX_DEPTH = 20;
-
-const RESERVED_MAP_KEY = '__type__';
-const RESERVED_MAP_KEY_VECTOR_VALUE = '__vector__';
-const VECTOR_MAP_VECTORS_KEY = 'value';
 
 /**
  * An interface for Firestore types that can be serialized to Protobuf.
@@ -298,23 +295,18 @@ export class Serializer {
       case 'mapValue': {
         const fields = proto.mapValue!.fields;
         if (fields) {
-          const props = Object.keys(fields);
-          if (
-            props.indexOf(RESERVED_MAP_KEY) !== -1 &&
-            this.decodeValue(fields[RESERVED_MAP_KEY]) ===
-              RESERVED_MAP_KEY_VECTOR_VALUE
-          ) {
-            return VectorValue._fromProto(fields[VECTOR_MAP_VECTORS_KEY]);
-          } else {
-            const obj: DocumentData = {};
-            for (const prop of Object.keys(fields)) {
-              obj[prop] = this.decodeValue(fields[prop]);
-            }
-            return obj;
+          const obj: DocumentData = {};
+          for (const prop of Object.keys(fields)) {
+            obj[prop] = this.decodeValue(fields[prop]);
           }
+          return obj;
         } else {
           return {};
         }
+      }
+      case 'vectorValue': {
+        const fields = proto.mapValue!.fields!;
+        return VectorValue._fromProto(fields[VECTOR_MAP_VECTORS_KEY]);
       }
       case 'geoPointValue': {
         return GeoPoint.fromProto(proto.geoPointValue!);

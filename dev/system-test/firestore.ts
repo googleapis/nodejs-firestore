@@ -3005,6 +3005,44 @@ describe('Query class', () => {
 
       unsubscribe();
     });
+
+    it.only('orders vector field correctly', async () => {
+      await randomCol.add({"embedding": {"HELLO": "WORLD"}});
+      await randomCol.add({"embedding": {"hello": "world"}});
+      await randomCol.add({"embedding": FieldValue.vector([1, 2, 3])});
+      await randomCol.add({"embedding": FieldValue.vector([1, 2])});
+      await randomCol.add({"embedding": FieldValue.vector([2, 2])});
+      await randomCol.add({"embedding": FieldValue.vector([100, 2, 3, 4, 5])});
+      await randomCol.add({"embedding": FieldValue.vector([1, 2, 3, 4, 5])});
+      await randomCol.add({"embedding": FieldValue.vector([1, 2, 100, 4, 5])});
+      await randomCol.add({"embedding": FieldValue.vector([1, 2, 3, 4])});
+
+      const orderedQuery = randomCol.orderBy("embedding");
+
+      const unsubscribe = orderedQuery.onSnapshot(
+          snapshot => {
+            currentDeferred.resolve(snapshot);
+          },
+          err => {
+            currentDeferred.reject!(err);
+          }
+      );
+
+      const watchSnapshot = await waitForSnapshot();
+      unsubscribe();
+      const getSnapshot = await orderedQuery.get();
+
+      console.log("---- watch snapshot ----")
+      watchSnapshot.docs.forEach(ds => console.log(ds.get("embedding")));
+
+      console.log("---- get snapshot ----")
+      getSnapshot.docs.forEach(ds => console.log(ds.get("embedding")));
+
+      snapshotsEqual(watchSnapshot, {
+        docs: getSnapshot.docs,
+        docChanges: getSnapshot.docChanges()
+      });
+    });
   });
 
   (process.env.FIRESTORE_EMULATOR_HOST === undefined
