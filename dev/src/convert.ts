@@ -219,7 +219,8 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
         },
       };
     }
-    case 'mapValue': {
+    case 'mapValue':
+    case 'vectorValue': {
       const mapValue: ApiMapValue = {};
       const fields = fieldValue.mapValue!.fields;
       if (fields) {
