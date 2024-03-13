@@ -1281,6 +1281,9 @@ export class FirestoreClient {
    *   This must be a microsecond precision timestamp within the past one hour,
    *   or if Point-in-Time Recovery is enabled, can additionally be a whole
    *   minute timestamp within the past 7 days.
+   * @param {google.firestore.v1.ExplainOptions} [request.explainOptions]
+   *   Optional. Explain options for the query. If set, additional query
+   *   statistics will be returned. If not, only query results will be returned.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1347,6 +1350,9 @@ export class FirestoreClient {
    *   This must be a microsecond precision timestamp within the past one hour,
    *   or if Point-in-Time Recovery is enabled, can additionally be a whole
    *   minute timestamp within the past 7 days.
+   * @param {google.firestore.v1.ExplainOptions} [request.explainOptions]
+   *   Optional. Explain options for the query. If set, additional query
+   *   statistics will be returned. If not, only query results will be returned.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
