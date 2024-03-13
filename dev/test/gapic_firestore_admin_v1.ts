@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -166,14 +166,62 @@ function stubAsyncIterationCall<ResponseType>(
 
 describe('v1.FirestoreAdminClient', () => {
   describe('Common methods', () => {
-    it('has servicePath', () => {
-      const servicePath = firestoreadminModule.FirestoreAdminClient.servicePath;
-      assert(servicePath);
+    it('has apiEndpoint', () => {
+      const client = new firestoreadminModule.FirestoreAdminClient();
+      const apiEndpoint = client.apiEndpoint;
+      assert.strictEqual(apiEndpoint, 'firestore.googleapis.com');
     });
 
-    it('has apiEndpoint', () => {
-      const apiEndpoint = firestoreadminModule.FirestoreAdminClient.apiEndpoint;
-      assert(apiEndpoint);
+    it('has universeDomain', () => {
+      const client = new firestoreadminModule.FirestoreAdminClient();
+      const universeDomain = client.universeDomain;
+      assert.strictEqual(universeDomain, 'googleapis.com');
+    });
+
+    if (
+      typeof process !== 'undefined' &&
+      typeof process.emitWarning === 'function'
+    ) {
+      it('throws DeprecationWarning if static servicePath is used', () => {
+        const stub = sinon.stub(process, 'emitWarning');
+        const servicePath =
+          firestoreadminModule.FirestoreAdminClient.servicePath;
+        assert.strictEqual(servicePath, 'firestore.googleapis.com');
+        assert(stub.called);
+        stub.restore();
+      });
+
+      it('throws DeprecationWarning if static apiEndpoint is used', () => {
+        const stub = sinon.stub(process, 'emitWarning');
+        const apiEndpoint =
+          firestoreadminModule.FirestoreAdminClient.apiEndpoint;
+        assert.strictEqual(apiEndpoint, 'firestore.googleapis.com');
+        assert(stub.called);
+        stub.restore();
+      });
+    }
+    it('sets apiEndpoint according to universe domain camelCase', () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        universeDomain: 'example.com',
+      });
+      const servicePath = client.apiEndpoint;
+      assert.strictEqual(servicePath, 'firestore.example.com');
+    });
+
+    it('sets apiEndpoint according to universe domain snakeCase', () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        universe_domain: 'example.com',
+      });
+      const servicePath = client.apiEndpoint;
+      assert.strictEqual(servicePath, 'firestore.example.com');
+    });
+    it('does not allow setting both universeDomain and universe_domain', () => {
+      assert.throws(() => {
+        new firestoreadminModule.FirestoreAdminClient({
+          universe_domain: 'example.com',
+          universeDomain: 'example.net',
+        });
+      });
     });
 
     it('has port', () => {

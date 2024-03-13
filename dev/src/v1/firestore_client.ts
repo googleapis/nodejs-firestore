@@ -31,6 +31,7 @@ import type {
 import {Transform, PassThrough} from 'stream';
 import * as protos from '../../protos/firestore_v1_proto_api';
 import jsonProtos = require('../../protos/v1.json');
+
 /**
  * Client JSON configuration object, loaded from
  * `src/v1/firestore_client_config.json`.
@@ -59,6 +60,8 @@ export class FirestoreClient {
   private _gaxGrpc: gax.GrpcClient | gax.fallback.GrpcClient;
   private _protos: {};
   private _defaults: {[method: string]: gax.CallSettings};
+  private _universeDomain: string;
+  private _servicePath: string;
   auth: gax.GoogleAuth;
   descriptors: Descriptors = {
     page: {},
@@ -116,8 +119,20 @@ export class FirestoreClient {
   ) {
     // Ensure that options include all the required fields.
     const staticMembers = this.constructor as typeof FirestoreClient;
+    if (
+      opts?.universe_domain &&
+      opts?.universeDomain &&
+      opts?.universe_domain !== opts?.universeDomain
+    ) {
+      throw new Error(
+        'Please set either universe_domain or universeDomain, but not both.'
+      );
+    }
+    this._universeDomain =
+      opts?.universeDomain ?? opts?.universe_domain ?? 'googleapis.com';
+    this._servicePath = 'firestore.' + this._universeDomain;
     const servicePath =
-      opts?.servicePath || opts?.apiEndpoint || staticMembers.servicePath;
+      opts?.servicePath || opts?.apiEndpoint || this._servicePath;
     this._providedCustomServicePath = !!(
       opts?.servicePath || opts?.apiEndpoint
     );
@@ -132,7 +147,7 @@ export class FirestoreClient {
     opts.numericEnums = true;
 
     // If scopes are unset in options and we're connecting to a non-default endpoint, set scopes just in case.
-    if (servicePath !== staticMembers.servicePath && !('scopes' in opts)) {
+    if (servicePath !== this._servicePath && !('scopes' in opts)) {
       opts['scopes'] = staticMembers.scopes;
     }
 
@@ -157,10 +172,10 @@ export class FirestoreClient {
     this.auth.useJWTAccessWithScope = true;
 
     // Set defaultServicePath on the auth object.
-    this.auth.defaultServicePath = staticMembers.servicePath;
+    this.auth.defaultServicePath = this._servicePath;
 
     // Set the default scopes in auth client if needed.
-    if (servicePath === staticMembers.servicePath) {
+    if (servicePath === this._servicePath) {
       this.auth.defaultScopes = staticMembers.scopes;
     }
     this.locationsClient = new this._gaxModule.LocationsClient(
@@ -212,23 +227,28 @@ export class FirestoreClient {
     this.descriptors.stream = {
       batchGetDocuments: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ false
       ),
       runQuery: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ false
       ),
       runAggregationQuery: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ false
       ),
       write: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.BIDI_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ false
       ),
       listen: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.BIDI_STREAMING,
-        !!opts.fallback
+        !!opts.fallback,
+        /* gaxStreamingRetries: */ false
       ),
     };
 
@@ -345,19 +365,50 @@ export class FirestoreClient {
 
   /**
    * The DNS address for this API service.
+   * @deprecated Use the apiEndpoint method of the client instance.
    * @returns {string} The DNS address for this service.
    */
   static get servicePath() {
+    if (
+      typeof process !== undefined &&
+      typeof process.emitWarning === 'function'
+    ) {
+      process.emitWarning(
+        'Static servicePath is deprecated, please use the instance method instead.',
+        'DeprecationWarning'
+      );
+    }
     return 'firestore.googleapis.com';
   }
 
   /**
-   * The DNS address for this API service - same as servicePath(),
-   * exists for compatibility reasons.
+   * The DNS address for this API service - same as servicePath.
+   * @deprecated Use the apiEndpoint method of the client instance.
    * @returns {string} The DNS address for this service.
    */
   static get apiEndpoint() {
+    if (
+      typeof process !== undefined &&
+      typeof process.emitWarning === 'function'
+    ) {
+      process.emitWarning(
+        'Static apiEndpoint is deprecated, please use the instance method instead.',
+        'DeprecationWarning'
+      );
+    }
     return 'firestore.googleapis.com';
+  }
+
+  /**
+   * The DNS address for this API service.
+   * @returns {string} The DNS address for this service.
+   */
+  get apiEndpoint() {
+    return this._servicePath;
+  }
+
+  get universeDomain() {
+    return this._universeDomain;
   }
 
   /**
@@ -1230,10 +1281,9 @@ export class FirestoreClient {
    *   This must be a microsecond precision timestamp within the past one hour,
    *   or if Point-in-Time Recovery is enabled, can additionally be a whole
    *   minute timestamp within the past 7 days.
-   * @param {google.firestore.v1.QueryMode} [request.mode]
-   *   Optional. The mode in which the query request is processed. This field is
-   *   optional, and when not provided, it defaults to `NORMAL` mode where no
-   *   additional statistics will be returned with the query results.
+   * @param {google.firestore.v1.ExplainOptions} [request.explainOptions]
+   *   Optional. Explain options for the query. If set, additional query
+   *   statistics will be returned. If not, only query results will be returned.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1300,10 +1350,9 @@ export class FirestoreClient {
    *   This must be a microsecond precision timestamp within the past one hour,
    *   or if Point-in-Time Recovery is enabled, can additionally be a whole
    *   minute timestamp within the past 7 days.
-   * @param {google.firestore.v1.QueryMode} [request.mode]
-   *   Optional. The mode in which the query request is processed. This field is
-   *   optional, and when not provided, it defaults to `NORMAL` mode where no
-   *   additional statistics will be returned with the query results.
+   * @param {google.firestore.v1.ExplainOptions} [request.explainOptions]
+   *   Optional. Explain options for the query. If set, additional query
+   *   statistics will be returned. If not, only query results will be returned.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}

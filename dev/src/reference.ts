@@ -142,17 +142,22 @@ export class DocumentReference<
 {
   /**
    * @private
-   *
-   * @private
+   * @internal
    * @param _firestore The Firestore Database client.
    * @param _path The Path of this reference.
    * @param _converter The converter to use when serializing data.
    */
   constructor(
     private readonly _firestore: Firestore,
-    /** @private */
+    /**
+     * @private
+     * @internal
+     **/
     readonly _path: ResourcePath,
-    /** @private */
+    /**
+     * @internal
+     * @private
+     **/
     readonly _converter = defaultConverter<AppModelType, DbModelType>()
   ) {}
 
@@ -1412,19 +1417,29 @@ export class Query<
 > implements firestore.Query<AppModelType, DbModelType>
 {
   private readonly _serializer: Serializer;
-  /** @private */
+  /**
+   * @internal
+   * @private
+   **/
   protected readonly _allowUndefined: boolean;
 
   /**
+   * @internal
    * @private
    *
    * @param _firestore The Firestore Database client.
    * @param _queryOptions Options that define the query.
    */
   constructor(
-    /** @private */
+    /**
+     * @internal
+     * @private
+     **/
     readonly _firestore: Firestore,
-    /** @private */
+    /**
+     * @internal
+     * @private
+     **/
     protected readonly _queryOptions: QueryOptions<AppModelType, DbModelType>
   ) {
     this._serializer = new Serializer(_firestore);
@@ -1442,8 +1457,6 @@ export class Query<
    * @param fieldOrders The field order that defines what fields we should
    * extract.
    * @return {Array.<*>} The field values to use.
-   * @private
-   * @internal
    */
   static _extractFieldValues(
     documentSnapshot: DocumentSnapshot,
@@ -1582,6 +1595,10 @@ export class Query<
     return new Query(this._firestore, options);
   }
 
+  /**
+   * @internal
+   * @private
+   */
   _parseFilter(filter: Filter): FilterInternal {
     if (filter instanceof UnaryFilter) {
       return this._parseFieldFilter(filter);
@@ -1589,6 +1606,10 @@ export class Query<
     return this._parseCompositeFilter(filter as CompositeFilter);
   }
 
+  /**
+   * @internal
+   * @private
+   */
   _parseFieldFilter(fieldFilterData: UnaryFilter): FieldFilterInternal {
     let value = fieldFilterData._getValue();
     let operator = fieldFilterData._getOperator();
@@ -1627,6 +1648,10 @@ export class Query<
     );
   }
 
+  /**
+   * @internal
+   * @private
+   */
   _parseCompositeFilter(compositeFilterData: CompositeFilter): FilterInternal {
     const parsedFilters = compositeFilterData
       ._getFilters()
@@ -2400,10 +2425,11 @@ export class Query<
    *
    * @private
    * @internal
-   * @param {bytes=} transactionId A transaction ID.
+   * @param transactionIdOrReadTime A transaction ID or the read time at which
+   * to execute the query.
    */
   _get(
-    transactionId?: Uint8Array
+    transactionIdOrReadTime?: Uint8Array | Timestamp
   ): Promise<QuerySnapshot<AppModelType, DbModelType>> {
     const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
 
@@ -2413,7 +2439,7 @@ export class Query<
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
 
-      this._stream(transactionId)
+      this._stream(transactionIdOrReadTime)
         .on('error', err => {
           reject(wrapError(err, stack));
         })
@@ -2707,11 +2733,19 @@ export class Query<
     return structuredQuery;
   }
 
-  // This method exists solely to enable unit tests to mock it.
+  /**
+   * @internal
+   * @private
+   * This method exists solely to enable unit tests to mock it.
+   */
   _isPermanentRpcError(err: GoogleError, methodName: string): boolean {
     return isPermanentRpcError(err, methodName);
   }
 
+  /**
+   * @internal
+   * @private
+   */
   _hasRetryTimedOut(methodName: string, startTime: number): boolean {
     const totalTimeout = getTotalTimeout(methodName);
     if (totalTimeout === 0) {
@@ -2724,14 +2758,15 @@ export class Query<
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
-   * @param transactionId A transaction ID.
+   * @param transactionIdOrReadTime A transaction ID or the read time at which
+   * to execute the query.
    * @param explainOptions Options to use for explaining the query (if any).
    * @private
    * @internal
    * @returns A stream of document results.
    */
   _stream(
-    transactionId?: Uint8Array,
+    transactionIdOrReadTime?: Uint8Array | Timestamp,
     explainOptions?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
     const tag = requestTag();
@@ -2809,7 +2844,7 @@ export class Query<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        let request = this.toProto(transactionId, explainOptions);
+        let request = this.toProto(transactionIdOrReadTime, explainOptions);
 
         let streamActive: Deferred<boolean>;
         do {
@@ -2830,7 +2865,7 @@ export class Query<
             // incorrect/partial profiling results.
             if (
               !isExplain &&
-              !transactionId &&
+              !transactionIdOrReadTime &&
               !this._isPermanentRpcError(err, 'runQuery')
             ) {
               logger(
@@ -3428,9 +3463,7 @@ export class AggregateQuery<
   private readonly serverAliasToClientAliasMap: Record<string, string> = {};
 
   /**
-   * @private
    * @internal
-   *
    * @param _query The query whose aggregations will be calculated by this
    * object.
    * @param _aggregates The aggregations that will be performed by this query.
@@ -3477,7 +3510,7 @@ export class AggregateQuery<
    * @param {bytes=} transactionId A transaction ID.
    */
   _get(
-    transactionId?: Uint8Array
+    transactionIdOrReadTime?: Uint8Array | Timestamp
   ): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
@@ -3491,7 +3524,7 @@ export class AggregateQuery<
     > | null = null;
 
     return new Promise((resolve, reject) => {
-      const stream = this._stream(transactionId);
+      const stream = this._stream(transactionIdOrReadTime);
       stream.on('error', err => {
         reject(wrapError(err, stack));
       });
@@ -3515,12 +3548,13 @@ export class AggregateQuery<
    *
    * @private
    * @internal
-   * @param transactionId A transaction ID.
+   * @param transactionIdOrReadTime A transaction ID or the read time at which
+   * to execute the query.
    * @param explainOptions Options to use for explaining the query (if any).
    * @returns A stream of document results.
    */
   _stream(
-    transactionId?: Uint8Array,
+    transactionIdOrReadTime?: Uint8Array | Timestamp,
     explainOptions?: firestore.ExplainOptions
   ): Readable {
     const tag = requestTag();
@@ -3565,7 +3599,7 @@ export class AggregateQuery<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = this.toProto(transactionId, explainOptions);
+        const request = this.toProto(transactionIdOrReadTime, explainOptions);
 
         const backendStream = await firestore.requestStream(
           'runAggregationQuery',
@@ -3639,7 +3673,7 @@ export class AggregateQuery<
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionId?: Uint8Array,
+    transactionIdOrReadTime?: Uint8Array | Timestamp,
     explainOptions?: firestore.ExplainOptions
   ): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
@@ -3662,8 +3696,10 @@ export class AggregateQuery<
       },
     };
 
-    if (transactionId instanceof Uint8Array) {
-      runQueryRequest.transaction = transactionId;
+    if (transactionIdOrReadTime instanceof Uint8Array) {
+      runQueryRequest.transaction = transactionIdOrReadTime;
+    } else if (transactionIdOrReadTime instanceof Timestamp) {
+      runQueryRequest.readTime = transactionIdOrReadTime;
     }
 
     if (explainOptions) {
@@ -3773,7 +3809,6 @@ export class AggregateQuerySnapshot<
     >
 {
   /**
-   * @private
    * @internal
    *
    * @param _query The query that was executed to produce this result.

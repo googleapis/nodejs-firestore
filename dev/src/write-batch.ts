@@ -132,6 +132,7 @@ export class WriteBatch implements firestore.WriteBatch {
   /**
    * The number of writes in this batch.
    * @private
+   * @internal
    */
   get _opCount(): number {
     return this._ops.length;
@@ -660,12 +661,12 @@ export class WriteBatch implements firestore.WriteBatch {
  * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The object to validate
- * @param allowExists Whether to allow the 'exists' preconditions.
+ * @param options Options describing other things for this function to validate.
  */
 function validatePrecondition(
   arg: string | number,
   value: unknown,
-  allowExists: boolean
+  options?: {allowedExistsValues?: boolean[]}
 ): void {
   if (typeof value !== 'object' || value === null) {
     throw new Error('Input is not an object.');
@@ -677,20 +678,22 @@ function validatePrecondition(
 
   if (precondition.exists !== undefined) {
     ++conditions;
-    if (!allowExists) {
-      throw new Error(
-        `${invalidArgumentMessage(
-          arg,
-          'precondition'
-        )} "exists" is not an allowed precondition.`
-      );
-    }
     if (typeof precondition.exists !== 'boolean') {
       throw new Error(
         `${invalidArgumentMessage(
           arg,
           'precondition'
         )} "exists" is not a boolean.'`
+      );
+    }
+    if (
+      options?.allowedExistsValues &&
+      options.allowedExistsValues.indexOf(precondition.exists) < 0
+    ) {
+      throw new Error(
+        `${invalidArgumentMessage(arg, 'precondition')} ` +
+          `"exists" is not allowed to have the value ${precondition.exists} ` +
+          `(allowed values: ${options.allowedExistsValues.join(', ')})`
       );
     }
   }
@@ -733,7 +736,7 @@ function validateUpdatePrecondition(
   options?: RequiredArgumentOptions
 ): asserts value is {lastUpdateTime?: Timestamp} {
   if (!validateOptional(value, options)) {
-    validatePrecondition(arg, value, /* allowExists= */ false);
+    validatePrecondition(arg, value, {allowedExistsValues: [true]});
   }
 }
 
@@ -753,7 +756,7 @@ function validateDeletePrecondition(
   options?: RequiredArgumentOptions
 ): void {
   if (!validateOptional(value, options)) {
-    validatePrecondition(arg, value, /* allowExists= */ true);
+    validatePrecondition(arg, value);
   }
 }
 

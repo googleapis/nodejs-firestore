@@ -5494,30 +5494,6 @@ describe('Transaction class', () => {
     expect(snapshot.exists).to.be.true;
     expect(snapshot.get('foo')).to.equal(1);
   });
-
-  // Skip this test when running against the emulator because it does not work
-  // against the emulator. The emulator fails to enforce read-only transactions.
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it.skip)(
-    'fails read-only with writes',
-    async () => {
-      let attempts = 0;
-
-      const ref = randomCol.doc('doc');
-      try {
-        await firestore.runTransaction(
-          async updateFunction => {
-            ++attempts;
-            updateFunction.set(ref, {});
-          },
-          {readOnly: true}
-        );
-        expect.fail();
-      } catch (e) {
-        expect(attempts).to.equal(1);
-        expect(e.code).to.equal(Status.INVALID_ARGUMENT);
-      }
-    }
-  );
 });
 
 describe('WriteBatch class', () => {

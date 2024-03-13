@@ -4,6 +4,44 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.3.1](https://github.com/googleapis/nodejs-firestore/compare/v7.3.0...v7.3.1) (2024-03-04)
+
+
+### Bug Fixes
+
+* Add client library version to headers ([#2003](https://github.com/googleapis/nodejs-firestore/issues/2003)) ([8799032](https://github.com/googleapis/nodejs-firestore/commit/8799032d8cc39adc774fe21b7eb70f96a3a18fda))
+* Add missing type for exposed database id ([#1996](https://github.com/googleapis/nodejs-firestore/issues/1996)) ([e967279](https://github.com/googleapis/nodejs-firestore/commit/e967279cfe532ae3375ae9dcb94f4a65af5ffb42))
+* Optimize Transaction PITR ([#2002](https://github.com/googleapis/nodejs-firestore/issues/2002)) ([2f08612](https://github.com/googleapis/nodejs-firestore/commit/2f0861296151f7b0094501e4a9ff6fc4154d52a4))
+* Revert changes to streaming retries ([d964a13](https://github.com/googleapis/nodejs-firestore/commit/d964a13818e6bc4be6547e88ffbe16be1a6ceeeb))
+
+## [7.3.0](https://github.com/googleapis/nodejs-firestore/compare/v7.2.0...v7.3.0) (2024-01-31)
+
+
+### Features
+
+* Expose the undeliverable_first_gen_event.proto ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+
+
+### Bug Fixes
+
+* Allow an explicit MustExist precondition for update ([#1985](https://github.com/googleapis/nodejs-firestore/issues/1985)) ([99d60a6](https://github.com/googleapis/nodejs-firestore/commit/99d60a6f87b70c942ac2bd9464cc6d64323f9dfb))
+* Fix redaction of credentials in Firestore settings ([#1989](https://github.com/googleapis/nodejs-firestore/issues/1989)) ([98e668b](https://github.com/googleapis/nodejs-firestore/commit/98e668bb9ce7feb090f65fc61d92af433bc23094))
+* Improve retry logic for streaming API calls ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+* Removed unsupported QueryMode, QueryPlan, and ResultSetStats protos ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+
+## [7.2.0](https://github.com/googleapis/nodejs-firestore/compare/v7.1.1...v7.2.0) (2024-01-16)
+
+
+### Features
+
+* Add new types QueryMode, QueryPlan, ResultSetStats ([#1911](https://github.com/googleapis/nodejs-firestore/issues/1911)) ([8f77b68](https://github.com/googleapis/nodejs-firestore/commit/8f77b68bf70b04a66e982067aa246de0596e4ea2))
+* Expose databaseId and projectId getter on Firestore class ([#1937](https://github.com/googleapis/nodejs-firestore/issues/1937)) ([d9c867f](https://github.com/googleapis/nodejs-firestore/commit/d9c867fc5048748e5af378fd8465303224668781)), closes [#1936](https://github.com/googleapis/nodejs-firestore/issues/1936)
+
+
+### Bug Fixes
+
+* Make transaction rollback best effort. ([#1967](https://github.com/googleapis/nodejs-firestore/issues/1967)) ([1d76546](https://github.com/googleapis/nodejs-firestore/commit/1d76546a781527ef5b9085fc9f189c024355ae9f))
+
 ## [7.1.1](https://github.com/googleapis/nodejs-firestore/compare/v7.1.0...v7.1.1) (2023-11-20)
 
 
