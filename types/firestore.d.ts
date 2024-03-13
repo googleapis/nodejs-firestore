@@ -2985,9 +2985,6 @@ declare namespace FirebaseFirestore {
     /** The number of query results. */
     readonly resultsReturned: number;
 
-    /** The number of bytes that were returned as a result of the query. */
-    readonly bytesReturned: number;
-
     /** The total execution time of the query. */
     readonly executionDuration: Duration;
 

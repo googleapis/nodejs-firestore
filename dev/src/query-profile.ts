@@ -46,7 +46,6 @@ export class PlanSummary implements firestore.PlanSummary {
 export class ExecutionStats implements firestore.ExecutionStats {
   constructor(
     readonly resultsReturned: number,
-    readonly bytesReturned: number,
     readonly executionDuration: firestore.Duration,
     readonly readOperations: number,
     readonly debugStats: Record<string, unknown>
@@ -59,7 +58,6 @@ export class ExecutionStats implements firestore.ExecutionStats {
     if (stats) {
       return new ExecutionStats(
         Number(stats.resultsReturned),
-        Number(stats.bytesReturned),
         {
           seconds: Number(stats.executionDuration?.seconds),
           nanoseconds: Number(stats.executionDuration?.nanos),

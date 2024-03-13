@@ -189,7 +189,6 @@ describe('Firestore class', () => {
     ).to.be.greaterThan(0);
 
     const stats = metrics.executionStats!;
-    expect(stats.bytesReturned).to.be.greaterThan(0);
     expect(stats.readOperations).to.be.greaterThan(0);
     expect(stats.resultsReturned).to.be.equal(2);
     expect(
@@ -225,7 +224,6 @@ describe('Firestore class', () => {
     ).to.be.greaterThan(0);
 
     const stats = metrics.executionStats!;
-    expect(stats.bytesReturned).to.be.equal(0);
     expect(stats.readOperations).to.be.greaterThan(0);
     expect(stats.resultsReturned).to.be.equal(0);
     expect(
@@ -273,7 +271,6 @@ describe('Firestore class', () => {
 
     expect(metrics.executionStats).to.not.be.null;
     const stats = metrics.executionStats!;
-    expect(stats.bytesReturned).to.be.greaterThan(0);
     expect(stats.readOperations).to.be.greaterThan(0);
     expect(stats.resultsReturned).to.be.equal(1);
     expect(
