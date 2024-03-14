@@ -2013,7 +2013,7 @@ declare namespace FirebaseFirestore {
       queryVector: VectorValue | Array<number>,
       options: {
         limit: number;
-        distanceMeasure: 'EUCLIDEAN' | 'COSINE';
+        distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
       }
     ): VectorQuery<AppModelType, DbModelType>;
 
