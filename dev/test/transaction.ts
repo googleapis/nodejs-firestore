@@ -780,8 +780,7 @@ describe('transaction operations', () => {
         async (transaction, docRef) => {
           transaction.set(docRef, {foo: 'bar'});
         },
-        begin({readOnly: {}}),
-        rollback()
+        begin({readOnly: {}})
       )
     ).to.eventually.be.rejectedWith(
       'Firestore read-only transactions cannot execute writes.'
@@ -824,8 +823,7 @@ describe('transaction operations', () => {
       {readOnly: true},
       (transaction, docRef) => transaction.get(docRef),
       begin({readOnly: {}}),
-      getDocument(),
-      commit()
+      getDocument()
     );
   });
 
