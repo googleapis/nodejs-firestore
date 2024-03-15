@@ -169,7 +169,9 @@ export function detectValueType(proto: ProtobufJsValue): string {
  * @param proto The `firestore.v1.Value` proto.
  * @return The string value for 'valueType'.
  */
-export function detectGoogleProtobufValueType(proto: google.protobuf.IValue): string {
+export function detectGoogleProtobufValueType(
+  proto: google.protobuf.IValue
+): string {
   const detectedValues: string[] = [];
 
   if (proto.nullValue !== undefined) {
