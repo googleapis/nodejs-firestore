@@ -4,6 +4,46 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.4.0](https://github.com/googleapis/nodejs-firestore/compare/v7.3.1...v7.4.0) (2024-03-15)
+
+
+### Features
+
+* A new message `Backup` is added ([#2021](https://github.com/googleapis/nodejs-firestore/issues/2021)) ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `BackupSchedule` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `CreateBackupScheduleRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `DailyRecurrence` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `DeleteBackupRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `DeleteBackupScheduleRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `GetBackupRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `GetBackupScheduleRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `ListBackupSchedulesRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `ListBackupSchedulesResponse` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `ListBackupsRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `ListBackupsResponse` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `RestoreDatabaseMetadata` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `RestoreDatabaseRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `UpdateBackupScheduleRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `WeeklyRecurrence` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `CreateBackupSchedule` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `DeleteBackup` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `DeleteBackupSchedule` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `GetBackup` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `GetBackupSchedule` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `ListBackups` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `ListBackupSchedules` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `RestoreDatabase` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `UpdateBackupSchedule` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new resource_definition `firestore.googleapis.com/Backup` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new resource_definition `firestore.googleapis.com/BackupSchedule` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* Add new types ExplainOptions, ExplainMetrics, PlanSummary, ExecutionStats ([#2013](https://github.com/googleapis/nodejs-firestore/issues/2013)) ([e598b9d](https://github.com/googleapis/nodejs-firestore/commit/e598b9daf628cbc54dc10dab80bb0f46e2a3e2a2))
+
+
+### Bug Fixes
+
+* ReadOnly transaction do not need to commit not rollback. ([#2007](https://github.com/googleapis/nodejs-firestore/issues/2007)) ([6a220a6](https://github.com/googleapis/nodejs-firestore/commit/6a220a6f6563903673066576f09ecf405c53f87b))
+* Update service definitions ([#2016](https://github.com/googleapis/nodejs-firestore/issues/2016)) ([ea4b6d0](https://github.com/googleapis/nodejs-firestore/commit/ea4b6d05383751f9a089958a20c1dd56419bc66d))
+
 ## [7.3.1](https://github.com/googleapis/nodejs-firestore/compare/v7.3.0...v7.3.1) (2024-03-04)
 
 
