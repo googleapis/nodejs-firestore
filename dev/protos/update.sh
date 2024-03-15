@@ -70,7 +70,7 @@ cp googleapis/google/rpc/status.proto \
    "${PROTOS_DIR}/google/rpc/"
 
 mkdir -p "${PROTOS_DIR}/google/type"
-cp googleapis/google/type/latlng.proto \
+cp googleapis/google/type/{latlng,dayofweek}.proto \
    "${PROTOS_DIR}/google/type/"
 
 mkdir -p "${PROTOS_DIR}/google/protobuf"
