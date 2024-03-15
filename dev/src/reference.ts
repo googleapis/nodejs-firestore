@@ -2534,7 +2534,7 @@ export class Query<
    *
    * let count = 0;
    *
-   * query.explainStream().on('data', (data) => {
+   * query.explainStream({analyze: true}).on('data', (data) => {
    *   if (data.document) {
    *     // Use data.document which is a DocumentSnapshot instance.
    *     console.log(`Found document with name '${data.document.id}'`);
@@ -2544,7 +2544,7 @@ export class Query<
    *     // Use data.metrics which is an ExplainMetrics instance.
    *   }
    * }).on('end', () => {
-   *   console.log(`Received ${count} documents as well as metrics.`);
+   *   console.log(`Received ${count} documents.`);
    * });
    * ```
    */

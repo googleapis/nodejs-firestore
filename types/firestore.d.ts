@@ -1683,23 +1683,6 @@ declare namespace FirebaseFirestore {
     | 'array-contains-any';
 
   /**
-   * InformationalQueryPlan contains information about the query plan.
-   * This should be inspected or logged, because the contents are intended to be
-   * human-readable. Contents are subject to change, and it is advised to not
-   * program against this object.
-   */
-  export type InformationalQueryPlan = Record<string, unknown>;
-
-  /**
-   * InformationalQueryExecutionStats contains statistics about the
-   * execution of the query.
-   * This should be inspected or logged, because the contents are intended to be
-   * human-readable. Contents are subject to change, and it is advised to not
-   * program against this object.
-   */
-  export type InformationalQueryExecutionStats = Record<string, unknown>;
-
-  /**
    * A `Query` refers to a Query which you can read or listen to. You can also
    * construct refined `Query` objects by adding filters and ordering.
    */
@@ -1942,11 +1925,34 @@ declare namespace FirebaseFirestore {
     stream(): NodeJS.ReadableStream;
 
     /**
-     * Plans and optionally executes this query, and streams the results as Node Stream.
+     * Plans and optionally executes this query, and streams the results as Node Stream
+     * of `{document?: DocumentSnapshot, metrics?: ExplainMetrics}` objects.
      *
-     * @return A stream of Plan, ExecutionStats, and QueryDocumentSnapshot objects. There
-     *  may be no ExecutionStats or QueryDocumentSnapshot objects depending on explain
-     *  options.
+     * The stream surfaces documents one at a time as they are received from the
+     * server, and at the end, it will surface the metrics associated with
+     * executing the query (if any).
+     *
+     * @example
+     * ```
+     * let query = firestore.collection('col').where('foo', '==', 'bar');
+     * let count = 0;
+     *
+     * query.explainStream({analyze: true}).on('data', (data) => {
+     *   if (data.document) {
+     *     // Use data.document which is a DocumentSnapshot instance.
+     *     console.log(`Found document with name '${data.document.id}'`);
+     *     ++count;
+     *   }
+     *   if (data.metrics) {
+     *     // Use data.metrics which is an ExplainMetrics instance.
+     *   }
+     * }).on('end', () => {
+     *   console.log(`Received ${count} documents.`);
+     * });
+     * ```
+     *
+     * @return A stream of `{document?: DocumentSnapshot, metrics?: ExplainMetrics}`
+     * objects. None of the responses may contain any metrics depending on `options`.
      */
     explainStream(options: ExplainOptions): NodeJS.ReadableStream;
 
@@ -2975,7 +2981,9 @@ declare namespace FirebaseFirestore {
   export interface PlanSummary {
     /**
      * Information about the indexes that were used to serve the query.
-     * Note: This content is subject to change.
+     * This should be inspected or logged, because the contents are intended to be
+     * human-readable. Contents are subject to change, and it is advised to not
+     * program against this object.
      */
     readonly indexesUsed: Record<string, unknown>[];
   }
@@ -2993,7 +3001,9 @@ declare namespace FirebaseFirestore {
 
     /**
      * Contains additional statistics related to the query execution.
-     * Note: This content is subject to change.
+     * This should be inspected or logged, because the contents are intended to be
+     * human-readable. Contents are subject to change, and it is advised to not
+     * program against this object.
      */
     readonly debugStats: Record<string, unknown>;
   }
