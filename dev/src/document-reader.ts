@@ -26,6 +26,22 @@ import {DocumentData} from '@google-cloud/firestore';
 import api = google.firestore.v1;
 
 /**
+ * @private
+ * @internal
+ */
+export interface BatchGetResponse<
+  AppModelType,
+  DbModelType extends DocumentData,
+> {
+  documents: Array<DocumentSnapshot<AppModelType, DbModelType>>;
+  /**
+   * The transaction that was started as part of this request. Will only be if
+   * `DocumentReader.transactionIdOrNewTransaction` was `api.ITransactionOptions`.
+   */
+  transaction?: Uint8Array;
+}
+
+/**
  * A wrapper around BatchGetDocumentsRequest that retries request upon stream
  * failure and returns ordered results.
  *
@@ -35,13 +51,14 @@ import api = google.firestore.v1;
 export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
   /** An optional field mask to apply to this read. */
   fieldMask?: FieldPath[];
-  /** An optional transaction ID to use for this read. */
-  transactionId?: Uint8Array;
+  /** An optional transaction ID or options for beginning a new transaction to use for this read. */
+  transactionIdOrNewTransaction?: Uint8Array | api.ITransactionOptions;
   /** An optional readTime to use for this read. */
   readTime?: Timestamp;
 
-  private outstandingDocuments = new Set<string>();
-  private retrievedDocuments = new Map<string, DocumentSnapshot>();
+  private readonly outstandingDocuments = new Set<string>();
+  private readonly retrievedDocuments = new Map<string, DocumentSnapshot>();
+  private retrievedTransactionId?: Uint8Array;
 
   /**
    * Creates a new DocumentReader that fetches the provided documents (via
@@ -51,8 +68,10 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
    * @param allDocuments The documents to get.
    */
   constructor(
-    private firestore: Firestore,
-    private allDocuments: Array<DocumentReference<AppModelType, DbModelType>>
+    private readonly firestore: Firestore,
+    private readonly allDocuments: ReadonlyArray<
+      DocumentReference<AppModelType, DbModelType>
+    >
   ) {
     for (const docRef of this.allDocuments) {
       this.outstandingDocuments.add(docRef.formattedName);
@@ -60,13 +79,26 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
   }
 
   /**
-   * Invokes the BatchGetDocuments RPC and returns the results.
+   * Invokes the BatchGetDocuments RPC and returns the results as an array of
+   * documents.
    *
    * @param requestTag A unique client-assigned identifier for this request.
    */
   async get(
     requestTag: string
   ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
+    const result = await this.getResponse(requestTag);
+    return result.documents;
+  }
+
+  /**
+   * Invokes the BatchGetDocuments RPC and returns the results with metadata.
+   *
+   * @param requestTag A unique client-assigned identifier for this request.
+   */
+  async getResponse(
+    requestTag: string
+  ): Promise<BatchGetResponse<AppModelType, DbModelType>> {
     await this.fetchDocuments(requestTag);
 
     // BatchGetDocuments doesn't preserve document order. We use the request
@@ -92,7 +124,10 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
       }
     }
 
-    return orderedDocuments;
+    return {
+      documents: orderedDocuments,
+      transaction: this.retrievedTransactionId,
+    };
   }
 
   private async fetchDocuments(requestTag: string): Promise<void> {
@@ -104,8 +139,10 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
       database: this.firestore.formattedName,
       documents: Array.from(this.outstandingDocuments),
     };
-    if (this.transactionId) {
-      request.transaction = this.transactionId;
+    if (this.transactionIdOrNewTransaction instanceof Uint8Array) {
+      request.transaction = this.transactionIdOrNewTransaction;
+    } else if (this.transactionIdOrNewTransaction) {
+      request.newTransaction = this.transactionIdOrNewTransaction;
     } else if (this.readTime) {
       request.readTime = this.readTime.toProto().timestampValue;
     }
@@ -131,7 +168,10 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
       for await (const response of stream) {
         let snapshot: DocumentSnapshot<DocumentData>;
 
-        if (response.found) {
+        if (response.transaction) {
+          this.retrievedTransactionId = response.transaction;
+          continue;
+        } else if (response.found) {
           logger(
             'DocumentReader.fetchDocuments',
             requestTag,
@@ -163,7 +203,8 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
     } catch (error) {
       const shouldRetry =
         // Transactional reads are retried via the transaction runner.
-        !this.transactionId &&
+        !this.transactionIdOrNewTransaction &&
+        !this.retrievedTransactionId &&
         // Only retry if we made progress.
         resultCount > 0 &&
         // Don't retry permanent errors.
