@@ -229,6 +229,12 @@ export class FirestoreAdminClient {
     // identifiers to uniquely identify resources within the API.
     // Create useful helper objects for these.
     this.pathTemplates = {
+      backupPathTemplate: new this._gaxModule.PathTemplate(
+        'projects/{project}/locations/{location}/backups/{backup}'
+      ),
+      backupSchedulePathTemplate: new this._gaxModule.PathTemplate(
+        'projects/{project}/databases/{database}/backupSchedules/{backup_schedule}'
+      ),
       collectionGroupPathTemplate: new this._gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}'
       ),
@@ -240,6 +246,9 @@ export class FirestoreAdminClient {
       ),
       indexPathTemplate: new this._gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}'
+      ),
+      locationPathTemplate: new this._gaxModule.PathTemplate(
+        'projects/{project}/locations/{location}'
       ),
       projectPathTemplate: new this._gaxModule.PathTemplate(
         'projects/{project}'
@@ -337,6 +346,12 @@ export class FirestoreAdminClient {
     const deleteDatabaseMetadata = protoFilesRoot.lookup(
       '.google.firestore.admin.v1.DeleteDatabaseMetadata'
     ) as gax.protobuf.Type;
+    const restoreDatabaseResponse = protoFilesRoot.lookup(
+      '.google.firestore.admin.v1.Database'
+    ) as gax.protobuf.Type;
+    const restoreDatabaseMetadata = protoFilesRoot.lookup(
+      '.google.firestore.admin.v1.RestoreDatabaseMetadata'
+    ) as gax.protobuf.Type;
 
     this.descriptors.longrunning = {
       createIndex: new this._gaxModule.LongrunningDescriptor(
@@ -373,6 +388,11 @@ export class FirestoreAdminClient {
         this.operationsClient,
         deleteDatabaseResponse.decode.bind(deleteDatabaseResponse),
         deleteDatabaseMetadata.decode.bind(deleteDatabaseMetadata)
+      ),
+      restoreDatabase: new this._gaxModule.LongrunningDescriptor(
+        this.operationsClient,
+        restoreDatabaseResponse.decode.bind(restoreDatabaseResponse),
+        restoreDatabaseMetadata.decode.bind(restoreDatabaseMetadata)
       ),
     };
 
@@ -440,6 +460,15 @@ export class FirestoreAdminClient {
       'listDatabases',
       'updateDatabase',
       'deleteDatabase',
+      'getBackup',
+      'listBackups',
+      'deleteBackup',
+      'restoreDatabase',
+      'createBackupSchedule',
+      'getBackupSchedule',
+      'listBackupSchedules',
+      'updateBackupSchedule',
+      'deleteBackupSchedule',
     ];
     for (const methodName of firestoreAdminStubMethods) {
       const callPromise = this.firestoreAdminStub.then(
@@ -980,6 +1009,732 @@ export class FirestoreAdminClient {
       });
     this.initialize();
     return this.innerApiCalls.listDatabases(request, options, callback);
+  }
+  /**
+   * Gets information about a backup.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. Name of the backup to fetch.
+   *
+   *   Format is `projects/{project}/locations/{location}/backups/{backup}`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.Backup|Backup}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.get_backup.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_GetBackup_async
+   */
+  getBackup(
+    request?: protos.google.firestore.admin.v1.IGetBackupRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IBackup,
+      protos.google.firestore.admin.v1.IGetBackupRequest | undefined,
+      {} | undefined,
+    ]
+  >;
+  getBackup(
+    request: protos.google.firestore.admin.v1.IGetBackupRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IBackup,
+      protos.google.firestore.admin.v1.IGetBackupRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  getBackup(
+    request: protos.google.firestore.admin.v1.IGetBackupRequest,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IBackup,
+      protos.google.firestore.admin.v1.IGetBackupRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  getBackup(
+    request?: protos.google.firestore.admin.v1.IGetBackupRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          protos.google.firestore.admin.v1.IBackup,
+          protos.google.firestore.admin.v1.IGetBackupRequest | null | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.firestore.admin.v1.IBackup,
+      protos.google.firestore.admin.v1.IGetBackupRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IBackup,
+      protos.google.firestore.admin.v1.IGetBackupRequest | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.getBackup(request, options, callback);
+  }
+  /**
+   * Lists all the backups.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The location to list backups from.
+   *
+   *   Format is `projects/{project}/locations/{location}`.
+   *   Use `{location} = '-'` to list backups from all locations for the given
+   *   project. This allows listing backups from a single location or from all
+   *   locations.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.ListBackupsResponse|ListBackupsResponse}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.list_backups.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_ListBackups_async
+   */
+  listBackups(
+    request?: protos.google.firestore.admin.v1.IListBackupsRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IListBackupsResponse,
+      protos.google.firestore.admin.v1.IListBackupsRequest | undefined,
+      {} | undefined,
+    ]
+  >;
+  listBackups(
+    request: protos.google.firestore.admin.v1.IListBackupsRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IListBackupsResponse,
+      protos.google.firestore.admin.v1.IListBackupsRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  listBackups(
+    request: protos.google.firestore.admin.v1.IListBackupsRequest,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IListBackupsResponse,
+      protos.google.firestore.admin.v1.IListBackupsRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  listBackups(
+    request?: protos.google.firestore.admin.v1.IListBackupsRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          protos.google.firestore.admin.v1.IListBackupsResponse,
+          | protos.google.firestore.admin.v1.IListBackupsRequest
+          | null
+          | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.firestore.admin.v1.IListBackupsResponse,
+      protos.google.firestore.admin.v1.IListBackupsRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IListBackupsResponse,
+      protos.google.firestore.admin.v1.IListBackupsRequest | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.listBackups(request, options, callback);
+  }
+  /**
+   * Deletes a backup.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. Name of the backup to delete.
+   *
+   *   format is `projects/{project}/locations/{location}/backups/{backup}`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing {@link protos.google.protobuf.Empty|Empty}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.delete_backup.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_DeleteBackup_async
+   */
+  deleteBackup(
+    request?: protos.google.firestore.admin.v1.IDeleteBackupRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteBackupRequest | undefined,
+      {} | undefined,
+    ]
+  >;
+  deleteBackup(
+    request: protos.google.firestore.admin.v1.IDeleteBackupRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteBackupRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  deleteBackup(
+    request: protos.google.firestore.admin.v1.IDeleteBackupRequest,
+    callback: Callback<
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteBackupRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  deleteBackup(
+    request?: protos.google.firestore.admin.v1.IDeleteBackupRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          protos.google.protobuf.IEmpty,
+          | protos.google.firestore.admin.v1.IDeleteBackupRequest
+          | null
+          | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteBackupRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteBackupRequest | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.deleteBackup(request, options, callback);
+  }
+  /**
+   * Creates a backup schedule on a database.
+   * At most two backup schedules can be configured on a database, one daily
+   * backup schedule with retention up to 7 days and one weekly backup schedule
+   * with retention up to 14 weeks.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent database.
+   *
+   *    Format `projects/{project}/databases/{database}`
+   * @param {google.firestore.admin.v1.BackupSchedule} request.backupSchedule
+   *   Required. The backup schedule to create.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.BackupSchedule|BackupSchedule}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.create_backup_schedule.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_CreateBackupSchedule_async
+   */
+  createBackupSchedule(
+    request?: protos.google.firestore.admin.v1.ICreateBackupScheduleRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      protos.google.firestore.admin.v1.ICreateBackupScheduleRequest | undefined,
+      {} | undefined,
+    ]
+  >;
+  createBackupSchedule(
+    request: protos.google.firestore.admin.v1.ICreateBackupScheduleRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      | protos.google.firestore.admin.v1.ICreateBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  createBackupSchedule(
+    request: protos.google.firestore.admin.v1.ICreateBackupScheduleRequest,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      | protos.google.firestore.admin.v1.ICreateBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  createBackupSchedule(
+    request?: protos.google.firestore.admin.v1.ICreateBackupScheduleRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          protos.google.firestore.admin.v1.IBackupSchedule,
+          | protos.google.firestore.admin.v1.ICreateBackupScheduleRequest
+          | null
+          | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      | protos.google.firestore.admin.v1.ICreateBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      protos.google.firestore.admin.v1.ICreateBackupScheduleRequest | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.createBackupSchedule(request, options, callback);
+  }
+  /**
+   * Gets information about a backup schedule.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. The name of the backup schedule.
+   *
+   *   Format
+   *   `projects/{project}/databases/{database}/backupSchedules/{backup_schedule}`
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.BackupSchedule|BackupSchedule}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.get_backup_schedule.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_GetBackupSchedule_async
+   */
+  getBackupSchedule(
+    request?: protos.google.firestore.admin.v1.IGetBackupScheduleRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      protos.google.firestore.admin.v1.IGetBackupScheduleRequest | undefined,
+      {} | undefined,
+    ]
+  >;
+  getBackupSchedule(
+    request: protos.google.firestore.admin.v1.IGetBackupScheduleRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      | protos.google.firestore.admin.v1.IGetBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  getBackupSchedule(
+    request: protos.google.firestore.admin.v1.IGetBackupScheduleRequest,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      | protos.google.firestore.admin.v1.IGetBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  getBackupSchedule(
+    request?: protos.google.firestore.admin.v1.IGetBackupScheduleRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          protos.google.firestore.admin.v1.IBackupSchedule,
+          | protos.google.firestore.admin.v1.IGetBackupScheduleRequest
+          | null
+          | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      | protos.google.firestore.admin.v1.IGetBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      protos.google.firestore.admin.v1.IGetBackupScheduleRequest | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.getBackupSchedule(request, options, callback);
+  }
+  /**
+   * List backup schedules.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent database.
+   *
+   *   Format is `projects/{project}/databases/{database}`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.ListBackupSchedulesResponse|ListBackupSchedulesResponse}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.list_backup_schedules.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_ListBackupSchedules_async
+   */
+  listBackupSchedules(
+    request?: protos.google.firestore.admin.v1.IListBackupSchedulesRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IListBackupSchedulesResponse,
+      protos.google.firestore.admin.v1.IListBackupSchedulesRequest | undefined,
+      {} | undefined,
+    ]
+  >;
+  listBackupSchedules(
+    request: protos.google.firestore.admin.v1.IListBackupSchedulesRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IListBackupSchedulesResponse,
+      | protos.google.firestore.admin.v1.IListBackupSchedulesRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  listBackupSchedules(
+    request: protos.google.firestore.admin.v1.IListBackupSchedulesRequest,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IListBackupSchedulesResponse,
+      | protos.google.firestore.admin.v1.IListBackupSchedulesRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  listBackupSchedules(
+    request?: protos.google.firestore.admin.v1.IListBackupSchedulesRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          protos.google.firestore.admin.v1.IListBackupSchedulesResponse,
+          | protos.google.firestore.admin.v1.IListBackupSchedulesRequest
+          | null
+          | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.firestore.admin.v1.IListBackupSchedulesResponse,
+      | protos.google.firestore.admin.v1.IListBackupSchedulesRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IListBackupSchedulesResponse,
+      protos.google.firestore.admin.v1.IListBackupSchedulesRequest | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.listBackupSchedules(request, options, callback);
+  }
+  /**
+   * Updates a backup schedule.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {google.firestore.admin.v1.BackupSchedule} request.backupSchedule
+   *   Required. The backup schedule to update.
+   * @param {google.protobuf.FieldMask} request.updateMask
+   *   The list of fields to be updated.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.BackupSchedule|BackupSchedule}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.update_backup_schedule.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateBackupSchedule_async
+   */
+  updateBackupSchedule(
+    request?: protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest | undefined,
+      {} | undefined,
+    ]
+  >;
+  updateBackupSchedule(
+    request: protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      | protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  updateBackupSchedule(
+    request: protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      | protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  updateBackupSchedule(
+    request?: protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          protos.google.firestore.admin.v1.IBackupSchedule,
+          | protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest
+          | null
+          | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      | protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.firestore.admin.v1.IBackupSchedule,
+      protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        'backup_schedule.name': request.backupSchedule!.name ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.updateBackupSchedule(request, options, callback);
+  }
+  /**
+   * Deletes a backup schedule.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. The name of backup schedule.
+   *
+   *   Format
+   *   `projects/{project}/databases/{database}/backupSchedules/{backup_schedule}`
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing {@link protos.google.protobuf.Empty|Empty}.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.delete_backup_schedule.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_DeleteBackupSchedule_async
+   */
+  deleteBackupSchedule(
+    request?: protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest | undefined,
+      {} | undefined,
+    ]
+  >;
+  deleteBackupSchedule(
+    request: protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest,
+    options: CallOptions,
+    callback: Callback<
+      protos.google.protobuf.IEmpty,
+      | protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  deleteBackupSchedule(
+    request: protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest,
+    callback: Callback<
+      protos.google.protobuf.IEmpty,
+      | protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  deleteBackupSchedule(
+    request?: protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          protos.google.protobuf.IEmpty,
+          | protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest
+          | null
+          | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.protobuf.IEmpty,
+      | protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest
+      | null
+      | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.deleteBackupSchedule(request, options, callback);
   }
 
   /**
@@ -2037,6 +2792,174 @@ export class FirestoreAdminClient {
     >;
   }
   /**
+   * Creates a new database by restoring from an existing backup.
+   *
+   * The new database must be in the same cloud region or multi-region location
+   * as the existing backup. This behaves similar to
+   * {@link protos.google.firestore.admin.v1.CreateDatabase|FirestoreAdmin.CreateDatabase}
+   * except instead of creating a new empty database, a new database is created
+   * with the database type, index configuration, and documents from an existing
+   * backup.
+   *
+   * The {@link protos.google.longrunning.Operation|long-running operation} can be used to
+   * track the progress of the restore, with the Operation's
+   * {@link protos.google.longrunning.Operation.metadata|metadata} field type being the
+   * {@link protos.google.firestore.admin.v1.RestoreDatabaseMetadata|RestoreDatabaseMetadata}.
+   * The {@link protos.google.longrunning.Operation.response|response} type is the
+   * {@link protos.google.firestore.admin.v1.Database|Database} if the restore was
+   * successful. The new database is not readable or writeable until the LRO has
+   * completed.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The project to restore the database in. Format is
+   *   `projects/{project_id}`.
+   * @param {string} request.databaseId
+   *   Required. The ID to use for the database, which will become the final
+   *   component of the database's resource name. This database id must not be
+   *   associated with an existing database.
+   *
+   *   This value should be 4-63 characters. Valid characters are /{@link protos.0-9|a-z}-/
+   *   with first character a letter and the last a letter or a number. Must not
+   *   be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+   *
+   *   "(default)" database id is also valid.
+   * @param {string} request.backup
+   *   Required. Backup to restore from. Must be from the same project as the
+   *   parent.
+   *
+   *   Format is: `projects/{project_id}/locations/{location}/backups/{backup}`
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing
+   *   a long running operation. Its `promise()` method returns a promise
+   *   you can `await` for.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.restore_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_RestoreDatabase_async
+   */
+  restoreDatabase(
+    request?: protos.google.firestore.admin.v1.IRestoreDatabaseRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IRestoreDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | undefined,
+      {} | undefined,
+    ]
+  >;
+  restoreDatabase(
+    request: protos.google.firestore.admin.v1.IRestoreDatabaseRequest,
+    options: CallOptions,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IRestoreDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  restoreDatabase(
+    request: protos.google.firestore.admin.v1.IRestoreDatabaseRequest,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IRestoreDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  restoreDatabase(
+    request?: protos.google.firestore.admin.v1.IRestoreDatabaseRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          LROperation<
+            protos.google.firestore.admin.v1.IDatabase,
+            protos.google.firestore.admin.v1.IRestoreDatabaseMetadata
+          >,
+          protos.google.longrunning.IOperation | null | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IRestoreDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.IRestoreDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        parent: request.parent ?? '',
+      });
+    this.initialize();
+    return this.innerApiCalls.restoreDatabase(request, options, callback);
+  }
+  /**
+   * Check the status of the long running operation returned by `restoreDatabase()`.
+   * @param {String} name
+   *   The operation name that will be passed.
+   * @returns {Promise} - The promise which resolves to an object.
+   *   The decoded operation object has result and metadata field to get information from.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.restore_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_RestoreDatabase_async
+   */
+  async checkRestoreDatabaseProgress(
+    name: string
+  ): Promise<
+    LROperation<
+      protos.google.firestore.admin.v1.Database,
+      protos.google.firestore.admin.v1.RestoreDatabaseMetadata
+    >
+  > {
+    const request =
+      new this._gaxModule.operationsProtos.google.longrunning.GetOperationRequest(
+        {name}
+      );
+    const [operation] = await this.operationsClient.getOperation(request);
+    const decodeOperation = new this._gaxModule.Operation(
+      operation,
+      this.descriptors.longrunning.restoreDatabase,
+      this._gaxModule.createDefaultBackoffSettings()
+    );
+    return decodeOperation as LROperation<
+      protos.google.firestore.admin.v1.Database,
+      protos.google.firestore.admin.v1.RestoreDatabaseMetadata
+    >;
+  }
+  /**
    * Lists composite indexes.
    *
    * @param {Object} request
@@ -2707,6 +3630,114 @@ export class FirestoreAdminClient {
   // --------------------
 
   /**
+   * Return a fully-qualified backup resource name string.
+   *
+   * @param {string} project
+   * @param {string} location
+   * @param {string} backup
+   * @returns {string} Resource name string.
+   */
+  backupPath(project: string, location: string, backup: string) {
+    return this.pathTemplates.backupPathTemplate.render({
+      project: project,
+      location: location,
+      backup: backup,
+    });
+  }
+
+  /**
+   * Parse the project from Backup resource.
+   *
+   * @param {string} backupName
+   *   A fully-qualified path representing Backup resource.
+   * @returns {string} A string representing the project.
+   */
+  matchProjectFromBackupName(backupName: string) {
+    return this.pathTemplates.backupPathTemplate.match(backupName).project;
+  }
+
+  /**
+   * Parse the location from Backup resource.
+   *
+   * @param {string} backupName
+   *   A fully-qualified path representing Backup resource.
+   * @returns {string} A string representing the location.
+   */
+  matchLocationFromBackupName(backupName: string) {
+    return this.pathTemplates.backupPathTemplate.match(backupName).location;
+  }
+
+  /**
+   * Parse the backup from Backup resource.
+   *
+   * @param {string} backupName
+   *   A fully-qualified path representing Backup resource.
+   * @returns {string} A string representing the backup.
+   */
+  matchBackupFromBackupName(backupName: string) {
+    return this.pathTemplates.backupPathTemplate.match(backupName).backup;
+  }
+
+  /**
+   * Return a fully-qualified backupSchedule resource name string.
+   *
+   * @param {string} project
+   * @param {string} database
+   * @param {string} backup_schedule
+   * @returns {string} Resource name string.
+   */
+  backupSchedulePath(
+    project: string,
+    database: string,
+    backupSchedule: string
+  ) {
+    return this.pathTemplates.backupSchedulePathTemplate.render({
+      project: project,
+      database: database,
+      backup_schedule: backupSchedule,
+    });
+  }
+
+  /**
+   * Parse the project from BackupSchedule resource.
+   *
+   * @param {string} backupScheduleName
+   *   A fully-qualified path representing BackupSchedule resource.
+   * @returns {string} A string representing the project.
+   */
+  matchProjectFromBackupScheduleName(backupScheduleName: string) {
+    return this.pathTemplates.backupSchedulePathTemplate.match(
+      backupScheduleName
+    ).project;
+  }
+
+  /**
+   * Parse the database from BackupSchedule resource.
+   *
+   * @param {string} backupScheduleName
+   *   A fully-qualified path representing BackupSchedule resource.
+   * @returns {string} A string representing the database.
+   */
+  matchDatabaseFromBackupScheduleName(backupScheduleName: string) {
+    return this.pathTemplates.backupSchedulePathTemplate.match(
+      backupScheduleName
+    ).database;
+  }
+
+  /**
+   * Parse the backup_schedule from BackupSchedule resource.
+   *
+   * @param {string} backupScheduleName
+   *   A fully-qualified path representing BackupSchedule resource.
+   * @returns {string} A string representing the backup_schedule.
+   */
+  matchBackupScheduleFromBackupScheduleName(backupScheduleName: string) {
+    return this.pathTemplates.backupSchedulePathTemplate.match(
+      backupScheduleName
+    ).backup_schedule;
+  }
+
+  /**
    * Return a fully-qualified collectionGroup resource name string.
    *
    * @param {string} project
@@ -2929,6 +3960,42 @@ export class FirestoreAdminClient {
    */
   matchIndexFromIndexName(indexName: string) {
     return this.pathTemplates.indexPathTemplate.match(indexName).index;
+  }
+
+  /**
+   * Return a fully-qualified location resource name string.
+   *
+   * @param {string} project
+   * @param {string} location
+   * @returns {string} Resource name string.
+   */
+  locationPath(project: string, location: string) {
+    return this.pathTemplates.locationPathTemplate.render({
+      project: project,
+      location: location,
+    });
+  }
+
+  /**
+   * Parse the project from Location resource.
+   *
+   * @param {string} locationName
+   *   A fully-qualified path representing Location resource.
+   * @returns {string} A string representing the project.
+   */
+  matchProjectFromLocationName(locationName: string) {
+    return this.pathTemplates.locationPathTemplate.match(locationName).project;
+  }
+
+  /**
+   * Parse the location from Location resource.
+   *
+   * @param {string} locationName
+   *   A fully-qualified path representing Location resource.
+   * @returns {string} A string representing the location.
+   */
+  matchLocationFromLocationName(locationName: string) {
+    return this.pathTemplates.locationPathTemplate.match(locationName).location;
   }
 
   /**
