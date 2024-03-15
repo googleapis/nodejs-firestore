@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,37 @@
 
 syntax = "proto3";
 
-package google.firestore.admin.v1;
+package google.type;
 
-option csharp_namespace = "Google.Cloud.Firestore.Admin.V1";
-option go_package = "cloud.google.com/go/firestore/apiv1/admin/adminpb;adminpb";
+option go_package = "google.golang.org/genproto/googleapis/type/dayofweek;dayofweek";
 option java_multiple_files = true;
-option java_outer_classname = "LocationProto";
-option java_package = "com.google.firestore.admin.v1";
-option objc_class_prefix = "GCFS";
-option php_namespace = "Google\\Cloud\\Firestore\\Admin\\V1";
-option ruby_package = "Google::Cloud::Firestore::Admin::V1";
+option java_outer_classname = "DayOfWeekProto";
+option java_package = "com.google.type";
+option objc_class_prefix = "GTP";
 
-// The metadata message for
-// [google.cloud.location.Location.metadata][google.cloud.location.Location.metadata].
-message LocationMetadata {}
+// Represents a day of the week.
+enum DayOfWeek {
+  // The day of the week is unspecified.
+  DAY_OF_WEEK_UNSPECIFIED = 0;
+
+  // Monday
+  MONDAY = 1;
+
+  // Tuesday
+  TUESDAY = 2;
+
+  // Wednesday
+  WEDNESDAY = 3;
+
+  // Thursday
+  THURSDAY = 4;
+
+  // Friday
+  FRIDAY = 5;
+
+  // Saturday
+  SATURDAY = 6;
+
+  // Sunday
+  SUNDAY = 7;
+}
