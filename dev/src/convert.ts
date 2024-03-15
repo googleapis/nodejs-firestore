@@ -20,7 +20,6 @@ import {ApiMapValue, ProtobufJsValue} from './types';
 import {validateObject} from './validate';
 
 import api = google.firestore.v1;
-import IValue = google.protobuf.IValue;
 
 /*!
  * @module firestore/convert
@@ -170,7 +169,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
  * @param proto The `firestore.v1.Value` proto.
  * @return The string value for 'valueType'.
  */
-export function detectGoogleProtobufValueType(proto: IValue): string {
+export function detectGoogleProtobufValueType(proto: google.protobuf.IValue): string {
   const detectedValues: string[] = [];
 
   if (proto.nullValue !== undefined) {
