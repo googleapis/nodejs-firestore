@@ -26,7 +26,7 @@ import {afterEach, before, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
-import {firestore, google} from '../protos/firestore_v1_proto_api';
+import {firestore} from '../protos/firestore_v1_proto_api';
 
 import {
   AggregateField,
@@ -56,8 +56,8 @@ import {BulkWriter} from '../src/bulk-writer';
 import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
-import {Filter} from '../src/filter';
 import IBundleElement = firestore.IBundleElement;
+import {Filter} from '../src/filter';
 
 use(chaiAsPromised);
 
@@ -100,9 +100,7 @@ if (process.env.NODE_ENV === 'DEBUG') {
 }
 
 function getTestRoot(settings: Settings = {}): CollectionReference {
-  const internalSettings: Settings = {
-    host: 'test-firestore.sandbox.googleapis.com',
-  };
+  const internalSettings: Settings = {};
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }

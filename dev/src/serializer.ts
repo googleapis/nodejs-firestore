@@ -29,9 +29,6 @@ import {isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;
-import {google} from '../protos/firestore_v1_proto_api';
-import IValue = google.protobuf.IValue;
-import IStruct = google.protobuf.IStruct;
 
 /**
  * The maximum depth of a Firestore object.
@@ -298,7 +295,7 @@ export class Serializer {
    * @param proto A Google Protobuf 'Value'.
    * @returns The converted JS type.
    */
-  decodeGoogleProtobufValue(proto: IValue): unknown {
+  decodeGoogleProtobufValue(proto: proto.google.protobuf.IValue): unknown {
     switch (detectGoogleProtobufValueType(proto)) {
       case 'nullValue': {
         return null;
@@ -342,7 +339,7 @@ export class Serializer {
    * @returns The converted JS type.
    */
   decodeGoogleProtobufStruct(
-    proto: IStruct | null | undefined
+    proto: proto.google.protobuf.IStruct | null | undefined
   ): Record<string, unknown> {
     const result: Record<string, unknown> = {};
     if (proto && proto.fields) {
