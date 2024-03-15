@@ -3536,7 +3536,7 @@ export class AggregateQuery<
       stream.on('end', () => {
         stream.destroy();
         if (result === null) {
-          reject('No AggregateQuery results');
+          reject(Error('RunAggregationQueryResponse is missing result'));
         }
         resolve(result!);
       });
