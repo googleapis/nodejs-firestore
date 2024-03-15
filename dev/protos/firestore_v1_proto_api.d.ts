@@ -8586,6 +8586,10 @@ export namespace google {
              */
             public static getTypeUrl(typeUrlPrefix?: string): string;
         }
+
+        /** DayOfWeek enum. */
+        type DayOfWeek =
+            "DAY_OF_WEEK_UNSPECIFIED"| "MONDAY"| "TUESDAY"| "WEDNESDAY"| "THURSDAY"| "FRIDAY"| "SATURDAY"| "SUNDAY";
     }
 
     /** Namespace api. */

@@ -18288,6 +18288,32 @@
                 return LatLng;
             })();
     
+            /**
+             * DayOfWeek enum.
+             * @name google.type.DayOfWeek
+             * @enum {string}
+             * @property {string} DAY_OF_WEEK_UNSPECIFIED=DAY_OF_WEEK_UNSPECIFIED DAY_OF_WEEK_UNSPECIFIED value
+             * @property {string} MONDAY=MONDAY MONDAY value
+             * @property {string} TUESDAY=TUESDAY TUESDAY value
+             * @property {string} WEDNESDAY=WEDNESDAY WEDNESDAY value
+             * @property {string} THURSDAY=THURSDAY THURSDAY value
+             * @property {string} FRIDAY=FRIDAY FRIDAY value
+             * @property {string} SATURDAY=SATURDAY SATURDAY value
+             * @property {string} SUNDAY=SUNDAY SUNDAY value
+             */
+            type.DayOfWeek = (function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "DAY_OF_WEEK_UNSPECIFIED"] = "DAY_OF_WEEK_UNSPECIFIED";
+                values[valuesById[1] = "MONDAY"] = "MONDAY";
+                values[valuesById[2] = "TUESDAY"] = "TUESDAY";
+                values[valuesById[3] = "WEDNESDAY"] = "WEDNESDAY";
+                values[valuesById[4] = "THURSDAY"] = "THURSDAY";
+                values[valuesById[5] = "FRIDAY"] = "FRIDAY";
+                values[valuesById[6] = "SATURDAY"] = "SATURDAY";
+                values[valuesById[7] = "SUNDAY"] = "SUNDAY";
+                return values;
+            })();
+    
             return type;
         })();
     

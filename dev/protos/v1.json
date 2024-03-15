@@ -3441,9 +3441,9 @@
         "type": {
           "options": {
             "cc_enable_arenas": true,
-            "go_package": "google.golang.org/genproto/googleapis/type/latlng;latlng",
+            "go_package": "google.golang.org/genproto/googleapis/type/dayofweek;dayofweek",
             "java_multiple_files": true,
-            "java_outer_classname": "LatLngProto",
+            "java_outer_classname": "DayOfWeekProto",
             "java_package": "com.google.type",
             "objc_class_prefix": "GTP"
           },
@@ -3458,6 +3458,18 @@
                   "type": "double",
                   "id": 2
                 }
+              }
+            },
+            "DayOfWeek": {
+              "values": {
+                "DAY_OF_WEEK_UNSPECIFIED": 0,
+                "MONDAY": 1,
+                "TUESDAY": 2,
+                "WEDNESDAY": 3,
+                "THURSDAY": 4,
+                "FRIDAY": 5,
+                "SATURDAY": 6,
+                "SUNDAY": 7
               }
             }
           }
