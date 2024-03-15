@@ -289,22 +289,23 @@ message StructuredQuery {
       DOT_PRODUCT = 3;
     }
 
-    // An indexed vector field to search upon. Only documents which contain
-    // vectors whose dimensionality match the query_vector can be returned.
+    // Required. An indexed vector field to search upon. Only documents which
+    // contain vectors whose dimensionality match the query_vector can be
+    // returned.
     FieldReference vector_field = 1 [(google.api.field_behavior) = REQUIRED];
 
-    // The query vector that we are searching on. Must be a vector of no more
-    // than 2048 dimensions.
+    // Required. The query vector that we are searching on. Must be a vector of
+    // no more than 2048 dimensions.
     Value query_vector = 2 [(google.api.field_behavior) = REQUIRED];
 
-    // The Distance Measure to use, required.
+    // Required. The Distance Measure to use, required.
     DistanceMeasure distance_measure = 3
-    [(google.api.field_behavior) = REQUIRED];
+        [(google.api.field_behavior) = REQUIRED];
 
-    // The number of nearest neighbors to return. Must be a positive integer
-    // of no more than 1000.
+    // Required. The number of nearest neighbors to return. Must be a positive
+    // integer of no more than 1000.
     google.protobuf.Int32Value limit = 4
-    [(google.api.field_behavior) = REQUIRED];
+        [(google.api.field_behavior) = REQUIRED];
   }
 
   // Optional sub-set of the fields to return.
@@ -405,7 +406,7 @@ message StructuredQuery {
   // * The value must be greater than or equal to zero if specified.
   google.protobuf.Int32Value limit = 5;
 
-  // A potential Nearest Neighbors Search.
+  // Optional. A potential Nearest Neighbors Search.
   //
   // Applies after all other filters and ordering.
   //
