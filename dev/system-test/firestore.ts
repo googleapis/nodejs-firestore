@@ -144,6 +144,30 @@ describe('Firestore class', () => {
       });
   });
 
+  it.only('can plan a query', async () => {
+    const plan = await randomCol.where('a', '>', 10).plan();
+    console.log(plan);
+  });
+
+  it.only('can profile a query', async () => {
+    const profile = await randomCol.where('a', '>', 10).profile();
+    console.log(profile.plan);
+    console.log(profile.stats);
+    console.log(profile.snapshot.size);
+  });
+
+  it.only('can plan an aggregate query', async () => {
+    const plan = await randomCol.where('a', '>', 10).count().plan();
+    console.log(plan);
+  });
+
+  it.only('can profile an aggregate query', async () => {
+    const profile = await randomCol.where('a', '>', 10).count().profile();
+    console.log(profile.plan);
+    console.log(profile.stats);
+    console.log(profile.snapshot.data());
+  });
+
   it('getAll() supports array destructuring', () => {
     const ref1 = randomCol.doc('doc1');
     const ref2 = randomCol.doc('doc2');
