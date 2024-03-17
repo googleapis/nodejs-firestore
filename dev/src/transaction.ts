@@ -195,29 +195,11 @@ export class Transaction implements firestore.Transaction {
     }
 
     if (refOrQuery instanceof DocumentReference) {
-      return this.ensureTransactionOpts(async opts => {
-        const documentReader = new DocumentReader(this._firestore, [
-          refOrQuery,
-        ]);
-        // Note: We don't set read time because the options for lazily started
-        // transactions already contain the read time (for readonly transactions)
-        documentReader.transactionIdOrNewTransaction = opts;
-        const {
-          transaction,
-          documents: [result],
-        } = await documentReader.getResponse(this._requestTag);
-        return {transaction, result};
-      });
+      return this.ensureTransactionOpts(refOrQuery, this.singleGetFn);
     }
 
     if (refOrQuery instanceof Query || refOrQuery instanceof AggregateQuery) {
-      return this.ensureTransactionOpts(async opts => {
-        const {transaction, snapshot} = await refOrQuery._getResponse(opts);
-        return {
-          transaction,
-          result: snapshot,
-        };
-      });
+      return this.ensureTransactionOpts(refOrQuery, this.queryGetFn);
     }
 
     throw new Error(
@@ -269,21 +251,10 @@ export class Transaction implements firestore.Transaction {
       1
     );
 
-    const {documents, fieldMask} = parseGetAllArguments(
-      documentRefsOrReadOptions
+    return this.ensureTransactionOpts(
+      parseGetAllArguments(documentRefsOrReadOptions),
+      this.batchGetFn
     );
-
-    return this.ensureTransactionOpts(async opts => {
-      const documentReader = new DocumentReader(this._firestore, documents);
-      documentReader.fieldMask = fieldMask || undefined;
-      // Note: We don't set read time because the options for lazily started
-      // transactions already contain the read time (for readonly transactions)
-      documentReader.transactionIdOrNewTransaction = opts;
-      const {transaction, documents: result} = await documentReader.getResponse(
-        this._requestTag
-      );
-      return {transaction, result};
-    });
   }
 
   /**
@@ -655,8 +626,11 @@ export class Transaction implements firestore.Transaction {
    * is provided with new transaction options and all subsequent ones are queued
    * upon the resulting transaction ID.
    */
-  private ensureTransactionOpts<TResult>(
+  private ensureTransactionOpts<TParam, TResult>(
+    param: TParam,
     resultFn: (
+      this: Transaction,
+      param: TParam,
       opts: Uint8Array | api.ITransactionOptions
     ) => Promise<{transaction?: Uint8Array; result: TResult}>
   ): Promise<TResult> {
@@ -664,7 +638,10 @@ export class Transaction implements firestore.Transaction {
       // Simply queue this subsequent read operation after the first read
       // operation has resolved and we don't expect a transaction ID in the
       // response because we are not starting a new transaction
-      return this._transactionIdPromise.then(resultFn).then(r => r.result);
+      return this._transactionIdPromise.then(async opts => {
+        const r = await resultFn.call(this, param, opts);
+        return r.result;
+      });
     } else {
       // This is the first read of the transaction so we create the appropriate
       // options for lazily starting the transaction inside this first read op
@@ -682,15 +659,15 @@ export class Transaction implements firestore.Transaction {
           },
         };
       }
-      const resultPromise = resultFn(opts);
+      const resultPromise = resultFn.call(this, param, opts);
 
       // Ensure the _transactionIdPromise is set synchronously so that
       // subsequent operations will not race to start another transaction
-      this._transactionIdPromise = resultPromise.then(({transaction}) => {
+      this._transactionIdPromise = resultPromise.then(async ({transaction}) => {
         if (!transaction) {
           // Illegal state
           // The read operation was provided with new transaction options but did not return a transaction ID
-          // Rejecting error will cause all queued reads to reject
+          // Rejecting here will cause all queued reads to reject
           throw new Error('Transaction ID was missing from server response');
         }
         return transaction;
@@ -698,6 +675,71 @@ export class Transaction implements firestore.Transaction {
 
       return resultPromise.then(r => r.result);
     }
+  }
+
+  private async singleGetFn<
+    AppModelType,
+    DbModelType extends firestore.DocumentData,
+  >(
+    document: DocumentReference<AppModelType, DbModelType>,
+    opts: Uint8Array | api.ITransactionOptions
+  ): Promise<{
+    transaction?: Uint8Array;
+    result: DocumentSnapshot<AppModelType, DbModelType>;
+  }> {
+    const documentReader = new DocumentReader(this._firestore, [document]);
+    // Note: We don't set read time because the options for lazily started
+    // transactions already contain the read time (for readonly transactions)
+    documentReader.transactionIdOrNewTransaction = opts;
+    const {
+      transaction,
+      documents: [result],
+    } = await documentReader.getResponse(this._requestTag);
+    return {transaction, result};
+  }
+
+  private async batchGetFn<
+    AppModelType,
+    DbModelType extends firestore.DocumentData,
+  >(
+    {
+      documents,
+      fieldMask,
+    }: {
+      documents: Array<DocumentReference<AppModelType, DbModelType>>;
+      fieldMask?: FieldPath[] | null;
+    },
+    opts: Uint8Array | api.ITransactionOptions
+  ): Promise<{
+    transaction?: Uint8Array;
+    result: DocumentSnapshot<AppModelType, DbModelType>[];
+  }> {
+    const documentReader = new DocumentReader(this._firestore, documents);
+    documentReader.fieldMask = fieldMask || undefined;
+    // Note: We don't set read time because the options for lazily started
+    // transactions already contain the read time (for readonly transactions)
+    documentReader.transactionIdOrNewTransaction = opts;
+    const {transaction, documents: result} = await documentReader.getResponse(
+      this._requestTag
+    );
+    return {transaction, result};
+  }
+
+  private async queryGetFn<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    TQuery extends Query<any, any> | AggregateQuery<any, any>,
+  >(
+    query: TQuery,
+    opts: Uint8Array | api.ITransactionOptions
+  ): Promise<{
+    transaction?: Uint8Array;
+    result: Awaited<ReturnType<TQuery['_getResponse']>>['snapshot'];
+  }> {
+    const {transaction, snapshot} = await query._getResponse(opts);
+    return {
+      transaction,
+      result: snapshot,
+    };
   }
 }
 
