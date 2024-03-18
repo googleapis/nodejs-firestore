@@ -476,31 +476,16 @@ export class Transaction implements firestore.Transaction {
       return;
     }
 
-    try {
-      await this._writeBatch._commit({
-        transactionId,
-        requestTag: this._requestTag,
-      });
-      this._transactionIdPromise = undefined;
-      this._prevTransactionId = transactionId;
-    } catch (err) {
-      // A failed commit also rolls back the transaction so if we know that the
-      // server responded with an error then we clear the transaction ID so that
-      // we don't continue on to perform a superfluous rollback
-      if (err instanceof GoogleError) {
-        const code = err.code as number | undefined;
-        if (
-          code === StatusCode.ABORTED ||
-          code === StatusCode.ALREADY_EXISTS ||
-          code === StatusCode.FAILED_PRECONDITION ||
-          code === StatusCode.INVALID_ARGUMENT
-        ) {
-          this._transactionIdPromise = undefined;
-          this._prevTransactionId = transactionId;
-        }
-      }
-      throw err;
-    }
+    // TODO: Some error codes imply that the transaction has already been aborted
+    // by the server so we could also avoid superfluous rollback by clearing
+    // the _transactionIdPromise flag on those particular errors
+    // for example "transaction expired" errors
+    await this._writeBatch._commit({
+      transactionId,
+      requestTag: this._requestTag,
+    });
+    this._transactionIdPromise = undefined;
+    this._prevTransactionId = transactionId;
   }
 
   /**

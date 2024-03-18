@@ -451,15 +451,15 @@ describe('failed transactions', () => {
     [Status.UNKNOWN]: {retry: true, rollback: true},
     [Status.DEADLINE_EXCEEDED]: {retry: true, rollback: true},
     [Status.RESOURCE_EXHAUSTED]: {retry: true, rollback: true},
-    [Status.ABORTED]: {retry: true, rollback: false},
+    [Status.ABORTED]: {retry: true, rollback: true},
     [Status.INTERNAL]: {retry: true, rollback: true},
     [Status.UNAVAILABLE]: {retry: true, rollback: true},
     [Status.UNAUTHENTICATED]: {retry: true, rollback: true},
 
-    [Status.INVALID_ARGUMENT]: {retry: false, rollback: false},
+    [Status.INVALID_ARGUMENT]: {retry: false, rollback: true},
     [Status.NOT_FOUND]: {retry: false, rollback: true},
-    [Status.ALREADY_EXISTS]: {retry: false, rollback: false},
-    [Status.FAILED_PRECONDITION]: {retry: false, rollback: false},
+    [Status.ALREADY_EXISTS]: {retry: false, rollback: true},
+    [Status.FAILED_PRECONDITION]: {retry: false, rollback: true},
     [Status.OUT_OF_RANGE]: {retry: false, rollback: true},
     [Status.UNIMPLEMENTED]: {retry: false, rollback: true},
     [Status.DATA_LOSS]: {retry: false, rollback: true},
@@ -526,7 +526,9 @@ describe('failed transactions', () => {
       transactionFunction,
       getDocument({newTransaction: {readWrite: {}}}),
       commit('foo1', undefined, serverError),
-      //rollback('foo1'), rollback not performed for this error code
+      retryBehavior[Status.INVALID_ARGUMENT].rollback !== false
+        ? rollback('foo1')
+        : null,
       backoff(),
       getDocument({newTransaction: {readWrite: {prevTransactionId: 'foo1'}}}),
       commit('foo2')
