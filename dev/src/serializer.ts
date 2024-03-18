@@ -333,7 +333,7 @@ export class Serializer {
    * @returns The converted JS type.
    */
   decodeGoogleProtobufList(
-      proto: proto.google.protobuf.IListValue | null | undefined
+    proto: proto.google.protobuf.IListValue | null | undefined
   ): unknown[] {
     const result: unknown[] = [];
     if (proto && proto.values && Array.isArray(proto.values)) {

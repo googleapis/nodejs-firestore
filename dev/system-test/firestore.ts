@@ -274,7 +274,9 @@ describe('Firestore class', () => {
     let totalResponses = 0;
     let totalDocuments = 0;
     let metrics: ExplainMetrics | null = null;
-    const stream = randomCol.where('foo', '==', 1).explainStream({analyze: true});
+    const stream = randomCol
+      .where('foo', '==', 1)
+      .explainStream({analyze: true});
     const promise = new Promise<boolean>((resolve, reject) => {
       stream.on('data', data => {
         ++totalResponses;
