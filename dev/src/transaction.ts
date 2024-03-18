@@ -632,7 +632,7 @@ export class Transaction implements firestore.Transaction {
     resultFn: (
       this: typeof this,
       param: TParam,
-      opts: Uint8Array | api.ITransactionOptions
+      opts: Uint8Array | api.ITransactionOptions | Timestamp
     ) => Promise<{transaction?: Uint8Array; result: TResult}>
   ): Promise<TResult> {
     if (this._transactionIdPromise) {
@@ -644,36 +644,40 @@ export class Transaction implements firestore.Transaction {
         return r.result;
       });
     } else {
-      // This is the first read of the transaction so we create the appropriate
-      // options for lazily starting the transaction inside this first read op
-      let opts: Uint8Array | api.ITransactionOptions;
-      if (this._writeBatch) {
-        opts = {readWrite: {}};
-        if (this._prevTransactionId) {
-          opts.readWrite!.retryTransaction = this._prevTransactionId;
-        }
+      if (this._readOnlyReadTime) {
+        // We do not start a transaction for read-only transactions
+        // do not set _prevTransactionId
+        return resultFn
+          .call(this, param, this._readOnlyReadTime)
+          .then(resolveResult);
       } else {
-        opts = {readOnly: {}};
-        if (this._readOnlyReadTime) {
-          opts.readOnly!.readTime =
-            this._readOnlyReadTime.toProto().timestampValue;
+        // This is the first read of the transaction so we create the appropriate
+        // options for lazily starting the transaction inside this first read op
+        let opts: api.ITransactionOptions;
+        if (this._writeBatch) {
+          opts = this._prevTransactionId
+            ? {readWrite: {retryTransaction: this._prevTransactionId}}
+            : {readWrite: {}};
+        } else {
+          opts = {readOnly: {}};
         }
+
+        const resultPromise = resultFn.call(this, param, opts);
+
+        // Ensure the _transactionIdPromise is set synchronously so that
+        // subsequent operations will not race to start another transaction
+        this._transactionIdPromise = resultPromise.then(async r => {
+          if (!r.transaction) {
+            // Illegal state
+            // The read operation was provided with new transaction options but did not return a transaction ID
+            // Rejecting here will cause all queued reads to reject
+            throw new Error('Transaction ID was missing from server response');
+          }
+          return r.transaction;
+        });
+
+        return resultPromise.then(resolveResult);
       }
-      const resultPromise = resultFn.call(this, param, opts);
-
-      // Ensure the _transactionIdPromise is set synchronously so that
-      // subsequent operations will not race to start another transaction
-      this._transactionIdPromise = resultPromise.then(async ({transaction}) => {
-        if (!transaction) {
-          // Illegal state
-          // The read operation was provided with new transaction options but did not return a transaction ID
-          // Rejecting here will cause all queued reads to reject
-          throw new Error('Transaction ID was missing from server response');
-        }
-        return transaction;
-      });
-
-      return resultPromise.then(r => r.result);
     }
   }
 
@@ -682,15 +686,17 @@ export class Transaction implements firestore.Transaction {
     DbModelType extends firestore.DocumentData,
   >(
     document: DocumentReference<AppModelType, DbModelType>,
-    opts: Uint8Array | api.ITransactionOptions
+    opts: Uint8Array | api.ITransactionOptions | Timestamp
   ): Promise<{
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>;
   }> {
     const documentReader = new DocumentReader(this._firestore, [document]);
-    // Note: We don't set read time because the options for lazily started
-    // transactions already contain the read time (for readonly transactions)
-    documentReader.transactionIdOrNewTransaction = opts;
+    if (opts instanceof Timestamp) {
+      documentReader.readTime = opts;
+    } else {
+      documentReader.transactionIdOrNewTransaction = opts;
+    }
     const {
       transaction,
       result: [result],
@@ -709,16 +715,18 @@ export class Transaction implements firestore.Transaction {
       documents: Array<DocumentReference<AppModelType, DbModelType>>;
       fieldMask?: FieldPath[] | null;
     },
-    opts: Uint8Array | api.ITransactionOptions
+    opts: Uint8Array | api.ITransactionOptions | Timestamp
   ): Promise<{
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>[];
   }> {
     const documentReader = new DocumentReader(this._firestore, documents);
     documentReader.fieldMask = fieldMask || undefined;
-    // Note: We don't set read time because the options for lazily started
-    // transactions already contain the read time (for readonly transactions)
-    documentReader.transactionIdOrNewTransaction = opts;
+    if (opts instanceof Timestamp) {
+      documentReader.readTime = opts;
+    } else {
+      documentReader.transactionIdOrNewTransaction = opts;
+    }
     return documentReader.getResponse(this._requestTag);
   }
 
@@ -727,7 +735,7 @@ export class Transaction implements firestore.Transaction {
     TQuery extends Query<any, any> | AggregateQuery<any, any>,
   >(
     query: TQuery,
-    opts: Uint8Array | api.ITransactionOptions
+    opts: Uint8Array | api.ITransactionOptions | Timestamp
   ): Promise<{
     transaction?: Uint8Array;
     result: Awaited<ReturnType<TQuery['_getResponse']>>['result'];
@@ -887,4 +895,8 @@ async function maybeBackoff(
     backoff.resetToMax();
   }
   await backoff.backoffAndWait();
+}
+
+function resolveResult<TResult>({result}: {result: TResult}): TResult {
+  return result;
 }

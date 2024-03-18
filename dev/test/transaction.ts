@@ -141,6 +141,7 @@ function getAll(
       readOnly?: {readTime?: Timestamp};
       readWrite?: {prevTransactionId?: Uint8Array | string};
     };
+    readTime?: Timestamp;
     error?: Error;
   }
 ): TransactionStep {
@@ -172,6 +173,9 @@ function getAll(
     };
   }
 
+  if (options?.readTime) {
+    request.readTime = options.readTime.toProto().timestampValue;
+  }
   if (options?.fieldMask) {
     request.mask = {fieldPaths: options.fieldMask};
   }
@@ -234,6 +238,7 @@ function getDocument(options?: {
     readOnly?: {readTime?: Timestamp};
     readWrite?: {prevTransactionId?: Uint8Array | string};
   };
+  readTime?: Timestamp;
   error?: Error;
 }): TransactionStep {
   return getAll([options?.document || DOCUMENT_ID], options);
@@ -245,6 +250,7 @@ function query(options?: {
     readOnly?: {readTime?: Timestamp};
     readWrite?: {prevTransactionId?: Uint8Array | string};
   };
+  readTime?: Timestamp;
   error?: Error;
 }): TransactionStep {
   const request: api.IRunQueryRequest = {
@@ -289,6 +295,10 @@ function query(options?: {
           }
         : {},
     };
+  }
+
+  if (options?.readTime) {
+    request.readTime = options.readTime.toProto().timestampValue;
   }
 
   const stream = through2.obj();
@@ -866,9 +876,7 @@ describe('transaction operations', () => {
         readTime: Timestamp.fromMillis(1),
       },
       (transaction, docRef) => transaction.get(docRef),
-      getDocument({
-        newTransaction: {readOnly: {readTime: Timestamp.fromMillis(1)}},
-      })
+      getDocument({readTime: Timestamp.fromMillis(1)})
     );
   });
 
@@ -884,9 +892,7 @@ describe('transaction operations', () => {
           expect(results.docs[0].id).to.equal('documentId');
         });
       },
-      query({
-        newTransaction: {readOnly: {readTime: Timestamp.fromMillis(2)}},
-      })
+      query({readTime: Timestamp.fromMillis(2)})
     );
   });
 
