@@ -2352,9 +2352,9 @@ export class Query<
    *  transaction, or timestamp to use as read time.
    */
   async _get(
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+    transactionIdOrReadTime?: Uint8Array | Timestamp
   ): Promise<QuerySnapshot<AppModelType, DbModelType>> {
-    const resp = await this._getResponse(transactionOrReadTime);
+    const resp = await this._getResponse(transactionIdOrReadTime);
     return resp.result;
   }
 
@@ -3390,11 +3390,11 @@ export class AggregateQuery<
    *  transaction, or timestamp to use as read time.
    */
   async _get(
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+    transactionIdOrReadTime?: Uint8Array | Timestamp
   ): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
-    const resp = await this._getResponse(transactionOrReadTime);
+    const resp = await this._getResponse(transactionIdOrReadTime);
     return resp.result;
   }
 
