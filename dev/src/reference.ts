@@ -1187,13 +1187,9 @@ export class QuerySnapshot<
   }
 }
 
-/**
- * @private
- * @internal
- */
-export interface QueryResponse<TSnapshot> {
+interface QueryResponse<TSnapshot> {
   transaction?: Uint8Array;
-  snapshot: TSnapshot;
+  result: TSnapshot;
 }
 
 /** Internal representation of a query cursor before serialization. */
@@ -2359,11 +2355,12 @@ export class Query<
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): Promise<QuerySnapshot<AppModelType, DbModelType>> {
     const resp = await this._getResponse(transactionOrReadTime);
-    return resp.snapshot;
+    return resp.result;
   }
 
   /**
-   * Internal get() method that accepts an optional transaction id.
+   * Internal get() method that accepts an optional transaction id, and returns
+   * transaction metadata.
    *
    * @private
    * @internal
@@ -2406,7 +2403,7 @@ export class Query<
 
           resolve({
             transaction: responseTransaction,
-            snapshot: new QuerySnapshot(
+            result: new QuerySnapshot(
               this,
               readTime,
               docs.length,
@@ -3398,11 +3395,12 @@ export class AggregateQuery<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
     const resp = await this._getResponse(transactionOrReadTime);
-    return resp.snapshot;
+    return resp.result;
   }
 
   /**
-   * Internal get() method that accepts an optional transaction id.
+   * Internal get() method that accepts an optional transaction id, and returns
+   * transaction metadata.
    *
    * @private
    * @internal
@@ -3432,7 +3430,7 @@ export class AggregateQuery<
           stream.destroy();
           resolve({
             transaction: responseTransaction,
-            snapshot: result,
+            result,
           });
         }
       });

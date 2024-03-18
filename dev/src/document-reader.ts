@@ -25,15 +25,8 @@ import {Timestamp} from './timestamp';
 import {DocumentData} from '@google-cloud/firestore';
 import api = google.firestore.v1;
 
-/**
- * @private
- * @internal
- */
-export interface BatchGetResponse<
-  AppModelType,
-  DbModelType extends DocumentData,
-> {
-  documents: Array<DocumentSnapshot<AppModelType, DbModelType>>;
+interface BatchGetResponse<AppModelType, DbModelType extends DocumentData> {
+  result: Array<DocumentSnapshot<AppModelType, DbModelType>>;
   /**
    * The transaction that was started as part of this request. Will only be if
    * `DocumentReader.transactionIdOrNewTransaction` was `api.ITransactionOptions`.
@@ -87,12 +80,13 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
   async get(
     requestTag: string
   ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
-    const result = await this.getResponse(requestTag);
-    return result.documents;
+    const {result} = await this.getResponse(requestTag);
+    return result;
   }
 
   /**
-   * Invokes the BatchGetDocuments RPC and returns the results with metadata.
+   * Invokes the BatchGetDocuments RPC and returns the results with transaction
+   * metadata.
    *
    * @param requestTag A unique client-assigned identifier for this request.
    */
@@ -125,7 +119,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
     }
 
     return {
-      documents: orderedDocuments,
+      result: orderedDocuments,
       transaction: this.retrievedTransactionId,
     };
   }
