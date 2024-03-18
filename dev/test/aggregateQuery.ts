@@ -17,7 +17,6 @@ import {
   ApiOverride,
   createInstance,
   stream,
-  streamWithoutEnd,
   verifyInstance,
 } from './util/helpers';
 import {Firestore, Query, Timestamp} from '../src';

@@ -1906,11 +1906,11 @@ declare namespace FirebaseFirestore {
     get(): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
     /**
-     * Plans and optionally executes this query. Returns an ApiFuture that will be
+     * Plans and optionally executes this query. Returns a Promise that will be
      * resolved with the planner information, statistics from the query execution (if any),
      * and the query results (if any).
      *
-     * @return An ApiFuture that will be resolved with the planner information, statistics
+     * @return A Promise that will be resolved with the planner information, statistics
      *  from the query execution (if any), and the query results (if any).
      */
     explain(
@@ -1952,7 +1952,7 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @return A stream of `{document?: DocumentSnapshot, metrics?: ExplainMetrics}`
-     * objects. None of the responses may contain any metrics depending on `options`.
+     * objects.
      */
     explainStream(options: ExplainOptions): NodeJS.ReadableStream;
 
@@ -2482,11 +2482,11 @@ declare namespace FirebaseFirestore {
     >;
 
     /**
-     * Plans and optionally executes this query. Returns an ApiFuture that will be
+     * Plans and optionally executes this query. Returns a Promise that will be
      * resolved with the planner information, statistics from the query execution (if any),
      * and the query results (if any).
      *
-     * @return An ApiFuture that will be resolved with the planner information, statistics
+     * @return A Promise that will be resolved with the planner information, statistics
      *  from the query execution (if any), and the query results (if any).
      */
     explain(
@@ -2976,7 +2976,7 @@ declare namespace FirebaseFirestore {
   }
 
   /**
-   * Plan contains information about the planning stage of a query.
+   * PlanSummary contains information about the planning stage of a query.
    */
   export interface PlanSummary {
     /**

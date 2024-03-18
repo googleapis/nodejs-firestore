@@ -160,7 +160,6 @@ describe('Firestore class', () => {
     // Should have query plan.
     const plan = metrics.planSummary;
     expect(plan).to.not.be.null;
-    console.log(explainResults);
     expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
 
     // No execution stats and no snapshot.
@@ -231,6 +230,77 @@ describe('Firestore class', () => {
     expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
 
     expect(explainResults.snapshot!.size).to.equal(0);
+  });
+
+  it('can stream explain results without analyze', async () => {
+    await randomCol.doc('doc1').set({foo: 1, bar: 0});
+    await randomCol.doc('doc2').set({foo: 2, bar: 1});
+    await randomCol.doc('doc3').set({foo: 1, bar: 2});
+    let totalResponses = 0;
+    let totalDocuments = 0;
+    let metrics: ExplainMetrics | null = null;
+    const stream = randomCol.explainStream({analyze: false});
+    const promise = new Promise<boolean>((resolve, reject) => {
+      stream.on('data', data => {
+        ++totalResponses;
+        if (data.document) {
+          ++totalDocuments;
+        }
+        if (data.metrics) {
+          metrics = data.metrics;
+        }
+      });
+      stream.on('end', () => {
+        expect(totalResponses).to.equal(1);
+        expect(totalDocuments).to.equal(0);
+        expect(metrics).to.not.be.null;
+        expect(metrics!.planSummary.indexesUsed.length).to.be.greaterThan(0);
+        expect(metrics!.executionStats).to.be.null;
+        resolve(true);
+      });
+      stream.on('error', (error: Error) => {
+        reject(error);
+      });
+    });
+
+    const success: boolean = await promise;
+    expect(success).to.be.true;
+  });
+
+  it('can stream explain results with analyze', async () => {
+    await randomCol.doc('doc1').set({foo: 1, bar: 0});
+    await randomCol.doc('doc2').set({foo: 2, bar: 1});
+    await randomCol.doc('doc3').set({foo: 1, bar: 2});
+    let totalResponses = 0;
+    let totalDocuments = 0;
+    let metrics: ExplainMetrics | null = null;
+    const stream = randomCol.where('foo', '==', 1).explainStream({analyze: true});
+    const promise = new Promise<boolean>((resolve, reject) => {
+      stream.on('data', data => {
+        ++totalResponses;
+        if (data.document) {
+          ++totalDocuments;
+        }
+        if (data.metrics) {
+          metrics = data.metrics;
+        }
+      });
+      stream.on('end', () => {
+        expect(totalResponses).to.equal(2);
+        expect(totalDocuments).to.equal(2);
+        expect(metrics).to.not.be.null;
+        expect(metrics!.planSummary.indexesUsed.length).to.be.greaterThan(0);
+        expect(metrics!.executionStats).to.not.be.null;
+        expect(metrics!.executionStats!.resultsReturned).to.equal(2);
+        resolve(true);
+      });
+      stream.on('error', (error: Error) => {
+        reject(error);
+      });
+    });
+
+    const success: boolean = await promise;
+    expect(success).to.be.true;
   });
 
   it('can plan an aggregate query', async () => {
@@ -1483,39 +1553,6 @@ describe('runs query on a large collection', () => {
     }
 
     expect(received).to.equal(1000);
-  });
-
-  it('can stream explain results', async () => {
-    let totalResponses = 0;
-    let totalDocuments = 0;
-    let metrics: ExplainMetrics | null = null;
-    const stream = randomCol.explainStream({analyze: true});
-    const promise = new Promise<boolean>((resolve, reject) => {
-      stream.on('data', data => {
-        ++totalResponses;
-        if (data.document) {
-          ++totalDocuments;
-        }
-        if (data.metrics) {
-          metrics = data.metrics;
-        }
-      });
-      stream.on('end', () => {
-        expect(totalResponses).to.equal(1000);
-        expect(totalDocuments).to.equal(1000);
-        expect(metrics).to.not.be.null;
-        expect(metrics!.planSummary.indexesUsed.length).to.be.greaterThan(0);
-        expect(metrics!.executionStats).to.not.be.null;
-        expect(metrics!.executionStats!.resultsReturned).to.equal(1000);
-        resolve(true);
-      });
-      stream.on('error', (error: Error) => {
-        reject(error);
-      });
-    });
-
-    const success: boolean = await promise;
-    expect(success).to.be.true;
   });
 });
 

@@ -310,16 +310,10 @@ export class Serializer {
         return proto.boolValue;
       }
       case 'listValue': {
-        const array: unknown[] = [];
-        if (Array.isArray(proto.listValue!.values)) {
-          for (const value of proto.listValue!.values!) {
-            array.push(this.decodeGoogleProtobufValue(value));
-          }
-        }
-        return array;
+        return this.decodeGoogleProtobufList(proto.listValue);
       }
       case 'structValue': {
-        return this.decodeGoogleProtobufStruct(proto.structValue!);
+        return this.decodeGoogleProtobufStruct(proto.structValue);
       }
       default: {
         throw new Error(
@@ -328,6 +322,26 @@ export class Serializer {
         );
       }
     }
+  }
+
+  /**
+   * Decodes a google.protobuf.ListValue
+   *
+   * @private
+   * @internal
+   * @param proto A Google Protobuf 'ListValue'.
+   * @returns The converted JS type.
+   */
+  decodeGoogleProtobufList(
+      proto: proto.google.protobuf.IListValue | null | undefined
+  ): unknown[] {
+    const result: unknown[] = [];
+    if (proto && proto.values && Array.isArray(proto.values)) {
+      for (const value of proto.values) {
+        result.push(this.decodeGoogleProtobufValue(value));
+      }
+    }
+    return result;
   }
 
   /**

@@ -2554,7 +2554,7 @@ export class Query<
     if (this._queryOptions.limitType === LimitType.Last) {
       throw new Error(
         'Query results for queries that include limitToLast() ' +
-          'constraints cannot be streamed. Use Query.get() instead.'
+          'constraints cannot be streamed. Use Query.explain() instead.'
       );
     }
 

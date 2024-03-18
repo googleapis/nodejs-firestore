@@ -17,13 +17,13 @@
 
 import * as firestore from '@google-cloud/firestore';
 import {google} from '../protos/firestore_v1_proto_api';
-import IPlanSummary = google.firestore.v1.IPlanSummary;
 import {Serializer} from './serializer';
+import IPlanSummary = google.firestore.v1.IPlanSummary;
 import IExecutionStats = google.firestore.v1.IExecutionStats;
 import IExplainMetrics = google.firestore.v1.IExplainMetrics;
 
 /**
- * Plan contains information about the planning stage of a query.
+ * PlanSummary contains information about the planning stage of a query.
  */
 export class PlanSummary implements firestore.PlanSummary {
   constructor(readonly indexesUsed: Record<string, unknown>[]) {}
