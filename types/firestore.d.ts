@@ -1914,7 +1914,7 @@ declare namespace FirebaseFirestore {
      *  from the query execution (if any), and the query results (if any).
      */
     explain(
-      options: ExplainOptions
+      options?: ExplainOptions
     ): Promise<ExplainResults<QuerySnapshot<AppModelType, DbModelType>>>;
 
     /**
@@ -1954,7 +1954,7 @@ declare namespace FirebaseFirestore {
      * @return A stream of `{document?: DocumentSnapshot, metrics?: ExplainMetrics}`
      * objects.
      */
-    explainStream(options: ExplainOptions): NodeJS.ReadableStream;
+    explainStream(options?: ExplainOptions): NodeJS.ReadableStream;
 
     /**
      * Attaches a listener for `QuerySnapshot `events.
@@ -2490,7 +2490,7 @@ declare namespace FirebaseFirestore {
      *  from the query execution (if any), and the query results (if any).
      */
     explain(
-      options: ExplainOptions
+      options?: ExplainOptions
     ): Promise<
       ExplainResults<
         AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>

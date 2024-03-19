@@ -2348,8 +2348,12 @@ export class Query<
    *  from the query execution (if any), and the query results (if any).
    */
   explain(
-    options: firestore.ExplainOptions
+    options?: firestore.ExplainOptions
   ): Promise<ExplainResults<QuerySnapshot<AppModelType, DbModelType>>> {
+    if (options === undefined) {
+      options = {};
+    }
+
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
@@ -2549,8 +2553,11 @@ export class Query<
    * ```
    */
   explainStream(
-    explainOptions: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
+    if (explainOptions === undefined) {
+      explainOptions = {};
+    }
     if (this._queryOptions.limitType === LimitType.Last) {
       throw new Error(
         'Query results for queries that include limitToLast() ' +
@@ -3749,12 +3756,15 @@ export class AggregateQuery<
    * statistics from the query execution (if any), and the query results (if any).
    */
   explain(
-    options: firestore.ExplainOptions
+    options?: firestore.ExplainOptions
   ): Promise<
     ExplainResults<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
     >
   > {
+    if (options === undefined) {
+      options = {};
+    }
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
