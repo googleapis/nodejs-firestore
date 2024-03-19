@@ -149,9 +149,7 @@ describe('Firestore class', () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
-    const explainResults = await randomCol
-      .where('foo', '>', 1)
-      .explain();
+    const explainResults = await randomCol.where('foo', '>', 1).explain();
 
     // Should have metrics.
     const metrics = explainResults.metrics;
@@ -172,8 +170,8 @@ describe('Firestore class', () => {
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
     const explainResults = await randomCol
-        .where('foo', '>', 1)
-        .explain({analyze: false});
+      .where('foo', '>', 1)
+      .explain({analyze: false});
 
     // Should have metrics.
     const metrics = explainResults.metrics;
@@ -367,9 +365,9 @@ describe('Firestore class', () => {
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
     const explainResults = await randomCol
-        .where('foo', '>', 0)
-        .count()
-        .explain();
+      .where('foo', '>', 0)
+      .count()
+      .explain();
 
     const metrics = explainResults.metrics;
 
