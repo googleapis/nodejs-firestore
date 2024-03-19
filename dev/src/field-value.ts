@@ -34,6 +34,8 @@ import api = proto.google.firestore.v1;
 /**
  * Represent a vector type in Firestore documents.
  * Create an instance with {@link FieldValue.vector}.
+ *
+ * @class VectorValue
  */
 export class VectorValue implements firestore.VectorValue {
   private readonly _values: number[];
