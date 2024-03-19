@@ -476,10 +476,6 @@ export class Transaction implements firestore.Transaction {
       return;
     }
 
-    // TODO: Some error codes imply that the transaction has already been aborted
-    // by the server so we could also avoid superfluous rollback by clearing
-    // the _transactionIdPromise flag on those particular errors
-    // for example "transaction expired" errors
     await this._writeBatch._commit({
       transactionId,
       requestTag: this._requestTag,

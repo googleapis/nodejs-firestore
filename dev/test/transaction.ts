@@ -362,9 +362,8 @@ function runTransaction<T>(
     transaction: Transaction,
     docRef: DocumentReference
   ) => Promise<T>,
-  ...expectedRequests: (TransactionStep | null)[]
+  ...expectedRequests: TransactionStep[]
 ) {
-  expectedRequests = expectedRequests.filter(Boolean);
   const overrides: ApiOverride = {
     beginTransaction: () => {
       // Transactions are lazily started upon first read so the beginTransaction
@@ -433,7 +432,7 @@ function runTransaction<T>(
       setTimeoutHandler(setTimeout);
       expect(expectedRequests.length).to.equal(
         0,
-        'Missing requests: ' + expectedRequests.map(r => r!.type).join(', ')
+        'Missing requests: ' + expectedRequests.map(r => r.type).join(', ')
       );
     }
   });
@@ -456,23 +455,22 @@ describe('successful transactions', () => {
 });
 
 describe('failed transactions', () => {
-  const retryBehavior: {[code: number]: {retry: boolean; rollback: boolean}} = {
-    [Status.CANCELLED]: {retry: true, rollback: true},
-    [Status.UNKNOWN]: {retry: true, rollback: true},
-    [Status.DEADLINE_EXCEEDED]: {retry: true, rollback: true},
-    [Status.RESOURCE_EXHAUSTED]: {retry: true, rollback: true},
-    [Status.ABORTED]: {retry: true, rollback: true},
-    [Status.INTERNAL]: {retry: true, rollback: true},
-    [Status.UNAVAILABLE]: {retry: true, rollback: true},
-    [Status.UNAUTHENTICATED]: {retry: true, rollback: true},
-
-    [Status.INVALID_ARGUMENT]: {retry: false, rollback: true},
-    [Status.NOT_FOUND]: {retry: false, rollback: true},
-    [Status.ALREADY_EXISTS]: {retry: false, rollback: true},
-    [Status.FAILED_PRECONDITION]: {retry: false, rollback: true},
-    [Status.OUT_OF_RANGE]: {retry: false, rollback: true},
-    [Status.UNIMPLEMENTED]: {retry: false, rollback: true},
-    [Status.DATA_LOSS]: {retry: false, rollback: true},
+  const retryBehavior: {[code: number]: boolean} = {
+    [Status.CANCELLED]: true,
+    [Status.UNKNOWN]: true,
+    [Status.INVALID_ARGUMENT]: false,
+    [Status.DEADLINE_EXCEEDED]: true,
+    [Status.NOT_FOUND]: false,
+    [Status.ALREADY_EXISTS]: false,
+    [Status.RESOURCE_EXHAUSTED]: true,
+    [Status.FAILED_PRECONDITION]: false,
+    [Status.ABORTED]: true,
+    [Status.OUT_OF_RANGE]: false,
+    [Status.UNIMPLEMENTED]: false,
+    [Status.INTERNAL]: true,
+    [Status.UNAVAILABLE]: true,
+    [Status.DATA_LOSS]: false,
+    [Status.UNAUTHENTICATED]: true,
   };
 
   it('retries commit based on error code', async () => {
@@ -485,17 +483,17 @@ describe('failed transactions', () => {
       await trans.get(ref);
     };
 
-    for (const [errorCode, e] of Object.entries(retryBehavior)) {
+    for (const [errorCode, retry] of Object.entries(retryBehavior)) {
       const serverError = new GoogleError('Test Error');
       serverError.code = Number(errorCode) as Status;
 
-      if (e.retry) {
+      if (retry) {
         await runTransaction(
           /* transactionOptions= */ {},
           transactionFunction,
           getDocument({newTransaction: {readWrite: {}}}),
           commit('foo1', undefined, serverError),
-          e.rollback ? rollback('foo1') : null,
+          rollback('foo1'),
           backoff(),
           getDocument({
             newTransaction: {readWrite: {prevTransactionId: 'foo1'}},
@@ -509,7 +507,7 @@ describe('failed transactions', () => {
             transactionFunction,
             getDocument({newTransaction: {readWrite: {}}}),
             commit('foo1', undefined, serverError),
-            e.rollback ? rollback('foo1') : null
+            rollback('foo1')
           )
         ).to.eventually.be.rejected;
       }
@@ -536,9 +534,7 @@ describe('failed transactions', () => {
       transactionFunction,
       getDocument({newTransaction: {readWrite: {}}}),
       commit('foo1', undefined, serverError),
-      retryBehavior[Status.INVALID_ARGUMENT].rollback !== false
-        ? rollback('foo1')
-        : null,
+      rollback('foo1'),
       backoff(),
       getDocument({newTransaction: {readWrite: {prevTransactionId: 'foo1'}}}),
       commit('foo2')
@@ -554,17 +550,17 @@ describe('failed transactions', () => {
       return transaction.get(query);
     };
 
-    for (const [errorCode, e] of Object.entries(retryBehavior)) {
+    for (const [errorCode, retry] of Object.entries(retryBehavior)) {
       const serverError = new GoogleError('Test Error');
       serverError.code = Number(errorCode) as Status;
 
-      if (e.retry) {
+      if (retry) {
         await runTransaction(
           /* transactionOptions= */ {},
           transactionFunction,
           query({newTransaction: {readWrite: {}}, error: serverError}),
           // No rollback because the lazy-start operation failed
-          //e.rollback ? rollback('foo1') : null,
+          //rollback('foo1'),
           backoff(),
           query({newTransaction: {readWrite: {}}}),
           commit('foo1')
@@ -576,7 +572,7 @@ describe('failed transactions', () => {
             transactionFunction,
             query({newTransaction: {readWrite: {}}, error: serverError})
             // No rollback because the lazy-start operation failed
-            //e.rollback ? rollback('foo1') : null,
+            //rollback('foo1'),
           )
         ).to.eventually.be.rejected;
       }
@@ -591,17 +587,17 @@ describe('failed transactions', () => {
       return transaction.get(docRef);
     };
 
-    for (const [errorCode, e] of Object.entries(retryBehavior)) {
+    for (const [errorCode, retry] of Object.entries(retryBehavior)) {
       const serverError = new GoogleError('Test Error');
       serverError.code = Number(errorCode) as Status;
 
-      if (e.retry) {
+      if (retry) {
         await runTransaction(
           /* transactionOptions= */ {},
           transactionFunction,
           getDocument({newTransaction: {readWrite: {}}, error: serverError}),
           // No rollback because the lazy-start operation failed
-          //e.rollback ? rollback('foo1') : null,
+          //rollback('foo1'),
           backoff(),
           getDocument({newTransaction: {readWrite: {}}}),
           commit('foo1')
@@ -613,7 +609,7 @@ describe('failed transactions', () => {
             transactionFunction,
             getDocument({newTransaction: {readWrite: {}}, error: serverError})
             // No rollback because the lazy-start operation failed
-            //e.rollback ? rollback('foo1') : null,
+            //rollback('foo1'),
           )
         ).to.eventually.be.rejected;
       }
@@ -628,17 +624,17 @@ describe('failed transactions', () => {
       await trans.get(doc);
     };
 
-    for (const [errorCode, e] of Object.entries(retryBehavior)) {
+    for (const [errorCode, retry] of Object.entries(retryBehavior)) {
       const serverError = new GoogleError('Test Error');
       serverError.code = Number(errorCode) as Status;
 
-      if (e.retry) {
+      if (retry) {
         await runTransaction(
           /* transactionOptions= */ {},
           transactionFunction,
           getDocument({newTransaction: {readWrite: {}}}),
           commit('foo1', /* writes=*/ undefined, serverError),
-          e.rollback ? rollback('foo1', serverError) : null,
+          rollback('foo1', serverError),
           backoff(),
           getDocument({
             newTransaction: {readWrite: {prevTransactionId: 'foo1'}},
@@ -652,7 +648,7 @@ describe('failed transactions', () => {
             transactionFunction,
             getDocument({newTransaction: {readWrite: {}}}),
             commit('foo1', /* writes=*/ undefined, serverError),
-            e.rollback ? rollback('foo1', serverError) : null
+            rollback('foo1', serverError)
           )
         ).to.eventually.be.rejected;
       }
