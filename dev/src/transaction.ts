@@ -485,7 +485,9 @@ export class Transaction implements firestore.Transaction {
   }
 
   /**
-   * Releases all locks and rolls back this transaction.
+   * Releases all locks and rolls back this transaction. The rollback process
+   * is completed asynchronously and this function resolves before the operation
+   * is completed.
    *
    * @private
    * @internal
@@ -497,7 +499,7 @@ export class Transaction implements firestore.Transaction {
       return;
     }
 
-    let transactionId: Uint8Array | undefined;
+    let transactionId: Uint8Array;
     try {
       transactionId = await this._transactionIdPromise;
     } catch {
@@ -507,23 +509,25 @@ export class Transaction implements firestore.Transaction {
       return;
     }
 
-    const request = {
+    const request: api.IRollbackRequest = {
       database: this._firestore.formattedName,
       transaction: transactionId,
     };
     this._transactionIdPromise = undefined;
     this._prevTransactionId = transactionId;
 
-    try {
-      await this._firestore.request('rollback', request, this._requestTag);
-    } catch (reason) {
-      logger(
-        'Firestore.runTransaction',
-        this._requestTag,
-        'Best effort to rollback failed with error:',
-        reason
-      );
-    }
+    // Rollback request is completed asynchronously
+    // We don't need to wait for it to completed before continuing the next attempt
+    this._firestore
+      .request('rollback', request, this._requestTag)
+      .catch(err => {
+        logger(
+          'Firestore.runTransaction',
+          this._requestTag,
+          'Best effort to rollback failed with error:',
+          err
+        );
+      });
   }
 
   /**
@@ -538,7 +542,7 @@ export class Transaction implements firestore.Transaction {
     updateFunction: (transaction: Transaction) => Promise<T>
   ): Promise<T> {
     // No backoff is set for readonly transactions (i.e. attempts == 1)
-    if (!this._backoff) {
+    if (!this._writeBatch) {
       return this.runTransactionOnce(updateFunction);
     }
 
@@ -554,9 +558,9 @@ export class Transaction implements firestore.Transaction {
           );
         }
 
-        this._writeBatch!._reset();
+        this._writeBatch._reset();
 
-        await maybeBackoff(this._backoff, lastError);
+        await maybeBackoff(this._backoff!, lastError);
 
         return await this.runTransactionOnce(updateFunction);
       } catch (err) {
