@@ -43,11 +43,12 @@ interface BatchGetResponse<AppModelType, DbModelType extends DocumentData> {
  */
 export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
   /** An optional field mask to apply to this read. */
-  fieldMask?: FieldPath[];
+  private readonly fieldMask?: FieldPath[];
   /** An optional transaction ID or options for beginning a new transaction to use for this read. */
-  transactionIdOrNewTransaction?: Uint8Array | api.ITransactionOptions;
-  /** An optional readTime to use for this read. */
-  readTime?: Timestamp;
+  private readonly transactionOrReadTime?:
+    | Uint8Array
+    | api.ITransactionOptions
+    | Timestamp;
 
   private readonly outstandingDocuments = new Set<string>();
   private readonly retrievedDocuments = new Map<string, DocumentSnapshot>();
@@ -64,8 +65,16 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
     private readonly firestore: Firestore,
     private readonly allDocuments: ReadonlyArray<
       DocumentReference<AppModelType, DbModelType>
-    >
+    >,
+    opts?: {
+      transactionOrReadTime?: Uint8Array | api.ITransactionOptions | Timestamp;
+      fieldMask?: FieldPath[];
+    }
   ) {
+    if (opts) {
+      this.transactionOrReadTime = opts.transactionOrReadTime;
+      this.fieldMask = opts.fieldMask;
+    }
     for (const docRef of this.allDocuments) {
       this.outstandingDocuments.add(docRef.formattedName);
     }
@@ -133,12 +142,12 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
       database: this.firestore.formattedName,
       documents: Array.from(this.outstandingDocuments),
     };
-    if (this.transactionIdOrNewTransaction instanceof Uint8Array) {
-      request.transaction = this.transactionIdOrNewTransaction;
-    } else if (this.transactionIdOrNewTransaction) {
-      request.newTransaction = this.transactionIdOrNewTransaction;
-    } else if (this.readTime) {
-      request.readTime = this.readTime.toProto().timestampValue;
+    if (this.transactionOrReadTime instanceof Uint8Array) {
+      request.transaction = this.transactionOrReadTime;
+    } else if (this.transactionOrReadTime instanceof Timestamp) {
+      request.readTime = this.transactionOrReadTime.toProto().timestampValue;
+    } else if (this.transactionOrReadTime) {
+      request.newTransaction = this.transactionOrReadTime;
     }
 
     if (this.fieldMask) {
@@ -197,8 +206,8 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
     } catch (error) {
       const shouldRetry =
         // Transactional reads are retried via the transaction runner.
-        !this.transactionIdOrNewTransaction &&
-        !this.retrievedTransactionId &&
+        !request.transaction &&
+        !request.newTransaction &&
         // Only retry if we made progress.
         resultCount > 0 &&
         // Don't retry permanent errors.

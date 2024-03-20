@@ -566,10 +566,6 @@ export class Transaction implements firestore.Transaction {
       } catch (err) {
         lastError = err;
 
-        // We may or may not have a previous transaction ID
-        // For example, the initial read operation could have failed with a
-        // retry-able error meaning we did not obtain the ID of the lazy-started
-        // transaction so we will retry without the ID of the previous attempt
         if (!isRetryableTransactionError(err)) {
           break;
         }
@@ -649,17 +645,17 @@ export class Transaction implements firestore.Transaction {
         // do not set _prevTransactionId
         return resultFn
           .call(this, param, this._readOnlyReadTime)
-          .then(resolveResult);
+          .then(r => r.result);
       } else {
         // This is the first read of the transaction so we create the appropriate
         // options for lazily starting the transaction inside this first read op
-        let opts: api.ITransactionOptions;
+        const opts: api.ITransactionOptions = {};
         if (this._writeBatch) {
-          opts = this._prevTransactionId
-            ? {readWrite: {retryTransaction: this._prevTransactionId}}
-            : {readWrite: {}};
+          opts.readWrite = this._prevTransactionId
+            ? {retryTransaction: this._prevTransactionId}
+            : {};
         } else {
-          opts = {readOnly: {}};
+          opts.readOnly = {};
         }
 
         const resultPromise = resultFn.call(this, param, opts);
@@ -676,7 +672,7 @@ export class Transaction implements firestore.Transaction {
           return r.transaction;
         });
 
-        return resultPromise.then(resolveResult);
+        return resultPromise.then(r => r.result);
       }
     }
   }
@@ -691,12 +687,9 @@ export class Transaction implements firestore.Transaction {
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>;
   }> {
-    const documentReader = new DocumentReader(this._firestore, [document]);
-    if (opts instanceof Timestamp) {
-      documentReader.readTime = opts;
-    } else {
-      documentReader.transactionIdOrNewTransaction = opts;
-    }
+    const documentReader = new DocumentReader(this._firestore, [document], {
+      transactionOrReadTime: opts,
+    });
     const {
       transaction,
       result: [result],
@@ -713,20 +706,17 @@ export class Transaction implements firestore.Transaction {
       fieldMask,
     }: {
       documents: Array<DocumentReference<AppModelType, DbModelType>>;
-      fieldMask?: FieldPath[] | null;
+      fieldMask?: FieldPath[];
     },
     opts: Uint8Array | api.ITransactionOptions | Timestamp
   ): Promise<{
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>[];
   }> {
-    const documentReader = new DocumentReader(this._firestore, documents);
-    documentReader.fieldMask = fieldMask || undefined;
-    if (opts instanceof Timestamp) {
-      documentReader.readTime = opts;
-    } else {
-      documentReader.transactionIdOrNewTransaction = opts;
-    }
+    const documentReader = new DocumentReader(this._firestore, documents, {
+      transactionOrReadTime: opts,
+      fieldMask,
+    });
     return documentReader.getResponse(this._requestTag);
   }
 
@@ -763,7 +753,7 @@ export function parseGetAllArguments<
   >
 ): {
   documents: Array<DocumentReference<AppModelType, DbModelType>>;
-  fieldMask: FieldPath[] | null;
+  fieldMask: FieldPath[] | undefined;
 } {
   let documents: Array<DocumentReference<AppModelType, DbModelType>>;
   let readOptions: firestore.ReadOptions | undefined = undefined;
@@ -801,7 +791,7 @@ export function parseGetAllArguments<
       ? readOptions.fieldMask.map(fieldPath =>
           FieldPath.fromArgument(fieldPath)
         )
-      : null;
+      : undefined;
   return {fieldMask, documents};
 }
 
@@ -895,8 +885,4 @@ async function maybeBackoff(
     backoff.resetToMax();
   }
   await backoff.backoffAndWait();
-}
-
-function resolveResult<TResult>({result}: {result: TResult}): TResult {
-  return result;
 }
