@@ -18,6 +18,7 @@ import {
   QuerySnapshot,
   SetOptions,
   Settings,
+  VectorValue,
   WithFieldValue,
 } from '@google-cloud/firestore';
 
@@ -1871,6 +1872,66 @@ describe('Query class', () => {
     expect(
       res.docs[2].get('nested.embedding').isEqual(FieldValue.vector([1, 1]))
     ).to.be.true;
+  });
+
+  it('supports findNearest with select to exclude vector data in response', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionReference = await indexTestHelper.createTestDocs([
+      {foo: 1},
+      {foo: 2, embedding: FieldValue.vector([10, 10])},
+      {foo: 3, embedding: FieldValue.vector([1, 1])},
+      {foo: 4, embedding: FieldValue.vector([10, 0])},
+      {foo: 5, embedding: FieldValue.vector([20, 0])},
+      {foo: 6, embedding: FieldValue.vector([100, 100])},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionReference)
+      .where('foo', 'in', [1, 2, 3, 4, 5, 6])
+      .select('foo')
+      .findNearest('embedding', [10, 10], {
+        limit: 10,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+
+    const res = await vectorQuery.get();
+    expect(res.size).to.equal(5);
+    expect(res.docs[0].get('foo')).to.equal(2);
+    expect(res.docs[1].get('foo')).to.equal(4);
+    expect(res.docs[2].get('foo')).to.equal(3);
+    expect(res.docs[3].get('foo')).to.equal(5);
+    expect(res.docs[4].get('foo')).to.equal(6);
+
+    res.docs.forEach(ds => expect(ds.get('embedding')).to.be.undefined);
+  });
+
+  it('supports findNearest limits', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const embeddingVector = [];
+    const queryVector = [];
+    for (let i = 0; i < 2048; i++) {
+      embeddingVector.push(i + 1);
+      queryVector.push(i - 1);
+    }
+
+    const collectionReference = await indexTestHelper.createTestDocs([
+      {embedding: FieldValue.vector(embeddingVector)},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionReference)
+      .findNearest('embedding', queryVector, {
+        limit: 1000,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+
+    const res = await vectorQuery.get();
+    expect(res.size).to.equal(1);
+    expect(
+      (res.docs[0].get('embedding') as VectorValue).toArray()
+    ).to.deep.equal(embeddingVector);
   });
 
   it('supports !=', async () => {
