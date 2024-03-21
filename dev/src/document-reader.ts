@@ -169,8 +169,6 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
       stream.resume();
 
       for await (const response of stream) {
-        // The transaction ID may or may not come in the same response element
-        // as the document response
         // Proto comes with zero-length buffer by default
         if (response.transaction?.length) {
           this.retrievedTransactionId = response.transaction;
