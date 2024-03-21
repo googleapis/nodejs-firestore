@@ -3430,7 +3430,7 @@ export class AggregateQuery<
       stream.on('error', err => {
         reject(wrapError(err, stack));
       });
-      stream.once('data', result => {
+      stream.on('data', result => {
         if (result.transaction) {
           responseTransaction = result.transaction;
         } else {
