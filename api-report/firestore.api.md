@@ -1399,6 +1399,8 @@ export class VectorQuerySnapshot<AppModelType = firestore.DocumentData, DbModelT
     get size(): number;
 }
 
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
+//
 // @public
 export class VectorValue implements firestore.VectorValue {
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
