@@ -2495,7 +2495,8 @@ export class Query<
    * @param vectorField - A string or {@link FieldPath} specifying the vector field to search on.
    * @param queryVector - The {@link VectorValue} used to measure the distance from `vectorField` values in the documents.
    * @param options - Options control the vector query. `limit` specifies the upper bound of documents to return, must
-   * be a positive integer. `distanceMeasure` specifies what type of distance is calculated when performing the query.
+   * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is calculated
+   * when performing the query.
    */
   findNearest(
     vectorField: string | firestore.FieldPath,

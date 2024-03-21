@@ -2006,7 +2006,8 @@ declare namespace FirebaseFirestore {
      * @param vectorField The field path this vector query executes on.
      * @param queryVector The vector value used to measure the distance from `vectorField` values in the documents.
      * @param options Options control the vector query. `limit` specifies the upper bound of documents to return, must
-     * be a positive integer. `distanceMeasure` specifies what type of distance is calculated when performing the query.
+     * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is
+     * calculated when performing the query.
      */
     findNearest(
       vectorField: string | FieldPath,
