@@ -1187,6 +1187,11 @@ export class QuerySnapshot<
   }
 }
 
+interface QueryResponse<TSnapshot> {
+  transaction?: Uint8Array;
+  result: TSnapshot;
+}
+
 /** Internal representation of a query cursor before serialization. */
 interface QueryCursor {
   before: boolean;
@@ -2343,12 +2348,28 @@ export class Query<
    *
    * @private
    * @internal
-   * @param transactionIdOrReadTime A transaction ID or the read time at which
-   * to execute the query.
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    */
-  _get(
+  async _get(
     transactionIdOrReadTime?: Uint8Array | Timestamp
   ): Promise<QuerySnapshot<AppModelType, DbModelType>> {
+    const resp = await this._getResponse(transactionIdOrReadTime);
+    return resp.result;
+  }
+
+  /**
+   * Internal get() method that accepts an optional transaction id, and returns
+   * transaction metadata.
+   *
+   * @private
+   * @internal
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
+   */
+  _getResponse(
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+  ): Promise<QueryResponse<QuerySnapshot<AppModelType, DbModelType>>> {
     const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
 
     // Capture the error stack to preserve stack tracing across async calls.
@@ -2356,13 +2377,19 @@ export class Query<
 
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
+      let responseTransaction: Uint8Array | undefined;
 
-      this._stream(transactionIdOrReadTime)
+      this._stream(transactionOrReadTime)
         .on('error', err => {
           reject(wrapError(err, stack));
         })
         .on('data', result => {
-          readTime = result.readTime;
+          if (result.transaction) {
+            responseTransaction = result.transaction;
+          }
+          if (result.readTime) {
+            readTime = result.readTime;
+          }
           if (result.document) {
             docs.push(result.document);
           }
@@ -2375,8 +2402,9 @@ export class Query<
             docs.reverse();
           }
 
-          resolve(
-            new QuerySnapshot(
+          resolve({
+            transaction: responseTransaction,
+            result: new QuerySnapshot(
               this,
               readTime,
               docs.length,
@@ -2390,8 +2418,8 @@ export class Query<
                 }
                 return changes;
               }
-            )
-          );
+            ),
+          });
         });
     });
   }
@@ -2429,7 +2457,12 @@ export class Query<
     const transform = new Transform({
       objectMode: true,
       transform(chunk, encoding, callback) {
-        callback(undefined, chunk.document);
+        if (chunk.transaction) {
+          // Skip transaction response
+          callback();
+        } else {
+          callback(undefined, chunk.document);
+        }
       },
     });
 
@@ -2459,14 +2492,14 @@ export class Query<
    * Internal method for serializing a query to its RunQuery proto
    * representation with an optional transaction id or read time.
    *
-   * @param transactionIdOrReadTime A transaction ID or the read time at which
-   * to execute the query.
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    * @private
    * @internal
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionIdOrReadTime?: Uint8Array | Timestamp
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
     const databaseId = this.firestore.databaseId;
@@ -2513,11 +2546,12 @@ export class Query<
       structuredQuery,
     };
 
-    if (transactionIdOrReadTime instanceof Uint8Array) {
-      runQueryRequest.transaction = transactionIdOrReadTime;
-    } else if (transactionIdOrReadTime instanceof Timestamp) {
-      runQueryRequest.readTime =
-        transactionIdOrReadTime.toProto().timestampValue;
+    if (transactionOrReadTime instanceof Uint8Array) {
+      runQueryRequest.transaction = transactionOrReadTime;
+    } else if (transactionOrReadTime instanceof Timestamp) {
+      runQueryRequest.readTime = transactionOrReadTime.toProto().timestampValue;
+    } else if (transactionOrReadTime) {
+      runQueryRequest.newTransaction = transactionOrReadTime;
     }
 
     return runQueryRequest;
@@ -2617,15 +2651,20 @@ export class Query<
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
-   * @param transactionIdOrReadTime A transaction ID or the read time at which
-   * to execute the query.
+   * BEWARE: If `transactionOrReadTime` is `ITransactionOptions`, then the first
+   * response in the stream will be a transaction response.
+   *
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    * @private
    * @internal
-   * @returns A stream of document results.
+   * @returns A stream of document results, optionally preceded by a transaction response.
    */
   _stream(
-    transactionIdOrReadTime?: Uint8Array | Timestamp
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): NodeJS.ReadableStream {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
     const tag = requestTag();
     const startTime = Date.now();
 
@@ -2637,21 +2676,30 @@ export class Query<
     let backendStream: Duplex;
     const stream = new Transform({
       objectMode: true,
-      transform: (proto, enc, callback) => {
+      transform(
+        proto: api.IRunQueryResponse | typeof NOOP_MESSAGE,
+        enc,
+        callback
+      ) {
         if (proto === NOOP_MESSAGE) {
           callback(undefined);
           return;
         }
-        const readTime = Timestamp.fromProto(proto.readTime);
+        // Proto comes with zero-length buffer by default
+        if (proto.transaction?.length) {
+          this.push({transaction: proto.transaction});
+        }
+
         if (proto.document) {
-          const document = this.firestore.snapshot_(
+          const readTime = Timestamp.fromProto(proto.readTime!);
+          const document = self.firestore.snapshot_(
             proto.document,
-            proto.readTime
+            proto.readTime!
           );
           const finalDoc = new DocumentSnapshotBuilder<
             AppModelType,
             DbModelType
-          >(document.ref.withConverter(this._queryOptions.converter));
+          >(document.ref.withConverter(self._queryOptions.converter));
           // Recreate the QueryDocumentSnapshot with the DocumentReference
           // containing the original converter.
           finalDoc.fieldsProto = document._fieldsProto;
@@ -2662,7 +2710,7 @@ export class Query<
             AppModelType,
             DbModelType
           >;
-          callback(undefined, {document: lastReceivedDocument, readTime});
+          this.push({document: lastReceivedDocument, readTime});
           if (proto.done) {
             logger('Query._stream', tag, 'Trigger Logical Termination.');
             backendStream.unpipe(stream);
@@ -2670,9 +2718,12 @@ export class Query<
             backendStream.end();
             stream.end();
           }
-        } else {
-          callback(undefined, {readTime});
+        } else if (proto.readTime) {
+          const readTime = Timestamp.fromProto(proto.readTime!);
+          this.push({readTime});
         }
+
+        callback();
       },
     });
 
@@ -2682,7 +2733,7 @@ export class Query<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        let request = this.toProto(transactionIdOrReadTime);
+        let request = this.toProto(transactionOrReadTime);
 
         let streamActive: Deferred<boolean>;
         do {
@@ -2700,7 +2751,7 @@ export class Query<
             // If a non-transactional query failed, attempt to restart.
             // Transactional queries are retried via the transaction runner.
             if (
-              !transactionIdOrReadTime &&
+              !transactionOrReadTime &&
               !this._isPermanentRpcError(err, 'runQuery')
             ) {
               logger(
@@ -3342,27 +3393,56 @@ export class AggregateQuery<
    *
    * @private
    * @internal
-   * @param {bytes=} transactionId A transaction ID.
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    */
-  _get(
+  async _get(
     transactionIdOrReadTime?: Uint8Array | Timestamp
   ): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+  > {
+    const resp = await this._getResponse(transactionIdOrReadTime);
+    return resp.result;
+  }
+
+  /**
+   * Internal get() method that accepts an optional transaction id, and returns
+   * transaction metadata.
+   *
+   * @private
+   * @internal
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
+   */
+  _getResponse(
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+  ): Promise<
+    QueryResponse<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >
   > {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
     return new Promise((resolve, reject) => {
-      const stream = this._stream(transactionIdOrReadTime);
+      let responseTransaction: Uint8Array | undefined;
+      const stream = this._stream(transactionOrReadTime);
       stream.on('error', err => {
         reject(wrapError(err, stack));
       });
-      stream.once('data', result => {
-        stream.destroy();
-        resolve(result);
+      stream.on('data', result => {
+        if (result.transaction) {
+          responseTransaction = result.transaction;
+        } else {
+          stream.destroy();
+          resolve({
+            transaction: responseTransaction,
+            result,
+          });
+        }
       });
       stream.on('end', () => {
-        reject('No AggregateQuery results');
+        reject(wrapError(new Error('No AggregateQuery results'), stack));
       });
     });
   }
@@ -3370,25 +3450,36 @@ export class AggregateQuery<
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
+   * BEWARE: If `transactionOrReadTime` is `ITransactionOptions`, then the first
+   * response in the stream will be a transaction response.
+   *
    * @private
    * @internal
-   * @param transactionId A transaction ID.
-   * @returns A stream of document results.
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
+   * @returns A stream of document results optionally preceded by a transaction response.
    */
-  _stream(transactionIdOrReadTime?: Uint8Array | Timestamp): Readable {
+  _stream(
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+  ): Readable {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
     const tag = requestTag();
     const firestore = this._query.firestore;
 
     const stream: Transform = new Transform({
       objectMode: true,
-      transform: (proto: api.IRunAggregationQueryResponse, enc, callback) => {
+      transform(proto: api.IRunAggregationQueryResponse, enc, callback) {
+        // Proto comes with zero-length buffer by default
+        if (proto.transaction?.length) {
+          this.push({transaction: proto.transaction});
+        }
         if (proto.result) {
           const readTime = Timestamp.fromProto(proto.readTime!);
-          const data = this.decodeResult(proto.result);
-          callback(undefined, new AggregateQuerySnapshot(this, readTime, data));
-        } else {
-          callback(Error('RunAggregationQueryResponse is missing result'));
+          const data = self.decodeResult(proto.result);
+          this.push(new AggregateQuerySnapshot(self, readTime, data));
         }
+        callback();
       },
     });
 
@@ -3398,7 +3489,7 @@ export class AggregateQuery<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = this.toProto(transactionIdOrReadTime);
+        const request = this.toProto(transactionOrReadTime);
 
         const backendStream = await firestore.requestStream(
           'runAggregationQuery',
@@ -3471,7 +3562,7 @@ export class AggregateQuery<
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionIdOrReadTime?: Uint8Array | Timestamp
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
     const runQueryRequest: api.IRunAggregationQueryRequest = {
@@ -3493,10 +3584,12 @@ export class AggregateQuery<
       },
     };
 
-    if (transactionIdOrReadTime instanceof Uint8Array) {
-      runQueryRequest.transaction = transactionIdOrReadTime;
-    } else if (transactionIdOrReadTime instanceof Timestamp) {
-      runQueryRequest.readTime = transactionIdOrReadTime;
+    if (transactionOrReadTime instanceof Uint8Array) {
+      runQueryRequest.transaction = transactionOrReadTime;
+    } else if (transactionOrReadTime instanceof Timestamp) {
+      runQueryRequest.readTime = transactionOrReadTime;
+    } else if (transactionOrReadTime) {
+      runQueryRequest.newTransaction = transactionOrReadTime;
     }
 
     return runQueryRequest;
