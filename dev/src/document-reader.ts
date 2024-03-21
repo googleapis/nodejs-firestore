@@ -42,14 +42,6 @@ interface BatchGetResponse<AppModelType, DbModelType extends DocumentData> {
  * @internal
  */
 export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
-  /** An optional field mask to apply to this read. */
-  private readonly fieldMask?: FieldPath[];
-  /** An optional transaction ID or options for beginning a new transaction to use for this read. */
-  private readonly transactionOrReadTime?:
-    | Uint8Array
-    | api.ITransactionOptions
-    | Timestamp;
-
   private readonly outstandingDocuments = new Set<string>();
   private readonly retrievedDocuments = new Map<string, DocumentSnapshot>();
   private retrievedTransactionId?: Uint8Array;
@@ -60,21 +52,21 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
    *
    * @param firestore The Firestore instance to use.
    * @param allDocuments The documents to get.
+   * @param fieldMask An optional field mask to apply to this read
+   * @param transactionOrReadTime An optional transaction ID to use for this
+   * read or options for beginning a new transaction with this read
    */
   constructor(
     private readonly firestore: Firestore,
     private readonly allDocuments: ReadonlyArray<
       DocumentReference<AppModelType, DbModelType>
     >,
-    opts?: {
-      transactionOrReadTime?: Uint8Array | api.ITransactionOptions | Timestamp;
-      fieldMask?: FieldPath[];
-    }
+    private readonly fieldMask?: FieldPath[],
+    private readonly transactionOrReadTime?:
+      | Uint8Array
+      | api.ITransactionOptions
+      | Timestamp
   ) {
-    if (opts) {
-      this.transactionOrReadTime = opts.transactionOrReadTime;
-      this.fieldMask = opts.fieldMask;
-    }
     for (const docRef of this.allDocuments) {
       this.outstandingDocuments.add(docRef.formattedName);
     }

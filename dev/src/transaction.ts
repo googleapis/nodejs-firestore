@@ -687,9 +687,12 @@ export class Transaction implements firestore.Transaction {
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>;
   }> {
-    const documentReader = new DocumentReader(this._firestore, [document], {
-      transactionOrReadTime: opts,
-    });
+    const documentReader = new DocumentReader(
+      this._firestore,
+      [document],
+      undefined,
+      opts
+    );
     const {
       transaction,
       result: [result],
@@ -713,10 +716,12 @@ export class Transaction implements firestore.Transaction {
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>[];
   }> {
-    const documentReader = new DocumentReader(this._firestore, documents, {
-      transactionOrReadTime: opts,
+    const documentReader = new DocumentReader(
+      this._firestore,
+      documents,
       fieldMask,
-    });
+      opts
+    );
     return documentReader.getResponse(this._requestTag);
   }
 
