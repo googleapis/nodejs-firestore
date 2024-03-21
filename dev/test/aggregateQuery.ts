@@ -185,9 +185,7 @@ describe('aggregate query interface', () => {
         throw new Error('Unexpected success in Promise');
       })
       .catch(err => {
-        expect(err.message).to.equal(
-          'RunAggregationQueryResponse is missing result'
-        );
+        expect(err.message).to.equal('No AggregateQuery results');
         expect(attempts).to.equal(1);
       });
   });

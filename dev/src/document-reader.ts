@@ -169,12 +169,15 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
       stream.resume();
 
       for await (const response of stream) {
-        let snapshot: DocumentSnapshot<DocumentData>;
-
-        if (response.transaction) {
+        // The transaction ID may or may not come in the same response element
+        // as the document response
+        // Proto comes with zero-length buffer by default
+        if (response.transaction?.length) {
           this.retrievedTransactionId = response.transaction;
-          continue;
-        } else if (response.found) {
+        }
+
+        let snapshot: DocumentSnapshot<DocumentData> | undefined;
+        if (response.found) {
           logger(
             'DocumentReader.fetchDocuments',
             requestTag,
@@ -185,7 +188,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
             response.found,
             response.readTime!
           );
-        } else {
+        } else if (response.missing) {
           logger(
             'DocumentReader.fetchDocuments',
             requestTag,
@@ -193,15 +196,17 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
             response.missing!
           );
           snapshot = this.firestore.snapshot_(
-            response.missing!,
+            response.missing,
             response.readTime!
           );
         }
 
-        const path = snapshot.ref.formattedName;
-        this.outstandingDocuments.delete(path);
-        this.retrievedDocuments.set(path, snapshot);
-        ++resultCount;
+        if (snapshot) {
+          const path = snapshot.ref.formattedName;
+          this.outstandingDocuments.delete(path);
+          this.retrievedDocuments.set(path, snapshot);
+          ++resultCount;
+        }
       }
     } catch (error) {
       const shouldRetry =

@@ -2386,11 +2386,12 @@ export class Query<
         .on('data', result => {
           if (result.transaction) {
             responseTransaction = result.transaction;
-          } else {
+          }
+          if (result.readTime) {
             readTime = result.readTime;
-            if (result.document) {
-              docs.push(result.document);
-            }
+          }
+          if (result.document) {
+            docs.push(result.document);
           }
         })
         .on('end', () => {
@@ -2662,6 +2663,8 @@ export class Query<
   _stream(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): NodeJS.ReadableStream {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
     const tag = requestTag();
     const startTime = Date.now();
 
@@ -2673,29 +2676,30 @@ export class Query<
     let backendStream: Duplex;
     const stream = new Transform({
       objectMode: true,
-      transform: (
+      transform(
         proto: api.IRunQueryResponse | typeof NOOP_MESSAGE,
         enc,
         callback
-      ) => {
+      ) {
         if (proto === NOOP_MESSAGE) {
           callback(undefined);
           return;
         }
-        if (proto.transaction) {
-          callback(undefined, proto);
-          return;
+        // Proto comes with zero-length buffer by default
+        if (proto.transaction?.length) {
+          this.push({transaction: proto.transaction});
         }
-        const readTime = Timestamp.fromProto(proto.readTime!);
+
         if (proto.document) {
-          const document = this.firestore.snapshot_(
+          const readTime = Timestamp.fromProto(proto.readTime!);
+          const document = self.firestore.snapshot_(
             proto.document,
             proto.readTime!
           );
           const finalDoc = new DocumentSnapshotBuilder<
             AppModelType,
             DbModelType
-          >(document.ref.withConverter(this._queryOptions.converter));
+          >(document.ref.withConverter(self._queryOptions.converter));
           // Recreate the QueryDocumentSnapshot with the DocumentReference
           // containing the original converter.
           finalDoc.fieldsProto = document._fieldsProto;
@@ -2706,7 +2710,7 @@ export class Query<
             AppModelType,
             DbModelType
           >;
-          callback(undefined, {document: lastReceivedDocument, readTime});
+          this.push({document: lastReceivedDocument, readTime});
           if (proto.done) {
             logger('Query._stream', tag, 'Trigger Logical Termination.');
             backendStream.unpipe(stream);
@@ -2714,9 +2718,12 @@ export class Query<
             backendStream.end();
             stream.end();
           }
-        } else {
-          callback(undefined, {readTime});
+        } else if (proto.readTime) {
+          const readTime = Timestamp.fromProto(proto.readTime!);
+          this.push({readTime});
         }
+
+        callback();
       },
     });
 
@@ -3435,7 +3442,7 @@ export class AggregateQuery<
         }
       });
       stream.on('end', () => {
-        reject('No AggregateQuery results');
+        reject(wrapError(new Error('No AggregateQuery results'), stack));
       });
     });
   }
@@ -3455,21 +3462,24 @@ export class AggregateQuery<
   _stream(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): Readable {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
     const tag = requestTag();
     const firestore = this._query.firestore;
 
     const stream: Transform = new Transform({
       objectMode: true,
-      transform: (proto: api.IRunAggregationQueryResponse, enc, callback) => {
-        if (proto.transaction) {
-          callback(undefined, proto);
-        } else if (proto.result) {
-          const readTime = Timestamp.fromProto(proto.readTime!);
-          const data = this.decodeResult(proto.result);
-          callback(undefined, new AggregateQuerySnapshot(this, readTime, data));
-        } else {
-          callback(Error('RunAggregationQueryResponse is missing result'));
+      transform(proto: api.IRunAggregationQueryResponse, enc, callback) {
+        // Proto comes with zero-length buffer by default
+        if (proto.transaction?.length) {
+          this.push({transaction: proto.transaction});
         }
+        if (proto.result) {
+          const readTime = Timestamp.fromProto(proto.readTime!);
+          const data = self.decodeResult(proto.result);
+          this.push(new AggregateQuerySnapshot(self, readTime, data));
+        }
+        callback();
       },
     });
 
