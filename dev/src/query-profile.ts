@@ -1,12 +1,11 @@
-/**
- * @license
- * Copyright 2024 Google LLC
+/*!
+ * Copyright 2024 Google LLC. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,11 +23,21 @@ import IExplainMetrics = google.firestore.v1.IExplainMetrics;
 
 /**
  * PlanSummary contains information about the planning stage of a query.
+ *
+ * @class PlanSummary
  */
 export class PlanSummary implements firestore.PlanSummary {
+  /**
+   * @private
+   * @internal
+   */
   constructor(readonly indexesUsed: Record<string, unknown>[]) {}
 
-  static fromProto(
+  /**
+   * @private
+   * @internal
+   */
+  static _fromProto(
     plan: IPlanSummary | null | undefined,
     serializer: Serializer
   ): PlanSummary {
@@ -42,8 +51,16 @@ export class PlanSummary implements firestore.PlanSummary {
   }
 }
 
-/** ExecutionStats contains information about the execution of a query. */
+/**
+ *  ExecutionStats contains information about the execution of a query.
+ *
+ * @class ExecutionStats
+ */
 export class ExecutionStats implements firestore.ExecutionStats {
+  /**
+   * @private
+   * @internal
+   */
   constructor(
     readonly resultsReturned: number,
     readonly executionDuration: firestore.Duration,
@@ -51,7 +68,11 @@ export class ExecutionStats implements firestore.ExecutionStats {
     readonly debugStats: Record<string, unknown>
   ) {}
 
-  static fromProto(
+  /**
+   * @private
+   * @internal
+   */
+  static _fromProto(
     stats: IExecutionStats | null | undefined,
     serializer: Serializer
   ): ExecutionStats | null {
@@ -72,20 +93,30 @@ export class ExecutionStats implements firestore.ExecutionStats {
 
 /**
  * ExplainMetrics contains information about planning and execution of a query.
+ *
+ * @class ExplainMetrics
  */
 export class ExplainMetrics implements firestore.ExplainMetrics {
+  /**
+   * @private
+   * @internal
+   */
   constructor(
     readonly planSummary: PlanSummary,
     readonly executionStats: ExecutionStats | null
   ) {}
 
-  static fromProto(
+  /**
+   * @private
+   * @internal
+   */
+  static _fromProto(
     metrics: IExplainMetrics,
     serializer: Serializer
   ): ExplainMetrics {
     return new ExplainMetrics(
-      PlanSummary.fromProto(metrics.planSummary, serializer),
-      ExecutionStats.fromProto(metrics.executionStats, serializer)
+      PlanSummary._fromProto(metrics.planSummary, serializer),
+      ExecutionStats._fromProto(metrics.executionStats, serializer)
     );
   }
 }
@@ -93,8 +124,14 @@ export class ExplainMetrics implements firestore.ExplainMetrics {
 /**
  * ExplainResults contains information about planning, execution, and results
  * of a query.
+ *
+ * @class ExplainResults
  */
 export class ExplainResults<T> implements firestore.ExplainResults<T> {
+  /**
+   * @private
+   * @internal
+   */
   constructor(
     readonly metrics: ExplainMetrics,
     readonly snapshot: T | null

@@ -2827,7 +2827,7 @@ export class Query<
         }
 
         if (proto.explainMetrics) {
-          output.explainMetrics = ExplainMetrics.fromProto(
+          output.explainMetrics = ExplainMetrics._fromProto(
             proto.explainMetrics,
             this._serializer
           );
@@ -3590,7 +3590,7 @@ export class AggregateQuery<
         }
 
         if (proto.explainMetrics) {
-          output.explainMetrics = ExplainMetrics.fromProto(
+          output.explainMetrics = ExplainMetrics._fromProto(
             proto.explainMetrics,
             firestore._serializer!
           );
