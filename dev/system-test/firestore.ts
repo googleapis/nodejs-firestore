@@ -19,6 +19,7 @@ import {
   QuerySnapshot,
   SetOptions,
   Settings,
+  VectorValue,
   WithFieldValue,
 } from '@google-cloud/firestore';
 
@@ -58,6 +59,7 @@ import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
 import IBundleElement = firestore.IBundleElement;
 import {Filter} from '../src/filter';
+import {IndexTestHelper} from './index_test_helper';
 
 use(chaiAsPromised);
 
@@ -1301,6 +1303,31 @@ describe('DocumentReference class', () => {
     return promise;
   });
 
+  it('can write and read vector embeddings', async () => {
+    const ref = randomCol.doc();
+    await ref.create({
+      vector0: FieldValue.vector([0.0]),
+      vector1: FieldValue.vector([1, 2, 3.99]),
+    });
+    await ref.set({
+      vector0: FieldValue.vector([0.0]),
+      vector1: FieldValue.vector([1, 2, 3.99]),
+      vector2: FieldValue.vector([0, 0, 0]),
+    });
+    await ref.update({
+      vector3: FieldValue.vector([-1, -200, -999]),
+    });
+
+    const snap1 = await ref.get();
+    expect(snap1.get('vector0').isEqual(FieldValue.vector([0.0]))).to.be.true;
+    expect(snap1.get('vector1').isEqual(FieldValue.vector([1, 2, 3.99]))).to.be
+      .true;
+    expect(snap1.get('vector2').isEqual(FieldValue.vector([0, 0, 0]))).to.be
+      .true;
+    expect(snap1.get('vector3').isEqual(FieldValue.vector([-1, -200, -999]))).to
+      .be.true;
+  });
+
   describe('watch', () => {
     const currentDeferred = new DeferredPromise<DocumentSnapshot>();
 
@@ -1594,6 +1621,89 @@ describe('DocumentReference class', () => {
     const result2 = await ref2.get();
     expect(result2.data()).to.deep.equal([1, 2, 3]);
   });
+
+  it('can listen to documents with vectors', async () => {
+    const ref = randomCol.doc();
+    const initialDeferred = new Deferred<void>();
+    const createDeferred = new Deferred<void>();
+    const setDeferred = new Deferred<void>();
+    const updateDeferred = new Deferred<void>();
+    const deleteDeferred = new Deferred<void>();
+
+    const expected = [
+      initialDeferred,
+      createDeferred,
+      setDeferred,
+      updateDeferred,
+      deleteDeferred,
+    ];
+    let idx = 0;
+    let document: DocumentSnapshot | null = null;
+
+    const unlisten = randomCol
+      .where('purpose', '==', 'vector tests')
+      .onSnapshot(snap => {
+        expected[idx].resolve();
+        idx += 1;
+        if (snap.docs.length > 0) {
+          document = snap.docs[0];
+        } else {
+          document = null;
+        }
+      });
+
+    await initialDeferred.promise;
+    expect(document).to.be.null;
+
+    await ref.create({
+      purpose: 'vector tests',
+      vector0: FieldValue.vector([0.0]),
+      vector1: FieldValue.vector([1, 2, 3.99]),
+    });
+
+    await createDeferred.promise;
+    expect(document).to.be.not.null;
+    expect(document!.get('vector0').isEqual(FieldValue.vector([0.0]))).to.be
+      .true;
+    expect(document!.get('vector1').isEqual(FieldValue.vector([1, 2, 3.99]))).to
+      .be.true;
+
+    await ref.set({
+      purpose: 'vector tests',
+      vector0: FieldValue.vector([0.0]),
+      vector1: FieldValue.vector([1, 2, 3.99]),
+      vector2: FieldValue.vector([0, 0, 0]),
+    });
+    await setDeferred.promise;
+    expect(document).to.be.not.null;
+    expect(document!.get('vector0').isEqual(FieldValue.vector([0.0]))).to.be
+      .true;
+    expect(document!.get('vector1').isEqual(FieldValue.vector([1, 2, 3.99]))).to
+      .be.true;
+    expect(document!.get('vector2').isEqual(FieldValue.vector([0, 0, 0]))).to.be
+      .true;
+
+    await ref.update({
+      vector3: FieldValue.vector([-1, -200, -999]),
+    });
+    await updateDeferred.promise;
+    expect(document).to.be.not.null;
+    expect(document!.get('vector0').isEqual(FieldValue.vector([0.0]))).to.be
+      .true;
+    expect(document!.get('vector1').isEqual(FieldValue.vector([1, 2, 3.99]))).to
+      .be.true;
+    expect(document!.get('vector2').isEqual(FieldValue.vector([0, 0, 0]))).to.be
+      .true;
+    expect(
+      document!.get('vector3').isEqual(FieldValue.vector([-1, -200, -999]))
+    ).to.be.true;
+
+    await ref.delete();
+    await deleteDeferred.promise;
+    expect(document).to.be.null;
+
+    unlisten();
+  });
 });
 
 describe('runs query on a large collection', () => {
@@ -1783,6 +1893,328 @@ describe('Query class', () => {
         expect(res.size).to.equal(1);
         expect(res.docs[0].get('foo')).to.deep.equal(['bar']);
       });
+  });
+
+  it('supports findNearest by EUCLIDEAN distance', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionReference = await indexTestHelper.createTestDocs([
+      {foo: 'bar'},
+      {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
+      {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+      {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([20, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionReference)
+      .where('foo', '==', 'bar')
+      .findNearest('embedding', [10, 10], {
+        limit: 3,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+
+    const res = await vectorQuery.get();
+    expect(res.size).to.equal(3);
+    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([10, 0]))).to
+      .be.true;
+    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 1]))).to
+      .be.true;
+    expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0]))).to
+      .be.true;
+  });
+
+  it('supports findNearest by COSINE distance', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionReference = await indexTestHelper.setTestDocs({
+      '1': {foo: 'bar'},
+      '2': {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
+      '3': {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+      '4': {foo: 'bar', embedding: FieldValue.vector([20, 0])},
+      '5': {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+      '6': {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+    });
+
+    const vectorQuery = indexTestHelper
+      .query(collectionReference)
+      .where('foo', '==', 'bar')
+      .findNearest('embedding', [10, 10], {
+        limit: 3,
+        distanceMeasure: 'COSINE',
+      });
+
+    const res = await vectorQuery.get();
+
+    expect(res.size).to.equal(3);
+
+    if (res.docs[0].get('embedding').isEqual(FieldValue.vector([1, 1]))) {
+      expect(
+        res.docs[1].get('embedding').isEqual(FieldValue.vector([100, 100]))
+      ).to.be.true;
+    } else {
+      expect(
+        res.docs[0].get('embedding').isEqual(FieldValue.vector([100, 100]))
+      ).to.be.true;
+      expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 1]))).to
+        .be.true;
+    }
+
+    expect(
+      res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0])) ||
+        res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0]))
+    ).to.be.true;
+  });
+
+  it('supports findNearest by DOT_PRODUCT distance', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionReference = await indexTestHelper.createTestDocs([
+      {foo: 'bar'},
+      {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
+      {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+      {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([20, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionReference)
+      .where('foo', '==', 'bar')
+      .findNearest('embedding', [10, 10], {
+        limit: 3,
+        distanceMeasure: 'DOT_PRODUCT',
+      });
+
+    const res = await vectorQuery.get();
+    expect(res.size).to.equal(3);
+    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([100, 100])))
+      .to.be.true;
+    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([20, 0]))).to
+      .be.true;
+    expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([10, 0]))).to
+      .be.true;
+  });
+
+  it('findNearest works with converters', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    class FooDistance {
+      constructor(
+        readonly foo: string,
+        readonly embedding: Array<number>
+      ) {}
+    }
+
+    const fooConverter = {
+      toFirestore(d: FooDistance): DocumentData {
+        return {title: d.foo, embedding: FieldValue.vector(d.embedding)};
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot): FooDistance {
+        const data = snapshot.data();
+        return new FooDistance(data.foo, data.embedding.toArray());
+      },
+    };
+
+    const collectionRef = await indexTestHelper.createTestDocs([
+      {foo: 'bar', embedding: FieldValue.vector([5, 5])},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionRef)
+      .withConverter(fooConverter)
+      .where('foo', '==', 'bar')
+      .findNearest('embedding', [10, 10], {
+        limit: 3,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+
+    const res = await vectorQuery.get();
+
+    expect(res.size).to.equal(1);
+    expect(res.docs[0].data().foo).to.equal('bar');
+    expect(res.docs[0].data().embedding).to.deep.equal([5, 5]);
+  });
+
+  it('supports findNearest skipping fields of wrong types', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionRef = await indexTestHelper.createTestDocs([
+      {foo: 'bar'},
+
+      // These documents are skipped because it is not really a vector value
+      {foo: 'bar', embedding: [10, 10]},
+      {foo: 'bar', embedding: 'not actually a vector'},
+      {foo: 'bar', embedding: null},
+
+      // Actual vector values
+      {foo: 'bar', embedding: FieldValue.vector([9, 9])},
+      {foo: 'bar', embedding: FieldValue.vector([50, 50])},
+      {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionRef)
+      .where('foo', '==', 'bar')
+      .findNearest('embedding', [10, 10], {
+        limit: 100, // Intentionally large to get all matches.
+        distanceMeasure: 'EUCLIDEAN',
+      });
+
+    const res = await vectorQuery.get();
+    expect(res.size).to.equal(3);
+    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([9, 9]))).to
+      .be.true;
+    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([50, 50]))).to
+      .be.true;
+    expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([100, 100])))
+      .to.be.true;
+  });
+
+  it('findNearest ignores mismatching dimensions', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionRef = await indexTestHelper.createTestDocs([
+      {foo: 'bar'},
+
+      // Vectors with dimension mismatch
+      {foo: 'bar', embedding: FieldValue.vector([10])},
+
+      // Vectors with dimension match
+      {foo: 'bar', embedding: FieldValue.vector([9, 9])},
+      {foo: 'bar', embedding: FieldValue.vector([50, 50])},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionRef)
+      .where('foo', '==', 'bar')
+      .findNearest('embedding', [10, 10], {
+        limit: 3,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+
+    const res = await vectorQuery.get();
+    expect(res.size).to.equal(2);
+    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([9, 9]))).to
+      .be.true;
+    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([50, 50]))).to
+      .be.true;
+  });
+
+  it('supports findNearest on non-existent field', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionRef = await indexTestHelper.createTestDocs([
+      {foo: 'bar'},
+      {foo: 'bar', otherField: [10, 10]},
+      {foo: 'bar', otherField: 'not actually a vector'},
+      {foo: 'bar', otherField: null},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionRef)
+      .where('foo', '==', 'bar')
+      .findNearest('embedding', [10, 10], {
+        limit: 3,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+
+    const res = await vectorQuery.get();
+
+    expect(res.size).to.equal(0);
+  });
+
+  it('supports findNearest on vector nested in a map', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionReference = await indexTestHelper.createTestDocs([
+      {nested: {foo: 'bar'}},
+      {nested: {foo: 'xxx', embedding: FieldValue.vector([10, 10])}},
+      {nested: {foo: 'bar', embedding: FieldValue.vector([1, 1])}},
+      {nested: {foo: 'bar', embedding: FieldValue.vector([10, 0])}},
+      {nested: {foo: 'bar', embedding: FieldValue.vector([20, 0])}},
+      {nested: {foo: 'bar', embedding: FieldValue.vector([100, 100])}},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionReference)
+      .findNearest('nested.embedding', [10, 10], {
+        limit: 3,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+
+    const res = await vectorQuery.get();
+    expect(res.size).to.equal(3);
+    expect(
+      res.docs[0].get('nested.embedding').isEqual(FieldValue.vector([10, 10]))
+    ).to.be.true;
+    expect(
+      res.docs[1].get('nested.embedding').isEqual(FieldValue.vector([10, 0]))
+    ).to.be.true;
+    expect(
+      res.docs[2].get('nested.embedding').isEqual(FieldValue.vector([1, 1]))
+    ).to.be.true;
+  });
+
+  it('supports findNearest with select to exclude vector data in response', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionReference = await indexTestHelper.createTestDocs([
+      {foo: 1},
+      {foo: 2, embedding: FieldValue.vector([10, 10])},
+      {foo: 3, embedding: FieldValue.vector([1, 1])},
+      {foo: 4, embedding: FieldValue.vector([10, 0])},
+      {foo: 5, embedding: FieldValue.vector([20, 0])},
+      {foo: 6, embedding: FieldValue.vector([100, 100])},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionReference)
+      .where('foo', 'in', [1, 2, 3, 4, 5, 6])
+      .select('foo')
+      .findNearest('embedding', [10, 10], {
+        limit: 10,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+
+    const res = await vectorQuery.get();
+    expect(res.size).to.equal(5);
+    expect(res.docs[0].get('foo')).to.equal(2);
+    expect(res.docs[1].get('foo')).to.equal(4);
+    expect(res.docs[2].get('foo')).to.equal(3);
+    expect(res.docs[3].get('foo')).to.equal(5);
+    expect(res.docs[4].get('foo')).to.equal(6);
+
+    res.docs.forEach(ds => expect(ds.get('embedding')).to.be.undefined);
+  });
+
+  it('supports findNearest limits', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const embeddingVector = [];
+    const queryVector = [];
+    for (let i = 0; i < 2048; i++) {
+      embeddingVector.push(i + 1);
+      queryVector.push(i - 1);
+    }
+
+    const collectionReference = await indexTestHelper.createTestDocs([
+      {embedding: FieldValue.vector(embeddingVector)},
+    ]);
+
+    const vectorQuery = indexTestHelper
+      .query(collectionReference)
+      .findNearest('embedding', queryVector, {
+        limit: 1000,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+
+    const res = await vectorQuery.get();
+    expect(res.size).to.equal(1);
+    expect(
+      (res.docs[0].get('embedding') as VectorValue).toArray()
+    ).to.deep.equal(embeddingVector);
   });
 
   it('supports !=', async () => {
@@ -2945,6 +3377,61 @@ describe('Query class', () => {
       });
 
       unsubscribe();
+    });
+
+    it('orders vector field correctly', async () => {
+      const docsInOrder = [
+        {embedding: [1, 2, 3, 4, 5, 6]},
+        {embedding: [100]},
+        {embedding: FieldValue.vector([Number.NEGATIVE_INFINITY])},
+        {embedding: FieldValue.vector([-100])},
+        {embedding: FieldValue.vector([100])},
+        {embedding: FieldValue.vector([Number.POSITIVE_INFINITY])},
+        {embedding: FieldValue.vector([1, 2])},
+        {embedding: FieldValue.vector([2, 2])},
+        {embedding: FieldValue.vector([1, 2, 3])},
+        {embedding: FieldValue.vector([1, 2, 3, 4])},
+        {embedding: FieldValue.vector([1, 2, 3, 4, 5])},
+        {embedding: FieldValue.vector([1, 2, 100, 4, 4])},
+        {embedding: FieldValue.vector([100, 2, 3, 4, 5])},
+        {embedding: {HELLO: 'WORLD'}},
+        {embedding: {hello: 'world'}},
+      ];
+
+      const expectedSnapshots = [];
+      const expectedChanges = [];
+
+      for (let i = 0; i < docsInOrder.length; i++) {
+        const dr = await randomCol.add(docsInOrder[i]);
+        expectedSnapshots.push(snapshot(dr.id, docsInOrder[i]));
+        expectedChanges.push(added(dr.id, docsInOrder[i]));
+      }
+
+      const orderedQuery = randomCol.orderBy('embedding');
+
+      const unsubscribe = orderedQuery.onSnapshot(
+        snapshot => {
+          currentDeferred.resolve(snapshot);
+        },
+        err => {
+          currentDeferred.reject!(err);
+        }
+      );
+
+      const watchSnapshot = await waitForSnapshot();
+      unsubscribe();
+
+      const getSnapshot = await orderedQuery.get();
+
+      snapshotsEqual(watchSnapshot, {
+        docs: getSnapshot.docs,
+        docChanges: getSnapshot.docChanges(),
+      });
+
+      snapshotsEqual(watchSnapshot, {
+        docs: expectedSnapshots,
+        docChanges: expectedChanges,
+      });
     });
   });
 
@@ -6162,13 +6649,13 @@ describe('Bundle building', () => {
     expect(namedQuery).to.deep.equal({
       name: 'query',
       readTime: snap.readTime.toProto().timestampValue,
-      // TODO(wuandy): Fix query.toProto to skip undefined fields, so we can stop using `extend` here.
+      // TODO(wuandy): Fix query._toProto to skip undefined fields, so we can stop using `extend` here.
       bundledQuery: extend(
         true,
         {},
         {
-          parent: query.toProto().parent,
-          structuredQuery: query.toProto().structuredQuery,
+          parent: query._toProto().parent,
+          structuredQuery: query._toProto().structuredQuery,
         }
       ),
     });
@@ -6230,8 +6717,8 @@ describe('Bundle building', () => {
         true,
         {},
         {
-          parent: limitQuery.toProto().parent,
-          structuredQuery: limitQuery.toProto().structuredQuery,
+          parent: limitQuery._toProto().parent,
+          structuredQuery: limitQuery._toProto().structuredQuery,
           limitType: 'FIRST',
         }
       ),
@@ -6248,8 +6735,8 @@ describe('Bundle building', () => {
         true,
         {},
         {
-          parent: q.toProto().parent,
-          structuredQuery: q.toProto().structuredQuery,
+          parent: q._toProto().parent,
+          structuredQuery: q._toProto().structuredQuery,
           limitType: 'LAST',
         }
       ),

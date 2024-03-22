@@ -22,6 +22,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 
 import {FieldPath} from './path';
 import {Serializer, validateUserInput} from './serializer';
+import {isPrimitiveArrayEqual} from './util';
 import {
   invalidArgumentMessage,
   validateMinNumberOfArguments,
@@ -29,6 +30,58 @@ import {
 } from './validate';
 
 import api = proto.google.firestore.v1;
+
+/**
+ * Represent a vector type in Firestore documents.
+ * Create an instance with {@link FieldValue.vector}.
+ *
+ * @class VectorValue
+ */
+export class VectorValue implements firestore.VectorValue {
+  private readonly _values: number[];
+
+  /**
+   * @private
+   * @internal
+   */
+  constructor(values: number[] | undefined) {
+    // Making a copy of the parameter.
+    this._values = (values || []).map(n => n);
+  }
+
+  /**
+   * Returns a copy of the raw number array form of the vector.
+   */
+  public toArray(): number[] {
+    return this._values.map(n => n);
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _toProto(serializer: Serializer): api.IValue {
+    return serializer.encodeVector(this._values);
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  static _fromProto(valueArray: api.IValue): VectorValue {
+    const values = valueArray.arrayValue?.values?.map(v => {
+      return v.doubleValue!;
+    });
+    return new VectorValue(values);
+  }
+
+  /**
+   * Returns `true` if the two VectorValue has the same raw number arrays, returns `false` otherwise.
+   */
+  isEqual(other: VectorValue): boolean {
+    return isPrimitiveArrayEqual(this._values, other._values);
+  }
+}
 
 /**
  * Sentinel values that can be used when writing documents with set(), create()
@@ -39,6 +92,17 @@ import api = proto.google.firestore.v1;
 export class FieldValue implements firestore.FieldValue {
   /** @private */
   constructor() {}
+
+  /**
+   * Creates a new `VectorValue` constructed with a copy of the given array of numbers.
+   *
+   * @param values - Create a `VectorValue` instance with a copy of this array of numbers.
+   *
+   * @returns A new `VectorValue` constructed with a copy of the given array of numbers.
+   */
+  static vector(values?: number[]): VectorValue {
+    return new VectorValue(values);
+  }
 
   /**
    * Returns a sentinel for use with update() or set() with {merge:true} to mark
@@ -220,7 +284,7 @@ export class FieldValue implements firestore.FieldValue {
  * An internal interface shared by all field transforms.
  *
  * A 'FieldTransform` subclass should implement '.includeInDocumentMask',
- * '.includeInDocumentTransform' and 'toProto' (if '.includeInDocumentTransform'
+ * '.includeInDocumentTransform' and '_toProto' (if '.includeInDocumentTransform'
  * is 'true').
  *
  * @private

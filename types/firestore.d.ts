@@ -2029,6 +2029,40 @@ declare namespace FirebaseFirestore {
     ): AggregateQuery<T, AppModelType, DbModelType>;
 
     /**
+     * Returns a query that can perform vector distance (similarity) search with given parameters.
+     *
+     * The returned query, when executed, performs a distance (similarity) search on the specified
+     * `vectorField` against the given `queryVector` and returns the top documents that are closest
+     * to the `queryVector`.
+     *
+     * Only documents whose `vectorField` field is a `VectorValue` of the same dimension as `queryVector`
+     * participate in the query, all other documents are ignored.
+     *
+     * @example
+     * ```typescript
+     * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
+     * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
+     *
+     * const querySnapshot = await aggregateQuery.get();
+     * querySnapshot.forEach(...);
+     * ```
+     *
+     * @param vectorField The field path this vector query executes on.
+     * @param queryVector The vector value used to measure the distance from `vectorField` values in the documents.
+     * @param options Options control the vector query. `limit` specifies the upper bound of documents to return, must
+     * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is
+     * calculated when performing the query.
+     */
+    findNearest(
+      vectorField: string | FieldPath,
+      queryVector: VectorValue | Array<number>,
+      options: {
+        limit: number;
+        distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
+      }
+    ): VectorQuery<AppModelType, DbModelType>;
+
+    /**
      * Returns true if this `Query` is equal to the provided one.
      *
      * @param other The `Query` to compare against.
@@ -2115,6 +2149,68 @@ declare namespace FirebaseFirestore {
      * @return true if this `QuerySnapshot` is equal to the provided one.
      */
     isEqual(other: QuerySnapshot<AppModelType, DbModelType>): boolean;
+  }
+
+  /**
+   * A `VectorQuerySnapshot` contains zero or more `QueryDocumentSnapshot` objects
+   * representing the results of a query. The documents can be accessed as an
+   * array via the `docs` property or enumerated using the `forEach` method. The
+   * number of documents can be determined via the `empty` and `size`
+   * properties.
+   */
+  export class VectorQuerySnapshot<
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData,
+  > {
+    private constructor();
+
+    /**
+     * The query on which you called `get` in order to get this
+     * `VectorQuerySnapshot`.
+     */
+    readonly query: VectorQuery<AppModelType, DbModelType>;
+
+    /** An array of all the documents in the QuerySnapshot. */
+    readonly docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>>;
+
+    /** The number of documents in the QuerySnapshot. */
+    readonly size: number;
+
+    /** True if there are no documents in the QuerySnapshot. */
+    readonly empty: boolean;
+
+    /** The time this query snapshot was obtained. */
+    readonly readTime: Timestamp;
+
+    /**
+     * Returns an array of the documents changes since the last snapshot. If
+     * this is the first snapshot, all documents will be in the list as added
+     * changes.
+     */
+    docChanges(): DocumentChange<AppModelType, DbModelType>[];
+
+    /**
+     * Enumerates all of the documents in the QuerySnapshot.
+     *
+     * @param callback A callback to be called with a `DocumentSnapshot` for
+     * each document in the snapshot.
+     * @param thisArg The `this` binding for the callback.
+     */
+    forEach(
+      callback: (
+        result: QueryDocumentSnapshot<AppModelType, DbModelType>
+      ) => void,
+      thisArg?: any
+    ): void;
+
+    /**
+     * Returns true if the document data in this `VectorQuerySnapshot` is equal to the
+     * provided one.
+     *
+     * @param other The `VectorQuerySnapshot` to compare against.
+     * @return true if this `VectorQuerySnapshot` is equal to the provided one.
+     */
+    isEqual(other: VectorQuerySnapshot<AppModelType, DbModelType>): boolean;
   }
 
   /**
@@ -2568,6 +2664,57 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * A query that finds the document whose vector fields are closest to a certain vector.
+   */
+  export class VectorQuery<
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData,
+  > {
+    private constructor();
+
+    /** The query whose results participants in the distance search. */
+    readonly query: Query<AppModelType, DbModelType>;
+
+    /**
+     * Executes this query.
+     *
+     * @return A promise that will be resolved with the results of the query.
+     */
+    get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>>;
+
+    /**
+     * Compares this object with the given object for equality.
+     *
+     * This object is considered "equal" to the other object if and only if
+     * `other` performs the same vector distance search as this `VectorQuery` and
+     * the underlying Query of `other` compares equal to that of this object
+     * using `Query.isEqual()`.
+     *
+     * @param other The object to compare to this object for equality.
+     * @return `true` if this object is "equal" to the given object, as
+     * defined above, or `false` otherwise.
+     */
+    isEqual(other: VectorQuery<AppModelType, DbModelType>): boolean;
+  }
+
+  /**
+   * Represent a vector type in Firestore documents.
+   */
+  export class VectorValue {
+    private constructor(values: number[] | undefined);
+
+    /**
+     * Returns a copy of the raw number array form of the vector.
+     */
+    toArray(): number[];
+
+    /**
+     * Returns true if the two `VectorValue` has the same raw number arrays, returns false otherwise.
+     */
+    isEqual(other: VectorValue): boolean;
+  }
+
+  /**
    * Sentinel values that can be used when writing document fields with set(),
    * create() or update().
    */
@@ -2636,6 +2783,11 @@ declare namespace FirebaseFirestore {
      * update().
      */
     static arrayRemove(...elements: any[]): FieldValue;
+
+    /**
+     * @return A new `VectorValue` constructed with a copy of the given array of number.
+     */
+    static vector(values?: number[]): VectorValue;
 
     /**
      * Returns true if this `FieldValue` is equal to the provided one.

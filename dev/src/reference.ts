@@ -16,18 +16,21 @@
 
 import * as firestore from '@google-cloud/firestore';
 import * as assert from 'assert';
-import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 import {GoogleError} from 'google-gax';
+import {Duplex, Readable, Transform} from 'stream';
 
 import * as protos from '../protos/firestore_v1_proto_api';
 
+import {Aggregate, AggregateField, AggregateSpec} from './aggregate';
 import {
   DocumentSnapshot,
   DocumentSnapshotBuilder,
   QueryDocumentSnapshot,
 } from './document';
 import {DocumentChange} from './document-change';
+import {VectorValue} from './field-value';
+import {CompositeFilter, Filter, UnaryFilter} from './filter';
 import {Firestore} from './index';
 import {logger} from './logger';
 import {compare} from './order';
@@ -45,7 +48,9 @@ import {
   autoId,
   Deferred,
   getTotalTimeout,
+  isArrayEqual,
   isPermanentRpcError,
+  isPrimitiveArrayEqual,
   mapToArray,
   requestTag,
   wrapError,
@@ -60,8 +65,6 @@ import {
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 import api = protos.google.firestore.v1;
-import {CompositeFilter, Filter, UnaryFilter} from './filter';
-import {AggregateField, Aggregate, AggregateSpec} from './aggregate';
 import {ExplainMetrics, ExplainResults} from './query-profile';
 
 /**
@@ -1188,6 +1191,273 @@ export class QuerySnapshot<
   }
 }
 
+/**
+ * A `VectorQuerySnapshot` contains zero or more `QueryDocumentSnapshot` objects
+ * representing the results of a query. The documents can be accessed as an
+ * array via the `docs` property or enumerated using the `forEach` method. The
+ * number of documents can be determined via the `empty` and `size`
+ * properties.
+ */
+export class VectorQuerySnapshot<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> implements firestore.VectorQuerySnapshot<AppModelType, DbModelType>
+{
+  private _materializedDocs: Array<
+    QueryDocumentSnapshot<AppModelType, DbModelType>
+  > | null = null;
+  private _materializedChanges: Array<
+    DocumentChange<AppModelType, DbModelType>
+  > | null = null;
+  private _docs:
+    | (() => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>)
+    | null = null;
+  private _changes:
+    | (() => Array<DocumentChange<AppModelType, DbModelType>>)
+    | null = null;
+
+  /**
+   * @private
+   * @internal
+   *
+   * @param _query - The originating query.
+   * @param _readTime - The time when this query snapshot was obtained.
+   * @param _size - The number of documents in the result set.
+   * @param docs - A callback returning a sorted array of documents matching
+   * this query
+   * @param changes - A callback returning a sorted array of document change
+   * events for this snapshot.
+   */
+  constructor(
+    private readonly _query: VectorQuery<AppModelType, DbModelType>,
+    private readonly _readTime: Timestamp,
+    private readonly _size: number,
+    docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+  ) {
+    this._docs = docs;
+    this._changes = changes;
+  }
+
+  /**
+   * The `VectorQuery` on which you called get() in order to get this
+   * `VectorQuerySnapshot`.
+   *
+   * @readonly
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   *
+   * query.findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"})
+   *   .get().then(querySnapshot => {
+   *     console.log(`Returned first batch of results`);
+   *     let query = querySnapshot.query;
+   *     return query.offset(10).get();
+   *   }).then(() => {
+   *   console.log(`Returned second batch of results`);
+   *   });
+   * ```
+   */
+  get query(): VectorQuery<AppModelType, DbModelType> {
+    return this._query;
+  }
+
+  /**
+   * An array of all the documents in this `VectorQuerySnapshot`.
+   *
+   * @readonly
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
+   *
+   * query.get().then(querySnapshot => {
+   *   let docs = querySnapshot.docs;
+   *   for (let doc of docs) {
+   *     console.log(`Document found at path: ${doc.ref.path}`);
+   *   }
+   * });
+   * ```
+   */
+  get docs(): Array<QueryDocumentSnapshot<AppModelType, DbModelType>> {
+    if (this._materializedDocs) {
+      return this._materializedDocs!;
+    }
+    this._materializedDocs = this._docs!();
+    this._docs = null;
+    return this._materializedDocs!;
+  }
+
+  /**
+   * `true` if there are no documents in the `VectorQuerySnapshot`.
+   *
+   * @readonly
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
+   *
+   * query.get().then(querySnapshot => {
+   *   if (querySnapshot.empty) {
+   *     console.log('No documents found.');
+   *   }
+   * });
+   * ```
+   */
+  get empty(): boolean {
+    return this._size === 0;
+  }
+
+  /**
+   * The number of documents in the `VectorQuerySnapshot`.
+   *
+   * @readonly
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
+   *
+   * query.get().then(querySnapshot => {
+   *   console.log(`Found ${querySnapshot.size} documents.`);
+   * });
+   * ```
+   */
+  get size(): number {
+    return this._size;
+  }
+
+  /**
+   * The time this `VectorQuerySnapshot` was obtained.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
+   *
+   * query.get().then((querySnapshot) => {
+   *   let readTime = querySnapshot.readTime;
+   *   console.log(`Query results returned at '${readTime.toDate()}'`);
+   * });
+   * ```
+   */
+  get readTime(): Timestamp {
+    return this._readTime;
+  }
+
+  /**
+   * Returns an array of the documents changes since the last snapshot. If
+   * this is the first snapshot, all documents will be in the list as added
+   * changes.
+   *
+   * @returns An array of the documents changes since the last snapshot.
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
+   *
+   * query.get().then(querySnapshot => {
+   *   let changes = querySnapshot.docChanges();
+   *   for (let change of changes) {
+   *     console.log(`A document was ${change.type}.`);
+   *   }
+   * });
+   * ```
+   */
+  docChanges(): Array<DocumentChange<AppModelType, DbModelType>> {
+    if (this._materializedChanges) {
+      return this._materializedChanges!;
+    }
+    this._materializedChanges = this._changes!();
+    this._changes = null;
+    return this._materializedChanges!;
+  }
+
+  /**
+   * Enumerates all of the documents in the `VectorQuerySnapshot`. This is a convenience
+   * method for running the same callback on each {@link QueryDocumentSnapshot}
+   * that is returned.
+   *
+   * @param callback - A callback to be called with a
+   * {@link QueryDocumentSnapshot} for each document in
+   * the snapshot.
+   * @param thisArg - The `this` binding for the callback..
+   *
+   * @example
+   * ```
+   * let query = firestore.collection('col')
+   *   .findNearest("embedding", [0, 0], {limit: 10, distanceMeasure: "EUCLIDEAN"});
+   *
+   * query.get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Document found at path: ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   * ```
+   */
+  forEach(
+    callback: (
+      result: firestore.QueryDocumentSnapshot<AppModelType, DbModelType>
+    ) => void,
+    thisArg?: unknown
+  ): void {
+    validateFunction('callback', callback);
+
+    for (const doc of this.docs) {
+      callback.call(thisArg, doc);
+    }
+  }
+
+  /**
+   * Returns true if the document data in this `VectorQuerySnapshot` is equal to the
+   * provided value.
+   *
+   * @param other - The value to compare against.
+   * @returns true if this `VectorQuerySnapshot` is equal to the provided
+   * value.
+   */
+  isEqual(
+    other: firestore.VectorQuerySnapshot<AppModelType, DbModelType>
+  ): boolean {
+    // Since the read time is different on every query read, we explicitly
+    // ignore all metadata in this comparison.
+
+    if (this === other) {
+      return true;
+    }
+
+    if (!(other instanceof VectorQuerySnapshot)) {
+      return false;
+    }
+
+    if (this._size !== other._size) {
+      return false;
+    }
+
+    if (!this._query.isEqual(other._query)) {
+      return false;
+    }
+
+    if (this._materializedDocs && !this._materializedChanges) {
+      // If we have only materialized the documents, we compare them first.
+      return (
+        isArrayEqual(this.docs, other.docs) &&
+        isArrayEqual(this.docChanges(), other.docChanges())
+      );
+    }
+
+    // Otherwise, we compare the changes first as we expect there to be fewer.
+    return (
+      isArrayEqual(this.docChanges(), other.docChanges()) &&
+      isArrayEqual(this.docs, other.docs)
+    );
+  }
+}
+
 /** Internal representation of a query cursor before serialization. */
 interface QueryCursor {
   before: boolean;
@@ -1405,6 +1675,295 @@ export class QueryOptions<
   }
 }
 
+class QueryUtil<
+  AppModelType,
+  DbModelType extends firestore.DocumentData,
+  Template extends
+    | Query<AppModelType, DbModelType>
+    | VectorQuery<AppModelType, DbModelType>,
+> {
+  constructor(
+    /** @private */
+    readonly _firestore: Firestore,
+    /** @private */
+    readonly _queryOptions: QueryOptions<AppModelType, DbModelType>,
+    /** @private */
+    readonly _serializer: Serializer
+  ) {}
+
+  _get(
+    query: Template,
+    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    retryWithCursor = true
+  ): Promise<
+    | QuerySnapshot<AppModelType, DbModelType>
+    | VectorQuerySnapshot<AppModelType, DbModelType>
+  > {
+    const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
+
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    return new Promise((resolve, reject) => {
+      let readTime: Timestamp;
+
+      this._stream(query, transactionIdOrReadTime, retryWithCursor)
+        .on('error', err => {
+          reject(wrapError(err, stack));
+        })
+        .on('data', result => {
+          readTime = result.readTime;
+          if (result.document) {
+            docs.push(result.document);
+          }
+        })
+        .on('end', () => {
+          if (this._queryOptions.limitType === LimitType.Last) {
+            // The results for limitToLast queries need to be flipped since
+            // we reversed the ordering constraints before sending the query
+            // to the backend.
+            docs.reverse();
+          }
+
+          resolve(
+            query._createSnapshot(
+              readTime,
+              docs.length,
+              () => docs,
+              () => {
+                const changes: Array<
+                  DocumentChange<AppModelType, DbModelType>
+                > = [];
+                for (let i = 0; i < docs.length; ++i) {
+                  changes.push(new DocumentChange('added', docs[i], -1, i));
+                }
+                return changes;
+              }
+            )
+          );
+        });
+    });
+  }
+
+  // This method exists solely to enable unit tests to mock it.
+  _isPermanentRpcError(err: GoogleError, methodName: string): boolean {
+    return isPermanentRpcError(err, methodName);
+  }
+
+  _hasRetryTimedOut(methodName: string, startTime: number): boolean {
+    const totalTimeout = getTotalTimeout(methodName);
+    if (totalTimeout === 0) {
+      return false;
+    }
+
+    return Date.now() - startTime >= totalTimeout;
+  }
+
+  stream(query: Template): NodeJS.ReadableStream {
+    if (this._queryOptions.limitType === LimitType.Last) {
+      throw new Error(
+        'Query results for queries that include limitToLast() ' +
+          'constraints cannot be streamed. Use Query.get() instead.'
+      );
+    }
+
+    const responseStream = this._stream(query);
+    const transform = new Transform({
+      objectMode: true,
+      transform(chunk, encoding, callback) {
+        callback(undefined, chunk.document);
+      },
+    });
+
+    responseStream.pipe(transform);
+    responseStream.on('error', e => transform.destroy(e));
+    return transform;
+  }
+
+  _stream(
+    query: Template,
+    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    retryWithCursor = true,
+    explainOptions?: firestore.ExplainOptions
+  ): NodeJS.ReadableStream {
+    const tag = requestTag();
+    const startTime = Date.now();
+    const isExplain = explainOptions !== undefined;
+
+    let lastReceivedDocument: QueryDocumentSnapshot<
+      AppModelType,
+      DbModelType
+    > | null = null;
+
+    let backendStream: Duplex;
+    const stream = new Transform({
+      objectMode: true,
+      transform: (proto, enc, callback) => {
+        if (proto === NOOP_MESSAGE) {
+          callback(undefined);
+          return;
+        }
+
+        const output: {
+          readTime?: Timestamp;
+          document?: QueryDocumentSnapshot<AppModelType, DbModelType>;
+          explainMetrics?: ExplainMetrics;
+        } = {};
+
+        if (proto.readTime) {
+          output.readTime = Timestamp.fromProto(proto.readTime);
+        }
+
+        if (proto.document) {
+          const document = this._firestore.snapshot_(
+            proto.document,
+            proto.readTime
+          );
+          const finalDoc = new DocumentSnapshotBuilder<
+            AppModelType,
+            DbModelType
+          >(document.ref.withConverter(this._queryOptions.converter));
+          // Recreate the QueryDocumentSnapshot with the DocumentReference
+          // containing the original converter.
+          finalDoc.fieldsProto = document._fieldsProto;
+          finalDoc.readTime = document.readTime;
+          finalDoc.createTime = document.createTime;
+          finalDoc.updateTime = document.updateTime;
+          lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<
+            AppModelType,
+            DbModelType
+          >;
+          output.document = lastReceivedDocument;
+        }
+
+        if (proto.explainMetrics) {
+          output.explainMetrics = ExplainMetrics.fromProto(
+            proto.explainMetrics,
+            this._serializer
+          );
+        }
+
+        callback(undefined, output);
+
+        if (proto.done) {
+          logger('QueryUtil._stream', tag, 'Trigger Logical Termination.');
+          backendStream.unpipe(stream);
+          backendStream.resume();
+          backendStream.end();
+          stream.end();
+        }
+      },
+    });
+
+    this._firestore
+      .initializeIfNeeded(tag)
+      .then(async () => {
+        // `toProto()` might throw an exception. We rely on the behavior of an
+        // async function to convert this exception into the rejected Promise we
+        // catch below.
+        let request = query._toProto(transactionIdOrReadTime, explainOptions);
+
+        let streamActive: Deferred<boolean>;
+        do {
+          streamActive = new Deferred<boolean>();
+          const methodName = 'runQuery';
+          backendStream = await this._firestore.requestStream(
+            methodName,
+            /* bidirectional= */ false,
+            request,
+            tag
+          );
+          backendStream.on('error', err => {
+            backendStream.unpipe(stream);
+
+            // If a non-transactional query failed, attempt to restart.
+            // Transactional queries are retried via the transaction runner.
+            // Explain queries are not retried with a cursor. That would produce
+            // incorrect/partial profiling results.
+            if (
+              !isExplain &&
+              !transactionIdOrReadTime &&
+              !this._isPermanentRpcError(err, 'runQuery')
+            ) {
+              logger(
+                'QueryUtil._stream',
+                tag,
+                'Query failed with retryable stream error:',
+                err
+              );
+
+              // Enqueue a "no-op" write into the stream and wait for it to be
+              // read by the downstream consumer. This ensures that all enqueued
+              // results in the stream are consumed, which will give us an accurate
+              // value for `lastReceivedDocument`.
+              stream.write(NOOP_MESSAGE, () => {
+                if (this._hasRetryTimedOut(methodName, startTime)) {
+                  logger(
+                    'QueryUtil._stream',
+                    tag,
+                    'Query failed with retryable stream error but the total retry timeout has exceeded.'
+                  );
+                  stream.destroy(err);
+                  streamActive.resolve(/* active= */ false);
+                } else if (lastReceivedDocument && retryWithCursor) {
+                  logger(
+                    'Query._stream',
+                    tag,
+                    'Query failed with retryable stream error and progress was made receiving ' +
+                      'documents, so the stream is being retried.'
+                  );
+
+                  // Restart the query but use the last document we received as
+                  // the query cursor. Note that we do not use backoff here. The
+                  // call to `requestStream()` will backoff should the restart
+                  // fail before delivering any results.
+                  if (this._queryOptions.requireConsistency) {
+                    request = query
+                      .startAfter(lastReceivedDocument)
+                      ._toProto(lastReceivedDocument.readTime);
+                  } else {
+                    request = query.startAfter(lastReceivedDocument)._toProto();
+                  }
+
+                  // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
+                  lastReceivedDocument = null;
+
+                  streamActive.resolve(/* active= */ true);
+                } else {
+                  logger(
+                    'QueryUtil._stream',
+                    tag,
+                    `Query failed with retryable stream error however either retryWithCursor="${retryWithCursor}", or ` +
+                      'no progress was made receiving documents, so the stream is being closed.'
+                  );
+                  stream.destroy(err);
+                  streamActive.resolve(/* active= */ false);
+                }
+              });
+            } else {
+              logger(
+                'QueryUtil._stream',
+                tag,
+                'Query failed with stream error:',
+                err
+              );
+              stream.destroy(err);
+              streamActive.resolve(/* active= */ false);
+            }
+          });
+          backendStream.on('end', () => {
+            streamActive.resolve(/* active= */ false);
+          });
+          backendStream.resume();
+          backendStream.pipe(stream);
+        } while (await streamActive.promise);
+      })
+      .catch(e => stream.destroy(e));
+
+    return stream;
+  }
+}
+
 /**
  * A Query refers to a query which you can read or stream from. You can also
  * construct refined Query objects by adding filters and ordering.
@@ -1416,12 +1975,25 @@ export class Query<
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
 > implements firestore.Query<AppModelType, DbModelType>
 {
-  private readonly _serializer: Serializer;
+  /**
+   * @internal
+   * @private
+   **/
+  readonly _serializer: Serializer;
   /**
    * @internal
    * @private
    **/
   protected readonly _allowUndefined: boolean;
+  /**
+   * @internal
+   * @private
+   **/
+  readonly _queryUtil: QueryUtil<
+    AppModelType,
+    DbModelType,
+    Query<AppModelType, DbModelType>
+  >;
 
   /**
    * @internal
@@ -1440,11 +2012,16 @@ export class Query<
      * @internal
      * @private
      **/
-    protected readonly _queryOptions: QueryOptions<AppModelType, DbModelType>
+    readonly _queryOptions: QueryOptions<AppModelType, DbModelType>
   ) {
     this._serializer = new Serializer(_firestore);
     this._allowUndefined =
       !!this._firestore._settings.ignoreUndefinedProperties;
+    this._queryUtil = new QueryUtil<
+      AppModelType,
+      DbModelType,
+      Query<AppModelType, DbModelType>
+    >(_firestore, _queryOptions, this._serializer);
   }
 
   /**
@@ -1919,6 +2496,64 @@ export class Query<
     return new AggregateQuery<T, AppModelType, DbModelType>(
       this,
       aggregateSpec
+    );
+  }
+
+  /**
+   * Returns a query that can perform vector distance (similarity) search with given parameters.
+   *
+   * The returned query, when executed, performs a distance (similarity) search on the specified
+   * `vectorField` against the given `queryVector` and returns the top documents that are closest
+   * to the `queryVector`.
+   *
+   * Only documents whose `vectorField` field is a {@link VectorValue} of the same dimension as `queryVector`
+   * participate in the query, all other documents are ignored.
+   *
+   * @example
+   * ```
+   * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
+   * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
+   *
+   * const querySnapshot = await aggregateQuery.get();
+   * querySnapshot.forEach(...);
+   * ```
+   *
+   * @param vectorField - A string or {@link FieldPath} specifying the vector field to search on.
+   * @param queryVector - The {@link VectorValue} used to measure the distance from `vectorField` values in the documents.
+   * @param options - Options control the vector query. `limit` specifies the upper bound of documents to return, must
+   * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is calculated
+   * when performing the query.
+   */
+  findNearest(
+    vectorField: string | firestore.FieldPath,
+    queryVector: firestore.VectorValue | Array<number>,
+    options: {
+      limit: number;
+      distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
+    }
+  ): VectorQuery<AppModelType, DbModelType> {
+    validateFieldPath('vectorField', vectorField);
+
+    if (options.limit <= 0) {
+      throw invalidArgumentMessage('options.limit', 'positive limit number');
+    }
+
+    if (
+      (Array.isArray(queryVector)
+        ? queryVector.length
+        : queryVector.toArray().length) === 0
+    ) {
+      throw invalidArgumentMessage(
+        'queryVector',
+        'vector size must be larger than 0'
+      );
+    }
+
+    return new VectorQuery<AppModelType, DbModelType>(
+      this,
+      vectorField,
+      queryVector,
+      new VectorQueryOptions(options.limit, options.distanceMeasure)
     );
   }
 
@@ -2435,51 +3070,9 @@ export class Query<
   _get(
     transactionIdOrReadTime?: Uint8Array | Timestamp
   ): Promise<QuerySnapshot<AppModelType, DbModelType>> {
-    const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
-
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    return new Promise((resolve, reject) => {
-      let readTime: Timestamp;
-
-      this._stream(transactionIdOrReadTime)
-        .on('error', err => {
-          reject(wrapError(err, stack));
-        })
-        .on('data', result => {
-          readTime = result.readTime;
-          if (result.document) {
-            docs.push(result.document);
-          }
-        })
-        .on('end', () => {
-          if (this._queryOptions.limitType === LimitType.Last) {
-            // The results for limitToLast queries need to be flipped since
-            // we reversed the ordering constraints before sending the query
-            // to the backend.
-            docs.reverse();
-          }
-
-          resolve(
-            new QuerySnapshot(
-              this,
-              readTime,
-              docs.length,
-              () => docs,
-              () => {
-                const changes: Array<
-                  DocumentChange<AppModelType, DbModelType>
-                > = [];
-                for (let i = 0; i < docs.length; ++i) {
-                  changes.push(new DocumentChange('added', docs[i], -1, i));
-                }
-                return changes;
-              }
-            )
-          );
-        });
-    });
+    return this._queryUtil._get(this, transactionIdOrReadTime) as Promise<
+      QuerySnapshot<AppModelType, DbModelType>
+    >;
   }
 
   /**
@@ -2504,24 +3097,7 @@ export class Query<
    * ```
    */
   stream(): NodeJS.ReadableStream {
-    if (this._queryOptions.limitType === LimitType.Last) {
-      throw new Error(
-        'Query results for queries that include limitToLast() ' +
-          'constraints cannot be streamed. Use Query.get() instead.'
-      );
-    }
-
-    const responseStream = this._stream();
-    const transform = new Transform({
-      objectMode: true,
-      transform(chunk, encoding, callback) {
-        callback(undefined, chunk.document);
-      },
-    });
-
-    responseStream.pipe(transform);
-    responseStream.on('error', e => transform.destroy(e));
-    return transform;
+    return this._queryUtil.stream(this);
   }
 
   /**
@@ -2608,7 +3184,7 @@ export class Query<
    * @internal
    * @returns Serialized JSON for the query.
    */
-  toProto(
+  _toProto(
     transactionIdOrReadTime?: Uint8Array | Timestamp,
     explainOptions?: firestore.ExplainOptions
   ): api.IRunQueryRequest {
@@ -2741,28 +3317,6 @@ export class Query<
   }
 
   /**
-   * @internal
-   * @private
-   * This method exists solely to enable unit tests to mock it.
-   */
-  _isPermanentRpcError(err: GoogleError, methodName: string): boolean {
-    return isPermanentRpcError(err, methodName);
-  }
-
-  /**
-   * @internal
-   * @private
-   */
-  _hasRetryTimedOut(methodName: string, startTime: number): boolean {
-    const totalTimeout = getTotalTimeout(methodName);
-    if (totalTimeout === 0) {
-      return false;
-    }
-
-    return Date.now() - startTime >= totalTimeout;
-  }
-
-  /**
    * Internal streaming method that accepts an optional transaction ID.
    *
    * @param transactionIdOrReadTime A transaction ID or the read time at which
@@ -2776,181 +3330,12 @@ export class Query<
     transactionIdOrReadTime?: Uint8Array | Timestamp,
     explainOptions?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
-    const tag = requestTag();
-    const startTime = Date.now();
-    const isExplain = explainOptions !== undefined;
-
-    let lastReceivedDocument: QueryDocumentSnapshot<
-      AppModelType,
-      DbModelType
-    > | null = null;
-
-    let backendStream: Duplex;
-    const stream = new Transform({
-      objectMode: true,
-      transform: (proto, enc, callback) => {
-        if (proto === NOOP_MESSAGE) {
-          callback(undefined);
-          return;
-        }
-
-        const output: {
-          readTime?: Timestamp;
-          document?: QueryDocumentSnapshot<AppModelType, DbModelType>;
-          explainMetrics?: ExplainMetrics;
-        } = {};
-
-        if (proto.readTime) {
-          output.readTime = Timestamp.fromProto(proto.readTime);
-        }
-
-        if (proto.document) {
-          const document = this.firestore.snapshot_(
-            proto.document,
-            proto.readTime
-          );
-          const finalDoc = new DocumentSnapshotBuilder<
-            AppModelType,
-            DbModelType
-          >(document.ref.withConverter(this._queryOptions.converter));
-          // Recreate the QueryDocumentSnapshot with the DocumentReference
-          // containing the original converter.
-          finalDoc.fieldsProto = document._fieldsProto;
-          finalDoc.readTime = document.readTime;
-          finalDoc.createTime = document.createTime;
-          finalDoc.updateTime = document.updateTime;
-          lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<
-            AppModelType,
-            DbModelType
-          >;
-          output.document = lastReceivedDocument;
-        }
-
-        if (proto.explainMetrics) {
-          output.explainMetrics = ExplainMetrics.fromProto(
-            proto.explainMetrics,
-            this._serializer
-          );
-        }
-
-        callback(undefined, output);
-
-        if (proto.done) {
-          logger('Query._stream', tag, 'Trigger Logical Termination.');
-          backendStream.unpipe(stream);
-          backendStream.resume();
-          backendStream.end();
-          stream.end();
-        }
-      },
-    });
-
-    this.firestore
-      .initializeIfNeeded(tag)
-      .then(async () => {
-        // `toProto()` might throw an exception. We rely on the behavior of an
-        // async function to convert this exception into the rejected Promise we
-        // catch below.
-        let request = this.toProto(transactionIdOrReadTime, explainOptions);
-
-        let streamActive: Deferred<boolean>;
-        do {
-          streamActive = new Deferred<boolean>();
-          const methodName = 'runQuery';
-          backendStream = await this._firestore.requestStream(
-            methodName,
-            /* bidirectional= */ false,
-            request,
-            tag
-          );
-          backendStream.on('error', err => {
-            backendStream.unpipe(stream);
-
-            // If a non-transactional query failed, attempt to restart.
-            // Transactional queries are retried via the transaction runner.
-            // Explain queries are not retried with a cursor. That would produce
-            // incorrect/partial profiling results.
-            if (
-              !isExplain &&
-              !transactionIdOrReadTime &&
-              !this._isPermanentRpcError(err, 'runQuery')
-            ) {
-              logger(
-                'Query._stream',
-                tag,
-                'Query failed with retryable stream error:',
-                err
-              );
-
-              // Enqueue a "no-op" write into the stream and wait for it to be
-              // read by the downstream consumer. This ensures that all enqueued
-              // results in the stream are consumed, which will give us an accurate
-              // value for `lastReceivedDocument`.
-              stream.write(NOOP_MESSAGE, () => {
-                if (this._hasRetryTimedOut(methodName, startTime)) {
-                  logger(
-                    'Query._stream',
-                    tag,
-                    'Query failed with retryable stream error but the total retry timeout has exceeded.'
-                  );
-                  stream.destroy(err);
-                  streamActive.resolve(/* active= */ false);
-                } else if (lastReceivedDocument) {
-                  logger(
-                    'Query._stream',
-                    tag,
-                    'Query failed with retryable stream error and progress was made receiving ' +
-                      'documents, so the stream is being retried.'
-                  );
-
-                  // Restart the query but use the last document we received as
-                  // the query cursor. Note that we do not use backoff here. The
-                  // call to `requestStream()` will backoff should the restart
-                  // fail before delivering any results.
-                  if (this._queryOptions.requireConsistency) {
-                    request = this.startAfter(lastReceivedDocument).toProto(
-                      lastReceivedDocument.readTime
-                    );
-                  } else {
-                    request = this.startAfter(lastReceivedDocument).toProto();
-                  }
-
-                  // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
-                  lastReceivedDocument = null;
-
-                  streamActive.resolve(/* active= */ true);
-                } else {
-                  logger(
-                    'Query._stream',
-                    tag,
-                    'Query failed with retryable stream error however no progress was made receiving ' +
-                      'documents, so the stream is being closed.'
-                  );
-                  stream.destroy(err);
-                  streamActive.resolve(/* active= */ false);
-                }
-              });
-            } else {
-              logger(
-                'Query._stream',
-                tag,
-                'Query failed with stream error:',
-                err
-              );
-              stream.destroy(err);
-              streamActive.resolve(/* active= */ false);
-            }
-          });
-          backendStream.on('end', () => {
-            streamActive.resolve(/* active= */ false);
-          });
-          backendStream.resume();
-          backendStream.pipe(stream);
-        } while (await streamActive.promise);
-      })
-      .catch(e => stream.destroy(e));
-
-    return stream;
+    return this._queryUtil._stream(
+      this,
+      transactionIdOrReadTime,
+      true,
+      explainOptions
+    );
   }
 
   /**
@@ -3115,6 +3500,27 @@ export class Query<
     return new Query<NewAppModelType, NewDbModelType>(
       this.firestore,
       this._queryOptions.withConverter(converter ?? defaultConverter())
+    );
+  }
+
+  /**
+   * Construct the resulting snapshot for this query with given documents.
+   *
+   * @private
+   * @internal
+   */
+  _createSnapshot(
+    readTime: Timestamp,
+    size: number,
+    docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+  ): QuerySnapshot<AppModelType, DbModelType> {
+    return new QuerySnapshot<AppModelType, DbModelType>(
+      this,
+      readTime,
+      size,
+      docs,
+      changes
     );
   }
 }
@@ -3603,7 +4009,7 @@ export class AggregateQuery<
     firestore
       .initializeIfNeeded(tag)
       .then(async () => {
-        // `toProto()` might throw an exception. We rely on the behavior of an
+        // `_toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
         const request = this.toProto(transactionIdOrReadTime, explainOptions);
@@ -3683,7 +4089,7 @@ export class AggregateQuery<
     transactionIdOrReadTime?: Uint8Array | Timestamp,
     explainOptions?: firestore.ExplainOptions
   ): api.IRunAggregationQueryRequest {
-    const queryProto = this._query.toProto();
+    const queryProto = this._query._toProto();
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
       structuredAggregationQuery: {
@@ -3896,6 +4302,216 @@ export class AggregateQuerySnapshot<
   }
 }
 
+class VectorQueryOptions {
+  constructor(
+    readonly limit: number,
+    readonly distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT'
+  ) {}
+
+  isEqual(other: VectorQueryOptions): boolean {
+    if (this === other) {
+      return true;
+    }
+    if (!(other instanceof VectorQueryOptions)) {
+      return false;
+    }
+
+    return (
+      this.limit === other.limit &&
+      this.distanceMeasure === other.distanceMeasure
+    );
+  }
+}
+
+/**
+ * A query that finds the documents whose vector fields are closest to a certain query vector.
+ * Create an instance of `VectorQuery` with {@link Query.findNearest}.
+ */
+export class VectorQuery<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> implements firestore.VectorQuery<AppModelType, DbModelType>
+{
+  /**
+   * @internal
+   * @private
+   **/
+  readonly _queryUtil: QueryUtil<
+    AppModelType,
+    DbModelType,
+    VectorQuery<AppModelType, DbModelType>
+  >;
+
+  /**
+   * @private
+   * @internal
+   */
+  constructor(
+    private readonly _query: Query<AppModelType, DbModelType>,
+    private readonly vectorField: string | firestore.FieldPath,
+    private readonly queryVector: firestore.VectorValue | Array<number>,
+    private readonly options: VectorQueryOptions
+  ) {
+    this._queryUtil = new QueryUtil<
+      AppModelType,
+      DbModelType,
+      VectorQuery<AppModelType, DbModelType>
+    >(_query._firestore, _query._queryOptions, _query._serializer);
+  }
+
+  /** The query whose results participants in the vector search. Filtering
+   * performed by the query will apply before the vector search.
+   **/
+  get query(): Query<AppModelType, DbModelType> {
+    return this._query;
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  private get _rawVectorField(): string {
+    return typeof this.vectorField === 'string'
+      ? this.vectorField
+      : this.vectorField.toString();
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  private get _rawQueryVector(): Array<number> {
+    return Array.isArray(this.queryVector)
+      ? this.queryVector
+      : this.queryVector.toArray();
+  }
+
+  /**
+   * Executes this vector search query.
+   *
+   * @returns A promise that will be resolved with the results of the query.
+   */
+  get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
+    return this._queryUtil._get(
+      this,
+      /*transactionId*/ undefined,
+      // VectorQuery cannot be retried with cursors as they do not support cursors yet.
+      /*retryWithCursor*/ false
+    ) as Promise<VectorQuerySnapshot<AppModelType, DbModelType>>;
+  }
+
+  /**
+   * Internal streaming method that accepts an optional transaction ID.
+   *
+   * @param transactionId - A transaction ID.
+   * @private
+   * @internal
+   * @returns A stream of document results.
+   */
+  _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
+    return this._queryUtil._stream(
+      this,
+      transactionId,
+      /*retryWithCursor*/ false
+    );
+  }
+
+  /**
+   * Internal method for serializing a query to its RunAggregationQuery proto
+   * representation with an optional transaction id.
+   *
+   * @private
+   * @internal
+   * @returns Serialized JSON for the query.
+   */
+  _toProto(
+    transactionIdOrReadTime?: Uint8Array | Timestamp
+  ): api.IRunQueryRequest {
+    const queryProto = this._query._toProto(transactionIdOrReadTime);
+
+    const queryVector = Array.isArray(this.queryVector)
+      ? new VectorValue(this.queryVector)
+      : (this.queryVector as VectorValue);
+
+    queryProto.structuredQuery!.findNearest = {
+      limit: {value: this.options.limit},
+      distanceMeasure: this.options.distanceMeasure,
+      vectorField: {
+        fieldPath: FieldPath.fromArgument(this.vectorField).formattedName,
+      },
+      queryVector: queryVector._toProto(this._query._serializer),
+    };
+    return queryProto;
+  }
+
+  /**
+   * Construct the resulting vector snapshot for this query with given documents.
+   *
+   * @private
+   * @internal
+   */
+  _createSnapshot(
+    readTime: Timestamp,
+    size: number,
+    docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+  ): VectorQuerySnapshot<AppModelType, DbModelType> {
+    return new VectorQuerySnapshot<AppModelType, DbModelType>(
+      this,
+      readTime,
+      size,
+      docs,
+      changes
+    );
+  }
+
+  /**
+   * Construct a new vector query whose result will start after To support stream().
+   * This now throws an exception because cursors are not supported from the backend for vector queries yet.
+   *
+   * @private
+   * @internal
+   * @returns Serialized JSON for the query.
+   */
+  startAfter(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+  ): VectorQuery<AppModelType, DbModelType> {
+    throw new Error(
+      'Unimplemented: Vector query does not support cursors yet.'
+    );
+  }
+
+  /**
+   * Compares this object with the given object for equality.
+   *
+   * This object is considered "equal" to the other object if and only if
+   * `other` performs the same vector distance search as this `VectorQuery` and
+   * the underlying Query of `other` compares equal to that of this object
+   * using `Query.isEqual()`.
+   *
+   * @param other - The object to compare to this object for equality.
+   * @returns `true` if this object is "equal" to the given object, as
+   * defined above, or `false` otherwise.
+   */
+  isEqual(other: firestore.VectorQuery<AppModelType, DbModelType>): boolean {
+    if (this === other) {
+      return true;
+    }
+    if (!(other instanceof VectorQuery)) {
+      return false;
+    }
+    if (!this.query.isEqual(other.query)) {
+      return false;
+    }
+    return (
+      this._rawVectorField === other._rawVectorField &&
+      isPrimitiveArrayEqual(this._rawQueryVector, other._rawQueryVector) &&
+      this.options.isEqual(other.options)
+    );
+  }
+}
+
 /**
  * Validates the input string as a field order direction.
  *
@@ -4002,32 +4618,6 @@ function validateQueryValue(
     allowTransforms: false,
     allowUndefined,
   });
-}
-
-/**
- * Verifies equality for an array of objects using the `isEqual` interface.
- *
- * @private
- * @internal
- * @param left Array of objects supporting `isEqual`.
- * @param right Array of objects supporting `isEqual`.
- * @return True if arrays are equal.
- */
-function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
-  left: T[],
-  right: T[]
-): boolean {
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  for (let i = 0; i < left.length; ++i) {
-    if (!left[i].isEqual(right[i])) {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 /**

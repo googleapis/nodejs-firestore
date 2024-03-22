@@ -6847,6 +6847,9 @@ export namespace google {
 
                 /** StructuredQuery limit */
                 limit?: (google.protobuf.IInt32Value|null);
+
+                /** StructuredQuery findNearest */
+                findNearest?: (google.firestore.v1.StructuredQuery.IFindNearest|null);
             }
 
             /** Represents a StructuredQuery. */
@@ -6881,6 +6884,9 @@ export namespace google {
 
                 /** StructuredQuery limit. */
                 public limit?: (google.protobuf.IInt32Value|null);
+
+                /** StructuredQuery findNearest. */
+                public findNearest?: (google.firestore.v1.StructuredQuery.IFindNearest|null);
 
                 /**
                  * Creates a StructuredQuery message from a plain object. Also converts values to their respective internal types.
@@ -7374,6 +7380,79 @@ export namespace google {
                      * @returns The default type url
                      */
                     public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a FindNearest. */
+                interface IFindNearest {
+
+                    /** FindNearest vectorField */
+                    vectorField?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                    /** FindNearest queryVector */
+                    queryVector?: (google.firestore.v1.IValue|null);
+
+                    /** FindNearest distanceMeasure */
+                    distanceMeasure?: (google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure|null);
+
+                    /** FindNearest limit */
+                    limit?: (google.protobuf.IInt32Value|null);
+                }
+
+                /** Represents a FindNearest. */
+                class FindNearest implements IFindNearest {
+
+                    /**
+                     * Constructs a new FindNearest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IFindNearest);
+
+                    /** FindNearest vectorField. */
+                    public vectorField?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                    /** FindNearest queryVector. */
+                    public queryVector?: (google.firestore.v1.IValue|null);
+
+                    /** FindNearest distanceMeasure. */
+                    public distanceMeasure: google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure;
+
+                    /** FindNearest limit. */
+                    public limit?: (google.protobuf.IInt32Value|null);
+
+                    /**
+                     * Creates a FindNearest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns FindNearest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.FindNearest;
+
+                    /**
+                     * Creates a plain object from a FindNearest message. Also converts values to other types if specified.
+                     * @param message FindNearest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.FindNearest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this FindNearest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for FindNearest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                namespace FindNearest {
+
+                    /** DistanceMeasure enum. */
+                    type DistanceMeasure =
+                        "DISTANCE_MEASURE_UNSPECIFIED"| "EUCLIDEAN"| "COSINE"| "DOT_PRODUCT";
                 }
             }
 
