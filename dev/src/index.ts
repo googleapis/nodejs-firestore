@@ -118,7 +118,7 @@ export type {
   PlanSummary,
   ExecutionStats,
   ExplainMetrics,
-  ExplainResults
+  ExplainResults,
 } from './query-profile';
 
 const libVersion = require('../../package.json').version;
