@@ -162,6 +162,47 @@ export function detectValueType(proto: ProtobufJsValue): string {
 }
 
 /**
+ * Detects the value kind from a Proto3 JSON `google.protobuf.Value` proto.
+ *
+ * @private
+ * @internal
+ * @param proto The `firestore.v1.Value` proto.
+ * @return The string value for 'valueType'.
+ */
+export function detectGoogleProtobufValueType(
+  proto: google.protobuf.IValue
+): string {
+  const detectedValues: string[] = [];
+
+  if (proto.nullValue !== undefined) {
+    detectedValues.push('nullValue');
+  }
+  if (proto.numberValue !== undefined) {
+    detectedValues.push('numberValue');
+  }
+  if (proto.stringValue !== undefined) {
+    detectedValues.push('stringValue');
+  }
+  if (proto.boolValue !== undefined) {
+    detectedValues.push('boolValue');
+  }
+  if (proto.structValue !== undefined) {
+    detectedValues.push('structValue');
+  }
+  if (proto.listValue !== undefined) {
+    detectedValues.push('listValue');
+  }
+
+  if (detectedValues.length !== 1) {
+    throw new Error(
+      `Unable to infer type value from '${JSON.stringify(proto)}'.`
+    );
+  }
+
+  return detectedValues[0];
+}
+
+/**
  * Converts a `firestore.v1.Value` in Proto3 JSON encoding into the
  * Protobuf JS format expected by this client.
  *

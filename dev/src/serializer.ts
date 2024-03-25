@@ -18,7 +18,7 @@ import {DocumentData} from '@google-cloud/firestore';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
-import {detectValueType} from './convert';
+import {detectGoogleProtobufValueType, detectValueType} from './convert';
 import {DeleteTransform, FieldTransform} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
@@ -285,6 +285,83 @@ export class Serializer {
         );
       }
     }
+  }
+
+  /**
+   * Decodes a google.protobuf.Value
+   *
+   * @private
+   * @internal
+   * @param proto A Google Protobuf 'Value'.
+   * @returns The converted JS type.
+   */
+  decodeGoogleProtobufValue(proto: proto.google.protobuf.IValue): unknown {
+    switch (detectGoogleProtobufValueType(proto)) {
+      case 'nullValue': {
+        return null;
+      }
+      case 'numberValue': {
+        return proto.numberValue;
+      }
+      case 'stringValue': {
+        return proto.stringValue;
+      }
+      case 'boolValue': {
+        return proto.boolValue;
+      }
+      case 'listValue': {
+        return this.decodeGoogleProtobufList(proto.listValue);
+      }
+      case 'structValue': {
+        return this.decodeGoogleProtobufStruct(proto.structValue);
+      }
+      default: {
+        throw new Error(
+          'Cannot decode type from google.protobuf.Value: ' +
+            JSON.stringify(proto)
+        );
+      }
+    }
+  }
+
+  /**
+   * Decodes a google.protobuf.ListValue
+   *
+   * @private
+   * @internal
+   * @param proto A Google Protobuf 'ListValue'.
+   * @returns The converted JS type.
+   */
+  decodeGoogleProtobufList(
+    proto: proto.google.protobuf.IListValue | null | undefined
+  ): unknown[] {
+    const result: unknown[] = [];
+    if (proto && proto.values && Array.isArray(proto.values)) {
+      for (const value of proto.values) {
+        result.push(this.decodeGoogleProtobufValue(value));
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Decodes a google.protobuf.Struct
+   *
+   * @private
+   * @internal
+   * @param proto A Google Protobuf 'Struct'.
+   * @returns The converted JS type.
+   */
+  decodeGoogleProtobufStruct(
+    proto: proto.google.protobuf.IStruct | null | undefined
+  ): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    if (proto && proto.fields) {
+      for (const prop of Object.keys(proto.fields)) {
+        result[prop] = this.decodeGoogleProtobufValue(proto.fields[prop]);
+      }
+    }
+    return result;
   }
 }
 

@@ -114,6 +114,12 @@ export type {
   AggregateSpec,
   AggregateType,
 } from './aggregate';
+export type {
+  PlanSummary,
+  ExecutionStats,
+  ExplainMetrics,
+  ExplainResults,
+} from './query-profile';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);

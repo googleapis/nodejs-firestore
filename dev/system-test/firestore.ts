@@ -14,6 +14,7 @@
 
 import {
   DocumentData,
+  ExplainMetrics,
   PartialWithFieldValue,
   QuerySnapshot,
   SetOptions,
@@ -142,6 +143,288 @@ describe('Firestore class', () => {
       .then(docs => {
         expect(docs.length).to.equal(2);
       });
+  });
+
+  it('can plan a query using default options', async () => {
+    await randomCol.doc('doc1').set({foo: 1});
+    await randomCol.doc('doc2').set({foo: 2});
+    await randomCol.doc('doc3').set({foo: 1});
+    const explainResults = await randomCol.where('foo', '>', 1).explain();
+
+    // Should have metrics.
+    const metrics = explainResults.metrics;
+    expect(metrics).to.not.be.null;
+
+    // Should have query plan.
+    const plan = metrics.planSummary;
+    expect(plan).to.not.be.null;
+    expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
+
+    // No execution stats and no snapshot.
+    expect(metrics.executionStats).to.be.null;
+    expect(explainResults.snapshot).to.be.null;
+  });
+
+  it('can plan a query', async () => {
+    await randomCol.doc('doc1').set({foo: 1});
+    await randomCol.doc('doc2').set({foo: 2});
+    await randomCol.doc('doc3').set({foo: 1});
+    const explainResults = await randomCol
+      .where('foo', '>', 1)
+      .explain({analyze: false});
+
+    // Should have metrics.
+    const metrics = explainResults.metrics;
+    expect(metrics).to.not.be.null;
+
+    // Should have query plan.
+    const plan = metrics.planSummary;
+    expect(plan).to.not.be.null;
+    expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
+
+    // No execution stats and no snapshot.
+    expect(metrics.executionStats).to.be.null;
+    expect(explainResults.snapshot).to.be.null;
+  });
+
+  it('can profile a query', async () => {
+    await randomCol.doc('doc1').set({foo: 1, bar: 0});
+    await randomCol.doc('doc2').set({foo: 2, bar: 1});
+    await randomCol.doc('doc3').set({foo: 1, bar: 2});
+    const explainResults = await randomCol
+      .where('foo', '==', 1)
+      .explain({analyze: true});
+
+    const metrics = explainResults.metrics;
+
+    expect(metrics.planSummary).to.not.be.null;
+    expect(metrics.executionStats).to.not.be.null;
+    expect(explainResults.snapshot).to.not.be.null;
+
+    expect(
+      Object.keys(metrics.planSummary.indexesUsed).length
+    ).to.be.greaterThan(0);
+
+    const stats = metrics.executionStats!;
+    expect(stats.readOperations).to.be.greaterThan(0);
+    expect(stats.resultsReturned).to.be.equal(2);
+    expect(
+      stats.executionDuration.nanoseconds > 0 ||
+        stats.executionDuration.seconds > 0
+    ).to.be.true;
+    expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
+
+    expect(explainResults.snapshot!.size).to.equal(2);
+  });
+
+  it('can profile a query that does not match any docs', async () => {
+    await randomCol.doc('doc1').set({foo: 1, bar: 0});
+    await randomCol.doc('doc2').set({foo: 2, bar: 1});
+    await randomCol.doc('doc3').set({foo: 1, bar: 2});
+    const results = await randomCol.where('foo', '==', 12345).get();
+    expect(results.empty).to.be.true;
+    expect(results.docs.length).to.equal(0);
+    expect(results.readTime.toMillis()).to.be.greaterThan(0);
+
+    const explainResults = await randomCol
+      .where('foo', '==', 12345)
+      .explain({analyze: true});
+
+    const metrics = explainResults.metrics;
+
+    expect(metrics.planSummary).to.not.be.null;
+    expect(metrics.executionStats).to.not.be.null;
+    expect(explainResults.snapshot).to.not.be.null;
+
+    expect(
+      Object.keys(metrics.planSummary.indexesUsed).length
+    ).to.be.greaterThan(0);
+
+    const stats = metrics.executionStats!;
+    expect(stats.readOperations).to.be.greaterThan(0);
+    expect(stats.resultsReturned).to.be.equal(0);
+    expect(
+      stats.executionDuration.nanoseconds > 0 ||
+        stats.executionDuration.seconds > 0
+    ).to.be.true;
+    expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
+
+    expect(explainResults.snapshot!.size).to.equal(0);
+  });
+
+  it('can stream explain results with default options', async () => {
+    await randomCol.doc('doc1').set({foo: 1, bar: 0});
+    await randomCol.doc('doc2').set({foo: 2, bar: 1});
+    await randomCol.doc('doc3').set({foo: 1, bar: 2});
+    let totalResponses = 0;
+    let totalDocuments = 0;
+    let metrics: ExplainMetrics | null = null;
+    const stream = randomCol.explainStream();
+    const promise = new Promise<boolean>((resolve, reject) => {
+      stream.on('data', data => {
+        ++totalResponses;
+        if (data.document) {
+          ++totalDocuments;
+        }
+        if (data.metrics) {
+          metrics = data.metrics;
+        }
+      });
+      stream.on('end', () => {
+        expect(totalResponses).to.equal(1);
+        expect(totalDocuments).to.equal(0);
+        expect(metrics).to.not.be.null;
+        expect(metrics!.planSummary.indexesUsed.length).to.be.greaterThan(0);
+        expect(metrics!.executionStats).to.be.null;
+        resolve(true);
+      });
+      stream.on('error', (error: Error) => {
+        reject(error);
+      });
+    });
+
+    const success: boolean = await promise;
+    expect(success).to.be.true;
+  });
+
+  it('can stream explain results without analyze', async () => {
+    await randomCol.doc('doc1').set({foo: 1, bar: 0});
+    await randomCol.doc('doc2').set({foo: 2, bar: 1});
+    await randomCol.doc('doc3').set({foo: 1, bar: 2});
+    let totalResponses = 0;
+    let totalDocuments = 0;
+    let metrics: ExplainMetrics | null = null;
+    const stream = randomCol.explainStream({analyze: false});
+    const promise = new Promise<boolean>((resolve, reject) => {
+      stream.on('data', data => {
+        ++totalResponses;
+        if (data.document) {
+          ++totalDocuments;
+        }
+        if (data.metrics) {
+          metrics = data.metrics;
+        }
+      });
+      stream.on('end', () => {
+        expect(totalResponses).to.equal(1);
+        expect(totalDocuments).to.equal(0);
+        expect(metrics).to.not.be.null;
+        expect(metrics!.planSummary.indexesUsed.length).to.be.greaterThan(0);
+        expect(metrics!.executionStats).to.be.null;
+        resolve(true);
+      });
+      stream.on('error', (error: Error) => {
+        reject(error);
+      });
+    });
+
+    const success: boolean = await promise;
+    expect(success).to.be.true;
+  });
+
+  it('can stream explain results with analyze', async () => {
+    await randomCol.doc('doc1').set({foo: 1, bar: 0});
+    await randomCol.doc('doc2').set({foo: 2, bar: 1});
+    await randomCol.doc('doc3').set({foo: 1, bar: 2});
+    let totalResponses = 0;
+    let totalDocuments = 0;
+    let metrics: ExplainMetrics | null = null;
+    const stream = randomCol
+      .where('foo', '==', 1)
+      .explainStream({analyze: true});
+    const promise = new Promise<boolean>((resolve, reject) => {
+      stream.on('data', data => {
+        ++totalResponses;
+        if (data.document) {
+          ++totalDocuments;
+        }
+        if (data.metrics) {
+          metrics = data.metrics;
+        }
+      });
+      stream.on('end', () => {
+        expect(totalResponses).to.equal(2);
+        expect(totalDocuments).to.equal(2);
+        expect(metrics).to.not.be.null;
+        expect(metrics!.planSummary.indexesUsed.length).to.be.greaterThan(0);
+        expect(metrics!.executionStats).to.not.be.null;
+        expect(metrics!.executionStats!.resultsReturned).to.equal(2);
+        resolve(true);
+      });
+      stream.on('error', (error: Error) => {
+        reject(error);
+      });
+    });
+
+    const success: boolean = await promise;
+    expect(success).to.be.true;
+  });
+
+  it('can plan an aggregate query using default options', async () => {
+    await randomCol.doc('doc1').set({foo: 1});
+    await randomCol.doc('doc2').set({foo: 2});
+    await randomCol.doc('doc3').set({foo: 1});
+    const explainResults = await randomCol
+      .where('foo', '>', 0)
+      .count()
+      .explain();
+
+    const metrics = explainResults.metrics;
+
+    const plan = metrics.planSummary;
+    expect(plan).to.not.be.null;
+    expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
+
+    expect(metrics.executionStats).to.be.null;
+    expect(explainResults.snapshot).to.be.null;
+  });
+
+  it('can plan an aggregate query', async () => {
+    await randomCol.doc('doc1').set({foo: 1});
+    await randomCol.doc('doc2').set({foo: 2});
+    await randomCol.doc('doc3').set({foo: 1});
+    const explainResults = await randomCol
+      .where('foo', '>', 0)
+      .count()
+      .explain({analyze: false});
+
+    const metrics = explainResults.metrics;
+
+    const plan = metrics.planSummary;
+    expect(plan).to.not.be.null;
+    expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
+
+    expect(metrics.executionStats).to.be.null;
+    expect(explainResults.snapshot).to.be.null;
+  });
+
+  it('can profile an aggregate query', async () => {
+    await randomCol.doc('doc1').set({foo: 1});
+    await randomCol.doc('doc2').set({foo: 2});
+    await randomCol.doc('doc3').set({foo: 1});
+    const explainResults = await randomCol
+      .where('foo', '<', 3)
+      .count()
+      .explain({analyze: true});
+
+    const metrics = explainResults.metrics;
+    expect(metrics.planSummary).to.not.be.null;
+    expect(
+      Object.keys(metrics.planSummary.indexesUsed).length
+    ).to.be.greaterThan(0);
+
+    expect(metrics.executionStats).to.not.be.null;
+    const stats = metrics.executionStats!;
+    expect(stats.readOperations).to.be.greaterThan(0);
+    expect(stats.resultsReturned).to.be.equal(1);
+    expect(
+      stats.executionDuration.nanoseconds > 0 ||
+        stats.executionDuration.seconds > 0
+    ).to.be.true;
+    expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
+
+    expect(explainResults.snapshot).to.not.be.null;
+    expect(explainResults.snapshot!.data().count).to.equal(3);
   });
 
   it('getAll() supports array destructuring', () => {
