@@ -96,6 +96,23 @@ export class WriteResult implements firestore.WriteResult {
         this._writeTime.isEqual(other._writeTime))
     );
   }
+
+  static reviver(this: any, key: string, value: any): any {
+    if (key === 'writeTime') {
+      return JSON.parse(value, Timestamp.reviver);
+    }
+  }
+
+  static replacer(this: any, key: string, value: any): any {
+    switch (key) {
+      case '':
+        return {
+          writeTime: value._writeTime,
+        };
+      case 'writeTime':
+        return JSON.stringify(value, Timestamp.replacer);
+    }
+  }
 }
 
 /**
