@@ -1627,6 +1627,7 @@
                              * @property {string|null} [fieldPath] IndexField fieldPath
                              * @property {google.firestore.admin.v1.Index.IndexField.Order|null} [order] IndexField order
                              * @property {google.firestore.admin.v1.Index.IndexField.ArrayConfig|null} [arrayConfig] IndexField arrayConfig
+                             * @property {google.firestore.admin.v1.Index.IndexField.IVectorConfig|null} [vectorConfig] IndexField vectorConfig
                              */
     
                             /**
@@ -1668,17 +1669,25 @@
                              */
                             IndexField.prototype.arrayConfig = null;
     
+                            /**
+                             * IndexField vectorConfig.
+                             * @member {google.firestore.admin.v1.Index.IndexField.IVectorConfig|null|undefined} vectorConfig
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @instance
+                             */
+                            IndexField.prototype.vectorConfig = null;
+    
                             // OneOf field names bound to virtual getters and setters
                             var $oneOfFields;
     
                             /**
                              * IndexField valueMode.
-                             * @member {"order"|"arrayConfig"|undefined} valueMode
+                             * @member {"order"|"arrayConfig"|"vectorConfig"|undefined} valueMode
                              * @memberof google.firestore.admin.v1.Index.IndexField
                              * @instance
                              */
                             Object.defineProperty(IndexField.prototype, "valueMode", {
-                                get: $util.oneOfGetter($oneOfFields = ["order", "arrayConfig"]),
+                                get: $util.oneOfGetter($oneOfFields = ["order", "arrayConfig", "vectorConfig"]),
                                 set: $util.oneOfSetter($oneOfFields)
                             });
     
@@ -1732,6 +1741,11 @@
                                     message.arrayConfig = 1;
                                     break;
                                 }
+                                if (object.vectorConfig != null) {
+                                    if (typeof object.vectorConfig !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Index.IndexField.vectorConfig: object expected");
+                                    message.vectorConfig = $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.fromObject(object.vectorConfig);
+                                }
                                 return message;
                             };
     
@@ -1761,6 +1775,11 @@
                                     object.arrayConfig = options.enums === String ? $root.google.firestore.admin.v1.Index.IndexField.ArrayConfig[message.arrayConfig] === undefined ? message.arrayConfig : $root.google.firestore.admin.v1.Index.IndexField.ArrayConfig[message.arrayConfig] : message.arrayConfig;
                                     if (options.oneofs)
                                         object.valueMode = "arrayConfig";
+                                }
+                                if (message.vectorConfig != null && message.hasOwnProperty("vectorConfig")) {
+                                    object.vectorConfig = $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.toObject(message.vectorConfig, options);
+                                    if (options.oneofs)
+                                        object.valueMode = "vectorConfig";
                                 }
                                 return object;
                             };
@@ -1819,6 +1838,216 @@
                                 values[valuesById[0] = "ARRAY_CONFIG_UNSPECIFIED"] = "ARRAY_CONFIG_UNSPECIFIED";
                                 values[valuesById[1] = "CONTAINS"] = "CONTAINS";
                                 return values;
+                            })();
+    
+                            IndexField.VectorConfig = (function() {
+    
+                                /**
+                                 * Properties of a VectorConfig.
+                                 * @memberof google.firestore.admin.v1.Index.IndexField
+                                 * @interface IVectorConfig
+                                 * @property {number|null} [dimension] VectorConfig dimension
+                                 * @property {google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex|null} [flat] VectorConfig flat
+                                 */
+    
+                                /**
+                                 * Constructs a new VectorConfig.
+                                 * @memberof google.firestore.admin.v1.Index.IndexField
+                                 * @classdesc Represents a VectorConfig.
+                                 * @implements IVectorConfig
+                                 * @constructor
+                                 * @param {google.firestore.admin.v1.Index.IndexField.IVectorConfig=} [properties] Properties to set
+                                 */
+                                function VectorConfig(properties) {
+                                    if (properties)
+                                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                            if (properties[keys[i]] != null)
+                                                this[keys[i]] = properties[keys[i]];
+                                }
+    
+                                /**
+                                 * VectorConfig dimension.
+                                 * @member {number} dimension
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @instance
+                                 */
+                                VectorConfig.prototype.dimension = 0;
+    
+                                /**
+                                 * VectorConfig flat.
+                                 * @member {google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex|null|undefined} flat
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @instance
+                                 */
+                                VectorConfig.prototype.flat = null;
+    
+                                // OneOf field names bound to virtual getters and setters
+                                var $oneOfFields;
+    
+                                /**
+                                 * VectorConfig type.
+                                 * @member {"flat"|undefined} type
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @instance
+                                 */
+                                Object.defineProperty(VectorConfig.prototype, "type", {
+                                    get: $util.oneOfGetter($oneOfFields = ["flat"]),
+                                    set: $util.oneOfSetter($oneOfFields)
+                                });
+    
+                                /**
+                                 * Creates a VectorConfig message from a plain object. Also converts values to their respective internal types.
+                                 * @function fromObject
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @static
+                                 * @param {Object.<string,*>} object Plain object
+                                 * @returns {google.firestore.admin.v1.Index.IndexField.VectorConfig} VectorConfig
+                                 */
+                                VectorConfig.fromObject = function fromObject(object) {
+                                    if (object instanceof $root.google.firestore.admin.v1.Index.IndexField.VectorConfig)
+                                        return object;
+                                    var message = new $root.google.firestore.admin.v1.Index.IndexField.VectorConfig();
+                                    if (object.dimension != null)
+                                        message.dimension = object.dimension | 0;
+                                    if (object.flat != null) {
+                                        if (typeof object.flat !== "object")
+                                            throw TypeError(".google.firestore.admin.v1.Index.IndexField.VectorConfig.flat: object expected");
+                                        message.flat = $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex.fromObject(object.flat);
+                                    }
+                                    return message;
+                                };
+    
+                                /**
+                                 * Creates a plain object from a VectorConfig message. Also converts values to other types if specified.
+                                 * @function toObject
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @static
+                                 * @param {google.firestore.admin.v1.Index.IndexField.VectorConfig} message VectorConfig
+                                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                 * @returns {Object.<string,*>} Plain object
+                                 */
+                                VectorConfig.toObject = function toObject(message, options) {
+                                    if (!options)
+                                        options = {};
+                                    var object = {};
+                                    if (options.defaults)
+                                        object.dimension = 0;
+                                    if (message.dimension != null && message.hasOwnProperty("dimension"))
+                                        object.dimension = message.dimension;
+                                    if (message.flat != null && message.hasOwnProperty("flat")) {
+                                        object.flat = $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex.toObject(message.flat, options);
+                                        if (options.oneofs)
+                                            object.type = "flat";
+                                    }
+                                    return object;
+                                };
+    
+                                /**
+                                 * Converts this VectorConfig to JSON.
+                                 * @function toJSON
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @instance
+                                 * @returns {Object.<string,*>} JSON object
+                                 */
+                                VectorConfig.prototype.toJSON = function toJSON() {
+                                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                };
+    
+                                /**
+                                 * Gets the default type url for VectorConfig
+                                 * @function getTypeUrl
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @static
+                                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns {string} The default type url
+                                 */
+                                VectorConfig.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                    if (typeUrlPrefix === undefined) {
+                                        typeUrlPrefix = "type.googleapis.com";
+                                    }
+                                    return typeUrlPrefix + "/google.firestore.admin.v1.Index.IndexField.VectorConfig";
+                                };
+    
+                                VectorConfig.FlatIndex = (function() {
+    
+                                    /**
+                                     * Properties of a FlatIndex.
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                     * @interface IFlatIndex
+                                     */
+    
+                                    /**
+                                     * Constructs a new FlatIndex.
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                     * @classdesc Represents a FlatIndex.
+                                     * @implements IFlatIndex
+                                     * @constructor
+                                     * @param {google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex=} [properties] Properties to set
+                                     */
+                                    function FlatIndex(properties) {
+                                        if (properties)
+                                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                                if (properties[keys[i]] != null)
+                                                    this[keys[i]] = properties[keys[i]];
+                                    }
+    
+                                    /**
+                                     * Creates a FlatIndex message from a plain object. Also converts values to their respective internal types.
+                                     * @function fromObject
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex
+                                     * @static
+                                     * @param {Object.<string,*>} object Plain object
+                                     * @returns {google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex} FlatIndex
+                                     */
+                                    FlatIndex.fromObject = function fromObject(object) {
+                                        if (object instanceof $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex)
+                                            return object;
+                                        return new $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex();
+                                    };
+    
+                                    /**
+                                     * Creates a plain object from a FlatIndex message. Also converts values to other types if specified.
+                                     * @function toObject
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex
+                                     * @static
+                                     * @param {google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex} message FlatIndex
+                                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                     * @returns {Object.<string,*>} Plain object
+                                     */
+                                    FlatIndex.toObject = function toObject() {
+                                        return {};
+                                    };
+    
+                                    /**
+                                     * Converts this FlatIndex to JSON.
+                                     * @function toJSON
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex
+                                     * @instance
+                                     * @returns {Object.<string,*>} JSON object
+                                     */
+                                    FlatIndex.prototype.toJSON = function toJSON() {
+                                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                    };
+    
+                                    /**
+                                     * Gets the default type url for FlatIndex
+                                     * @function getTypeUrl
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex
+                                     * @static
+                                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                     * @returns {string} The default type url
+                                     */
+                                    FlatIndex.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                        if (typeUrlPrefix === undefined) {
+                                            typeUrlPrefix = "type.googleapis.com";
+                                        }
+                                        return typeUrlPrefix + "/google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex";
+                                    };
+    
+                                    return FlatIndex;
+                                })();
+    
+                                return VectorConfig;
                             })();
     
                             return IndexField;
