@@ -349,7 +349,8 @@
                             "valueMode": {
                               "oneof": [
                                 "order",
-                                "arrayConfig"
+                                "arrayConfig",
+                                "vectorConfig"
                               ]
                             }
                           },
@@ -365,6 +366,10 @@
                             "arrayConfig": {
                               "type": "ArrayConfig",
                               "id": 3
+                            },
+                            "vectorConfig": {
+                              "type": "VectorConfig",
+                              "id": 4
                             }
                           },
                           "nested": {
@@ -379,6 +384,33 @@
                               "values": {
                                 "ARRAY_CONFIG_UNSPECIFIED": 0,
                                 "CONTAINS": 1
+                              }
+                            },
+                            "VectorConfig": {
+                              "oneofs": {
+                                "type": {
+                                  "oneof": [
+                                    "flat"
+                                  ]
+                                }
+                              },
+                              "fields": {
+                                "dimension": {
+                                  "type": "int32",
+                                  "id": 1,
+                                  "options": {
+                                    "(google.api.field_behavior)": "REQUIRED"
+                                  }
+                                },
+                                "flat": {
+                                  "type": "FlatIndex",
+                                  "id": 2
+                                }
+                              },
+                              "nested": {
+                                "FlatIndex": {
+                                  "fields": {}
+                                }
                               }
                             }
                           }
@@ -3282,6 +3314,10 @@
                 [
                   1002,
                   1002
+                ],
+                [
+                  9990,
+                  9990
                 ],
                 [
                   9995,
