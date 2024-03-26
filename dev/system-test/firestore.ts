@@ -3379,7 +3379,13 @@ describe('Query class', () => {
       unsubscribe();
     });
 
-    it('orders vector field correctly', async () => {
+    it('SDK orders vector field same way as backend', async () => {
+      // We validate that the SDK orders the vector field the same way as the backend
+      // by comparing the sort order of vector fields from a Query.get() and
+      // Query.onSnapshot(). Query.onSnapshot() will return sort order of the SDK,
+      // and Query.get() will return sort order of the backend.
+
+      // Test data in the order that we expect the backend to sort it.
       const docsInOrder = [
         {embedding: [1, 2, 3, 4, 5, 6]},
         {embedding: [100]},
@@ -3423,11 +3429,16 @@ describe('Query class', () => {
 
       const getSnapshot = await orderedQuery.get();
 
+      // Compare the snapshot (including sort order) of a snapshot
+      // from Query.onSnapshot() to an actual snapshot from Query.get()
       snapshotsEqual(watchSnapshot, {
         docs: getSnapshot.docs,
         docChanges: getSnapshot.docChanges(),
       });
 
+      // Compare the snapshot (including sort order) of a snapshot
+      // from Query.onSnapshot() to the expected sort order from
+      // the backend.
       snapshotsEqual(watchSnapshot, {
         docs: expectedSnapshots,
         docChanges: expectedChanges,
