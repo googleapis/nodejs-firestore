@@ -1858,7 +1858,7 @@ class QueryUtil<
     this._firestore
       .initializeIfNeeded(tag)
       .then(async () => {
-        // `toProto()` might throw an exception. We rely on the behavior of an
+        // `_toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
         let request = query._toProto(transactionIdOrReadTime, explainOptions);
