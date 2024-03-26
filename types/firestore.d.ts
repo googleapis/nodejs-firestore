@@ -1905,12 +1905,56 @@ declare namespace FirebaseFirestore {
      */
     get(): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
-    /*
+    /**
+     * Plans and optionally executes this query. Returns a Promise that will be
+     * resolved with the planner information, statistics from the query execution (if any),
+     * and the query results (if any).
+     *
+     * @return A Promise that will be resolved with the planner information, statistics
+     *  from the query execution (if any), and the query results (if any).
+     */
+    explain(
+      options?: ExplainOptions
+    ): Promise<ExplainResults<QuerySnapshot<AppModelType, DbModelType>>>;
+
+    /**
      * Executes the query and returns the results as Node Stream.
      *
      * @return A stream of QueryDocumentSnapshot.
      */
     stream(): NodeJS.ReadableStream;
+
+    /**
+     * Plans and optionally executes this query, and streams the results as Node Stream
+     * of `{document?: DocumentSnapshot, metrics?: ExplainMetrics}` objects.
+     *
+     * The stream surfaces documents one at a time as they are received from the
+     * server, and at the end, it will surface the metrics associated with
+     * executing the query (if any).
+     *
+     * @example
+     * ```
+     * let query = firestore.collection('col').where('foo', '==', 'bar');
+     * let count = 0;
+     *
+     * query.explainStream({analyze: true}).on('data', (data) => {
+     *   if (data.document) {
+     *     // Use data.document which is a DocumentSnapshot instance.
+     *     console.log(`Found document with name '${data.document.id}'`);
+     *     ++count;
+     *   }
+     *   if (data.metrics) {
+     *     // Use data.metrics which is an ExplainMetrics instance.
+     *   }
+     * }).on('end', () => {
+     *   console.log(`Received ${count} documents.`);
+     * });
+     * ```
+     *
+     * @return A stream of `{document?: DocumentSnapshot, metrics?: ExplainMetrics}`
+     * objects.
+     */
+    explainStream(options?: ExplainOptions): NodeJS.ReadableStream;
 
     /**
      * Attaches a listener for `QuerySnapshot `events.
@@ -2534,6 +2578,22 @@ declare namespace FirebaseFirestore {
     >;
 
     /**
+     * Plans and optionally executes this query. Returns a Promise that will be
+     * resolved with the planner information, statistics from the query execution (if any),
+     * and the query results (if any).
+     *
+     * @return A Promise that will be resolved with the planner information, statistics
+     *  from the query execution (if any), and the query results (if any).
+     */
+    explain(
+      options?: ExplainOptions
+    ): Promise<
+      ExplainResults<
+        AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+      >
+    >;
+
+    /**
      * Compares this object with the given object for equality.
      *
      * This object is considered "equal" to the other object if and only if
@@ -3040,6 +3100,97 @@ declare namespace FirebaseFirestore {
      * ```
      */
     static and(...filters: Filter[]): Filter;
+  }
+
+  type Duration = {
+    /** Signed seconds of the span of time. */
+    seconds: number;
+
+    /**
+     * Signed fractions of a second at nanosecond resolution of the span
+     * of time. Durations less than one second are represented with a 0
+     * `seconds` field and a positive or negative `nanos` field. For durations
+     * of one second or more, a non-zero value for the `nanos` field must be
+     * of the same sign as the `seconds` field. Must be from -999,999,999
+     * to +999,999,999 inclusive.
+     */
+    nanoseconds: number;
+  };
+
+  /** Options used to configure explain queries. */
+  export interface ExplainOptions {
+    /**
+     * Whether analyzing the query is enabled. If true, the query will be
+     * executed and execution statistics will be returned as part of the
+     * [ExplainResults]{@link ExplainResults}.
+     */
+    readonly analyze?: boolean;
+  }
+
+  /**
+   * PlanSummary contains information about the planning stage of a query.
+   */
+  export interface PlanSummary {
+    /**
+     * Information about the indexes that were used to serve the query.
+     * This should be inspected or logged, because the contents are intended to be
+     * human-readable. Contents are subject to change, and it is advised to not
+     * program against this object.
+     */
+    readonly indexesUsed: Record<string, unknown>[];
+  }
+
+  /** ExecutionStats contains information about the execution of a query. */
+  export interface ExecutionStats {
+    /** The number of query results. */
+    readonly resultsReturned: number;
+
+    /** The total execution time of the query. */
+    readonly executionDuration: Duration;
+
+    /** The number of read operations that occurred when executing the query. */
+    readonly readOperations: number;
+
+    /**
+     * Contains additional statistics related to the query execution.
+     * This should be inspected or logged, because the contents are intended to be
+     * human-readable. Contents are subject to change, and it is advised to not
+     * program against this object.
+     */
+    readonly debugStats: Record<string, unknown>;
+  }
+
+  /**
+   * ExplainMetrics contains information about planning and execution of a query.
+   */
+  export interface ExplainMetrics {
+    /**
+     * Information about the query plan.
+     */
+    readonly planSummary: PlanSummary;
+
+    /**
+     * Information about the execution of the query, or null if the query was
+     * not executed.
+     */
+    readonly executionStats: ExecutionStats | null;
+  }
+
+  /**
+   * ExplainResults contains information about planning, execution, and results
+   * of a query.
+   */
+  export interface ExplainResults<T> {
+    /**
+     * Information about planning and execution of the query.
+     */
+    readonly metrics: ExplainMetrics;
+
+    /**
+     * The snapshot that contains the results of executing the query, or null
+     * if the query was not executed.
+     */
+    readonly snapshot: T | null;
   }
 }
 

@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.5.0](https://github.com/googleapis/nodejs-firestore/compare/v7.4.0...v7.5.0) (2024-03-25)
+
+
+### Features
+
+* Protos and autogen client for vector ([#2027](https://github.com/googleapis/nodejs-firestore/issues/2027)) ([c65cef0](https://github.com/googleapis/nodejs-firestore/commit/c65cef04332e20be82129d0c49396485be683585))
+* Query Profile ([#2014](https://github.com/googleapis/nodejs-firestore/issues/2014)) ([9a45ec8](https://github.com/googleapis/nodejs-firestore/commit/9a45ec89fb3a8d9814bc186d7d494f5859946ffa))
+
 ## [7.4.0](https://github.com/googleapis/nodejs-firestore/compare/v7.3.1...v7.4.0) (2024-03-15)
 
 
