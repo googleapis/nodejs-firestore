@@ -16,9 +16,9 @@
 
 import * as firestore from '@google-cloud/firestore';
 import * as assert from 'assert';
+import {Duplex, Readable, Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 import {GoogleError} from 'google-gax';
-import {Duplex, Readable, Transform} from 'stream';
 
 import * as protos from '../protos/firestore_v1_proto_api';
 
@@ -1837,7 +1837,7 @@ class QueryUtil<
         }
 
         if (proto.explainMetrics) {
-          output.explainMetrics = ExplainMetrics.fromProto(
+          output.explainMetrics = ExplainMetrics._fromProto(
             proto.explainMetrics,
             this._serializer
           );
@@ -3996,7 +3996,7 @@ export class AggregateQuery<
         }
 
         if (proto.explainMetrics) {
-          output.explainMetrics = ExplainMetrics.fromProto(
+          output.explainMetrics = ExplainMetrics._fromProto(
             proto.explainMetrics,
             firestore._serializer!
           );
