@@ -182,8 +182,8 @@ describe('Bundle Builder', () => {
         true,
         {},
         {
-          parent: query._toProto().parent,
-          structuredQuery: query._toProto().structuredQuery,
+          parent: query.toProto().parent,
+          structuredQuery: query.toProto().structuredQuery,
         }
       ),
     });
@@ -194,8 +194,8 @@ describe('Bundle Builder', () => {
         true,
         {},
         {
-          parent: newQuery._toProto().parent,
-          structuredQuery: newQuery._toProto().structuredQuery,
+          parent: newQuery.toProto().parent,
+          structuredQuery: newQuery.toProto().structuredQuery,
         }
       ),
     });

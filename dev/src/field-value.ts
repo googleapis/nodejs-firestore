@@ -284,7 +284,7 @@ export class FieldValue implements firestore.FieldValue {
  * An internal interface shared by all field transforms.
  *
  * A 'FieldTransform` subclass should implement '.includeInDocumentMask',
- * '.includeInDocumentTransform' and '_toProto' (if '.includeInDocumentTransform'
+ * '.includeInDocumentTransform' and 'toProto' (if '.includeInDocumentTransform'
  * is 'true').
  *
  * @private

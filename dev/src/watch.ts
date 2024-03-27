@@ -935,7 +935,7 @@ export class QueryWatch<
   }
 
   getTarget(resumeToken?: Uint8Array): google.firestore.v1.ITarget {
-    const query = this.query._toProto();
+    const query = this.query.toProto();
     return {query, targetId: WATCH_TARGET_ID, resumeToken};
   }
 }

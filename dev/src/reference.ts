@@ -1858,10 +1858,10 @@ class QueryUtil<
     this._firestore
       .initializeIfNeeded(tag)
       .then(async () => {
-        // `_toProto()` might throw an exception. We rely on the behavior of an
+        // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        let request = query._toProto(transactionIdOrReadTime, explainOptions);
+        let request = query.toProto(transactionIdOrReadTime, explainOptions);
 
         let streamActive: Deferred<boolean>;
         do {
@@ -1920,9 +1920,9 @@ class QueryUtil<
                   if (this._queryOptions.requireConsistency) {
                     request = query
                       .startAfter(lastReceivedDocument)
-                      ._toProto(lastReceivedDocument.readTime);
+                      .toProto(lastReceivedDocument.readTime);
                   } else {
-                    request = query.startAfter(lastReceivedDocument)._toProto();
+                    request = query.startAfter(lastReceivedDocument).toProto();
                   }
 
                   // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
@@ -3184,7 +3184,7 @@ export class Query<
    * @internal
    * @returns Serialized JSON for the query.
    */
-  _toProto(
+  toProto(
     transactionIdOrReadTime?: Uint8Array | Timestamp,
     explainOptions?: firestore.ExplainOptions
   ): api.IRunQueryRequest {
@@ -4009,7 +4009,7 @@ export class AggregateQuery<
     firestore
       .initializeIfNeeded(tag)
       .then(async () => {
-        // `_toProto()` might throw an exception. We rely on the behavior of an
+        // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
         const request = this.toProto(transactionIdOrReadTime, explainOptions);
@@ -4089,7 +4089,7 @@ export class AggregateQuery<
     transactionIdOrReadTime?: Uint8Array | Timestamp,
     explainOptions?: firestore.ExplainOptions
   ): api.IRunAggregationQueryRequest {
-    const queryProto = this._query._toProto();
+    const queryProto = this._query.toProto();
     const runQueryRequest: api.IRunAggregationQueryRequest = {
       parent: queryProto.parent,
       structuredAggregationQuery: {
@@ -4424,10 +4424,10 @@ export class VectorQuery<
    * @internal
    * @returns Serialized JSON for the query.
    */
-  _toProto(
+  toProto(
     transactionIdOrReadTime?: Uint8Array | Timestamp
   ): api.IRunQueryRequest {
-    const queryProto = this._query._toProto(transactionIdOrReadTime);
+    const queryProto = this._query.toProto(transactionIdOrReadTime);
 
     const queryVector = Array.isArray(this.queryVector)
       ? new VectorValue(this.queryVector)
