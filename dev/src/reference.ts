@@ -3317,6 +3317,24 @@ export class Query<
   }
 
   /**
+   * @internal
+   * @private
+   * This method exists solely to maintain backward compatability.
+   */
+  _isPermanentRpcError(err: GoogleError, methodName: string): boolean {
+    return this._queryUtil._isPermanentRpcError(err, methodName);
+  }
+
+  /**
+   * @internal
+   * @private
+   * This method exists solely to maintain backward compatability.
+   */
+  _hasRetryTimedOut(methodName: string, startTime: number): boolean {
+    return this._queryUtil._hasRetryTimedOut(methodName, startTime);
+  }
+
+  /**
    * Internal streaming method that accepts an optional transaction ID.
    *
    * @param transactionIdOrReadTime A transaction ID or the read time at which
