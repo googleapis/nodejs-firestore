@@ -1656,7 +1656,7 @@ export class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.name
-   *   Required. The name of backup schedule.
+   *   Required. The name of the backup schedule.
    *
    *   Format
    *   `projects/{project}/databases/{database}/backupSchedules/{backup_schedule}`
