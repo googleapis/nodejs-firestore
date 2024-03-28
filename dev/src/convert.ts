@@ -20,6 +20,7 @@ import {ApiMapValue, ProtobufJsValue} from './types';
 import {validateObject} from './validate';
 
 import api = google.firestore.v1;
+import {RESERVED_MAP_KEY, RESERVED_MAP_KEY_VECTOR_VALUE} from './map-type';
 
 /*!
  * @module firestore/convert
@@ -112,53 +113,72 @@ function bytesFromJson(bytesValue: string | Uint8Array): Uint8Array {
  * @return The string value for 'valueType'.
  */
 export function detectValueType(proto: ProtobufJsValue): string {
+  let valueType: string | undefined;
+
   if (proto.valueType) {
-    return proto.valueType;
+    valueType = proto.valueType;
+  } else {
+    const detectedValues: string[] = [];
+
+    if (proto.stringValue !== undefined) {
+      detectedValues.push('stringValue');
+    }
+    if (proto.booleanValue !== undefined) {
+      detectedValues.push('booleanValue');
+    }
+    if (proto.integerValue !== undefined) {
+      detectedValues.push('integerValue');
+    }
+    if (proto.doubleValue !== undefined) {
+      detectedValues.push('doubleValue');
+    }
+    if (proto.timestampValue !== undefined) {
+      detectedValues.push('timestampValue');
+    }
+    if (proto.referenceValue !== undefined) {
+      detectedValues.push('referenceValue');
+    }
+    if (proto.arrayValue !== undefined) {
+      detectedValues.push('arrayValue');
+    }
+    if (proto.nullValue !== undefined) {
+      detectedValues.push('nullValue');
+    }
+    if (proto.mapValue !== undefined) {
+      detectedValues.push('mapValue');
+    }
+    if (proto.geoPointValue !== undefined) {
+      detectedValues.push('geoPointValue');
+    }
+    if (proto.bytesValue !== undefined) {
+      detectedValues.push('bytesValue');
+    }
+
+    if (detectedValues.length !== 1) {
+      throw new Error(
+        `Unable to infer type value from '${JSON.stringify(proto)}'.`
+      );
+    }
+
+    valueType = detectedValues[0];
   }
 
-  const detectedValues: string[] = [];
-
-  if (proto.stringValue !== undefined) {
-    detectedValues.push('stringValue');
-  }
-  if (proto.booleanValue !== undefined) {
-    detectedValues.push('booleanValue');
-  }
-  if (proto.integerValue !== undefined) {
-    detectedValues.push('integerValue');
-  }
-  if (proto.doubleValue !== undefined) {
-    detectedValues.push('doubleValue');
-  }
-  if (proto.timestampValue !== undefined) {
-    detectedValues.push('timestampValue');
-  }
-  if (proto.referenceValue !== undefined) {
-    detectedValues.push('referenceValue');
-  }
-  if (proto.arrayValue !== undefined) {
-    detectedValues.push('arrayValue');
-  }
-  if (proto.nullValue !== undefined) {
-    detectedValues.push('nullValue');
-  }
-  if (proto.mapValue !== undefined) {
-    detectedValues.push('mapValue');
-  }
-  if (proto.geoPointValue !== undefined) {
-    detectedValues.push('geoPointValue');
-  }
-  if (proto.bytesValue !== undefined) {
-    detectedValues.push('bytesValue');
+  // Special handling of mapValues used to represent other data types
+  if (valueType === 'mapValue') {
+    const fields = proto.mapValue?.fields;
+    if (fields) {
+      const props = Object.keys(fields);
+      if (
+        props.indexOf(RESERVED_MAP_KEY) !== -1 &&
+        detectValueType(fields[RESERVED_MAP_KEY]) === 'stringValue' &&
+        fields[RESERVED_MAP_KEY].stringValue === RESERVED_MAP_KEY_VECTOR_VALUE
+      ) {
+        valueType = 'vectorValue';
+      }
+    }
   }
 
-  if (detectedValues.length !== 1) {
-    throw new Error(
-      `Unable to infer type value from '${JSON.stringify(proto)}'.`
-    );
-  }
-
-  return detectedValues[0];
+  return valueType;
 }
 
 /**
@@ -240,7 +260,8 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
         },
       };
     }
-    case 'mapValue': {
+    case 'mapValue':
+    case 'vectorValue': {
       const mapValue: ApiMapValue = {};
       const fields = fieldValue.mapValue!.fields;
       if (fields) {

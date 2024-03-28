@@ -34,7 +34,8 @@ enum TypeOrder {
   REF = 6,
   GEO_POINT = 7,
   ARRAY = 8,
-  OBJECT = 9,
+  VECTOR = 9,
+  OBJECT = 10,
 }
 
 /*!
@@ -67,6 +68,8 @@ function typeOrder(val: api.IValue): TypeOrder {
       return TypeOrder.REF;
     case 'mapValue':
       return TypeOrder.OBJECT;
+    case 'vectorValue':
+      return TypeOrder.VECTOR;
     default:
       throw new Error('Unexpected value type: ' + valueType);
   }
@@ -229,6 +232,26 @@ function compareObjects(left: ApiMapValue, right: ApiMapValue): number {
  * @private
  * @internal
  */
+function compareVectors(left: ApiMapValue, right: ApiMapValue): number {
+  // The vector is a map, but only vector value is compared.
+  const leftArray = left?.['value']?.arrayValue?.values ?? [];
+  const rightArray = right?.['value']?.arrayValue?.values ?? [];
+
+  const lengthCompare = primitiveComparator(
+    leftArray.length,
+    rightArray.length
+  );
+  if (lengthCompare !== 0) {
+    return lengthCompare;
+  }
+
+  return compareArrays(leftArray, rightArray);
+}
+
+/*!
+ * @private
+ * @internal
+ */
 export function compare(left: api.IValue, right: api.IValue): number {
   // First compare the types.
   const leftType = typeOrder(left);
@@ -264,6 +287,11 @@ export function compare(left: api.IValue, right: api.IValue): number {
       );
     case TypeOrder.OBJECT:
       return compareObjects(
+        left.mapValue!.fields || {},
+        right.mapValue!.fields || {}
+      );
+    case TypeOrder.VECTOR:
+      return compareVectors(
         left.mapValue!.fields || {},
         right.mapValue!.fields || {}
       );

@@ -91,12 +91,17 @@ export {
   QuerySnapshot,
   Query,
 } from './reference';
-export type {AggregateQuery, AggregateQuerySnapshot} from './reference';
+export type {
+  AggregateQuery,
+  AggregateQuerySnapshot,
+  VectorQuery,
+  VectorQuerySnapshot,
+} from './reference';
 export {BulkWriter} from './bulk-writer';
 export type {BulkWriterError} from './bulk-writer';
 export type {BundleBuilder} from './bundle';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
-export {FieldValue} from './field-value';
+export {FieldValue, VectorValue} from './field-value';
 export {Filter} from './filter';
 export {WriteBatch, WriteResult} from './write-batch';
 export {Transaction} from './transaction';
