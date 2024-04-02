@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.6.0](https://github.com/googleapis/nodejs-firestore/compare/v7.5.0...v7.6.0) (2024-04-02)
+
+
+### Features
+
+* Vector Search ([#2006](https://github.com/googleapis/nodejs-firestore/issues/2006)) ([e906b42](https://github.com/googleapis/nodejs-firestore/commit/e906b4260da11fe5a1c34ae5f68d9f5717a99dab))
+
 ## [7.5.0](https://github.com/googleapis/nodejs-firestore/compare/v7.4.0...v7.5.0) (2024-03-25)
 
 
