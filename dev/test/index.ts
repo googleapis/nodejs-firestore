@@ -21,7 +21,7 @@ import {GoogleError, GrpcClient, Status} from 'google-gax';
 import {google} from '../protos/firestore_v1_proto_api';
 
 import * as Firestore from '../src';
-import {DocumentSnapshot, FieldPath} from '../src';
+import {DocumentSnapshot, FieldPath, FieldValue} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {QualifiedResourcePath} from '../src/path';
 import {
@@ -125,6 +125,31 @@ const allSupportedTypesProtobufJs = document(
       },
     },
   },
+  'vectorValue',
+  {
+    mapValue: {
+      fields: {
+        __type__: {
+          stringValue: '__vector__',
+        },
+        value: {
+          arrayValue: {
+            values: [
+              {
+                doubleValue: 0.1,
+              },
+              {
+                doubleValue: 0.2,
+              },
+              {
+                doubleValue: 0.3,
+              },
+            ],
+          },
+        },
+      },
+    },
+  },
   'emptyObject',
   {
     mapValue: {},
@@ -211,6 +236,30 @@ const allSupportedTypesJson = {
     emptyObject: {
       mapValue: {},
     },
+    vectorValue: {
+      mapValue: {
+        fields: {
+          __type__: {
+            stringValue: '__vector__',
+          },
+          value: {
+            arrayValue: {
+              values: [
+                {
+                  doubleValue: 0.1,
+                },
+                {
+                  doubleValue: 0.2,
+                },
+                {
+                  doubleValue: 0.3,
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
     pathValue: {
       referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
     },
@@ -244,6 +293,7 @@ const allSupportedTypesInput = {
   negativeInfinityValue: -Infinity,
   objectValue: {foo: 'bar'},
   emptyObject: {},
+  vectorValue: FieldValue.vector([0.1, 0.2, 0.3]),
   dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
   timestampValue: Firestore.Timestamp.fromDate(
     new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
@@ -272,6 +322,7 @@ const allSupportedTypesOutput: {[field: string]: unknown} = {
   negativeInfinityValue: -Infinity,
   objectValue: {foo: 'bar'},
   emptyObject: {},
+  vectorValue: FieldValue.vector([0.1, 0.2, 0.3]),
   dateValue: Firestore.Timestamp.fromDate(
     new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
   ),
