@@ -110,7 +110,13 @@
                 "EDITION_99998_TEST_ONLY": 99998,
                 "EDITION_99999_TEST_ONLY": 99999,
                 "EDITION_MAX": 2147483647
-              }
+              },
+              "reserved": [
+                [
+                  900,
+                  900
+                ]
+              ]
             },
             "FileDescriptorProto": {
               "fields": {
@@ -825,6 +831,10 @@
                   "type": "FeatureSet",
                   "id": 21
                 },
+                "featureSupport": {
+                  "type": "FeatureSupport",
+                  "id": 22
+                },
                 "uninterpretedOption": {
                   "rule": "repeated",
                   "type": "UninterpretedOption",
@@ -892,6 +902,26 @@
                     "value": {
                       "type": "string",
                       "id": 2
+                    }
+                  }
+                },
+                "FeatureSupport": {
+                  "fields": {
+                    "editionIntroduced": {
+                      "type": "Edition",
+                      "id": 1
+                    },
+                    "editionDeprecated": {
+                      "type": "Edition",
+                      "id": 2
+                    },
+                    "deprecationWarning": {
+                      "type": "string",
+                      "id": 3
+                    },
+                    "editionRemoved": {
+                      "type": "Edition",
+                      "id": 4
                     }
                   }
                 }
@@ -1272,6 +1302,14 @@
                     "edition": {
                       "type": "Edition",
                       "id": 3
+                    },
+                    "overridableFeatures": {
+                      "type": "FeatureSet",
+                      "id": 4
+                    },
+                    "fixedFeatures": {
+                      "type": "FeatureSet",
+                      "id": 5
                     },
                     "features": {
                       "type": "FeatureSet",
