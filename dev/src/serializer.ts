@@ -18,8 +18,8 @@ import {DocumentData} from '@google-cloud/firestore';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
-import {detectValueType} from './convert';
-import {DeleteTransform, FieldTransform} from './field-value';
+import {DeleteTransform, FieldTransform, VectorValue} from './field-value';
+import {detectGoogleProtobufValueType, detectValueType} from './convert';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
@@ -29,6 +29,11 @@ import {isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;
+import {
+  RESERVED_MAP_KEY,
+  RESERVED_MAP_KEY_VECTOR_VALUE,
+  VECTOR_MAP_VECTORS_KEY,
+} from './map-type';
 
 /**
  * The maximum depth of a Firestore object.
@@ -168,6 +173,10 @@ export class Serializer {
       };
     }
 
+    if (val instanceof VectorValue) {
+      return val._toProto(this);
+    }
+
     if (isObject(val)) {
       const toProto = val['toProto'];
       if (typeof toProto === 'function') {
@@ -218,6 +227,31 @@ export class Serializer {
   }
 
   /**
+   * @private
+   */
+  encodeVector(rawVector: number[]): api.IValue {
+    // A Firestore Vector is a map with reserved key/value pairs.
+    return {
+      mapValue: {
+        fields: {
+          [RESERVED_MAP_KEY]: {
+            stringValue: RESERVED_MAP_KEY_VECTOR_VALUE,
+          },
+          [VECTOR_MAP_VECTORS_KEY]: {
+            arrayValue: {
+              values: rawVector.map(value => {
+                return {
+                  doubleValue: value,
+                };
+              }),
+            },
+          },
+        },
+      },
+    };
+  }
+
+  /**
    * Decodes a single Firestore 'Value' Protobuf.
    *
    * @private
@@ -263,15 +297,20 @@ export class Serializer {
         return null;
       }
       case 'mapValue': {
-        const obj: DocumentData = {};
         const fields = proto.mapValue!.fields;
         if (fields) {
+          const obj: DocumentData = {};
           for (const prop of Object.keys(fields)) {
             obj[prop] = this.decodeValue(fields[prop]);
           }
+          return obj;
+        } else {
+          return {};
         }
-
-        return obj;
+      }
+      case 'vectorValue': {
+        const fields = proto.mapValue!.fields!;
+        return VectorValue._fromProto(fields[VECTOR_MAP_VECTORS_KEY]);
       }
       case 'geoPointValue': {
         return GeoPoint.fromProto(proto.geoPointValue!);
@@ -285,6 +324,83 @@ export class Serializer {
         );
       }
     }
+  }
+
+  /**
+   * Decodes a google.protobuf.Value
+   *
+   * @private
+   * @internal
+   * @param proto A Google Protobuf 'Value'.
+   * @returns The converted JS type.
+   */
+  decodeGoogleProtobufValue(proto: proto.google.protobuf.IValue): unknown {
+    switch (detectGoogleProtobufValueType(proto)) {
+      case 'nullValue': {
+        return null;
+      }
+      case 'numberValue': {
+        return proto.numberValue;
+      }
+      case 'stringValue': {
+        return proto.stringValue;
+      }
+      case 'boolValue': {
+        return proto.boolValue;
+      }
+      case 'listValue': {
+        return this.decodeGoogleProtobufList(proto.listValue);
+      }
+      case 'structValue': {
+        return this.decodeGoogleProtobufStruct(proto.structValue);
+      }
+      default: {
+        throw new Error(
+          'Cannot decode type from google.protobuf.Value: ' +
+            JSON.stringify(proto)
+        );
+      }
+    }
+  }
+
+  /**
+   * Decodes a google.protobuf.ListValue
+   *
+   * @private
+   * @internal
+   * @param proto A Google Protobuf 'ListValue'.
+   * @returns The converted JS type.
+   */
+  decodeGoogleProtobufList(
+    proto: proto.google.protobuf.IListValue | null | undefined
+  ): unknown[] {
+    const result: unknown[] = [];
+    if (proto && proto.values && Array.isArray(proto.values)) {
+      for (const value of proto.values) {
+        result.push(this.decodeGoogleProtobufValue(value));
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Decodes a google.protobuf.Struct
+   *
+   * @private
+   * @internal
+   * @param proto A Google Protobuf 'Struct'.
+   * @returns The converted JS type.
+   */
+  decodeGoogleProtobufStruct(
+    proto: proto.google.protobuf.IStruct | null | undefined
+  ): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    if (proto && proto.fields) {
+      for (const prop of Object.keys(proto.fields)) {
+        result[prop] = this.decodeGoogleProtobufValue(proto.fields[prop]);
+      }
+    }
+    return result;
   }
 }
 
@@ -367,6 +483,8 @@ export function validateUserInput(
           'If you want to ignore undefined values, enable `ignoreUndefinedProperties`.'
       );
     }
+  } else if (value instanceof VectorValue) {
+    // OK
   } else if (value instanceof DeleteTransform) {
     if (inArray) {
       throw new Error(

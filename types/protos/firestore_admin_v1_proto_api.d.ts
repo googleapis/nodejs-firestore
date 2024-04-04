@@ -1291,6 +1291,9 @@ export namespace google {
 
                         /** IndexField arrayConfig */
                         arrayConfig?: (google.firestore.admin.v1.Index.IndexField.ArrayConfig|null);
+
+                        /** IndexField vectorConfig */
+                        vectorConfig?: (google.firestore.admin.v1.Index.IndexField.IVectorConfig|null);
                     }
 
                     /** Represents an IndexField. */
@@ -1311,8 +1314,11 @@ export namespace google {
                         /** IndexField arrayConfig. */
                         public arrayConfig?: (google.firestore.admin.v1.Index.IndexField.ArrayConfig|null);
 
+                        /** IndexField vectorConfig. */
+                        public vectorConfig?: (google.firestore.admin.v1.Index.IndexField.IVectorConfig|null);
+
                         /** IndexField valueMode. */
-                        public valueMode?: ("order"|"arrayConfig");
+                        public valueMode?: ("order"|"arrayConfig"|"vectorConfig");
 
                         /**
                          * Creates an IndexField message from a plain object. Also converts values to their respective internal types.
@@ -1345,6 +1351,108 @@ export namespace google {
                         /** ArrayConfig enum. */
                         type ArrayConfig =
                             "ARRAY_CONFIG_UNSPECIFIED"| "CONTAINS";
+
+                        /** Properties of a VectorConfig. */
+                        interface IVectorConfig {
+
+                            /** VectorConfig dimension */
+                            dimension?: (number|null);
+
+                            /** VectorConfig flat */
+                            flat?: (google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex|null);
+                        }
+
+                        /** Represents a VectorConfig. */
+                        class VectorConfig implements IVectorConfig {
+
+                            /**
+                             * Constructs a new VectorConfig.
+                             * @param [properties] Properties to set
+                             */
+                            constructor(properties?: google.firestore.admin.v1.Index.IndexField.IVectorConfig);
+
+                            /** VectorConfig dimension. */
+                            public dimension: number;
+
+                            /** VectorConfig flat. */
+                            public flat?: (google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex|null);
+
+                            /** VectorConfig type. */
+                            public type?: "flat";
+
+                            /**
+                             * Creates a VectorConfig message from a plain object. Also converts values to their respective internal types.
+                             * @param object Plain object
+                             * @returns VectorConfig
+                             */
+                            public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Index.IndexField.VectorConfig;
+
+                            /**
+                             * Creates a plain object from a VectorConfig message. Also converts values to other types if specified.
+                             * @param message VectorConfig
+                             * @param [options] Conversion options
+                             * @returns Plain object
+                             */
+                            public static toObject(message: google.firestore.admin.v1.Index.IndexField.VectorConfig, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                            /**
+                             * Converts this VectorConfig to JSON.
+                             * @returns JSON object
+                             */
+                            public toJSON(): { [k: string]: any };
+
+                            /**
+                             * Gets the default type url for VectorConfig
+                             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns The default type url
+                             */
+                            public static getTypeUrl(typeUrlPrefix?: string): string;
+                        }
+
+                        namespace VectorConfig {
+
+                            /** Properties of a FlatIndex. */
+                            interface IFlatIndex {
+                            }
+
+                            /** Represents a FlatIndex. */
+                            class FlatIndex implements IFlatIndex {
+
+                                /**
+                                 * Constructs a new FlatIndex.
+                                 * @param [properties] Properties to set
+                                 */
+                                constructor(properties?: google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex);
+
+                                /**
+                                 * Creates a FlatIndex message from a plain object. Also converts values to their respective internal types.
+                                 * @param object Plain object
+                                 * @returns FlatIndex
+                                 */
+                                public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex;
+
+                                /**
+                                 * Creates a plain object from a FlatIndex message. Also converts values to other types if specified.
+                                 * @param message FlatIndex
+                                 * @param [options] Conversion options
+                                 * @returns Plain object
+                                 */
+                                public static toObject(message: google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                                /**
+                                 * Converts this FlatIndex to JSON.
+                                 * @returns JSON object
+                                 */
+                                public toJSON(): { [k: string]: any };
+
+                                /**
+                                 * Gets the default type url for FlatIndex
+                                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns The default type url
+                                 */
+                                public static getTypeUrl(typeUrlPrefix?: string): string;
+                            }
+                        }
                     }
 
                     /** QueryScope enum. */

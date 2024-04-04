@@ -38,6 +38,7 @@ import {
   collect,
   createInstance,
   document,
+  emptyQueryStream,
   InvalidApiUsage,
   Post,
   postConverter,
@@ -580,7 +581,7 @@ describe('query interface', () => {
           limit(10)
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -725,7 +726,7 @@ describe('query interface', () => {
     let attempts = 0;
     const query = firestore.collection('collectionId');
 
-    query._stream = () => {
+    query._queryUtil._stream = () => {
       ++attempts;
       throw new Error('Expected error');
     };
@@ -896,7 +897,7 @@ describe('query interface', () => {
     return createInstance(overrides).then(firestoreInstance => {
       firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
-      query._hasRetryTimedOut = () => false;
+      query._queryUtil._hasRetryTimedOut = () => false;
       return query
         .get()
         .then(() => {
@@ -956,7 +957,7 @@ describe('query interface', () => {
       firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
       // Fake our timeout check to fail after 10 retry attempts
-      query._hasRetryTimedOut = (methodName, startTime) => {
+      query._queryUtil._hasRetryTimedOut = (methodName, startTime) => {
         expect(methodName).to.equal('runQuery');
         expect(startTime).to.be.lessThanOrEqual(Date.now());
         return attempts >= 10;
@@ -1184,7 +1185,7 @@ describe('query interface', () => {
           orderBy('a', 'ASCENDING'),
           startAt(true, {integerValue: 1})
         );
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1218,7 +1219,7 @@ describe('where() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, fieldFiltersQuery('foo', 'EQUAL', 'bar'));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1281,7 +1282,7 @@ describe('where() interface', () => {
           )
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1317,7 +1318,7 @@ describe('where() interface', () => {
           })
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1343,7 +1344,7 @@ describe('where() interface', () => {
             'foobar'
           )
         );
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1368,7 +1369,7 @@ describe('where() interface', () => {
           })
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1399,7 +1400,7 @@ describe('where() interface', () => {
           })
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1436,7 +1437,7 @@ describe('where() interface', () => {
           })
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1593,7 +1594,7 @@ describe('where() interface', () => {
           unaryFiltersQuery('foo', 'IS_NAN', 'bar', 'IS_NULL')
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1614,7 +1615,7 @@ describe('where() interface', () => {
           unaryFiltersQuery('foo', 'IS_NOT_NAN', 'bar', 'IS_NOT_NULL')
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1688,7 +1689,7 @@ describe('where() interface', () => {
             )
           )
         );
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1734,7 +1735,7 @@ describe('where() interface', () => {
             )
           )
         );
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1774,7 +1775,7 @@ describe('where() interface', () => {
             )
           )
         );
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1799,7 +1800,7 @@ describe('where() interface', () => {
           request,
           where(fieldFilter('a', 'GREATER_THAN', {integerValue: 10}))
         );
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1838,7 +1839,7 @@ describe('orderBy() interface', () => {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'ASCENDING'));
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1855,7 +1856,7 @@ describe('orderBy() interface', () => {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'ASCENDING'));
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1872,7 +1873,7 @@ describe('orderBy() interface', () => {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'DESCENDING'));
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1901,7 +1902,7 @@ describe('orderBy() interface', () => {
           orderBy('foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING')
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -1974,7 +1975,7 @@ describe('orderBy() interface', () => {
           )
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2005,7 +2006,7 @@ describe('limit() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, limit(10));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2028,7 +2029,7 @@ describe('limit() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, limit(3));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2056,7 +2057,7 @@ describe('limitToLast() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'DESCENDING'), limit(10));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2078,7 +2079,7 @@ describe('limitToLast() interface', () => {
           endAt(false, 'start'),
           limit(10)
         );
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2138,7 +2139,7 @@ describe('limitToLast() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'DESCENDING'), limit(3));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2234,7 +2235,7 @@ describe('offset() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, offset(10));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2257,7 +2258,7 @@ describe('offset() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, offset(3));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2285,7 +2286,7 @@ describe('select() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, select('a', 'b.c'));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2315,7 +2316,7 @@ describe('select() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, select('bar'));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2331,7 +2332,7 @@ describe('select() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, select('__name__'));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2364,7 +2365,7 @@ describe('startAt() interface', () => {
           startAt(true, 'foo', 'bar')
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2389,7 +2390,7 @@ describe('startAt() interface', () => {
           })
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2476,7 +2477,7 @@ describe('startAt() interface', () => {
           })
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2502,7 +2503,7 @@ describe('startAt() interface', () => {
           })
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2531,7 +2532,7 @@ describe('startAt() interface', () => {
           })
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2558,7 +2559,7 @@ describe('startAt() interface', () => {
           })
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2585,7 +2586,7 @@ describe('startAt() interface', () => {
           })
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2628,7 +2629,7 @@ describe('startAt() interface', () => {
           )
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2661,7 +2662,7 @@ describe('startAt() interface', () => {
           fieldFiltersQuery('foo', 'EQUAL', 'bar')
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -2718,7 +2719,7 @@ describe('startAt() interface', () => {
               'value'
             )
           );
-          return stream();
+          return emptyQueryStream();
         },
       };
 
@@ -2780,7 +2781,7 @@ describe('startAt() interface', () => {
               'value'
             )
           );
-          return stream();
+          return emptyQueryStream();
         },
       };
 
@@ -2850,7 +2851,7 @@ describe('startAt() interface', () => {
               'value'
             )
           );
-          return stream();
+          return emptyQueryStream();
         },
       };
 
@@ -2916,7 +2917,7 @@ describe('startAt() interface', () => {
               'a.a'
             )
           );
-          return stream();
+          return emptyQueryStream();
         },
       };
 
@@ -2982,7 +2983,7 @@ describe('startAt() interface', () => {
               'value'
             )
           );
-          return stream();
+          return emptyQueryStream();
         },
       };
 
@@ -3045,7 +3046,7 @@ describe('startAt() interface', () => {
               )
             )
           );
-          return stream();
+          return emptyQueryStream();
         },
       };
 
@@ -3111,7 +3112,7 @@ describe('startAt() interface', () => {
               'value'
             )
           );
-          return stream();
+          return emptyQueryStream();
         },
       };
 
@@ -3163,7 +3164,7 @@ describe('startAt() interface', () => {
               'value'
             )
           );
-          return stream();
+          return emptyQueryStream();
         },
       };
 
@@ -3216,7 +3217,7 @@ describe('startAt() interface', () => {
               'value'
             )
           );
-          return stream();
+          return emptyQueryStream();
         },
       };
 
@@ -3279,7 +3280,7 @@ describe('startAt() interface', () => {
           startAt(true, 'foo')
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -3303,7 +3304,7 @@ describe('startAt() interface', () => {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'ASCENDING'), startAt(true, 'bar'));
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -3336,7 +3337,7 @@ describe('startAfter() interface', () => {
           startAt(false, 'foo', 'bar')
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -3364,7 +3365,7 @@ describe('startAfter() interface', () => {
           startAt(false, 'bar')
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -3397,7 +3398,7 @@ describe('endAt() interface', () => {
           endAt(false, 'foo', 'bar')
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -3421,7 +3422,7 @@ describe('endAt() interface', () => {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'ASCENDING'), endAt(false, 'bar'));
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -3454,7 +3455,7 @@ describe('endBefore() interface', () => {
           endAt(true, 'foo', 'bar')
         );
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -3478,7 +3479,7 @@ describe('endBefore() interface', () => {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'ASCENDING'), endAt(true, 'bar'));
 
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -3496,7 +3497,7 @@ describe('endBefore() interface', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, ...expectedComponents);
-        return stream();
+        return emptyQueryStream();
       },
     };
     return createInstance(overrides).then(firestoreInstance => {
@@ -3526,7 +3527,7 @@ describe('collectionGroup queries', () => {
           allDescendants(),
           fieldFiltersQuery('foo', 'EQUAL', 'bar')
         );
-        return stream();
+        return emptyQueryStream();
       },
     };
     return createInstance(overrides).then(firestore => {
@@ -3664,7 +3665,7 @@ describe('query resumption', () => {
     // the async iterator into an array.
     firestore = await createInstance(overrides);
     const query = firestore.collection('collectionId');
-    query._isPermanentRpcError = mockIsPermanentRpcError;
+    query._queryUtil._isPermanentRpcError = mockIsPermanentRpcError;
     const iterator = query
       .stream()
       [Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;

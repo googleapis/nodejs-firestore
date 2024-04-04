@@ -340,6 +340,13 @@ export function stream<T>(...elements: Array<T | Error>): Duplex {
   return stream;
 }
 
+/**
+ * Query streams with no results always at least emit a read time.
+ */
+export function emptyQueryStream(readTime = {seconds: 5, nanos: 6}) {
+  return stream({readTime});
+}
+
 export function streamWithoutEnd<T>(...elements: Array<T | Error>): Duplex {
   const stream = through2.obj();
 
