@@ -1775,12 +1775,17 @@ class QueryUtil<
             docs.reverse();
           }
 
-          if (!output.readTime) {
-            reject(wrapError(Error('No read time'), stack));
-            return;
-          }
+          // TODO(ehsannas): Typings of QuerySnapshot suggest that readTime is always available
+          // however there are in the scenario of query plan with no results there will be no read time sent
+          // so the typings should be updated to make readTime optional?
+          // For now we keep the null assertion behaviour which has been the case historically
+          // if (!output.readTime) {
+          //   reject(wrapError(Error('No read time'), stack));
+          //   return;
+          // }
 
           const result = query._createSnapshot(
+            // TODO(ehsannas): null assertion is incorrect in some scenarios, see above comment
             output.readTime!,
             docs.length,
             () => docs,
