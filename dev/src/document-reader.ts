@@ -183,7 +183,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
             'DocumentReader.fetchDocuments',
             requestTag,
             'Document missing: %s',
-            response.missing!
+            response.missing
           );
           snapshot = this.firestore.snapshot_(
             response.missing,
