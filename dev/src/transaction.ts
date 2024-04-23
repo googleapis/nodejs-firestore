@@ -696,7 +696,7 @@ export class Transaction implements firestore.Transaction {
     const {
       transaction,
       result: [result],
-    } = await documentReader.getResponse(this._requestTag);
+    } = await documentReader._get(this._requestTag);
     return {transaction, result};
   }
 
@@ -722,7 +722,7 @@ export class Transaction implements firestore.Transaction {
       fieldMask,
       opts
     );
-    return documentReader.getResponse(this._requestTag);
+    return documentReader._get(this._requestTag);
   }
 
   private async getQueryFn<
@@ -733,9 +733,9 @@ export class Transaction implements firestore.Transaction {
     opts: Uint8Array | api.ITransactionOptions | Timestamp
   ): Promise<{
     transaction?: Uint8Array;
-    result: Awaited<ReturnType<TQuery['_getResponse']>>['result'];
+    result: Awaited<ReturnType<TQuery['_get']>>['result'];
   }> {
-    return query._getResponse(opts);
+    return query._get(opts);
   }
 }
 

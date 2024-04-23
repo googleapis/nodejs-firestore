@@ -81,7 +81,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
   async get(
     requestTag: string
   ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
-    const {result} = await this.getResponse(requestTag);
+    const {result} = await this._get(requestTag);
     return result;
   }
 
@@ -91,7 +91,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
    *
    * @param requestTag A unique client-assigned identifier for this request.
    */
-  async getResponse(
+  async _get(
     requestTag: string
   ): Promise<BatchGetResponse<AppModelType, DbModelType>> {
     await this.fetchDocuments(requestTag);
