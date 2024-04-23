@@ -4240,7 +4240,7 @@ export class AggregateQuery<
   > {
     const {result, explainMetrics} = await this._getResponse(
       undefined,
-      options
+      options || {}
     );
     if (!explainMetrics) {
       throw new Error('No explain results');
