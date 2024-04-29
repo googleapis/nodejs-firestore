@@ -18,8 +18,8 @@ import {DocumentData} from '@google-cloud/firestore';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
+import {DeleteTransform, FieldTransform, VectorValue} from './field-value';
 import {detectGoogleProtobufValueType, detectValueType} from './convert';
-import {DeleteTransform, FieldTransform} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
@@ -29,6 +29,11 @@ import {isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;
+import {
+  RESERVED_MAP_KEY,
+  RESERVED_MAP_KEY_VECTOR_VALUE,
+  VECTOR_MAP_VECTORS_KEY,
+} from './map-type';
 
 /**
  * The maximum depth of a Firestore object.
@@ -168,6 +173,10 @@ export class Serializer {
       };
     }
 
+    if (val instanceof VectorValue) {
+      return val._toProto(this);
+    }
+
     if (isObject(val)) {
       const toProto = val['toProto'];
       if (typeof toProto === 'function') {
@@ -218,6 +227,31 @@ export class Serializer {
   }
 
   /**
+   * @private
+   */
+  encodeVector(rawVector: number[]): api.IValue {
+    // A Firestore Vector is a map with reserved key/value pairs.
+    return {
+      mapValue: {
+        fields: {
+          [RESERVED_MAP_KEY]: {
+            stringValue: RESERVED_MAP_KEY_VECTOR_VALUE,
+          },
+          [VECTOR_MAP_VECTORS_KEY]: {
+            arrayValue: {
+              values: rawVector.map(value => {
+                return {
+                  doubleValue: value,
+                };
+              }),
+            },
+          },
+        },
+      },
+    };
+  }
+
+  /**
    * Decodes a single Firestore 'Value' Protobuf.
    *
    * @private
@@ -263,15 +297,20 @@ export class Serializer {
         return null;
       }
       case 'mapValue': {
-        const obj: DocumentData = {};
         const fields = proto.mapValue!.fields;
         if (fields) {
+          const obj: DocumentData = {};
           for (const prop of Object.keys(fields)) {
             obj[prop] = this.decodeValue(fields[prop]);
           }
+          return obj;
+        } else {
+          return {};
         }
-
-        return obj;
+      }
+      case 'vectorValue': {
+        const fields = proto.mapValue!.fields!;
+        return VectorValue._fromProto(fields[VECTOR_MAP_VECTORS_KEY]);
       }
       case 'geoPointValue': {
         return GeoPoint.fromProto(proto.geoPointValue!);
@@ -444,6 +483,8 @@ export function validateUserInput(
           'If you want to ignore undefined values, enable `ignoreUndefinedProperties`.'
       );
     }
+  } else if (value instanceof VectorValue) {
+    // OK
   } else if (value instanceof DeleteTransform) {
     if (inArray) {
       throw new Error(
