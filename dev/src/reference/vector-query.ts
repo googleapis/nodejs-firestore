@@ -1,0 +1,219 @@
+/**
+ * Copyright 2024 Google LLC. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as protos from '../../protos/firestore_v1_proto_api';
+import api = protos.google.firestore.v1;
+import * as firestore from '@google-cloud/firestore';
+
+import {Timestamp} from '../timestamp';
+import {VectorValue} from '../field-value';
+import {FieldPath} from '../path';
+import {QueryDocumentSnapshot} from '../document';
+import {DocumentChange} from '../document-change';
+import {isPrimitiveArrayEqual} from '../util';
+import {QueryUtil} from './query-util';
+import {Query} from './query';
+import {VectorQueryOptions} from './vector-query-options';
+import {VectorQuerySnapshot} from './vector-query-snapshot';
+
+/**
+ * A query that finds the documents whose vector fields are closest to a certain query vector.
+ * Create an instance of `VectorQuery` with {@link Query.findNearest}.
+ */
+export class VectorQuery<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> implements firestore.VectorQuery<AppModelType, DbModelType>
+{
+  /**
+   * @internal
+   * @private
+   **/
+  readonly _queryUtil: QueryUtil<
+    AppModelType,
+    DbModelType,
+    VectorQuery<AppModelType, DbModelType>
+  >;
+
+  /**
+   * @private
+   * @internal
+   */
+  constructor(
+    private readonly _query: Query<AppModelType, DbModelType>,
+    private readonly vectorField: string | firestore.FieldPath,
+    private readonly queryVector: firestore.VectorValue | Array<number>,
+    private readonly options: VectorQueryOptions
+  ) {
+    this._queryUtil = new QueryUtil<
+      AppModelType,
+      DbModelType,
+      VectorQuery<AppModelType, DbModelType>
+    >(_query._firestore, _query._queryOptions, _query._serializer);
+  }
+
+  /** The query whose results participants in the vector search. Filtering
+   * performed by the query will apply before the vector search.
+   **/
+  get query(): Query<AppModelType, DbModelType> {
+    return this._query;
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  private get _rawVectorField(): string {
+    return typeof this.vectorField === 'string'
+      ? this.vectorField
+      : this.vectorField.toString();
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  private get _rawQueryVector(): Array<number> {
+    return Array.isArray(this.queryVector)
+      ? this.queryVector
+      : this.queryVector.toArray();
+  }
+
+  /**
+   * Executes this vector search query.
+   *
+   * @returns A promise that will be resolved with the results of the query.
+   */
+  get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
+    return this._queryUtil._get(
+      this,
+      /*transactionId*/ undefined,
+      // VectorQuery cannot be retried with cursors as they do not support cursors yet.
+      /*retryWithCursor*/ false
+    ) as Promise<VectorQuerySnapshot<AppModelType, DbModelType>>;
+  }
+
+  /**
+   * Internal streaming method that accepts an optional transaction ID.
+   *
+   * @param transactionId - A transaction ID.
+   * @private
+   * @internal
+   * @returns A stream of document results.
+   */
+  _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
+    return this._queryUtil._stream(
+      this,
+      transactionId,
+      /*retryWithCursor*/ false
+    );
+  }
+
+  /**
+   * Internal method for serializing a query to its RunAggregationQuery proto
+   * representation with an optional transaction id.
+   *
+   * @private
+   * @internal
+   * @returns Serialized JSON for the query.
+   */
+  toProto(
+    transactionIdOrReadTime?: Uint8Array | Timestamp
+  ): api.IRunQueryRequest {
+    const queryProto = this._query.toProto(transactionIdOrReadTime);
+
+    const queryVector = Array.isArray(this.queryVector)
+      ? new VectorValue(this.queryVector)
+      : (this.queryVector as VectorValue);
+
+    queryProto.structuredQuery!.findNearest = {
+      limit: {value: this.options.limit},
+      distanceMeasure: this.options.distanceMeasure,
+      vectorField: {
+        fieldPath: FieldPath.fromArgument(this.vectorField).formattedName,
+      },
+      queryVector: queryVector._toProto(this._query._serializer),
+    };
+    return queryProto;
+  }
+
+  /**
+   * Construct the resulting vector snapshot for this query with given documents.
+   *
+   * @private
+   * @internal
+   */
+  _createSnapshot(
+    readTime: Timestamp,
+    size: number,
+    docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+  ): VectorQuerySnapshot<AppModelType, DbModelType> {
+    return new VectorQuerySnapshot<AppModelType, DbModelType>(
+      this,
+      readTime,
+      size,
+      docs,
+      changes
+    );
+  }
+
+  /**
+   * Construct a new vector query whose result will start after To support stream().
+   * This now throws an exception because cursors are not supported from the backend for vector queries yet.
+   *
+   * @private
+   * @internal
+   * @returns Serialized JSON for the query.
+   */
+  startAfter(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ...fieldValuesOrDocumentSnapshot: Array<unknown>
+  ): VectorQuery<AppModelType, DbModelType> {
+    throw new Error(
+      'Unimplemented: Vector query does not support cursors yet.'
+    );
+  }
+
+  /**
+   * Compares this object with the given object for equality.
+   *
+   * This object is considered "equal" to the other object if and only if
+   * `other` performs the same vector distance search as this `VectorQuery` and
+   * the underlying Query of `other` compares equal to that of this object
+   * using `Query.isEqual()`.
+   *
+   * @param other - The object to compare to this object for equality.
+   * @returns `true` if this object is "equal" to the given object, as
+   * defined above, or `false` otherwise.
+   */
+  isEqual(other: firestore.VectorQuery<AppModelType, DbModelType>): boolean {
+    if (this === other) {
+      return true;
+    }
+    if (!(other instanceof VectorQuery)) {
+      return false;
+    }
+    if (!this.query.isEqual(other.query)) {
+      return false;
+    }
+    return (
+      this._rawVectorField === other._rawVectorField &&
+      isPrimitiveArrayEqual(this._rawQueryVector, other._rawQueryVector) &&
+      this.options.isEqual(other.options)
+    );
+  }
+}
