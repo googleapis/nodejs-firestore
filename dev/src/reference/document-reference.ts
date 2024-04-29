@@ -480,7 +480,7 @@ export class DocumentReference<
     validateFunction('onError', onError, {optional: true});
 
     const watch: DocumentWatch<AppModelType, DbModelType> =
-      new (require('./watch').DocumentWatch)(this.firestore, this);
+      new (require('../watch').DocumentWatch)(this.firestore, this);
     return watch.onSnapshot((readTime, size, docs) => {
       for (const document of docs()) {
         if (document.ref.path === this.path) {

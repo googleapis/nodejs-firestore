@@ -1490,7 +1490,7 @@ export class Query<
     validateFunction('onError', onError, {optional: true});
 
     const watch: QueryWatch<AppModelType, DbModelType> =
-      new (require('./watch').QueryWatch)(
+      new (require('../watch').QueryWatch)(
         this.firestore,
         this,
         this._queryOptions.converter
