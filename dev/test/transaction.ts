@@ -560,7 +560,6 @@ describe('failed transactions', () => {
           transactionFunction,
           query({newTransaction: {readWrite: {}}, error: serverError}),
           // No rollback because the lazy-start operation failed
-          //rollback('foo1'),
           backoff(),
           query({newTransaction: {readWrite: {}}}),
           commit('foo1')
@@ -572,7 +571,6 @@ describe('failed transactions', () => {
             transactionFunction,
             query({newTransaction: {readWrite: {}}, error: serverError})
             // No rollback because the lazy-start operation failed
-            //rollback('foo1'),
           )
         ).to.eventually.be.rejected;
       }
@@ -597,7 +595,6 @@ describe('failed transactions', () => {
           transactionFunction,
           getDocument({newTransaction: {readWrite: {}}, error: serverError}),
           // No rollback because the lazy-start operation failed
-          //rollback('foo1'),
           backoff(),
           getDocument({newTransaction: {readWrite: {}}}),
           commit('foo1')
@@ -609,7 +606,6 @@ describe('failed transactions', () => {
             transactionFunction,
             getDocument({newTransaction: {readWrite: {}}, error: serverError})
             // No rollback because the lazy-start operation failed
-            //rollback('foo1'),
           )
         ).to.eventually.be.rejected;
       }

@@ -516,18 +516,16 @@ export class Transaction implements firestore.Transaction {
     this._transactionIdPromise = undefined;
     this._prevTransactionId = transactionId;
 
-    // Rollback request is completed asynchronously
-    // We don't need to wait for it to completed before continuing the next attempt
-    this._firestore
-      .request('rollback', request, this._requestTag)
-      .catch(err => {
-        logger(
-          'Firestore.runTransaction',
-          this._requestTag,
-          'Best effort to rollback failed with error:',
-          err
-        );
-      });
+    try {
+      await this._firestore.request('rollback', request, this._requestTag);
+    } catch (err) {
+      logger(
+        'Firestore.runTransaction',
+        this._requestTag,
+        'Best effort to rollback failed with error:',
+        err
+      );
+    }
   }
 
   /**
@@ -635,10 +633,9 @@ export class Transaction implements firestore.Transaction {
       // Simply queue this subsequent read operation after the first read
       // operation has resolved and we don't expect a transaction ID in the
       // response because we are not starting a new transaction
-      return this._transactionIdPromise.then(async opts => {
-        const r = await resultFn.call(this, param, opts);
-        return r.result;
-      });
+      return this._transactionIdPromise
+        .then(opts => resultFn.call(this, param, opts))
+        .then(r => r.result);
     } else {
       if (this._readOnlyReadTime) {
         // We do not start a transaction for read-only transactions
@@ -662,7 +659,7 @@ export class Transaction implements firestore.Transaction {
 
         // Ensure the _transactionIdPromise is set synchronously so that
         // subsequent operations will not race to start another transaction
-        this._transactionIdPromise = resultPromise.then(async r => {
+        this._transactionIdPromise = resultPromise.then(r => {
           if (!r.transaction) {
             // Illegal state
             // The read operation was provided with new transaction options but did not return a transaction ID

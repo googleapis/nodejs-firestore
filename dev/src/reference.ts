@@ -3054,9 +3054,9 @@ export class Query<
    *  transaction, or timestamp to use as read time.
    */
   async _get(
-    transactionIdOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): Promise<QuerySnapshotResponse<QuerySnapshot<AppModelType, DbModelType>>> {
-    const result = await this._getResponse(transactionIdOrReadTime);
+    const result = await this._getResponse(transactionOrReadTime);
     if (!result.result) {
       throw new Error('No QuerySnapshot result');
     }
