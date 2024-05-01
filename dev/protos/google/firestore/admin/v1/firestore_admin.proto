@@ -329,8 +329,7 @@ service FirestoreAdmin {
 
   // Creates a backup schedule on a database.
   // At most two backup schedules can be configured on a database, one daily
-  // backup schedule with retention up to 7 days and one weekly backup schedule
-  // with retention up to 14 weeks.
+  // backup schedule and one weekly backup schedule.
   rpc CreateBackupSchedule(CreateBackupScheduleRequest)
       returns (BackupSchedule) {
     option (google.api.http) = {
@@ -547,7 +546,7 @@ message ListBackupSchedulesResponse {
 
 // The request for [FirestoreAdmin.DeleteBackupSchedules][].
 message DeleteBackupScheduleRequest {
-  // Required. The name of backup schedule.
+  // Required. The name of the backup schedule.
   //
   // Format
   // `projects/{project}/databases/{database}/backupSchedules/{backup_schedule}`

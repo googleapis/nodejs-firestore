@@ -152,8 +152,15 @@ export class FirestoreAdminClient {
         'Please set either universe_domain or universeDomain, but not both.'
       );
     }
+    const universeDomainEnvVar =
+      typeof process === 'object' && typeof process.env === 'object'
+        ? process.env['GOOGLE_CLOUD_UNIVERSE_DOMAIN']
+        : undefined;
     this._universeDomain =
-      opts?.universeDomain ?? opts?.universe_domain ?? 'googleapis.com';
+      opts?.universeDomain ??
+      opts?.universe_domain ??
+      universeDomainEnvVar ??
+      'googleapis.com';
     this._servicePath = 'firestore.' + this._universeDomain;
     const servicePath =
       opts?.servicePath || opts?.apiEndpoint || this._servicePath;
@@ -209,7 +216,7 @@ export class FirestoreAdminClient {
 
     // Determine the client header string.
     const clientHeader = [`gax/${this._gaxModule.version}`, `gapic/${version}`];
-    if (typeof process !== 'undefined' && 'versions' in process) {
+    if (typeof process === 'object' && 'versions' in process) {
       clientHeader.push(`gl-node/${process.versions.node}`);
     } else {
       clientHeader.push(`gl-web/${this._gaxModule.version}`);
@@ -509,7 +516,7 @@ export class FirestoreAdminClient {
    */
   static get servicePath() {
     if (
-      typeof process !== undefined &&
+      typeof process === 'object' &&
       typeof process.emitWarning === 'function'
     ) {
       process.emitWarning(
@@ -527,7 +534,7 @@ export class FirestoreAdminClient {
    */
   static get apiEndpoint() {
     if (
-      typeof process !== undefined &&
+      typeof process === 'object' &&
       typeof process.emitWarning === 'function'
     ) {
       process.emitWarning(
@@ -1272,8 +1279,7 @@ export class FirestoreAdminClient {
   /**
    * Creates a backup schedule on a database.
    * At most two backup schedules can be configured on a database, one daily
-   * backup schedule with retention up to 7 days and one weekly backup schedule
-   * with retention up to 14 weeks.
+   * backup schedule and one weekly backup schedule.
    *
    * @param {Object} request
    *   The request object that will be sent.
@@ -1649,7 +1655,7 @@ export class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.name
-   *   Required. The name of backup schedule.
+   *   Required. The name of the backup schedule.
    *
    *   Format
    *   `projects/{project}/databases/{database}/backupSchedules/{backup_schedule}`
