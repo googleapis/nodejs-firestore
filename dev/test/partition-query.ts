@@ -29,6 +29,7 @@ import {setTimeoutHandler} from '../src/backoff';
 import {
   ApiOverride,
   createInstance,
+  emptyQueryStream,
   stream,
   verifyInstance,
 } from './util/helpers';
@@ -225,7 +226,7 @@ describe('Partition Query', () => {
         } else {
           expect(request!.structuredQuery!.endAt).to.be.undefined;
         }
-        return stream();
+        return emptyQueryStream();
       },
     };
     return createInstance(overrides).then(async firestore => {
@@ -263,7 +264,7 @@ describe('Partition Query', () => {
         expect(
           request!.structuredQuery!.endAt!.values![0].integerValue
         ).to.equal(bigIntValue.toString());
-        return stream();
+        return emptyQueryStream();
       },
     };
     return createInstance(overrides).then(async firestore => {

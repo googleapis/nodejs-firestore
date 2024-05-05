@@ -1458,6 +1458,26 @@ export class VectorQuerySnapshot<
   }
 }
 
+interface QueryStreamElement<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> {
+  transaction?: Uint8Array;
+  readTime?: Timestamp;
+  explainMetrics?: ExplainMetrics;
+  document?: QueryDocumentSnapshot<AppModelType, DbModelType>;
+}
+
+interface QueryResponse<TSnapshot> {
+  transaction?: Uint8Array;
+  explainMetrics?: ExplainMetrics;
+  result?: TSnapshot;
+}
+
+interface QuerySnapshotResponse<TSnapshot> extends QueryResponse<TSnapshot> {
+  result: TSnapshot;
+}
+
 /** Internal representation of a query cursor before serialization. */
 interface QueryCursor {
   before: boolean;
@@ -1691,30 +1711,42 @@ class QueryUtil<
     readonly _serializer: Serializer
   ) {}
 
-  _get(
+  _getResponse(
     query: Template,
-    transactionIdOrReadTime?: Uint8Array | Timestamp,
-    retryWithCursor = true
-  ): Promise<
-    | QuerySnapshot<AppModelType, DbModelType>
-    | VectorQuerySnapshot<AppModelType, DbModelType>
-  > {
-    const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
-
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
+    retryWithCursor = true,
+    explainOptions?: firestore.ExplainOptions
+  ): Promise<QueryResponse<ReturnType<Template['_createSnapshot']>>> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
     return new Promise((resolve, reject) => {
-      let readTime: Timestamp;
+      const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
+      const output: Omit<QueryResponse<never>, 'result'> & {
+        readTime?: Timestamp;
+      } = {};
 
-      this._stream(query, transactionIdOrReadTime, retryWithCursor)
+      this._stream(
+        query,
+        transactionOrReadTime,
+        retryWithCursor,
+        explainOptions
+      )
         .on('error', err => {
           reject(wrapError(err, stack));
         })
-        .on('data', result => {
-          readTime = result.readTime;
-          if (result.document) {
-            docs.push(result.document);
+        .on('data', (data: QueryStreamElement<AppModelType, DbModelType>) => {
+          if (data.transaction) {
+            output.transaction = data.transaction;
+          }
+          if (data.readTime) {
+            output.readTime = data.readTime;
+          }
+          if (data.explainMetrics) {
+            output.explainMetrics = data.explainMetrics;
+          }
+          if (data.document) {
+            docs.push(data.document);
           }
         })
         .on('end', () => {
@@ -1725,22 +1757,30 @@ class QueryUtil<
             docs.reverse();
           }
 
-          resolve(
-            query._createSnapshot(
-              readTime,
-              docs.length,
-              () => docs,
-              () => {
-                const changes: Array<
-                  DocumentChange<AppModelType, DbModelType>
-                > = [];
-                for (let i = 0; i < docs.length; ++i) {
-                  changes.push(new DocumentChange('added', docs[i], -1, i));
+          // Only return a snapshot when we have a readTime
+          // explain queries with analyze !== true will return no documents and no read time
+          const result = output.readTime
+            ? (query._createSnapshot(
+                output.readTime,
+                docs.length,
+                () => docs,
+                () => {
+                  const changes: Array<
+                    DocumentChange<AppModelType, DbModelType>
+                  > = [];
+                  for (let i = 0; i < docs.length; ++i) {
+                    changes.push(new DocumentChange('added', docs[i], -1, i));
+                  }
+                  return changes;
                 }
-                return changes;
-              }
-            )
-          );
+              ) as ReturnType<Template['_createSnapshot']>)
+            : undefined;
+
+          resolve({
+            transaction: output.transaction,
+            explainMetrics: output.explainMetrics,
+            result,
+          });
         });
     });
   }
@@ -1782,7 +1822,7 @@ class QueryUtil<
 
   _stream(
     query: Template,
-    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     retryWithCursor = true,
     explainOptions?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
@@ -1798,17 +1838,22 @@ class QueryUtil<
     let backendStream: Duplex;
     const stream = new Transform({
       objectMode: true,
-      transform: (proto, enc, callback) => {
+      transform: (
+        proto: api.RunQueryResponse | typeof NOOP_MESSAGE,
+        enc,
+        callback
+      ) => {
         if (proto === NOOP_MESSAGE) {
           callback(undefined);
           return;
         }
 
-        const output: {
-          readTime?: Timestamp;
-          document?: QueryDocumentSnapshot<AppModelType, DbModelType>;
-          explainMetrics?: ExplainMetrics;
-        } = {};
+        const output: QueryStreamElement<AppModelType, DbModelType> = {};
+
+        // Proto comes with zero-length buffer by default
+        if (proto.transaction?.length) {
+          output.transaction = proto.transaction;
+        }
 
         if (proto.readTime) {
           output.readTime = Timestamp.fromProto(proto.readTime);
@@ -1817,7 +1862,7 @@ class QueryUtil<
         if (proto.document) {
           const document = this._firestore.snapshot_(
             proto.document,
-            proto.readTime
+            proto.readTime!
           );
           const finalDoc = new DocumentSnapshotBuilder<
             AppModelType,
@@ -1861,7 +1906,7 @@ class QueryUtil<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        let request = query.toProto(transactionIdOrReadTime, explainOptions);
+        let request = query.toProto(transactionOrReadTime, explainOptions);
 
         let streamActive: Deferred<boolean>;
         do {
@@ -1882,7 +1927,7 @@ class QueryUtil<
             // incorrect/partial profiling results.
             if (
               !isExplain &&
-              !transactionIdOrReadTime &&
+              !transactionOrReadTime &&
               !this._isPermanentRpcError(err, 'runQuery')
             ) {
               logger(
@@ -2970,8 +3015,9 @@ export class Query<
    * });
    * ```
    */
-  get(): Promise<QuerySnapshot<AppModelType, DbModelType>> {
-    return this._get();
+  async get(): Promise<QuerySnapshot<AppModelType, DbModelType>> {
+    const {result} = await this._get();
+    return result;
   }
 
   /**
@@ -2982,97 +3028,53 @@ export class Query<
    * @return A Promise that will be resolved with the planner information, statistics
    *  from the query execution (if any), and the query results (if any).
    */
-  explain(
+  async explain(
     options?: firestore.ExplainOptions
   ): Promise<ExplainResults<QuerySnapshot<AppModelType, DbModelType>>> {
     if (options === undefined) {
       options = {};
     }
-
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    return new Promise((resolve, reject) => {
-      let readTime: Timestamp;
-      let docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> | null =
-        null;
-      let metrics: ExplainMetrics | null = null;
-
-      this._stream(undefined, options)
-        .on('error', err => {
-          reject(wrapError(err, stack));
-        })
-        .on('data', data => {
-          if (data.readTime) {
-            readTime = data.readTime;
-          }
-          if (data.document) {
-            if (docs === null) {
-              docs = [];
-            }
-            docs.push(data.document);
-          }
-          if (data.explainMetrics) {
-            metrics = data.explainMetrics;
-
-            if (docs === null && metrics?.executionStats !== null) {
-              // This indicates that the query was executed, but no documents
-              // had matched the query.
-              docs = [];
-            }
-          }
-        })
-        .on('end', () => {
-          if (metrics === null) {
-            reject('No explain results.');
-          }
-
-          // Some explain queries will not have a snapshot associated with them.
-          let snapshot: QuerySnapshot<AppModelType, DbModelType> | null = null;
-          if (docs !== null) {
-            if (this._queryOptions.limitType === LimitType.Last) {
-              // The results for limitToLast queries need to be flipped since
-              // we reversed the ordering constraints before sending the query
-              // to the backend.
-              docs.reverse();
-            }
-
-            snapshot = new QuerySnapshot(
-              this,
-              readTime,
-              docs.length,
-              () => docs!,
-              () => {
-                const changes: Array<
-                  DocumentChange<AppModelType, DbModelType>
-                > = [];
-                for (let i = 0; i < docs!.length; ++i) {
-                  changes.push(new DocumentChange('added', docs![i], -1, i));
-                }
-                return changes;
-              }
-            );
-          }
-
-          resolve(new ExplainResults(metrics!, snapshot));
-        });
-    });
+    const {result, explainMetrics} = await this._getResponse(
+      undefined,
+      options
+    );
+    if (!explainMetrics) {
+      throw new Error('No explain results');
+    }
+    return new ExplainResults(explainMetrics, result || null);
   }
 
   /**
-   * Internal get() method that accepts an optional transaction id.
+   * Internal get() method that accepts an optional transaction options, and
+   * returns a query snapshot with transaction and explain metadata.
    *
    * @private
    * @internal
-   * @param transactionIdOrReadTime A transaction ID or the read time at which
-   * to execute the query.
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    */
-  _get(
-    transactionIdOrReadTime?: Uint8Array | Timestamp
-  ): Promise<QuerySnapshot<AppModelType, DbModelType>> {
-    return this._queryUtil._get(this, transactionIdOrReadTime) as Promise<
+  async _get(
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+  ): Promise<QuerySnapshotResponse<QuerySnapshot<AppModelType, DbModelType>>> {
+    const result = await this._getResponse(transactionOrReadTime);
+    if (!result.result) {
+      throw new Error('No QuerySnapshot result');
+    }
+    return result as QuerySnapshotResponse<
       QuerySnapshot<AppModelType, DbModelType>
     >;
+  }
+
+  _getResponse(
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
+    explainOptions?: firestore.ExplainOptions
+  ): Promise<QueryResponse<QuerySnapshot<AppModelType, DbModelType>>> {
+    return this._queryUtil._getResponse(
+      this,
+      transactionOrReadTime,
+      true,
+      explainOptions
+    );
   }
 
   /**
@@ -3144,11 +3146,17 @@ export class Query<
     const responseStream = this._stream(undefined, explainOptions);
     const transform = new Transform({
       objectMode: true,
-      transform(chunk, encoding, callback) {
-        callback(undefined, {
-          document: chunk.document,
-          metrics: chunk.explainMetrics,
-        });
+      transform(
+        chunk: QueryStreamElement<AppModelType, DbModelType>,
+        encoding,
+        callback
+      ) {
+        if (chunk.document || chunk.explainMetrics) {
+          callback(undefined, {
+            document: chunk.document,
+            metrics: chunk.explainMetrics,
+          });
+        }
       },
     });
     responseStream.pipe(transform);
@@ -3177,15 +3185,15 @@ export class Query<
    * Internal method for serializing a query to its RunQuery proto
    * representation with an optional transaction id or read time.
    *
-   * @param transactionIdOrReadTime A transaction ID or the read time at which
-   * to execute the query.
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    * @param explainOptions Options to use for explaining the query (if any).
    * @private
    * @internal
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
@@ -3233,11 +3241,12 @@ export class Query<
       structuredQuery,
     };
 
-    if (transactionIdOrReadTime instanceof Uint8Array) {
-      runQueryRequest.transaction = transactionIdOrReadTime;
-    } else if (transactionIdOrReadTime instanceof Timestamp) {
-      runQueryRequest.readTime =
-        transactionIdOrReadTime.toProto().timestampValue;
+    if (transactionOrReadTime instanceof Uint8Array) {
+      runQueryRequest.transaction = transactionOrReadTime;
+    } else if (transactionOrReadTime instanceof Timestamp) {
+      runQueryRequest.readTime = transactionOrReadTime.toProto().timestampValue;
+    } else if (transactionOrReadTime) {
+      runQueryRequest.newTransaction = transactionOrReadTime;
     }
 
     if (explainOptions) {
@@ -3337,20 +3346,23 @@ export class Query<
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
-   * @param transactionIdOrReadTime A transaction ID or the read time at which
-   * to execute the query.
+   * BEWARE: If `transactionOrReadTime` is `ITransactionOptions`, then the first
+   * response in the stream will be a transaction response.
+   *
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    * @param explainOptions Options to use for explaining the query (if any).
    * @private
    * @internal
-   * @returns A stream of document results.
+   * @returns A stream of document results, optionally preceded by a transaction response.
    */
   _stream(
-    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
     return this._queryUtil._stream(
       this,
-      transactionIdOrReadTime,
+      transactionOrReadTime,
       true,
       explainOptions
     );
@@ -3927,49 +3939,88 @@ export class AggregateQuery<
    *
    * @return A promise that will be resolved with the results of the query.
    */
-  get(): Promise<
+  async get(): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
-    return this._get();
+    const {result} = await this._get();
+    return result;
   }
 
   /**
-   * Internal get() method that accepts an optional transaction id.
+   * Internal get() method that accepts an optional transaction options and
+   * returns a snapshot with transaction and explain metadata.
    *
    * @private
    * @internal
-   * @param {bytes=} transactionId A transaction ID.
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    */
-  _get(
-    transactionIdOrReadTime?: Uint8Array | Timestamp
+  async _get(
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): Promise<
-    AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    QuerySnapshotResponse<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >
+  > {
+    const response = await this._getResponse(transactionOrReadTime);
+    if (!response.result) {
+      throw new Error('No AggregateQuery results');
+    }
+    return response as QuerySnapshotResponse<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >;
+  }
+
+  /**
+   * Internal get() method that accepts an optional transaction id, and returns
+   * transaction metadata.
+   *
+   * @private
+   * @internal
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
+   */
+  _getResponse(
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
+    explainOptions?: firestore.ExplainOptions
+  ): Promise<
+    QueryResponse<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >
   > {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    let result: AggregateQuerySnapshot<
-      AggregateSpecType,
-      AppModelType,
-      DbModelType
-    > | null = null;
-
     return new Promise((resolve, reject) => {
-      const stream = this._stream(transactionIdOrReadTime);
+      const output: QueryResponse<
+        AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+      > = {};
+
+      const stream = this._stream(transactionOrReadTime, explainOptions);
       stream.on('error', err => {
         reject(wrapError(err, stack));
       });
-      stream.on('data', data => {
-        if (data.aggregationResult) {
-          result = data.aggregationResult;
+      stream.on(
+        'data',
+        (
+          data: QueryResponse<
+            AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+          >
+        ) => {
+          if (data.transaction) {
+            output.transaction = data.transaction;
+          }
+          if (data.explainMetrics) {
+            output.explainMetrics = data.explainMetrics;
+          }
+          if (data.result) {
+            output.result = data.result;
+          }
         }
-      });
+      );
       stream.on('end', () => {
         stream.destroy();
-        if (result === null) {
-          reject(Error('RunAggregationQueryResponse is missing result'));
-        }
-        resolve(result!);
+        resolve(output);
       });
     });
   }
@@ -3977,15 +4028,18 @@ export class AggregateQuery<
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
+   * BEWARE: If `transactionOrReadTime` is `ITransactionOptions`, then the first
+   * response in the stream will be a transaction response.
+   *
    * @private
    * @internal
-   * @param transactionIdOrReadTime A transaction ID or the read time at which
-   * to execute the query.
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    * @param explainOptions Options to use for explaining the query (if any).
-   * @returns A stream of document results.
+   * @returns A stream of document results optionally preceded by a transaction response.
    */
   _stream(
-    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): Readable {
     const tag = requestTag();
@@ -3994,23 +4048,13 @@ export class AggregateQuery<
     const stream: Transform = new Transform({
       objectMode: true,
       transform: (proto: api.IRunAggregationQueryResponse, enc, callback) => {
-        const output: {
-          aggregationResult?: AggregateQuerySnapshot<
-            AggregateSpecType,
-            AppModelType,
-            DbModelType
-          >;
-          explainMetrics?: ExplainMetrics;
-        } = {};
+        const output: QueryResponse<
+          AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+        > = {};
 
-        if (proto.result) {
-          const readTime = Timestamp.fromProto(proto.readTime!);
-          const data = this.decodeResult(proto.result);
-          output.aggregationResult = new AggregateQuerySnapshot(
-            this,
-            readTime,
-            data
-          );
+        // Proto comes with zero-length buffer by default
+        if (proto.transaction?.length) {
+          output.transaction = proto.transaction;
         }
 
         if (proto.explainMetrics) {
@@ -4018,6 +4062,12 @@ export class AggregateQuery<
             proto.explainMetrics,
             firestore._serializer!
           );
+        }
+
+        if (proto.result) {
+          const readTime = Timestamp.fromProto(proto.readTime!);
+          const data = this.decodeResult(proto.result);
+          output.result = new AggregateQuerySnapshot(this, readTime, data);
         }
 
         callback(undefined, output);
@@ -4030,7 +4080,7 @@ export class AggregateQuery<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = this.toProto(transactionIdOrReadTime, explainOptions);
+        const request = this.toProto(transactionOrReadTime, explainOptions);
 
         const backendStream = await firestore.requestStream(
           'runAggregationQuery',
@@ -4104,7 +4154,7 @@ export class AggregateQuery<
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
@@ -4127,10 +4177,12 @@ export class AggregateQuery<
       },
     };
 
-    if (transactionIdOrReadTime instanceof Uint8Array) {
-      runQueryRequest.transaction = transactionIdOrReadTime;
-    } else if (transactionIdOrReadTime instanceof Timestamp) {
-      runQueryRequest.readTime = transactionIdOrReadTime;
+    if (transactionOrReadTime instanceof Uint8Array) {
+      runQueryRequest.transaction = transactionOrReadTime;
+    } else if (transactionOrReadTime instanceof Timestamp) {
+      runQueryRequest.readTime = transactionOrReadTime;
+    } else if (transactionOrReadTime) {
+      runQueryRequest.newTransaction = transactionOrReadTime;
     }
 
     if (explainOptions) {
@@ -4179,52 +4231,21 @@ export class AggregateQuery<
    * @return A Promise that will be resolved with the planner information,
    * statistics from the query execution (if any), and the query results (if any).
    */
-  explain(
+  async explain(
     options?: firestore.ExplainOptions
   ): Promise<
     ExplainResults<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
     >
   > {
-    if (options === undefined) {
-      options = {};
+    const {result, explainMetrics} = await this._getResponse(
+      undefined,
+      options || {}
+    );
+    if (!explainMetrics) {
+      throw new Error('No explain results');
     }
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    let metrics: ExplainMetrics | null = null;
-    let aggregationResult: AggregateQuerySnapshot<
-      AggregateSpecType,
-      AppModelType,
-      DbModelType
-    > | null = null;
-
-    return new Promise((resolve, reject) => {
-      const stream = this._stream(undefined, options);
-      stream.on('error', err => {
-        reject(wrapError(err, stack));
-      });
-      stream.on('data', data => {
-        if (data.aggregationResult) {
-          aggregationResult = data.aggregationResult;
-        }
-
-        if (data.explainMetrics) {
-          metrics = data.explainMetrics;
-        }
-      });
-      stream.on('end', () => {
-        stream.destroy();
-        if (metrics === null) {
-          reject('No explain results.');
-        }
-        resolve(
-          new ExplainResults<
-            AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-          >(metrics!, aggregationResult)
-        );
-      });
-    });
+    return new ExplainResults(explainMetrics, result || null);
   }
 }
 
@@ -4409,13 +4430,17 @@ export class VectorQuery<
    *
    * @returns A promise that will be resolved with the results of the query.
    */
-  get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
-    return this._queryUtil._get(
+  async get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
+    const {result} = await this._queryUtil._getResponse(
       this,
       /*transactionId*/ undefined,
       // VectorQuery cannot be retried with cursors as they do not support cursors yet.
       /*retryWithCursor*/ false
-    ) as Promise<VectorQuerySnapshot<AppModelType, DbModelType>>;
+    );
+    if (!result) {
+      throw new Error('No VectorQuerySnapshot result');
+    }
+    return result;
   }
 
   /**
@@ -4443,9 +4468,9 @@ export class VectorQuery<
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionIdOrReadTime?: Uint8Array | Timestamp
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): api.IRunQueryRequest {
-    const queryProto = this._query.toProto(transactionIdOrReadTime);
+    const queryProto = this._query.toProto(transactionOrReadTime);
 
     const queryVector = Array.isArray(this.queryVector)
       ? new VectorValue(this.queryVector)

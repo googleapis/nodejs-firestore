@@ -25,6 +25,15 @@ import {Timestamp} from './timestamp';
 import {DocumentData} from '@google-cloud/firestore';
 import api = google.firestore.v1;
 
+interface BatchGetResponse<AppModelType, DbModelType extends DocumentData> {
+  result: Array<DocumentSnapshot<AppModelType, DbModelType>>;
+  /**
+   * The transaction that was started as part of this request. Will only be if
+   * `DocumentReader.transactionIdOrNewTransaction` was `api.ITransactionOptions`.
+   */
+  transaction?: Uint8Array;
+}
+
 /**
  * A wrapper around BatchGetDocumentsRequest that retries request upon stream
  * failure and returns ordered results.
@@ -33,15 +42,9 @@ import api = google.firestore.v1;
  * @internal
  */
 export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
-  /** An optional field mask to apply to this read. */
-  fieldMask?: FieldPath[];
-  /** An optional transaction ID to use for this read. */
-  transactionId?: Uint8Array;
-  /** An optional readTime to use for this read. */
-  readTime?: Timestamp;
-
-  private outstandingDocuments = new Set<string>();
-  private retrievedDocuments = new Map<string, DocumentSnapshot>();
+  private readonly outstandingDocuments = new Set<string>();
+  private readonly retrievedDocuments = new Map<string, DocumentSnapshot>();
+  private retrievedTransactionId?: Uint8Array;
 
   /**
    * Creates a new DocumentReader that fetches the provided documents (via
@@ -49,10 +52,20 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
    *
    * @param firestore The Firestore instance to use.
    * @param allDocuments The documents to get.
+   * @param fieldMask An optional field mask to apply to this read
+   * @param transactionOrReadTime An optional transaction ID to use for this
+   * read or options for beginning a new transaction with this read
    */
   constructor(
-    private firestore: Firestore,
-    private allDocuments: Array<DocumentReference<AppModelType, DbModelType>>
+    private readonly firestore: Firestore,
+    private readonly allDocuments: ReadonlyArray<
+      DocumentReference<AppModelType, DbModelType>
+    >,
+    private readonly fieldMask?: FieldPath[],
+    private readonly transactionOrReadTime?:
+      | Uint8Array
+      | api.ITransactionOptions
+      | Timestamp
   ) {
     for (const docRef of this.allDocuments) {
       this.outstandingDocuments.add(docRef.formattedName);
@@ -60,13 +73,27 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
   }
 
   /**
-   * Invokes the BatchGetDocuments RPC and returns the results.
+   * Invokes the BatchGetDocuments RPC and returns the results as an array of
+   * documents.
    *
    * @param requestTag A unique client-assigned identifier for this request.
    */
   async get(
     requestTag: string
   ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
+    const {result} = await this._get(requestTag);
+    return result;
+  }
+
+  /**
+   * Invokes the BatchGetDocuments RPC and returns the results with transaction
+   * metadata.
+   *
+   * @param requestTag A unique client-assigned identifier for this request.
+   */
+  async _get(
+    requestTag: string
+  ): Promise<BatchGetResponse<AppModelType, DbModelType>> {
     await this.fetchDocuments(requestTag);
 
     // BatchGetDocuments doesn't preserve document order. We use the request
@@ -92,7 +119,10 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
       }
     }
 
-    return orderedDocuments;
+    return {
+      result: orderedDocuments,
+      transaction: this.retrievedTransactionId,
+    };
   }
 
   private async fetchDocuments(requestTag: string): Promise<void> {
@@ -104,10 +134,12 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
       database: this.firestore.formattedName,
       documents: Array.from(this.outstandingDocuments),
     };
-    if (this.transactionId) {
-      request.transaction = this.transactionId;
-    } else if (this.readTime) {
-      request.readTime = this.readTime.toProto().timestampValue;
+    if (this.transactionOrReadTime instanceof Uint8Array) {
+      request.transaction = this.transactionOrReadTime;
+    } else if (this.transactionOrReadTime instanceof Timestamp) {
+      request.readTime = this.transactionOrReadTime.toProto().timestampValue;
+    } else if (this.transactionOrReadTime) {
+      request.newTransaction = this.transactionOrReadTime;
     }
 
     if (this.fieldMask) {
@@ -129,8 +161,12 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
       stream.resume();
 
       for await (const response of stream) {
-        let snapshot: DocumentSnapshot<DocumentData>;
+        // Proto comes with zero-length buffer by default
+        if (response.transaction?.length) {
+          this.retrievedTransactionId = response.transaction;
+        }
 
+        let snapshot: DocumentSnapshot<DocumentData> | undefined;
         if (response.found) {
           logger(
             'DocumentReader.fetchDocuments',
@@ -142,28 +178,31 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
             response.found,
             response.readTime!
           );
-        } else {
+        } else if (response.missing) {
           logger(
             'DocumentReader.fetchDocuments',
             requestTag,
             'Document missing: %s',
-            response.missing!
+            response.missing
           );
           snapshot = this.firestore.snapshot_(
-            response.missing!,
+            response.missing,
             response.readTime!
           );
         }
 
-        const path = snapshot.ref.formattedName;
-        this.outstandingDocuments.delete(path);
-        this.retrievedDocuments.set(path, snapshot);
-        ++resultCount;
+        if (snapshot) {
+          const path = snapshot.ref.formattedName;
+          this.outstandingDocuments.delete(path);
+          this.retrievedDocuments.set(path, snapshot);
+          ++resultCount;
+        }
       }
     } catch (error) {
       const shouldRetry =
         // Transactional reads are retried via the transaction runner.
-        !this.transactionId &&
+        !request.transaction &&
+        !request.newTransaction &&
         // Only retry if we made progress.
         resultCount > 0 &&
         // Don't retry permanent errors.

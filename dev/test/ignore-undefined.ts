@@ -20,11 +20,11 @@ import {
   create,
   createInstance,
   document,
+  emptyQueryStream,
   InvalidApiUsage,
   requestEquals,
   response,
   set,
-  stream,
   update,
   updateMask,
   writeResult,
@@ -169,7 +169,7 @@ describe('ignores undefined values', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, fieldFiltersQuery('foo', 'EQUAL', FOO_MAP));
-        return stream();
+        return emptyQueryStream();
       },
     };
 
@@ -191,7 +191,7 @@ describe('ignores undefined values', () => {
           orderBy('foo', 'ASCENDING'),
           startAt(true, FOO_MAP)
         );
-        return stream();
+        return emptyQueryStream();
       },
     };
 
