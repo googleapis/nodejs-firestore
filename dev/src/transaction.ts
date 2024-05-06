@@ -516,16 +516,20 @@ export class Transaction implements firestore.Transaction {
     this._transactionIdPromise = undefined;
     this._prevTransactionId = transactionId;
 
-    try {
-      await this._firestore.request('rollback', request, this._requestTag);
-    } catch (err) {
-      logger(
-        'Firestore.runTransaction',
-        this._requestTag,
-        'Best effort to rollback failed with error:',
-        err
-      );
-    }
+    // We don't need to wait for rollback to completed before continuing.
+    // If there are any locks held, then rollback will eventually release them.
+    // Rollback can be done concurrently thereby reducing latency caused by
+    // otherwise blocking.
+    this._firestore
+      .request('rollback', request, this._requestTag)
+      .catch(err => {
+        logger(
+          'Firestore.runTransaction',
+          this._requestTag,
+          'Best effort to rollback failed with error:',
+          err
+        );
+      });
   }
 
   /**
