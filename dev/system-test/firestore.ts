@@ -429,6 +429,77 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot!.data().count).to.equal(3);
   });
 
+  it('can plan a vector query', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionReference = await indexTestHelper.createTestDocs([
+      {foo: 'bar'},
+      {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
+      {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+      {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([20, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+    ]);
+
+    const explainResults = await indexTestHelper
+      .query(collectionReference)
+      .findNearest('embedding', FieldValue.vector([1, 3]), {
+        limit: 10,
+        distanceMeasure: 'COSINE',
+      })
+      .explain({analyze: false});
+
+    const metrics = explainResults.metrics;
+
+    const plan = metrics.planSummary;
+    expect(plan).to.not.be.null;
+    expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
+
+    expect(metrics.executionStats).to.be.null;
+    expect(explainResults.snapshot).to.be.null;
+  });
+
+  it('can profile a vector query', async () => {
+    const indexTestHelper = new IndexTestHelper(firestore);
+
+    const collectionReference = await indexTestHelper.createTestDocs([
+      {foo: 'bar'},
+      {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
+      {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+      {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([20, 0])},
+      {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+    ]);
+
+    const explainResults = await indexTestHelper
+      .query(collectionReference)
+      .findNearest('embedding', FieldValue.vector([1, 3]), {
+        limit: 10,
+        distanceMeasure: 'COSINE',
+      })
+      .explain({analyze: true});
+
+    const metrics = explainResults.metrics;
+    expect(metrics.planSummary).to.not.be.null;
+    expect(
+      Object.keys(metrics.planSummary.indexesUsed).length
+    ).to.be.greaterThan(0);
+
+    expect(metrics.executionStats).to.not.be.null;
+    const stats = metrics.executionStats!;
+
+    expect(stats.readOperations).to.be.greaterThan(0);
+    expect(stats.resultsReturned).to.be.equal(5);
+    expect(
+      stats.executionDuration.nanoseconds > 0 ||
+        stats.executionDuration.seconds > 0
+    ).to.be.true;
+    expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
+
+    expect(explainResults.snapshot).to.not.be.null;
+    expect(explainResults.snapshot!.docs.length).to.equal(5);
+  });
+
   it('getAll() supports array destructuring', () => {
     const ref1 = randomCol.doc('doc1');
     const ref2 = randomCol.doc('doc2');
