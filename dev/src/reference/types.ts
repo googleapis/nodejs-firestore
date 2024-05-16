@@ -17,6 +17,33 @@
 import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
+import {Timestamp} from '../timestamp';
+import {ExplainMetrics} from '../query-profile';
+import {QueryDocumentSnapshot} from '../document';
+
+import * as firestore from '@google-cloud/firestore';
+
+export interface QueryStreamElement<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> {
+  transaction?: Uint8Array;
+  readTime?: Timestamp;
+  explainMetrics?: ExplainMetrics;
+  document?: QueryDocumentSnapshot<AppModelType, DbModelType>;
+}
+
+export interface QueryResponse<TSnapshot> {
+  transaction?: Uint8Array;
+  explainMetrics?: ExplainMetrics;
+  result?: TSnapshot;
+}
+
+export interface QuerySnapshotResponse<TSnapshot>
+  extends QueryResponse<TSnapshot> {
+  result: TSnapshot;
+}
+
 /** Internal representation of a query cursor before serialization. */
 export interface QueryCursor {
   before: boolean;

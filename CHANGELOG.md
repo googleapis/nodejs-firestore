@@ -4,6 +4,20 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.7.0](https://github.com/googleapis/nodejs-firestore/compare/v7.6.0...v7.7.0) (2024-05-07)
+
+
+### Features
+
+* Add several fields to manage state of database encryption update ([5811492](https://github.com/googleapis/nodejs-firestore/commit/5811492357c7b66324839c02bcbf45a5b6d6d7e7))
+* Lazy-started transactions ([#2017](https://github.com/googleapis/nodejs-firestore/issues/2017)) ([2c726a1](https://github.com/googleapis/nodejs-firestore/commit/2c726a176407c45f519846052469e1bbbbc24750))
+
+
+### Bug Fixes
+
+* Nonblocking rollback ([#2039](https://github.com/googleapis/nodejs-firestore/issues/2039)) ([52099c8](https://github.com/googleapis/nodejs-firestore/commit/52099c8eb8ce8aba0ab5aee9f3dd4c4a59c2afd4))
+* Upgrade the `google-gax` dependency version. ([#2040](https://github.com/googleapis/nodejs-firestore/issues/2040)) ([0b9efa6](https://github.com/googleapis/nodejs-firestore/commit/0b9efa6d5a3d46ad2f084aef58c529e710c7f596))
+
 ## [7.6.0](https://github.com/googleapis/nodejs-firestore/compare/v7.5.0...v7.6.0) (2024-04-02)
 
 

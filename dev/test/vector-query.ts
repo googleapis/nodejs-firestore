@@ -17,6 +17,7 @@ import {fieldFiltersQuery, queryEquals, result} from './query';
 import {
   ApiOverride,
   createInstance,
+  emptyQueryStream,
   stream,
   streamWithoutEnd,
   verifyInstance,
@@ -174,7 +175,7 @@ describe('Vector(findNearest) query interface', () => {
           fieldFiltersQuery('foo', 'EQUAL', 'bar'),
           findNearestQuery('embedding', [3, 4, 5], 100, 'COSINE')
         );
-        return stream();
+        return emptyQueryStream();
       },
     };
 

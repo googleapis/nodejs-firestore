@@ -61,10 +61,17 @@ export class AggregateQuery<AggregateSpecType extends AggregateSpec, AppModelTyp
     get(): Promise<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-    // Warning: (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
+    // Warning: (ae-forgotten-export) The symbol "google" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "QuerySnapshotResponse" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    _get(transactionIdOrReadTime?: Uint8Array | Timestamp): Promise<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>;
+    _get(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions): Promise<QuerySnapshotResponse<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>>;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (ae-forgotten-export) The symbol "QueryResponse" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    _getResponse(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions, explainOptions?: firestore.ExplainOptions): Promise<QueryResponse<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>>;
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     isEqual(other: firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>): boolean;
@@ -74,12 +81,11 @@ export class AggregateQuery<AggregateSpecType extends AggregateSpec, AppModelTyp
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     //
     // @internal
-    _stream(transactionIdOrReadTime?: Uint8Array | Timestamp, explainOptions?: firestore.ExplainOptions): Readable;
+    _stream(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions, explainOptions?: firestore.ExplainOptions): Readable;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-    // Warning: (ae-forgotten-export) The symbol "google" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    toProto(transactionIdOrReadTime?: Uint8Array | Timestamp, explainOptions?: firestore.ExplainOptions): api.IRunAggregationQueryRequest;
+    toProto(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions, explainOptions?: firestore.ExplainOptions): api.IRunAggregationQueryRequest;
 }
 
 // @public
@@ -1053,7 +1059,9 @@ export class Query<AppModelType = firestore.DocumentData, DbModelType extends fi
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     //
     // @internal
-    _get(transactionIdOrReadTime?: Uint8Array | Timestamp): Promise<QuerySnapshot<AppModelType, DbModelType>>;
+    _get(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions): Promise<QuerySnapshotResponse<QuerySnapshot<AppModelType, DbModelType>>>;
+    // (undocumented)
+    _getResponse(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions, explainOptions?: firestore.ExplainOptions): Promise<QueryResponse<QuerySnapshot<AppModelType, DbModelType>>>;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
     // @internal
@@ -1148,7 +1156,7 @@ export class Query<AppModelType = firestore.DocumentData, DbModelType extends fi
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
     // @internal
-    _stream(transactionIdOrReadTime?: Uint8Array | Timestamp, explainOptions?: firestore.ExplainOptions): NodeJS.ReadableStream;
+    _stream(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions, explainOptions?: firestore.ExplainOptions): NodeJS.ReadableStream;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     // Warning: (ae-forgotten-export) The symbol "protos" needs to be exported by the entry point index.d.ts
     //
@@ -1159,7 +1167,7 @@ export class Query<AppModelType = firestore.DocumentData, DbModelType extends fi
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
     // @internal
-    toProto(transactionIdOrReadTime?: Uint8Array | Timestamp, explainOptions?: firestore.ExplainOptions): api.IRunQueryRequest;
+    toProto(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions, explainOptions?: firestore.ExplainOptions): api.IRunQueryRequest;
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
@@ -1365,10 +1373,6 @@ export class Transaction implements firestore.Transaction {
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
     // @internal
-    begin(): Promise<void>;
-    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-    //
-    // @internal
     commit(): Promise<void>;
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
@@ -1471,7 +1475,7 @@ export class VectorQuery<AppModelType = firestore.DocumentData, DbModelType exte
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
     // @internal
-    toProto(transactionIdOrReadTime?: Uint8Array | Timestamp): api.IRunQueryRequest;
+    toProto(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions): api.IRunQueryRequest;
 }
 
 // @public
@@ -1652,34 +1656,32 @@ export class WriteResult implements firestore.WriteResult {
 // build/src/path.d.ts:120:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/src/path.d.ts:312:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/src/rate-limiter.d.ts:13:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/aggregate-query.d.ts:71:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/src/reference/aggregate-query.d.ts:87:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/src/reference/field-filter-internal.d.ts:24:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/src/reference/field-filter-internal.d.ts:26:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 // build/src/reference/field-order.d.ts:22:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/src/reference/field-order.d.ts:24:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 // build/src/reference/query-options.d.ts:28:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/query.d.ts:392:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
-// build/src/reference/query.d.ts:398:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/query.d.ts:400:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:408:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/query.d.ts:410:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:410:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
-// build/src/reference/query.d.ts:412:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:412:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
-// build/src/reference/query.d.ts:414:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:416:24 - (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// build/src/reference/query.d.ts:416:17 - (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-// build/src/reference/query.d.ts:425:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:427:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
-// build/src/reference/query.d.ts:429:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/query.d.ts:613:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:614:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/src/reference/query.d.ts:393:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// build/src/reference/query.d.ts:399:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/src/reference/query.d.ts:401:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/src/reference/query.d.ts:409:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/src/reference/query.d.ts:411:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/src/reference/query.d.ts:411:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
+// build/src/reference/query.d.ts:413:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/src/reference/query.d.ts:413:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
+// build/src/reference/query.d.ts:415:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/src/reference/query.d.ts:417:24 - (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+// build/src/reference/query.d.ts:417:17 - (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+// build/src/reference/query.d.ts:426:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/src/reference/query.d.ts:428:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// build/src/reference/query.d.ts:430:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/src/reference/query.d.ts:616:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/src/reference/query.d.ts:617:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/src/reference/vector-query.d.ts:52:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/src/reference/vector-query.d.ts:57:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/src/serializer.d.ts:26:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/src/serializer.d.ts:36:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/transaction.d.ts:241:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/transaction.d.ts:243:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
 // build/src/write-batch.d.ts:86:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/src/write-batch.d.ts:109:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 

@@ -97,13 +97,17 @@ export class VectorQuery<
    *
    * @returns A promise that will be resolved with the results of the query.
    */
-  get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
-    return this._queryUtil._get(
+  async get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
+    const {result} = await this._queryUtil._getResponse(
       this,
       /*transactionId*/ undefined,
       // VectorQuery cannot be retried with cursors as they do not support cursors yet.
       /*retryWithCursor*/ false
-    ) as Promise<VectorQuerySnapshot<AppModelType, DbModelType>>;
+    );
+    if (!result) {
+      throw new Error('No VectorQuerySnapshot result');
+    }
+    return result;
   }
 
   /**
@@ -131,9 +135,9 @@ export class VectorQuery<
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionIdOrReadTime?: Uint8Array | Timestamp
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): api.IRunQueryRequest {
-    const queryProto = this._query.toProto(transactionIdOrReadTime);
+    const queryProto = this._query.toProto(transactionOrReadTime);
 
     const queryVector = Array.isArray(this.queryVector)
       ? new VectorValue(this.queryVector)

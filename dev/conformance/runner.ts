@@ -285,7 +285,11 @@ function queryHandler(spec: ConformanceProto) {
     const expectedQuery = STRUCTURED_QUERY_TYPE.fromObject(spec.query);
     expect(actualQuery).to.deep.equal(expectedQuery);
     const stream = through2.obj();
-    setImmediate(() => stream.push(null));
+    setImmediate(() => {
+      // Empty query always emits a readTime
+      stream.push({readTime: {seconds: 0, nanos: 0}});
+      stream.push(null);
+    });
     return stream;
   };
 }

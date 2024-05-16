@@ -29,6 +29,7 @@ import {logger} from '../logger';
 import {AggregateQuerySnapshot} from './aggregate-query-snapshot';
 import {Query} from './query';
 import {Readable, Transform} from 'stream';
+import {QueryResponse, QuerySnapshotResponse} from './types';
 
 /**
  * A query that calculates aggregations over an underlying query.
@@ -77,49 +78,88 @@ export class AggregateQuery<
    *
    * @return A promise that will be resolved with the results of the query.
    */
-  get(): Promise<
+  async get(): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
-    return this._get();
+    const {result} = await this._get();
+    return result;
   }
 
   /**
-   * Internal get() method that accepts an optional transaction id.
+   * Internal get() method that accepts an optional transaction options and
+   * returns a snapshot with transaction and explain metadata.
    *
    * @private
    * @internal
-   * @param {bytes=} transactionId A transaction ID.
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    */
-  _get(
-    transactionIdOrReadTime?: Uint8Array | Timestamp
+  async _get(
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): Promise<
-    AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    QuerySnapshotResponse<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >
+  > {
+    const response = await this._getResponse(transactionOrReadTime);
+    if (!response.result) {
+      throw new Error('No AggregateQuery results');
+    }
+    return response as QuerySnapshotResponse<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >;
+  }
+
+  /**
+   * Internal get() method that accepts an optional transaction id, and returns
+   * transaction metadata.
+   *
+   * @private
+   * @internal
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
+   */
+  _getResponse(
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
+    explainOptions?: firestore.ExplainOptions
+  ): Promise<
+    QueryResponse<
+      AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+    >
   > {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    let result: AggregateQuerySnapshot<
-      AggregateSpecType,
-      AppModelType,
-      DbModelType
-    > | null = null;
-
     return new Promise((resolve, reject) => {
-      const stream = this._stream(transactionIdOrReadTime);
+      const output: QueryResponse<
+        AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+      > = {};
+
+      const stream = this._stream(transactionOrReadTime, explainOptions);
       stream.on('error', err => {
         reject(wrapError(err, stack));
       });
-      stream.on('data', data => {
-        if (data.aggregationResult) {
-          result = data.aggregationResult;
+      stream.on(
+        'data',
+        (
+          data: QueryResponse<
+            AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+          >
+        ) => {
+          if (data.transaction) {
+            output.transaction = data.transaction;
+          }
+          if (data.explainMetrics) {
+            output.explainMetrics = data.explainMetrics;
+          }
+          if (data.result) {
+            output.result = data.result;
+          }
         }
-      });
+      );
       stream.on('end', () => {
         stream.destroy();
-        if (result === null) {
-          reject(Error('RunAggregationQueryResponse is missing result'));
-        }
-        resolve(result!);
+        resolve(output);
       });
     });
   }
@@ -127,15 +167,18 @@ export class AggregateQuery<
   /**
    * Internal streaming method that accepts an optional transaction ID.
    *
+   * BEWARE: If `transactionOrReadTime` is `ITransactionOptions`, then the first
+   * response in the stream will be a transaction response.
+   *
    * @private
    * @internal
-   * @param transactionIdOrReadTime A transaction ID or the read time at which
-   * to execute the query.
+   * @param transactionOrReadTime A transaction ID, options to start a new
+   *  transaction, or timestamp to use as read time.
    * @param explainOptions Options to use for explaining the query (if any).
-   * @returns A stream of document results.
+   * @returns A stream of document results optionally preceded by a transaction response.
    */
   _stream(
-    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): Readable {
     const tag = requestTag();
@@ -144,23 +187,13 @@ export class AggregateQuery<
     const stream: Transform = new Transform({
       objectMode: true,
       transform: (proto: api.IRunAggregationQueryResponse, enc, callback) => {
-        const output: {
-          aggregationResult?: AggregateQuerySnapshot<
-            AggregateSpecType,
-            AppModelType,
-            DbModelType
-          >;
-          explainMetrics?: ExplainMetrics;
-        } = {};
+        const output: QueryResponse<
+          AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
+        > = {};
 
-        if (proto.result) {
-          const readTime = Timestamp.fromProto(proto.readTime!);
-          const data = this.decodeResult(proto.result);
-          output.aggregationResult = new AggregateQuerySnapshot(
-            this,
-            readTime,
-            data
-          );
+        // Proto comes with zero-length buffer by default
+        if (proto.transaction?.length) {
+          output.transaction = proto.transaction;
         }
 
         if (proto.explainMetrics) {
@@ -168,6 +201,12 @@ export class AggregateQuery<
             proto.explainMetrics,
             firestore._serializer!
           );
+        }
+
+        if (proto.result) {
+          const readTime = Timestamp.fromProto(proto.readTime!);
+          const data = this.decodeResult(proto.result);
+          output.result = new AggregateQuerySnapshot(this, readTime, data);
         }
 
         callback(undefined, output);
@@ -180,7 +219,7 @@ export class AggregateQuery<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = this.toProto(transactionIdOrReadTime, explainOptions);
+        const request = this.toProto(transactionOrReadTime, explainOptions);
 
         const backendStream = await firestore.requestStream(
           'runAggregationQuery',
@@ -254,7 +293,7 @@ export class AggregateQuery<
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
@@ -277,10 +316,12 @@ export class AggregateQuery<
       },
     };
 
-    if (transactionIdOrReadTime instanceof Uint8Array) {
-      runQueryRequest.transaction = transactionIdOrReadTime;
-    } else if (transactionIdOrReadTime instanceof Timestamp) {
-      runQueryRequest.readTime = transactionIdOrReadTime;
+    if (transactionOrReadTime instanceof Uint8Array) {
+      runQueryRequest.transaction = transactionOrReadTime;
+    } else if (transactionOrReadTime instanceof Timestamp) {
+      runQueryRequest.readTime = transactionOrReadTime;
+    } else if (transactionOrReadTime) {
+      runQueryRequest.newTransaction = transactionOrReadTime;
     }
 
     if (explainOptions) {
@@ -329,51 +370,20 @@ export class AggregateQuery<
    * @return A Promise that will be resolved with the planner information,
    * statistics from the query execution (if any), and the query results (if any).
    */
-  explain(
+  async explain(
     options?: firestore.ExplainOptions
   ): Promise<
     ExplainResults<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
     >
   > {
-    if (options === undefined) {
-      options = {};
+    const {result, explainMetrics} = await this._getResponse(
+      undefined,
+      options || {}
+    );
+    if (!explainMetrics) {
+      throw new Error('No explain results');
     }
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    let metrics: ExplainMetrics | null = null;
-    let aggregationResult: AggregateQuerySnapshot<
-      AggregateSpecType,
-      AppModelType,
-      DbModelType
-    > | null = null;
-
-    return new Promise((resolve, reject) => {
-      const stream = this._stream(undefined, options);
-      stream.on('error', err => {
-        reject(wrapError(err, stack));
-      });
-      stream.on('data', data => {
-        if (data.aggregationResult) {
-          aggregationResult = data.aggregationResult;
-        }
-
-        if (data.explainMetrics) {
-          metrics = data.explainMetrics;
-        }
-      });
-      stream.on('end', () => {
-        stream.destroy();
-        if (metrics === null) {
-          reject('No explain results.');
-        }
-        resolve(
-          new ExplainResults<
-            AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-          >(metrics!, aggregationResult)
-        );
-      });
-    });
+    return new ExplainResults(explainMetrics, result || null);
   }
 }

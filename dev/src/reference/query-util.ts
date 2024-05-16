@@ -35,10 +35,11 @@ import {VectorQuery} from './vector-query';
 import {Query} from './query';
 import Firestore from '../index';
 import {QueryOptions} from './query-options';
-import {QuerySnapshot} from './query-snapshot';
-import {VectorQuerySnapshot} from './vector-query-snapshot';
-import {LimitType} from './types';
+import {LimitType, QueryResponse, QueryStreamElement} from './types';
 import {NOOP_MESSAGE} from './constants';
+
+import * as protos from '../../protos/firestore_v1_proto_api';
+import api = protos.google.firestore.v1;
 
 export class QueryUtil<
   AppModelType,
@@ -56,30 +57,42 @@ export class QueryUtil<
     readonly _serializer: Serializer
   ) {}
 
-  _get(
+  _getResponse(
     query: Template,
-    transactionIdOrReadTime?: Uint8Array | Timestamp,
-    retryWithCursor = true
-  ): Promise<
-    | QuerySnapshot<AppModelType, DbModelType>
-    | VectorQuerySnapshot<AppModelType, DbModelType>
-  > {
-    const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
-
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
+    retryWithCursor = true,
+    explainOptions?: firestore.ExplainOptions
+  ): Promise<QueryResponse<ReturnType<Template['_createSnapshot']>>> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
     return new Promise((resolve, reject) => {
-      let readTime: Timestamp;
+      const docs: Array<QueryDocumentSnapshot<AppModelType, DbModelType>> = [];
+      const output: Omit<QueryResponse<never>, 'result'> & {
+        readTime?: Timestamp;
+      } = {};
 
-      this._stream(query, transactionIdOrReadTime, retryWithCursor)
+      this._stream(
+        query,
+        transactionOrReadTime,
+        retryWithCursor,
+        explainOptions
+      )
         .on('error', err => {
           reject(wrapError(err, stack));
         })
-        .on('data', result => {
-          readTime = result.readTime;
-          if (result.document) {
-            docs.push(result.document);
+        .on('data', (data: QueryStreamElement<AppModelType, DbModelType>) => {
+          if (data.transaction) {
+            output.transaction = data.transaction;
+          }
+          if (data.readTime) {
+            output.readTime = data.readTime;
+          }
+          if (data.explainMetrics) {
+            output.explainMetrics = data.explainMetrics;
+          }
+          if (data.document) {
+            docs.push(data.document);
           }
         })
         .on('end', () => {
@@ -90,22 +103,30 @@ export class QueryUtil<
             docs.reverse();
           }
 
-          resolve(
-            query._createSnapshot(
-              readTime,
-              docs.length,
-              () => docs,
-              () => {
-                const changes: Array<
-                  DocumentChange<AppModelType, DbModelType>
-                > = [];
-                for (let i = 0; i < docs.length; ++i) {
-                  changes.push(new DocumentChange('added', docs[i], -1, i));
+          // Only return a snapshot when we have a readTime
+          // explain queries with analyze !== true will return no documents and no read time
+          const result = output.readTime
+            ? (query._createSnapshot(
+                output.readTime,
+                docs.length,
+                () => docs,
+                () => {
+                  const changes: Array<
+                    DocumentChange<AppModelType, DbModelType>
+                  > = [];
+                  for (let i = 0; i < docs.length; ++i) {
+                    changes.push(new DocumentChange('added', docs[i], -1, i));
+                  }
+                  return changes;
                 }
-                return changes;
-              }
-            )
-          );
+              ) as ReturnType<Template['_createSnapshot']>)
+            : undefined;
+
+          resolve({
+            transaction: output.transaction,
+            explainMetrics: output.explainMetrics,
+            result,
+          });
         });
     });
   }
@@ -147,7 +168,7 @@ export class QueryUtil<
 
   _stream(
     query: Template,
-    transactionIdOrReadTime?: Uint8Array | Timestamp,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     retryWithCursor = true,
     explainOptions?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
@@ -163,17 +184,22 @@ export class QueryUtil<
     let backendStream: Duplex;
     const stream = new Transform({
       objectMode: true,
-      transform: (proto, enc, callback) => {
+      transform: (
+        proto: api.RunQueryResponse | typeof NOOP_MESSAGE,
+        enc,
+        callback
+      ) => {
         if (proto === NOOP_MESSAGE) {
           callback(undefined);
           return;
         }
 
-        const output: {
-          readTime?: Timestamp;
-          document?: QueryDocumentSnapshot<AppModelType, DbModelType>;
-          explainMetrics?: ExplainMetrics;
-        } = {};
+        const output: QueryStreamElement<AppModelType, DbModelType> = {};
+
+        // Proto comes with zero-length buffer by default
+        if (proto.transaction?.length) {
+          output.transaction = proto.transaction;
+        }
 
         if (proto.readTime) {
           output.readTime = Timestamp.fromProto(proto.readTime);
@@ -182,7 +208,7 @@ export class QueryUtil<
         if (proto.document) {
           const document = this._firestore.snapshot_(
             proto.document,
-            proto.readTime
+            proto.readTime!
           );
           const finalDoc = new DocumentSnapshotBuilder<
             AppModelType,
@@ -226,7 +252,7 @@ export class QueryUtil<
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        let request = query.toProto(transactionIdOrReadTime, explainOptions);
+        let request = query.toProto(transactionOrReadTime, explainOptions);
 
         let streamActive: Deferred<boolean>;
         do {
@@ -247,7 +273,7 @@ export class QueryUtil<
             // incorrect/partial profiling results.
             if (
               !isExplain &&
-              !transactionIdOrReadTime &&
+              !transactionOrReadTime &&
               !this._isPermanentRpcError(err, 'runQuery')
             ) {
               logger(
