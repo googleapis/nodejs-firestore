@@ -133,7 +133,7 @@ export class VectorQuery<
   ): Promise<QueryResponse<VectorQuerySnapshot<AppModelType, DbModelType>>> {
     return this._queryUtil._getResponse(
       this,
-      undefined,
+      /*transactionOrReadTime*/ undefined,
       // VectorQuery cannot be retried with cursors as they do not support cursors yet.
       /*retryWithCursor*/ false,
       explainOptions
