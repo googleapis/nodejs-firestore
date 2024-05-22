@@ -381,6 +381,14 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * Options that can be used to configure OpenTelemetry for this library.
+   */
+  export interface FirestoreOpenTelemetryOptions {
+    enableTracing?: boolean;
+    traceProvider?: any;
+  }
+
+  /**
    * Settings used to directly configure a `Firestore` instance.
    */
   export interface Settings {
@@ -459,6 +467,11 @@ declare namespace FirebaseFirestore {
      * or `Query<T>.onSnapshot()`.
      */
     preferRest?: boolean;
+
+    /**
+     * Options that can be used to configure OpenTelemetry for this library.
+     */
+    openTelemetryOptions?: FirestoreOpenTelemetryOptions;
 
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }
