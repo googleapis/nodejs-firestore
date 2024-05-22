@@ -84,6 +84,10 @@ import {
   RECURSIVE_DELETE_MIN_PENDING_OPS,
   RecursiveDelete,
 } from './recursive-delete';
+import {TraceUtil} from "./telemetry/trace-util";
+import {FirestoreOpenTelemetryOptions} from "@google-cloud/firestore";
+import {DisabledTraceUtil} from "./telemetry/disabled-trace-util";
+import {EnabledTraceUtil} from "./telemetry/enabled-trace-util";
 
 export {
   CollectionReference,
@@ -459,6 +463,13 @@ export class Firestore implements firestore.Firestore {
   _serializer: Serializer | null = null;
 
   /**
+   * The OpenTelemetry tracing utility object.
+   * @private
+   * @internal
+   */
+  _traceUtil: TraceUtil;
+
+  /**
    * The project ID for this client.
    *
    * The project ID is auto-detected during the first request unless a project
@@ -575,6 +586,8 @@ export class Firestore implements firestore.Firestore {
     }
 
     this.validateAndApplySettings({...settings, ...libraryHeader});
+
+    this._traceUtil = this.newTraceUtilInstance(settings?.openTelemetryOptions);
 
     const retryConfig = serviceConfig.retry_params.default;
     this._backoffSettings = {
@@ -773,6 +786,16 @@ export class Firestore implements firestore.Firestore {
       return temp;
     };
     this._serializer = new Serializer(this);
+    this._traceUtil = this.newTraceUtilInstance(settings.openTelemetryOptions);
+  }
+
+
+  private newTraceUtilInstance(options?: FirestoreOpenTelemetryOptions) : TraceUtil {
+    if (options && options.enableTracing) {
+      return new EnabledTraceUtil(options);
+    } else {
+      return new DisabledTraceUtil();
+    }
   }
 
   /**
