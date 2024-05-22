@@ -15,7 +15,7 @@
  */
 
 import {DocumentSnapshot, DocumentSnapshotBuilder} from './document';
-import {DocumentReference} from './reference';
+import {DocumentReference} from './reference/document-reference';
 import {FieldPath} from './path';
 import {isPermanentRpcError} from './util';
 import {google} from '../protos/firestore_v1_proto_api';

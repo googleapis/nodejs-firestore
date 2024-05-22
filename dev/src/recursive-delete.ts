@@ -28,7 +28,7 @@ import Firestore, {
 import {Deferred, wrapError} from './util';
 import type {GoogleError} from 'google-gax';
 import {BulkWriterError} from './bulk-writer';
-import {QueryOptions} from './reference';
+import {QueryOptions} from './reference/query-options';
 import {StatusCode} from './status-code';
 
 /*!

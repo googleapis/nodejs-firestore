@@ -26,14 +26,13 @@ import {Timestamp} from './timestamp';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {StatusCode} from './status-code';
-import {
-  AggregateQuery,
-  AggregateQuerySnapshot,
-  DocumentReference,
-  Query,
-  QuerySnapshot,
-  validateDocumentReference,
-} from './reference';
+import {AggregateQuery} from './reference/aggregate-query';
+import {AggregateQuerySnapshot} from './reference/aggregate-query-snapshot';
+import {DocumentReference} from './reference/document-reference';
+import {Query} from './reference/query';
+import {QuerySnapshot} from './reference/query-snapshot';
+import {validateDocumentReference} from './reference/helpers';
+
 import {isObject, isPlainObject} from './util';
 import {
   invalidArgumentMessage,

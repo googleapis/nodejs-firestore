@@ -15,7 +15,7 @@
 import {firestore, google} from '../protos/firestore_v1_proto_api';
 
 import {DocumentSnapshot} from './document';
-import {QuerySnapshot} from './reference';
+import {QuerySnapshot} from './reference/query-snapshot';
 import {Timestamp} from './timestamp';
 import {
   invalidArgumentMessage,

@@ -42,7 +42,8 @@ import {
   validateResourcePath,
 } from './path';
 import {ClientPool} from './pool';
-import {CollectionReference, DocumentReference} from './reference';
+import {CollectionReference} from './reference/collection-reference';
+import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
@@ -85,18 +86,14 @@ import {
   RecursiveDelete,
 } from './recursive-delete';
 
-export {
-  CollectionReference,
-  DocumentReference,
-  QuerySnapshot,
-  Query,
-} from './reference';
-export type {
-  AggregateQuery,
-  AggregateQuerySnapshot,
-  VectorQuery,
-  VectorQuerySnapshot,
-} from './reference';
+export {CollectionReference} from './reference/collection-reference';
+export {DocumentReference} from './reference/document-reference';
+export {QuerySnapshot} from './reference/query-snapshot';
+export {Query} from './reference/query';
+export type {AggregateQuery} from './reference/aggregate-query';
+export type {AggregateQuerySnapshot} from './reference/aggregate-query-snapshot';
+export type {VectorQuery} from './reference/vector-query';
+export type {VectorQuerySnapshot} from './reference/vector-query-snapshot';
 export {BulkWriter} from './bulk-writer';
 export type {BulkWriterError} from './bulk-writer';
 export type {BundleBuilder} from './bundle';

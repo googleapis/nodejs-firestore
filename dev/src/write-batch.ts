@@ -26,7 +26,7 @@ import {
 import {Firestore} from './index';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
-import {validateDocumentReference} from './reference';
+import {validateDocumentReference} from './reference/helpers';
 import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {FirestoreUnaryMethod, UpdateMap} from './types';
