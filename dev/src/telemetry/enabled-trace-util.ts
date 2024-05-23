@@ -20,6 +20,7 @@ import {TraceUtil} from './trace-util';
 import {Span} from "./span";
 import {FirestoreOpenTelemetryOptions} from "@google-cloud/firestore";
 import {GrpcInstrumentation} from "@opentelemetry/instrumentation-grpc";
+import {Span as OpenTelemetrySpan} from '@opentelemetry/api/build/src/trace/span';
 
 export class EnabledTraceUtil implements TraceUtil {
   private tracer: Tracer;
@@ -49,9 +50,11 @@ export class EnabledTraceUtil implements TraceUtil {
     this.tracer = traceProvider.getTracer('firestore');
   }
 
-  // startActiveSpan<F extends (span: Span) => unknown>(name: string, fn: F): ReturnType<F> {
-  //   return this.tracer.startActiveSpan(name, fn);
-  // }
+  startActiveSpan<F extends (span: Span) => unknown>(name: string, fn: F): ReturnType<F> {
+    return this.tracer.startActiveSpan(name, (otelSpan: OpenTelemetrySpan) => {
+      return fn(new Span(otelSpan)) as ReturnType<F>;
+    });
+  }
 
   startSpan(name: string): Span {
     console.log('in EnabledTraceUtil.startSpan().');

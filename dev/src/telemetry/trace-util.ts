@@ -17,6 +17,6 @@
 import {Span} from "./span";
 
 export interface TraceUtil {
-  // startActiveSpan<F extends (span: Span) => unknown>(name: string, fn: F): ReturnType<F>;
+  startActiveSpan<F extends (span: Span) => unknown>(name: string, fn: F): ReturnType<F>;
   startSpan(name: string): Span;
 }

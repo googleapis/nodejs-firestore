@@ -295,18 +295,18 @@ export class DocumentReference<
    * ```
    */
   get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
-    // return this._firestore._traceUtil.startActiveSpan('get()', span =>
-    //     this._firestore.getAll(this).then(([result]) => {
-    //       //span.end();
-    //       return result;
-    //     })
-    // );
+    return this._firestore._traceUtil.startActiveSpan('get()', span =>
+        this._firestore.getAll(this).then(([result]) => {
+          span.end();
+          return result;
+        })
+    );
 
-    const span = this._firestore._traceUtil.startSpan("foo");
-    return this._firestore.getAll(this).then(([result]) => {
-      span.end();
-      return result;
-    });
+    // const span = this._firestore._traceUtil.startSpan("foo");
+    // return this._firestore.getAll(this).then(([result]) => {
+    //   span.end();
+    //   return result;
+    // });
   }
 
   /**

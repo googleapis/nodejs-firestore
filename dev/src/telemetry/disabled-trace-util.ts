@@ -21,7 +21,8 @@ export class DisabledTraceUtil implements TraceUtil {
     return new Span();
   }
 
-  // startActiveSpan<F extends (span: Span) => unknown>(name: string, fn: F): ReturnType<F> {
-  //   return fn(new Span());
-  // }
+  startActiveSpan<F extends (span: Span) => unknown>(name: string, fn: F): ReturnType<F> {
+    const emptySpan = new Span();
+    return fn(emptySpan) as ReturnType<F>;
+  }
 }
