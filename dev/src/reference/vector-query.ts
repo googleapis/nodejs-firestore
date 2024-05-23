@@ -28,6 +28,8 @@ import {QueryUtil} from './query-util';
 import {Query} from './query';
 import {VectorQueryOptions} from './vector-query-options';
 import {VectorQuerySnapshot} from './vector-query-snapshot';
+import {ExplainResults} from '../query-profile';
+import {QueryResponse} from './types';
 
 /**
  * A query that finds the documents whose vector fields are closest to a certain query vector.
@@ -93,21 +95,49 @@ export class VectorQuery<
   }
 
   /**
+   * Plans and optionally executes this vector search query. Returns a Promise that will be
+   * resolved with the planner information, statistics from the query execution (if any),
+   * and the query results (if any).
+   *
+   * @return A Promise that will be resolved with the planner information, statistics
+   *  from the query execution (if any), and the query results (if any).
+   */
+  async explain(
+    options?: firestore.ExplainOptions
+  ): Promise<ExplainResults<VectorQuerySnapshot<AppModelType, DbModelType>>> {
+    if (options === undefined) {
+      options = {};
+    }
+    const {result, explainMetrics} = await this._getResponse(options);
+    if (!explainMetrics) {
+      throw new Error('No explain results');
+    }
+    return new ExplainResults(explainMetrics, result || null);
+  }
+
+  /**
    * Executes this vector search query.
    *
    * @returns A promise that will be resolved with the results of the query.
    */
   async get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
-    const {result} = await this._queryUtil._getResponse(
-      this,
-      /*transactionId*/ undefined,
-      // VectorQuery cannot be retried with cursors as they do not support cursors yet.
-      /*retryWithCursor*/ false
-    );
+    const {result} = await this._getResponse();
     if (!result) {
       throw new Error('No VectorQuerySnapshot result');
     }
     return result;
+  }
+
+  _getResponse(
+    explainOptions?: firestore.ExplainOptions
+  ): Promise<QueryResponse<VectorQuerySnapshot<AppModelType, DbModelType>>> {
+    return this._queryUtil._getResponse(
+      this,
+      /*transactionOrReadTime*/ undefined,
+      // VectorQuery cannot be retried with cursors as they do not support cursors yet.
+      /*retryWithCursor*/ false,
+      explainOptions
+    );
   }
 
   /**
@@ -135,7 +165,8 @@ export class VectorQuery<
    * @returns Serialized JSON for the query.
    */
   toProto(
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
+    explainOptions?: firestore.ExplainOptions
   ): api.IRunQueryRequest {
     const queryProto = this._query.toProto(transactionOrReadTime);
 
@@ -151,6 +182,11 @@ export class VectorQuery<
       },
       queryVector: queryVector._toProto(this._query._serializer),
     };
+
+    if (explainOptions) {
+      queryProto.explainOptions = explainOptions;
+    }
+
     return queryProto;
   }
 
