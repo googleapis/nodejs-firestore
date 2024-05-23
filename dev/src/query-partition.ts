@@ -17,7 +17,9 @@
 import * as firestore from '@google-cloud/firestore';
 import * as protos from '../protos/firestore_v1_proto_api';
 
-import {FieldOrder, Query, QueryOptions} from './reference';
+import {FieldOrder} from './reference/field-order';
+import {Query} from './reference/query';
+import {QueryOptions} from './reference/query-options';
 import {FieldPath} from './path';
 import {Serializer} from './serializer';
 import {Firestore} from './index';

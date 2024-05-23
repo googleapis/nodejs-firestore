@@ -23,7 +23,7 @@ import * as assert from 'assert';
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldTransform} from './field-value';
 import {FieldPath, validateFieldPath} from './path';
-import {DocumentReference} from './reference';
+import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, defaultConverter, UpdateMap} from './types';
