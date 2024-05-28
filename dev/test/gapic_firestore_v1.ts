@@ -1439,6 +1439,49 @@ describe('v1.FirestoreClient', () => {
       assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
     });
 
+    it('invokes batchGetDocuments without error and gaxServerStreamingRetries enabled', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        gaxServerStreamingRetries: true,
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.BatchGetDocumentsRequest()
+      );
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1.BatchGetDocumentsRequest',
+        ['database']
+      );
+      request.database = defaultValue1;
+      const expectedHeaderRequestParams = `database=${defaultValue1}`;
+      const expectedResponse = generateSampleMessage(
+        new protos.google.firestore.v1.BatchGetDocumentsResponse()
+      );
+      client.innerApiCalls.batchGetDocuments =
+        stubServerStreamingCall(expectedResponse);
+      const stream = client.batchGetDocuments(request);
+      const promise = new Promise((resolve, reject) => {
+        stream.on(
+          'data',
+          (response: protos.google.firestore.v1.BatchGetDocumentsResponse) => {
+            resolve(response);
+          }
+        );
+        stream.on('error', (err: Error) => {
+          reject(err);
+        });
+      });
+      const response = await promise;
+      assert.deepStrictEqual(response, expectedResponse);
+      const actualRequest = (
+        client.innerApiCalls.batchGetDocuments as SinonStub
+      ).getCall(0).args[0];
+      assert.deepStrictEqual(actualRequest, request);
+      const actualHeaderRequestParams = (
+        client.innerApiCalls.batchGetDocuments as SinonStub
+      ).getCall(0).args[1].otherArgs.headers['x-goog-request-params'];
+      assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
+    });
+
     it('invokes batchGetDocuments with error', async () => {
       const client = new firestoreModule.FirestoreClient({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
@@ -1514,6 +1557,12 @@ describe('v1.FirestoreClient', () => {
       });
       await assert.rejects(promise, expectedError);
     });
+    it('should create a client with gaxServerStreamingRetries enabled', () => {
+      const client = new firestoreModule.FirestoreClient({
+        gaxServerStreamingRetries: true,
+      });
+      assert(client);
+    });
   });
 
   describe('runQuery', () => {
@@ -1521,6 +1570,48 @@ describe('v1.FirestoreClient', () => {
       const client = new firestoreModule.FirestoreClient({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.RunQueryRequest()
+      );
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1.RunQueryRequest',
+        ['parent']
+      );
+      request.parent = defaultValue1;
+      const expectedHeaderRequestParams = `parent=${defaultValue1}`;
+      const expectedResponse = generateSampleMessage(
+        new protos.google.firestore.v1.RunQueryResponse()
+      );
+      client.innerApiCalls.runQuery = stubServerStreamingCall(expectedResponse);
+      const stream = client.runQuery(request);
+      const promise = new Promise((resolve, reject) => {
+        stream.on(
+          'data',
+          (response: protos.google.firestore.v1.RunQueryResponse) => {
+            resolve(response);
+          }
+        );
+        stream.on('error', (err: Error) => {
+          reject(err);
+        });
+      });
+      const response = await promise;
+      assert.deepStrictEqual(response, expectedResponse);
+      const actualRequest = (
+        client.innerApiCalls.runQuery as SinonStub
+      ).getCall(0).args[0];
+      assert.deepStrictEqual(actualRequest, request);
+      const actualHeaderRequestParams = (
+        client.innerApiCalls.runQuery as SinonStub
+      ).getCall(0).args[1].otherArgs.headers['x-goog-request-params'];
+      assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
+    });
+
+    it('invokes runQuery without error and gaxServerStreamingRetries enabled', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        gaxServerStreamingRetries: true,
       });
       client.initialize();
       const request = generateSampleMessage(
@@ -1635,6 +1726,12 @@ describe('v1.FirestoreClient', () => {
       });
       await assert.rejects(promise, expectedError);
     });
+    it('should create a client with gaxServerStreamingRetries enabled', () => {
+      const client = new firestoreModule.FirestoreClient({
+        gaxServerStreamingRetries: true,
+      });
+      assert(client);
+    });
   });
 
   describe('runAggregationQuery', () => {
@@ -1642,6 +1739,51 @@ describe('v1.FirestoreClient', () => {
       const client = new firestoreModule.FirestoreClient({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.RunAggregationQueryRequest()
+      );
+      const defaultValue1 = getTypeDefaultValue(
+        '.google.firestore.v1.RunAggregationQueryRequest',
+        ['parent']
+      );
+      request.parent = defaultValue1;
+      const expectedHeaderRequestParams = `parent=${defaultValue1}`;
+      const expectedResponse = generateSampleMessage(
+        new protos.google.firestore.v1.RunAggregationQueryResponse()
+      );
+      client.innerApiCalls.runAggregationQuery =
+        stubServerStreamingCall(expectedResponse);
+      const stream = client.runAggregationQuery(request);
+      const promise = new Promise((resolve, reject) => {
+        stream.on(
+          'data',
+          (
+            response: protos.google.firestore.v1.RunAggregationQueryResponse
+          ) => {
+            resolve(response);
+          }
+        );
+        stream.on('error', (err: Error) => {
+          reject(err);
+        });
+      });
+      const response = await promise;
+      assert.deepStrictEqual(response, expectedResponse);
+      const actualRequest = (
+        client.innerApiCalls.runAggregationQuery as SinonStub
+      ).getCall(0).args[0];
+      assert.deepStrictEqual(actualRequest, request);
+      const actualHeaderRequestParams = (
+        client.innerApiCalls.runAggregationQuery as SinonStub
+      ).getCall(0).args[1].otherArgs.headers['x-goog-request-params'];
+      assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
+    });
+
+    it('invokes runAggregationQuery without error and gaxServerStreamingRetries enabled', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        gaxServerStreamingRetries: true,
       });
       client.initialize();
       const request = generateSampleMessage(
@@ -1762,6 +1904,12 @@ describe('v1.FirestoreClient', () => {
         });
       });
       await assert.rejects(promise, expectedError);
+    });
+    it('should create a client with gaxServerStreamingRetries enabled', () => {
+      const client = new firestoreModule.FirestoreClient({
+        gaxServerStreamingRetries: true,
+      });
+      assert(client);
     });
   });
 

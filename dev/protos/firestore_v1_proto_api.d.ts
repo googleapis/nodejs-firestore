@@ -648,7 +648,7 @@ export namespace google {
 
         /** Edition enum. */
         type Edition =
-            "EDITION_UNKNOWN"| "EDITION_PROTO2"| "EDITION_PROTO3"| "EDITION_2023"| "EDITION_2024"| "EDITION_1_TEST_ONLY"| "EDITION_2_TEST_ONLY"| "EDITION_99997_TEST_ONLY"| "EDITION_99998_TEST_ONLY"| "EDITION_99999_TEST_ONLY"| "EDITION_MAX";
+            "EDITION_UNKNOWN"| "EDITION_LEGACY"| "EDITION_PROTO2"| "EDITION_PROTO3"| "EDITION_2023"| "EDITION_2024"| "EDITION_1_TEST_ONLY"| "EDITION_2_TEST_ONLY"| "EDITION_99997_TEST_ONLY"| "EDITION_99998_TEST_ONLY"| "EDITION_99999_TEST_ONLY"| "EDITION_MAX";
 
         /** Properties of a FileDescriptorProto. */
         interface IFileDescriptorProto {
@@ -2832,9 +2832,6 @@ export namespace google {
 
                 /** FeatureSetEditionDefault fixedFeatures */
                 fixedFeatures?: (google.protobuf.IFeatureSet|null);
-
-                /** FeatureSetEditionDefault features */
-                features?: (google.protobuf.IFeatureSet|null);
             }
 
             /** Represents a FeatureSetEditionDefault. */
@@ -2854,9 +2851,6 @@ export namespace google {
 
                 /** FeatureSetEditionDefault fixedFeatures. */
                 public fixedFeatures?: (google.protobuf.IFeatureSet|null);
-
-                /** FeatureSetEditionDefault features. */
-                public features?: (google.protobuf.IFeatureSet|null);
 
                 /**
                  * Creates a FeatureSetEditionDefault message from a plain object. Also converts values to their respective internal types.

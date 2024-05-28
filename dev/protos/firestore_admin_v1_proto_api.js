@@ -11804,6 +11804,7 @@
              * @name google.protobuf.Edition
              * @enum {string}
              * @property {string} EDITION_UNKNOWN=EDITION_UNKNOWN EDITION_UNKNOWN value
+             * @property {string} EDITION_LEGACY=EDITION_LEGACY EDITION_LEGACY value
              * @property {string} EDITION_PROTO2=EDITION_PROTO2 EDITION_PROTO2 value
              * @property {string} EDITION_PROTO3=EDITION_PROTO3 EDITION_PROTO3 value
              * @property {string} EDITION_2023=EDITION_2023 EDITION_2023 value
@@ -11818,6 +11819,7 @@
             protobuf.Edition = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
                 values[valuesById[0] = "EDITION_UNKNOWN"] = "EDITION_UNKNOWN";
+                values[valuesById[900] = "EDITION_LEGACY"] = "EDITION_LEGACY";
                 values[valuesById[998] = "EDITION_PROTO2"] = "EDITION_PROTO2";
                 values[valuesById[999] = "EDITION_PROTO3"] = "EDITION_PROTO3";
                 values[valuesById[1000] = "EDITION_2023"] = "EDITION_2023";
@@ -12077,6 +12079,10 @@
                     case "EDITION_UNKNOWN":
                     case 0:
                         message.edition = 0;
+                        break;
+                    case "EDITION_LEGACY":
+                    case 900:
+                        message.edition = 900;
                         break;
                     case "EDITION_PROTO2":
                     case 998:
@@ -15732,6 +15738,10 @@
                         case 0:
                             message.edition = 0;
                             break;
+                        case "EDITION_LEGACY":
+                        case 900:
+                            message.edition = 900;
+                            break;
                         case "EDITION_PROTO2":
                         case 998:
                             message.edition = 998;
@@ -15913,6 +15923,10 @@
                         case 0:
                             message.editionIntroduced = 0;
                             break;
+                        case "EDITION_LEGACY":
+                        case 900:
+                            message.editionIntroduced = 900;
+                            break;
                         case "EDITION_PROTO2":
                         case 998:
                             message.editionIntroduced = 998;
@@ -15964,6 +15978,10 @@
                         case "EDITION_UNKNOWN":
                         case 0:
                             message.editionDeprecated = 0;
+                            break;
+                        case "EDITION_LEGACY":
+                        case 900:
+                            message.editionDeprecated = 900;
                             break;
                         case "EDITION_PROTO2":
                         case 998:
@@ -16018,6 +16036,10 @@
                         case "EDITION_UNKNOWN":
                         case 0:
                             message.editionRemoved = 0;
+                            break;
+                        case "EDITION_LEGACY":
+                        case 900:
+                            message.editionRemoved = 900;
                             break;
                         case "EDITION_PROTO2":
                         case 998:
@@ -17824,6 +17846,10 @@
                     case 0:
                         message.minimumEdition = 0;
                         break;
+                    case "EDITION_LEGACY":
+                    case 900:
+                        message.minimumEdition = 900;
+                        break;
                     case "EDITION_PROTO2":
                     case 998:
                         message.minimumEdition = 998;
@@ -17875,6 +17901,10 @@
                     case "EDITION_UNKNOWN":
                     case 0:
                         message.maximumEdition = 0;
+                        break;
+                    case "EDITION_LEGACY":
+                    case 900:
+                        message.maximumEdition = 900;
                         break;
                     case "EDITION_PROTO2":
                     case 998:
@@ -17986,7 +18016,6 @@
                      * @property {google.protobuf.Edition|null} [edition] FeatureSetEditionDefault edition
                      * @property {google.protobuf.IFeatureSet|null} [overridableFeatures] FeatureSetEditionDefault overridableFeatures
                      * @property {google.protobuf.IFeatureSet|null} [fixedFeatures] FeatureSetEditionDefault fixedFeatures
-                     * @property {google.protobuf.IFeatureSet|null} [features] FeatureSetEditionDefault features
                      */
     
                     /**
@@ -18029,14 +18058,6 @@
                     FeatureSetEditionDefault.prototype.fixedFeatures = null;
     
                     /**
-                     * FeatureSetEditionDefault features.
-                     * @member {google.protobuf.IFeatureSet|null|undefined} features
-                     * @memberof google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault
-                     * @instance
-                     */
-                    FeatureSetEditionDefault.prototype.features = null;
-    
-                    /**
                      * Creates a FeatureSetEditionDefault message from a plain object. Also converts values to their respective internal types.
                      * @function fromObject
                      * @memberof google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault
@@ -18058,6 +18079,10 @@
                         case "EDITION_UNKNOWN":
                         case 0:
                             message.edition = 0;
+                            break;
+                        case "EDITION_LEGACY":
+                        case 900:
+                            message.edition = 900;
                             break;
                         case "EDITION_PROTO2":
                         case 998:
@@ -18110,11 +18135,6 @@
                                 throw TypeError(".google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault.fixedFeatures: object expected");
                             message.fixedFeatures = $root.google.protobuf.FeatureSet.fromObject(object.fixedFeatures);
                         }
-                        if (object.features != null) {
-                            if (typeof object.features !== "object")
-                                throw TypeError(".google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault.features: object expected");
-                            message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
-                        }
                         return message;
                     };
     
@@ -18132,13 +18152,10 @@
                             options = {};
                         var object = {};
                         if (options.defaults) {
-                            object.features = null;
                             object.edition = options.enums === String ? "EDITION_UNKNOWN" : 0;
                             object.overridableFeatures = null;
                             object.fixedFeatures = null;
                         }
-                        if (message.features != null && message.hasOwnProperty("features"))
-                            object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
                         if (message.edition != null && message.hasOwnProperty("edition"))
                             object.edition = options.enums === String ? $root.google.protobuf.Edition[message.edition] === undefined ? message.edition : $root.google.protobuf.Edition[message.edition] : message.edition;
                         if (message.overridableFeatures != null && message.hasOwnProperty("overridableFeatures"))
