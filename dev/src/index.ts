@@ -791,6 +791,13 @@ export class Firestore implements firestore.Firestore {
 
 
   private newTraceUtilInstance(options?: FirestoreOpenTelemetryOptions) : TraceUtil {
+    // The master switch. If this is false, no tracing code will take effect.
+    // TODO(tracing): Remove this code to enable tracing.
+    const FIRESTORE_TRACING_ENABLED = true;
+    if (!FIRESTORE_TRACING_ENABLED) {
+      return new DisabledTraceUtil();
+    }
+
     if (options && options.enableTracing) {
       return new EnabledTraceUtil(options);
     } else {

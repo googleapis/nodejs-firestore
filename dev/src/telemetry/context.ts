@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import {Span as OpenTelemetrySpan} from '@opentelemetry/api';
-import {Attributes} from './trace-util';
+import {Context as OpenTelemetryContext} from '@opentelemetry/api';
+import {ContextManager} from '@opentelemetry/api';
+import {context} from '@opentelemetry/api';
 
-export class Span {
-  constructor(private span?: OpenTelemetrySpan) {}
+export class Context {
+    constructor(private context?: OpenTelemetryContext) {}
+    get otelContext() : OpenTelemetryContext | undefined {
+      return this.context;
+    }
 
-  end(): void {
-    this.span?.end();
-  }
-
-  addEvent(name: string, attributes?: Attributes): this {
-    this.span?.addEvent(name, attributes);
-    return this;
-  }
+    static currentContext() : Context {
+        return new Context(context.active());
+    }
 }

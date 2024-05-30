@@ -16,23 +16,22 @@
 
 import {TraceAPI, Tracer, TracerProvider} from '@opentelemetry/api';
 
-import {TraceUtil} from './trace-util';
+import {Context} from "./context";
 import {Span} from "./span";
-import {FirestoreOpenTelemetryOptions} from "@google-cloud/firestore";
+import {Attributes, TraceUtil} from './trace-util';
+import {Span as OpenTelemetrySpan} from '@opentelemetry/api';
 import {GrpcInstrumentation} from "@opentelemetry/instrumentation-grpc";
-import {Span as OpenTelemetrySpan} from '@opentelemetry/api/build/src/trace/span';
+import {HttpInstrumentation} from "@opentelemetry/instrumentation-http";
+import {FirestoreOpenTelemetryOptions} from "@google-cloud/firestore";
 
 export class EnabledTraceUtil implements TraceUtil {
   private tracer: Tracer;
 
   constructor(options: FirestoreOpenTelemetryOptions) {
-    console.log("creating EnabledTraceUtil");
-
     let traceProvider : TracerProvider = options.traceProvider;
 
     // If a TraceProvider has not been given to us, we try to use the global one.
     if (!traceProvider) {
-      console.log('TraceProvider was not provided in options.');
       const {trace} = require('@opentelemetry/api');
       traceProvider = trace.getTracerProvider();
     }
@@ -43,6 +42,11 @@ export class EnabledTraceUtil implements TraceUtil {
       tracerProvider: traceProvider,
       instrumentations: [
         new GrpcInstrumentation(),
+        new HttpInstrumentation({
+          requestHook: (span, request) => {
+            span.setAttribute("custom request hook attribute", "request");
+          },
+        }),
       ],
     });
 
@@ -50,14 +54,28 @@ export class EnabledTraceUtil implements TraceUtil {
     this.tracer = traceProvider.getTracer('firestore');
   }
 
-  startActiveSpan<F extends (span: Span) => unknown>(name: string, fn: F): ReturnType<F> {
-    return this.tracer.startActiveSpan(name, (otelSpan: OpenTelemetrySpan) => {
+  startActiveSpan<F extends (span: Span) => unknown>(name: string, fn: F, attributes?: Attributes): ReturnType<F> {
+    return this.tracer.startActiveSpan(name,
+        {
+          attributes: attributes
+        },
+        (otelSpan: OpenTelemetrySpan) => {
+      otelSpan.addEvent("active span started");
       return fn(new Span(otelSpan)) as ReturnType<F>;
     });
   }
 
   startSpan(name: string): Span {
-    console.log('in EnabledTraceUtil.startSpan().');
-    return new Span(this.tracer.startSpan(name));
+    // Get the active context
+    const currentContext = Context.currentContext();
+    return new Span(this.tracer.startSpan(name, undefined, currentContext.otelContext));
+  }
+
+  startSpanWithinCurrentContext(name: string): Span {
+    return new Span(this.tracer.startSpan(name, undefined, Context.currentContext().otelContext));
+  }
+
+  startSpanWithContext(name: string, context: Context): Span {
+    return new Span(this.tracer.startSpan(name, undefined, context.otelContext));
   }
 }
