@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 import {Attributes, TraceUtil} from './trace-util';
-import {Span} from "./span";
+import {Span} from './span';
 
 export class DisabledTraceUtil implements TraceUtil {
   startSpan(name: string): Span {
     return new Span();
   }
 
-  startActiveSpan<F extends (span: Span) => unknown>(name: string, fn: F, attributes?: Attributes): ReturnType<F> {
+  startActiveSpan<F extends (span: Span) => unknown>(
+    name: string,
+    fn: F,
+    attributes?: Attributes
+  ): ReturnType<F> {
     const emptySpan = new Span();
     return fn(emptySpan) as ReturnType<F>;
   }

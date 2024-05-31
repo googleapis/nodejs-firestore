@@ -74,6 +74,8 @@
   },
   "devDependencies": {
     "@google-cloud/cloud-rad": "^0.4.0",
+    "@opentelemetry/sdk-trace-base": "^1.15.0",
+    "@opentelemetry/sdk-trace-node": "^1.24.1",
     "@types/assert": "^1.4.0",
     "@types/chai": "^4.2.7",
     "@types/chai-as-promised": "^7.1.2",

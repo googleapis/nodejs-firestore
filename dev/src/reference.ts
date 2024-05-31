@@ -295,9 +295,9 @@ export class DocumentReference<
    * ```
    */
   get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
-    return this._firestore._traceUtil.startActiveSpan('get()', (span) => {
+    return this._firestore._traceUtil.startActiveSpan('get()', span => {
       return this._firestore.getAll(this).then(([result]) => {
-        span.addEvent("going to call span.end()", {'span-attr': 'value'});
+        span.addEvent('going to call span.end()', {'span-attr': 'value'});
         span.end();
         return result;
       });

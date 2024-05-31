@@ -84,10 +84,10 @@ import {
   RECURSIVE_DELETE_MIN_PENDING_OPS,
   RecursiveDelete,
 } from './recursive-delete';
-import {TraceUtil} from "./telemetry/trace-util";
-import {FirestoreOpenTelemetryOptions} from "@google-cloud/firestore";
-import {DisabledTraceUtil} from "./telemetry/disabled-trace-util";
-import {EnabledTraceUtil} from "./telemetry/enabled-trace-util";
+import {TraceUtil} from './telemetry/trace-util';
+import {FirestoreOpenTelemetryOptions} from '@google-cloud/firestore';
+import {DisabledTraceUtil} from './telemetry/disabled-trace-util';
+import {EnabledTraceUtil} from './telemetry/enabled-trace-util';
 
 export {
   CollectionReference,
@@ -789,8 +789,9 @@ export class Firestore implements firestore.Firestore {
     this._traceUtil = this.newTraceUtilInstance(settings.openTelemetryOptions);
   }
 
-
-  private newTraceUtilInstance(options?: FirestoreOpenTelemetryOptions) : TraceUtil {
+  private newTraceUtilInstance(
+    options?: FirestoreOpenTelemetryOptions
+  ): TraceUtil {
     // The master switch. If this is false, no tracing code will take effect.
     // TODO(tracing): Remove this code to enable tracing.
     const FIRESTORE_TRACING_ENABLED = true;
