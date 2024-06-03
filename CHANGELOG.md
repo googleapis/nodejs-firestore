@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.8.0](https://github.com/googleapis/nodejs-firestore/compare/v7.7.0...v7.8.0) (2024-05-28)
+
+
+### Features
+
+* Query profiling for VectorQuery ([d406f14](https://github.com/googleapis/nodejs-firestore/commit/d406f14612a4890e405913aadc75c7ee22993f2b))
+* Update Nodejs generator to send API versions in headers for GAPICs ([#2041](https://github.com/googleapis/nodejs-firestore/issues/2041)) ([6dbe4b0](https://github.com/googleapis/nodejs-firestore/commit/6dbe4b0baac261f03f9032765b375938ce5e46d7))
+
 ## [7.7.0](https://github.com/googleapis/nodejs-firestore/compare/v7.6.0...v7.7.0) (2024-05-07)
 
 
