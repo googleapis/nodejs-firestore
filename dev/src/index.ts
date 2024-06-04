@@ -16,6 +16,16 @@
 
 import * as firestore from '@google-cloud/firestore';
 
+console.log("loading instrumentation-grpc");
+import {GrpcInstrumentation} from "@opentelemetry/instrumentation-grpc";
+import {HttpInstrumentation} from "@opentelemetry/instrumentation-http";
+export const GRPC_INSTRUMENTATION_INSTANCE = new GrpcInstrumentation();
+export const HTTP_INSTRUMENTATION_INSTANCE = new HttpInstrumentation({
+  requestHook: (span, request) => {
+    span.setAttribute('custom request hook attribute', 'request');
+  },
+});
+
 import type {CallOptions, ClientOptions} from 'google-gax';
 import type * as googleGax from 'google-gax';
 import type * as googleGaxFallback from 'google-gax/build/src/fallback';
@@ -797,6 +807,10 @@ export class Firestore implements firestore.Firestore {
     }
 
     if (options && options.enableTracing) {
+      // Re-use the existing TraceUtil if one has been created.
+      if (this._traceUtil) {
+        return this._traceUtil;
+      }
       return new EnabledTraceUtil(options);
     } else {
       return new DisabledTraceUtil();

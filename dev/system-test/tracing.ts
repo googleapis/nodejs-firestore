@@ -13,32 +13,50 @@
 // limitations under the License.
 
 import * as chaiAsPromised from 'chai-as-promised';
-
 import {expect, use} from 'chai';
 import {describe, it, beforeEach, afterEach} from 'mocha';
-import {verifyInstance} from '../test/util/helpers';
+import {TraceExporter} from "@google-cloud/opentelemetry-cloud-trace-exporter";
+import {Settings} from "@google-cloud/firestore";
 import {
+  AlwaysOnSampler,
+  ConsoleSpanExporter,
   InMemorySpanExporter,
   NodeTracerProvider,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
-import {Firestore} from '../src';
-import {Settings} from '@google-cloud/firestore';
+import {setLogFunction, Firestore} from '../src';
+import {verifyInstance} from '../test/util/helpers';
+import {SPAN_NAME_DOC_REF_GET} from "../src/telemetry/trace-util";
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 
 use(chaiAsPromised);
 
 describe.only('Tracing with InMemorySpanExporter', () => {
+
   let firestore: Firestore;
   let tracerProvider: NodeTracerProvider;
   let inMemorySpanExporter: InMemorySpanExporter;
 
   beforeEach(async () => {
-    tracerProvider = new NodeTracerProvider();
-    inMemorySpanExporter = new InMemorySpanExporter();
-    tracerProvider.addSpanProcessor(
-      new SimpleSpanProcessor(inMemorySpanExporter)
+
+    diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+
+    tracerProvider = new NodeTracerProvider(
+        {
+          sampler: new AlwaysOnSampler()
+        }
     );
+
+    inMemorySpanExporter = new InMemorySpanExporter();
+    tracerProvider.addSpanProcessor(new SimpleSpanProcessor(inMemorySpanExporter));
+    tracerProvider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+    tracerProvider.addSpanProcessor(new SimpleSpanProcessor(new TraceExporter()));
     tracerProvider.register();
+
+
+    setLogFunction((msg: string) => {
+      console.log(`LOG: ${msg}`);
+    });
 
     const internalSettings: Settings = {};
     if (process.env.FIRESTORE_NAMED_DATABASE) {
@@ -55,9 +73,10 @@ describe.only('Tracing with InMemorySpanExporter', () => {
 
     firestore = new Firestore({
       ...internalSettings,
+      preferRest: false,
       openTelemetryOptions: {
         enableTracing: true,
-        traceProvider: tracerProvider,
+        traceProvider: tracerProvider
       },
     });
   });
@@ -66,17 +85,26 @@ describe.only('Tracing with InMemorySpanExporter', () => {
     return verifyInstance(firestore);
   });
 
-  async function waitForCompletedSpans(): Promise<void> {
-    await inMemorySpanExporter.forceFlush();
+  function expectSpanHierarchy(spansNames: string[]) : void {
+
   }
 
-  it('doc.get()', async () => {
+  async function waitForCompletedSpans(): Promise<void> {
+    //await firestore.terminate();
+    await tracerProvider.forceFlush();
+    await inMemorySpanExporter.forceFlush();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+
+  it('document reference get()', async () => {
     await firestore.collection('foo').doc('bar').get();
+
     await waitForCompletedSpans();
     const spans = inMemorySpanExporter.getFinishedSpans();
     spans.forEach(span => {
       console.log(span.name);
     });
-    expect(spans.length).to.equal(1);
+    expect(spans.length).to.equal(2);
+    expect(spans[0].name).to.equal(SPAN_NAME_DOC_REF_GET);
   });
 });

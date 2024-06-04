@@ -27,6 +27,11 @@ export declare type AttributeValue =
   | Array<number>
   | Array<boolean>;
 
+/**
+ * Span names for instrumented operations.
+ */
+export const SPAN_NAME_DOC_REF_GET : string = "DocumentReference.Get";
+
 export interface TraceUtil {
   startActiveSpan<F extends (span: Span) => unknown>(
     name: string,

@@ -27,6 +27,7 @@ import {requestTag} from '../util';
 import {validateFunction, validateMinNumberOfArguments} from '../validate';
 import {DocumentWatch} from '../watch';
 import {DocumentSnapshotBuilder} from '../document';
+import {SPAN_NAME_DOC_REF_GET} from "../telemetry/trace-util";
 
 /**
  * A DocumentReference refers to a document location in a Firestore database
@@ -198,7 +199,13 @@ export class DocumentReference<
    * ```
    */
   get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
-    return this._firestore.getAll(this).then(([result]) => result);
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_DOC_REF_GET, span => {
+      return this._firestore.getAll(this).then(([result]) => {
+        span.addEvent('going to call span.end()', {'span-attr': 'value'});
+        span.end();
+        return result;
+      });
+    });
   }
 
   /**
