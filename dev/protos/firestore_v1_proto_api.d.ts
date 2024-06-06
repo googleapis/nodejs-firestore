@@ -3921,6 +3921,15 @@ export namespace google {
 
                 /** Value mapValue */
                 mapValue?: (google.firestore.v1.IMapValue|null);
+
+                /** Value fieldReferenceValue */
+                fieldReferenceValue?: (string|null);
+
+                /** Value functionValue */
+                functionValue?: (google.firestore.v1.IFunction|null);
+
+                /** Value pipelineValue */
+                pipelineValue?: (google.firestore.v1.IPipeline|null);
             }
 
             /** Represents a Value. */
@@ -3965,8 +3974,17 @@ export namespace google {
                 /** Value mapValue. */
                 public mapValue?: (google.firestore.v1.IMapValue|null);
 
+                /** Value fieldReferenceValue. */
+                public fieldReferenceValue?: (string|null);
+
+                /** Value functionValue. */
+                public functionValue?: (google.firestore.v1.IFunction|null);
+
+                /** Value pipelineValue. */
+                public pipelineValue?: (google.firestore.v1.IPipeline|null);
+
                 /** Value valueType. */
-                public valueType?: ("nullValue"|"booleanValue"|"integerValue"|"doubleValue"|"timestampValue"|"stringValue"|"bytesValue"|"referenceValue"|"geoPointValue"|"arrayValue"|"mapValue");
+                public valueType?: ("nullValue"|"booleanValue"|"integerValue"|"doubleValue"|"timestampValue"|"stringValue"|"bytesValue"|"referenceValue"|"geoPointValue"|"arrayValue"|"mapValue"|"fieldReferenceValue"|"functionValue"|"pipelineValue");
 
                 /**
                  * Creates a Value message from a plain object. Also converts values to their respective internal types.
@@ -4091,6 +4109,177 @@ export namespace google {
                  * @returns The default type url
                  */
                 public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a Function. */
+            interface IFunction {
+
+                /** Function name */
+                name?: (string|null);
+
+                /** Function args */
+                args?: (google.firestore.v1.IValue[]|null);
+
+                /** Function options */
+                options?: ({ [k: string]: google.firestore.v1.IValue }|null);
+            }
+
+            /** Represents a Function. */
+            class Function implements IFunction {
+
+                /**
+                 * Constructs a new Function.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IFunction);
+
+                /** Function name. */
+                public name: string;
+
+                /** Function args. */
+                public args: google.firestore.v1.IValue[];
+
+                /** Function options. */
+                public options: { [k: string]: google.firestore.v1.IValue };
+
+                /**
+                 * Creates a Function message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Function
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Function;
+
+                /**
+                 * Creates a plain object from a Function message. Also converts values to other types if specified.
+                 * @param message Function
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.Function, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Function to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Function
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a Pipeline. */
+            interface IPipeline {
+
+                /** Pipeline stages */
+                stages?: (google.firestore.v1.Pipeline.IStage[]|null);
+            }
+
+            /** Represents a Pipeline. */
+            class Pipeline implements IPipeline {
+
+                /**
+                 * Constructs a new Pipeline.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IPipeline);
+
+                /** Pipeline stages. */
+                public stages: google.firestore.v1.Pipeline.IStage[];
+
+                /**
+                 * Creates a Pipeline message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Pipeline
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Pipeline;
+
+                /**
+                 * Creates a plain object from a Pipeline message. Also converts values to other types if specified.
+                 * @param message Pipeline
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.Pipeline, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Pipeline to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Pipeline
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            namespace Pipeline {
+
+                /** Properties of a Stage. */
+                interface IStage {
+
+                    /** Stage name */
+                    name?: (string|null);
+
+                    /** Stage args */
+                    args?: (google.firestore.v1.IValue[]|null);
+
+                    /** Stage options */
+                    options?: ({ [k: string]: google.firestore.v1.IValue }|null);
+                }
+
+                /** Represents a Stage. */
+                class Stage implements IStage {
+
+                    /**
+                     * Constructs a new Stage.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.Pipeline.IStage);
+
+                    /** Stage name. */
+                    public name: string;
+
+                    /** Stage args. */
+                    public args: google.firestore.v1.IValue[];
+
+                    /** Stage options. */
+                    public options: { [k: string]: google.firestore.v1.IValue };
+
+                    /**
+                     * Creates a Stage message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Stage
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.Pipeline.Stage;
+
+                    /**
+                     * Creates a plain object from a Stage message. Also converts values to other types if specified.
+                     * @param message Stage
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.Pipeline.Stage, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Stage to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for Stage
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
             }
 
             /** Properties of a BitSequence. */
@@ -4603,6 +4792,20 @@ export namespace google {
                 public runQuery(request: google.firestore.v1.IRunQueryRequest): Promise<google.firestore.v1.RunQueryResponse>;
 
                 /**
+                 * Calls ExecutePipeline.
+                 * @param request ExecutePipelineRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and ExecutePipelineResponse
+                 */
+                public executePipeline(request: google.firestore.v1.IExecutePipelineRequest, callback: google.firestore.v1.Firestore.ExecutePipelineCallback): void;
+
+                /**
+                 * Calls ExecutePipeline.
+                 * @param request ExecutePipelineRequest message or plain object
+                 * @returns Promise
+                 */
+                public executePipeline(request: google.firestore.v1.IExecutePipelineRequest): Promise<google.firestore.v1.ExecutePipelineResponse>;
+
+                /**
                  * Calls RunAggregationQuery.
                  * @param request RunAggregationQueryRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and RunAggregationQueryResponse
@@ -4765,6 +4968,13 @@ export namespace google {
                  * @param [response] RunQueryResponse
                  */
                 type RunQueryCallback = (error: (Error|null), response?: google.firestore.v1.RunQueryResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1.Firestore#executePipeline}.
+                 * @param error Error, if any
+                 * @param [response] ExecutePipelineResponse
+                 */
+                type ExecutePipelineCallback = (error: (Error|null), response?: google.firestore.v1.ExecutePipelineResponse) => void;
 
                 /**
                  * Callback as used by {@link google.firestore.v1.Firestore#runAggregationQuery}.
@@ -5809,6 +6019,144 @@ export namespace google {
 
                 /**
                  * Gets the default type url for RunQueryResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of an ExecutePipelineRequest. */
+            interface IExecutePipelineRequest {
+
+                /** ExecutePipelineRequest database */
+                database?: (string|null);
+
+                /** ExecutePipelineRequest structuredPipeline */
+                structuredPipeline?: (google.firestore.v1.IStructuredPipeline|null);
+
+                /** ExecutePipelineRequest transaction */
+                transaction?: (Uint8Array|null);
+
+                /** ExecutePipelineRequest newTransaction */
+                newTransaction?: (google.firestore.v1.ITransactionOptions|null);
+
+                /** ExecutePipelineRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents an ExecutePipelineRequest. */
+            class ExecutePipelineRequest implements IExecutePipelineRequest {
+
+                /**
+                 * Constructs a new ExecutePipelineRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IExecutePipelineRequest);
+
+                /** ExecutePipelineRequest database. */
+                public database: string;
+
+                /** ExecutePipelineRequest structuredPipeline. */
+                public structuredPipeline?: (google.firestore.v1.IStructuredPipeline|null);
+
+                /** ExecutePipelineRequest transaction. */
+                public transaction?: (Uint8Array|null);
+
+                /** ExecutePipelineRequest newTransaction. */
+                public newTransaction?: (google.firestore.v1.ITransactionOptions|null);
+
+                /** ExecutePipelineRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** ExecutePipelineRequest pipelineType. */
+                public pipelineType?: "structuredPipeline";
+
+                /** ExecutePipelineRequest consistencySelector. */
+                public consistencySelector?: ("transaction"|"newTransaction"|"readTime");
+
+                /**
+                 * Creates an ExecutePipelineRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExecutePipelineRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ExecutePipelineRequest;
+
+                /**
+                 * Creates a plain object from an ExecutePipelineRequest message. Also converts values to other types if specified.
+                 * @param message ExecutePipelineRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ExecutePipelineRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExecutePipelineRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExecutePipelineRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of an ExecutePipelineResponse. */
+            interface IExecutePipelineResponse {
+
+                /** ExecutePipelineResponse transaction */
+                transaction?: (Uint8Array|null);
+
+                /** ExecutePipelineResponse results */
+                results?: (google.firestore.v1.IDocument[]|null);
+
+                /** ExecutePipelineResponse executionTime */
+                executionTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents an ExecutePipelineResponse. */
+            class ExecutePipelineResponse implements IExecutePipelineResponse {
+
+                /**
+                 * Constructs a new ExecutePipelineResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IExecutePipelineResponse);
+
+                /** ExecutePipelineResponse transaction. */
+                public transaction: Uint8Array;
+
+                /** ExecutePipelineResponse results. */
+                public results: google.firestore.v1.IDocument[];
+
+                /** ExecutePipelineResponse executionTime. */
+                public executionTime?: (google.protobuf.ITimestamp|null);
+
+                /**
+                 * Creates an ExecutePipelineResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExecutePipelineResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ExecutePipelineResponse;
+
+                /**
+                 * Creates a plain object from an ExecutePipelineResponse message. Also converts values to other types if specified.
+                 * @param message ExecutePipelineResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ExecutePipelineResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExecutePipelineResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExecutePipelineResponse
                  * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                  * @returns The default type url
                  */
@@ -6893,6 +7241,60 @@ export namespace google {
 
                 /**
                  * Gets the default type url for BatchWriteResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a StructuredPipeline. */
+            interface IStructuredPipeline {
+
+                /** StructuredPipeline pipeline */
+                pipeline?: (google.firestore.v1.IPipeline|null);
+
+                /** StructuredPipeline options */
+                options?: ({ [k: string]: google.firestore.v1.IValue }|null);
+            }
+
+            /** Represents a StructuredPipeline. */
+            class StructuredPipeline implements IStructuredPipeline {
+
+                /**
+                 * Constructs a new StructuredPipeline.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IStructuredPipeline);
+
+                /** StructuredPipeline pipeline. */
+                public pipeline?: (google.firestore.v1.IPipeline|null);
+
+                /** StructuredPipeline options. */
+                public options: { [k: string]: google.firestore.v1.IValue };
+
+                /**
+                 * Creates a StructuredPipeline message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns StructuredPipeline
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredPipeline;
+
+                /**
+                 * Creates a plain object from a StructuredPipeline message. Also converts values to other types if specified.
+                 * @param message StructuredPipeline
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.StructuredPipeline, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this StructuredPipeline to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for StructuredPipeline
                  * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                  * @returns The default type url
                  */

@@ -1555,7 +1555,10 @@
                         "referenceValue",
                         "geoPointValue",
                         "arrayValue",
-                        "mapValue"
+                        "mapValue",
+                        "fieldReferenceValue",
+                        "functionValue",
+                        "pipelineValue"
                       ]
                     }
                   },
@@ -1603,6 +1606,18 @@
                     "mapValue": {
                       "type": "MapValue",
                       "id": 6
+                    },
+                    "fieldReferenceValue": {
+                      "type": "string",
+                      "id": 19
+                    },
+                    "functionValue": {
+                      "type": "Function",
+                      "id": 20
+                    },
+                    "pipelineValue": {
+                      "type": "Pipeline",
+                      "id": 21
                     }
                   }
                 },
@@ -1621,6 +1636,53 @@
                       "keyType": "string",
                       "type": "Value",
                       "id": 1
+                    }
+                  }
+                },
+                "Function": {
+                  "fields": {
+                    "name": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "args": {
+                      "rule": "repeated",
+                      "type": "Value",
+                      "id": 2
+                    },
+                    "options": {
+                      "keyType": "string",
+                      "type": "Value",
+                      "id": 3
+                    }
+                  }
+                },
+                "Pipeline": {
+                  "fields": {
+                    "stages": {
+                      "rule": "repeated",
+                      "type": "Stage",
+                      "id": 1
+                    }
+                  },
+                  "nested": {
+                    "Stage": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "args": {
+                          "rule": "repeated",
+                          "type": "Value",
+                          "id": 2
+                        },
+                        "options": {
+                          "keyType": "string",
+                          "type": "Value",
+                          "id": 3
+                        }
+                      }
                     }
                   }
                 },
@@ -1894,6 +1956,23 @@
                               "post": "/v1/{parent=projects/*/databases/*/documents/*/**}:runQuery",
                               "body": "*"
                             }
+                          }
+                        }
+                      ]
+                    },
+                    "ExecutePipeline": {
+                      "requestType": "ExecutePipelineRequest",
+                      "responseType": "ExecutePipelineResponse",
+                      "responseStream": true,
+                      "options": {
+                        "(google.api.http).post": "/v1beta1/{database=projects/*/databases/*}:executePipeline",
+                        "(google.api.http).body": "*"
+                      },
+                      "parsedOptions": [
+                        {
+                          "(google.api.http)": {
+                            "post": "/v1beta1/{database=projects/*/databases/*}:executePipeline",
+                            "body": "*"
                           }
                         }
                       ]
@@ -2446,6 +2525,64 @@
                     }
                   }
                 },
+                "ExecutePipelineRequest": {
+                  "oneofs": {
+                    "pipelineType": {
+                      "oneof": [
+                        "structuredPipeline"
+                      ]
+                    },
+                    "consistencySelector": {
+                      "oneof": [
+                        "transaction",
+                        "newTransaction",
+                        "readTime"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "database": {
+                      "type": "string",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
+                    },
+                    "structuredPipeline": {
+                      "type": "StructuredPipeline",
+                      "id": 2
+                    },
+                    "transaction": {
+                      "type": "bytes",
+                      "id": 5
+                    },
+                    "newTransaction": {
+                      "type": "TransactionOptions",
+                      "id": 6
+                    },
+                    "readTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 7
+                    }
+                  }
+                },
+                "ExecutePipelineResponse": {
+                  "fields": {
+                    "transaction": {
+                      "type": "bytes",
+                      "id": 1
+                    },
+                    "results": {
+                      "rule": "repeated",
+                      "type": "Document",
+                      "id": 2
+                    },
+                    "executionTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 3
+                    }
+                  }
+                },
                 "RunAggregationQueryRequest": {
                   "oneofs": {
                     "queryType": {
@@ -2873,6 +3010,19 @@
                     "status": {
                       "rule": "repeated",
                       "type": "google.rpc.Status",
+                      "id": 2
+                    }
+                  }
+                },
+                "StructuredPipeline": {
+                  "fields": {
+                    "pipeline": {
+                      "type": "Pipeline",
+                      "id": 1
+                    },
+                    "options": {
+                      "keyType": "string",
+                      "type": "Value",
                       "id": 2
                     }
                   }

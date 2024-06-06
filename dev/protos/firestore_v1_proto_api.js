@@ -10212,6 +10212,9 @@
                      * @property {google.type.ILatLng|null} [geoPointValue] Value geoPointValue
                      * @property {google.firestore.v1.IArrayValue|null} [arrayValue] Value arrayValue
                      * @property {google.firestore.v1.IMapValue|null} [mapValue] Value mapValue
+                     * @property {string|null} [fieldReferenceValue] Value fieldReferenceValue
+                     * @property {google.firestore.v1.IFunction|null} [functionValue] Value functionValue
+                     * @property {google.firestore.v1.IPipeline|null} [pipelineValue] Value pipelineValue
                      */
     
                     /**
@@ -10317,17 +10320,41 @@
                      */
                     Value.prototype.mapValue = null;
     
+                    /**
+                     * Value fieldReferenceValue.
+                     * @member {string|null|undefined} fieldReferenceValue
+                     * @memberof google.firestore.v1.Value
+                     * @instance
+                     */
+                    Value.prototype.fieldReferenceValue = null;
+    
+                    /**
+                     * Value functionValue.
+                     * @member {google.firestore.v1.IFunction|null|undefined} functionValue
+                     * @memberof google.firestore.v1.Value
+                     * @instance
+                     */
+                    Value.prototype.functionValue = null;
+    
+                    /**
+                     * Value pipelineValue.
+                     * @member {google.firestore.v1.IPipeline|null|undefined} pipelineValue
+                     * @memberof google.firestore.v1.Value
+                     * @instance
+                     */
+                    Value.prototype.pipelineValue = null;
+    
                     // OneOf field names bound to virtual getters and setters
                     var $oneOfFields;
     
                     /**
                      * Value valueType.
-                     * @member {"nullValue"|"booleanValue"|"integerValue"|"doubleValue"|"timestampValue"|"stringValue"|"bytesValue"|"referenceValue"|"geoPointValue"|"arrayValue"|"mapValue"|undefined} valueType
+                     * @member {"nullValue"|"booleanValue"|"integerValue"|"doubleValue"|"timestampValue"|"stringValue"|"bytesValue"|"referenceValue"|"geoPointValue"|"arrayValue"|"mapValue"|"fieldReferenceValue"|"functionValue"|"pipelineValue"|undefined} valueType
                      * @memberof google.firestore.v1.Value
                      * @instance
                      */
                     Object.defineProperty(Value.prototype, "valueType", {
-                        get: $util.oneOfGetter($oneOfFields = ["nullValue", "booleanValue", "integerValue", "doubleValue", "timestampValue", "stringValue", "bytesValue", "referenceValue", "geoPointValue", "arrayValue", "mapValue"]),
+                        get: $util.oneOfGetter($oneOfFields = ["nullValue", "booleanValue", "integerValue", "doubleValue", "timestampValue", "stringValue", "bytesValue", "referenceValue", "geoPointValue", "arrayValue", "mapValue", "fieldReferenceValue", "functionValue", "pipelineValue"]),
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
@@ -10396,6 +10423,18 @@
                             if (typeof object.mapValue !== "object")
                                 throw TypeError(".google.firestore.v1.Value.mapValue: object expected");
                             message.mapValue = $root.google.firestore.v1.MapValue.fromObject(object.mapValue);
+                        }
+                        if (object.fieldReferenceValue != null)
+                            message.fieldReferenceValue = String(object.fieldReferenceValue);
+                        if (object.functionValue != null) {
+                            if (typeof object.functionValue !== "object")
+                                throw TypeError(".google.firestore.v1.Value.functionValue: object expected");
+                            message.functionValue = $root.google.firestore.v1.Function.fromObject(object.functionValue);
+                        }
+                        if (object.pipelineValue != null) {
+                            if (typeof object.pipelineValue !== "object")
+                                throw TypeError(".google.firestore.v1.Value.pipelineValue: object expected");
+                            message.pipelineValue = $root.google.firestore.v1.Pipeline.fromObject(object.pipelineValue);
                         }
                         return message;
                     };
@@ -10470,6 +10509,21 @@
                             object.bytesValue = options.bytes === String ? $util.base64.encode(message.bytesValue, 0, message.bytesValue.length) : options.bytes === Array ? Array.prototype.slice.call(message.bytesValue) : message.bytesValue;
                             if (options.oneofs)
                                 object.valueType = "bytesValue";
+                        }
+                        if (message.fieldReferenceValue != null && message.hasOwnProperty("fieldReferenceValue")) {
+                            object.fieldReferenceValue = message.fieldReferenceValue;
+                            if (options.oneofs)
+                                object.valueType = "fieldReferenceValue";
+                        }
+                        if (message.functionValue != null && message.hasOwnProperty("functionValue")) {
+                            object.functionValue = $root.google.firestore.v1.Function.toObject(message.functionValue, options);
+                            if (options.oneofs)
+                                object.valueType = "functionValue";
+                        }
+                        if (message.pipelineValue != null && message.hasOwnProperty("pipelineValue")) {
+                            object.pipelineValue = $root.google.firestore.v1.Pipeline.toObject(message.pipelineValue, options);
+                            if (options.oneofs)
+                                object.valueType = "pipelineValue";
                         }
                         return object;
                     };
@@ -10722,6 +10776,422 @@
                     };
     
                     return MapValue;
+                })();
+    
+                v1.Function = (function() {
+    
+                    /**
+                     * Properties of a Function.
+                     * @memberof google.firestore.v1
+                     * @interface IFunction
+                     * @property {string|null} [name] Function name
+                     * @property {Array.<google.firestore.v1.IValue>|null} [args] Function args
+                     * @property {Object.<string,google.firestore.v1.IValue>|null} [options] Function options
+                     */
+    
+                    /**
+                     * Constructs a new Function.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a Function.
+                     * @implements IFunction
+                     * @constructor
+                     * @param {google.firestore.v1.IFunction=} [properties] Properties to set
+                     */
+                    function Function(properties) {
+                        this.args = [];
+                        this.options = {};
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * Function name.
+                     * @member {string} name
+                     * @memberof google.firestore.v1.Function
+                     * @instance
+                     */
+                    Function.prototype.name = "";
+    
+                    /**
+                     * Function args.
+                     * @member {Array.<google.firestore.v1.IValue>} args
+                     * @memberof google.firestore.v1.Function
+                     * @instance
+                     */
+                    Function.prototype.args = $util.emptyArray;
+    
+                    /**
+                     * Function options.
+                     * @member {Object.<string,google.firestore.v1.IValue>} options
+                     * @memberof google.firestore.v1.Function
+                     * @instance
+                     */
+                    Function.prototype.options = $util.emptyObject;
+    
+                    /**
+                     * Creates a Function message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.Function
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.Function} Function
+                     */
+                    Function.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.Function)
+                            return object;
+                        var message = new $root.google.firestore.v1.Function();
+                        if (object.name != null)
+                            message.name = String(object.name);
+                        if (object.args) {
+                            if (!Array.isArray(object.args))
+                                throw TypeError(".google.firestore.v1.Function.args: array expected");
+                            message.args = [];
+                            for (var i = 0; i < object.args.length; ++i) {
+                                if (typeof object.args[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.Function.args: object expected");
+                                message.args[i] = $root.google.firestore.v1.Value.fromObject(object.args[i]);
+                            }
+                        }
+                        if (object.options) {
+                            if (typeof object.options !== "object")
+                                throw TypeError(".google.firestore.v1.Function.options: object expected");
+                            message.options = {};
+                            for (var keys = Object.keys(object.options), i = 0; i < keys.length; ++i) {
+                                if (typeof object.options[keys[i]] !== "object")
+                                    throw TypeError(".google.firestore.v1.Function.options: object expected");
+                                message.options[keys[i]] = $root.google.firestore.v1.Value.fromObject(object.options[keys[i]]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Function message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.Function
+                     * @static
+                     * @param {google.firestore.v1.Function} message Function
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Function.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.args = [];
+                        if (options.objects || options.defaults)
+                            object.options = {};
+                        if (options.defaults)
+                            object.name = "";
+                        if (message.name != null && message.hasOwnProperty("name"))
+                            object.name = message.name;
+                        if (message.args && message.args.length) {
+                            object.args = [];
+                            for (var j = 0; j < message.args.length; ++j)
+                                object.args[j] = $root.google.firestore.v1.Value.toObject(message.args[j], options);
+                        }
+                        var keys2;
+                        if (message.options && (keys2 = Object.keys(message.options)).length) {
+                            object.options = {};
+                            for (var j = 0; j < keys2.length; ++j)
+                                object.options[keys2[j]] = $root.google.firestore.v1.Value.toObject(message.options[keys2[j]], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Function to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.Function
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Function.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for Function
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.Function
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    Function.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.Function";
+                    };
+    
+                    return Function;
+                })();
+    
+                v1.Pipeline = (function() {
+    
+                    /**
+                     * Properties of a Pipeline.
+                     * @memberof google.firestore.v1
+                     * @interface IPipeline
+                     * @property {Array.<google.firestore.v1.Pipeline.IStage>|null} [stages] Pipeline stages
+                     */
+    
+                    /**
+                     * Constructs a new Pipeline.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a Pipeline.
+                     * @implements IPipeline
+                     * @constructor
+                     * @param {google.firestore.v1.IPipeline=} [properties] Properties to set
+                     */
+                    function Pipeline(properties) {
+                        this.stages = [];
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * Pipeline stages.
+                     * @member {Array.<google.firestore.v1.Pipeline.IStage>} stages
+                     * @memberof google.firestore.v1.Pipeline
+                     * @instance
+                     */
+                    Pipeline.prototype.stages = $util.emptyArray;
+    
+                    /**
+                     * Creates a Pipeline message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.Pipeline
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.Pipeline} Pipeline
+                     */
+                    Pipeline.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.Pipeline)
+                            return object;
+                        var message = new $root.google.firestore.v1.Pipeline();
+                        if (object.stages) {
+                            if (!Array.isArray(object.stages))
+                                throw TypeError(".google.firestore.v1.Pipeline.stages: array expected");
+                            message.stages = [];
+                            for (var i = 0; i < object.stages.length; ++i) {
+                                if (typeof object.stages[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.Pipeline.stages: object expected");
+                                message.stages[i] = $root.google.firestore.v1.Pipeline.Stage.fromObject(object.stages[i]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Pipeline message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.Pipeline
+                     * @static
+                     * @param {google.firestore.v1.Pipeline} message Pipeline
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Pipeline.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.stages = [];
+                        if (message.stages && message.stages.length) {
+                            object.stages = [];
+                            for (var j = 0; j < message.stages.length; ++j)
+                                object.stages[j] = $root.google.firestore.v1.Pipeline.Stage.toObject(message.stages[j], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Pipeline to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.Pipeline
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Pipeline.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for Pipeline
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.Pipeline
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    Pipeline.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.Pipeline";
+                    };
+    
+                    Pipeline.Stage = (function() {
+    
+                        /**
+                         * Properties of a Stage.
+                         * @memberof google.firestore.v1.Pipeline
+                         * @interface IStage
+                         * @property {string|null} [name] Stage name
+                         * @property {Array.<google.firestore.v1.IValue>|null} [args] Stage args
+                         * @property {Object.<string,google.firestore.v1.IValue>|null} [options] Stage options
+                         */
+    
+                        /**
+                         * Constructs a new Stage.
+                         * @memberof google.firestore.v1.Pipeline
+                         * @classdesc Represents a Stage.
+                         * @implements IStage
+                         * @constructor
+                         * @param {google.firestore.v1.Pipeline.IStage=} [properties] Properties to set
+                         */
+                        function Stage(properties) {
+                            this.args = [];
+                            this.options = {};
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Stage name.
+                         * @member {string} name
+                         * @memberof google.firestore.v1.Pipeline.Stage
+                         * @instance
+                         */
+                        Stage.prototype.name = "";
+    
+                        /**
+                         * Stage args.
+                         * @member {Array.<google.firestore.v1.IValue>} args
+                         * @memberof google.firestore.v1.Pipeline.Stage
+                         * @instance
+                         */
+                        Stage.prototype.args = $util.emptyArray;
+    
+                        /**
+                         * Stage options.
+                         * @member {Object.<string,google.firestore.v1.IValue>} options
+                         * @memberof google.firestore.v1.Pipeline.Stage
+                         * @instance
+                         */
+                        Stage.prototype.options = $util.emptyObject;
+    
+                        /**
+                         * Creates a Stage message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.Pipeline.Stage
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.Pipeline.Stage} Stage
+                         */
+                        Stage.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.Pipeline.Stage)
+                                return object;
+                            var message = new $root.google.firestore.v1.Pipeline.Stage();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            if (object.args) {
+                                if (!Array.isArray(object.args))
+                                    throw TypeError(".google.firestore.v1.Pipeline.Stage.args: array expected");
+                                message.args = [];
+                                for (var i = 0; i < object.args.length; ++i) {
+                                    if (typeof object.args[i] !== "object")
+                                        throw TypeError(".google.firestore.v1.Pipeline.Stage.args: object expected");
+                                    message.args[i] = $root.google.firestore.v1.Value.fromObject(object.args[i]);
+                                }
+                            }
+                            if (object.options) {
+                                if (typeof object.options !== "object")
+                                    throw TypeError(".google.firestore.v1.Pipeline.Stage.options: object expected");
+                                message.options = {};
+                                for (var keys = Object.keys(object.options), i = 0; i < keys.length; ++i) {
+                                    if (typeof object.options[keys[i]] !== "object")
+                                        throw TypeError(".google.firestore.v1.Pipeline.Stage.options: object expected");
+                                    message.options[keys[i]] = $root.google.firestore.v1.Value.fromObject(object.options[keys[i]]);
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a Stage message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.Pipeline.Stage
+                         * @static
+                         * @param {google.firestore.v1.Pipeline.Stage} message Stage
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Stage.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.args = [];
+                            if (options.objects || options.defaults)
+                                object.options = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.args && message.args.length) {
+                                object.args = [];
+                                for (var j = 0; j < message.args.length; ++j)
+                                    object.args[j] = $root.google.firestore.v1.Value.toObject(message.args[j], options);
+                            }
+                            var keys2;
+                            if (message.options && (keys2 = Object.keys(message.options)).length) {
+                                object.options = {};
+                                for (var j = 0; j < keys2.length; ++j)
+                                    object.options[keys2[j]] = $root.google.firestore.v1.Value.toObject(message.options[keys2[j]], options);
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Stage to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.Pipeline.Stage
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Stage.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for Stage
+                         * @function getTypeUrl
+                         * @memberof google.firestore.v1.Pipeline.Stage
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        Stage.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.v1.Pipeline.Stage";
+                        };
+    
+                        return Stage;
+                    })();
+    
+                    return Pipeline;
                 })();
     
                 v1.BitSequence = (function() {
@@ -11871,6 +12341,39 @@
                      * @instance
                      * @param {google.firestore.v1.IRunQueryRequest} request RunQueryRequest message or plain object
                      * @returns {Promise<google.firestore.v1.RunQueryResponse>} Promise
+                     * @variation 2
+                     */
+    
+                    /**
+                     * Callback as used by {@link google.firestore.v1.Firestore#executePipeline}.
+                     * @memberof google.firestore.v1.Firestore
+                     * @typedef ExecutePipelineCallback
+                     * @type {function}
+                     * @param {Error|null} error Error, if any
+                     * @param {google.firestore.v1.ExecutePipelineResponse} [response] ExecutePipelineResponse
+                     */
+    
+                    /**
+                     * Calls ExecutePipeline.
+                     * @function executePipeline
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.IExecutePipelineRequest} request ExecutePipelineRequest message or plain object
+                     * @param {google.firestore.v1.Firestore.ExecutePipelineCallback} callback Node-style callback called with the error, if any, and ExecutePipelineResponse
+                     * @returns {undefined}
+                     * @variation 1
+                     */
+                    Object.defineProperty(Firestore.prototype.executePipeline = function executePipeline(request, callback) {
+                        return this.rpcCall(executePipeline, $root.google.firestore.v1.ExecutePipelineRequest, $root.google.firestore.v1.ExecutePipelineResponse, request, callback);
+                    }, "name", { value: "ExecutePipeline" });
+    
+                    /**
+                     * Calls ExecutePipeline.
+                     * @function executePipeline
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.IExecutePipelineRequest} request ExecutePipelineRequest message or plain object
+                     * @returns {Promise<google.firestore.v1.ExecutePipelineResponse>} Promise
                      * @variation 2
                      */
     
@@ -14494,6 +14997,357 @@
                     };
     
                     return RunQueryResponse;
+                })();
+    
+                v1.ExecutePipelineRequest = (function() {
+    
+                    /**
+                     * Properties of an ExecutePipelineRequest.
+                     * @memberof google.firestore.v1
+                     * @interface IExecutePipelineRequest
+                     * @property {string|null} [database] ExecutePipelineRequest database
+                     * @property {google.firestore.v1.IStructuredPipeline|null} [structuredPipeline] ExecutePipelineRequest structuredPipeline
+                     * @property {Uint8Array|null} [transaction] ExecutePipelineRequest transaction
+                     * @property {google.firestore.v1.ITransactionOptions|null} [newTransaction] ExecutePipelineRequest newTransaction
+                     * @property {google.protobuf.ITimestamp|null} [readTime] ExecutePipelineRequest readTime
+                     */
+    
+                    /**
+                     * Constructs a new ExecutePipelineRequest.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents an ExecutePipelineRequest.
+                     * @implements IExecutePipelineRequest
+                     * @constructor
+                     * @param {google.firestore.v1.IExecutePipelineRequest=} [properties] Properties to set
+                     */
+                    function ExecutePipelineRequest(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * ExecutePipelineRequest database.
+                     * @member {string} database
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @instance
+                     */
+                    ExecutePipelineRequest.prototype.database = "";
+    
+                    /**
+                     * ExecutePipelineRequest structuredPipeline.
+                     * @member {google.firestore.v1.IStructuredPipeline|null|undefined} structuredPipeline
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @instance
+                     */
+                    ExecutePipelineRequest.prototype.structuredPipeline = null;
+    
+                    /**
+                     * ExecutePipelineRequest transaction.
+                     * @member {Uint8Array|null|undefined} transaction
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @instance
+                     */
+                    ExecutePipelineRequest.prototype.transaction = null;
+    
+                    /**
+                     * ExecutePipelineRequest newTransaction.
+                     * @member {google.firestore.v1.ITransactionOptions|null|undefined} newTransaction
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @instance
+                     */
+                    ExecutePipelineRequest.prototype.newTransaction = null;
+    
+                    /**
+                     * ExecutePipelineRequest readTime.
+                     * @member {google.protobuf.ITimestamp|null|undefined} readTime
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @instance
+                     */
+                    ExecutePipelineRequest.prototype.readTime = null;
+    
+                    // OneOf field names bound to virtual getters and setters
+                    var $oneOfFields;
+    
+                    /**
+                     * ExecutePipelineRequest pipelineType.
+                     * @member {"structuredPipeline"|undefined} pipelineType
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @instance
+                     */
+                    Object.defineProperty(ExecutePipelineRequest.prototype, "pipelineType", {
+                        get: $util.oneOfGetter($oneOfFields = ["structuredPipeline"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
+                     * ExecutePipelineRequest consistencySelector.
+                     * @member {"transaction"|"newTransaction"|"readTime"|undefined} consistencySelector
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @instance
+                     */
+                    Object.defineProperty(ExecutePipelineRequest.prototype, "consistencySelector", {
+                        get: $util.oneOfGetter($oneOfFields = ["transaction", "newTransaction", "readTime"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
+                     * Creates an ExecutePipelineRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ExecutePipelineRequest} ExecutePipelineRequest
+                     */
+                    ExecutePipelineRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ExecutePipelineRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.ExecutePipelineRequest();
+                        if (object.database != null)
+                            message.database = String(object.database);
+                        if (object.structuredPipeline != null) {
+                            if (typeof object.structuredPipeline !== "object")
+                                throw TypeError(".google.firestore.v1.ExecutePipelineRequest.structuredPipeline: object expected");
+                            message.structuredPipeline = $root.google.firestore.v1.StructuredPipeline.fromObject(object.structuredPipeline);
+                        }
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length >= 0)
+                                message.transaction = object.transaction;
+                        if (object.newTransaction != null) {
+                            if (typeof object.newTransaction !== "object")
+                                throw TypeError(".google.firestore.v1.ExecutePipelineRequest.newTransaction: object expected");
+                            message.newTransaction = $root.google.firestore.v1.TransactionOptions.fromObject(object.newTransaction);
+                        }
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.ExecutePipelineRequest.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an ExecutePipelineRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @static
+                     * @param {google.firestore.v1.ExecutePipelineRequest} message ExecutePipelineRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ExecutePipelineRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults)
+                            object.database = "";
+                        if (message.database != null && message.hasOwnProperty("database"))
+                            object.database = message.database;
+                        if (message.structuredPipeline != null && message.hasOwnProperty("structuredPipeline")) {
+                            object.structuredPipeline = $root.google.firestore.v1.StructuredPipeline.toObject(message.structuredPipeline, options);
+                            if (options.oneofs)
+                                object.pipelineType = "structuredPipeline";
+                        }
+                        if (message.transaction != null && message.hasOwnProperty("transaction")) {
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                            if (options.oneofs)
+                                object.consistencySelector = "transaction";
+                        }
+                        if (message.newTransaction != null && message.hasOwnProperty("newTransaction")) {
+                            object.newTransaction = $root.google.firestore.v1.TransactionOptions.toObject(message.newTransaction, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "newTransaction";
+                        }
+                        if (message.readTime != null && message.hasOwnProperty("readTime")) {
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "readTime";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ExecutePipelineRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ExecutePipelineRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for ExecutePipelineRequest
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.ExecutePipelineRequest
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    ExecutePipelineRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.ExecutePipelineRequest";
+                    };
+    
+                    return ExecutePipelineRequest;
+                })();
+    
+                v1.ExecutePipelineResponse = (function() {
+    
+                    /**
+                     * Properties of an ExecutePipelineResponse.
+                     * @memberof google.firestore.v1
+                     * @interface IExecutePipelineResponse
+                     * @property {Uint8Array|null} [transaction] ExecutePipelineResponse transaction
+                     * @property {Array.<google.firestore.v1.IDocument>|null} [results] ExecutePipelineResponse results
+                     * @property {google.protobuf.ITimestamp|null} [executionTime] ExecutePipelineResponse executionTime
+                     */
+    
+                    /**
+                     * Constructs a new ExecutePipelineResponse.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents an ExecutePipelineResponse.
+                     * @implements IExecutePipelineResponse
+                     * @constructor
+                     * @param {google.firestore.v1.IExecutePipelineResponse=} [properties] Properties to set
+                     */
+                    function ExecutePipelineResponse(properties) {
+                        this.results = [];
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * ExecutePipelineResponse transaction.
+                     * @member {Uint8Array} transaction
+                     * @memberof google.firestore.v1.ExecutePipelineResponse
+                     * @instance
+                     */
+                    ExecutePipelineResponse.prototype.transaction = $util.newBuffer([]);
+    
+                    /**
+                     * ExecutePipelineResponse results.
+                     * @member {Array.<google.firestore.v1.IDocument>} results
+                     * @memberof google.firestore.v1.ExecutePipelineResponse
+                     * @instance
+                     */
+                    ExecutePipelineResponse.prototype.results = $util.emptyArray;
+    
+                    /**
+                     * ExecutePipelineResponse executionTime.
+                     * @member {google.protobuf.ITimestamp|null|undefined} executionTime
+                     * @memberof google.firestore.v1.ExecutePipelineResponse
+                     * @instance
+                     */
+                    ExecutePipelineResponse.prototype.executionTime = null;
+    
+                    /**
+                     * Creates an ExecutePipelineResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ExecutePipelineResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ExecutePipelineResponse} ExecutePipelineResponse
+                     */
+                    ExecutePipelineResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ExecutePipelineResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.ExecutePipelineResponse();
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length >= 0)
+                                message.transaction = object.transaction;
+                        if (object.results) {
+                            if (!Array.isArray(object.results))
+                                throw TypeError(".google.firestore.v1.ExecutePipelineResponse.results: array expected");
+                            message.results = [];
+                            for (var i = 0; i < object.results.length; ++i) {
+                                if (typeof object.results[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.ExecutePipelineResponse.results: object expected");
+                                message.results[i] = $root.google.firestore.v1.Document.fromObject(object.results[i]);
+                            }
+                        }
+                        if (object.executionTime != null) {
+                            if (typeof object.executionTime !== "object")
+                                throw TypeError(".google.firestore.v1.ExecutePipelineResponse.executionTime: object expected");
+                            message.executionTime = $root.google.protobuf.Timestamp.fromObject(object.executionTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an ExecutePipelineResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ExecutePipelineResponse
+                     * @static
+                     * @param {google.firestore.v1.ExecutePipelineResponse} message ExecutePipelineResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ExecutePipelineResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.results = [];
+                        if (options.defaults) {
+                            if (options.bytes === String)
+                                object.transaction = "";
+                            else {
+                                object.transaction = [];
+                                if (options.bytes !== Array)
+                                    object.transaction = $util.newBuffer(object.transaction);
+                            }
+                            object.executionTime = null;
+                        }
+                        if (message.transaction != null && message.hasOwnProperty("transaction"))
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                        if (message.results && message.results.length) {
+                            object.results = [];
+                            for (var j = 0; j < message.results.length; ++j)
+                                object.results[j] = $root.google.firestore.v1.Document.toObject(message.results[j], options);
+                        }
+                        if (message.executionTime != null && message.hasOwnProperty("executionTime"))
+                            object.executionTime = $root.google.protobuf.Timestamp.toObject(message.executionTime, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ExecutePipelineResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ExecutePipelineResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ExecutePipelineResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for ExecutePipelineResponse
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.ExecutePipelineResponse
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    ExecutePipelineResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.ExecutePipelineResponse";
+                    };
+    
+                    return ExecutePipelineResponse;
                 })();
     
                 v1.RunAggregationQueryRequest = (function() {
@@ -17195,6 +18049,135 @@
                     };
     
                     return BatchWriteResponse;
+                })();
+    
+                v1.StructuredPipeline = (function() {
+    
+                    /**
+                     * Properties of a StructuredPipeline.
+                     * @memberof google.firestore.v1
+                     * @interface IStructuredPipeline
+                     * @property {google.firestore.v1.IPipeline|null} [pipeline] StructuredPipeline pipeline
+                     * @property {Object.<string,google.firestore.v1.IValue>|null} [options] StructuredPipeline options
+                     */
+    
+                    /**
+                     * Constructs a new StructuredPipeline.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a StructuredPipeline.
+                     * @implements IStructuredPipeline
+                     * @constructor
+                     * @param {google.firestore.v1.IStructuredPipeline=} [properties] Properties to set
+                     */
+                    function StructuredPipeline(properties) {
+                        this.options = {};
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * StructuredPipeline pipeline.
+                     * @member {google.firestore.v1.IPipeline|null|undefined} pipeline
+                     * @memberof google.firestore.v1.StructuredPipeline
+                     * @instance
+                     */
+                    StructuredPipeline.prototype.pipeline = null;
+    
+                    /**
+                     * StructuredPipeline options.
+                     * @member {Object.<string,google.firestore.v1.IValue>} options
+                     * @memberof google.firestore.v1.StructuredPipeline
+                     * @instance
+                     */
+                    StructuredPipeline.prototype.options = $util.emptyObject;
+    
+                    /**
+                     * Creates a StructuredPipeline message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.StructuredPipeline
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.StructuredPipeline} StructuredPipeline
+                     */
+                    StructuredPipeline.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.StructuredPipeline)
+                            return object;
+                        var message = new $root.google.firestore.v1.StructuredPipeline();
+                        if (object.pipeline != null) {
+                            if (typeof object.pipeline !== "object")
+                                throw TypeError(".google.firestore.v1.StructuredPipeline.pipeline: object expected");
+                            message.pipeline = $root.google.firestore.v1.Pipeline.fromObject(object.pipeline);
+                        }
+                        if (object.options) {
+                            if (typeof object.options !== "object")
+                                throw TypeError(".google.firestore.v1.StructuredPipeline.options: object expected");
+                            message.options = {};
+                            for (var keys = Object.keys(object.options), i = 0; i < keys.length; ++i) {
+                                if (typeof object.options[keys[i]] !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredPipeline.options: object expected");
+                                message.options[keys[i]] = $root.google.firestore.v1.Value.fromObject(object.options[keys[i]]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a StructuredPipeline message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.StructuredPipeline
+                     * @static
+                     * @param {google.firestore.v1.StructuredPipeline} message StructuredPipeline
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    StructuredPipeline.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.objects || options.defaults)
+                            object.options = {};
+                        if (options.defaults)
+                            object.pipeline = null;
+                        if (message.pipeline != null && message.hasOwnProperty("pipeline"))
+                            object.pipeline = $root.google.firestore.v1.Pipeline.toObject(message.pipeline, options);
+                        var keys2;
+                        if (message.options && (keys2 = Object.keys(message.options)).length) {
+                            object.options = {};
+                            for (var j = 0; j < keys2.length; ++j)
+                                object.options[keys2[j]] = $root.google.firestore.v1.Value.toObject(message.options[keys2[j]], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this StructuredPipeline to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.StructuredPipeline
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    StructuredPipeline.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for StructuredPipeline
+                     * @function getTypeUrl
+                     * @memberof google.firestore.v1.StructuredPipeline
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    StructuredPipeline.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.firestore.v1.StructuredPipeline";
+                    };
+    
+                    return StructuredPipeline;
                 })();
     
                 v1.StructuredQuery = (function() {
