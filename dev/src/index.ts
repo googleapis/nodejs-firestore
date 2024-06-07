@@ -96,7 +96,6 @@ import {
   RecursiveDelete,
 } from './recursive-delete';
 import {TraceUtil} from './telemetry/trace-util';
-import {FirestoreOpenTelemetryOptions} from '@google-cloud/firestore';
 import {DisabledTraceUtil} from './telemetry/disabled-trace-util';
 import {EnabledTraceUtil} from './telemetry/enabled-trace-util';
 
