@@ -594,7 +594,7 @@ export class Firestore implements firestore.Firestore {
 
     this.validateAndApplySettings({...settings, ...libraryHeader});
 
-    this._traceUtil = this.newTraceUtilInstance(settings?.openTelemetryOptions);
+    this._traceUtil = this.newTraceUtilInstance(settings);
 
     const retryConfig = serviceConfig.retry_params.default;
     this._backoffSettings = {
@@ -793,11 +793,11 @@ export class Firestore implements firestore.Firestore {
       return temp;
     };
     this._serializer = new Serializer(this);
-    this._traceUtil = this.newTraceUtilInstance(settings.openTelemetryOptions);
+    this._traceUtil = this.newTraceUtilInstance(settings);
   }
 
   private newTraceUtilInstance(
-    options?: FirestoreOpenTelemetryOptions
+    settings?: firestore.Settings
   ): TraceUtil {
     // The master switch. If this is false, no tracing code will take effect.
     // TODO(tracing): Remove this code to enable tracing.
@@ -806,12 +806,12 @@ export class Firestore implements firestore.Firestore {
       return new DisabledTraceUtil();
     }
 
-    if (options && options.enableTracing) {
+    if (settings?.openTelemetryOptions?.enableTracing) {
       // Re-use the existing TraceUtil if one has been created.
       if (this._traceUtil) {
         return this._traceUtil;
       }
-      return new EnabledTraceUtil(options);
+      return new EnabledTraceUtil(settings);
     } else {
       return new DisabledTraceUtil();
     }

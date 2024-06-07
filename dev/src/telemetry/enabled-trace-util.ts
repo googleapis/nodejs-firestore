@@ -20,14 +20,14 @@ import {Context} from './context';
 import {Span} from './span';
 import {Attributes, TraceUtil} from './trace-util';
 import {Span as OpenTelemetrySpan} from '@opentelemetry/api';
-import {FirestoreOpenTelemetryOptions} from '@google-cloud/firestore';
+import {FirestoreOpenTelemetryOptions, Settings} from '@google-cloud/firestore';
 import {GRPC_INSTRUMENTATION_INSTANCE, HTTP_INSTRUMENTATION_INSTANCE} from "../index";
 
 export class EnabledTraceUtil implements TraceUtil {
   private tracer: Tracer;
 
-  constructor(options: FirestoreOpenTelemetryOptions) {
-    let traceProvider: TracerProvider = options.traceProvider;
+  constructor(settings: Settings) {
+    let traceProvider = settings.openTelemetryOptions?.traceProvider;
 
     // If a TraceProvider has not been given to us, we try to use the global one.
     if (!traceProvider) {
@@ -46,8 +46,9 @@ export class EnabledTraceUtil implements TraceUtil {
       ],
     });
 
-    // TODO(tracing): update to the proper library name and version.
-    this.tracer = traceProvider.getTracer('firestore');
+    const libVersion = require('../../../package.json').version;
+    const libName = require('../../../package.json').name;
+    this.tracer = traceProvider.getTracer(libName, libVersion);
   }
 
   startActiveSpan<F extends (span: Span) => unknown>(
