@@ -44,7 +44,7 @@ pushd "$WORK_DIR"
 git clone --depth 1 https://github.com/googleapis/googleapis.git
 # Protobuf may have breaking changes, so it will be pinned to a specific release.
 # TODO(version) nodejs-firestore should maintain the version number of protobuf manually
-git clone --single-branch --branch v27.0 --depth 1 https://github.com/google/protobuf.git
+git clone --single-branch --branch v26.1 --depth 1 https://github.com/google/protobuf.git
 
 # Copy necessary protos.
 mkdir -p "${PROTOS_DIR}/google/api"
