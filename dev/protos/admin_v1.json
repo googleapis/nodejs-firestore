@@ -2230,7 +2230,6 @@
             "Edition": {
               "values": {
                 "EDITION_UNKNOWN": 0,
-                "EDITION_LEGACY": 900,
                 "EDITION_PROTO2": 998,
                 "EDITION_PROTO3": 999,
                 "EDITION_2023": 1000,
@@ -2956,10 +2955,6 @@
                   "type": "FeatureSet",
                   "id": 21
                 },
-                "featureSupport": {
-                  "type": "FeatureSupport",
-                  "id": 22
-                },
                 "uninterpretedOption": {
                   "rule": "repeated",
                   "type": "UninterpretedOption",
@@ -3027,26 +3022,6 @@
                     "value": {
                       "type": "string",
                       "id": 2
-                    }
-                  }
-                },
-                "FeatureSupport": {
-                  "fields": {
-                    "editionIntroduced": {
-                      "type": "Edition",
-                      "id": 1
-                    },
-                    "editionDeprecated": {
-                      "type": "Edition",
-                      "id": 2
-                    },
-                    "deprecationWarning": {
-                      "type": "string",
-                      "id": 3
-                    },
-                    "editionRemoved": {
-                      "type": "Edition",
-                      "id": 4
                     }
                   }
                 }
@@ -3272,7 +3247,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_2023",
                     "edition_defaults.value": "EXPLICIT"
                   }
@@ -3283,7 +3257,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_PROTO3",
                     "edition_defaults.value": "OPEN"
                   }
@@ -3294,7 +3267,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_PROTO3",
                     "edition_defaults.value": "PACKED"
                   }
@@ -3305,7 +3277,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_PROTO3",
                     "edition_defaults.value": "VERIFY"
                   }
@@ -3316,7 +3287,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_PROTO2",
                     "edition_defaults.value": "LENGTH_PREFIXED"
                   }
@@ -3327,7 +3297,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_PROTO3",
                     "edition_defaults.value": "ALLOW"
                   }
@@ -3336,7 +3305,15 @@
               "extensions": [
                 [
                   1000,
-                  9994
+                  1000
+                ],
+                [
+                  1001,
+                  1001
+                ],
+                [
+                  1002,
+                  1002
                 ],
                 [
                   9995,
@@ -3422,13 +3399,9 @@
                       "type": "Edition",
                       "id": 3
                     },
-                    "overridableFeatures": {
+                    "features": {
                       "type": "FeatureSet",
-                      "id": 4
-                    },
-                    "fixedFeatures": {
-                      "type": "FeatureSet",
-                      "id": 5
+                      "id": 2
                     }
                   }
                 }

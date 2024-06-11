@@ -648,7 +648,7 @@ export namespace google {
 
         /** Edition enum. */
         type Edition =
-            "EDITION_UNKNOWN"| "EDITION_LEGACY"| "EDITION_PROTO2"| "EDITION_PROTO3"| "EDITION_2023"| "EDITION_2024"| "EDITION_1_TEST_ONLY"| "EDITION_2_TEST_ONLY"| "EDITION_99997_TEST_ONLY"| "EDITION_99998_TEST_ONLY"| "EDITION_99999_TEST_ONLY"| "EDITION_MAX";
+            "EDITION_UNKNOWN"| "EDITION_PROTO2"| "EDITION_PROTO3"| "EDITION_2023"| "EDITION_2024"| "EDITION_1_TEST_ONLY"| "EDITION_2_TEST_ONLY"| "EDITION_99997_TEST_ONLY"| "EDITION_99998_TEST_ONLY"| "EDITION_99999_TEST_ONLY"| "EDITION_MAX";
 
         /** Properties of a FileDescriptorProto. */
         interface IFileDescriptorProto {
@@ -1938,9 +1938,6 @@ export namespace google {
             /** FieldOptions features */
             features?: (google.protobuf.IFeatureSet|null);
 
-            /** FieldOptions featureSupport */
-            featureSupport?: (google.protobuf.FieldOptions.IFeatureSupport|null);
-
             /** FieldOptions uninterpretedOption */
             uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
 
@@ -1995,9 +1992,6 @@ export namespace google {
 
             /** FieldOptions features. */
             public features?: (google.protobuf.IFeatureSet|null);
-
-            /** FieldOptions featureSupport. */
-            public featureSupport?: (google.protobuf.FieldOptions.IFeatureSupport|null);
 
             /** FieldOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
@@ -2097,72 +2091,6 @@ export namespace google {
 
                 /**
                  * Gets the default type url for EditionDefault
-                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns The default type url
-                 */
-                public static getTypeUrl(typeUrlPrefix?: string): string;
-            }
-
-            /** Properties of a FeatureSupport. */
-            interface IFeatureSupport {
-
-                /** FeatureSupport editionIntroduced */
-                editionIntroduced?: (google.protobuf.Edition|null);
-
-                /** FeatureSupport editionDeprecated */
-                editionDeprecated?: (google.protobuf.Edition|null);
-
-                /** FeatureSupport deprecationWarning */
-                deprecationWarning?: (string|null);
-
-                /** FeatureSupport editionRemoved */
-                editionRemoved?: (google.protobuf.Edition|null);
-            }
-
-            /** Represents a FeatureSupport. */
-            class FeatureSupport implements IFeatureSupport {
-
-                /**
-                 * Constructs a new FeatureSupport.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: google.protobuf.FieldOptions.IFeatureSupport);
-
-                /** FeatureSupport editionIntroduced. */
-                public editionIntroduced: google.protobuf.Edition;
-
-                /** FeatureSupport editionDeprecated. */
-                public editionDeprecated: google.protobuf.Edition;
-
-                /** FeatureSupport deprecationWarning. */
-                public deprecationWarning: string;
-
-                /** FeatureSupport editionRemoved. */
-                public editionRemoved: google.protobuf.Edition;
-
-                /**
-                 * Creates a FeatureSupport message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns FeatureSupport
-                 */
-                public static fromObject(object: { [k: string]: any }): google.protobuf.FieldOptions.FeatureSupport;
-
-                /**
-                 * Creates a plain object from a FeatureSupport message. Also converts values to other types if specified.
-                 * @param message FeatureSupport
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: google.protobuf.FieldOptions.FeatureSupport, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                /**
-                 * Converts this FeatureSupport to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-
-                /**
-                 * Gets the default type url for FeatureSupport
                  * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                  * @returns The default type url
                  */
@@ -2827,11 +2755,8 @@ export namespace google {
                 /** FeatureSetEditionDefault edition */
                 edition?: (google.protobuf.Edition|null);
 
-                /** FeatureSetEditionDefault overridableFeatures */
-                overridableFeatures?: (google.protobuf.IFeatureSet|null);
-
-                /** FeatureSetEditionDefault fixedFeatures */
-                fixedFeatures?: (google.protobuf.IFeatureSet|null);
+                /** FeatureSetEditionDefault features */
+                features?: (google.protobuf.IFeatureSet|null);
             }
 
             /** Represents a FeatureSetEditionDefault. */
@@ -2846,11 +2771,8 @@ export namespace google {
                 /** FeatureSetEditionDefault edition. */
                 public edition: google.protobuf.Edition;
 
-                /** FeatureSetEditionDefault overridableFeatures. */
-                public overridableFeatures?: (google.protobuf.IFeatureSet|null);
-
-                /** FeatureSetEditionDefault fixedFeatures. */
-                public fixedFeatures?: (google.protobuf.IFeatureSet|null);
+                /** FeatureSetEditionDefault features. */
+                public features?: (google.protobuf.IFeatureSet|null);
 
                 /**
                  * Creates a FeatureSetEditionDefault message from a plain object. Also converts values to their respective internal types.
