@@ -22,6 +22,8 @@ import * as deepEqual from 'fast-deep-equal';
 
 import * as firestore from '@google-cloud/firestore';
 import {Aggregate, AggregateSpec} from '../aggregate';
+import {AggregateTarget, avg, count, countAll, Field, sum} from '../expression';
+import {Pipeline} from '../pipeline';
 import {Timestamp} from '../timestamp';
 import {mapToArray, requestTag, wrapError} from '../util';
 import {ExplainMetrics, ExplainResults} from '../query-profile';
@@ -329,6 +331,25 @@ export class AggregateQuery<
     }
 
     return runQueryRequest;
+  }
+
+  toPipeline(): Pipeline {
+    const aggregates = mapToArray(
+      this._aggregates,
+      (aggregate, clientAlias) => {
+        if (aggregate.aggregateType === 'count') {
+          if (aggregate._field === undefined) {
+            return countAll().toField(clientAlias);
+          }
+          return count(Field.of(aggregate._field)).toField(clientAlias);
+        } else if (aggregate.aggregateType === 'avg') {
+          return avg(Field.of(aggregate._field!)).toField(clientAlias);
+        } else {
+          return sum(Field.of(aggregate._field!)).toField(clientAlias);
+        }
+      }
+    );
+    return this._query.toPipeline().aggregate(...aggregates);
   }
 
   /**

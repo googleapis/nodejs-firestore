@@ -15,6 +15,7 @@
  */
 
 import * as protos from '../../protos/firestore_v1_proto_api';
+import {PipelineResult} from '../pipeline';
 import api = protos.google.firestore.v1;
 
 import {Timestamp} from '../timestamp';
@@ -57,6 +58,16 @@ export interface QueryCursor {
 export enum LimitType {
   First,
   Last,
+}
+
+export interface PipelineStreamElement<
+  AppModelType = firestore.DocumentData,
+  DbModelType extends firestore.DocumentData = firestore.DocumentData,
+> {
+  transaction?: Uint8Array;
+  executionTime?: Timestamp;
+  explainMetrics?: ExplainMetrics;
+  result?: PipelineResult<AppModelType, DbModelType>;
 }
 
 /**

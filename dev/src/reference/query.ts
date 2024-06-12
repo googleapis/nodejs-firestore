@@ -14,48 +14,54 @@
  * limitations under the License.
  */
 
-import * as protos from '../../protos/firestore_v1_proto_api';
-import api = protos.google.firestore.v1;
 import * as firestore from '@google-cloud/firestore';
 import {GoogleError} from 'google-gax';
 import {Transform} from 'stream';
+import * as protos from '../../protos/firestore_v1_proto_api';
+import {Field, Ordering} from '../expression';
 
-import {QueryUtil} from './query-util';
+import {CompositeFilter, UnaryFilter} from '../filter';
 import {
-  Firestore,
   AggregateField,
   DocumentChange,
   DocumentSnapshot,
   FieldPath,
   Filter,
+  Firestore,
   QueryDocumentSnapshot,
   Timestamp,
 } from '../index';
-import {QueryOptions} from './query-options';
-import {FieldOrder} from './field-order';
-import {FilterInternal} from './filter-internal';
-import {FieldFilterInternal} from './field-filter-internal';
-import {CompositeFilterInternal} from './composite-filter-internal';
-import {comparisonOperators, directionOperators} from './constants';
-import {VectorQueryOptions} from './vector-query-options';
-import {DocumentReference} from './document-reference';
-import {QuerySnapshot} from './query-snapshot';
-import {Serializer} from '../serializer';
-import {ExplainResults} from '../query-profile';
-
-import {CompositeFilter, UnaryFilter} from '../filter';
+import {compare} from '../order';
 import {validateFieldPath} from '../path';
-import {
-  validateQueryOperator,
-  validateQueryOrder,
-  validateQueryValue,
-} from './helpers';
+import {Pipeline} from '../pipeline';
+import {toPipelineFilterCondition} from '../pipeline-util';
+import {ExplainResults} from '../query-profile';
+import {Serializer} from '../serializer';
+import {Limit} from '../stage';
+import {defaultConverter} from '../types';
 import {
   invalidArgumentMessage,
   validateFunction,
   validateInteger,
   validateMinNumberOfArguments,
 } from '../validate';
+import {QueryWatch} from '../watch';
+import {AggregateQuery} from './aggregate-query';
+import {CompositeFilterInternal} from './composite-filter-internal';
+import {comparisonOperators, directionOperators} from './constants';
+import {DocumentReference} from './document-reference';
+import {FieldFilterInternal} from './field-filter-internal';
+import {FieldOrder} from './field-order';
+import {FilterInternal} from './filter-internal';
+import {
+  validateQueryOperator,
+  validateQueryOrder,
+  validateQueryValue,
+} from './helpers';
+import {QueryOptions} from './query-options';
+import {QuerySnapshot} from './query-snapshot';
+
+import {QueryUtil} from './query-util';
 import {
   LimitType,
   QueryCursor,
@@ -63,11 +69,9 @@ import {
   QuerySnapshotResponse,
   QueryStreamElement,
 } from './types';
-import {AggregateQuery} from './aggregate-query';
 import {VectorQuery} from './vector-query';
-import {QueryWatch} from '../watch';
-import {compare} from '../order';
-import {defaultConverter} from '../types';
+import {VectorQueryOptions} from './vector-query-options';
+import api = protos.google.firestore.v1;
 
 /**
  * A Query refers to a query which you can read or stream from. You can also
@@ -662,6 +666,80 @@ export class Query<
     );
   }
 
+  toPipeline(): Pipeline {
+    let pipeline;
+    if (this._queryOptions.allDescendants) {
+      pipeline = Pipeline.fromCollectionGroup(this._queryOptions.collectionId);
+    } else {
+      pipeline = Pipeline.fromCollection(
+        this._queryOptions.parentPath.append(this._queryOptions.collectionId)
+          .relativeName
+      );
+    }
+
+    // filters
+    for (const f of this._queryOptions.filters) {
+      pipeline = pipeline.filter(
+        toPipelineFilterCondition(f, this._serializer)
+      );
+    }
+
+    // projections
+    const projections = this._queryOptions.projection?.fields || [];
+    if (projections.length > 0) {
+      pipeline = pipeline.select(
+        ...projections.map(p => Field.of(p.fieldPath!))
+      );
+    }
+
+    // orderbys
+    const orderings = this.createImplicitOrderBy().map(fieldOrder => {
+      let dir: 'asc' | 'desc' | undefined = undefined;
+      switch (fieldOrder.direction) {
+        case 'ASCENDING': {
+          dir = 'asc';
+          break;
+        }
+        case 'DESCENDING': {
+          dir = 'desc';
+          break;
+        }
+      }
+      return Ordering.of(Field.of(fieldOrder.field), dir);
+    });
+    if (orderings.length > 0) {
+      pipeline = pipeline.sort(orderings, 'required', 'unspecified');
+    }
+
+    // Cursors, Limit and Offset
+    if (
+      !this._queryOptions.startAt ||
+      !this._queryOptions.endAt ||
+      this._queryOptions.limitType === LimitType.Last
+    ) {
+      let paginating = pipeline.paginate(this._queryOptions.limit || 10);
+      if (this._queryOptions.startAt) {
+        paginating = paginating.withStartCursor(this._queryOptions.startAt!);
+      }
+      if (this._queryOptions.endAt) {
+        paginating = paginating.withEndCursor(this._queryOptions.endAt!);
+      }
+      if (this._queryOptions.limit === LimitType.Last) {
+        return paginating.lastPage();
+      } else {
+        return paginating.firstPage();
+      }
+    } else {
+      if (this._queryOptions.offset) {
+        pipeline = pipeline.offset(this._queryOptions.offset);
+      }
+      if (this._queryOptions.limit) {
+        pipeline = pipeline.offset(this._queryOptions.limit);
+      }
+    }
+    return pipeline;
+  }
+
   /**
    * Returns true if this `Query` is equal to the provided value.
    *
@@ -706,7 +784,7 @@ export class Query<
    * set of field values to use as the boundary.
    * @returns The implicit ordering semantics.
    */
-  private createImplicitOrderBy(
+  private createImplicitOrderByForCursor(
     cursorValuesOrDocumentSnapshot: Array<
       DocumentSnapshot<AppModelType, DbModelType> | unknown
     >
@@ -719,6 +797,10 @@ export class Query<
       return this._queryOptions.fieldOrders;
     }
 
+    return this.createImplicitOrderBy();
+  }
+
+  private createImplicitOrderBy(): FieldOrder[] {
     const fieldOrders = this._queryOptions.fieldOrders.slice();
     const fieldsNormalized = new Set([
       ...fieldOrders.map(item => item.field.toString()),
@@ -914,7 +996,7 @@ export class Query<
       1
     );
 
-    const fieldOrders = this.createImplicitOrderBy(
+    const fieldOrders = this.createImplicitOrderByForCursor(
       fieldValuesOrDocumentSnapshot
     );
     const startAt = this.createCursor(
@@ -958,7 +1040,7 @@ export class Query<
       1
     );
 
-    const fieldOrders = this.createImplicitOrderBy(
+    const fieldOrders = this.createImplicitOrderByForCursor(
       fieldValuesOrDocumentSnapshot
     );
     const startAt = this.createCursor(
@@ -1001,7 +1083,7 @@ export class Query<
       1
     );
 
-    const fieldOrders = this.createImplicitOrderBy(
+    const fieldOrders = this.createImplicitOrderByForCursor(
       fieldValuesOrDocumentSnapshot
     );
     const endAt = this.createCursor(
@@ -1044,7 +1126,7 @@ export class Query<
       1
     );
 
-    const fieldOrders = this.createImplicitOrderBy(
+    const fieldOrders = this.createImplicitOrderByForCursor(
       fieldValuesOrDocumentSnapshot
     );
     const endAt = this.createCursor(

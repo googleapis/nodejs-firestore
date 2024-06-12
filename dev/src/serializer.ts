@@ -184,6 +184,13 @@ export class Serializer {
       }
     }
 
+    if (isObject(val)) {
+      const _toProto = val['_toProto'];
+      if (typeof _toProto === 'function') {
+        return _toProto.bind(val)(this);
+      }
+    }
+
     if (Array.isArray(val)) {
       const array: api.IValue = {
         arrayValue: {},
