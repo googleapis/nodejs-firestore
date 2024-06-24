@@ -183,11 +183,10 @@ export class CollectionReference<
       };
 
       return this.firestore
-        .request<api.IListDocumentsRequest, api.IDocument[]>(
-          'listDocuments',
-          request,
-          tag
-        )
+        .request<
+          api.IListDocumentsRequest,
+          api.IDocument[]
+        >('listDocuments', request, tag)
         .then(documents => {
           // Note that the backend already orders these documents by name,
           // so we do not need to manually sort them.
