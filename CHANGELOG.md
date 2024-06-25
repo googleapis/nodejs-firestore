@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.9.0](https://github.com/googleapis/nodejs-firestore/compare/v7.8.0...v7.9.0) (2024-06-25)
+
+
+### Features
+
+* Update FirebaseFirestore.v1 and FirebaseFirestore.v1beta1 auto-gen types ([6732d4d](https://github.com/googleapis/nodejs-firestore/commit/6732d4da3c5ea851dccb0515757fbfb521f21410))
+
 ## [7.8.0](https://github.com/googleapis/nodejs-firestore/compare/v7.7.0...v7.8.0) (2024-05-28)
 
 
