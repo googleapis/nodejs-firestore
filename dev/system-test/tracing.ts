@@ -37,9 +37,10 @@ import {
 import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
-  SERVICE, SPAN_NAME_AGGREGATION_QUERY_GET, SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_DOC_REF_DELETE,
+  SERVICE, SPAN_NAME_AGGREGATION_QUERY_GET, SPAN_NAME_COL_REF_ADD, SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_DOC_REF_DELETE,
   SPAN_NAME_DOC_REF_GET, SPAN_NAME_DOC_REF_LIST_COLLECTIONS, SPAN_NAME_DOC_REF_SET, SPAN_NAME_DOC_REF_UPDATE,
 } from '../src/telemetry/trace-util';
+import {AsyncLocalStorageContextManager} from "@opentelemetry/context-async-hooks";
 
 use(chaiAsPromised);
 
@@ -84,10 +85,6 @@ describe.only('Tracing Tests', function () {
   let rootSpanIds: string[] = [];
 
   function afterEachTest(config: TestConfig): Promise<void> {
-    // Remove the global tracer provider in case anything was registered
-    // in order to avoid duplicate global tracers.
-    trace.disable();
-
     spanIdToChildrenSpanIds.clear();
     spanIdToSpanData.clear();
     rootSpanIds = [];
@@ -114,6 +111,16 @@ describe.only('Tracing Tests', function () {
   }
 
   function beforeEachTest(config: TestConfig) {
+    // Remove the global tracer provider in case anything was registered
+    // in order to avoid duplicate global tracers.
+    trace.disable();
+    context.disable();
+
+    // Set up a context manager.
+    const contextManager = new AsyncLocalStorageContextManager();
+    contextManager.enable();
+    context.setGlobalContextManager(contextManager);
+
     console.log('in beforeEachTest');
     // Create a new tracer and span processor for each test to make sure there
     // are no overlaps when reading the results.
@@ -496,6 +503,13 @@ describe.only('Tracing Tests', function () {
 
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_AGGREGATION_QUERY_GET);
+    });
+
+    it('collection reference add()', async () => {
+      await firestore.collection('foo').add({'foo': 'bar'});
+
+      await waitForCompletedSpans(config, 2);
+      expectSpanHierarchy(SPAN_NAME_COL_REF_ADD, SPAN_NAME_DOC_REF_CREATE);
     });
   }
 });

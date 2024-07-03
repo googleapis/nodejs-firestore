@@ -30,6 +30,7 @@ import {Query} from './query';
 import Firestore from '../index';
 import {DocumentReference} from './document-reference';
 import {QueryOptions} from './query-options';
+import {SPAN_NAME_COL_REF_ADD, SPAN_NAME_DOC_REF_UPDATE} from "../telemetry/trace-util";
 
 /**
  * A CollectionReference object can be used for adding documents, getting
@@ -265,16 +266,21 @@ export class CollectionReference<
   add(
     data: firestore.WithFieldValue<AppModelType>
   ): Promise<DocumentReference<AppModelType, DbModelType>> {
-    const firestoreData = this._queryOptions.converter.toFirestore(data);
-    validateDocumentData(
-      'data',
-      firestoreData,
-      /*allowDeletes=*/ false,
-      this._allowUndefined
-    );
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_COL_REF_ADD, span => {
+      const firestoreData = this._queryOptions.converter.toFirestore(data);
+      validateDocumentData(
+          'data',
+          firestoreData,
+          /*allowDeletes=*/ false,
+          this._allowUndefined
+      );
 
-    const documentRef = this.doc();
-    return documentRef.create(data).then(() => documentRef);
+      const documentRef = this.doc();
+      return documentRef.create(data).then(() => {
+        span.end();
+        return documentRef;
+      });
+    });
   }
 
   /**

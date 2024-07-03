@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {context, Tracer, TracerProvider} from '@opentelemetry/api';
+import {Tracer} from '@opentelemetry/api';
 
 import {Context} from './context';
 import {Span} from './span';
