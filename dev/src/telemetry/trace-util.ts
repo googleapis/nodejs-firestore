@@ -30,9 +30,41 @@ export declare type AttributeValue =
 /**
  * Span names for instrumented operations.
  */
-export const SPAN_NAME_DOC_REF_GET = "DocumentReference.Get";
-
 export const SERVICE = "google.firestore.v1.Firestore/";
+export const SPAN_NAME_DOC_REF_CREATE = "DocumentReference.Create";
+export const SPAN_NAME_DOC_REF_SET = "DocumentReference.Set";
+export const SPAN_NAME_DOC_REF_UPDATE = "DocumentReference.Update";
+export const SPAN_NAME_DOC_REF_DELETE = "DocumentReference.Delete";
+export const SPAN_NAME_DOC_REF_GET = "DocumentReference.Get";
+export const SPAN_NAME_DOC_REF_LIST_COLLECTIONS = "DocumentReference.ListCollections";
+export const SPAN_NAME_COL_REF_ADD = "CollectionReference.Add";
+export const SPAN_NAME_COL_REF_LIST_DOCUMENTS = "CollectionReference.ListDocuments";
+export const SPAN_NAME_QUERY_GET = "Query.Get";
+export const SPAN_NAME_AGGREGATION_QUERY_GET = "AggregationQuery.Get";
+export const SPAN_NAME_RUN_QUERY = "RunQuery";
+export const SPAN_NAME_RUN_AGGREGATION_QUERY = "RunAggregationQuery";
+export const SPAN_NAME_BATCH_GET_DOCUMENTS = "BatchGetDocuments";
+export const SPAN_NAME_TRANSACTION_RUN = "Transaction.Run";
+export const SPAN_NAME_TRANSACTION_BEGIN = "Transaction.Begin";
+export const SPAN_NAME_TRANSACTION_GET_QUERY = "Transaction.Get.Query";
+export const SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY = "Transaction.Get.AggregationQuery";
+export const SPAN_NAME_TRANSACTION_GET_DOCUMENT = "Transaction.Get.Document";
+export const SPAN_NAME_TRANSACTION_GET_DOCUMENTS = "Transaction.Get.Documents";
+export const SPAN_NAME_TRANSACTION_ROLLBACK = "Transaction.Rollback";
+export const SPAN_NAME_BATCH_COMMIT = "Batch.Commit";
+export const SPAN_NAME_TRANSACTION_COMMIT = "Transaction.Commit";
+export const SPAN_NAME_PARTITION_QUERY = "PartitionQuery";
+export const SPAN_NAME_BULK_WRITER_COMMIT = "BulkWriter.Commit";
+export const ATTRIBUTE_KEY_ATTEMPT = "attempt";
+export const ATTRIBUTE_KEY_DOC_COUNT = "doc_count";
+export const ATTRIBUTE_KEY_IS_TRANSACTIONAL = "transactional";
+export const ATTRIBUTE_KEY_NUM_RESPONSES = "response_count";
+export const ATTRIBUTE_KEY_IS_RETRY_WITH_CURSOR = "retry_query_with_cursor";
+export const ATTRIBUTE_KEY_TRANSACTION_TYPE = "transaction_type";
+export const ATTRIBUTE_KEY_ATTEMPTS_ALLOWED = "attempts_allowed";
+export const ATTRIBUTE_KEY_ATTEMPTS_REMAINING = "attempts_remaining";
+export const ENABLE_TRACING_ENV_VAR = "FIRESTORE_ENABLE_TRACING";
+export const LIBRARY_NAME = "com.google.cloud.firestore";
 
 export interface TraceUtil {
   startActiveSpan<F extends (span: Span) => unknown>(

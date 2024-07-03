@@ -27,7 +27,7 @@ import {requestTag} from '../util';
 import {validateFunction, validateMinNumberOfArguments} from '../validate';
 import {DocumentWatch} from '../watch';
 import {DocumentSnapshotBuilder} from '../document';
-import {SPAN_NAME_DOC_REF_GET} from "../telemetry/trace-util";
+import {SPAN_NAME_DOC_REF_GET, SPAN_NAME_DOC_REF_LIST_COLLECTIONS} from "../telemetry/trace-util";
 
 /**
  * A DocumentReference refers to a document location in a Firestore database
@@ -201,7 +201,6 @@ export class DocumentReference<
   get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
     return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_DOC_REF_GET, span => {
       return this._firestore.getAll(this).then(([result]) => {
-        span.addEvent('going to call span.end()', {'span-attr': 'value'});
         span.end();
         return result;
       });
@@ -254,34 +253,37 @@ export class DocumentReference<
    * ```
    */
   listCollections(): Promise<Array<CollectionReference>> {
-    const tag = requestTag();
-    return this.firestore.initializeIfNeeded(tag).then(() => {
-      const request: api.IListCollectionIdsRequest = {
-        parent: this.formattedName,
-        // Setting `pageSize` to an arbitrarily large value lets the backend cap
-        // the page size (currently to 300). Note that the backend rejects
-        // MAX_INT32 (b/146883794).
-        pageSize: Math.pow(2, 16) - 1,
-      };
-      return this._firestore
-        .request<api.IListCollectionIdsRequest, string[]>(
-          'listCollectionIds',
-          request,
-          tag
-        )
-        .then(collectionIds => {
-          const collections: Array<CollectionReference> = [];
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_DOC_REF_LIST_COLLECTIONS, span => {
+      const tag = requestTag();
+      return this.firestore.initializeIfNeeded(tag).then(() => {
+        const request: api.IListCollectionIdsRequest = {
+          parent: this.formattedName,
+          // Setting `pageSize` to an arbitrarily large value lets the backend cap
+          // the page size (currently to 300). Note that the backend rejects
+          // MAX_INT32 (b/146883794).
+          pageSize: Math.pow(2, 16) - 1,
+        };
+        return this._firestore
+            .request<api.IListCollectionIdsRequest, string[]>(
+                'listCollectionIds',
+                request,
+                tag
+            )
+            .then(collectionIds => {
+              const collections: Array<CollectionReference> = [];
 
-          // We can just sort this list using the default comparator since it
-          // will only contain collection ids.
-          collectionIds.sort();
+              // We can just sort this list using the default comparator since it
+              // will only contain collection ids.
+              collectionIds.sort();
 
-          for (const collectionId of collectionIds) {
-            collections.push(this.collection(collectionId));
-          }
+              for (const collectionId of collectionIds) {
+                collections.push(this.collection(collectionId));
+              }
 
-          return collections;
-        });
+              span.end();
+              return collections;
+            });
+      });
     });
   }
 

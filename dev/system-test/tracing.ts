@@ -38,7 +38,7 @@ import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
   SERVICE,
-  SPAN_NAME_DOC_REF_GET,
+  SPAN_NAME_DOC_REF_GET, SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
 } from '../src/telemetry/trace-util';
 
 use(chaiAsPromised);
@@ -452,12 +452,12 @@ describe.only('Tracing Tests', function () {
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_DOC_REF_GET);
     });
-    it('document reference get() 2', async () => {
+    it('document reference list collections', async () => {
       console.log(config);
-      await firestore.collection('foo').doc('bar').get();
+      await firestore.collection('foo').doc('bar').listCollections();
 
       await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_GET);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_LIST_COLLECTIONS);
     });
   }
 });
