@@ -15,11 +15,11 @@
  */
 
 import {Context as OpenTelemetryContext} from '@opentelemetry/api';
-import {ContextManager} from '@opentelemetry/api';
 import {context} from '@opentelemetry/api';
 
 export class Context {
   constructor(private context?: OpenTelemetryContext) {}
+
   get otelContext(): OpenTelemetryContext | undefined {
     return this.context;
   }

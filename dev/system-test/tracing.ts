@@ -46,7 +46,7 @@ import {
   SPAN_NAME_DOC_REF_GET,
   SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
   SPAN_NAME_DOC_REF_SET,
-  SPAN_NAME_DOC_REF_UPDATE,
+  SPAN_NAME_DOC_REF_UPDATE, SPAN_NAME_QUERY_GET,
 } from '../src/telemetry/trace-util';
 import {AsyncLocalStorageContextManager} from "@opentelemetry/context-async-hooks";
 
@@ -525,6 +525,13 @@ describe.only('Tracing Tests', function () {
 
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_COL_REF_LIST_DOCUMENTS);
+    });
+
+    it.only('query get()', async () => {
+      await firestore.collection('foo').where('foo', '==', 'bar').limit(1).get();
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_QUERY_GET);
     });
   }
 });

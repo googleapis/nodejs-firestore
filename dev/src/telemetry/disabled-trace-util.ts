@@ -15,6 +15,8 @@
  */
 import {Attributes, TraceUtil} from './trace-util';
 import {Span} from './span';
+import {Context} from "./context";
+import {trace} from "@opentelemetry/api";
 
 export class DisabledTraceUtil implements TraceUtil {
   startSpan(name: string): Span {
@@ -28,5 +30,13 @@ export class DisabledTraceUtil implements TraceUtil {
   ): ReturnType<F> {
     const emptySpan = new Span();
     return fn(emptySpan) as ReturnType<F>;
+  }
+
+  currentContext(): Context {
+    return new Context();
+  }
+
+  currentSpan(): Span {
+    return new Span();
   }
 }

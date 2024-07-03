@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {Tracer} from '@opentelemetry/api';
-
+import {context, trace, Tracer} from '@opentelemetry/api';
 import {Context} from './context';
 import {Span} from './span';
 import {Attributes, TraceUtil} from './trace-util';
@@ -69,7 +68,7 @@ export class EnabledTraceUtil implements TraceUtil {
       this.tracer.startSpan(
         name,
         undefined,
-        Context.currentContext().otelContext
+        context.active()
       )
     );
   }
@@ -78,5 +77,13 @@ export class EnabledTraceUtil implements TraceUtil {
     return new Span(
       this.tracer.startSpan(name, undefined, context.otelContext)
     );
+  }
+
+  currentContext(): Context {
+    return new Context(context.active());
+  }
+
+  currentSpan(): Span {
+    return new Span(trace.getActiveSpan());
   }
 }

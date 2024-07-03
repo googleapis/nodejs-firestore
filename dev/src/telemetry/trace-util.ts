@@ -15,6 +15,7 @@
  */
 
 import {Span} from './span';
+import {Context} from "./context";
 
 export interface Attributes {
   [attributeKey: string]: AttributeValue | undefined;
@@ -73,4 +74,8 @@ export interface TraceUtil {
     attributes?: Attributes
   ): ReturnType<F>;
   startSpan(name: string): Span;
+
+  currentContext(): Context;
+
+  currentSpan(): Span;
 }
