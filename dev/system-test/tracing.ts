@@ -37,8 +37,16 @@ import {
 import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
-  SERVICE, SPAN_NAME_AGGREGATION_QUERY_GET, SPAN_NAME_COL_REF_ADD, SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_DOC_REF_DELETE,
-  SPAN_NAME_DOC_REF_GET, SPAN_NAME_DOC_REF_LIST_COLLECTIONS, SPAN_NAME_DOC_REF_SET, SPAN_NAME_DOC_REF_UPDATE,
+  SERVICE,
+  SPAN_NAME_AGGREGATION_QUERY_GET,
+  SPAN_NAME_COL_REF_ADD,
+  SPAN_NAME_COL_REF_LIST_DOCUMENTS,
+  SPAN_NAME_DOC_REF_CREATE,
+  SPAN_NAME_DOC_REF_DELETE,
+  SPAN_NAME_DOC_REF_GET,
+  SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
+  SPAN_NAME_DOC_REF_SET,
+  SPAN_NAME_DOC_REF_UPDATE,
 } from '../src/telemetry/trace-util';
 import {AsyncLocalStorageContextManager} from "@opentelemetry/context-async-hooks";
 
@@ -510,6 +518,13 @@ describe.only('Tracing Tests', function () {
 
       await waitForCompletedSpans(config, 2);
       expectSpanHierarchy(SPAN_NAME_COL_REF_ADD, SPAN_NAME_DOC_REF_CREATE);
+    });
+
+    it('collection reference list documents', async () => {
+      await firestore.collection('foo').listDocuments();
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_COL_REF_LIST_DOCUMENTS);
     });
   }
 });
