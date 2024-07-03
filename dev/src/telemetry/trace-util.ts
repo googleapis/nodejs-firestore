@@ -33,7 +33,6 @@ export declare type AttributeValue =
 export const SPAN_NAME_DOC_REF_GET = "DocumentReference.Get";
 
 export const SERVICE = "google.firestore.v1.Firestore/";
-export const BATCH_GET_DOCUMENTS_RPC_NAME = "BatchGetDocuments";
 
 export interface TraceUtil {
   startActiveSpan<F extends (span: Span) => unknown>(

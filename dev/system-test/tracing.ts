@@ -16,9 +16,11 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {assert, expect, use} from 'chai';
 import {describe, it, beforeEach, afterEach, before} from 'mocha';
 import {
+  context,
   diag,
   DiagConsoleLogger,
   DiagLogLevel,
+  propagation,
   trace,
   TracerProvider,
 } from '@opentelemetry/api';
@@ -35,7 +37,6 @@ import {
 import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
-  BATCH_GET_DOCUMENTS_RPC_NAME,
   SERVICE,
   SPAN_NAME_DOC_REF_GET,
 } from '../src/telemetry/trace-util';
@@ -82,7 +83,7 @@ describe.only('Tracing Tests', function () {
   let spanIdToSpanData = new Map<string, ReadableSpan>();
   let rootSpanIds: string[] = [];
 
-  afterEach(() => {
+  function afterEachTest(config: TestConfig): Promise<void> {
     // Remove the global tracer provider in case anything was registered
     // in order to avoid duplicate global tracers.
     trace.disable();
@@ -92,7 +93,7 @@ describe.only('Tracing Tests', function () {
     rootSpanIds = [];
 
     return verifyInstance(firestore);
-  });
+  }
 
   function getOpenTelemetryOptions(
     config: TestConfig,
@@ -113,6 +114,7 @@ describe.only('Tracing Tests', function () {
   }
 
   function beforeEachTest(config: TestConfig) {
+    console.log('in beforeEachTest');
     // Create a new tracer and span processor for each test to make sure there
     // are no overlaps when reading the results.
     tracerProvider = new NodeTracerProvider({
@@ -137,9 +139,6 @@ describe.only('Tracing Tests', function () {
 
     if (config.globalOpenTelemetry) {
       trace.setGlobalTracerProvider(tracerProvider);
-    } else {
-      // TODO: Do we need to register the tracer provider here?
-      tracerProvider.register();
     }
 
     const settings: Settings = {
@@ -352,8 +351,8 @@ describe.only('Tracing Tests', function () {
   }
 
   describe.only('In-Memory', function () {
-    describe.only('Non-Global-OTEL', function () {
-      describe.only('GRPC', function () {
+    describe('Non-Global-OTEL', function () {
+      describe('GRPC', function () {
         let config: TestConfig = {
           e2e: false,
           globalOpenTelemetry: false,
@@ -361,6 +360,7 @@ describe.only('Tracing Tests', function () {
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
+        afterEach(async () => afterEachTest(config));
       });
       describe('REST', function () {
         let config: TestConfig = {
@@ -370,10 +370,11 @@ describe.only('Tracing Tests', function () {
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
+        afterEach(async () => afterEachTest(config));
       });
     });
-    describe.only('with Global-OTEL', function () {
-      describe.only('GRPC', function () {
+    describe('with Global-OTEL', function () {
+      describe('GRPC', function () {
         let config: TestConfig = {
           e2e: false,
           globalOpenTelemetry: true,
@@ -381,6 +382,7 @@ describe.only('Tracing Tests', function () {
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
+        afterEach(async () => afterEachTest(config));
       });
       describe('REST', function () {
         let config: TestConfig = {
@@ -390,6 +392,7 @@ describe.only('Tracing Tests', function () {
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
+        afterEach(async () => afterEachTest(config));
       });
     });
   });
@@ -404,6 +407,7 @@ describe.only('Tracing Tests', function () {
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
+        afterEach(async () => afterEachTest(config));
       });
       describe('REST', function () {
         let config: TestConfig = {
@@ -413,6 +417,7 @@ describe.only('Tracing Tests', function () {
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
+        afterEach(async () => afterEachTest(config));
       });
     });
     describe('with Global-OTEL', function () {
@@ -424,6 +429,7 @@ describe.only('Tracing Tests', function () {
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
+        afterEach(async () => afterEachTest(config));
       });
       describe('REST', function () {
         let config: TestConfig = {
@@ -433,6 +439,7 @@ describe.only('Tracing Tests', function () {
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
+        afterEach(async () => afterEachTest(config));
       });
     });
   });
@@ -442,12 +449,15 @@ describe.only('Tracing Tests', function () {
       console.log(config);
       await firestore.collection('foo').doc('bar').get();
 
-      await waitForCompletedSpans(config, 3);
-      expectSpanHierarchy(
-        SPAN_NAME_DOC_REF_GET,
-        grpcSpanName(BATCH_GET_DOCUMENTS_RPC_NAME),
-        HTTP_POST_SPAN_NAME
-      );
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_GET);
+    });
+    it('document reference get() 2', async () => {
+      console.log(config);
+      await firestore.collection('foo').doc('bar').get();
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_GET);
     });
   }
 });

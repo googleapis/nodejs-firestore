@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import {Tracer, TracerProvider} from '@opentelemetry/api';
+import {context, Tracer, TracerProvider} from '@opentelemetry/api';
 
 import {Context} from './context';
 import {Span} from './span';
 import {Attributes, TraceUtil} from './trace-util';
 import {Span as OpenTelemetrySpan} from '@opentelemetry/api';
-import {FirestoreOpenTelemetryOptions, Settings} from '@google-cloud/firestore';
-import {GRPC_INSTRUMENTATION_INSTANCE, HTTP_INSTRUMENTATION_INSTANCE} from "../index";
+import {Settings} from '@google-cloud/firestore';
 
 export class EnabledTraceUtil implements TraceUtil {
   private tracer: Tracer;
@@ -34,17 +33,6 @@ export class EnabledTraceUtil implements TraceUtil {
       const {trace} = require('@opentelemetry/api');
       traceProvider = trace.getTracerProvider();
     }
-
-    const {
-      registerInstrumentations,
-    } = require('@opentelemetry/instrumentation');
-    registerInstrumentations({
-      tracerProvider: traceProvider,
-      instrumentations: [
-        GRPC_INSTRUMENTATION_INSTANCE,
-        HTTP_INSTRUMENTATION_INSTANCE,
-      ],
-    });
 
     const libVersion = require('../../../package.json').version;
     const libName = require('../../../package.json').name;
