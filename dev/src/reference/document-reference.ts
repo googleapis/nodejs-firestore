@@ -27,7 +27,11 @@ import {requestTag} from '../util';
 import {validateFunction, validateMinNumberOfArguments} from '../validate';
 import {DocumentWatch} from '../watch';
 import {DocumentSnapshotBuilder} from '../document';
-import {SPAN_NAME_DOC_REF_GET, SPAN_NAME_DOC_REF_LIST_COLLECTIONS} from "../telemetry/trace-util";
+import {
+  SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_DOC_REF_DELETE,
+  SPAN_NAME_DOC_REF_GET,
+  SPAN_NAME_DOC_REF_LIST_COLLECTIONS, SPAN_NAME_DOC_REF_SET, SPAN_NAME_DOC_REF_UPDATE
+} from "../telemetry/trace-util";
 
 /**
  * A DocumentReference refers to a document location in a Firestore database
@@ -309,11 +313,17 @@ export class DocumentReference<
    * ```
    */
   create(data: firestore.WithFieldValue<AppModelType>): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-      .create(this, data)
-      .commit()
-      .then(([writeResult]) => writeResult);
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_DOC_REF_CREATE, span => {
+      const writeBatch = new WriteBatch(this._firestore);
+      return writeBatch
+          .create(this, data)
+          .commit()
+          .then(([writeResult]) => writeResult)
+          .then((result) => {
+            span.end();
+            return result;
+          });
+    });
   }
 
   /**
@@ -342,11 +352,17 @@ export class DocumentReference<
    * ```
    */
   delete(precondition?: firestore.Precondition): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-      .delete(this, precondition)
-      .commit()
-      .then(([writeResult]) => writeResult);
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_DOC_REF_DELETE, span => {
+      const writeBatch = new WriteBatch(this._firestore);
+      return writeBatch
+          .delete(this, precondition)
+          .commit()
+          .then(([writeResult]) => writeResult)
+          .then((result) => {
+            span.end();
+            return result;
+          });
+    });
   }
 
   set(
@@ -388,16 +404,24 @@ export class DocumentReference<
     data: firestore.PartialWithFieldValue<AppModelType>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
-    let writeBatch = new WriteBatch(this._firestore);
-    if (options) {
-      writeBatch = writeBatch.set(this, data, options);
-    } else {
-      writeBatch = writeBatch.set(
-        this,
-        data as firestore.WithFieldValue<AppModelType>
-      );
-    }
-    return writeBatch.commit().then(([writeResult]) => writeResult);
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_DOC_REF_SET, span => {
+      let writeBatch = new WriteBatch(this._firestore);
+      if (options) {
+        writeBatch = writeBatch.set(this, data, options);
+      } else {
+        writeBatch = writeBatch.set(
+            this,
+            data as firestore.WithFieldValue<AppModelType>
+        );
+      }
+      return writeBatch
+          .commit()
+          .then(([writeResult]) => writeResult)
+          .then((result) => {
+            span.end();
+            return result;
+          });
+    });
   }
 
   /**
@@ -441,14 +465,20 @@ export class DocumentReference<
       unknown | string | firestore.FieldPath | firestore.Precondition
     >
   ): Promise<WriteResult> {
-    // eslint-disable-next-line prefer-rest-params
-    validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_DOC_REF_UPDATE, span => {
+      // eslint-disable-next-line prefer-rest-params
+      validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
-    const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-      .update(this, dataOrField, ...preconditionOrValues)
-      .commit()
-      .then(([writeResult]) => writeResult);
+      const writeBatch = new WriteBatch(this._firestore);
+      return writeBatch
+          .update(this, dataOrField, ...preconditionOrValues)
+          .commit()
+          .then(([writeResult]) => writeResult)
+          .then((result) => {
+            span.end();
+            return result;
+          });
+    });
   }
 
   /**

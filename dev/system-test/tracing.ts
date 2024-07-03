@@ -37,8 +37,8 @@ import {
 import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
-  SERVICE,
-  SPAN_NAME_DOC_REF_GET, SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
+  SERVICE, SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_DOC_REF_DELETE,
+  SPAN_NAME_DOC_REF_GET, SPAN_NAME_DOC_REF_LIST_COLLECTIONS, SPAN_NAME_DOC_REF_SET, SPAN_NAME_DOC_REF_UPDATE,
 } from '../src/telemetry/trace-util';
 
 use(chaiAsPromised);
@@ -129,6 +129,10 @@ describe.only('Tracing Tests', function () {
     tracerProvider.addSpanProcessor(
       new BatchSpanProcessor(consoleSpanExporter)
     );
+
+    // TEMPORARY. TODO(tracing): Remove this line:
+    tracerProvider.addSpanProcessor(new BatchSpanProcessor(gcpTraceExporter));
+
     if (config.e2e) {
       tracerProvider.addSpanProcessor(new BatchSpanProcessor(gcpTraceExporter));
     } else {
@@ -446,18 +450,45 @@ describe.only('Tracing Tests', function () {
 
   function runTestCases(config: TestConfig) {
     it('document reference get()', async () => {
-      console.log(config);
       await firestore.collection('foo').doc('bar').get();
 
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_DOC_REF_GET);
     });
+
     it('document reference list collections', async () => {
-      console.log(config);
       await firestore.collection('foo').doc('bar').listCollections();
 
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_DOC_REF_LIST_COLLECTIONS);
+    });
+
+    it('document reference create()', async () => {
+      await firestore.collection('foo').doc().create({});
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_CREATE);
+    });
+
+    it('document reference delete()', async () => {
+      await firestore.collection('foo').doc('bar').delete();
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_DELETE);
+    });
+
+    it('document reference set()', async () => {
+      await firestore.collection('foo').doc('bar').set({'foo': 'bar'});
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_SET);
+    });
+
+    it.only('document reference update()', async () => {
+      await firestore.collection('foo').doc('bar').update('foo', 'bar2');
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_UPDATE);
     });
   }
 });
