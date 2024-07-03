@@ -30,6 +30,7 @@ import {AggregateQuerySnapshot} from './aggregate-query-snapshot';
 import {Query} from './query';
 import {Readable, Transform} from 'stream';
 import {QueryResponse, QuerySnapshotResponse} from './types';
+import {SPAN_NAME_AGGREGATION_QUERY_GET} from "../telemetry/trace-util";
 
 /**
  * A query that calculates aggregations over an underlying query.
@@ -81,8 +82,11 @@ export class AggregateQuery<
   async get(): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
-    const {result} = await this._get();
-    return result;
+    return this._query._firestore._traceUtil.startActiveSpan(SPAN_NAME_AGGREGATION_QUERY_GET, async (span) => {
+      const {result} = await this._get();
+      span.end();
+      return result;
+    });
   }
 
   /**

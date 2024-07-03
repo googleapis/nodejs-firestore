@@ -37,7 +37,7 @@ import {
 import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
-  SERVICE, SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_DOC_REF_DELETE,
+  SERVICE, SPAN_NAME_AGGREGATION_QUERY_GET, SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_DOC_REF_DELETE,
   SPAN_NAME_DOC_REF_GET, SPAN_NAME_DOC_REF_LIST_COLLECTIONS, SPAN_NAME_DOC_REF_SET, SPAN_NAME_DOC_REF_UPDATE,
 } from '../src/telemetry/trace-util';
 
@@ -484,11 +484,18 @@ describe.only('Tracing Tests', function () {
       expectSpanHierarchy(SPAN_NAME_DOC_REF_SET);
     });
 
-    it.only('document reference update()', async () => {
+    it('document reference update()', async () => {
       await firestore.collection('foo').doc('bar').update('foo', 'bar2');
 
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_DOC_REF_UPDATE);
+    });
+
+    it('aggregate query get()', async () => {
+      await firestore.collection('foo').count().get();
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_AGGREGATION_QUERY_GET);
     });
   }
 });
