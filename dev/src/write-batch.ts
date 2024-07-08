@@ -48,6 +48,7 @@ import {
 import {StatusCode} from './status-code';
 
 import api = google.firestore.v1;
+import {SPAN_NAME_BATCH_COMMIT, SPAN_NAME_TRANSACTION_GET_DOCUMENT} from "./telemetry/trace-util";
 
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
@@ -571,26 +572,32 @@ export class WriteBatch implements firestore.WriteBatch {
    * ```
    */
   commit(): Promise<WriteResult[]> {
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_BATCH_COMMIT, async (span) => {
+      // Capture the error stack to preserve stack tracing across async calls.
+      const stack = Error().stack!;
 
-    // Commits should also be retried when they fail with status code ABORTED.
-    const retryCodes = [StatusCode.ABORTED, ...getRetryCodes('commit')];
+      // Commits should also be retried when they fail with status code ABORTED.
+      const retryCodes = [StatusCode.ABORTED, ...getRetryCodes('commit')];
 
-    return this._commit<api.CommitRequest, api.CommitResponse>({retryCodes})
-      .then(response => {
-        return (response.writeResults || []).map(
-          writeResult =>
-            new WriteResult(
-              Timestamp.fromProto(
-                writeResult.updateTime || response.commitTime!
-              )
-            )
-        );
-      })
-      .catch(err => {
-        throw wrapError(err, stack);
-      });
+      return this._commit<api.CommitRequest, api.CommitResponse>({retryCodes})
+          .then(response => {
+            return (response.writeResults || []).map(
+                writeResult =>
+                    new WriteResult(
+                        Timestamp.fromProto(
+                            writeResult.updateTime || response.commitTime!
+                        )
+                    )
+            );
+          })
+          .then(result =>{
+            span.end();
+            return result;
+          })
+          .catch(err => {
+            throw wrapError(err, stack);
+          });
+    });
   }
 
   /**

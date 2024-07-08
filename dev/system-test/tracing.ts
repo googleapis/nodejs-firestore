@@ -38,7 +38,7 @@ import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
   SERVICE,
-  SPAN_NAME_AGGREGATION_QUERY_GET,
+  SPAN_NAME_AGGREGATION_QUERY_GET, SPAN_NAME_BATCH_COMMIT,
   SPAN_NAME_COL_REF_ADD,
   SPAN_NAME_COL_REF_LIST_DOCUMENTS,
   SPAN_NAME_DOC_REF_CREATE,
@@ -538,7 +538,7 @@ describe.only('Tracing Tests', function () {
       expectSpanHierarchy(SPAN_NAME_QUERY_GET);
     });
 
-    it('transaction with serial operations', async () => {
+    it('transaction', async () => {
       const docRef1 = firestore.collection("foo").doc("bar");
       const docRef2 = firestore.collection("foo").doc("bar");
 
@@ -556,6 +556,16 @@ describe.only('Tracing Tests', function () {
       expectSpanHierarchy(SPAN_NAME_TRANSACTION_RUN, SPAN_NAME_TRANSACTION_GET_QUERY);
       expectSpanHierarchy(SPAN_NAME_TRANSACTION_RUN, SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY);
       expectSpanHierarchy(SPAN_NAME_TRANSACTION_RUN, SPAN_NAME_TRANSACTION_COMMIT);
+    });
+
+    it('batch', async () => {
+      let writeBatch = firestore.batch();
+      let documentRef = firestore.doc('col/doc');
+      writeBatch.set(documentRef, {foo: 'bar'});
+      await writeBatch.commit();
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_BATCH_COMMIT);
     });
   }
 });
