@@ -46,7 +46,7 @@ import {
   SPAN_NAME_DOC_REF_GET,
   SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
   SPAN_NAME_DOC_REF_SET,
-  SPAN_NAME_DOC_REF_UPDATE,
+  SPAN_NAME_DOC_REF_UPDATE, SPAN_NAME_PARTITION_QUERY,
   SPAN_NAME_QUERY_GET, SPAN_NAME_TRANSACTION_COMMIT, SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY,
   SPAN_NAME_TRANSACTION_GET_DOCUMENT,
   SPAN_NAME_TRANSACTION_GET_DOCUMENTS, SPAN_NAME_TRANSACTION_GET_QUERY,
@@ -566,6 +566,17 @@ describe.only('Tracing Tests', function () {
 
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_BATCH_COMMIT);
+    });
+
+    it('partition query', async () => {
+      const query = firestore.collectionGroup('foo');
+      let numPartitions = 0;
+      for await (const partition of query.getPartitions(3)) {
+        numPartitions++;
+      }
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_PARTITION_QUERY);
     });
   }
 });
