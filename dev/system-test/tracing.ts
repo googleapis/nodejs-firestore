@@ -46,7 +46,11 @@ import {
   SPAN_NAME_DOC_REF_GET,
   SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
   SPAN_NAME_DOC_REF_SET,
-  SPAN_NAME_DOC_REF_UPDATE, SPAN_NAME_QUERY_GET,
+  SPAN_NAME_DOC_REF_UPDATE,
+  SPAN_NAME_QUERY_GET, SPAN_NAME_TRANSACTION_COMMIT, SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY,
+  SPAN_NAME_TRANSACTION_GET_DOCUMENT,
+  SPAN_NAME_TRANSACTION_GET_DOCUMENTS, SPAN_NAME_TRANSACTION_GET_QUERY,
+  SPAN_NAME_TRANSACTION_RUN,
 } from '../src/telemetry/trace-util';
 import {AsyncLocalStorageContextManager} from "@opentelemetry/context-async-hooks";
 
@@ -527,11 +531,31 @@ describe.only('Tracing Tests', function () {
       expectSpanHierarchy(SPAN_NAME_COL_REF_LIST_DOCUMENTS);
     });
 
-    it.only('query get()', async () => {
+    it('query get()', async () => {
       await firestore.collection('foo').where('foo', '==', 'bar').limit(1).get();
 
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_QUERY_GET);
+    });
+
+    it('transaction with serial operations', async () => {
+      const docRef1 = firestore.collection("foo").doc("bar");
+      const docRef2 = firestore.collection("foo").doc("bar");
+
+      await firestore.runTransaction(async (transaction) => {
+        await transaction.get(docRef1);
+        await transaction.getAll(docRef1, docRef2);
+        await transaction.get(firestore.collection("foo").limit(1));
+        await transaction.get(firestore.collection("nonexistent").count());
+        transaction.set(firestore.collection("foo").doc(), {'foo': 'bar'});
+      });
+
+      await waitForCompletedSpans(config, 6);
+      expectSpanHierarchy(SPAN_NAME_TRANSACTION_RUN, SPAN_NAME_TRANSACTION_GET_DOCUMENT);
+      expectSpanHierarchy(SPAN_NAME_TRANSACTION_RUN, SPAN_NAME_TRANSACTION_GET_DOCUMENTS);
+      expectSpanHierarchy(SPAN_NAME_TRANSACTION_RUN, SPAN_NAME_TRANSACTION_GET_QUERY);
+      expectSpanHierarchy(SPAN_NAME_TRANSACTION_RUN, SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY);
+      expectSpanHierarchy(SPAN_NAME_TRANSACTION_RUN, SPAN_NAME_TRANSACTION_COMMIT);
     });
   }
 });

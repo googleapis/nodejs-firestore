@@ -68,7 +68,7 @@ import {VectorQuery} from './vector-query';
 import {QueryWatch} from '../watch';
 import {compare} from '../order';
 import {defaultConverter} from '../types';
-import {SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_QUERY_GET} from "../telemetry/trace-util";
+import {SPAN_NAME_QUERY_GET} from "../telemetry/trace-util";
 
 /**
  * A Query refers to a query which you can read or stream from. You can also

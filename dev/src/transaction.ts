@@ -42,6 +42,15 @@ import {
 } from './validate';
 import {DocumentReader} from './document-reader';
 import api = proto.google.firestore.v1;
+import {
+  SPAN_NAME_TRANSACTION_COMMIT,
+  SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY,
+  SPAN_NAME_TRANSACTION_GET_DOCUMENT,
+  SPAN_NAME_TRANSACTION_GET_DOCUMENTS,
+  SPAN_NAME_TRANSACTION_GET_QUERY,
+  SPAN_NAME_TRANSACTION_ROLLBACK,
+  SPAN_NAME_TRANSACTION_RUN
+} from "./telemetry/trace-util";
 
 /*!
  * Error message for transactional reads that were executed after performing
@@ -198,11 +207,23 @@ export class Transaction implements firestore.Transaction {
     }
 
     if (refOrQuery instanceof DocumentReference) {
-      return this.withLazyStartedTransaction(refOrQuery, this.getSingleFn);
+      return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_TRANSACTION_GET_DOCUMENT, async (span) => {
+        return this.withLazyStartedTransaction(refOrQuery, this.getSingleFn).then(result => {
+          span.end();
+          return result;
+        });
+      });
     }
 
     if (refOrQuery instanceof Query || refOrQuery instanceof AggregateQuery) {
-      return this.withLazyStartedTransaction(refOrQuery, this.getQueryFn);
+      return this._firestore._traceUtil.startActiveSpan(
+          refOrQuery instanceof Query ? SPAN_NAME_TRANSACTION_GET_QUERY : SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY
+          , async (span) => {
+        return this.withLazyStartedTransaction(refOrQuery, this.getQueryFn).then(result => {
+          span.end();
+          return result;
+        });
+      });
     }
 
     throw new Error(
@@ -460,27 +481,31 @@ export class Transaction implements firestore.Transaction {
    * @internal
    */
   async commit(): Promise<void> {
-    if (!this._writeBatch) {
-      throw new Error(READ_ONLY_WRITE_ERROR_MSG);
-    }
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_TRANSACTION_COMMIT, async (span) => {
+      if (!this._writeBatch) {
+        throw new Error(READ_ONLY_WRITE_ERROR_MSG);
+      }
 
-    // If we have not performed any reads in this particular attempt
-    // then the writes will be atomically committed without a transaction ID
-    let transactionId: Uint8Array | undefined;
-    if (this._transactionIdPromise) {
-      transactionId = await this._transactionIdPromise;
-    } else if (this._writeBatch.isEmpty) {
-      // If we have not started a transaction (no reads) and we have no writes
-      // then the commit is a no-op (success)
-      return;
-    }
+      // If we have not performed any reads in this particular attempt
+      // then the writes will be atomically committed without a transaction ID
+      let transactionId: Uint8Array | undefined;
+      if (this._transactionIdPromise) {
+        transactionId = await this._transactionIdPromise;
+      } else if (this._writeBatch.isEmpty) {
+        // If we have not started a transaction (no reads) and we have no writes
+        // then the commit is a no-op (success)
+        span.end();
+        return;
+      }
 
-    await this._writeBatch._commit({
-      transactionId,
-      requestTag: this._requestTag,
+      await this._writeBatch._commit({
+        transactionId,
+        requestTag: this._requestTag,
+      });
+      this._transactionIdPromise = undefined;
+      this._prevTransactionId = transactionId;
+      span.end();
     });
-    this._transactionIdPromise = undefined;
-    this._prevTransactionId = transactionId;
   }
 
   /**
@@ -492,43 +517,47 @@ export class Transaction implements firestore.Transaction {
    * @internal
    */
   async rollback(): Promise<void> {
-    // No need to roll back if we have not lazily started the transaction
-    // or if we are read only
-    if (!this._transactionIdPromise || !this._writeBatch) {
-      return;
-    }
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_TRANSACTION_ROLLBACK, async (span) => {
+      // No need to roll back if we have not lazily started the transaction
+      // or if we are read only
+      if (!this._transactionIdPromise || !this._writeBatch) {
+        span.end();
+        return;
+      }
 
-    let transactionId: Uint8Array;
-    try {
-      transactionId = await this._transactionIdPromise;
-    } catch {
-      // This means the initial read operation rejected
-      // and we do not have a transaction ID to roll back
+      let transactionId: Uint8Array;
+      try {
+        transactionId = await this._transactionIdPromise;
+      } catch {
+        // This means the initial read operation rejected
+        // and we do not have a transaction ID to roll back
+        this._transactionIdPromise = undefined;
+        return;
+      }
+
+      const request: api.IRollbackRequest = {
+        database: this._firestore.formattedName,
+        transaction: transactionId,
+      };
       this._transactionIdPromise = undefined;
-      return;
-    }
+      this._prevTransactionId = transactionId;
 
-    const request: api.IRollbackRequest = {
-      database: this._firestore.formattedName,
-      transaction: transactionId,
-    };
-    this._transactionIdPromise = undefined;
-    this._prevTransactionId = transactionId;
-
-    // We don't need to wait for rollback to completed before continuing.
-    // If there are any locks held, then rollback will eventually release them.
-    // Rollback can be done concurrently thereby reducing latency caused by
-    // otherwise blocking.
-    this._firestore
-      .request('rollback', request, this._requestTag)
-      .catch(err => {
-        logger(
-          'Firestore.runTransaction',
-          this._requestTag,
-          'Best effort to rollback failed with error:',
-          err
-        );
-      });
+      // We don't need to wait for rollback to completed before continuing.
+      // If there are any locks held, then rollback will eventually release them.
+      // Rollback can be done concurrently thereby reducing latency caused by
+      // otherwise blocking.
+      this._firestore
+          .request('rollback', request, this._requestTag)
+          .catch(err => {
+            logger(
+                'Firestore.runTransaction',
+                this._requestTag,
+                'Best effort to rollback failed with error:',
+                err
+            );
+          });
+      span.end();
+    });
   }
 
   /**
@@ -542,45 +571,54 @@ export class Transaction implements firestore.Transaction {
   async runTransaction<T>(
     updateFunction: (transaction: Transaction) => Promise<T>
   ): Promise<T> {
-    // No backoff is set for readonly transactions (i.e. attempts == 1)
-    if (!this._writeBatch) {
-      return this.runTransactionOnce(updateFunction);
-    }
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_TRANSACTION_RUN, async (span) => {
+      // No backoff is set for readonly transactions (i.e. attempts == 1)
+      if (!this._writeBatch) {
+        return this.runTransactionOnce(updateFunction).then(result => {
+          span.end();
+          return result;
+        });
+      }
 
-    let lastError: GoogleError | undefined = undefined;
-    for (let attempt = 0; attempt < this._maxAttempts; ++attempt) {
-      try {
-        if (lastError) {
-          logger(
-            'Firestore.runTransaction',
-            this._requestTag,
-            'Retrying transaction after error:',
-            lastError
-          );
-        }
+      let lastError: GoogleError | undefined = undefined;
+      for (let attempt = 0; attempt < this._maxAttempts; ++attempt) {
+        try {
+          if (lastError) {
+            logger(
+                'Firestore.runTransaction',
+                this._requestTag,
+                'Retrying transaction after error:',
+                lastError
+            );
+          }
 
-        this._writeBatch._reset();
+          this._writeBatch._reset();
 
-        await maybeBackoff(this._backoff!, lastError);
+          await maybeBackoff(this._backoff!, lastError);
 
-        return await this.runTransactionOnce(updateFunction);
-      } catch (err) {
-        lastError = err;
+          return await this.runTransactionOnce(updateFunction).then(result => {
+            span.end();
+            return result;
+          });
+        } catch (err) {
+          lastError = err;
 
-        if (!isRetryableTransactionError(err)) {
-          break;
+          if (!isRetryableTransactionError(err)) {
+            break;
+          }
         }
       }
-    }
 
-    logger(
-      'Firestore.runTransaction',
-      this._requestTag,
-      'Transaction not eligible for retry, returning error: %s',
-      lastError
-    );
+      logger(
+          'Firestore.runTransaction',
+          this._requestTag,
+          'Transaction not eligible for retry, returning error: %s',
+          lastError
+      );
 
-    return Promise.reject(lastError);
+      span.end();
+      return Promise.reject(lastError);
+    });
   }
 
   /**
@@ -688,10 +726,10 @@ export class Transaction implements firestore.Transaction {
     result: DocumentSnapshot<AppModelType, DbModelType>;
   }> {
     const documentReader = new DocumentReader(
-      this._firestore,
-      [document],
-      undefined,
-      opts
+        this._firestore,
+        [document],
+        undefined,
+        opts
     );
     const {
       transaction,
@@ -716,13 +754,18 @@ export class Transaction implements firestore.Transaction {
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>[];
   }> {
-    const documentReader = new DocumentReader(
-      this._firestore,
-      documents,
-      fieldMask,
-      opts
-    );
-    return documentReader._get(this._requestTag);
+    return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_TRANSACTION_GET_DOCUMENTS, async (span) => {
+      const documentReader = new DocumentReader(
+          this._firestore,
+          documents,
+          fieldMask,
+          opts
+      );
+      return documentReader._get(this._requestTag).then(result => {
+        span.end();
+        return result;
+      });
+    });
   }
 
   private async getQueryFn<
