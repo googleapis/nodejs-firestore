@@ -114,7 +114,7 @@ export type PendingWriteOp = () => api.IWrite;
  * @class WriteBatch
  */
 export class WriteBatch implements firestore.WriteBatch {
-  private readonly _firestore: Firestore;
+  protected readonly _firestore: Firestore;
   private readonly _serializer: Serializer;
   private readonly _allowUndefined: boolean;
 

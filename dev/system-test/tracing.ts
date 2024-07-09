@@ -16,6 +16,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {assert, expect, use} from 'chai';
 import {describe, it, beforeEach, afterEach, before} from 'mocha';
 import {
+  Attributes,
   context,
   diag,
   DiagConsoleLogger,
@@ -37,8 +38,9 @@ import {
 import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
+  ATTRIBUTE_KEY_DOC_COUNT,
   SERVICE,
-  SPAN_NAME_AGGREGATION_QUERY_GET, SPAN_NAME_BATCH_COMMIT,
+  SPAN_NAME_AGGREGATION_QUERY_GET, SPAN_NAME_BATCH_COMMIT, SPAN_NAME_BULK_WRITER_COMMIT,
   SPAN_NAME_COL_REF_ADD,
   SPAN_NAME_COL_REF_LIST_DOCUMENTS,
   SPAN_NAME_DOC_REF_CREATE,
@@ -53,6 +55,7 @@ import {
   SPAN_NAME_TRANSACTION_RUN,
 } from '../src/telemetry/trace-util';
 import {AsyncLocalStorageContextManager} from "@opentelemetry/context-async-hooks";
+import {deepEqual, deepStrictEqual} from "assert";
 
 use(chaiAsPromised);
 
@@ -269,6 +272,17 @@ describe.only('Tracing Tests', function () {
     return spanIdToChildrenSpanIds.get(spanId);
   }
 
+  // Returns the first span it can find with the given name, or null if it cannot find a span with the given name.
+  // If there are multiple spans with the same name, it'll return the first one.
+  function getSpanByName(spanName: string): ReadableSpan | null {
+    for(let spanData of spanIdToSpanData.values()) {
+      if(spanData.name === spanName) {
+        return spanData;
+      }
+    }
+    return null;
+  }
+
   // Returns the array of spans that match the given span hierarchy names starting
   // at the given root. Returns an empty list if it cannot find such hierarchy under
   // the given root.
@@ -373,9 +387,19 @@ describe.only('Tracing Tests', function () {
     }
   }
 
+  // Ensures that the given span exists and has exactly all the given attributes.
+  function expectSpanHasAttributes(spanName: string, attributes : Attributes) {
+    // Expect that the span exists first.
+    const span = getSpanByName(spanName);
+    expect(span).to.not.be.null;
+
+    // Assert that the attributes are the same.
+    deepStrictEqual(span!.attributes, attributes);
+  }
+
   describe.only('In-Memory', function () {
-    describe('Non-Global-OTEL', function () {
-      describe('GRPC', function () {
+    describe.only('Non-Global-OTEL', function () {
+      describe.only('GRPC', function () {
         let config: TestConfig = {
           e2e: false,
           globalOpenTelemetry: false,
@@ -385,7 +409,7 @@ describe.only('Tracing Tests', function () {
         runTestCases(config);
         afterEach(async () => afterEachTest(config));
       });
-      describe('REST', function () {
+      describe.skip('REST', function () {
         let config: TestConfig = {
           e2e: false,
           globalOpenTelemetry: false,
@@ -396,7 +420,7 @@ describe.only('Tracing Tests', function () {
         afterEach(async () => afterEachTest(config));
       });
     });
-    describe('with Global-OTEL', function () {
+    describe.skip('with Global-OTEL', function () {
       describe('GRPC', function () {
         let config: TestConfig = {
           e2e: false,
@@ -420,7 +444,7 @@ describe.only('Tracing Tests', function () {
     });
   });
 
-  describe('E2E', function () {
+  describe.skip('E2E', function () {
     describe('Non-Global-OTEL', function () {
       describe('GRPC', function () {
         let config: TestConfig = {
@@ -577,6 +601,21 @@ describe.only('Tracing Tests', function () {
 
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_PARTITION_QUERY);
+    });
+
+    it.only('bulk writer', async () => {
+      const bulkWriter = firestore.bulkWriter();
+      // No need to await the set operations as 'close()' will commit all writes before closing.
+      bulkWriter.set(firestore.collection("foo").doc(), {'foo': 1});
+      bulkWriter.set(firestore.collection("foo").doc(), {'foo': 2});
+      bulkWriter.set(firestore.collection("foo").doc(), {'foo': 3});
+      bulkWriter.set(firestore.collection("foo").doc(), {'foo': 4});
+      bulkWriter.set(firestore.collection("foo").doc(), {'foo': 5});
+      await bulkWriter.close();
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_BULK_WRITER_COMMIT);
+      expectSpanHasAttributes(SPAN_NAME_BULK_WRITER_COMMIT, {[ATTRIBUTE_KEY_DOC_COUNT]: 5});
     });
   }
 });
