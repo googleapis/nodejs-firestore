@@ -25,7 +25,12 @@ export class Span {
   }
 
   addEvent(name: string, attributes?: Attributes): this {
-    this.span?.addEvent(name, attributes);
+    this.span = this.span?.addEvent(name, attributes);
+    return this;
+  }
+
+  setAttributes(attributes: Attributes): this {
+    this.span = this.span?.setAttributes(attributes);
     return this;
   }
 }

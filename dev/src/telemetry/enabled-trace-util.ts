@@ -49,7 +49,6 @@ export class EnabledTraceUtil implements TraceUtil {
         attributes: attributes,
       },
       (otelSpan: OpenTelemetrySpan) => {
-        otelSpan.addEvent('active span started');
         return fn(new Span(otelSpan)) as ReturnType<F>;
       }
     );

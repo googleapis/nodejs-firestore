@@ -43,6 +43,9 @@ import {
 import {DocumentReader} from './document-reader';
 import api = proto.google.firestore.v1;
 import {
+  ATTRIBUTE_KEY_ATTEMPTS_ALLOWED, ATTRIBUTE_KEY_ATTEMPTS_REMAINING,
+  ATTRIBUTE_KEY_DOC_COUNT,
+  ATTRIBUTE_KEY_IS_TRANSACTIONAL, ATTRIBUTE_KEY_TRANSACTION_TYPE,
   SPAN_NAME_TRANSACTION_COMMIT,
   SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY,
   SPAN_NAME_TRANSACTION_GET_DOCUMENT,
@@ -505,6 +508,10 @@ export class Transaction implements firestore.Transaction {
       this._transactionIdPromise = undefined;
       this._prevTransactionId = transactionId;
       span.end();
+    },
+    {
+      [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: true,
+      [ATTRIBUTE_KEY_DOC_COUNT]: this._writeBatch?._opCount
     });
   }
 
@@ -582,6 +589,12 @@ export class Transaction implements firestore.Transaction {
 
       let lastError: GoogleError | undefined = undefined;
       for (let attempt = 0; attempt < this._maxAttempts; ++attempt) {
+        span.setAttributes({
+          [ATTRIBUTE_KEY_TRANSACTION_TYPE]: this._writeBatch ? 'READ_WRITE' : 'READ_ONLY',
+          [ATTRIBUTE_KEY_ATTEMPTS_ALLOWED]: this._maxAttempts,
+          [ATTRIBUTE_KEY_ATTEMPTS_REMAINING]: this._maxAttempts - attempt - 1
+        });
+
         try {
           if (lastError) {
             logger(
@@ -590,6 +603,8 @@ export class Transaction implements firestore.Transaction {
                 'Retrying transaction after error:',
                 lastError
             );
+
+            span.addEvent('Initiate transaction retry');
           }
 
           this._writeBatch._reset();

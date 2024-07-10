@@ -85,7 +85,12 @@ import {
   RECURSIVE_DELETE_MIN_PENDING_OPS,
   RecursiveDelete,
 } from './recursive-delete';
-import {TraceUtil} from './telemetry/trace-util';
+import {
+  ATTRIBUTE_KEY_DOC_COUNT, ATTRIBUTE_KEY_IS_TRANSACTIONAL,
+  ATTRIBUTE_KEY_NUM_RESPONSES,
+  SPAN_NAME_BATCH_GET_DOCUMENTS,
+  TraceUtil
+} from './telemetry/trace-util';
 import {DisabledTraceUtil} from './telemetry/disabled-trace-util';
 import {EnabledTraceUtil} from './telemetry/enabled-trace-util';
 
@@ -1310,28 +1315,40 @@ export class Firestore implements firestore.Firestore {
       | firestore.ReadOptions
     >
   ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
-    validateMinNumberOfArguments(
-      'Firestore.getAll',
-      documentRefsOrReadOptions,
-      1
-    );
+    return this._traceUtil.startActiveSpan(SPAN_NAME_BATCH_GET_DOCUMENTS, span => {
+      validateMinNumberOfArguments(
+          'Firestore.getAll',
+          documentRefsOrReadOptions,
+          1
+      );
 
-    const {documents, fieldMask} = parseGetAllArguments(
-      documentRefsOrReadOptions
-    );
-    const tag = requestTag();
+      const {documents, fieldMask} = parseGetAllArguments(
+          documentRefsOrReadOptions
+      );
 
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    return this.initializeIfNeeded(tag)
-      .then(() => {
-        const reader = new DocumentReader(this, documents, fieldMask);
-        return reader.get(tag);
-      })
-      .catch(err => {
-        throw wrapError(err, stack);
+      this._traceUtil.currentSpan().setAttributes({
+        [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: false,
+        [ATTRIBUTE_KEY_DOC_COUNT]: documents.length
       });
+
+      const tag = requestTag();
+
+      // Capture the error stack to preserve stack tracing across async calls.
+      const stack = Error().stack!;
+
+      return this.initializeIfNeeded(tag)
+          .then(() => {
+            const reader = new DocumentReader(this, documents, fieldMask);
+            return reader.get(tag);
+          })
+          .then(result => {
+            span.end();
+            return result;
+          })
+          .catch(err => {
+            throw wrapError(err, stack);
+          });
+    });
   }
 
   /**
@@ -1821,6 +1838,8 @@ export class Firestore implements firestore.Firestore {
     const callOptions = this.createCallOptions(methodName);
 
     const bidirectional = methodName === 'listen';
+    let numResponses = 0;
+    const NUM_RESPONSES_PER_TRACE_EVENT = 100;
 
     return this._retry(methodName, requestTag, () => {
       const result = new Deferred<Duplex>();
@@ -1832,6 +1851,9 @@ export class Firestore implements firestore.Firestore {
           'Sending request: %j',
           request
         );
+
+        this._traceUtil.currentSpan().addEvent(`Firestore.${methodName}: Start`);
+
         try {
           const stream = bidirectional
             ? gapicClient[methodName](callOptions)
@@ -1845,6 +1867,12 @@ export class Firestore implements firestore.Firestore {
                 'Received response: %j',
                 chunk
               );
+              numResponses++;
+              if (numResponses === 1) {
+                this._traceUtil.currentSpan().addEvent(`Firestore.${methodName}: First response received`);
+              } else if(numResponses % NUM_RESPONSES_PER_TRACE_EVENT === 0) {
+                this._traceUtil.currentSpan().addEvent(`Firestore.${methodName}: Received ${numResponses} responses`);
+              }
               callback();
             },
           });
@@ -1857,7 +1885,10 @@ export class Firestore implements firestore.Firestore {
             requestTag,
             bidirectional ? request : undefined
           );
-          resultStream.on('end', () => stream.end());
+          resultStream.on('end', () => {
+            stream.end();
+            this._traceUtil.currentSpan().addEvent(`Firestore.${methodName}: Completed`, {[ATTRIBUTE_KEY_NUM_RESPONSES]: numResponses});
+          });
           result.resolve(resultStream);
 
           // While we return the stream to the callee early, we don't want to

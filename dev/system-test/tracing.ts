@@ -40,7 +40,7 @@ import {verifyInstance} from '../test/util/helpers';
 import {
   ATTRIBUTE_KEY_DOC_COUNT,
   SERVICE,
-  SPAN_NAME_AGGREGATION_QUERY_GET, SPAN_NAME_BATCH_COMMIT, SPAN_NAME_BULK_WRITER_COMMIT,
+  SPAN_NAME_AGGREGATION_QUERY_GET, SPAN_NAME_BATCH_COMMIT, SPAN_NAME_BATCH_GET_DOCUMENTS, SPAN_NAME_BULK_WRITER_COMMIT,
   SPAN_NAME_COL_REF_ADD,
   SPAN_NAME_COL_REF_LIST_DOCUMENTS,
   SPAN_NAME_DOC_REF_CREATE,
@@ -495,8 +495,36 @@ describe.only('Tracing Tests', function () {
     it('document reference get()', async () => {
       await firestore.collection('foo').doc('bar').get();
 
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_GET);
+      await waitForCompletedSpans(config, 2);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_GET, SPAN_NAME_BATCH_GET_DOCUMENTS);
+    });
+
+    it('document reference create()', async () => {
+      await firestore.collection('foo').doc().create({});
+
+      await waitForCompletedSpans(config, 2);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_BATCH_COMMIT);
+    });
+
+    it('document reference delete()', async () => {
+      await firestore.collection('foo').doc('bar').delete();
+
+      await waitForCompletedSpans(config, 2);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_DELETE, SPAN_NAME_BATCH_COMMIT);
+    });
+
+    it('document reference set()', async () => {
+      await firestore.collection('foo').doc('bar').set({'foo': 'bar'});
+
+      await waitForCompletedSpans(config, 2);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_SET, SPAN_NAME_BATCH_COMMIT);
+    });
+
+    it('document reference update()', async () => {
+      await firestore.collection('foo').doc('bar').update('foo', 'bar2');
+
+      await waitForCompletedSpans(config, 2);
+      expectSpanHierarchy(SPAN_NAME_DOC_REF_UPDATE, SPAN_NAME_BATCH_COMMIT);
     });
 
     it('document reference list collections', async () => {
@@ -504,34 +532,6 @@ describe.only('Tracing Tests', function () {
 
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_DOC_REF_LIST_COLLECTIONS);
-    });
-
-    it('document reference create()', async () => {
-      await firestore.collection('foo').doc().create({});
-
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_CREATE);
-    });
-
-    it('document reference delete()', async () => {
-      await firestore.collection('foo').doc('bar').delete();
-
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_DELETE);
-    });
-
-    it('document reference set()', async () => {
-      await firestore.collection('foo').doc('bar').set({'foo': 'bar'});
-
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_SET);
-    });
-
-    it('document reference update()', async () => {
-      await firestore.collection('foo').doc('bar').update('foo', 'bar2');
-
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_UPDATE);
     });
 
     it('aggregate query get()', async () => {
@@ -544,8 +544,8 @@ describe.only('Tracing Tests', function () {
     it('collection reference add()', async () => {
       await firestore.collection('foo').add({'foo': 'bar'});
 
-      await waitForCompletedSpans(config, 2);
-      expectSpanHierarchy(SPAN_NAME_COL_REF_ADD, SPAN_NAME_DOC_REF_CREATE);
+      await waitForCompletedSpans(config, 3);
+      expectSpanHierarchy(SPAN_NAME_COL_REF_ADD, SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_BATCH_COMMIT);
     });
 
     it('collection reference list documents', async () => {
@@ -560,6 +560,15 @@ describe.only('Tracing Tests', function () {
 
       await waitForCompletedSpans(config, 1);
       expectSpanHierarchy(SPAN_NAME_QUERY_GET);
+    });
+
+    it('firestore getAll()', async () => {
+      const docRef1 = firestore.collection("foo").doc("1");
+      const docRef2 = firestore.collection("foo").doc("2");
+      await firestore.getAll(docRef1, docRef2);
+
+      await waitForCompletedSpans(config, 1);
+      expectSpanHierarchy(SPAN_NAME_BATCH_GET_DOCUMENTS);
     });
 
     it('transaction', async () => {
@@ -603,7 +612,7 @@ describe.only('Tracing Tests', function () {
       expectSpanHierarchy(SPAN_NAME_PARTITION_QUERY);
     });
 
-    it.only('bulk writer', async () => {
+    it('bulk writer', async () => {
       const bulkWriter = firestore.bulkWriter();
       // No need to await the set operations as 'close()' will commit all writes before closing.
       bulkWriter.set(firestore.collection("foo").doc(), {'foo': 1});

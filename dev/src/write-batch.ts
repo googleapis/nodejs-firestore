@@ -48,7 +48,12 @@ import {
 import {StatusCode} from './status-code';
 
 import api = google.firestore.v1;
-import {SPAN_NAME_BATCH_COMMIT, SPAN_NAME_TRANSACTION_GET_DOCUMENT} from "./telemetry/trace-util";
+import {
+  ATTRIBUTE_KEY_DOC_COUNT,
+  ATTRIBUTE_KEY_IS_TRANSACTIONAL,
+  SPAN_NAME_BATCH_COMMIT,
+  SPAN_NAME_TRANSACTION_GET_DOCUMENT
+} from "./telemetry/trace-util";
 
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
@@ -597,6 +602,10 @@ export class WriteBatch implements firestore.WriteBatch {
           .catch(err => {
             throw wrapError(err, stack);
           });
+    },
+    {
+      [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: false,
+      [ATTRIBUTE_KEY_DOC_COUNT]: this._opCount
     });
   }
 

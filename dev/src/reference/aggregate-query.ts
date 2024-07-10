@@ -224,9 +224,10 @@ export class AggregateQuery<
         // async function to convert this exception into the rejected Promise we
         // catch below.
         const request = this.toProto(transactionOrReadTime, explainOptions);
+        const methodName = 'runAggregationQuery';
 
         const backendStream = await firestore.requestStream(
-          'runAggregationQuery',
+          methodName,
           /* bidirectional= */ false,
           request,
           tag
@@ -249,6 +250,11 @@ export class AggregateQuery<
             'AggregateQuery failed with stream error:',
             err
           );
+
+          this._query._firestore._traceUtil
+              .currentSpan()
+              .addEvent(`${methodName}: Error.`, {'error.message': err.message});
+
           stream.destroy(err);
         });
         backendStream.resume();

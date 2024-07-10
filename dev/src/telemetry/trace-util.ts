@@ -32,6 +32,7 @@ export declare type AttributeValue =
  * Span names for instrumented operations.
  */
 export const SERVICE = "google.firestore.v1.Firestore/";
+export const SPAN_NAME_BATCH_GET_DOCUMENTS = "BatchGetDocuments";
 export const SPAN_NAME_DOC_REF_CREATE = "DocumentReference.Create";
 export const SPAN_NAME_DOC_REF_SET = "DocumentReference.Set";
 export const SPAN_NAME_DOC_REF_UPDATE = "DocumentReference.Update";
@@ -61,7 +62,6 @@ export const ATTRIBUTE_KEY_TRANSACTION_TYPE = "transaction_type";
 export const ATTRIBUTE_KEY_ATTEMPTS_ALLOWED = "attempts_allowed";
 export const ATTRIBUTE_KEY_ATTEMPTS_REMAINING = "attempts_remaining";
 export const ENABLE_TRACING_ENV_VAR = "FIRESTORE_ENABLE_TRACING";
-export const LIBRARY_NAME = "com.google.cloud.firestore";
 
 export interface TraceUtil {
   startActiveSpan<F extends (span: Span) => unknown>(
