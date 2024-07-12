@@ -294,7 +294,6 @@ class BulkCommitBatch extends WriteBatch {
           this.pendingOps[i].onError(wrapError(error, stack));
         }
       }
-      span.end();
     }, {
       [ATTRIBUTE_KEY_DOC_COUNT]: this._opCount
     });

@@ -1079,7 +1079,6 @@ export class Query<
   async get(): Promise<QuerySnapshot<AppModelType, DbModelType>> {
     return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_QUERY_GET, async (span) => {
       const {result} = await this._get();
-      span.end();
       return result;
     });
   }

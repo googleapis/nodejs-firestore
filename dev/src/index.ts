@@ -1341,10 +1341,6 @@ export class Firestore implements firestore.Firestore {
             const reader = new DocumentReader(this, documents, fieldMask);
             return reader.get(tag);
           })
-          .then(result => {
-            span.end();
-            return result;
-          })
           .catch(err => {
             throw wrapError(err, stack);
           });

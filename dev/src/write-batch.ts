@@ -595,10 +595,6 @@ export class WriteBatch implements firestore.WriteBatch {
                     )
             );
           })
-          .then(result =>{
-            span.end();
-            return result;
-          })
           .catch(err => {
             throw wrapError(err, stack);
           });

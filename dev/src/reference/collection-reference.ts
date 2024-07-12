@@ -203,9 +203,6 @@ export class CollectionReference<
                 );
                 return this.doc(path.id!);
               });
-            }).then(result => {
-              span.end();
-              return result;
             });
       });
     });
@@ -285,10 +282,7 @@ export class CollectionReference<
       );
 
       const documentRef = this.doc();
-      return documentRef.create(data).then(() => {
-        span.end();
-        return documentRef;
-      });
+      return documentRef.create(data).then(() => documentRef);
     });
   }
 

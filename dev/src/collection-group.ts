@@ -124,8 +124,6 @@ export class CollectionGroup<
 
       // Sort the partitions as they may not be ordered if responses are paged.
       partitions.sort((l, r) => compareArrays(l, r));
-
-      span.end();
     });
 
     for (let i = 0; i < partitions.length; ++i) {

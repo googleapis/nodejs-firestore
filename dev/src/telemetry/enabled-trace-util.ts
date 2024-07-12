@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {context, trace, Tracer} from '@opentelemetry/api';
+import {context, SpanStatusCode, trace, Tracer} from '@opentelemetry/api';
 import {Context} from './context';
 import {Span} from './span';
 import {Attributes, TraceUtil} from './trace-util';
@@ -49,7 +49,31 @@ export class EnabledTraceUtil implements TraceUtil {
         attributes: attributes,
       },
       (otelSpan: OpenTelemetrySpan) => {
-        return fn(new Span(otelSpan)) as ReturnType<F>;
+        // Note that if `fn` returns a `Promise`, we want the otelSpan to end
+        // after the `Promise` has resolved, NOT after the `fn` has returned.
+        // Therefore, we should not use a `finally` clause to end the otelSpan.
+        try {
+          let result = fn(new Span(otelSpan));
+          if (result instanceof Promise) {
+            result = result.then((value) => {
+              otelSpan.end();
+              return value;
+            }).catch(error => {
+              otelSpan.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+              otelSpan.recordException(error);
+              otelSpan.end();
+            });
+          } else {
+            otelSpan.end();
+          }
+          return result as ReturnType<F>;
+        } catch (error) {
+          otelSpan.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+          otelSpan.recordException(error);
+          otelSpan.end();
+          // Re-throw the exception to maintain normal error handling.
+          throw error;
+        }
       }
     );
   }
@@ -59,22 +83,6 @@ export class EnabledTraceUtil implements TraceUtil {
     const currentContext = Context.currentContext();
     return new Span(
       this.tracer.startSpan(name, undefined, currentContext.otelContext)
-    );
-  }
-
-  startSpanWithinCurrentContext(name: string): Span {
-    return new Span(
-      this.tracer.startSpan(
-        name,
-        undefined,
-        context.active()
-      )
-    );
-  }
-
-  startSpanWithContext(name: string, context: Context): Span {
-    return new Span(
-      this.tracer.startSpan(name, undefined, context.otelContext)
     );
   }
 

@@ -84,7 +84,6 @@ export class AggregateQuery<
   > {
     return this._query._firestore._traceUtil.startActiveSpan(SPAN_NAME_AGGREGATION_QUERY_GET, async (span) => {
       const {result} = await this._get();
-      span.end();
       return result;
     });
   }

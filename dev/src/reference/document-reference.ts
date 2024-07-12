@@ -204,10 +204,7 @@ export class DocumentReference<
    */
   get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
     return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_DOC_REF_GET, span => {
-      return this._firestore.getAll(this).then(([result]) => {
-        span.end();
-        return result;
-      });
+      return this._firestore.getAll(this).then(([result]) => result);
     });
   }
 
@@ -284,7 +281,6 @@ export class DocumentReference<
                 collections.push(this.collection(collectionId));
               }
 
-              span.end();
               return collections;
             });
       });
@@ -318,11 +314,7 @@ export class DocumentReference<
       return writeBatch
           .create(this, data)
           .commit()
-          .then(([writeResult]) => writeResult)
-          .then((result) => {
-            span.end();
-            return result;
-          });
+          .then(([writeResult]) => writeResult);
     });
   }
 
@@ -357,11 +349,7 @@ export class DocumentReference<
       return writeBatch
           .delete(this, precondition)
           .commit()
-          .then(([writeResult]) => writeResult)
-          .then((result) => {
-            span.end();
-            return result;
-          });
+          .then(([writeResult]) => writeResult);
     });
   }
 
@@ -414,13 +402,7 @@ export class DocumentReference<
             data as firestore.WithFieldValue<AppModelType>
         );
       }
-      return writeBatch
-          .commit()
-          .then(([writeResult]) => writeResult)
-          .then((result) => {
-            span.end();
-            return result;
-          });
+      return writeBatch.commit().then(([writeResult]) => writeResult);
     });
   }
 
@@ -473,11 +455,7 @@ export class DocumentReference<
       return writeBatch
           .update(this, dataOrField, ...preconditionOrValues)
           .commit()
-          .then(([writeResult]) => writeResult)
-          .then((result) => {
-            span.end();
-            return result;
-          });
+          .then(([writeResult]) => writeResult);
     });
   }
 

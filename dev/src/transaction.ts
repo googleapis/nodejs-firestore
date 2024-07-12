@@ -211,10 +211,7 @@ export class Transaction implements firestore.Transaction {
 
     if (refOrQuery instanceof DocumentReference) {
       return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_TRANSACTION_GET_DOCUMENT, async (span) => {
-        return this.withLazyStartedTransaction(refOrQuery, this.getSingleFn).then(result => {
-          span.end();
-          return result;
-        });
+        return this.withLazyStartedTransaction(refOrQuery, this.getSingleFn);
       });
     }
 
@@ -222,10 +219,7 @@ export class Transaction implements firestore.Transaction {
       return this._firestore._traceUtil.startActiveSpan(
           refOrQuery instanceof Query ? SPAN_NAME_TRANSACTION_GET_QUERY : SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY
           , async (span) => {
-        return this.withLazyStartedTransaction(refOrQuery, this.getQueryFn).then(result => {
-          span.end();
-          return result;
-        });
+        return this.withLazyStartedTransaction(refOrQuery, this.getQueryFn);
       });
     }
 
@@ -497,7 +491,6 @@ export class Transaction implements firestore.Transaction {
       } else if (this._writeBatch.isEmpty) {
         // If we have not started a transaction (no reads) and we have no writes
         // then the commit is a no-op (success)
-        span.end();
         return;
       }
 
@@ -507,7 +500,6 @@ export class Transaction implements firestore.Transaction {
       });
       this._transactionIdPromise = undefined;
       this._prevTransactionId = transactionId;
-      span.end();
     },
     {
       [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: true,
@@ -528,7 +520,6 @@ export class Transaction implements firestore.Transaction {
       // No need to roll back if we have not lazily started the transaction
       // or if we are read only
       if (!this._transactionIdPromise || !this._writeBatch) {
-        span.end();
         return;
       }
 
@@ -563,7 +554,6 @@ export class Transaction implements firestore.Transaction {
                 err
             );
           });
-      span.end();
     });
   }
 
@@ -581,10 +571,7 @@ export class Transaction implements firestore.Transaction {
     return this._firestore._traceUtil.startActiveSpan(SPAN_NAME_TRANSACTION_RUN, async (span) => {
       // No backoff is set for readonly transactions (i.e. attempts == 1)
       if (!this._writeBatch) {
-        return this.runTransactionOnce(updateFunction).then(result => {
-          span.end();
-          return result;
-        });
+        return this.runTransactionOnce(updateFunction);
       }
 
       let lastError: GoogleError | undefined = undefined;
@@ -611,10 +598,7 @@ export class Transaction implements firestore.Transaction {
 
           await maybeBackoff(this._backoff!, lastError);
 
-          return await this.runTransactionOnce(updateFunction).then(result => {
-            span.end();
-            return result;
-          });
+          return await this.runTransactionOnce(updateFunction);
         } catch (err) {
           lastError = err;
 
@@ -631,7 +615,6 @@ export class Transaction implements firestore.Transaction {
           lastError
       );
 
-      span.end();
       return Promise.reject(lastError);
     });
   }
@@ -776,10 +759,7 @@ export class Transaction implements firestore.Transaction {
           fieldMask,
           opts
       );
-      return documentReader._get(this._requestTag).then(result => {
-        span.end();
-        return result;
-      });
+      return documentReader._get(this._requestTag);
     });
   }
 
