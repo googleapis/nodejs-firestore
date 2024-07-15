@@ -1138,13 +1138,13 @@ describe('DocumentReference class', () => {
   it('will fail to delete document with exists: true if doc does not exist', async () => {
     const ref = randomCol.doc();
     const promise = ref
-      .delete({exists: true})
-      .then(() => Promise.reject('Delete should have failed'));
+        .delete({exists: true})
+        .then(() => Promise.reject('Delete should have failed'));
 
     // Validate the error message when testing against the firestore backend.
     if (process.env.FIRESTORE_EMULATOR_HOST === undefined) {
       await expect(promise).to.eventually.be.rejectedWith(
-        /No document to update/
+          /No document to update/
       );
     } else {
       // The emulator generates a different error message, do not validate the error message.
@@ -1774,6 +1774,12 @@ describe('DocumentReference class', () => {
     expect(document).to.be.null;
 
     unlisten();
+  });
+
+  it('will error on create if document already exists', async () => {
+    const ref = randomCol.doc();
+    await ref.create({});
+    return expect(ref.create({})).to.be.eventually.rejectedWith(/already exists/);
   });
 });
 
