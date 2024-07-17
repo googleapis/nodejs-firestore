@@ -77,7 +77,7 @@ setLogFunction((msg: string) => {
 //  release the feature.
 export interface FirestoreOpenTelemetryOptions {
   enableTracing?: boolean;
-  traceProvider?: any;
+  tracerProvider?: any;
 }
 
 interface TestConfig {
@@ -124,13 +124,13 @@ describe('Tracing Tests', () => {
   ): FirestoreOpenTelemetryOptions {
     const options: FirestoreOpenTelemetryOptions = {
       enableTracing: true,
-      traceProvider: undefined,
+      tracerProvider: undefined,
     };
 
     // If we are *not* using a global OpenTelemetry instance, a TracerProvider
     // must be passed to the Firestore SDK.
     if (!config.globalOpenTelemetry) {
-      options.traceProvider = tracerProvider;
+      options.tracerProvider = tracerProvider;
     }
 
     return options;

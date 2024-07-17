@@ -31,17 +31,17 @@ export class EnabledTraceUtil implements TraceUtil {
   private tracer: Tracer;
 
   constructor(settings: Settings) {
-    let traceProvider = settings.openTelemetryOptions?.traceProvider;
+    let tracerProvider = settings.openTelemetryOptions?.tracerProvider;
 
-    // If a TraceProvider has not been given to us, we try to use the global one.
-    if (!traceProvider) {
+    // If a TracerProvider has not been given to us, we try to use the global one.
+    if (!tracerProvider) {
       const {trace} = require('@opentelemetry/api');
-      traceProvider = trace.getTracerProvider();
+      tracerProvider = trace.getTracerProvider();
     }
 
     const libVersion = require('../../../package.json').version;
     const libName = require('../../../package.json').name;
-    this.tracer = traceProvider.getTracer(libName, libVersion);
+    this.tracer = tracerProvider.getTracer(libName, libVersion);
   }
 
   private endSpan(otelSpan: OpenTelemetrySpan, error: Error): void {
