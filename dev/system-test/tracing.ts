@@ -14,16 +14,16 @@
 
 import * as chaiAsPromised from 'chai-as-promised';
 import {config, expect, use} from 'chai';
-import {describe, it, beforeEach, afterEach, Context} from 'mocha';
+import {describe, it, beforeEach, afterEach} from 'mocha';
 import {
   Attributes,
   context,
   diag,
   DiagConsoleLogger,
-  DiagLogLevel, propagation, ROOT_CONTEXT, Span, SpanContext,
+  DiagLogLevel, ROOT_CONTEXT, SpanContext,
   trace, TraceFlags, Tracer,
   TracerProvider,
-  Context as OpenTelemetryContext
+  Context as OpenTelemetryContext,
 } from '@opentelemetry/api';
 import {TraceExporter} from '@google-cloud/opentelemetry-cloud-trace-exporter';
 import {Settings} from '@google-cloud/firestore';
@@ -33,7 +33,7 @@ import {
   ConsoleSpanExporter,
   InMemorySpanExporter,
   NodeTracerProvider,
-  ReadableSpan,
+  ReadableSpan, TimedEvent,
 } from '@opentelemetry/sdk-trace-node';
 import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
@@ -64,6 +64,10 @@ import {
 import {AsyncLocalStorageContextManager} from '@opentelemetry/context-async-hooks';
 import {deepStrictEqual} from 'assert';
 import {cloudtrace_v1} from "@googleapis/cloudtrace";
+import {GoogleAuth} from "google-gax";
+import Schema$Trace = cloudtrace_v1.Schema$Trace;
+import Schema$TraceSpan = cloudtrace_v1.Schema$TraceSpan;
+import {logger} from "../src/logger";
 
 use(chaiAsPromised);
 
@@ -101,9 +105,35 @@ interface TestConfig {
   preferRest: boolean;
 }
 
+// Unfortunately the in-memory spans and Cloud Trace spans do not share the
+// same data-structures. This interface is useful to abstract that away for
+// testing.
+// Also note that Cloud Trace currently does NOT return span attributes nor
+// span events. So we'll have to leave those as empty and not check them for
+// end-to-end tests.
+class SpanData {
+  constructor(
+      public id: string | null | undefined,
+      public parentId: string | null | undefined,
+      public traceId: string,
+      public name: string | null | undefined,
+      public attributes: Attributes,
+      public events: TimedEvent[]) {}
+  static fromInMemorySpan(span: ReadableSpan) : SpanData {
+    return new SpanData(span.spanContext().spanId, span.parentSpanId, span.spanContext().traceId, span.name, span.attributes, span.events);
+  }
+
+  static fromCloudTraceSpan(span: Schema$TraceSpan, traceId: string) : SpanData {
+    return new SpanData(span.spanId, span.parentSpanId, traceId, span.name, {}, []);
+  }
+}
+
 const NUM_TRACE_ID_BYTES = 32;
 const NUM_SPAN_ID_BYTES = 16;
 const SPAN_NAME_TEST_ROOT = 'TestRootSpan';
+const GET_TRACE_INITIAL_WAIT_MILLIS = 500;
+const GET_TRACE_RETRY_BACKOFF_MILLIS = 1000;
+const GET_TRACE_MAX_RETRY_COUNT = 60;
 
 describe('Tracing Tests', () => {
   let firestore: Firestore;
@@ -112,6 +142,7 @@ describe('Tracing Tests', () => {
   let consoleSpanExporter: ConsoleSpanExporter;
   let gcpTraceExporter: TraceExporter;
   let tracer: Tracer;
+  let cloudTraceInfo: Schema$Trace;
 
   // Custom SpanContext for each test, required for trace ID injection.
   let customSpanContext: SpanContext;
@@ -120,7 +151,7 @@ describe('Tracing Tests', () => {
   let customContext: OpenTelemetryContext;
 
   const spanIdToChildrenSpanIds = new Map<string, string[]>();
-  const spanIdToSpanData = new Map<string, ReadableSpan>();
+  const spanIdToSpanData = new Map<string, SpanData>();
   let rootSpanIds: string[] = [];
 
   function afterEachTest(config: TestConfig): Promise<void> {
@@ -176,7 +207,8 @@ describe('Tracing Tests', () => {
   }
 
   function beforeEachTest(config: TestConfig, testName: string) {
-    console.log(config);
+    logger('beforeEach', null, 'Starting test with config:', config);
+
     // Remove the global tracer provider in case anything was registered
     // in order to avoid duplicate global tracers.
     trace.disable();
@@ -262,14 +294,49 @@ describe('Tracing Tests', () => {
   async function waitForCompletedCloudTraceSpans(
     numExpectedSpans: number
   ): Promise<boolean> {
-    // TODO(tracing): implement
-    const bar = new cloudtrace_v1.Cloudtrace({});
-    const foo = new cloudtrace_v1.Resource$Projects$Traces(null);
-    foo.get({
-      projectId: 'project_id',
-      traceId: 'trace_id'
-    }, )
-    return false;
+    const client = new cloudtrace_v1.Cloudtrace({
+      auth: new GoogleAuth()
+    });
+    const projectTraces = new cloudtrace_v1.Resource$Projects$Traces(client.context);
+
+    // Querying the trace from Cloud Trace immediately is almost always going
+    // to fail. So we have an initial delay before making our first attempt.
+    await new Promise(resolve => setTimeout(resolve, GET_TRACE_INITIAL_WAIT_MILLIS));
+
+    let remainingAttempts = GET_TRACE_MAX_RETRY_COUNT;
+    let receivedFullTrace = false;
+    do {
+      try {
+        const getTraceResponse = await projectTraces.get({
+          projectId: firestore.projectId,
+          traceId: customSpanContext.traceId
+        });
+
+        cloudTraceInfo = getTraceResponse.data;
+
+        receivedFullTrace = cloudTraceInfo.spans?.length === numExpectedSpans;
+        logger('waitForCompletedCloudTraceSpans',
+            null,
+            `fetched a trace with ${cloudTraceInfo.spans?.length} spans`
+        );
+      } catch (error) {
+        logger('waitForCompletedCloudTraceSpans',
+            null,
+            'failed with error:',
+            error
+        );
+      }
+
+      // Using a constant backoff for each attempt.
+      if (!receivedFullTrace) {
+        logger('waitForCompletedCloudTraceSpans',
+            null,
+            `Could not fetch a full trace from the server. Retrying in ${GET_TRACE_RETRY_BACKOFF_MILLIS}ms.`
+        );
+        await new Promise(resolve => setTimeout(resolve, GET_TRACE_RETRY_BACKOFF_MILLIS));
+      }
+    } while (!receivedFullTrace && --remainingAttempts > 0);
+    return receivedFullTrace;
   }
 
   async function waitForCompletedSpans(
@@ -292,51 +359,53 @@ describe('Tracing Tests', () => {
     );
   }
 
+  function buildSpanMapsFromInMemorySpanExporter() : void {
+    const spans = inMemorySpanExporter.getFinishedSpans();
+    spans.forEach(span => {
+      const id = span?.spanContext().spanId!;
+      const parentId = span?.parentSpanId;
+      if (!parentId || span.name === SPAN_NAME_TEST_ROOT) {
+        rootSpanIds.push(id);
+      } else {
+        let children = spanIdToChildrenSpanIds.get(parentId);
+        // Initialize to empty array if it hasn't been seen before.
+        if (!children) {
+          children = [];
+        }
+        // Add the new child.
+        children.push(id);
+        spanIdToChildrenSpanIds.set(parentId, children);
+      }
+      spanIdToSpanData.set(id, SpanData.fromInMemorySpan(span));
+    });
+  }
+
+  function buildSpanMapsFromCloudTraceInfo() : void {
+    const spans = cloudTraceInfo.spans;
+    spans?.forEach(span => {
+      const id = span.spanId;
+      const parentId = span.parentSpanId;
+      if (!parentId || span.name === SPAN_NAME_TEST_ROOT) {
+        rootSpanIds.push(id!);
+      } else {
+        let children = spanIdToChildrenSpanIds.get(parentId);
+        if (!children) {
+          children = [];
+        }
+        children.push(id!);
+        spanIdToChildrenSpanIds.set(parentId, children);
+      }
+      spanIdToSpanData.set(id!, SpanData.fromCloudTraceSpan(span, customSpanContext.traceId));
+    });
+  }
+
   function buildSpanMaps(config: TestConfig): void {
     if (config.e2e) {
-      // TODO(tracing): implement
+      buildSpanMapsFromCloudTraceInfo();
     } else {
-      // Using InMemorySpanExporter.
-      const spans = inMemorySpanExporter.getFinishedSpans();
-      spans.forEach(span => {
-        const id = getSpanId(span)!;
-        const parentId = getParentSpanId(span);
-        if (!parentId || parentId === customSpanContext.spanId) {
-          rootSpanIds.push(id);
-        } else {
-          let children = spanIdToChildrenSpanIds.get(parentId);
-          // Initialize to empty array if it hasn't been seen before.
-          if (!children) {
-            children = [];
-          }
-          // Add the new child.
-          children.push(id);
-          spanIdToChildrenSpanIds.set(parentId, children);
-        }
-        spanIdToSpanData.set(id, span);
-      });
+      buildSpanMapsFromInMemorySpanExporter();
     }
-    console.log('rootSpanIds');
-    console.log(rootSpanIds);
-    console.log('spanIdToSpanData');
-    console.log(spanIdToSpanData);
-    console.log('spanIdToChildrenSpanIds');
-    console.log(spanIdToChildrenSpanIds);
-  }
-
-  // Returns the span id of the given span.
-  function getSpanId(span: ReadableSpan | undefined): string | undefined {
-    return span?.spanContext().spanId;
-  }
-
-  // Returns the parent span id of the given span.
-  function getParentSpanId(span: ReadableSpan | undefined): string | undefined {
-    return span?.parentSpanId;
-  }
-
-  // Returns the trace id of the given span.
-  function getTraceId(span: ReadableSpan | undefined): string | undefined {
-    return span?.spanContext().traceId;
+    logger('buildSpanMaps', null, 'Built the following spans:', rootSpanIds, spanIdToSpanData, spanIdToChildrenSpanIds);
   }
 
   function getChildSpans(spanId: string): string[] | undefined {
@@ -345,7 +414,7 @@ describe('Tracing Tests', () => {
 
   // Returns the first span it can find with the given name, or null if it cannot find a span with the given name.
   // If there are multiple spans with the same name, it'll return the first one.
-  function getSpanByName(spanName: string): ReadableSpan | null {
+  function getSpanByName(spanName: string): SpanData | null {
     for (const spanData of spanIdToSpanData.values()) {
       if (spanData.name === spanName) {
         return spanData;
@@ -360,9 +429,9 @@ describe('Tracing Tests', () => {
   function dfsSpanHierarchy(
     rootSpanId: string,
     spanNamesHierarchy: string[]
-  ): ReadableSpan[] {
+  ): SpanData[] {
     // This function returns an empty list if it cannot find a full match.
-    const notAMatch: ReadableSpan[] = [];
+    const notAMatch: SpanData[] = [];
     const rootSpan = spanIdToSpanData.get(rootSpanId);
 
     if (spanNamesHierarchy.length === 0 || !rootSpan) {
@@ -421,7 +490,7 @@ describe('Tracing Tests', () => {
       'The expected spans hierarchy was empty'
     );
 
-    let matchingSpanHierarchy: ReadableSpan[] = [];
+    let matchingSpanHierarchy: SpanData[] = [];
 
     // The Firestore operations that have been executed generate a number of
     // spans. The span names, however, are not unique. For example, we could have:
@@ -444,14 +513,13 @@ describe('Tracing Tests', () => {
       0,
       `Was not able to find the following span hierarchy: ${spanNamesHierarchy}`
     );
-    console.log('Found the following span hierarchy:');
-    matchingSpanHierarchy.forEach(value => console.log(value.name));
+    logger('expectSpanHierarchy',null, 'Found the following span hierarchy:', matchingSpanHierarchy);
 
     for (let i = 0; i + 1 < matchingSpanHierarchy.length; ++i) {
       const parentSpan = matchingSpanHierarchy[i];
       const childSpan = matchingSpanHierarchy[i + 1];
-      expect(getTraceId(childSpan)).to.equal(
-        getTraceId(parentSpan),
+      expect(childSpan.traceId).to.equal(
+        parentSpan.traceId,
         `'${childSpan.name}' and '${parentSpan.name}' spans do not belong to the same trace`
       );
       // TODO(tracing): expect that each span has the needed attributes.
@@ -523,52 +591,60 @@ describe('Tracing Tests', () => {
     // });
   });
 
-  // describe.skip('E2E', () => {
-  //   describe('Non-Global-OTEL', () => {
-  //     describe('GRPC', () => {
-  //       const config: TestConfig = {
-  //         e2e: true,
-  //         globalOpenTelemetry: false,
-  //         preferRest: false,
-  //       };
-  //       beforeEach(async () => beforeEachTest(config));
-  //       runTestCases(config);
-  //       afterEach(async () => afterEachTest(config));
-  //     });
-  //     describe('REST', () => {
-  //       const config: TestConfig = {
-  //         e2e: true,
-  //         globalOpenTelemetry: false,
-  //         preferRest: true,
-  //       };
-  //       beforeEach(async () => beforeEachTest(config));
-  //       runTestCases(config);
-  //       afterEach(async () => afterEachTest(config));
-  //     });
-  //   });
-  //   describe('with Global-OTEL', () => {
-  //     describe('GRPC', () => {
-  //       const config: TestConfig = {
-  //         e2e: true,
-  //         globalOpenTelemetry: true,
-  //         preferRest: false,
-  //       };
-  //       beforeEach(async () => beforeEachTest(config));
-  //       runTestCases(config);
-  //       afterEach(async () => afterEachTest(config));
-  //     });
-  //     describe('REST', () => {
-  //       const config: TestConfig = {
-  //         e2e: true,
-  //         globalOpenTelemetry: true,
-  //         preferRest: true,
-  //       };
-  //       beforeEach(async () => beforeEachTest(config));
-  //       runTestCases(config);
-  //       afterEach(async () => afterEachTest(config));
-  //     });
-  //   });
-  // });
+  describe('E2E', () => {
+    describe('Non-Global-OTEL', () => {
+      describe('GRPC', () => {
+        const config: TestConfig = {
+          e2e: true,
+          globalOpenTelemetry: false,
+          preferRest: false,
+        };
+        beforeEach(function () {
+          beforeEachTest(config, `${this.currentTest?.title}${Date.now()}`);
+        });
+        runTestCases(config);
+        afterEach(async () => afterEachTest(config));
+      });
+      describe.skip('REST', () => {
+        const config: TestConfig = {
+          e2e: true,
+          globalOpenTelemetry: false,
+          preferRest: true,
+        };
+        beforeEach(function () {
+          beforeEachTest(config, `${this.currentTest?.title}${Date.now()}`);
+        });
+        runTestCases(config);
+        afterEach(async () => afterEachTest(config));
+      });
+    });
+    describe.skip('with Global-OTEL', () => {
+      describe('GRPC', () => {
+        const config: TestConfig = {
+          e2e: true,
+          globalOpenTelemetry: true,
+          preferRest: false,
+        };
+        beforeEach(function () {
+          beforeEachTest(config, `${this.currentTest?.title}${Date.now()}`);
+        });
+        runTestCases(config);
+        afterEach(async () => afterEachTest(config));
+      });
+      describe('REST', () => {
+        const config: TestConfig = {
+          e2e: true,
+          globalOpenTelemetry: true,
+          preferRest: true,
+        };
+        beforeEach(function () {
+          beforeEachTest(config, `${this.currentTest?.title}${Date.now()}`);
+        });
+        runTestCases(config);
+        afterEach(async () => afterEachTest(config));
+      });
+    });
+  });
 
   function runTestCases(config: TestConfig) {
     it.only('document reference get()', async () => {
@@ -577,7 +653,7 @@ describe('Tracing Tests', () => {
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_DOC_REF_GET, SPAN_NAME_BATCH_GET_DOCUMENTS);
     });
 
-    it.only('document reference create()', async () => {
+    it('document reference create()', async () => {
       await runFirestoreOperationInRootSpan(() => firestore.collection('foo').doc().create({}));
       await waitForCompletedSpans(config, 3);
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_BATCH_COMMIT);
