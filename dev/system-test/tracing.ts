@@ -38,7 +38,6 @@ import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
   ATTRIBUTE_KEY_DOC_COUNT,
-  SERVICE,
   SPAN_NAME_AGGREGATION_QUERY_GET,
   SPAN_NAME_BATCH_COMMIT,
   SPAN_NAME_BATCH_GET_DOCUMENTS,
@@ -93,7 +92,7 @@ interface TestConfig {
   // circumstances: (1) the user provides us with a specific OpenTelemetry
   // instance. (2) the user does not provide an instance and we find the
   // global instance to use.
-  globalOpenTelemetry: boolean;
+  useGlobalOpenTelemetry: boolean;
 
   // Whether the Firestore instance should use gRPC or REST.
   preferRest: boolean;
@@ -110,7 +109,7 @@ describe('Tracing Tests', () => {
   const spanIdToSpanData = new Map<string, ReadableSpan>();
   let rootSpanIds: string[] = [];
 
-  function afterEachTest(config: TestConfig): Promise<void> {
+  function afterEachTest(): Promise<void> {
     spanIdToChildrenSpanIds.clear();
     spanIdToSpanData.clear();
     rootSpanIds = [];
@@ -129,7 +128,7 @@ describe('Tracing Tests', () => {
 
     // If we are *not* using a global OpenTelemetry instance, a TracerProvider
     // must be passed to the Firestore SDK.
-    if (!config.globalOpenTelemetry) {
+    if (!config.useGlobalOpenTelemetry) {
       options.tracerProvider = tracerProvider;
     }
 
@@ -147,7 +146,6 @@ describe('Tracing Tests', () => {
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
 
-    console.log('in beforeEachTest');
     // Create a new tracer and span processor for each test to make sure there
     // are no overlaps when reading the results.
     tracerProvider = new NodeTracerProvider({
@@ -171,7 +169,7 @@ describe('Tracing Tests', () => {
       );
     }
 
-    if (config.globalOpenTelemetry) {
+    if (config.useGlobalOpenTelemetry) {
       trace.setGlobalTracerProvider(tracerProvider);
     }
 
@@ -179,14 +177,20 @@ describe('Tracing Tests', () => {
       preferRest: config.preferRest,
       openTelemetryOptions: getOpenTelemetryOptions(config, tracerProvider),
     };
+
+    // Named-database tests use an environment variable to specify the database ID. Add it to the settings.
     if (process.env.FIRESTORE_NAMED_DATABASE) {
       settings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
     }
-    if (!settings.projectId && process.env.PROJECT_ID) {
-      settings.projectId = process.env.PROJECT_ID;
-    }
+    // If a database ID has not been specified in the settings, check whether
+    // it's been specified using an environment variable.
     if (!settings.databaseId && process.env.DATABASE_ID) {
       settings.databaseId = process.env.DATABASE_ID;
+    }
+    // If a Project ID has not been specified in the settings, check whether
+    // it's been specified using an environment variable.
+    if (!settings.projectId && process.env.PROJECT_ID) {
+      settings.projectId = process.env.PROJECT_ID;
     }
 
     firestore = new Firestore(settings);
@@ -403,44 +407,44 @@ describe('Tracing Tests', () => {
       describe('GRPC', () => {
         const config: TestConfig = {
           e2e: false,
-          globalOpenTelemetry: false,
+          useGlobalOpenTelemetry: false,
           preferRest: false,
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
-        afterEach(async () => afterEachTest(config));
+        afterEach(async () => afterEachTest());
       });
       describe('REST', () => {
         const config: TestConfig = {
           e2e: false,
-          globalOpenTelemetry: false,
+          useGlobalOpenTelemetry: false,
           preferRest: true,
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
-        afterEach(async () => afterEachTest(config));
+        afterEach(async () => afterEachTest());
       });
     });
     describe('with Global-OTEL', () => {
       describe('GRPC', () => {
         const config: TestConfig = {
           e2e: false,
-          globalOpenTelemetry: true,
+          useGlobalOpenTelemetry: true,
           preferRest: false,
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
-        afterEach(async () => afterEachTest(config));
+        afterEach(async () => afterEachTest());
       });
       describe('REST', () => {
         const config: TestConfig = {
           e2e: false,
-          globalOpenTelemetry: true,
+          useGlobalOpenTelemetry: true,
           preferRest: true,
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
-        afterEach(async () => afterEachTest(config));
+        afterEach(async () => afterEachTest());
       });
     });
   });
@@ -450,44 +454,44 @@ describe('Tracing Tests', () => {
       describe('GRPC', () => {
         const config: TestConfig = {
           e2e: true,
-          globalOpenTelemetry: false,
+          useGlobalOpenTelemetry: false,
           preferRest: false,
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
-        afterEach(async () => afterEachTest(config));
+        afterEach(async () => afterEachTest());
       });
       describe('REST', () => {
         const config: TestConfig = {
           e2e: true,
-          globalOpenTelemetry: false,
+          useGlobalOpenTelemetry: false,
           preferRest: true,
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
-        afterEach(async () => afterEachTest(config));
+        afterEach(async () => afterEachTest());
       });
     });
     describe('with Global-OTEL', () => {
       describe('GRPC', () => {
         const config: TestConfig = {
           e2e: true,
-          globalOpenTelemetry: true,
+          useGlobalOpenTelemetry: true,
           preferRest: false,
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
-        afterEach(async () => afterEachTest(config));
+        afterEach(async () => afterEachTest());
       });
       describe('REST', () => {
         const config: TestConfig = {
           e2e: true,
-          globalOpenTelemetry: true,
+          useGlobalOpenTelemetry: true,
           preferRest: true,
         };
         beforeEach(async () => beforeEachTest(config));
         runTestCases(config);
-        afterEach(async () => afterEachTest(config));
+        afterEach(async () => afterEachTest());
       });
     });
   });
