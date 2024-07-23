@@ -265,8 +265,7 @@ export class QueryUtil<
           const methodName = 'runQuery';
 
           this._firestore._traceUtil.currentSpan().addEvent(methodName, {
-            [ATTRIBUTE_KEY_IS_TRANSACTIONAL]:
-              request.transaction !== null && request.transaction !== undefined,
+            [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: !!request.transaction,
             [ATTRIBUTE_KEY_IS_RETRY_WITH_CURSOR]: isRetryRequestWithCursor,
           });
 
