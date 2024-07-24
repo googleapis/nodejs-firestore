@@ -43,6 +43,7 @@ import api = protos.google.firestore.v1;
 import {
   ATTRIBUTE_KEY_IS_RETRY_WITH_CURSOR,
   ATTRIBUTE_KEY_IS_TRANSACTIONAL,
+  SPAN_NAME_RUN_QUERY,
 } from '../telemetry/trace-util';
 
 export class QueryUtil<
@@ -264,10 +265,12 @@ export class QueryUtil<
           streamActive = new Deferred<boolean>();
           const methodName = 'runQuery';
 
-          this._firestore._traceUtil.currentSpan().addEvent(methodName, {
-            [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: !!request.transaction,
-            [ATTRIBUTE_KEY_IS_RETRY_WITH_CURSOR]: isRetryRequestWithCursor,
-          });
+          this._firestore._traceUtil
+            .currentSpan()
+            .addEvent(SPAN_NAME_RUN_QUERY, {
+              [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: !!request.transaction,
+              [ATTRIBUTE_KEY_IS_RETRY_WITH_CURSOR]: isRetryRequestWithCursor,
+            });
 
           backendStream = await this._firestore.requestStream(
             methodName,
@@ -296,7 +299,7 @@ export class QueryUtil<
 
               this._firestore._traceUtil
                 .currentSpan()
-                .addEvent(`${methodName}: Retryable Error.`, {
+                .addEvent(`${SPAN_NAME_RUN_QUERY}: Retryable Error.`, {
                   'error.message': err.message,
                 });
 
@@ -360,7 +363,7 @@ export class QueryUtil<
 
               this._firestore._traceUtil
                 .currentSpan()
-                .addEvent(`${methodName}: Error.`, {
+                .addEvent(`${SPAN_NAME_RUN_QUERY}: Error.`, {
                   'error.message': err.message,
                 });
 

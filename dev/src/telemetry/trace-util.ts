@@ -32,6 +32,8 @@ export declare type AttributeValue =
  */
 export const SERVICE = 'google.firestore.v1.Firestore/';
 export const SPAN_NAME_BATCH_GET_DOCUMENTS = 'BatchGetDocuments';
+export const SPAN_NAME_RUN_QUERY = 'RunQuery';
+export const SPAN_NAME_RUN_AGGREGATION_QUERY = 'RunAggregationQuery';
 export const SPAN_NAME_DOC_REF_CREATE = 'DocumentReference.Create';
 export const SPAN_NAME_DOC_REF_SET = 'DocumentReference.Set';
 export const SPAN_NAME_DOC_REF_UPDATE = 'DocumentReference.Update';
