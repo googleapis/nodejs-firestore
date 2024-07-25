@@ -209,6 +209,21 @@ export class Serializer {
       return array;
     }
 
+    if (val instanceof Map) {
+      const map: api.IMapValue = {fields: {}};
+      for (const [key, value] of val.entries()) {
+        if (typeof key !== 'string') {
+          throw new Error(`Cannot encode map with non-string key: ${key}`);
+        }
+
+        map.fields![key] = this.encodeValue(value)!;
+      }
+
+      return {
+        mapValue: map,
+      };
+    }
+
     if (typeof val === 'object' && isPlainObject(val)) {
       const map: api.IValue = {
         mapValue: {},

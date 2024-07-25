@@ -72,18 +72,20 @@ export class ExecutionUtil<
         })
         .on(
           'data',
-          (data: PipelineStreamElement<AppModelType, DbModelType>) => {
-            if (data.transaction) {
-              output.transaction = data.transaction;
-            }
-            if (data.executionTime) {
-              output.executionTime = data.executionTime;
-            }
-            if (data.explainMetrics) {
-              output.explainMetrics = data.explainMetrics;
-            }
-            if (data.result) {
-              results.push(data.result);
+          (data: PipelineStreamElement<AppModelType, DbModelType>[]) => {
+            for (const element of data) {
+              if (element.transaction) {
+                output.transaction = element.transaction;
+              }
+              if (element.executionTime) {
+                output.executionTime = element.executionTime;
+              }
+              if (element.explainMetrics) {
+                output.explainMetrics = element.explainMetrics;
+              }
+              if (element.result) {
+                results.push(element.result);
+              }
             }
           }
         )
@@ -142,41 +144,55 @@ export class ExecutionUtil<
         enc,
         callback
       ) => {
+        console.log(`Pipeline response: ${JSON.stringify(proto, null, 2)}`);
         if (proto === NOOP_MESSAGE) {
           callback(undefined);
           return;
         }
 
-        if (proto.results) {
-          for (const r of proto.results) {
-            const output: PipelineStreamElement<AppModelType, DbModelType> = {};
-
-            // Proto comes with zero-length buffer by default
-            if (proto.transaction?.length) {
-              output.transaction = proto.transaction;
-            }
-
-            if (proto.executionTime) {
-              output.executionTime = Timestamp.fromProto(proto.executionTime);
-            }
-
-            const ref = r.name
-              ? new DocumentReference<AppModelType, DbModelType>(
-                  this._firestore,
-                  QualifiedResourcePath.fromSlashSeparatedString(r.name)
-                )
-              : undefined;
-            output.result = new PipelineResult(
-              this._serializer,
-              ref,
-              r.fields,
-              Timestamp.fromProto(proto.executionTime!),
-              r.createTime ? Timestamp.fromProto(r.createTime!) : undefined,
-              r.updateTime ? Timestamp.fromProto(r.updateTime!) : undefined
-            );
-
-            callback(undefined, output);
+        if (proto.results && proto.results.length === 0) {
+          const output: PipelineStreamElement<AppModelType, DbModelType> = {};
+          if (proto.transaction?.length) {
+            output.transaction = proto.transaction;
           }
+          if (proto.executionTime) {
+            output.executionTime = Timestamp.fromProto(proto.executionTime);
+          }
+          callback(undefined, [output]);
+        } else {
+          callback(
+            undefined,
+            proto.results.map(result => {
+              const output: PipelineStreamElement<AppModelType, DbModelType> =
+                {};
+              if (proto.transaction?.length) {
+                output.transaction = proto.transaction;
+              }
+              if (proto.executionTime) {
+                output.executionTime = Timestamp.fromProto(proto.executionTime);
+              }
+
+              const ref = result.name
+                ? new DocumentReference<AppModelType, DbModelType>(
+                    this._firestore,
+                    QualifiedResourcePath.fromSlashSeparatedString(result.name)
+                  )
+                : undefined;
+              output.result = new PipelineResult(
+                this._serializer,
+                ref,
+                result.fields,
+                Timestamp.fromProto(proto.executionTime!),
+                result.createTime
+                  ? Timestamp.fromProto(result.createTime!)
+                  : undefined,
+                result.updateTime
+                  ? Timestamp.fromProto(result.updateTime!)
+                  : undefined
+              );
+              return output;
+            })
+          );
         }
       },
     });
@@ -188,9 +204,12 @@ export class ExecutionUtil<
         // async function to convert this exception into the rejected Promise we
         // catch below.
         const request = pipeline._toProto(
-          this._firestore,
           transactionOrReadTime,
           explainOptions
+        );
+
+        console.log(
+          `Executing pipeline: \n ${JSON.stringify(request, null, 2)}`
         );
 
         let streamActive: Deferred<boolean>;
@@ -207,9 +226,9 @@ export class ExecutionUtil<
             backendStream.unpipe(stream);
 
             logger(
-              'QueryUtil._stream',
+              'PipelineUtil._stream',
               tag,
-              'Query failed with stream error:',
+              'Pipeline failed with stream error:',
               err
             );
             stream.destroy(err);
@@ -222,7 +241,15 @@ export class ExecutionUtil<
           backendStream.pipe(stream);
         } while (await streamActive.promise);
       })
-      .catch(e => stream.destroy(e));
+      .catch(e => {
+        logger(
+          'PipelineUtil._stream',
+          tag,
+          'Pipeline failed with stream error:',
+          e
+        );
+        stream.destroy(e);
+      });
 
     return stream;
   }
@@ -233,77 +260,78 @@ function isITimestamp(obj: any): obj is google.protobuf.ITimestamp {
     return false; // Must be a non-null object
   }
   if (
-    ('seconds' in obj &&
-      !(
-        obj.seconds === null ||
-        typeof obj.seconds === 'number' ||
-        typeof obj.seconds === 'string'
-      )) ||
-    ('nanos' in obj && !(obj.nanos === null || typeof obj.nanos === 'number'))
+    'seconds' in obj &&
+    (obj.seconds === null ||
+      typeof obj.seconds === 'number' ||
+      typeof obj.seconds === 'string') &&
+    'nanos' in obj &&
+    (obj.nanos === null || typeof obj.nanos === 'number')
   ) {
-    return false; // Invalid property type
+    return true;
   }
 
-  return true; // All checks passed
+  return false;
 }
 function isILatLng(obj: any): obj is google.type.ILatLng {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
   if (
-    ('latitude' in obj &&
-      !(obj.latitude === null || typeof obj.latitude === 'number')) ||
-    ('longitude' in obj &&
-      !(obj.longitude === null || typeof obj.longitude === 'number'))
+    'latitude' in obj &&
+    (obj.latitude === null || typeof obj.latitude === 'number') &&
+    'longitude' in obj &&
+    (obj.longitude === null || typeof obj.longitude === 'number')
   ) {
-    return false; // Invalid property type
+    return true;
   }
 
-  return true; // All checks passed
+  return false;
 }
 function isIArrayValue(obj: any): obj is api.IArrayValue {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
-  if ('values' in obj && !(obj.values === null || Array.isArray(obj.values))) {
-    return false; // Invalid property type
+  if ('values' in obj && (obj.values === null || Array.isArray(obj.values))) {
+    return true;
   }
 
-  return true; // All checks passed
+  return false;
 }
 function isIMapValue(obj: any): obj is api.IMapValue {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
-  if ('fields' in obj && !(obj.fields === null || isObject(obj.fields))) {
-    return false; // Invalid property type
+  if ('fields' in obj && (obj.fields === null || isObject(obj.fields))) {
+    return true;
   }
 
-  return true; // All checks passed
+  return false;
 }
 function isIFunction(obj: any): obj is api.IFunction {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
   if (
-    ('name' in obj && !(obj.name === null || typeof obj.name === 'string')) ||
-    ('args' in obj && !(obj.args === null || Array.isArray(obj.args)))
+    'name' in obj &&
+    (obj.name === null || typeof obj.name === 'string') &&
+    'args' in obj &&
+    (obj.args === null || Array.isArray(obj.args))
   ) {
-    return false; // Invalid property type
+    return true;
   }
 
-  return true; // All checks passed
+  return false;
 }
 
 function isIPipeline(obj: any): obj is api.IPipeline {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
-  if ('stages' in obj && !(obj.stages === null || Array.isArray(obj.stages))) {
-    return false; // Invalid property type
+  if ('stages' in obj && (obj.stages === null || Array.isArray(obj.stages))) {
+    return true;
   }
 
-  return true; // All checks passed
+  return false;
 }
 
 export function isFirestoreValue(obj: any): obj is api.IValue {
@@ -314,50 +342,42 @@ export function isFirestoreValue(obj: any): obj is api.IValue {
   // Check optional properties and their types
   if (
     ('nullValue' in obj &&
-      !(
-        obj.nullValue === null ||
-        obj.nullValue instanceof google.protobuf.BoolValue
-      )) ||
+      (obj.nullValue === null || obj.nullValue === 'NULL_VALUE')) ||
     ('booleanValue' in obj &&
-      !(obj.booleanValue === null || typeof obj.booleanValue === 'boolean')) ||
+      (obj.booleanValue === null || typeof obj.booleanValue === 'boolean')) ||
     ('integerValue' in obj &&
-      !(
-        obj.integerValue === null ||
+      (obj.integerValue === null ||
         typeof obj.integerValue === 'number' ||
-        typeof obj.integerValue === 'string'
-      )) ||
+        typeof obj.integerValue === 'string')) ||
     ('doubleValue' in obj &&
-      !(obj.doubleValue === null || typeof obj.doubleValue === 'number')) ||
+      (obj.doubleValue === null || typeof obj.doubleValue === 'number')) ||
     ('timestampValue' in obj &&
-      !(obj.timestampValue === null || isITimestamp(obj.timestampValue))) ||
+      (obj.timestampValue === null || isITimestamp(obj.timestampValue))) ||
     ('stringValue' in obj &&
-      !(obj.stringValue === null || typeof obj.stringValue === 'string')) ||
+      (obj.stringValue === null || typeof obj.stringValue === 'string')) ||
     ('bytesValue' in obj &&
-      !(obj.bytesValue === null || obj.bytesValue instanceof Uint8Array)) ||
+      (obj.bytesValue === null || obj.bytesValue instanceof Uint8Array)) ||
     ('referenceValue' in obj &&
-      !(
-        obj.referenceValue === null || typeof obj.referenceValue === 'string'
-      )) ||
+      (obj.referenceValue === null ||
+        typeof obj.referenceValue === 'string')) ||
     ('geoPointValue' in obj &&
-      !(obj.geoPointValue === null || isILatLng(obj.geoPointValue))) ||
+      (obj.geoPointValue === null || isILatLng(obj.geoPointValue))) ||
     ('arrayValue' in obj &&
-      !(obj.arrayValue === null || isIArrayValue(obj.arrayValue))) ||
+      (obj.arrayValue === null || isIArrayValue(obj.arrayValue))) ||
     ('mapValue' in obj &&
-      !(obj.mapValue === null || isIMapValue(obj.mapValue))) ||
+      (obj.mapValue === null || isIMapValue(obj.mapValue))) ||
     ('fieldReferenceValue' in obj &&
-      !(
-        obj.fieldReferenceValue === null ||
-        typeof obj.fieldReferenceValue === 'string'
-      )) ||
+      (obj.fieldReferenceValue === null ||
+        typeof obj.fieldReferenceValue === 'string')) ||
     ('functionValue' in obj &&
-      !(obj.functionValue === null || isIFunction(obj.functionValue))) ||
+      (obj.functionValue === null || isIFunction(obj.functionValue))) ||
     ('pipelineValue' in obj &&
-      !(obj.pipelineValue === null || isIPipeline(obj.pipelineValue)))
+      (obj.pipelineValue === null || isIPipeline(obj.pipelineValue)))
   ) {
-    return false; // Invalid property type
+    return true;
   }
 
-  return true; // All checks passed
+  return false;
 }
 
 export function toPipelineFilterCondition(
@@ -365,17 +385,18 @@ export function toPipelineFilterCondition(
   serializer: Serializer
 ): FilterCondition & Expr {
   if (f instanceof FieldFilterInternal) {
+    const field = Field.of(f.field);
     if (f.isNanChecking()) {
       if (f.nanOp() === 'IS_NAN') {
-        return Field.of(f.field).isNaN();
+        return and(field.exists(), field.isNaN());
       } else {
-        return not(Field.of(f.field).isNaN());
+        return and(field.exists(), not(field.isNaN()));
       }
     } else if (f.isNullChecking()) {
       if (f.nullOp() === 'IS_NULL') {
-        return Field.of(f.field).isNull();
+        return and(field.exists(), field.isNull());
       } else {
-        return not(Field.of(f.field).isNull());
+        return and(field.exists(), not(field.isNull()));
       }
     } else {
       // Comparison filters
@@ -384,36 +405,36 @@ export function toPipelineFilterCondition(
         : serializer.encodeValue(f.value);
       switch (f.op) {
         case 'LESS_THAN':
-          return Field.of(f.field).lessThan(value);
+          return and(field.exists(), field.lessThan(value));
         case 'LESS_THAN_OR_EQUAL':
-          return Field.of(f.field).lessThanOrEqual(value);
+          return and(field.exists(), field.lessThanOrEqual(value));
         case 'GREATER_THAN':
-          return Field.of(f.field).greaterThan(value);
+          return and(field.exists(), field.greaterThan(value));
         case 'GREATER_THAN_OR_EQUAL':
-          return Field.of(f.field).greaterThanOrEqual(value);
+          return and(field.exists(), field.greaterThanOrEqual(value));
         case 'EQUAL':
-          return Field.of(f.field).equal(value);
+          return and(field.exists(), field.equal(value));
         case 'NOT_EQUAL':
-          return Field.of(f.field).notEqual(value);
+          return and(field.exists(), field.notEqual(value));
         case 'ARRAY_CONTAINS':
-          return Field.of(f.field).arrayContains(value);
+          return and(field.exists(), field.arrayContains(value));
         case 'IN': {
           const values = value?.arrayValue?.values?.map(val =>
-            Constant.of(value)
+            Constant.of(val)
           );
-          return Field.of(f.field).in(...values!);
+          return and(field.exists(), field.in(...values!));
         }
         case 'ARRAY_CONTAINS_ANY': {
           const values = value?.arrayValue?.values?.map(val =>
-            Constant.of(value)
+            Constant.of(val)
           );
-          return Field.of(f.field).arrayContainsAny(values!);
+          return and(field.exists(), field.arrayContainsAny(values!));
         }
         case 'NOT_IN': {
           const values = value?.arrayValue?.values?.map(val =>
-            Constant.of(value)
+            Constant.of(val)
           );
-          return not(Field.of(f.field).in(...values!));
+          return and(field.exists(), not(field.in(...values!)));
         }
       }
     }

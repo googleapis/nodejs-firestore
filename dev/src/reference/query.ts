@@ -18,7 +18,7 @@ import * as firestore from '@google-cloud/firestore';
 import {GoogleError} from 'google-gax';
 import {Transform} from 'stream';
 import * as protos from '../../protos/firestore_v1_proto_api';
-import {Field, Ordering} from '../expression';
+import {and, Field, Ordering} from '../expression';
 
 import {CompositeFilter, UnaryFilter} from '../filter';
 import {
@@ -669,19 +669,21 @@ export class Query<
   toPipeline(): Pipeline {
     let pipeline;
     if (this._queryOptions.allDescendants) {
-      pipeline = Pipeline.fromCollectionGroup(this._queryOptions.collectionId);
+      pipeline = this.firestore
+        .pipeline()
+        .collectionGroup(this._queryOptions.collectionId);
     } else {
-      pipeline = Pipeline.fromCollection(
-        this._queryOptions.parentPath.append(this._queryOptions.collectionId)
-          .relativeName
-      );
+      pipeline = this.firestore
+        .pipeline()
+        .collection(
+          this._queryOptions.parentPath.append(this._queryOptions.collectionId)
+            .relativeName
+        );
     }
 
     // filters
     for (const f of this._queryOptions.filters) {
-      pipeline = pipeline.filter(
-        toPipelineFilterCondition(f, this._serializer)
-      );
+      pipeline = pipeline.where(toPipelineFilterCondition(f, this._serializer));
     }
 
     // projections
@@ -693,15 +695,25 @@ export class Query<
     }
 
     // orderbys
+    const exists = this.createImplicitOrderBy().map(fieldOrder => {
+      return Field.of(fieldOrder.field).exists();
+    });
+    if (exists.length > 1) {
+      const [first, ...rest] = exists;
+      pipeline = pipeline.where(and(first, ...rest));
+    } else if (exists.length == 1) {
+      pipeline = pipeline.where(exists[0]);
+    }
+
     const orderings = this.createImplicitOrderBy().map(fieldOrder => {
-      let dir: 'asc' | 'desc' | undefined = undefined;
+      let dir: 'ascending' | 'descending' | undefined = undefined;
       switch (fieldOrder.direction) {
         case 'ASCENDING': {
-          dir = 'asc';
+          dir = 'ascending';
           break;
         }
         case 'DESCENDING': {
-          dir = 'desc';
+          dir = 'descending';
           break;
         }
       }
@@ -713,8 +725,8 @@ export class Query<
 
     // Cursors, Limit and Offset
     if (
-      !this._queryOptions.startAt ||
-      !this._queryOptions.endAt ||
+      !!this._queryOptions.startAt ||
+      !!this._queryOptions.endAt ||
       this._queryOptions.limitType === LimitType.Last
     ) {
       let paginating = pipeline.paginate(this._queryOptions.limit || 10);
@@ -734,7 +746,7 @@ export class Query<
         pipeline = pipeline.offset(this._queryOptions.offset);
       }
       if (this._queryOptions.limit) {
-        pipeline = pipeline.offset(this._queryOptions.limit);
+        pipeline = pipeline.limit(this._queryOptions.limit);
       }
     }
     return pipeline;

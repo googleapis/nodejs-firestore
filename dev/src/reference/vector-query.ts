@@ -138,6 +138,7 @@ export class VectorQuery<
     } as FindNearestOptions;
     return this.query
       .toPipeline()
+      .where(Field.of(this.vectorField).exists())
       .findNearest(Field.of(this.vectorField), this.queryVector, options);
   }
 

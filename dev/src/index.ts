@@ -41,6 +41,7 @@ import {
   ResourcePath,
   validateResourcePath,
 } from './path';
+import {PipelineSource} from './pipeline';
 import {ClientPool} from './pool';
 import {CollectionReference} from './reference/collection-reference';
 import {DocumentReference} from './reference/document-reference';
@@ -896,6 +897,10 @@ export class Firestore implements firestore.Firestore {
     }
 
     return new CollectionGroup(this, collectionId, /* converter= */ undefined);
+  }
+
+  pipeline(): PipelineSource {
+    return new PipelineSource(this);
   }
 
   /**

@@ -1,6 +1,8 @@
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
+import * as firestore from '@google-cloud/firestore';
+
 import {VectorValue} from './field-value';
 import {GeoPoint} from './geo-point';
 import {FieldPath} from './path';
@@ -127,6 +129,10 @@ export abstract class Expr {
     return new IsNull(this);
   }
 
+  exists(): Exists {
+    return new Exists(this);
+  }
+
   count(): Count {
     return new Count(this, false);
   }
@@ -203,26 +209,36 @@ export class Field extends Expr implements Selectable {
   selectable = true as const;
 
   private constructor(
-    private fieldPath: FirebaseFirestore.FieldPath,
+    private fieldPath: firestore.FieldPath,
     private pipeline: Pipeline | null = null
   ) {
     super();
   }
 
   static of(name: string): Field;
-  static of(path: FirebaseFirestore.FieldPath): Field;
-  static of(nameOrPath: string | FirebaseFirestore.FieldPath): Field;
+  static of(path: firestore.FieldPath): Field;
+  static of(nameOrPath: string | firestore.FieldPath): Field;
   static of(pipeline: Pipeline, name: string): Field;
   static of(
-    pipelineOrName: Pipeline | string | FirebaseFirestore.FieldPath,
+    pipelineOrName: Pipeline | string | firestore.FieldPath,
     name?: string
   ): Field {
     if (typeof pipelineOrName === 'string') {
+      if (FieldPath.documentId().formattedName === pipelineOrName) {
+        return new Field(new FieldPath('__path__'));
+      }
+
       return new Field(FieldPath.fromArgument(pipelineOrName));
-    } else if (pipelineOrName instanceof FirebaseFirestore.FieldPath) {
+    } else if (pipelineOrName instanceof FieldPath) {
+      if (FieldPath.documentId().isEqual(pipelineOrName)) {
+        return new Field(new FieldPath('__path__'));
+      }
       return new Field(pipelineOrName);
     } else {
-      return new Field(FieldPath.fromArgument(name!), pipelineOrName);
+      return new Field(
+        FieldPath.fromArgument(name!),
+        pipelineOrName as Pipeline
+      );
     }
   }
 
@@ -424,6 +440,14 @@ class IsNan extends Function implements FilterCondition {
   }
   filterable = true as const;
 }
+
+class Exists extends Function implements FilterCondition {
+  constructor(private expr: Expr) {
+    super('exists', [expr]);
+  }
+  filterable = true as const;
+}
+
 class IsNull extends Function implements FilterCondition {
   constructor(private expr: Expr) {
     super('is_null', [expr]);
@@ -666,6 +690,14 @@ export function not(filter: FilterExpr): Not {
   return new Not(filter);
 }
 
+export function exists(value: Expr): Exists;
+export function exists(field: string): Exists;
+export function exists(valueOrField: Expr | string): Exists {
+  const valueExpr =
+    valueOrField instanceof Expr ? valueOrField : Field.of(valueOrField);
+  return new Exists(valueExpr);
+}
+
 export function isNull(value: Expr): IsNull;
 export function isNull(value: string): IsNull;
 export function isNull(value: Expr | string): IsNull {
@@ -774,20 +806,20 @@ function genericFunction(name: string, params: Expr[]): Function {
 export class Ordering {
   constructor(
     private expr: Expr,
-    private direction: 'asc' | 'desc'
+    private direction: 'ascending' | 'descending'
   ) {}
 
   static of(
     expr: Expr,
-    direction: 'asc' | 'desc' | undefined = undefined
+    direction: 'ascending' | 'descending' | undefined = undefined
   ): Ordering {
-    return new Ordering(expr, direction || 'asc');
+    return new Ordering(expr, direction || 'ascending');
   }
   static ascending(expr: Expr): Ordering {
-    return new Ordering(expr, 'asc');
+    return new Ordering(expr, 'ascending');
   }
   static descending(expr: Expr): Ordering {
-    return new Ordering(expr, 'desc');
+    return new Ordering(expr, 'descending');
   }
 
   _toProto(serializer: Serializer): api.IValue {

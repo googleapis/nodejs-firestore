@@ -52,7 +52,11 @@ export class Aggregate implements Stage {
 export class Collection implements Stage {
   name = 'collection';
 
-  constructor(private collectionPath: string) {}
+  constructor(private collectionPath: string) {
+    if (!this.collectionPath.startsWith('/')) {
+      this.collectionPath = '/' + this.collectionPath;
+    }
+  }
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
@@ -104,8 +108,8 @@ export class Documents implements Stage {
   }
 }
 
-export class Filter implements Stage {
-  name = 'filter';
+export class Where implements Stage {
+  name = 'where';
 
   constructor(private condition: FilterCondition & Expr) {}
 
@@ -146,9 +150,9 @@ export class FindNearest implements Stage {
       name: this.name,
       args: [
         this.property._toProto(serializer),
-        this.vector instanceof FirebaseFirestore.VectorValue
+        this.vector instanceof VectorValue
           ? serializer.encodeValue(this.vector)!
-          : serializer.encodeVector(this.vector),
+          : serializer.encodeVector(this.vector as number[]),
         serializer.encodeValue(this.options.distanceMeasure)!,
       ],
       options,
@@ -196,7 +200,7 @@ export class Select implements Stage {
 }
 
 export class Sort implements Stage {
-  name = 'filter';
+  name = 'sort';
 
   constructor(
     private orders: Ordering[],

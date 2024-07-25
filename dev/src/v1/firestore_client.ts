@@ -242,6 +242,11 @@ export class FirestoreClient {
         !!opts.fallback,
         !!opts.gaxServerStreamingRetries
       ),
+      executePipeline: new this._gaxModule.StreamDescriptor(
+        this._gaxModule.StreamType.SERVER_STREAMING,
+        !!opts.fallback,
+        !!opts.gaxServerStreamingRetries
+      ),
       runAggregationQuery: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
         !!opts.fallback,
@@ -317,6 +322,7 @@ export class FirestoreClient {
       'beginTransaction',
       'commit',
       'rollback',
+      'executePipeline',
       'runQuery',
       'runAggregationQuery',
       'partitionQuery',
@@ -1314,6 +1320,22 @@ export class FirestoreClient {
       });
     this.initialize();
     return this.innerApiCalls.runQuery(request, options);
+  }
+
+  executePipeline(
+    request?: protos.google.firestore.v1.IExecutePipelineRequest,
+    options?: CallOptions
+  ): gax.CancellableStream {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        parent: '',
+      });
+    this.initialize();
+    return this.innerApiCalls.executePipeline(request, options);
   }
 
   /**

@@ -10,7 +10,6 @@ import {
   Ordering,
   Selectable,
 } from './expression';
-import {VectorValue} from './field-value';
 import Firestore, {Timestamp} from './index';
 import {ExecutionUtil} from './pipeline-util';
 import {DocumentReference} from './reference/document-reference';
@@ -22,7 +21,7 @@ import {
   CollectionGroup,
   Database,
   Documents,
-  Filter,
+  Where,
   FindNearest,
   FindNearestOptions,
   GenerateStage,
@@ -39,32 +38,39 @@ import IStructuredPipeline = google.firestore.v1.IStructuredPipeline;
 import IStage = google.firestore.v1.Pipeline.IStage;
 import {QueryCursor} from './reference/types';
 
+export class PipelineSource {
+  constructor(private db: Firestore) {}
+
+  collection(collectionPath: string): Pipeline {
+    return new Pipeline(this.db, [new Collection(collectionPath)]);
+  }
+
+  collectionGroup(collectionId: string): Pipeline {
+    return new Pipeline(this.db, [new CollectionGroup(collectionId)]);
+  }
+
+  database(): Pipeline {
+    return new Pipeline(this.db, [new Database()]);
+  }
+
+  documents(docs: DocumentReference[]): Pipeline {
+    return new Pipeline(this.db, [Documents.of(docs)]);
+  }
+}
+
 export class Pipeline<
   AppModelType = firestore.DocumentData,
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
 > {
-  private constructor(private stages: Stage[]) {}
-
-  static fromCollection(collectionPath: string): Pipeline {
-    return new Pipeline([new Collection(collectionPath)]);
-  }
-
-  static fromCollectionGroup(collectionId: string): Pipeline {
-    return new Pipeline([new CollectionGroup(collectionId)]);
-  }
-
-  static fromDatabase(): Pipeline {
-    return new Pipeline([new Database()]);
-  }
-
-  static fromDocuments(docs: DocumentReference[]): Pipeline {
-    return new Pipeline([Documents.of(docs)]);
-  }
+  constructor(
+    private db: Firestore,
+    private stages: Stage[]
+  ) {}
 
   addFields(...fields: Selectable[]): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new AddField(this.selectablesToMap(fields)));
-    return new Pipeline(copy);
+    return new Pipeline(this.db, copy);
   }
 
   select(...fields: string[]): Pipeline;
@@ -72,7 +78,7 @@ export class Pipeline<
   select(...fields: (Selectable | string)[]): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new Select(this.selectablesToMap(fields)));
-    return new Pipeline(copy);
+    return new Pipeline(this.db, copy);
   }
 
   private selectablesToMap(
@@ -97,22 +103,22 @@ export class Pipeline<
     return result;
   }
 
-  filter(condition: FilterCondition & Expr): Pipeline {
+  where(condition: FilterCondition & Expr): Pipeline {
     const copy = this.stages.map(s => s);
-    copy.push(new Filter(condition));
-    return new Pipeline(copy);
+    copy.push(new Where(condition));
+    return new Pipeline(this.db, copy);
   }
 
   offset(offset: number): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new Offset(offset));
-    return new Pipeline(copy);
+    return new Pipeline(this.db, copy);
   }
 
   limit(limit: number): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new Limit(limit));
-    return new Pipeline(copy);
+    return new Pipeline(this.db, copy);
   }
 
   aggregate(...targets: AggregateTarget[]): Pipeline {
@@ -125,7 +131,7 @@ export class Pipeline<
         )
       )
     );
-    return new Pipeline(copy);
+    return new Pipeline(this.db, copy);
   }
 
   findNearest(
@@ -151,7 +157,7 @@ export class Pipeline<
     const copy = this.stages.map(s => s);
     const fieldExpr = typeof field === 'string' ? Field.of(field) : field;
     copy.push(new FindNearest(fieldExpr, vector, options));
-    return new Pipeline(copy);
+    return new Pipeline(this.db, copy);
   }
 
   sort(orderings: Ordering[]): Pipeline;
@@ -169,49 +175,50 @@ export class Pipeline<
     copy.push(
       new Sort(orderings, density ?? 'unspecified', truncation ?? 'unspecified')
     );
-    return new Pipeline(copy);
+    return new Pipeline(this.db, copy);
   }
 
   paginate(pageSize: number, orderings?: Ordering[]): PaginatingPipeline {
     const copy = this.stages.map(s => s);
-    return new PaginatingPipeline(new Pipeline(copy), pageSize, orderings);
+    return new PaginatingPipeline(
+      new Pipeline(this.db, copy),
+      pageSize,
+      orderings
+    );
   }
 
   genericStage(name: string, params: any[]): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new GenerateStage(name, params));
-    return new Pipeline(copy);
+    return new Pipeline(this.db, copy);
   }
 
-  execute(
-    db: Firestore
-  ): Promise<Array<PipelineResult<AppModelType, DbModelType>>> {
+  execute(): Promise<Array<PipelineResult<AppModelType, DbModelType>>> {
     const util = new ExecutionUtil<AppModelType, DbModelType>(
-      db,
-      db._serializer!
+      this.db,
+      this.db._serializer!
     );
     return util._getResponse(this).then(result => result!);
   }
 
-  stream(db: Firestore): NodeJS.ReadableStream {
+  stream(): NodeJS.ReadableStream {
     const util = new ExecutionUtil<AppModelType, DbModelType>(
-      db,
-      db._serializer!
+      this.db,
+      this.db._serializer!
     );
     return util.stream(this);
   }
 
   _toProto(
-    db: Firestore,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: FirebaseFirestore.ExplainOptions
   ): api.IExecutePipelineRequest {
     const stages: IStage[] = this.stages.map(stage =>
-      stage._toProto(db._serializer!)
+      stage._toProto(this.db._serializer!)
     );
     const structuredPipeline: IStructuredPipeline = {pipeline: {stages}};
     return {
-      database: db.formattedName,
+      database: this.db.formattedName,
       structuredPipeline,
     };
   }
@@ -278,9 +285,9 @@ export class PipelineResult<
 > {
   private _ref: DocumentReference<AppModelType, DbModelType> | undefined;
   private _serializer: Serializer;
-  private _readTime: Timestamp | undefined;
-  private _createTime: Timestamp | undefined;
-  private _updateTime: Timestamp | undefined;
+  public readonly _readTime: Timestamp | undefined;
+  public readonly _createTime: Timestamp | undefined;
+  public readonly _updateTime: Timestamp | undefined;
 
   /**
    * @private
