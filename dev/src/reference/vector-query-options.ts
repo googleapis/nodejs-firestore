@@ -13,12 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as firestore from '@google-cloud/firestore';
+import {FieldPath} from "../path";
 
 export class VectorQueryOptions {
+  readonly distanceResultField?: firestore.FieldPath;
+
   constructor(
-    readonly limit: number,
-    readonly distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT'
-  ) {}
+      distanceResultField?: string | firestore.FieldPath,
+      readonly distanceThreshold?: number
+  ) {
+    if (typeof distanceResultField == 'string') {
+      this.distanceResultField = new FieldPath(distanceResultField);
+    }
+  }
 
   isEqual(other: VectorQueryOptions): boolean {
     if (this === other) {
@@ -28,9 +36,13 @@ export class VectorQueryOptions {
       return false;
     }
 
-    return (
-      this.limit === other.limit &&
-      this.distanceMeasure === other.distanceMeasure
-    );
+    let distanceResultFieldEqual = false;
+    if (typeof other.distanceResultField == 'undefined') {
+      distanceResultFieldEqual = (typeof this.distanceResultField == 'undefined');
+    } else {
+      distanceResultFieldEqual = (this.distanceResultField?.isEqual(other.distanceResultField) == true);
+    }
+
+    return this.distanceThreshold === other.distanceThreshold && distanceResultFieldEqual;
   }
 }

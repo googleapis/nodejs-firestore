@@ -628,6 +628,9 @@ export class Query<
    * @param options - Options control the vector query. `limit` specifies the upper bound of documents to return, must
    * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is calculated
    * when performing the query.
+   *
+   * @deprecated Use the new {@link findNearest} implementation
+   * accepting `limit` and `distanceMeasure` as independent arguments.
    */
   findNearest(
     vectorField: string | firestore.FieldPath,
@@ -636,29 +639,97 @@ export class Query<
       limit: number;
       distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
     }
+  ): VectorQuery<AppModelType, DbModelType>;
+
+  /**
+   * Returns a query that can perform vector distance (similarity) search with given parameters.
+   *
+   * The returned query, when executed, performs a distance (similarity) search on the specified
+   * `vectorField` against the given `queryVector` and returns the top documents that are closest
+   * to the `queryVector`.
+   *
+   * Only documents whose `vectorField` field is a {@link VectorValue} of the same dimension as `queryVector`
+   * participate in the query, all other documents are ignored.
+   *
+   * @example
+   * ```
+   * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
+   * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
+   *
+   * const querySnapshot = await aggregateQuery.get();
+   * querySnapshot.forEach(...);
+   * ```
+   *
+   * @param vectorField - A string or {@link FieldPath} specifying the vector field to search on.
+   * @param queryVector - The {@link VectorValue} used to measure the distance from `vectorField` values in the documents.
+   * @param options - Options control the vector query. `limit` specifies the upper bound of documents to return, must
+   * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is calculated
+   * when performing the query.
+   */
+  findNearest(
+      vectorField: string | firestore.FieldPath,
+      queryVector: firestore.VectorValue | Array<number>,
+      limit: number,
+      distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
+      options?: {
+    distanceResultField?: string | firestore.FieldPath;
+    distanceThreshold?: number;
+  }): VectorQuery<AppModelType, DbModelType>;
+
+  findNearest(
+      vectorField: string | firestore.FieldPath,
+      queryVector: firestore.VectorValue | Array<number>,
+      limitOrOptions: number |{
+        limit?: number;
+        distanceMeasure?: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
+      },
+      distanceMeasure?: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
+      options?:  {
+        distanceResultField?: string | firestore.FieldPath;
+        distanceThreshold?: number;
+      }
+  ): VectorQuery<AppModelType, DbModelType> {
+    if (typeof limitOrOptions == 'number') {
+      return this._findNearest(vectorField, queryVector, limitOrOptions, distanceMeasure!, options);
+    } else {
+      return this._findNearest(vectorField, queryVector, limitOrOptions!.limit!, limitOrOptions!.distanceMeasure!);
+    }
+  }
+
+  _findNearest(
+      vectorField: string | firestore.FieldPath,
+      queryVector: firestore.VectorValue | Array<number>,
+      limit: number,
+      distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
+      options?: {
+        distanceResultField?: string | firestore.FieldPath;
+        distanceThreshold?: number;
+      }
   ): VectorQuery<AppModelType, DbModelType> {
     validateFieldPath('vectorField', vectorField);
 
-    if (options.limit <= 0) {
-      throw invalidArgumentMessage('options.limit', 'positive limit number');
+    if (limit <= 0) {
+      throw invalidArgumentMessage('limit', 'positive limit number');
     }
 
     if (
-      (Array.isArray(queryVector)
-        ? queryVector.length
-        : queryVector.toArray().length) === 0
+        (Array.isArray(queryVector)
+            ? queryVector.length
+            : queryVector.toArray().length) === 0
     ) {
       throw invalidArgumentMessage(
-        'queryVector',
-        'vector size must be larger than 0'
+          'queryVector',
+          'vector size must be larger than 0'
       );
     }
 
     return new VectorQuery<AppModelType, DbModelType>(
-      this,
-      vectorField,
-      queryVector,
-      new VectorQueryOptions(options.limit, options.distanceMeasure)
+        this,
+        vectorField,
+        queryVector,
+        limit,
+        distanceMeasure,
+        new VectorQueryOptions(options?.distanceResultField, options?.distanceThreshold)
     );
   }
 

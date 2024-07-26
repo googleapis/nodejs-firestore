@@ -58,6 +58,8 @@ export class VectorQuery<
     private readonly _query: Query<AppModelType, DbModelType>,
     private readonly vectorField: string | firestore.FieldPath,
     private readonly queryVector: firestore.VectorValue | Array<number>,
+    private readonly limit: number,
+    private readonly distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
     private readonly options: VectorQueryOptions
   ) {
     this._queryUtil = new QueryUtil<
@@ -157,7 +159,7 @@ export class VectorQuery<
   }
 
   /**
-   * Internal method for serializing a query to its RunAggregationQuery proto
+   * Internal method for serializing a query to its proto
    * representation with an optional transaction id.
    *
    * @private
@@ -175,8 +177,8 @@ export class VectorQuery<
       : (this.queryVector as VectorValue);
 
     queryProto.structuredQuery!.findNearest = {
-      limit: {value: this.options.limit},
-      distanceMeasure: this.options.distanceMeasure,
+      limit: {value: this.limit},
+      distanceMeasure: this.distanceMeasure,
       vectorField: {
         fieldPath: FieldPath.fromArgument(this.vectorField).formattedName,
       },
