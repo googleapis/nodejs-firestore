@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 import * as firestore from '@google-cloud/firestore';
-import {FieldPath} from "../path";
 
 export class VectorQueryOptions {
-  readonly distanceResultField?: firestore.FieldPath;
-
   constructor(
-      distanceResultField?: string | firestore.FieldPath,
-      readonly distanceThreshold?: number
-  ) {
-    if (typeof distanceResultField == 'string') {
-      this.distanceResultField = new FieldPath(distanceResultField);
-    }
-  }
+    readonly distanceResultField?: string | firestore.FieldPath,
+    readonly distanceThreshold?: number
+  ) {}
 
   isEqual(other: VectorQueryOptions): boolean {
     if (this === other) {
@@ -36,13 +29,21 @@ export class VectorQueryOptions {
       return false;
     }
 
-    let distanceResultFieldEqual = false;
-    if (typeof other.distanceResultField == 'undefined') {
-      distanceResultFieldEqual = (typeof this.distanceResultField == 'undefined');
-    } else {
-      distanceResultFieldEqual = (this.distanceResultField?.isEqual(other.distanceResultField) == true);
-    }
+    return (
+      this.distanceThreshold === other.distanceThreshold &&
+      this._rawDistanceResultField === other._rawDistanceResultField
+    );
+  }
 
-    return this.distanceThreshold === other.distanceThreshold && distanceResultFieldEqual;
+  /**
+   * @private
+   * @internal
+   */
+  private get _rawDistanceResultField(): string | undefined {
+    if (typeof this.distanceResultField === 'undefined') return undefined;
+
+    return typeof this.distanceResultField === 'string'
+      ? this.distanceResultField
+      : this.distanceResultField.toString();
   }
 }

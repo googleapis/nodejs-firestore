@@ -1966,326 +1966,595 @@ describe('Query class', () => {
       });
   });
 
-  it('supports findNearest by EUCLIDEAN distance', async () => {
-    const indexTestHelper = new IndexTestHelper(firestore);
+  describe('vector search', () => {
+    it('supports findNearest by EUCLIDEAN distance', async () => {
+      const indexTestHelper = new IndexTestHelper(firestore);
 
-    const collectionReference = await indexTestHelper.createTestDocs([
-      {foo: 'bar'},
-      {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
-      {foo: 'bar', embedding: FieldValue.vector([1, 1])},
-      {foo: 'bar', embedding: FieldValue.vector([10, 0])},
-      {foo: 'bar', embedding: FieldValue.vector([20, 0])},
-      {foo: 'bar', embedding: FieldValue.vector([100, 100])},
-    ]);
+      const collectionReference = await indexTestHelper.createTestDocs([
+        {foo: 'bar'},
+        {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
+        {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+        {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+        {foo: 'bar', embedding: FieldValue.vector([20, 0])},
+        {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+      ]);
 
-    const vectorQuery = indexTestHelper
-      .query(collectionReference)
-      .where('foo', '==', 'bar')
-      .findNearest('embedding', [10, 10], {
-        limit: 3,
-        distanceMeasure: 'EUCLIDEAN',
-      });
+      const vectorQuery = indexTestHelper
+        .query(collectionReference)
+        .where('foo', '==', 'bar')
+        .findNearest('embedding', [10, 10], {
+          limit: 3,
+          distanceMeasure: 'EUCLIDEAN',
+        });
 
-    const res = await vectorQuery.get();
-    expect(res.size).to.equal(3);
-    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([10, 0]))).to
-      .be.true;
-    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 1]))).to
-      .be.true;
-    expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0]))).to
-      .be.true;
-  });
-
-  it('supports findNearest by COSINE distance', async () => {
-    const indexTestHelper = new IndexTestHelper(firestore);
-
-    const collectionReference = await indexTestHelper.setTestDocs({
-      '1': {foo: 'bar'},
-      '2': {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
-      '3': {foo: 'bar', embedding: FieldValue.vector([1, 1])},
-      '4': {foo: 'bar', embedding: FieldValue.vector([20, 0])},
-      '5': {foo: 'bar', embedding: FieldValue.vector([10, 0])},
-      '6': {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+      const res = await vectorQuery.get();
+      expect(res.size).to.equal(3);
+      expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([10, 0])))
+        .to.be.true;
+      expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 1]))).to
+        .be.true;
+      expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0])))
+        .to.be.true;
     });
 
-    const vectorQuery = indexTestHelper
-      .query(collectionReference)
-      .where('foo', '==', 'bar')
-      .findNearest('embedding', [10, 10], {
-        limit: 3,
-        distanceMeasure: 'COSINE',
+    it('supports findNearest by COSINE distance', async () => {
+      const indexTestHelper = new IndexTestHelper(firestore);
+
+      const collectionReference = await indexTestHelper.setTestDocs({
+        '1': {foo: 'bar'},
+        '2': {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
+        '3': {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+        '4': {foo: 'bar', embedding: FieldValue.vector([20, 0])},
+        '5': {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+        '6': {foo: 'bar', embedding: FieldValue.vector([100, 100])},
       });
 
-    const res = await vectorQuery.get();
+      const vectorQuery = indexTestHelper
+        .query(collectionReference)
+        .where('foo', '==', 'bar')
+        .findNearest('embedding', [10, 10], {
+          limit: 3,
+          distanceMeasure: 'COSINE',
+        });
 
-    expect(res.size).to.equal(3);
+      const res = await vectorQuery.get();
 
-    if (res.docs[0].get('embedding').isEqual(FieldValue.vector([1, 1]))) {
+      expect(res.size).to.equal(3);
+
+      if (res.docs[0].get('embedding').isEqual(FieldValue.vector([1, 1]))) {
+        expect(
+          res.docs[1].get('embedding').isEqual(FieldValue.vector([100, 100]))
+        ).to.be.true;
+      } else {
+        expect(
+          res.docs[0].get('embedding').isEqual(FieldValue.vector([100, 100]))
+        ).to.be.true;
+        expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 1])))
+          .to.be.true;
+      }
+
       expect(
-        res.docs[1].get('embedding').isEqual(FieldValue.vector([100, 100]))
+        res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0])) ||
+          res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0]))
       ).to.be.true;
-    } else {
+    });
+
+    it('supports findNearest by DOT_PRODUCT distance', async () => {
+      const indexTestHelper = new IndexTestHelper(firestore);
+
+      const collectionReference = await indexTestHelper.createTestDocs([
+        {foo: 'bar'},
+        {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
+        {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+        {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+        {foo: 'bar', embedding: FieldValue.vector([20, 0])},
+        {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+      ]);
+
+      const vectorQuery = indexTestHelper
+        .query(collectionReference)
+        .where('foo', '==', 'bar')
+        .findNearest('embedding', [10, 10], {
+          limit: 3,
+          distanceMeasure: 'DOT_PRODUCT',
+        });
+
+      const res = await vectorQuery.get();
+      expect(res.size).to.equal(3);
       expect(
         res.docs[0].get('embedding').isEqual(FieldValue.vector([100, 100]))
       ).to.be.true;
-      expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 1]))).to
+      expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([20, 0])))
+        .to.be.true;
+      expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([10, 0])))
+        .to.be.true;
+    });
+
+    it('findNearest works with converters', async () => {
+      const indexTestHelper = new IndexTestHelper(firestore);
+
+      class FooDistance {
+        constructor(
+          readonly foo: string,
+          readonly embedding: Array<number>
+        ) {}
+      }
+
+      const fooConverter = {
+        toFirestore(d: FooDistance): DocumentData {
+          return {title: d.foo, embedding: FieldValue.vector(d.embedding)};
+        },
+        fromFirestore(snapshot: QueryDocumentSnapshot): FooDistance {
+          const data = snapshot.data();
+          return new FooDistance(data.foo, data.embedding.toArray());
+        },
+      };
+
+      const collectionRef = await indexTestHelper.createTestDocs([
+        {foo: 'bar', embedding: FieldValue.vector([5, 5])},
+      ]);
+
+      const vectorQuery = indexTestHelper
+        .query(collectionRef)
+        .withConverter(fooConverter)
+        .where('foo', '==', 'bar')
+        .findNearest('embedding', [10, 10], {
+          limit: 3,
+          distanceMeasure: 'EUCLIDEAN',
+        });
+
+      const res = await vectorQuery.get();
+
+      expect(res.size).to.equal(1);
+      expect(res.docs[0].data().foo).to.equal('bar');
+      expect(res.docs[0].data().embedding).to.deep.equal([5, 5]);
+    });
+
+    it('supports findNearest skipping fields of wrong types', async () => {
+      const indexTestHelper = new IndexTestHelper(firestore);
+
+      const collectionRef = await indexTestHelper.createTestDocs([
+        {foo: 'bar'},
+
+        // These documents are skipped because it is not really a vector value
+        {foo: 'bar', embedding: [10, 10]},
+        {foo: 'bar', embedding: 'not actually a vector'},
+        {foo: 'bar', embedding: null},
+
+        // Actual vector values
+        {foo: 'bar', embedding: FieldValue.vector([9, 9])},
+        {foo: 'bar', embedding: FieldValue.vector([50, 50])},
+        {foo: 'bar', embedding: FieldValue.vector([100, 100])},
+      ]);
+
+      const vectorQuery = indexTestHelper
+        .query(collectionRef)
+        .where('foo', '==', 'bar')
+        .findNearest('embedding', [10, 10], {
+          limit: 100, // Intentionally large to get all matches.
+          distanceMeasure: 'EUCLIDEAN',
+        });
+
+      const res = await vectorQuery.get();
+      expect(res.size).to.equal(3);
+      expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([9, 9]))).to
         .be.true;
-    }
+      expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([50, 50])))
+        .to.be.true;
+      expect(
+        res.docs[2].get('embedding').isEqual(FieldValue.vector([100, 100]))
+      ).to.be.true;
+    });
 
-    expect(
-      res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0])) ||
-        res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0]))
-    ).to.be.true;
-  });
+    it('findNearest ignores mismatching dimensions', async () => {
+      const indexTestHelper = new IndexTestHelper(firestore);
 
-  it('supports findNearest by DOT_PRODUCT distance', async () => {
-    const indexTestHelper = new IndexTestHelper(firestore);
+      const collectionRef = await indexTestHelper.createTestDocs([
+        {foo: 'bar'},
 
-    const collectionReference = await indexTestHelper.createTestDocs([
-      {foo: 'bar'},
-      {foo: 'xxx', embedding: FieldValue.vector([10, 10])},
-      {foo: 'bar', embedding: FieldValue.vector([1, 1])},
-      {foo: 'bar', embedding: FieldValue.vector([10, 0])},
-      {foo: 'bar', embedding: FieldValue.vector([20, 0])},
-      {foo: 'bar', embedding: FieldValue.vector([100, 100])},
-    ]);
+        // Vectors with dimension mismatch
+        {foo: 'bar', embedding: FieldValue.vector([10])},
 
-    const vectorQuery = indexTestHelper
-      .query(collectionReference)
-      .where('foo', '==', 'bar')
-      .findNearest('embedding', [10, 10], {
-        limit: 3,
-        distanceMeasure: 'DOT_PRODUCT',
+        // Vectors with dimension match
+        {foo: 'bar', embedding: FieldValue.vector([9, 9])},
+        {foo: 'bar', embedding: FieldValue.vector([50, 50])},
+      ]);
+
+      const vectorQuery = indexTestHelper
+        .query(collectionRef)
+        .where('foo', '==', 'bar')
+        .findNearest('embedding', [10, 10], {
+          limit: 3,
+          distanceMeasure: 'EUCLIDEAN',
+        });
+
+      const res = await vectorQuery.get();
+      expect(res.size).to.equal(2);
+      expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([9, 9]))).to
+        .be.true;
+      expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([50, 50])))
+        .to.be.true;
+    });
+
+    it('supports findNearest on non-existent field', async () => {
+      const indexTestHelper = new IndexTestHelper(firestore);
+
+      const collectionRef = await indexTestHelper.createTestDocs([
+        {foo: 'bar'},
+        {foo: 'bar', otherField: [10, 10]},
+        {foo: 'bar', otherField: 'not actually a vector'},
+        {foo: 'bar', otherField: null},
+      ]);
+
+      const vectorQuery = indexTestHelper
+        .query(collectionRef)
+        .where('foo', '==', 'bar')
+        .findNearest('embedding', [10, 10], {
+          limit: 3,
+          distanceMeasure: 'EUCLIDEAN',
+        });
+
+      const res = await vectorQuery.get();
+
+      expect(res.size).to.equal(0);
+    });
+
+    it('supports findNearest on vector nested in a map', async () => {
+      const indexTestHelper = new IndexTestHelper(firestore);
+
+      const collectionReference = await indexTestHelper.createTestDocs([
+        {nested: {foo: 'bar'}},
+        {nested: {foo: 'xxx', embedding: FieldValue.vector([10, 10])}},
+        {nested: {foo: 'bar', embedding: FieldValue.vector([1, 1])}},
+        {nested: {foo: 'bar', embedding: FieldValue.vector([10, 0])}},
+        {nested: {foo: 'bar', embedding: FieldValue.vector([20, 0])}},
+        {nested: {foo: 'bar', embedding: FieldValue.vector([100, 100])}},
+      ]);
+
+      const vectorQuery = indexTestHelper
+        .query(collectionReference)
+        .findNearest('nested.embedding', [10, 10], {
+          limit: 3,
+          distanceMeasure: 'EUCLIDEAN',
+        });
+
+      const res = await vectorQuery.get();
+      expect(res.size).to.equal(3);
+      expect(
+        res.docs[0].get('nested.embedding').isEqual(FieldValue.vector([10, 10]))
+      ).to.be.true;
+      expect(
+        res.docs[1].get('nested.embedding').isEqual(FieldValue.vector([10, 0]))
+      ).to.be.true;
+      expect(
+        res.docs[2].get('nested.embedding').isEqual(FieldValue.vector([1, 1]))
+      ).to.be.true;
+    });
+
+    it('supports findNearest with select to exclude vector data in response', async () => {
+      const indexTestHelper = new IndexTestHelper(firestore);
+
+      const collectionReference = await indexTestHelper.createTestDocs([
+        {foo: 1},
+        {foo: 2, embedding: FieldValue.vector([10, 10])},
+        {foo: 3, embedding: FieldValue.vector([1, 1])},
+        {foo: 4, embedding: FieldValue.vector([10, 0])},
+        {foo: 5, embedding: FieldValue.vector([20, 0])},
+        {foo: 6, embedding: FieldValue.vector([100, 100])},
+      ]);
+
+      const vectorQuery = indexTestHelper
+        .query(collectionReference)
+        .where('foo', 'in', [1, 2, 3, 4, 5, 6])
+        .select('foo')
+        .findNearest('embedding', [10, 10], {
+          limit: 10,
+          distanceMeasure: 'EUCLIDEAN',
+        });
+
+      const res = await vectorQuery.get();
+      expect(res.size).to.equal(5);
+      expect(res.docs[0].get('foo')).to.equal(2);
+      expect(res.docs[1].get('foo')).to.equal(4);
+      expect(res.docs[2].get('foo')).to.equal(3);
+      expect(res.docs[3].get('foo')).to.equal(5);
+      expect(res.docs[4].get('foo')).to.equal(6);
+
+      res.docs.forEach(ds => expect(ds.get('embedding')).to.be.undefined);
+    });
+
+    it('supports findNearest limits', async () => {
+      const indexTestHelper = new IndexTestHelper(firestore);
+
+      const embeddingVector = [];
+      const queryVector = [];
+      for (let i = 0; i < 2048; i++) {
+        embeddingVector.push(i + 1);
+        queryVector.push(i - 1);
+      }
+
+      const collectionReference = await indexTestHelper.createTestDocs([
+        {embedding: FieldValue.vector(embeddingVector)},
+      ]);
+
+      const vectorQuery = indexTestHelper
+        .query(collectionReference)
+        .findNearest('embedding', queryVector, {
+          limit: 1000,
+          distanceMeasure: 'EUCLIDEAN',
+        });
+
+      const res = await vectorQuery.get();
+      expect(res.size).to.equal(1);
+      expect(
+        (res.docs[0].get('embedding') as VectorValue).toArray()
+      ).to.deep.equal(embeddingVector);
+    });
+
+    describe('requesting computed distance', () => {
+      it('supports COSINE distance', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
+
+        const collectionReference = await indexTestHelper.setTestDocs({
+          '1': {foo: 'bar'},
+          '2': {foo: 'bar', embedding: FieldValue.vector([1, 0])},
+          '3': {foo: 'bar', embedding: FieldValue.vector([0, 1])},
+          '4': {foo: 'bar', embedding: FieldValue.vector([0, -0.1])},
+          '5': {foo: 'bar', embedding: FieldValue.vector([-1, 0])},
+        });
+
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .findNearest('embedding', [1, 0], 5, 'COSINE', {
+            distanceResultField: 'distance',
+          });
+
+        const res = await vectorQuery.get();
+
+        expect(res.size).to.equal(4);
+
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([1, 0])))
+          .to.be.true;
+        expect(res.docs[0].get('distance')).to.equal(0);
+
+        expect(res.docs[1].get('distance')).to.equal(1);
+        expect(res.docs[2].get('distance')).to.equal(1);
+
+        expect(res.docs[3].get('embedding').isEqual(FieldValue.vector([-1, 0])))
+          .to.be.true;
+        expect(res.docs[3].get('distance')).to.equal(2);
       });
 
-    const res = await vectorQuery.get();
-    expect(res.size).to.equal(3);
-    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([100, 100])))
-      .to.be.true;
-    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([20, 0]))).to
-      .be.true;
-    expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([10, 0]))).to
-      .be.true;
-  });
+      it('supports EUCLIDEAN distance', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
 
-  it('findNearest works with converters', async () => {
-    const indexTestHelper = new IndexTestHelper(firestore);
+        const collectionReference = await indexTestHelper.setTestDocs({
+          '1': {foo: 'bar'},
+          '2': {foo: 'bar', embedding: FieldValue.vector([2, 0])},
+          '3': {foo: 'bar', embedding: FieldValue.vector([1, 100])},
+          '4': {foo: 'bar', embedding: FieldValue.vector([1, -0.1])},
+          '5': {foo: 'bar', embedding: FieldValue.vector([4, 4])},
+        });
 
-    class FooDistance {
-      constructor(
-        readonly foo: string,
-        readonly embedding: Array<number>
-      ) {}
-    }
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .findNearest('embedding', [1, 0], 5, 'EUCLIDEAN', {
+            distanceResultField: 'distance',
+          });
 
-    const fooConverter = {
-      toFirestore(d: FooDistance): DocumentData {
-        return {title: d.foo, embedding: FieldValue.vector(d.embedding)};
-      },
-      fromFirestore(snapshot: QueryDocumentSnapshot): FooDistance {
-        const data = snapshot.data();
-        return new FooDistance(data.foo, data.embedding.toArray());
-      },
-    };
+        const res = await vectorQuery.get();
 
-    const collectionRef = await indexTestHelper.createTestDocs([
-      {foo: 'bar', embedding: FieldValue.vector([5, 5])},
-    ]);
+        expect(res.size).to.equal(4);
 
-    const vectorQuery = indexTestHelper
-      .query(collectionRef)
-      .withConverter(fooConverter)
-      .where('foo', '==', 'bar')
-      .findNearest('embedding', [10, 10], {
-        limit: 3,
-        distanceMeasure: 'EUCLIDEAN',
+        expect(
+          res.docs[0].get('embedding').isEqual(FieldValue.vector([1, -0.1]))
+        ).to.be.true;
+        expect(res.docs[0].get('distance')).to.equal(0.1);
+
+        expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([2, 0])))
+          .to.be.true;
+        expect(res.docs[1].get('distance')).to.equal(1);
+
+        expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([4, 4])))
+          .to.be.true;
+        expect(res.docs[2].get('distance')).to.equal(5);
+
+        expect(
+          res.docs[3].get('embedding').isEqual(FieldValue.vector([1, 100]))
+        ).to.be.true;
+        expect(res.docs[3].get('distance')).to.equal(100);
       });
 
-    const res = await vectorQuery.get();
+      it('supports DOT_PRODUCT distance', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
 
-    expect(res.size).to.equal(1);
-    expect(res.docs[0].data().foo).to.equal('bar');
-    expect(res.docs[0].data().embedding).to.deep.equal([5, 5]);
-  });
+        const collectionReference = await indexTestHelper.setTestDocs({
+          '1': {foo: 'bar'},
+          '2': {foo: 'bar', embedding: FieldValue.vector([2, 0])},
+          '3': {foo: 'bar', embedding: FieldValue.vector([1, 100])},
+          '4': {foo: 'bar', embedding: FieldValue.vector([-20, 0])},
+          '5': {foo: 'bar', embedding: FieldValue.vector([0.1, 4])},
+        });
 
-  it('supports findNearest skipping fields of wrong types', async () => {
-    const indexTestHelper = new IndexTestHelper(firestore);
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .findNearest('embedding', [1, 0], 5, 'DOT_PRODUCT', {
+            distanceResultField: 'distance',
+          });
 
-    const collectionRef = await indexTestHelper.createTestDocs([
-      {foo: 'bar'},
+        const res = await vectorQuery.get();
 
-      // These documents are skipped because it is not really a vector value
-      {foo: 'bar', embedding: [10, 10]},
-      {foo: 'bar', embedding: 'not actually a vector'},
-      {foo: 'bar', embedding: null},
+        expect(res.size).to.equal(4);
 
-      // Actual vector values
-      {foo: 'bar', embedding: FieldValue.vector([9, 9])},
-      {foo: 'bar', embedding: FieldValue.vector([50, 50])},
-      {foo: 'bar', embedding: FieldValue.vector([100, 100])},
-    ]);
+        expect(res.docs[0].get('distance')).to.equal(2);
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([2, 0])))
+          .to.be.true;
 
-    const vectorQuery = indexTestHelper
-      .query(collectionRef)
-      .where('foo', '==', 'bar')
-      .findNearest('embedding', [10, 10], {
-        limit: 100, // Intentionally large to get all matches.
-        distanceMeasure: 'EUCLIDEAN',
+        expect(res.docs[1].get('distance')).to.equal(1);
+        expect(
+          res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 100]))
+        ).to.be.true;
+
+        expect(res.docs[2].get('distance')).to.equal(0.1);
+        expect(
+          res.docs[2].get('embedding').isEqual(FieldValue.vector([0.1, 4]))
+        ).to.be.true;
+
+        expect(res.docs[3].get('distance')).to.equal(-20);
+        expect(
+          res.docs[3].get('embedding').isEqual(FieldValue.vector([-20, 0]))
+        ).to.be.true;
       });
 
-    const res = await vectorQuery.get();
-    expect(res.size).to.equal(3);
-    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([9, 9]))).to
-      .be.true;
-    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([50, 50]))).to
-      .be.true;
-    expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([100, 100])))
-      .to.be.true;
-  });
+      it('overwrites distance result field on conflict', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
 
-  it('findNearest ignores mismatching dimensions', async () => {
-    const indexTestHelper = new IndexTestHelper(firestore);
+        const collectionReference = await indexTestHelper.setTestDocs({
+          '1': {
+            foo: 'bar',
+            embedding: FieldValue.vector([0, 1]),
+            distance: '100 miles',
+          },
+        });
 
-    const collectionRef = await indexTestHelper.createTestDocs([
-      {foo: 'bar'},
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .findNearest('embedding', [1, 0], 5, 'COSINE', {
+            distanceResultField: 'distance',
+          });
 
-      // Vectors with dimension mismatch
-      {foo: 'bar', embedding: FieldValue.vector([10])},
+        const res = await vectorQuery.get();
 
-      // Vectors with dimension match
-      {foo: 'bar', embedding: FieldValue.vector([9, 9])},
-      {foo: 'bar', embedding: FieldValue.vector([50, 50])},
-    ]);
+        expect(res.size).to.equal(1);
 
-    const vectorQuery = indexTestHelper
-      .query(collectionRef)
-      .where('foo', '==', 'bar')
-      .findNearest('embedding', [10, 10], {
-        limit: 3,
-        distanceMeasure: 'EUCLIDEAN',
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([0, 1])))
+          .to.be.true;
+        expect(res.docs[0].get('distance')).to.equal(1);
+      });
+    });
+
+    describe('querying with distance threshold', () => {
+      it('supports COSINE distance', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
+
+        const collectionReference = await indexTestHelper.setTestDocs({
+          '1': {foo: 'bar'},
+          '2': {foo: 'bar', embedding: FieldValue.vector([1, 0])},
+          '3': {foo: 'bar', embedding: FieldValue.vector([1, 1])},
+          '4': {foo: 'bar', embedding: FieldValue.vector([0, -0.1])},
+          '5': {foo: 'bar', embedding: FieldValue.vector([-1, 0])},
+        });
+
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .findNearest('embedding', [1, 0], 5, 'COSINE', {
+            distanceThreshold: 1,
+          });
+
+        const res = await vectorQuery.get();
+
+        expect(res.size).to.equal(3);
+
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([1, 0])))
+          .to.be.true;
+        expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 1])))
+          .to.be.true;
+        expect(
+          res.docs[2].get('embedding').isEqual(FieldValue.vector([0, -0.1]))
+        ).to.be.true;
       });
 
-    const res = await vectorQuery.get();
-    expect(res.size).to.equal(2);
-    expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([9, 9]))).to
-      .be.true;
-    expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([50, 50]))).to
-      .be.true;
-  });
+      it('supports EUCLIDEAN distance', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
 
-  it('supports findNearest on non-existent field', async () => {
-    const indexTestHelper = new IndexTestHelper(firestore);
+        const collectionReference = await indexTestHelper.setTestDocs({
+          '1': {foo: 'bar'},
+          '2': {foo: 'bar', embedding: FieldValue.vector([2, 0])},
+          '3': {foo: 'bar', embedding: FieldValue.vector([1, 100])},
+          '4': {foo: 'bar', embedding: FieldValue.vector([1, -0.1])},
+          '5': {foo: 'bar', embedding: FieldValue.vector([4, 4])},
+        });
 
-    const collectionRef = await indexTestHelper.createTestDocs([
-      {foo: 'bar'},
-      {foo: 'bar', otherField: [10, 10]},
-      {foo: 'bar', otherField: 'not actually a vector'},
-      {foo: 'bar', otherField: null},
-    ]);
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .findNearest('embedding', [1, 0], 5, 'EUCLIDEAN', {
+            distanceThreshold: 5,
+          });
 
-    const vectorQuery = indexTestHelper
-      .query(collectionRef)
-      .where('foo', '==', 'bar')
-      .findNearest('embedding', [10, 10], {
-        limit: 3,
-        distanceMeasure: 'EUCLIDEAN',
+        const res = await vectorQuery.get();
+
+        expect(res.size).to.equal(3);
+
+        expect(
+          res.docs[0].get('embedding').isEqual(FieldValue.vector([1, -0.1]))
+        ).to.be.true;
+        expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([2, 0])))
+          .to.be.true;
+        expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([4, 4])))
+          .to.be.true;
       });
 
-    const res = await vectorQuery.get();
+      it('supports DOT_PRODUCT distance', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
 
-    expect(res.size).to.equal(0);
-  });
+        const collectionReference = await indexTestHelper.setTestDocs({
+          '1': {foo: 'bar'},
+          '2': {foo: 'bar', embedding: FieldValue.vector([2, 0])},
+          '3': {foo: 'bar', embedding: FieldValue.vector([1, 100])},
+          '4': {foo: 'bar', embedding: FieldValue.vector([-20, 0])},
+          '5': {foo: 'bar', embedding: FieldValue.vector([0.1, 4])},
+        });
 
-  it('supports findNearest on vector nested in a map', async () => {
-    const indexTestHelper = new IndexTestHelper(firestore);
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .findNearest('embedding', [1, 0], 5, 'DOT_PRODUCT', {
+            distanceThreshold: 1,
+          });
 
-    const collectionReference = await indexTestHelper.createTestDocs([
-      {nested: {foo: 'bar'}},
-      {nested: {foo: 'xxx', embedding: FieldValue.vector([10, 10])}},
-      {nested: {foo: 'bar', embedding: FieldValue.vector([1, 1])}},
-      {nested: {foo: 'bar', embedding: FieldValue.vector([10, 0])}},
-      {nested: {foo: 'bar', embedding: FieldValue.vector([20, 0])}},
-      {nested: {foo: 'bar', embedding: FieldValue.vector([100, 100])}},
-    ]);
+        const res = await vectorQuery.get();
 
-    const vectorQuery = indexTestHelper
-      .query(collectionReference)
-      .findNearest('nested.embedding', [10, 10], {
-        limit: 3,
-        distanceMeasure: 'EUCLIDEAN',
+        expect(res.size).to.equal(2);
+
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([2, 0])))
+          .to.be.true;
+
+        expect(
+          res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 100]))
+        ).to.be.true;
       });
 
-    const res = await vectorQuery.get();
-    expect(res.size).to.equal(3);
-    expect(
-      res.docs[0].get('nested.embedding').isEqual(FieldValue.vector([10, 10]))
-    ).to.be.true;
-    expect(
-      res.docs[1].get('nested.embedding').isEqual(FieldValue.vector([10, 0]))
-    ).to.be.true;
-    expect(
-      res.docs[2].get('nested.embedding').isEqual(FieldValue.vector([1, 1]))
-    ).to.be.true;
-  });
+      it('works with distance threshold', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
 
-  it('supports findNearest with select to exclude vector data in response', async () => {
-    const indexTestHelper = new IndexTestHelper(firestore);
+        const collectionReference = await indexTestHelper.setTestDocs({
+          '1': {foo: 'bar'},
+          '2': {foo: 'bar', embedding: FieldValue.vector([2, 0])},
+          '3': {foo: 'bar', embedding: FieldValue.vector([1, 100])},
+          '4': {foo: 'bar', embedding: FieldValue.vector([-20, 0])},
+          '5': {foo: 'bar', embedding: FieldValue.vector([0.1, 4])},
+        });
 
-    const collectionReference = await indexTestHelper.createTestDocs([
-      {foo: 1},
-      {foo: 2, embedding: FieldValue.vector([10, 10])},
-      {foo: 3, embedding: FieldValue.vector([1, 1])},
-      {foo: 4, embedding: FieldValue.vector([10, 0])},
-      {foo: 5, embedding: FieldValue.vector([20, 0])},
-      {foo: 6, embedding: FieldValue.vector([100, 100])},
-    ]);
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .findNearest('embedding', [1, 0], 5, 'DOT_PRODUCT', {
+            distanceThreshold: 0.11,
+            distanceResultField: 'foo',
+          });
 
-    const vectorQuery = indexTestHelper
-      .query(collectionReference)
-      .where('foo', 'in', [1, 2, 3, 4, 5, 6])
-      .select('foo')
-      .findNearest('embedding', [10, 10], {
-        limit: 10,
-        distanceMeasure: 'EUCLIDEAN',
+        const res = await vectorQuery.get();
+
+        expect(res.size).to.equal(2);
+
+        expect(res.docs[0].get('foo')).to.equal(2);
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([2, 0])))
+          .to.be.true;
+
+        expect(res.docs[1].get('foo')).to.equal(1);
+        expect(
+          res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 100]))
+        ).to.be.true;
       });
-
-    const res = await vectorQuery.get();
-    expect(res.size).to.equal(5);
-    expect(res.docs[0].get('foo')).to.equal(2);
-    expect(res.docs[1].get('foo')).to.equal(4);
-    expect(res.docs[2].get('foo')).to.equal(3);
-    expect(res.docs[3].get('foo')).to.equal(5);
-    expect(res.docs[4].get('foo')).to.equal(6);
-
-    res.docs.forEach(ds => expect(ds.get('embedding')).to.be.undefined);
-  });
-
-  it('supports findNearest limits', async () => {
-    const indexTestHelper = new IndexTestHelper(firestore);
-
-    const embeddingVector = [];
-    const queryVector = [];
-    for (let i = 0; i < 2048; i++) {
-      embeddingVector.push(i + 1);
-      queryVector.push(i - 1);
-    }
-
-    const collectionReference = await indexTestHelper.createTestDocs([
-      {embedding: FieldValue.vector(embeddingVector)},
-    ]);
-
-    const vectorQuery = indexTestHelper
-      .query(collectionReference)
-      .findNearest('embedding', queryVector, {
-        limit: 1000,
-        distanceMeasure: 'EUCLIDEAN',
-      });
-
-    const res = await vectorQuery.get();
-    expect(res.size).to.equal(1);
-    expect(
-      (res.docs[0].get('embedding') as VectorValue).toArray()
-    ).to.deep.equal(embeddingVector);
+    });
   });
 
   it('supports !=', async () => {

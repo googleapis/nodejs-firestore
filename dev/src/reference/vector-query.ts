@@ -183,6 +183,13 @@ export class VectorQuery<
         fieldPath: FieldPath.fromArgument(this.vectorField).formattedName,
       },
       queryVector: queryVector._toProto(this._query._serializer),
+      distanceResultField: this.options?.distanceResultField
+        ? FieldPath.fromArgument(this.options!.distanceResultField!)
+            .formattedName
+        : undefined,
+      distanceThreshold: this.options?.distanceThreshold
+        ? {value: this.options?.distanceThreshold}
+        : undefined,
     };
 
     if (explainOptions) {

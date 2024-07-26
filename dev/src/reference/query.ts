@@ -667,44 +667,58 @@ export class Query<
    * when performing the query.
    */
   findNearest(
-      vectorField: string | firestore.FieldPath,
-      queryVector: firestore.VectorValue | Array<number>,
-      limit: number,
-      distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
-      options?: {
-    distanceResultField?: string | firestore.FieldPath;
-    distanceThreshold?: number;
-  }): VectorQuery<AppModelType, DbModelType>;
+    vectorField: string | firestore.FieldPath,
+    queryVector: firestore.VectorValue | Array<number>,
+    limit: number,
+    distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
+    options?: {
+      distanceResultField?: string | firestore.FieldPath;
+      distanceThreshold?: number;
+    }
+  ): VectorQuery<AppModelType, DbModelType>;
 
   findNearest(
-      vectorField: string | firestore.FieldPath,
-      queryVector: firestore.VectorValue | Array<number>,
-      limitOrOptions: number |{
-        limit?: number;
-        distanceMeasure?: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
-      },
-      distanceMeasure?: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
-      options?:  {
-        distanceResultField?: string | firestore.FieldPath;
-        distanceThreshold?: number;
-      }
+    vectorField: string | firestore.FieldPath,
+    queryVector: firestore.VectorValue | Array<number>,
+    limitOrOptions:
+      | number
+      | {
+          limit?: number;
+          distanceMeasure?: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
+        },
+    distanceMeasure?: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
+    options?: {
+      distanceResultField?: string | firestore.FieldPath;
+      distanceThreshold?: number;
+    }
   ): VectorQuery<AppModelType, DbModelType> {
-    if (typeof limitOrOptions == 'number') {
-      return this._findNearest(vectorField, queryVector, limitOrOptions, distanceMeasure!, options);
+    if (typeof limitOrOptions === 'number') {
+      return this._findNearest(
+        vectorField,
+        queryVector,
+        limitOrOptions,
+        distanceMeasure!,
+        options
+      );
     } else {
-      return this._findNearest(vectorField, queryVector, limitOrOptions!.limit!, limitOrOptions!.distanceMeasure!);
+      return this._findNearest(
+        vectorField,
+        queryVector,
+        limitOrOptions!.limit!,
+        limitOrOptions!.distanceMeasure!
+      );
     }
   }
 
   _findNearest(
-      vectorField: string | firestore.FieldPath,
-      queryVector: firestore.VectorValue | Array<number>,
-      limit: number,
-      distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
-      options?: {
-        distanceResultField?: string | firestore.FieldPath;
-        distanceThreshold?: number;
-      }
+    vectorField: string | firestore.FieldPath,
+    queryVector: firestore.VectorValue | Array<number>,
+    limit: number,
+    distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
+    options?: {
+      distanceResultField?: string | firestore.FieldPath;
+      distanceThreshold?: number;
+    }
   ): VectorQuery<AppModelType, DbModelType> {
     validateFieldPath('vectorField', vectorField);
 
@@ -713,23 +727,26 @@ export class Query<
     }
 
     if (
-        (Array.isArray(queryVector)
-            ? queryVector.length
-            : queryVector.toArray().length) === 0
+      (Array.isArray(queryVector)
+        ? queryVector.length
+        : queryVector.toArray().length) === 0
     ) {
       throw invalidArgumentMessage(
-          'queryVector',
-          'vector size must be larger than 0'
+        'queryVector',
+        'vector size must be larger than 0'
       );
     }
 
     return new VectorQuery<AppModelType, DbModelType>(
-        this,
-        vectorField,
-        queryVector,
-        limit,
-        distanceMeasure,
-        new VectorQueryOptions(options?.distanceResultField, options?.distanceThreshold)
+      this,
+      vectorField,
+      queryVector,
+      limit,
+      distanceMeasure,
+      new VectorQueryOptions(
+        options?.distanceResultField,
+        options?.distanceThreshold
+      )
     );
   }
 
