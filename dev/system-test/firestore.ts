@@ -2554,6 +2554,35 @@ describe('Query class', () => {
           res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 100]))
         ).to.be.true;
       });
+
+      it('will not exceed limit even if there are more results more similar than distanceThreshold', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
+
+        const collectionReference = await indexTestHelper.setTestDocs({
+          '1': {foo: 'bar'},
+          '2': {foo: 'bar', embedding: FieldValue.vector([2, 0])},
+          '3': {foo: 'bar', embedding: FieldValue.vector([1, 100])},
+          '4': {foo: 'bar', embedding: FieldValue.vector([-20, 0])},
+          '5': {foo: 'bar', embedding: FieldValue.vector([0.1, 4])},
+        });
+
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .findNearest('embedding', [1, 0], 2, 'DOT_PRODUCT', {
+            distanceThreshold: 0.0,
+          });
+
+        const res = await vectorQuery.get();
+
+        expect(res.size).to.equal(2);
+
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([2, 0])))
+          .to.be.true;
+
+        expect(
+          res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 100]))
+        ).to.be.true;
+      });
     });
   });
 

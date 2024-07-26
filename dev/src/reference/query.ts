@@ -654,7 +654,7 @@ export class Query<
    * @example
    * ```
    * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
-   * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
+   * const vectorQuery = col.findNearest('embedding', [41, 42], 10, 'EUCLIDEAN', { distanceResultField: 'distance'});
    *
    * const querySnapshot = await aggregateQuery.get();
    * querySnapshot.forEach(...);
@@ -662,9 +662,22 @@ export class Query<
    *
    * @param vectorField - A string or {@link FieldPath} specifying the vector field to search on.
    * @param queryVector - The {@link VectorValue} used to measure the distance from `vectorField` values in the documents.
-   * @param options - Options control the vector query. `limit` specifies the upper bound of documents to return, must
-   * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is calculated
-   * when performing the query.
+   * @param limit - Specifies the upper bound of documents to return, must be a positive integer with a maximum value of 1000
+   * @param distanceMeasure - Specifies what type of distance is calculated when performing the query.
+   * @param options - Options control the vector query.
+   *
+   * `distanceResultField` optionally specifies the name of a field that will be set on each returned DocumentSnapshot,
+   *  which will contain the computed distance for the document.
+   *
+   * `distanceThreshold` specifies a threshold for which no less similar documents will be returned. The behavior
+   *  of the specified `distanceMeasure` will affect the
+   *  meaning of the distance threshold.
+   *  For `distanceMeasure: "EUCLIDEAN"`, the meaning of `distanceThreshold` is:
+   *     SELECT docs WHERE euclidean_distance <= distanceThreshold
+   *  For `distanceMeasure: "COSINE"`, the meaning of `distanceThreshold` is:
+   *     SELECT docs WHERE cosine_distance <= distanceThreshold
+   *  For `distanceMeasure: "DOT_PRODUCT"`, the meaning of `distanceThreshold` is:
+   *     SELECT docs WHERE dot_product_distance >= distanceThreshold
    */
   findNearest(
     vectorField: string | firestore.FieldPath,
