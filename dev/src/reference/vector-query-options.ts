@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as firestore from '@google-cloud/firestore';
 
 export class VectorQueryOptions {
   constructor(
-    readonly limit: number,
-    readonly distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT'
+    readonly distanceResultField?: string | firestore.FieldPath,
+    readonly distanceThreshold?: number
   ) {}
 
   isEqual(other: VectorQueryOptions): boolean {
@@ -29,8 +30,20 @@ export class VectorQueryOptions {
     }
 
     return (
-      this.limit === other.limit &&
-      this.distanceMeasure === other.distanceMeasure
+      this.distanceThreshold === other.distanceThreshold &&
+      this._rawDistanceResultField === other._rawDistanceResultField
     );
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  private get _rawDistanceResultField(): string | undefined {
+    if (typeof this.distanceResultField === 'undefined') return undefined;
+
+    return typeof this.distanceResultField === 'string'
+      ? this.distanceResultField
+      : this.distanceResultField.toString();
   }
 }
