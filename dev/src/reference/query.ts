@@ -68,6 +68,7 @@ import {VectorQuery} from './vector-query';
 import {QueryWatch} from '../watch';
 import {compare} from '../order';
 import {defaultConverter} from '../types';
+import {SPAN_NAME_QUERY_GET} from '../telemetry/trace-util';
 
 /**
  * A Query refers to a query which you can read or stream from. You can also
@@ -1076,8 +1077,13 @@ export class Query<
    * ```
    */
   async get(): Promise<QuerySnapshot<AppModelType, DbModelType>> {
-    const {result} = await this._get();
-    return result;
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_QUERY_GET,
+      async () => {
+        const {result} = await this._get();
+        return result;
+      }
+    );
   }
 
   /**

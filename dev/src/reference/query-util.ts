@@ -40,6 +40,11 @@ import {NOOP_MESSAGE} from './constants';
 
 import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
+import {
+  ATTRIBUTE_KEY_IS_RETRY_WITH_CURSOR,
+  ATTRIBUTE_KEY_IS_TRANSACTIONAL,
+  SPAN_NAME_RUN_QUERY,
+} from '../telemetry/trace-util';
 
 export class QueryUtil<
   AppModelType,
@@ -254,10 +259,19 @@ export class QueryUtil<
         // catch below.
         let request = query.toProto(transactionOrReadTime, explainOptions);
 
+        let isRetryRequestWithCursor = false;
         let streamActive: Deferred<boolean>;
         do {
           streamActive = new Deferred<boolean>();
           const methodName = 'runQuery';
+
+          this._firestore._traceUtil
+            .currentSpan()
+            .addEvent(SPAN_NAME_RUN_QUERY, {
+              [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: !!request.transaction,
+              [ATTRIBUTE_KEY_IS_RETRY_WITH_CURSOR]: isRetryRequestWithCursor,
+            });
+
           backendStream = await this._firestore.requestStream(
             methodName,
             /* bidirectional= */ false,
@@ -274,7 +288,7 @@ export class QueryUtil<
             if (
               !isExplain &&
               !transactionOrReadTime &&
-              !this._isPermanentRpcError(err, 'runQuery')
+              !this._isPermanentRpcError(err, methodName)
             ) {
               logger(
                 'QueryUtil._stream',
@@ -282,6 +296,12 @@ export class QueryUtil<
                 'Query failed with retryable stream error:',
                 err
               );
+
+              this._firestore._traceUtil
+                .currentSpan()
+                .addEvent(`${SPAN_NAME_RUN_QUERY}: Retryable Error.`, {
+                  'error.message': err.message,
+                });
 
               // Enqueue a "no-op" write into the stream and wait for it to be
               // read by the downstream consumer. This ensures that all enqueued
@@ -303,6 +323,8 @@ export class QueryUtil<
                     'Query failed with retryable stream error and progress was made receiving ' +
                       'documents, so the stream is being retried.'
                   );
+
+                  isRetryRequestWithCursor = true;
 
                   // Restart the query but use the last document we received as
                   // the query cursor. Note that we do not use backoff here. The
@@ -338,6 +360,13 @@ export class QueryUtil<
                 'Query failed with stream error:',
                 err
               );
+
+              this._firestore._traceUtil
+                .currentSpan()
+                .addEvent(`${SPAN_NAME_RUN_QUERY}: Error.`, {
+                  'error.message': err.message,
+                });
+
               stream.destroy(err);
               streamActive.resolve(/* active= */ false);
             }

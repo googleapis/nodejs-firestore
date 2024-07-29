@@ -85,6 +85,15 @@ import {
   RECURSIVE_DELETE_MIN_PENDING_OPS,
   RecursiveDelete,
 } from './recursive-delete';
+import {
+  ATTRIBUTE_KEY_DOC_COUNT,
+  ATTRIBUTE_KEY_IS_TRANSACTIONAL,
+  ATTRIBUTE_KEY_NUM_RESPONSES,
+  SPAN_NAME_BATCH_GET_DOCUMENTS,
+  TraceUtil,
+} from './telemetry/trace-util';
+import {DisabledTraceUtil} from './telemetry/disabled-trace-util';
+import {EnabledTraceUtil} from './telemetry/enabled-trace-util';
 
 export {CollectionReference} from './reference/collection-reference';
 export {DocumentReference} from './reference/document-reference';
@@ -456,6 +465,13 @@ export class Firestore implements firestore.Firestore {
   _serializer: Serializer | null = null;
 
   /**
+   * The OpenTelemetry tracing utility object.
+   * @private
+   * @internal
+   */
+  _traceUtil: TraceUtil;
+
+  /**
    * The project ID for this client.
    *
    * The project ID is auto-detected during the first request unless a project
@@ -572,6 +588,8 @@ export class Firestore implements firestore.Firestore {
     }
 
     this.validateAndApplySettings({...settings, ...libraryHeader});
+
+    this._traceUtil = this.newTraceUtilInstance(this._settings);
 
     const retryConfig = serviceConfig.retry_params.default;
     this._backoffSettings = {
@@ -770,6 +788,34 @@ export class Firestore implements firestore.Firestore {
       return temp;
     };
     this._serializer = new Serializer(this);
+    this._traceUtil = this.newTraceUtilInstance(this._settings);
+  }
+
+  private newTraceUtilInstance(settings: firestore.Settings): TraceUtil {
+    // Take the tracing option from the settings.
+    let createEnabledInstance = settings.openTelemetryOptions?.enableTracing;
+
+    // The environment variable can override options to enable/disable telemetry collection.
+    if ('FIRESTORE_ENABLE_TRACING' in process.env) {
+      const enableTracingEnvVar =
+        process.env.FIRESTORE_ENABLE_TRACING!.toLowerCase();
+      if (enableTracingEnvVar === 'on' || enableTracingEnvVar === 'true') {
+        createEnabledInstance = true;
+      }
+      if (enableTracingEnvVar === 'off' || enableTracingEnvVar === 'false') {
+        createEnabledInstance = false;
+      }
+    }
+
+    if (createEnabledInstance) {
+      // Re-use the existing EnabledTraceUtil if one has been created.
+      if (this._traceUtil && this._traceUtil instanceof EnabledTraceUtil) {
+        return this._traceUtil;
+      }
+      return new EnabledTraceUtil(settings);
+    } else {
+      return new DisabledTraceUtil();
+    }
   }
 
   /**
@@ -1276,28 +1322,39 @@ export class Firestore implements firestore.Firestore {
       | firestore.ReadOptions
     >
   ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
-    validateMinNumberOfArguments(
-      'Firestore.getAll',
-      documentRefsOrReadOptions,
-      1
+    return this._traceUtil.startActiveSpan(
+      SPAN_NAME_BATCH_GET_DOCUMENTS,
+      () => {
+        validateMinNumberOfArguments(
+          'Firestore.getAll',
+          documentRefsOrReadOptions,
+          1
+        );
+
+        const {documents, fieldMask} = parseGetAllArguments(
+          documentRefsOrReadOptions
+        );
+
+        this._traceUtil.currentSpan().setAttributes({
+          [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: false,
+          [ATTRIBUTE_KEY_DOC_COUNT]: documents.length,
+        });
+
+        const tag = requestTag();
+
+        // Capture the error stack to preserve stack tracing across async calls.
+        const stack = Error().stack!;
+
+        return this.initializeIfNeeded(tag)
+          .then(() => {
+            const reader = new DocumentReader(this, documents, fieldMask);
+            return reader.get(tag);
+          })
+          .catch(err => {
+            throw wrapError(err, stack);
+          });
+      }
     );
-
-    const {documents, fieldMask} = parseGetAllArguments(
-      documentRefsOrReadOptions
-    );
-    const tag = requestTag();
-
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    return this.initializeIfNeeded(tag)
-      .then(() => {
-        const reader = new DocumentReader(this, documents, fieldMask);
-        return reader.get(tag);
-      })
-      .catch(err => {
-        throw wrapError(err, stack);
-      });
   }
 
   /**
@@ -1787,6 +1844,8 @@ export class Firestore implements firestore.Firestore {
     const callOptions = this.createCallOptions(methodName);
 
     const bidirectional = methodName === 'listen';
+    let numResponses = 0;
+    const NUM_RESPONSES_PER_TRACE_EVENT = 100;
 
     return this._retry(methodName, requestTag, () => {
       const result = new Deferred<Duplex>();
@@ -1798,6 +1857,11 @@ export class Firestore implements firestore.Firestore {
           'Sending request: %j',
           request
         );
+
+        this._traceUtil
+          .currentSpan()
+          .addEvent(`Firestore.${methodName}: Start`);
+
         try {
           const stream = bidirectional
             ? gapicClient[methodName](callOptions)
@@ -1811,6 +1875,18 @@ export class Firestore implements firestore.Firestore {
                 'Received response: %j',
                 chunk
               );
+              numResponses++;
+              if (numResponses === 1) {
+                this._traceUtil
+                  .currentSpan()
+                  .addEvent(`Firestore.${methodName}: First response received`);
+              } else if (numResponses % NUM_RESPONSES_PER_TRACE_EVENT === 0) {
+                this._traceUtil
+                  .currentSpan()
+                  .addEvent(
+                    `Firestore.${methodName}: Received ${numResponses} responses`
+                  );
+              }
               callback();
             },
           });
@@ -1823,7 +1899,14 @@ export class Firestore implements firestore.Firestore {
             requestTag,
             bidirectional ? request : undefined
           );
-          resultStream.on('end', () => stream.end());
+          resultStream.on('end', () => {
+            stream.end();
+            this._traceUtil
+              .currentSpan()
+              .addEvent(`Firestore.${methodName}: Completed`, {
+                [ATTRIBUTE_KEY_NUM_RESPONSES]: numResponses,
+              });
+          });
           result.resolve(resultStream);
 
           // While we return the stream to the callee early, we don't want to
