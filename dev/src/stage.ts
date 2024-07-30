@@ -34,17 +34,30 @@ export class Aggregate implements Stage {
   name = 'aggregate';
 
   constructor(
-    private groups: Map<string, Expr>,
-    private accumulators: Map<string, Accumulator>
+    private accumulators: Map<string, Accumulator>,
+    private groups: Map<string, Expr>
   ) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
       args: [
-        serializer.encodeValue(this.groups)!,
         serializer.encodeValue(this.accumulators)!,
+        serializer.encodeValue(this.groups)!,
       ],
+    };
+  }
+}
+
+export class Distinct implements Stage {
+  name = 'distinct';
+
+  constructor(private groups: Map<string, Expr>) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [serializer.encodeValue(this.groups)!],
     };
   }
 }

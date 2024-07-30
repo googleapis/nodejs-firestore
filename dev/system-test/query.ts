@@ -23,7 +23,7 @@ import {verifyInstance} from '../test/util/helpers';
 import {DeferredPromise, getTestRoot} from './firestore';
 import {IndexTestHelper} from './index_test_helper';
 
-describe.only('Query class', () => {
+describe('Query class', () => {
   interface PaginatedResults {
     pages: number;
     docs: QueryDocumentSnapshot[];
@@ -101,7 +101,7 @@ describe.only('Query class', () => {
 
   async function compareQueryAndPipeline(query: Query): Promise<QuerySnapshot> {
     const queryResults = await query.get();
-    const pipeline = query.toPipeline();
+    const pipeline = query.pipeline();
     const pipelineResults = await pipeline.execute();
 
     expect(pipelineResults.map(r => r._fieldsProto)).to.deep.equal(
@@ -204,7 +204,7 @@ describe.only('Query class', () => {
       });
   });
 
-  it.skip('supports findNearest by EUCLIDEAN distance', async () => {
+  it('supports findNearest by EUCLIDEAN distance', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const collectionReference = await indexTestHelper.createTestDocs([
@@ -234,7 +234,7 @@ describe.only('Query class', () => {
       .be.true;
   });
 
-  it.skip('supports findNearest by COSINE distance', async () => {
+  it('supports findNearest by COSINE distance', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const collectionReference = await indexTestHelper.setTestDocs({
@@ -276,7 +276,7 @@ describe.only('Query class', () => {
     ).to.be.true;
   });
 
-  it.skip('supports findNearest by DOT_PRODUCT distance', async () => {
+  it('supports findNearest by DOT_PRODUCT distance', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const collectionReference = await indexTestHelper.createTestDocs([
@@ -306,7 +306,7 @@ describe.only('Query class', () => {
       .be.true;
   });
 
-  it.skip('findNearest works with converters', async () => {
+  it('findNearest works with converters', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     class FooDistance {
@@ -346,7 +346,7 @@ describe.only('Query class', () => {
     expect(res.docs[0].data().embedding).to.deep.equal([5, 5]);
   });
 
-  it.skip('supports findNearest skipping fields of wrong types', async () => {
+  it('supports findNearest skipping fields of wrong types', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const collectionRef = await indexTestHelper.createTestDocs([
@@ -381,7 +381,7 @@ describe.only('Query class', () => {
       .to.be.true;
   });
 
-  it.skip('findNearest ignores mismatching dimensions', async () => {
+  it('findNearest ignores mismatching dimensions', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const collectionRef = await indexTestHelper.createTestDocs([
@@ -411,7 +411,7 @@ describe.only('Query class', () => {
       .be.true;
   });
 
-  it.skip('supports findNearest on non-existent field', async () => {
+  it('supports findNearest on non-existent field', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const collectionRef = await indexTestHelper.createTestDocs([
@@ -434,7 +434,7 @@ describe.only('Query class', () => {
     expect(res.size).to.equal(0);
   });
 
-  it.skip('supports findNearest on vector nested in a map', async () => {
+  it('supports findNearest on vector nested in a map', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const collectionReference = await indexTestHelper.createTestDocs([
@@ -498,7 +498,7 @@ describe.only('Query class', () => {
     res.docs.forEach(ds => expect(ds.get('embedding')).to.be.undefined);
   });
 
-  it.skip('supports findNearest limits', async () => {
+  it('supports findNearest limits', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const embeddingVector = [];
@@ -583,7 +583,7 @@ describe.only('Query class', () => {
     expectDocs(res, {count: 2}, {count: 3});
   });
 
-  it.skip('supports not-in', async () => {
+  it('supports not-in', async () => {
     await addDocs(
       {zip: 98101},
       {zip: 91102},
@@ -645,7 +645,7 @@ describe.only('Query class', () => {
     expectDocs(res, {zip: 98101}, {zip: 98103});
   });
 
-  it.only('supports "in" with document ID array', async () => {
+  it('supports "in" with document ID array', async () => {
     const refs = await addDocs({count: 1}, {count: 2}, {count: 3});
     const res = await compareQueryAndPipeline(
       randomCol.where(FieldPath.documentId(), 'in', [refs[0].id, refs[1]])
@@ -680,7 +680,7 @@ describe.only('Query class', () => {
     );
   });
 
-  it.skip('can query by FieldPath.documentId()', () => {
+  it('can query by FieldPath.documentId()', () => {
     const ref = randomCol.doc('foo');
 
     return ref
@@ -695,7 +695,7 @@ describe.only('Query class', () => {
       });
   });
 
-  it.skip('has orderBy() method', async () => {
+  it('has orderBy() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
 
     let res = await compareQueryAndPipeline(randomCol.orderBy('foo'));
@@ -739,7 +739,7 @@ describe.only('Query class', () => {
     expect(received).to.equal(0);
   });
 
-  it.skip('has limit() method on get()', async () => {
+  it('has limit() method on get()', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await compareQueryAndPipeline(
       randomCol.orderBy('foo').limit(1)
@@ -760,7 +760,7 @@ describe.only('Query class', () => {
     expect(received).to.equal(1);
   });
 
-  it.skip('can run limit(num), where num is larger than the collection size on get()', async () => {
+  it('can run limit(num), where num is larger than the collection size on get()', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await compareQueryAndPipeline(
       randomCol.orderBy('foo').limit(3)
@@ -781,7 +781,7 @@ describe.only('Query class', () => {
     expect(received).to.equal(2);
   });
 
-  it.skip('has limitToLast() method', async () => {
+  it('has limitToLast() method', async () => {
     await addDocs({doc: 1}, {doc: 2}, {doc: 3});
     // const res = await compareQueryAndPipeline(randomCol.orderBy('doc').limitToLast(2));
     const res = await randomCol.orderBy('doc').limitToLast(2).get();
@@ -790,13 +790,16 @@ describe.only('Query class', () => {
 
   it('limitToLast() supports Query cursors', async () => {
     await addDocs({doc: 1}, {doc: 2}, {doc: 3}, {doc: 4}, {doc: 5});
-    const res = await compareQueryAndPipeline(
-      randomCol.orderBy('doc').startAt(2).endAt(4).limitToLast(5)
-    );
+    const res = await randomCol
+      .orderBy('doc')
+      .startAt(2)
+      .endAt(4)
+      .limitToLast(5)
+      .get();
     expectDocs(res, {doc: 2}, {doc: 3}, {doc: 4});
   });
 
-  it.skip('can use offset() method with get()', async () => {
+  it('can use offset() method with get()', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await compareQueryAndPipeline(
       randomCol.orderBy('foo').offset(1)
@@ -817,7 +820,7 @@ describe.only('Query class', () => {
     expect(received).to.equal(1);
   });
 
-  it.skip('can run offset(num), where num is larger than the collection size on get()', async () => {
+  it('can run offset(num), where num is larger than the collection size on get()', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await compareQueryAndPipeline(
       randomCol.orderBy('foo').offset(3)
@@ -961,7 +964,7 @@ describe.only('Query class', () => {
     expect(received).to.equal(2);
   });
 
-  it.skip('can query collection groups', async () => {
+  it('can query collection groups', async () => {
     // Use `randomCol` to get a random collection group name to use but ensure
     // it starts with 'b' for predictable ordering.
     const collectionGroup = 'b' + randomCol.id;
@@ -1170,7 +1173,7 @@ describe.only('Query class', () => {
 
   // Skip this test if running against production because it results in a 'missing index' error.
   // The Firestore Emulator, however, does serve these queries.
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it)(
     'supports OR queries with composite indexes',
     async () => {
       const collection = await testCollectionWithDocs({
@@ -1277,7 +1280,7 @@ describe.only('Query class', () => {
 
   // Skip this test if running against production because it results in a 'missing index' error.
   // The Firestore Emulator, however, does serve these queries.
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it)(
     'supports OR queries on documents with missing fields',
     async () => {
       const collection = await testCollectionWithDocs({
@@ -1373,7 +1376,7 @@ describe.only('Query class', () => {
 
   // Skip this test if running against production because it results in a 'missing index' error.
   // The Firestore Emulator, however, does serve these queries.
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it)(
     'supports OR queries with not-in',
     async () => {
       const collection = await testCollectionWithDocs({
@@ -1786,7 +1789,7 @@ describe.only('Query class', () => {
   });
 
   (process.env.FIRESTORE_EMULATOR_HOST === undefined
-    ? describe.skip
+    ? describe
     : describe.only)('multiple inequality', () => {
     it('supports multiple inequality queries', async () => {
       const collection = await testCollectionWithDocs({

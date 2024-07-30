@@ -317,6 +317,30 @@ export function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
 }
 
 /**
+ * Verifies equality for an optional type using the `isEqual` interface.
+ *
+ * @private
+ * @internal
+ * @param left Optional object supporting `isEqual`.
+ * @param right Optional object supporting `isEqual`.
+ * @return True if equal.
+ */
+export function isOptionalEqual<T extends {isEqual: (t: T) => boolean}>(
+  left: T | undefined,
+  right: T | undefined
+): boolean {
+  if (left === undefined && right === undefined) {
+    return true;
+  }
+
+  if (left === undefined || right === undefined) {
+    return false;
+  }
+
+  return left.isEqual(right);
+}
+
+/**
  * Verifies equality for an array of primitives.
  *
  * @private

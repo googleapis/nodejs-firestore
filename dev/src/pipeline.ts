@@ -1,16 +1,19 @@
 import * as firestore from '@google-cloud/firestore';
+import * as deepEqual from 'fast-deep-equal';
 import {google} from '../protos/firestore_v1_proto_api';
 import {
   Accumulator,
-  AggregateTarget,
+  AccumulatorTarget,
   Expr,
+  ExprWithAlias,
   Field,
   Fields,
   FilterCondition,
   Ordering,
   Selectable,
 } from './expression';
-import Firestore, {Timestamp} from './index';
+import Firestore, {FieldPath, QueryDocumentSnapshot, Timestamp} from './index';
+import {validateFieldPath} from './path';
 import {ExecutionUtil} from './pipeline-util';
 import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
@@ -30,13 +33,15 @@ import {
   Select,
   Sort,
   Stage,
+  Distinct,
 } from './stage';
-import {ApiMapValue} from './types';
+import {ApiMapValue, defaultConverter} from './types';
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 import IStructuredPipeline = google.firestore.v1.IStructuredPipeline;
 import IStage = google.firestore.v1.Pipeline.IStage;
 import {QueryCursor} from './reference/types';
+import {isOptionalEqual} from './util';
 
 export class PipelineSource {
   constructor(private db: Firestore) {}
@@ -90,14 +95,14 @@ export class Pipeline<
         result.set(selectable as string, Field.of(selectable));
       } else if (selectable instanceof Field) {
         result.set((selectable as Field).fieldName(), selectable);
-      } else if (selectable instanceof AggregateTarget) {
-        const target = selectable as AggregateTarget;
-        result.set(target.field.fieldName(), target.accumulator);
       } else if (selectable instanceof Fields) {
         const fields = selectable as Fields;
         for (const field of fields.fieldList()) {
           result.set(field.fieldName(), field);
         }
+      } else if (selectable instanceof ExprWithAlias) {
+        const expr = selectable as ExprWithAlias<Expr>;
+        result.set(expr.alias, expr.expr);
       }
     }
     return result;
@@ -121,16 +126,49 @@ export class Pipeline<
     return new Pipeline(this.db, copy);
   }
 
-  aggregate(...targets: AggregateTarget[]): Pipeline {
+  distinct(...groups: (string | Selectable)[]): Pipeline {
     const copy = this.stages.map(s => s);
-    copy.push(
-      new Aggregate(
-        new Map<string, Expr>(),
-        new Map<string, Accumulator>(
-          targets.map(target => [target.field.fieldName(), target.accumulator])
+    copy.push(new Distinct(this.selectablesToMap(groups || [])));
+    return new Pipeline(this.db, copy);
+  }
+
+  aggregate(...accumulators: AccumulatorTarget[]): Pipeline;
+  aggregate(options: {
+    accumulators: AccumulatorTarget[];
+    groups?: (string | Selectable)[];
+  }): Pipeline;
+  aggregate(
+    optionsOrTarget:
+      | AccumulatorTarget
+      | {accumulators: AccumulatorTarget[]; groups?: (string | Selectable)[]},
+    ...rest: AccumulatorTarget[]
+  ): Pipeline {
+    const copy = this.stages.map(s => s);
+    if ('accumulators' in optionsOrTarget) {
+      copy.push(
+        new Aggregate(
+          new Map<string, Accumulator>(
+            optionsOrTarget.accumulators.map((target: AccumulatorTarget) => [
+              target.alias,
+              target.expr,
+            ])
+          ),
+          this.selectablesToMap(optionsOrTarget.groups || [])
         )
-      )
-    );
+      );
+    } else {
+      copy.push(
+        new Aggregate(
+          new Map<string, Accumulator>(
+            [optionsOrTarget, ...rest].map(target => [
+              target.alias,
+              target.expr,
+            ])
+          ),
+          new Map<string, Expr>()
+        )
+      );
+    }
     return new Pipeline(this.db, copy);
   }
 
@@ -160,21 +198,39 @@ export class Pipeline<
     return new Pipeline(this.db, copy);
   }
 
-  sort(orderings: Ordering[]): Pipeline;
+  sort(...orderings: Ordering[]): Pipeline;
+  sort(options: {
+    orderings: Ordering[];
+    density?: 'unspecified' | 'required';
+    truncation?: 'unspecified' | 'disabled';
+  }): Pipeline;
   sort(
-    orderings: Ordering[],
-    density?: 'unspecified' | 'required',
-    truncation?: 'unspecified' | 'disabled'
-  ): Pipeline;
-  sort(
-    orderings: Ordering[],
-    density?: 'unspecified' | 'required',
-    truncation?: 'unspecified' | 'disabled'
+    optionsOrOrderings:
+      | Ordering
+      | {
+          orderings: Ordering[];
+          density?: 'unspecified' | 'required';
+          truncation?: 'unspecified' | 'disabled';
+        },
+    ...rest: Ordering[]
   ): Pipeline {
     const copy = this.stages.map(s => s);
-    copy.push(
-      new Sort(orderings, density ?? 'unspecified', truncation ?? 'unspecified')
-    );
+    // Option object
+    if ('orderings' in optionsOrOrderings) {
+      copy.push(
+        new Sort(
+          optionsOrOrderings.orderings,
+          optionsOrOrderings.density ?? 'unspecified',
+          optionsOrOrderings.truncation ?? 'unspecified'
+        )
+      );
+    } else {
+      // Ordering object
+      copy.push(
+        new Sort([optionsOrOrderings, ...rest], 'unspecified', 'unspecified')
+      );
+    }
+
     return new Pipeline(this.db, copy);
   }
 
@@ -283,7 +339,9 @@ export class PipelineResult<
   AppModelType = firestore.DocumentData,
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
 > {
-  private _ref: DocumentReference<AppModelType, DbModelType> | undefined;
+  private readonly _ref:
+    | DocumentReference<AppModelType, DbModelType>
+    | undefined;
   private _serializer: Serializer;
   public readonly _readTime: Timestamp | undefined;
   public readonly _createTime: Timestamp | undefined;
@@ -311,7 +369,7 @@ export class PipelineResult<
      * @internal
      * @private
      **/
-    readonly _fieldsProto?: ApiMapValue | null,
+    readonly _fieldsProto?: ApiMapValue,
     readTime?: Timestamp,
     createTime?: Timestamp,
     updateTime?: Timestamp
@@ -321,5 +379,234 @@ export class PipelineResult<
     this._readTime = readTime;
     this._createTime = createTime;
     this._updateTime = updateTime;
+  }
+
+  get ref(): DocumentReference<AppModelType, DbModelType> | undefined {
+    return this._ref;
+  }
+
+  /**
+   * The ID of the document for which this DocumentSnapshot contains data.
+   *
+   * @type {string}
+   * @name DocumentSnapshot#id
+   * @readonly
+   *
+   * @example
+   * ```
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.get().then((documentSnapshot) => {
+   *   if (documentSnapshot.exists) {
+   *     console.log(`Document found with name '${documentSnapshot.id}'`);
+   *   }
+   * });
+   * ```
+   */
+  get id(): string | undefined {
+    return this._ref?.id;
+  }
+
+  /**
+   * The time the document was created. Undefined for documents that don't
+   * exist.
+   *
+   * @type {Timestamp|undefined}
+   * @name DocumentSnapshot#createTime
+   * @readonly
+   *
+   * @example
+   * ```
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.get().then(documentSnapshot => {
+   *   if (documentSnapshot.exists) {
+   *     let createTime = documentSnapshot.createTime;
+   *     console.log(`Document created at '${createTime.toDate()}'`);
+   *   }
+   * });
+   * ```
+   */
+  get createTime(): Timestamp | undefined {
+    return this._createTime;
+  }
+
+  /**
+   * The time the document was last updated (at the time the snapshot was
+   * generated). Undefined for documents that don't exist.
+   *
+   * @type {Timestamp|undefined}
+   * @name DocumentSnapshot#updateTime
+   * @readonly
+   *
+   * @example
+   * ```
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.get().then(documentSnapshot => {
+   *   if (documentSnapshot.exists) {
+   *     let updateTime = documentSnapshot.updateTime;
+   *     console.log(`Document updated at '${updateTime.toDate()}'`);
+   *   }
+   * });
+   * ```
+   */
+  get updateTime(): Timestamp | undefined {
+    return this._updateTime;
+  }
+
+  /**
+   * The time this snapshot was read.
+   *
+   * @type {Timestamp}
+   * @name DocumentSnapshot#readTime
+   * @readonly
+   *
+   * @example
+   * ```
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.get().then(documentSnapshot => {
+   *   let readTime = documentSnapshot.readTime;
+   *   console.log(`Document read at '${readTime.toDate()}'`);
+   * });
+   * ```
+   */
+  get readTime(): Timestamp {
+    if (this._readTime === undefined) {
+      throw new Error("Called 'readTime' on a local document");
+    }
+    return this._readTime;
+  }
+
+  /**
+   * Retrieves all fields in the document as an object. Returns 'undefined' if
+   * the document doesn't exist.
+   *
+   * @returns {T|undefined} An object containing all fields in the document or
+   * 'undefined' if the document doesn't exist.
+   *
+   * @example
+   * ```
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.get().then(documentSnapshot => {
+   *   let data = documentSnapshot.data();
+   *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
+   * });
+   * ```
+   */
+  data(): AppModelType | undefined {
+    const fields = this._fieldsProto;
+
+    if (fields === undefined) {
+      return undefined;
+    }
+
+    // We only want to use the converter and create a new QueryDocumentSnapshot
+    // if a converter has been provided.
+    if (!!this.ref && this.ref._converter !== defaultConverter()) {
+      const untypedReference = new DocumentReference(
+        this.ref.firestore,
+        this.ref._path
+      );
+      return this.ref._converter.fromFirestore(
+        new QueryDocumentSnapshot(
+          untypedReference,
+          this._fieldsProto!,
+          this.readTime,
+          this.createTime!,
+          this.updateTime!
+        )
+      );
+    } else {
+      const obj: firestore.DocumentData = {};
+      for (const prop of Object.keys(fields)) {
+        obj[prop] = this._serializer.decodeValue(fields[prop]);
+      }
+      return obj as AppModelType;
+    }
+  }
+
+  /**
+   * Retrieves the field specified by `field`.
+   *
+   * @param {string|FieldPath} field The field path
+   * (e.g. 'foo' or 'foo.bar') to a specific field.
+   * @returns {*} The data at the specified field location or undefined if no
+   * such field exists.
+   *
+   * @example
+   * ```
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.set({ a: { b: 'c' }}).then(() => {
+   *   return documentRef.get();
+   * }).then(documentSnapshot => {
+   *   let field = documentSnapshot.get('a.b');
+   *   console.log(`Retrieved field value: ${field}`);
+   * });
+   * ```
+   */
+  // We deliberately use `any` in the external API to not impose type-checking
+  // on end users.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get(field: string | FieldPath): any {
+    validateFieldPath('field', field);
+
+    const protoField = this.protoField(field);
+
+    if (protoField === undefined) {
+      return undefined;
+    }
+
+    return this._serializer.decodeValue(protoField);
+  }
+
+  /**
+   * Retrieves the field specified by 'fieldPath' in its Protobuf JS
+   * representation.
+   *
+   * @private
+   * @internal
+   * @param field The path (e.g. 'foo' or 'foo.bar') to a specific field.
+   * @returns The Protobuf-encoded data at the specified field location or
+   * undefined if no such field exists.
+   */
+  protoField(field: string | FieldPath): api.IValue | undefined {
+    let fields: ApiMapValue | api.IValue | undefined = this._fieldsProto;
+
+    if (fields === undefined) {
+      return undefined;
+    }
+
+    const components = FieldPath.fromArgument(field).toArray();
+    while (components.length > 1) {
+      fields = (fields as ApiMapValue)[components.shift()!];
+
+      if (!fields || !fields.mapValue) {
+        return undefined;
+      }
+
+      fields = fields.mapValue.fields!;
+    }
+
+    return (fields as ApiMapValue)[components[0]];
+  }
+
+  /**
+   * Returns true if the document's data and path in this `DocumentSnapshot` is
+   * equal to the provided value.
+   *
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `DocumentSnapshot` is equal to the provided
+   * value.
+   */
+  isEqual(other: PipelineResult<AppModelType, DbModelType>): boolean {
+    return (
+      this === other ||
+      (isOptionalEqual(this._ref, other._ref) &&
+        deepEqual(this._fieldsProto, other._fieldsProto))
+    );
   }
 }

@@ -90,11 +90,7 @@ export class ExecutionUtil<
           }
         )
         .on('end', () => {
-          // Only return a snapshot when we have a readTime
-          // explain queries with analyze !== true will return no documents and no read time
-          const result = output.executionTime ? results : undefined;
-
-          resolve(result);
+          resolve(results);
         });
     });
   }
@@ -181,7 +177,7 @@ export class ExecutionUtil<
               output.result = new PipelineResult(
                 this._serializer,
                 ref,
-                result.fields,
+                result.fields || undefined,
                 Timestamp.fromProto(proto.executionTime!),
                 result.createTime
                   ? Timestamp.fromProto(result.createTime!)
@@ -405,17 +401,17 @@ export function toPipelineFilterCondition(
         : serializer.encodeValue(f.value);
       switch (f.op) {
         case 'LESS_THAN':
-          return and(field.exists(), field.lessThan(value));
+          return and(field.exists(), field.lt(value));
         case 'LESS_THAN_OR_EQUAL':
-          return and(field.exists(), field.lessThanOrEqual(value));
+          return and(field.exists(), field.lte(value));
         case 'GREATER_THAN':
-          return and(field.exists(), field.greaterThan(value));
+          return and(field.exists(), field.gt(value));
         case 'GREATER_THAN_OR_EQUAL':
-          return and(field.exists(), field.greaterThanOrEqual(value));
+          return and(field.exists(), field.gte(value));
         case 'EQUAL':
-          return and(field.exists(), field.equal(value));
+          return and(field.exists(), field.eq(value));
         case 'NOT_EQUAL':
-          return and(field.exists(), field.notEqual(value));
+          return and(field.exists(), field.neq(value));
         case 'ARRAY_CONTAINS':
           return and(field.exists(), field.arrayContains(value));
         case 'IN': {

@@ -137,7 +137,7 @@ export class VectorQuery<
       distanceMeasure: this.options.distanceMeasure.toLowerCase(),
     } as FindNearestOptions;
     return this.query
-      .toPipeline()
+      .pipeline()
       .where(Field.of(this.vectorField).exists())
       .findNearest(Field.of(this.vectorField), this.queryVector, options);
   }

@@ -666,7 +666,7 @@ export class Query<
     );
   }
 
-  toPipeline(): Pipeline {
+  pipeline(): Pipeline {
     let pipeline;
     if (this._queryOptions.allDescendants) {
       pipeline = this.firestore
@@ -701,7 +701,7 @@ export class Query<
     if (exists.length > 1) {
       const [first, ...rest] = exists;
       pipeline = pipeline.where(and(first, ...rest));
-    } else if (exists.length == 1) {
+    } else if (exists.length === 1) {
       pipeline = pipeline.where(exists[0]);
     }
 
@@ -720,7 +720,11 @@ export class Query<
       return Ordering.of(Field.of(fieldOrder.field), dir);
     });
     if (orderings.length > 0) {
-      pipeline = pipeline.sort(orderings, 'required', 'unspecified');
+      pipeline = pipeline.sort({
+        orderings: orderings,
+        density: 'required',
+        truncation: 'unspecified',
+      });
     }
 
     // Cursors, Limit and Offset
@@ -729,18 +733,9 @@ export class Query<
       !!this._queryOptions.endAt ||
       this._queryOptions.limitType === LimitType.Last
     ) {
-      let paginating = pipeline.paginate(this._queryOptions.limit || 10);
-      if (this._queryOptions.startAt) {
-        paginating = paginating.withStartCursor(this._queryOptions.startAt!);
-      }
-      if (this._queryOptions.endAt) {
-        paginating = paginating.withEndCursor(this._queryOptions.endAt!);
-      }
-      if (this._queryOptions.limit === LimitType.Last) {
-        return paginating.lastPage();
-      } else {
-        return paginating.firstPage();
-      }
+      throw new Error(
+        'Query to Pipeline conversion: cursors and limitToLast is not supported yet.'
+      );
     } else {
       if (this._queryOptions.offset) {
         pipeline = pipeline.offset(this._queryOptions.offset);

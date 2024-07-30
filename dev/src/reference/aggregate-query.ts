@@ -22,7 +22,14 @@ import * as deepEqual from 'fast-deep-equal';
 
 import * as firestore from '@google-cloud/firestore';
 import {Aggregate, AggregateSpec} from '../aggregate';
-import {AggregateTarget, avg, count, countAll, Field, sum} from '../expression';
+import {
+  AccumulatorTarget,
+  avg,
+  count,
+  countAll,
+  Field,
+  sum,
+} from '../expression';
 import {Pipeline} from '../pipeline';
 import {Timestamp} from '../timestamp';
 import {mapToArray, requestTag, wrapError} from '../util';
@@ -339,17 +346,17 @@ export class AggregateQuery<
       (aggregate, clientAlias) => {
         if (aggregate.aggregateType === 'count') {
           if (aggregate._field === undefined) {
-            return countAll().toField(clientAlias);
+            return countAll().as(clientAlias);
           }
-          return count(Field.of(aggregate._field)).toField(clientAlias);
+          return count(Field.of(aggregate._field)).as(clientAlias);
         } else if (aggregate.aggregateType === 'avg') {
-          return avg(Field.of(aggregate._field!)).toField(clientAlias);
+          return avg(Field.of(aggregate._field!)).as(clientAlias);
         } else {
-          return sum(Field.of(aggregate._field!)).toField(clientAlias);
+          return sum(Field.of(aggregate._field!)).as(clientAlias);
         }
       }
     );
-    return this._query.toPipeline().aggregate(...aggregates);
+    return this._query.pipeline().aggregate(...aggregates);
   }
 
   /**
