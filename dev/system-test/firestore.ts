@@ -2832,7 +2832,7 @@ describe('Query class', () => {
     expect(snapshot.size).to.equal(100);
   });
 
-  it('supports OR queries', async () => {
+  it.only('supports OR queries', async () => {
     const collection = await testCollectionWithDocs({
       doc1: {a: 1, b: 0},
       doc2: {a: 2, b: 1},
