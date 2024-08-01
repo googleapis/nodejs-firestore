@@ -15,4 +15,4 @@
 # limitations under the License.
 
 export GCLOUD_PROJECT=java-review
-export GOOGLE_APPLICATION_CREDENTIALS=${KOKORO_GFILE_DIR}/secret_manager/java-review_firestore-java-it
+export GOOGLE_APPLICATION_CREDENTIALS=${KOKORO_GFILE_DIR}/secret_manager/java-review_firestore-nodejs-it-6d41b624fec9
