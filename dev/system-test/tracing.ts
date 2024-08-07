@@ -14,15 +14,20 @@
 
 import * as chaiAsPromised from 'chai-as-promised';
 import {expect, use} from 'chai';
-import {describe, it, beforeEach, afterEach} from 'mocha';
+import {describe, it, beforeEach, afterEach, Test} from 'mocha';
 import {
   Attributes,
   context,
   diag,
   DiagConsoleLogger,
   DiagLogLevel,
+  ROOT_CONTEXT,
+  SpanContext,
   trace,
+  TraceFlags,
+  Tracer,
   TracerProvider,
+  Context as OpenTelemetryContext,
 } from '@opentelemetry/api';
 import {TraceExporter} from '@google-cloud/opentelemetry-cloud-trace-exporter';
 import {Settings} from '@google-cloud/firestore';
@@ -33,6 +38,7 @@ import {
   InMemorySpanExporter,
   NodeTracerProvider,
   ReadableSpan,
+  TimedEvent,
 } from '@opentelemetry/sdk-trace-node';
 import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
@@ -61,8 +67,26 @@ import {
 } from '../src/telemetry/trace-util';
 import {AsyncLocalStorageContextManager} from '@opentelemetry/context-async-hooks';
 import {deepStrictEqual} from 'assert';
+import {cloudtrace_v1, auth as gAuth} from '@googleapis/cloudtrace';
+import Schema$Trace = cloudtrace_v1.Schema$Trace;
+import Schema$TraceSpan = cloudtrace_v1.Schema$TraceSpan;
+import {logger} from '../src/logger';
 
 use(chaiAsPromised);
+
+const NUM_TRACE_ID_BYTES = 32;
+const NUM_SPAN_ID_BYTES = 16;
+const SPAN_NAME_TEST_ROOT = 'TestRootSpan';
+const GET_TRACE_INITIAL_WAIT_MILLIS = 2000;
+const GET_TRACE_RETRY_BACKOFF_MILLIS = 2000;
+const GET_TRACE_MAX_RETRY_COUNT = 10;
+
+const E2E_TEST_SUITE_TITLE = 'E2E';
+const IN_MEMORY_TEST_SUITE_TITLE = 'IN-MEMORY';
+const GLOBAL_OTEL_TEST_SUITE_TITLE = 'GLOBAL-OTEL';
+const NON_GLOBAL_OTEL_TEST_SUITE_TITLE = 'NON-GLOBAL-OTEL';
+const GRPC_TEST_SUITE_TITLE = 'GRPC';
+const REST_TEST_SUITE_TITLE = 'REST';
 
 // Enable OpenTelemetry debug message for local debugging.
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
@@ -98,15 +122,62 @@ interface TestConfig {
   preferRest: boolean;
 }
 
+// Unfortunately the in-memory spans and Cloud Trace spans do not share the
+// same data-structures. This interface is useful to abstract that away for
+// testing.
+// Also note that Cloud Trace currently does NOT return span attributes nor
+// span events. So we'll have to leave those as empty and not check them for
+// end-to-end tests.
+class SpanData {
+  constructor(
+    public id: string | null | undefined,
+    public parentId: string | null | undefined,
+    public traceId: string,
+    public name: string | null | undefined,
+    public attributes: Attributes,
+    public events: TimedEvent[]
+  ) {}
+  static fromInMemorySpan(span: ReadableSpan): SpanData {
+    return new SpanData(
+      span.spanContext().spanId,
+      span.parentSpanId,
+      span.spanContext().traceId,
+      span.name,
+      span.attributes,
+      span.events
+    );
+  }
+
+  static fromCloudTraceSpan(span: Schema$TraceSpan, traceId: string): SpanData {
+    return new SpanData(
+      span.spanId,
+      span.parentSpanId,
+      traceId,
+      span.name,
+      {},
+      []
+    );
+  }
+}
+
 describe('Tracing Tests', () => {
   let firestore: Firestore;
   let tracerProvider: NodeTracerProvider;
   let inMemorySpanExporter: InMemorySpanExporter;
   let consoleSpanExporter: ConsoleSpanExporter;
   let gcpTraceExporter: TraceExporter;
+  let tracer: Tracer;
+  let cloudTraceInfo: Schema$Trace;
+  let testConfig: TestConfig;
+
+  // Custom SpanContext for each test, required for trace ID injection.
+  let customSpanContext: SpanContext;
+
+  // Custom Context for each test, required for trace ID injection.
+  let customContext: OpenTelemetryContext;
 
   const spanIdToChildrenSpanIds = new Map<string, string[]>();
-  const spanIdToSpanData = new Map<string, ReadableSpan>();
+  const spanIdToSpanData = new Map<string, SpanData>();
   let rootSpanIds: string[] = [];
 
   function afterEachTest(): Promise<void> {
@@ -118,7 +189,6 @@ describe('Tracing Tests', () => {
   }
 
   function getOpenTelemetryOptions(
-    config: TestConfig,
     tracerProvider: TracerProvider
   ): FirestoreOpenTelemetryOptions {
     const options: FirestoreOpenTelemetryOptions = {
@@ -128,14 +198,48 @@ describe('Tracing Tests', () => {
 
     // If we are *not* using a global OpenTelemetry instance, a TracerProvider
     // must be passed to the Firestore SDK.
-    if (!config.useGlobalOpenTelemetry) {
+    if (!testConfig.useGlobalOpenTelemetry) {
       options.tracerProvider = tracerProvider;
     }
 
     return options;
   }
 
-  function beforeEachTest(config: TestConfig) {
+  function generateRandomHexString(length: number): string {
+    if (length <= 0) {
+      throw new Error('Length must be a positive integer');
+    }
+
+    const hexCharacters = '0123456789abcdef';
+    let hexString = '';
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * hexCharacters.length);
+      hexString += hexCharacters[randomIndex];
+    }
+
+    return hexString;
+  }
+
+  function getNewSpanContext(): SpanContext {
+    const spanContext: SpanContext = {
+      traceId: generateRandomHexString(NUM_TRACE_ID_BYTES),
+      spanId: generateRandomHexString(NUM_SPAN_ID_BYTES),
+      traceFlags: TraceFlags.SAMPLED,
+    };
+    logger('getNewSpanContext', null, `custom span context:${spanContext}`);
+    return spanContext;
+  }
+
+  function beforeEachTest(test: Test) {
+    testConfig = {
+      preferRest: test.parent?.title === REST_TEST_SUITE_TITLE,
+      useGlobalOpenTelemetry:
+        test.parent?.parent?.title === GLOBAL_OTEL_TEST_SUITE_TITLE,
+      e2e: test.parent?.parent?.parent?.title === E2E_TEST_SUITE_TITLE,
+    };
+
+    logger('beforeEach', null, 'Starting test with config:', testConfig);
+
     // Remove the global tracer provider in case anything was registered
     // in order to avoid duplicate global tracers.
     trace.disable();
@@ -161,7 +265,7 @@ describe('Tracing Tests', () => {
       new BatchSpanProcessor(consoleSpanExporter)
     );
 
-    if (config.e2e) {
+    if (testConfig.e2e) {
       tracerProvider.addSpanProcessor(new BatchSpanProcessor(gcpTraceExporter));
     } else {
       tracerProvider.addSpanProcessor(
@@ -169,13 +273,19 @@ describe('Tracing Tests', () => {
       );
     }
 
-    if (config.useGlobalOpenTelemetry) {
+    if (testConfig.useGlobalOpenTelemetry) {
       trace.setGlobalTracerProvider(tracerProvider);
     }
 
+    // Using a unique tracer name for each test.
+    tracer = tracerProvider.getTracer(`${test.title}${Date.now()}`);
+
+    customSpanContext = getNewSpanContext();
+    customContext = trace.setSpanContext(ROOT_CONTEXT, customSpanContext);
+
     const settings: Settings = {
-      preferRest: config.preferRest,
-      openTelemetryOptions: getOpenTelemetryOptions(config, tracerProvider),
+      preferRest: testConfig.preferRest,
+      openTelemetryOptions: getOpenTelemetryOptions(tracerProvider),
     };
 
     // Named-database tests use an environment variable to specify the database ID. Add it to the settings.
@@ -196,6 +306,23 @@ describe('Tracing Tests', () => {
     firestore = new Firestore(settings);
   }
 
+  // Take a function and runs it inside a new root span. This makes it possible to
+  // encapsulate all the SDK-generated spans inside a test root span. It also makes
+  // it easy to query a trace storage backend for a known trace ID and span Id.
+  function runFirestoreOperationInRootSpan<F extends () => void>(
+    fn: F
+  ): Promise<void> {
+    return tracer.startActiveSpan(
+      SPAN_NAME_TEST_ROOT,
+      {},
+      customContext,
+      async span => {
+        await fn();
+        span.end();
+      }
+    );
+  }
+
   // Returns true on success, and false otherwise.
   async function waitForCompletedInMemorySpans(): Promise<boolean> {
     await tracerProvider.forceFlush();
@@ -208,23 +335,74 @@ describe('Tracing Tests', () => {
   async function waitForCompletedCloudTraceSpans(
     numExpectedSpans: number
   ): Promise<boolean> {
-    // TODO(tracing): implement
-    return false;
+    const auth = new gAuth.GoogleAuth({
+      projectId: firestore.projectId,
+      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    });
+    const client = new cloudtrace_v1.Cloudtrace({auth});
+    const projectTraces = new cloudtrace_v1.Resource$Projects$Traces(
+      client.context
+    );
+
+    // Querying the trace from Cloud Trace immediately is almost always going
+    // to fail. So we have an initial delay before making our first attempt.
+    await new Promise(resolve =>
+      setTimeout(resolve, GET_TRACE_INITIAL_WAIT_MILLIS)
+    );
+
+    let remainingAttempts = GET_TRACE_MAX_RETRY_COUNT;
+    let receivedFullTrace = false;
+    do {
+      try {
+        const getTraceResponse = await projectTraces.get({
+          projectId: firestore.projectId,
+          traceId: customSpanContext.traceId,
+        });
+
+        cloudTraceInfo = getTraceResponse.data;
+
+        receivedFullTrace = cloudTraceInfo.spans?.length === numExpectedSpans;
+        logger(
+          'waitForCompletedCloudTraceSpans',
+          null,
+          `fetched a trace with ${cloudTraceInfo.spans?.length} spans`
+        );
+      } catch (error) {
+        logger(
+          'waitForCompletedCloudTraceSpans',
+          null,
+          'failed with error:',
+          error
+        );
+      }
+
+      // Using a constant backoff for each attempt.
+      if (!receivedFullTrace) {
+        logger(
+          'waitForCompletedCloudTraceSpans',
+          null,
+          `Could not fetch a full trace from the server. Retrying in ${GET_TRACE_RETRY_BACKOFF_MILLIS}ms.`
+        );
+        await new Promise(resolve =>
+          setTimeout(resolve, GET_TRACE_RETRY_BACKOFF_MILLIS)
+        );
+      }
+    } while (!receivedFullTrace && --remainingAttempts > 0);
+    return receivedFullTrace;
   }
 
   async function waitForCompletedSpans(
-    config: TestConfig,
     numExpectedSpans: number
   ): Promise<void> {
     let success = false;
-    if (config.e2e) {
+    if (testConfig.e2e) {
       success = await waitForCompletedCloudTraceSpans(numExpectedSpans);
     } else {
       success = await waitForCompletedInMemorySpans();
     }
 
     if (success) {
-      buildSpanMaps(config);
+      buildSpanMaps();
     }
     expect(spanIdToSpanData.size).to.equal(
       numExpectedSpans,
@@ -232,45 +410,63 @@ describe('Tracing Tests', () => {
     );
   }
 
-  function buildSpanMaps(config: TestConfig): void {
-    if (config.e2e) {
-      // TODO(tracing): implement
-    } else {
-      // Using InMemorySpanExporter.
-      const spans = inMemorySpanExporter.getFinishedSpans();
-      spans.forEach(span => {
-        const id = getSpanId(span)!;
-        const parentId = getParentSpanId(span);
-        if (!parentId) {
-          rootSpanIds.push(id);
-        } else {
-          let children = spanIdToChildrenSpanIds.get(parentId);
-          // Initialize to empty array if it hasn't been seen before.
-          if (!children) {
-            children = [];
-          }
-          // Add the new child.
-          children.push(id);
-          spanIdToChildrenSpanIds.set(parentId, children);
+  function buildSpanMapsFromInMemorySpanExporter(): void {
+    const spans = inMemorySpanExporter.getFinishedSpans();
+    spans.forEach(span => {
+      const id = span?.spanContext().spanId;
+      const parentId = span?.parentSpanId;
+      if (!parentId || span.name === SPAN_NAME_TEST_ROOT) {
+        rootSpanIds.push(id);
+      } else {
+        let children = spanIdToChildrenSpanIds.get(parentId);
+        // Initialize to empty array if it hasn't been seen before.
+        if (!children) {
+          children = [];
         }
-        spanIdToSpanData.set(id, span);
-      });
+        // Add the new child.
+        children.push(id);
+        spanIdToChildrenSpanIds.set(parentId, children);
+      }
+      spanIdToSpanData.set(id, SpanData.fromInMemorySpan(span));
+    });
+  }
+
+  function buildSpanMapsFromCloudTraceInfo(): void {
+    const spans = cloudTraceInfo.spans;
+    spans?.forEach(span => {
+      const id = span.spanId;
+      const parentId = span.parentSpanId;
+      if (!parentId || span.name === SPAN_NAME_TEST_ROOT) {
+        rootSpanIds.push(id!);
+      } else {
+        let children = spanIdToChildrenSpanIds.get(parentId);
+        if (!children) {
+          children = [];
+        }
+        children.push(id!);
+        spanIdToChildrenSpanIds.set(parentId, children);
+      }
+      spanIdToSpanData.set(
+        id!,
+        SpanData.fromCloudTraceSpan(span, customSpanContext.traceId)
+      );
+    });
+  }
+
+  function buildSpanMaps(): void {
+    if (testConfig.e2e) {
+      buildSpanMapsFromCloudTraceInfo();
+    } else {
+      buildSpanMapsFromInMemorySpanExporter();
     }
-  }
-
-  // Returns the span id of the given span.
-  function getSpanId(span: ReadableSpan | undefined): string | undefined {
-    return span?.spanContext().spanId;
-  }
-
-  // Returns the parent span id of the given span.
-  function getParentSpanId(span: ReadableSpan | undefined): string | undefined {
-    return span?.parentSpanId;
-  }
-
-  // Returns the trace id of the given span.
-  function getTraceId(span: ReadableSpan | undefined): string | undefined {
-    return span?.spanContext().traceId;
+    logger(
+      'buildSpanMaps',
+      null,
+      'Built the following spans:',
+      rootSpanIds,
+      spanIdToSpanData,
+      spanIdToChildrenSpanIds
+    );
   }
 
   function getChildSpans(spanId: string): string[] | undefined {
@@ -279,7 +475,7 @@ describe('Tracing Tests', () => {
 
   // Returns the first span it can find with the given name, or null if it cannot find a span with the given name.
   // If there are multiple spans with the same name, it'll return the first one.
-  function getSpanByName(spanName: string): ReadableSpan | null {
+  function getSpanByName(spanName: string): SpanData | null {
     for (const spanData of spanIdToSpanData.values()) {
       if (spanData.name === spanName) {
         return spanData;
@@ -294,9 +490,9 @@ describe('Tracing Tests', () => {
   function dfsSpanHierarchy(
     rootSpanId: string,
     spanNamesHierarchy: string[]
-  ): ReadableSpan[] {
+  ): SpanData[] {
     // This function returns an empty list if it cannot find a full match.
-    const notAMatch: ReadableSpan[] = [];
+    const notAMatch: SpanData[] = [];
     const rootSpan = spanIdToSpanData.get(rootSpanId);
 
     if (spanNamesHierarchy.length === 0 || !rootSpan) {
@@ -355,7 +551,7 @@ describe('Tracing Tests', () => {
       'The expected spans hierarchy was empty'
     );
 
-    let matchingSpanHierarchy: ReadableSpan[] = [];
+    let matchingSpanHierarchy: SpanData[] = [];
 
     // The Firestore operations that have been executed generate a number of
     // spans. The span names, however, are not unique. For example, we could have:
@@ -378,14 +574,18 @@ describe('Tracing Tests', () => {
       0,
       `Was not able to find the following span hierarchy: ${spanNamesHierarchy}`
     );
-    console.log('Found the following span hierarchy:');
-    matchingSpanHierarchy.forEach(value => console.log(value.name));
+    logger(
+      'expectSpanHierarchy',
+      null,
+      'Found the following span hierarchy:',
+      matchingSpanHierarchy
+    );
 
     for (let i = 0; i + 1 < matchingSpanHierarchy.length; ++i) {
       const parentSpan = matchingSpanHierarchy[i];
       const childSpan = matchingSpanHierarchy[i + 1];
-      expect(getTraceId(childSpan)).to.equal(
-        getTraceId(parentSpan),
+      expect(childSpan.traceId).to.equal(
+        parentSpan.traceId,
         `'${childSpan.name}' and '${parentSpan.name}' spans do not belong to the same trace`
       );
       // TODO(tracing): expect that each span has the needed attributes.
@@ -393,7 +593,15 @@ describe('Tracing Tests', () => {
   }
 
   // Ensures that the given span exists and has exactly all the given attributes.
-  function expectSpanHasAttributes(spanName: string, attributes: Attributes) {
+  function expectSpanHasAttributes(
+    spanName: string,
+    attributes: Attributes
+  ): void {
+    // TODO(tracing): The current Cloud Trace API does not return span attributes and events.
+    if (testConfig.e2e) {
+      return;
+    }
+
     // Expect that the span exists first.
     const span = getSpanByName(spanName);
     expect(span).to.not.be.null;
@@ -402,155 +610,163 @@ describe('Tracing Tests', () => {
     deepStrictEqual(span!.attributes, attributes);
   }
 
-  describe('In-Memory', () => {
-    describe('Non-Global-OTEL', () => {
-      describe('GRPC', () => {
-        const config: TestConfig = {
-          e2e: false,
-          useGlobalOpenTelemetry: false,
-          preferRest: false,
-        };
-        beforeEach(async () => beforeEachTest(config));
-        runTestCases(config);
+  describe(IN_MEMORY_TEST_SUITE_TITLE, () => {
+    describe(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
+      describe(GRPC_TEST_SUITE_TITLE, () => {
+        beforeEach(function () {
+          beforeEachTest(this.currentTest!);
+        });
+        runTestCases();
         afterEach(async () => afterEachTest());
       });
-      describe('REST', () => {
-        const config: TestConfig = {
-          e2e: false,
-          useGlobalOpenTelemetry: false,
-          preferRest: true,
-        };
-        beforeEach(async () => beforeEachTest(config));
-        runTestCases(config);
+      describe(REST_TEST_SUITE_TITLE, () => {
+        beforeEach(function () {
+          beforeEachTest(this.currentTest!);
+        });
+        runTestCases();
         afterEach(async () => afterEachTest());
       });
     });
-    describe('with Global-OTEL', () => {
-      describe('GRPC', () => {
-        const config: TestConfig = {
-          e2e: false,
-          useGlobalOpenTelemetry: true,
-          preferRest: false,
-        };
-        beforeEach(async () => beforeEachTest(config));
-        runTestCases(config);
+    describe(GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
+      describe(GRPC_TEST_SUITE_TITLE, () => {
+        beforeEach(function () {
+          beforeEachTest(this.currentTest!);
+        });
+        runTestCases();
         afterEach(async () => afterEachTest());
       });
-      describe('REST', () => {
-        const config: TestConfig = {
-          e2e: false,
-          useGlobalOpenTelemetry: true,
-          preferRest: true,
-        };
-        beforeEach(async () => beforeEachTest(config));
-        runTestCases(config);
+      describe(REST_TEST_SUITE_TITLE, () => {
+        beforeEach(function () {
+          beforeEachTest(this.currentTest!);
+        });
+        runTestCases();
         afterEach(async () => afterEachTest());
       });
     });
   });
 
-  describe.skip('E2E', () => {
-    describe('Non-Global-OTEL', () => {
-      describe('GRPC', () => {
-        const config: TestConfig = {
-          e2e: true,
-          useGlobalOpenTelemetry: false,
-          preferRest: false,
-        };
-        beforeEach(async () => beforeEachTest(config));
-        runTestCases(config);
+  describe(E2E_TEST_SUITE_TITLE, () => {
+    describe(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
+      describe(GRPC_TEST_SUITE_TITLE, () => {
+        beforeEach(function () {
+          beforeEachTest(this.currentTest!);
+        });
+        runTestCases();
         afterEach(async () => afterEachTest());
       });
-      describe('REST', () => {
-        const config: TestConfig = {
-          e2e: true,
-          useGlobalOpenTelemetry: false,
-          preferRest: true,
-        };
-        beforeEach(async () => beforeEachTest(config));
-        runTestCases(config);
+      describe(REST_TEST_SUITE_TITLE, () => {
+        beforeEach(function () {
+          beforeEachTest(this.currentTest!);
+        });
+        runTestCases();
         afterEach(async () => afterEachTest());
       });
     });
-    describe('with Global-OTEL', () => {
-      describe('GRPC', () => {
-        const config: TestConfig = {
-          e2e: true,
-          useGlobalOpenTelemetry: true,
-          preferRest: false,
-        };
-        beforeEach(async () => beforeEachTest(config));
-        runTestCases(config);
+    describe(GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
+      describe(GRPC_TEST_SUITE_TITLE, () => {
+        beforeEach(function () {
+          beforeEachTest(this.currentTest!);
+        });
+        runTestCases();
         afterEach(async () => afterEachTest());
       });
-      describe('REST', () => {
-        const config: TestConfig = {
-          e2e: true,
-          useGlobalOpenTelemetry: true,
-          preferRest: true,
-        };
-        beforeEach(async () => beforeEachTest(config));
-        runTestCases(config);
+      describe(REST_TEST_SUITE_TITLE, () => {
+        beforeEach(function () {
+          beforeEachTest(this.currentTest!);
+        });
+        runTestCases();
         afterEach(async () => afterEachTest());
       });
     });
   });
 
-  function runTestCases(config: TestConfig) {
+  function runTestCases() {
     it('document reference get()', async () => {
-      await firestore.collection('foo').doc('bar').get();
-
-      await waitForCompletedSpans(config, 2);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_GET, SPAN_NAME_BATCH_GET_DOCUMENTS);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.collection('foo').doc('bar').get()
+      );
+      await waitForCompletedSpans(3);
+      expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
+        SPAN_NAME_DOC_REF_GET,
+        SPAN_NAME_BATCH_GET_DOCUMENTS
+      );
     });
 
     it('document reference create()', async () => {
-      await firestore.collection('foo').doc().create({});
-
-      await waitForCompletedSpans(config, 2);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_CREATE, SPAN_NAME_BATCH_COMMIT);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.collection('foo').doc().create({})
+      );
+      await waitForCompletedSpans(3);
+      expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
+        SPAN_NAME_DOC_REF_CREATE,
+        SPAN_NAME_BATCH_COMMIT
+      );
     });
 
     it('document reference delete()', async () => {
-      await firestore.collection('foo').doc('bar').delete();
-
-      await waitForCompletedSpans(config, 2);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_DELETE, SPAN_NAME_BATCH_COMMIT);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.collection('foo').doc('bar').delete()
+      );
+      await waitForCompletedSpans(3);
+      expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
+        SPAN_NAME_DOC_REF_DELETE,
+        SPAN_NAME_BATCH_COMMIT
+      );
     });
 
     it('document reference set()', async () => {
-      await firestore.collection('foo').doc('bar').set({foo: 'bar'});
-
-      await waitForCompletedSpans(config, 2);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_SET, SPAN_NAME_BATCH_COMMIT);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.collection('foo').doc('bar').set({foo: 'bar'})
+      );
+      await waitForCompletedSpans(3);
+      expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
+        SPAN_NAME_DOC_REF_SET,
+        SPAN_NAME_BATCH_COMMIT
+      );
     });
 
     it('document reference update()', async () => {
-      await firestore.collection('foo').doc('bar').update('foo', 'bar2');
-
-      await waitForCompletedSpans(config, 2);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_UPDATE, SPAN_NAME_BATCH_COMMIT);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.collection('foo').doc('bar').update('foo', 'bar2')
+      );
+      await waitForCompletedSpans(3);
+      expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
+        SPAN_NAME_DOC_REF_UPDATE,
+        SPAN_NAME_BATCH_COMMIT
+      );
     });
 
     it('document reference list collections', async () => {
-      await firestore.collection('foo').doc('bar').listCollections();
-
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_DOC_REF_LIST_COLLECTIONS);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.collection('foo').doc('bar').listCollections()
+      );
+      await waitForCompletedSpans(2);
+      expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
+        SPAN_NAME_DOC_REF_LIST_COLLECTIONS
+      );
     });
 
     it('aggregate query get()', async () => {
-      await firestore.collection('foo').count().get();
-
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_AGGREGATION_QUERY_GET);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.collection('foo').count().get()
+      );
+      await waitForCompletedSpans(2);
+      expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_AGGREGATION_QUERY_GET);
     });
 
     it('collection reference add()', async () => {
-      await firestore.collection('foo').add({foo: 'bar'});
-
-      await waitForCompletedSpans(config, 3);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.collection('foo').add({foo: 'bar'})
+      );
+      await waitForCompletedSpans(4);
       expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
         SPAN_NAME_COL_REF_ADD,
         SPAN_NAME_DOC_REF_CREATE,
         SPAN_NAME_BATCH_COMMIT
@@ -558,62 +774,71 @@ describe('Tracing Tests', () => {
     });
 
     it('collection reference list documents', async () => {
-      await firestore.collection('foo').listDocuments();
-
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_COL_REF_LIST_DOCUMENTS);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.collection('foo').listDocuments()
+      );
+      await waitForCompletedSpans(2);
+      expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
+        SPAN_NAME_COL_REF_LIST_DOCUMENTS
+      );
     });
 
     it('query get()', async () => {
-      await firestore
-        .collection('foo')
-        .where('foo', '==', 'bar')
-        .limit(1)
-        .get();
-
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_QUERY_GET);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.collection('foo').where('foo', '==', 'bar').limit(1).get()
+      );
+      await waitForCompletedSpans(2);
+      expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_QUERY_GET);
     });
 
     it('firestore getAll()', async () => {
       const docRef1 = firestore.collection('foo').doc('1');
       const docRef2 = firestore.collection('foo').doc('2');
-      await firestore.getAll(docRef1, docRef2);
-
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_BATCH_GET_DOCUMENTS);
+      await runFirestoreOperationInRootSpan(() =>
+        firestore.getAll(docRef1, docRef2)
+      );
+      await waitForCompletedSpans(2);
+      expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_BATCH_GET_DOCUMENTS);
     });
 
     it('transaction', async () => {
       const docRef1 = firestore.collection('foo').doc('bar');
       const docRef2 = firestore.collection('foo').doc('bar');
 
-      await firestore.runTransaction(async transaction => {
-        await transaction.get(docRef1);
-        await transaction.getAll(docRef1, docRef2);
-        await transaction.get(firestore.collection('foo').limit(1));
-        await transaction.get(firestore.collection('nonexistent').count());
-        transaction.set(firestore.collection('foo').doc(), {foo: 'bar'});
+      await runFirestoreOperationInRootSpan(async () => {
+        return firestore.runTransaction(async transaction => {
+          await transaction.get(docRef1);
+          await transaction.getAll(docRef1, docRef2);
+          await transaction.get(firestore.collection('foo').limit(1));
+          await transaction.get(firestore.collection('nonexistent').count());
+          transaction.set(firestore.collection('foo').doc(), {foo: 'bar'});
+        });
       });
 
-      await waitForCompletedSpans(config, 6);
+      await waitForCompletedSpans(7);
       expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
         SPAN_NAME_TRANSACTION_GET_DOCUMENT
       );
       expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
         SPAN_NAME_TRANSACTION_GET_DOCUMENTS
       );
       expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
         SPAN_NAME_TRANSACTION_GET_QUERY
       );
       expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
         SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY
       );
       expectSpanHierarchy(
+        SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
         SPAN_NAME_TRANSACTION_COMMIT
       );
@@ -623,35 +848,40 @@ describe('Tracing Tests', () => {
       const writeBatch = firestore.batch();
       const documentRef = firestore.doc('col/doc');
       writeBatch.set(documentRef, {foo: 'bar'});
-      await writeBatch.commit();
 
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_BATCH_COMMIT);
+      await runFirestoreOperationInRootSpan(() => writeBatch.commit());
+      await waitForCompletedSpans(2);
+      expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_BATCH_COMMIT);
     });
 
     it('partition query', async () => {
-      const query = firestore.collectionGroup('foo');
-      let numPartitions = 0;
-      for await (const partition of query.getPartitions(3)) {
-        numPartitions++;
-      }
+      await runFirestoreOperationInRootSpan(async () => {
+        const query = firestore.collectionGroup('foo');
+        let numPartitions = 0;
+        for await (const partition of query.getPartitions(3)) {
+          numPartitions++;
+        }
+        return numPartitions;
+      });
 
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_PARTITION_QUERY);
+      await waitForCompletedSpans(2);
+      expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_PARTITION_QUERY);
     });
 
     it('bulk writer', async () => {
-      const bulkWriter = firestore.bulkWriter();
-      // No need to await the set operations as 'close()' will commit all writes before closing.
-      bulkWriter.set(firestore.collection('foo').doc(), {foo: 1});
-      bulkWriter.set(firestore.collection('foo').doc(), {foo: 2});
-      bulkWriter.set(firestore.collection('foo').doc(), {foo: 3});
-      bulkWriter.set(firestore.collection('foo').doc(), {foo: 4});
-      bulkWriter.set(firestore.collection('foo').doc(), {foo: 5});
-      await bulkWriter.close();
+      await runFirestoreOperationInRootSpan(async () => {
+        const bulkWriter = firestore.bulkWriter();
+        // No need to await the set operations as 'close()' will commit all writes before closing.
+        bulkWriter.set(firestore.collection('foo').doc(), {foo: 1});
+        bulkWriter.set(firestore.collection('foo').doc(), {foo: 2});
+        bulkWriter.set(firestore.collection('foo').doc(), {foo: 3});
+        bulkWriter.set(firestore.collection('foo').doc(), {foo: 4});
+        bulkWriter.set(firestore.collection('foo').doc(), {foo: 5});
+        await bulkWriter.close();
+      });
 
-      await waitForCompletedSpans(config, 1);
-      expectSpanHierarchy(SPAN_NAME_BULK_WRITER_COMMIT);
+      await waitForCompletedSpans(2);
+      expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_BULK_WRITER_COMMIT);
       expectSpanHasAttributes(SPAN_NAME_BULK_WRITER_COMMIT, {
         [ATTRIBUTE_KEY_DOC_COUNT]: 5,
       });
