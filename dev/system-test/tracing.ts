@@ -226,8 +226,7 @@ describe('Tracing Tests', () => {
       spanId: generateRandomHexString(NUM_SPAN_ID_BYTES),
       traceFlags: TraceFlags.SAMPLED,
     };
-    console.log('custom span context=');
-    console.log(spanContext);
+    logger('getNewSpanContext', null, `custom span context:${spanContext}`);
     return spanContext;
   }
 
