@@ -6309,6 +6309,12 @@ export namespace google {
 
                     /** FindNearest limit */
                     limit?: (google.protobuf.IInt32Value|null);
+
+                    /** FindNearest distanceResultField */
+                    distanceResultField?: (string|null);
+
+                    /** FindNearest distanceThreshold */
+                    distanceThreshold?: (google.protobuf.IDoubleValue|null);
                 }
 
                 /** Represents a FindNearest. */
@@ -6331,6 +6337,12 @@ export namespace google {
 
                     /** FindNearest limit. */
                     public limit?: (google.protobuf.IInt32Value|null);
+
+                    /** FindNearest distanceResultField. */
+                    public distanceResultField: string;
+
+                    /** FindNearest distanceThreshold. */
+                    public distanceThreshold?: (google.protobuf.IDoubleValue|null);
 
                     /**
                      * Creates a new FindNearest instance using the specified properties.

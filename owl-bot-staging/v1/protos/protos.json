@@ -1614,6 +1614,20 @@
                           "options": {
                             "(google.api.field_behavior)": "REQUIRED"
                           }
+                        },
+                        "distanceResultField": {
+                          "type": "string",
+                          "id": 5,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        },
+                        "distanceThreshold": {
+                          "type": "google.protobuf.DoubleValue",
+                          "id": 6,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
                         }
                       },
                       "nested": {

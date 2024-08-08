@@ -16085,6 +16085,8 @@
                          * @property {google.firestore.v1.IValue|null} [queryVector] FindNearest queryVector
                          * @property {google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure|null} [distanceMeasure] FindNearest distanceMeasure
                          * @property {google.protobuf.IInt32Value|null} [limit] FindNearest limit
+                         * @property {string|null} [distanceResultField] FindNearest distanceResultField
+                         * @property {google.protobuf.IDoubleValue|null} [distanceThreshold] FindNearest distanceThreshold
                          */
     
                         /**
@@ -16135,6 +16137,22 @@
                         FindNearest.prototype.limit = null;
     
                         /**
+                         * FindNearest distanceResultField.
+                         * @member {string} distanceResultField
+                         * @memberof google.firestore.v1.StructuredQuery.FindNearest
+                         * @instance
+                         */
+                        FindNearest.prototype.distanceResultField = "";
+    
+                        /**
+                         * FindNearest distanceThreshold.
+                         * @member {google.protobuf.IDoubleValue|null|undefined} distanceThreshold
+                         * @memberof google.firestore.v1.StructuredQuery.FindNearest
+                         * @instance
+                         */
+                        FindNearest.prototype.distanceThreshold = null;
+    
+                        /**
                          * Creates a new FindNearest instance using the specified properties.
                          * @function create
                          * @memberof google.firestore.v1.StructuredQuery.FindNearest
@@ -16166,6 +16184,10 @@
                                 writer.uint32(/* id 3, wireType 0 =*/24).int32(message.distanceMeasure);
                             if (message.limit != null && Object.hasOwnProperty.call(message, "limit"))
                                 $root.google.protobuf.Int32Value.encode(message.limit, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+                            if (message.distanceResultField != null && Object.hasOwnProperty.call(message, "distanceResultField"))
+                                writer.uint32(/* id 5, wireType 2 =*/42).string(message.distanceResultField);
+                            if (message.distanceThreshold != null && Object.hasOwnProperty.call(message, "distanceThreshold"))
+                                $root.google.protobuf.DoubleValue.encode(message.distanceThreshold, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
                             return writer;
                         };
     
@@ -16214,6 +16236,14 @@
                                     }
                                 case 4: {
                                         message.limit = $root.google.protobuf.Int32Value.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 5: {
+                                        message.distanceResultField = reader.string();
+                                        break;
+                                    }
+                                case 6: {
+                                        message.distanceThreshold = $root.google.protobuf.DoubleValue.decode(reader, reader.uint32());
                                         break;
                                     }
                                 default:
@@ -16276,6 +16306,14 @@
                                 if (error)
                                     return "limit." + error;
                             }
+                            if (message.distanceResultField != null && message.hasOwnProperty("distanceResultField"))
+                                if (!$util.isString(message.distanceResultField))
+                                    return "distanceResultField: string expected";
+                            if (message.distanceThreshold != null && message.hasOwnProperty("distanceThreshold")) {
+                                var error = $root.google.protobuf.DoubleValue.verify(message.distanceThreshold);
+                                if (error)
+                                    return "distanceThreshold." + error;
+                            }
                             return null;
                         };
     
@@ -16330,6 +16368,13 @@
                                     throw TypeError(".google.firestore.v1.StructuredQuery.FindNearest.limit: object expected");
                                 message.limit = $root.google.protobuf.Int32Value.fromObject(object.limit);
                             }
+                            if (object.distanceResultField != null)
+                                message.distanceResultField = String(object.distanceResultField);
+                            if (object.distanceThreshold != null) {
+                                if (typeof object.distanceThreshold !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.FindNearest.distanceThreshold: object expected");
+                                message.distanceThreshold = $root.google.protobuf.DoubleValue.fromObject(object.distanceThreshold);
+                            }
                             return message;
                         };
     
@@ -16351,6 +16396,8 @@
                                 object.queryVector = null;
                                 object.distanceMeasure = options.enums === String ? "DISTANCE_MEASURE_UNSPECIFIED" : 0;
                                 object.limit = null;
+                                object.distanceResultField = "";
+                                object.distanceThreshold = null;
                             }
                             if (message.vectorField != null && message.hasOwnProperty("vectorField"))
                                 object.vectorField = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.vectorField, options);
@@ -16360,6 +16407,10 @@
                                 object.distanceMeasure = options.enums === String ? $root.google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure[message.distanceMeasure] === undefined ? message.distanceMeasure : $root.google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure[message.distanceMeasure] : message.distanceMeasure;
                             if (message.limit != null && message.hasOwnProperty("limit"))
                                 object.limit = $root.google.protobuf.Int32Value.toObject(message.limit, options);
+                            if (message.distanceResultField != null && message.hasOwnProperty("distanceResultField"))
+                                object.distanceResultField = message.distanceResultField;
+                            if (message.distanceThreshold != null && message.hasOwnProperty("distanceThreshold"))
+                                object.distanceThreshold = $root.google.protobuf.DoubleValue.toObject(message.distanceThreshold, options);
                             return object;
                         };
     
