@@ -145,13 +145,6 @@
                             "(google.api.field_behavior)": "OUTPUT_ONLY"
                           }
                         },
-                        "deleteTime": {
-                          "type": "google.protobuf.Timestamp",
-                          "id": 7,
-                          "options": {
-                            "(google.api.field_behavior)": "OUTPUT_ONLY"
-                          }
-                        },
                         "locationId": {
                           "type": "string",
                           "id": 9
@@ -197,20 +190,6 @@
                           "type": "DeleteProtectionState",
                           "id": 22
                         },
-                        "cmekConfig": {
-                          "type": "CmekConfig",
-                          "id": 23,
-                          "options": {
-                            "(google.api.field_behavior)": "OPTIONAL"
-                          }
-                        },
-                        "previousId": {
-                          "type": "string",
-                          "id": 25,
-                          "options": {
-                            "(google.api.field_behavior)": "OUTPUT_ONLY"
-                          }
-                        },
                         "etag": {
                           "type": "string",
                           "id": 99
@@ -251,25 +230,6 @@
                             "DELETE_PROTECTION_STATE_UNSPECIFIED": 0,
                             "DELETE_PROTECTION_DISABLED": 1,
                             "DELETE_PROTECTION_ENABLED": 2
-                          }
-                        },
-                        "CmekConfig": {
-                          "fields": {
-                            "kmsKeyName": {
-                              "type": "string",
-                              "id": 1,
-                              "options": {
-                                "(google.api.field_behavior)": "REQUIRED"
-                              }
-                            },
-                            "activeKeyVersion": {
-                              "rule": "repeated",
-                              "type": "string",
-                              "id": 2,
-                              "options": {
-                                "(google.api.field_behavior)": "OUTPUT_ONLY"
-                              }
-                            }
                           }
                         }
                       }
@@ -673,34 +633,6 @@
                             }
                           ]
                         },
-                        "BulkDeleteDocuments": {
-                          "requestType": "BulkDeleteDocumentsRequest",
-                          "responseType": "google.longrunning.Operation",
-                          "options": {
-                            "(google.api.http).post": "/v1/{name=projects/*/databases/*}:bulkDeleteDocuments",
-                            "(google.api.http).body": "*",
-                            "(google.api.method_signature)": "name",
-                            "(google.longrunning.operation_info).response_type": "BulkDeleteDocumentsResponse",
-                            "(google.longrunning.operation_info).metadata_type": "BulkDeleteDocumentsMetadata"
-                          },
-                          "parsedOptions": [
-                            {
-                              "(google.api.http)": {
-                                "post": "/v1/{name=projects/*/databases/*}:bulkDeleteDocuments",
-                                "body": "*"
-                              }
-                            },
-                            {
-                              "(google.api.method_signature)": "name"
-                            },
-                            {
-                              "(google.longrunning.operation_info)": {
-                                "response_type": "BulkDeleteDocumentsResponse",
-                                "metadata_type": "BulkDeleteDocumentsMetadata"
-                              }
-                            }
-                          ]
-                        },
                         "CreateDatabase": {
                           "requestType": "CreateDatabaseRequest",
                           "responseType": "google.longrunning.Operation",
@@ -1002,10 +934,6 @@
                             "(google.api.field_behavior)": "REQUIRED",
                             "(google.api.resource_reference).child_type": "firestore.googleapis.com/Database"
                           }
-                        },
-                        "showDeleted": {
-                          "type": "bool",
-                          "id": 4
                         }
                       }
                     },
@@ -1380,37 +1308,6 @@
                         }
                       }
                     },
-                    "BulkDeleteDocumentsRequest": {
-                      "fields": {
-                        "name": {
-                          "type": "string",
-                          "id": 1,
-                          "options": {
-                            "(google.api.field_behavior)": "REQUIRED",
-                            "(google.api.resource_reference).type": "firestore.googleapis.com/Database"
-                          }
-                        },
-                        "collectionIds": {
-                          "rule": "repeated",
-                          "type": "string",
-                          "id": 2,
-                          "options": {
-                            "(google.api.field_behavior)": "OPTIONAL"
-                          }
-                        },
-                        "namespaceIds": {
-                          "rule": "repeated",
-                          "type": "string",
-                          "id": 3,
-                          "options": {
-                            "(google.api.field_behavior)": "OPTIONAL"
-                          }
-                        }
-                      }
-                    },
-                    "BulkDeleteDocumentsResponse": {
-                      "fields": {}
-                    },
                     "GetBackupRequest": {
                       "fields": {
                         "name": {
@@ -1462,15 +1359,6 @@
                       }
                     },
                     "RestoreDatabaseRequest": {
-                      "oneofs": {
-                        "encryptionConfig": {
-                          "oneof": [
-                            "useGoogleDefaultEncryption",
-                            "useBackupEncryption",
-                            "kmsKeyName"
-                          ]
-                        }
-                      },
                       "fields": {
                         "parent": {
                           "type": "string",
@@ -1494,18 +1382,6 @@
                             "(google.api.field_behavior)": "REQUIRED",
                             "(google.api.resource_reference).type": "firestore.googleapis.com/Backup"
                           }
-                        },
-                        "useGoogleDefaultEncryption": {
-                          "type": "google.protobuf.Empty",
-                          "id": 6
-                        },
-                        "useBackupEncryption": {
-                          "type": "google.protobuf.Empty",
-                          "id": 7
-                        },
-                        "kmsKeyName": {
-                          "type": "string",
-                          "id": 8
                         }
                       }
                     },
@@ -1690,44 +1566,6 @@
                         "namespaceIds": {
                           "rule": "repeated",
                           "type": "string",
-                          "id": 8
-                        }
-                      }
-                    },
-                    "BulkDeleteDocumentsMetadata": {
-                      "fields": {
-                        "startTime": {
-                          "type": "google.protobuf.Timestamp",
-                          "id": 1
-                        },
-                        "endTime": {
-                          "type": "google.protobuf.Timestamp",
-                          "id": 2
-                        },
-                        "operationState": {
-                          "type": "OperationState",
-                          "id": 3
-                        },
-                        "progressDocuments": {
-                          "type": "Progress",
-                          "id": 4
-                        },
-                        "progressBytes": {
-                          "type": "Progress",
-                          "id": 5
-                        },
-                        "collectionIds": {
-                          "rule": "repeated",
-                          "type": "string",
-                          "id": 6
-                        },
-                        "namespaceIds": {
-                          "rule": "repeated",
-                          "type": "string",
-                          "id": 7
-                        },
-                        "snapshotTime": {
-                          "type": "google.protobuf.Timestamp",
                           "id": 8
                         }
                       }
@@ -3857,26 +3695,6 @@
                 "FRIDAY": 5,
                 "SATURDAY": 6,
                 "SUNDAY": 7
-              }
-            },
-            "TimeOfDay": {
-              "fields": {
-                "hours": {
-                  "type": "int32",
-                  "id": 1
-                },
-                "minutes": {
-                  "type": "int32",
-                  "id": 2
-                },
-                "seconds": {
-                  "type": "int32",
-                  "id": 3
-                },
-                "nanos": {
-                  "type": "int32",
-                  "id": 4
-                }
               }
             },
             "LatLng": {

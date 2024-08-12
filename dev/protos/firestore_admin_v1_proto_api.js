@@ -479,7 +479,6 @@
                          * @property {string|null} [uid] Database uid
                          * @property {google.protobuf.ITimestamp|null} [createTime] Database createTime
                          * @property {google.protobuf.ITimestamp|null} [updateTime] Database updateTime
-                         * @property {google.protobuf.ITimestamp|null} [deleteTime] Database deleteTime
                          * @property {string|null} [locationId] Database locationId
                          * @property {google.firestore.admin.v1.Database.DatabaseType|null} [type] Database type
                          * @property {google.firestore.admin.v1.Database.ConcurrencyMode|null} [concurrencyMode] Database concurrencyMode
@@ -489,8 +488,6 @@
                          * @property {google.firestore.admin.v1.Database.AppEngineIntegrationMode|null} [appEngineIntegrationMode] Database appEngineIntegrationMode
                          * @property {string|null} [keyPrefix] Database keyPrefix
                          * @property {google.firestore.admin.v1.Database.DeleteProtectionState|null} [deleteProtectionState] Database deleteProtectionState
-                         * @property {google.firestore.admin.v1.Database.ICmekConfig|null} [cmekConfig] Database cmekConfig
-                         * @property {string|null} [previousId] Database previousId
                          * @property {string|null} [etag] Database etag
                          */
     
@@ -540,14 +537,6 @@
                          * @instance
                          */
                         Database.prototype.updateTime = null;
-    
-                        /**
-                         * Database deleteTime.
-                         * @member {google.protobuf.ITimestamp|null|undefined} deleteTime
-                         * @memberof google.firestore.admin.v1.Database
-                         * @instance
-                         */
-                        Database.prototype.deleteTime = null;
     
                         /**
                          * Database locationId.
@@ -622,22 +611,6 @@
                         Database.prototype.deleteProtectionState = 0;
     
                         /**
-                         * Database cmekConfig.
-                         * @member {google.firestore.admin.v1.Database.ICmekConfig|null|undefined} cmekConfig
-                         * @memberof google.firestore.admin.v1.Database
-                         * @instance
-                         */
-                        Database.prototype.cmekConfig = null;
-    
-                        /**
-                         * Database previousId.
-                         * @member {string} previousId
-                         * @memberof google.firestore.admin.v1.Database
-                         * @instance
-                         */
-                        Database.prototype.previousId = "";
-    
-                        /**
                          * Database etag.
                          * @member {string} etag
                          * @memberof google.firestore.admin.v1.Database
@@ -670,11 +643,6 @@
                                 if (typeof object.updateTime !== "object")
                                     throw TypeError(".google.firestore.admin.v1.Database.updateTime: object expected");
                                 message.updateTime = $root.google.protobuf.Timestamp.fromObject(object.updateTime);
-                            }
-                            if (object.deleteTime != null) {
-                                if (typeof object.deleteTime !== "object")
-                                    throw TypeError(".google.firestore.admin.v1.Database.deleteTime: object expected");
-                                message.deleteTime = $root.google.protobuf.Timestamp.fromObject(object.deleteTime);
                             }
                             if (object.locationId != null)
                                 message.locationId = String(object.locationId);
@@ -794,13 +762,6 @@
                                 message.deleteProtectionState = 2;
                                 break;
                             }
-                            if (object.cmekConfig != null) {
-                                if (typeof object.cmekConfig !== "object")
-                                    throw TypeError(".google.firestore.admin.v1.Database.cmekConfig: object expected");
-                                message.cmekConfig = $root.google.firestore.admin.v1.Database.CmekConfig.fromObject(object.cmekConfig);
-                            }
-                            if (object.previousId != null)
-                                message.previousId = String(object.previousId);
                             if (object.etag != null)
                                 message.etag = String(object.etag);
                             return message;
@@ -824,7 +785,6 @@
                                 object.uid = "";
                                 object.createTime = null;
                                 object.updateTime = null;
-                                object.deleteTime = null;
                                 object.locationId = "";
                                 object.type = options.enums === String ? "DATABASE_TYPE_UNSPECIFIED" : 0;
                                 object.concurrencyMode = options.enums === String ? "CONCURRENCY_MODE_UNSPECIFIED" : 0;
@@ -834,8 +794,6 @@
                                 object.keyPrefix = "";
                                 object.pointInTimeRecoveryEnablement = options.enums === String ? "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED" : 0;
                                 object.deleteProtectionState = options.enums === String ? "DELETE_PROTECTION_STATE_UNSPECIFIED" : 0;
-                                object.cmekConfig = null;
-                                object.previousId = "";
                                 object.etag = "";
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
@@ -846,8 +804,6 @@
                                 object.createTime = $root.google.protobuf.Timestamp.toObject(message.createTime, options);
                             if (message.updateTime != null && message.hasOwnProperty("updateTime"))
                                 object.updateTime = $root.google.protobuf.Timestamp.toObject(message.updateTime, options);
-                            if (message.deleteTime != null && message.hasOwnProperty("deleteTime"))
-                                object.deleteTime = $root.google.protobuf.Timestamp.toObject(message.deleteTime, options);
                             if (message.locationId != null && message.hasOwnProperty("locationId"))
                                 object.locationId = message.locationId;
                             if (message.type != null && message.hasOwnProperty("type"))
@@ -866,10 +822,6 @@
                                 object.pointInTimeRecoveryEnablement = options.enums === String ? $root.google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement[message.pointInTimeRecoveryEnablement] === undefined ? message.pointInTimeRecoveryEnablement : $root.google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement[message.pointInTimeRecoveryEnablement] : message.pointInTimeRecoveryEnablement;
                             if (message.deleteProtectionState != null && message.hasOwnProperty("deleteProtectionState"))
                                 object.deleteProtectionState = options.enums === String ? $root.google.firestore.admin.v1.Database.DeleteProtectionState[message.deleteProtectionState] === undefined ? message.deleteProtectionState : $root.google.firestore.admin.v1.Database.DeleteProtectionState[message.deleteProtectionState] : message.deleteProtectionState;
-                            if (message.cmekConfig != null && message.hasOwnProperty("cmekConfig"))
-                                object.cmekConfig = $root.google.firestore.admin.v1.Database.CmekConfig.toObject(message.cmekConfig, options);
-                            if (message.previousId != null && message.hasOwnProperty("previousId"))
-                                object.previousId = message.previousId;
                             if (message.etag != null && message.hasOwnProperty("etag"))
                                 object.etag = message.etag;
                             return object;
@@ -981,128 +933,6 @@
                             values[valuesById[1] = "DELETE_PROTECTION_DISABLED"] = "DELETE_PROTECTION_DISABLED";
                             values[valuesById[2] = "DELETE_PROTECTION_ENABLED"] = "DELETE_PROTECTION_ENABLED";
                             return values;
-                        })();
-    
-                        Database.CmekConfig = (function() {
-    
-                            /**
-                             * Properties of a CmekConfig.
-                             * @memberof google.firestore.admin.v1.Database
-                             * @interface ICmekConfig
-                             * @property {string|null} [kmsKeyName] CmekConfig kmsKeyName
-                             * @property {Array.<string>|null} [activeKeyVersion] CmekConfig activeKeyVersion
-                             */
-    
-                            /**
-                             * Constructs a new CmekConfig.
-                             * @memberof google.firestore.admin.v1.Database
-                             * @classdesc Represents a CmekConfig.
-                             * @implements ICmekConfig
-                             * @constructor
-                             * @param {google.firestore.admin.v1.Database.ICmekConfig=} [properties] Properties to set
-                             */
-                            function CmekConfig(properties) {
-                                this.activeKeyVersion = [];
-                                if (properties)
-                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                        if (properties[keys[i]] != null)
-                                            this[keys[i]] = properties[keys[i]];
-                            }
-    
-                            /**
-                             * CmekConfig kmsKeyName.
-                             * @member {string} kmsKeyName
-                             * @memberof google.firestore.admin.v1.Database.CmekConfig
-                             * @instance
-                             */
-                            CmekConfig.prototype.kmsKeyName = "";
-    
-                            /**
-                             * CmekConfig activeKeyVersion.
-                             * @member {Array.<string>} activeKeyVersion
-                             * @memberof google.firestore.admin.v1.Database.CmekConfig
-                             * @instance
-                             */
-                            CmekConfig.prototype.activeKeyVersion = $util.emptyArray;
-    
-                            /**
-                             * Creates a CmekConfig message from a plain object. Also converts values to their respective internal types.
-                             * @function fromObject
-                             * @memberof google.firestore.admin.v1.Database.CmekConfig
-                             * @static
-                             * @param {Object.<string,*>} object Plain object
-                             * @returns {google.firestore.admin.v1.Database.CmekConfig} CmekConfig
-                             */
-                            CmekConfig.fromObject = function fromObject(object) {
-                                if (object instanceof $root.google.firestore.admin.v1.Database.CmekConfig)
-                                    return object;
-                                var message = new $root.google.firestore.admin.v1.Database.CmekConfig();
-                                if (object.kmsKeyName != null)
-                                    message.kmsKeyName = String(object.kmsKeyName);
-                                if (object.activeKeyVersion) {
-                                    if (!Array.isArray(object.activeKeyVersion))
-                                        throw TypeError(".google.firestore.admin.v1.Database.CmekConfig.activeKeyVersion: array expected");
-                                    message.activeKeyVersion = [];
-                                    for (var i = 0; i < object.activeKeyVersion.length; ++i)
-                                        message.activeKeyVersion[i] = String(object.activeKeyVersion[i]);
-                                }
-                                return message;
-                            };
-    
-                            /**
-                             * Creates a plain object from a CmekConfig message. Also converts values to other types if specified.
-                             * @function toObject
-                             * @memberof google.firestore.admin.v1.Database.CmekConfig
-                             * @static
-                             * @param {google.firestore.admin.v1.Database.CmekConfig} message CmekConfig
-                             * @param {$protobuf.IConversionOptions} [options] Conversion options
-                             * @returns {Object.<string,*>} Plain object
-                             */
-                            CmekConfig.toObject = function toObject(message, options) {
-                                if (!options)
-                                    options = {};
-                                var object = {};
-                                if (options.arrays || options.defaults)
-                                    object.activeKeyVersion = [];
-                                if (options.defaults)
-                                    object.kmsKeyName = "";
-                                if (message.kmsKeyName != null && message.hasOwnProperty("kmsKeyName"))
-                                    object.kmsKeyName = message.kmsKeyName;
-                                if (message.activeKeyVersion && message.activeKeyVersion.length) {
-                                    object.activeKeyVersion = [];
-                                    for (var j = 0; j < message.activeKeyVersion.length; ++j)
-                                        object.activeKeyVersion[j] = message.activeKeyVersion[j];
-                                }
-                                return object;
-                            };
-    
-                            /**
-                             * Converts this CmekConfig to JSON.
-                             * @function toJSON
-                             * @memberof google.firestore.admin.v1.Database.CmekConfig
-                             * @instance
-                             * @returns {Object.<string,*>} JSON object
-                             */
-                            CmekConfig.prototype.toJSON = function toJSON() {
-                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                            };
-    
-                            /**
-                             * Gets the default type url for CmekConfig
-                             * @function getTypeUrl
-                             * @memberof google.firestore.admin.v1.Database.CmekConfig
-                             * @static
-                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                             * @returns {string} The default type url
-                             */
-                            CmekConfig.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                                if (typeUrlPrefix === undefined) {
-                                    typeUrlPrefix = "type.googleapis.com";
-                                }
-                                return typeUrlPrefix + "/google.firestore.admin.v1.Database.CmekConfig";
-                            };
-    
-                            return CmekConfig;
                         })();
     
                         return Database;
@@ -2560,39 +2390,6 @@
                          */
     
                         /**
-                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#bulkDeleteDocuments}.
-                         * @memberof google.firestore.admin.v1.FirestoreAdmin
-                         * @typedef BulkDeleteDocumentsCallback
-                         * @type {function}
-                         * @param {Error|null} error Error, if any
-                         * @param {google.longrunning.Operation} [response] Operation
-                         */
-    
-                        /**
-                         * Calls BulkDeleteDocuments.
-                         * @function bulkDeleteDocuments
-                         * @memberof google.firestore.admin.v1.FirestoreAdmin
-                         * @instance
-                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsRequest} request BulkDeleteDocumentsRequest message or plain object
-                         * @param {google.firestore.admin.v1.FirestoreAdmin.BulkDeleteDocumentsCallback} callback Node-style callback called with the error, if any, and Operation
-                         * @returns {undefined}
-                         * @variation 1
-                         */
-                        Object.defineProperty(FirestoreAdmin.prototype.bulkDeleteDocuments = function bulkDeleteDocuments(request, callback) {
-                            return this.rpcCall(bulkDeleteDocuments, $root.google.firestore.admin.v1.BulkDeleteDocumentsRequest, $root.google.longrunning.Operation, request, callback);
-                        }, "name", { value: "BulkDeleteDocuments" });
-    
-                        /**
-                         * Calls BulkDeleteDocuments.
-                         * @function bulkDeleteDocuments
-                         * @memberof google.firestore.admin.v1.FirestoreAdmin
-                         * @instance
-                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsRequest} request BulkDeleteDocumentsRequest message or plain object
-                         * @returns {Promise<google.longrunning.Operation>} Promise
-                         * @variation 2
-                         */
-    
-                        /**
                          * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createDatabase}.
                          * @memberof google.firestore.admin.v1.FirestoreAdmin
                          * @typedef CreateDatabaseCallback
@@ -3064,7 +2861,6 @@
                          * @memberof google.firestore.admin.v1
                          * @interface IListDatabasesRequest
                          * @property {string|null} [parent] ListDatabasesRequest parent
-                         * @property {boolean|null} [showDeleted] ListDatabasesRequest showDeleted
                          */
     
                         /**
@@ -3091,14 +2887,6 @@
                         ListDatabasesRequest.prototype.parent = "";
     
                         /**
-                         * ListDatabasesRequest showDeleted.
-                         * @member {boolean} showDeleted
-                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
-                         * @instance
-                         */
-                        ListDatabasesRequest.prototype.showDeleted = false;
-    
-                        /**
                          * Creates a ListDatabasesRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.ListDatabasesRequest
@@ -3112,8 +2900,6 @@
                             var message = new $root.google.firestore.admin.v1.ListDatabasesRequest();
                             if (object.parent != null)
                                 message.parent = String(object.parent);
-                            if (object.showDeleted != null)
-                                message.showDeleted = Boolean(object.showDeleted);
                             return message;
                         };
     
@@ -3130,14 +2916,10 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.defaults) {
+                            if (options.defaults)
                                 object.parent = "";
-                                object.showDeleted = false;
-                            }
                             if (message.parent != null && message.hasOwnProperty("parent"))
                                 object.parent = message.parent;
-                            if (message.showDeleted != null && message.hasOwnProperty("showDeleted"))
-                                object.showDeleted = message.showDeleted;
                             return object;
                         };
     
@@ -6040,231 +5822,6 @@
                         return ImportDocumentsRequest;
                     })();
     
-                    v1.BulkDeleteDocumentsRequest = (function() {
-    
-                        /**
-                         * Properties of a BulkDeleteDocumentsRequest.
-                         * @memberof google.firestore.admin.v1
-                         * @interface IBulkDeleteDocumentsRequest
-                         * @property {string|null} [name] BulkDeleteDocumentsRequest name
-                         * @property {Array.<string>|null} [collectionIds] BulkDeleteDocumentsRequest collectionIds
-                         * @property {Array.<string>|null} [namespaceIds] BulkDeleteDocumentsRequest namespaceIds
-                         */
-    
-                        /**
-                         * Constructs a new BulkDeleteDocumentsRequest.
-                         * @memberof google.firestore.admin.v1
-                         * @classdesc Represents a BulkDeleteDocumentsRequest.
-                         * @implements IBulkDeleteDocumentsRequest
-                         * @constructor
-                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsRequest=} [properties] Properties to set
-                         */
-                        function BulkDeleteDocumentsRequest(properties) {
-                            this.collectionIds = [];
-                            this.namespaceIds = [];
-                            if (properties)
-                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                    if (properties[keys[i]] != null)
-                                        this[keys[i]] = properties[keys[i]];
-                        }
-    
-                        /**
-                         * BulkDeleteDocumentsRequest name.
-                         * @member {string} name
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
-                         * @instance
-                         */
-                        BulkDeleteDocumentsRequest.prototype.name = "";
-    
-                        /**
-                         * BulkDeleteDocumentsRequest collectionIds.
-                         * @member {Array.<string>} collectionIds
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
-                         * @instance
-                         */
-                        BulkDeleteDocumentsRequest.prototype.collectionIds = $util.emptyArray;
-    
-                        /**
-                         * BulkDeleteDocumentsRequest namespaceIds.
-                         * @member {Array.<string>} namespaceIds
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
-                         * @instance
-                         */
-                        BulkDeleteDocumentsRequest.prototype.namespaceIds = $util.emptyArray;
-    
-                        /**
-                         * Creates a BulkDeleteDocumentsRequest message from a plain object. Also converts values to their respective internal types.
-                         * @function fromObject
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
-                         * @static
-                         * @param {Object.<string,*>} object Plain object
-                         * @returns {google.firestore.admin.v1.BulkDeleteDocumentsRequest} BulkDeleteDocumentsRequest
-                         */
-                        BulkDeleteDocumentsRequest.fromObject = function fromObject(object) {
-                            if (object instanceof $root.google.firestore.admin.v1.BulkDeleteDocumentsRequest)
-                                return object;
-                            var message = new $root.google.firestore.admin.v1.BulkDeleteDocumentsRequest();
-                            if (object.name != null)
-                                message.name = String(object.name);
-                            if (object.collectionIds) {
-                                if (!Array.isArray(object.collectionIds))
-                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsRequest.collectionIds: array expected");
-                                message.collectionIds = [];
-                                for (var i = 0; i < object.collectionIds.length; ++i)
-                                    message.collectionIds[i] = String(object.collectionIds[i]);
-                            }
-                            if (object.namespaceIds) {
-                                if (!Array.isArray(object.namespaceIds))
-                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsRequest.namespaceIds: array expected");
-                                message.namespaceIds = [];
-                                for (var i = 0; i < object.namespaceIds.length; ++i)
-                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
-                            }
-                            return message;
-                        };
-    
-                        /**
-                         * Creates a plain object from a BulkDeleteDocumentsRequest message. Also converts values to other types if specified.
-                         * @function toObject
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
-                         * @static
-                         * @param {google.firestore.admin.v1.BulkDeleteDocumentsRequest} message BulkDeleteDocumentsRequest
-                         * @param {$protobuf.IConversionOptions} [options] Conversion options
-                         * @returns {Object.<string,*>} Plain object
-                         */
-                        BulkDeleteDocumentsRequest.toObject = function toObject(message, options) {
-                            if (!options)
-                                options = {};
-                            var object = {};
-                            if (options.arrays || options.defaults) {
-                                object.collectionIds = [];
-                                object.namespaceIds = [];
-                            }
-                            if (options.defaults)
-                                object.name = "";
-                            if (message.name != null && message.hasOwnProperty("name"))
-                                object.name = message.name;
-                            if (message.collectionIds && message.collectionIds.length) {
-                                object.collectionIds = [];
-                                for (var j = 0; j < message.collectionIds.length; ++j)
-                                    object.collectionIds[j] = message.collectionIds[j];
-                            }
-                            if (message.namespaceIds && message.namespaceIds.length) {
-                                object.namespaceIds = [];
-                                for (var j = 0; j < message.namespaceIds.length; ++j)
-                                    object.namespaceIds[j] = message.namespaceIds[j];
-                            }
-                            return object;
-                        };
-    
-                        /**
-                         * Converts this BulkDeleteDocumentsRequest to JSON.
-                         * @function toJSON
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
-                         * @instance
-                         * @returns {Object.<string,*>} JSON object
-                         */
-                        BulkDeleteDocumentsRequest.prototype.toJSON = function toJSON() {
-                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                        };
-    
-                        /**
-                         * Gets the default type url for BulkDeleteDocumentsRequest
-                         * @function getTypeUrl
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
-                         * @static
-                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                         * @returns {string} The default type url
-                         */
-                        BulkDeleteDocumentsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                            if (typeUrlPrefix === undefined) {
-                                typeUrlPrefix = "type.googleapis.com";
-                            }
-                            return typeUrlPrefix + "/google.firestore.admin.v1.BulkDeleteDocumentsRequest";
-                        };
-    
-                        return BulkDeleteDocumentsRequest;
-                    })();
-    
-                    v1.BulkDeleteDocumentsResponse = (function() {
-    
-                        /**
-                         * Properties of a BulkDeleteDocumentsResponse.
-                         * @memberof google.firestore.admin.v1
-                         * @interface IBulkDeleteDocumentsResponse
-                         */
-    
-                        /**
-                         * Constructs a new BulkDeleteDocumentsResponse.
-                         * @memberof google.firestore.admin.v1
-                         * @classdesc Represents a BulkDeleteDocumentsResponse.
-                         * @implements IBulkDeleteDocumentsResponse
-                         * @constructor
-                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsResponse=} [properties] Properties to set
-                         */
-                        function BulkDeleteDocumentsResponse(properties) {
-                            if (properties)
-                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                    if (properties[keys[i]] != null)
-                                        this[keys[i]] = properties[keys[i]];
-                        }
-    
-                        /**
-                         * Creates a BulkDeleteDocumentsResponse message from a plain object. Also converts values to their respective internal types.
-                         * @function fromObject
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
-                         * @static
-                         * @param {Object.<string,*>} object Plain object
-                         * @returns {google.firestore.admin.v1.BulkDeleteDocumentsResponse} BulkDeleteDocumentsResponse
-                         */
-                        BulkDeleteDocumentsResponse.fromObject = function fromObject(object) {
-                            if (object instanceof $root.google.firestore.admin.v1.BulkDeleteDocumentsResponse)
-                                return object;
-                            return new $root.google.firestore.admin.v1.BulkDeleteDocumentsResponse();
-                        };
-    
-                        /**
-                         * Creates a plain object from a BulkDeleteDocumentsResponse message. Also converts values to other types if specified.
-                         * @function toObject
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
-                         * @static
-                         * @param {google.firestore.admin.v1.BulkDeleteDocumentsResponse} message BulkDeleteDocumentsResponse
-                         * @param {$protobuf.IConversionOptions} [options] Conversion options
-                         * @returns {Object.<string,*>} Plain object
-                         */
-                        BulkDeleteDocumentsResponse.toObject = function toObject() {
-                            return {};
-                        };
-    
-                        /**
-                         * Converts this BulkDeleteDocumentsResponse to JSON.
-                         * @function toJSON
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
-                         * @instance
-                         * @returns {Object.<string,*>} JSON object
-                         */
-                        BulkDeleteDocumentsResponse.prototype.toJSON = function toJSON() {
-                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                        };
-    
-                        /**
-                         * Gets the default type url for BulkDeleteDocumentsResponse
-                         * @function getTypeUrl
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
-                         * @static
-                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                         * @returns {string} The default type url
-                         */
-                        BulkDeleteDocumentsResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                            if (typeUrlPrefix === undefined) {
-                                typeUrlPrefix = "type.googleapis.com";
-                            }
-                            return typeUrlPrefix + "/google.firestore.admin.v1.BulkDeleteDocumentsResponse";
-                        };
-    
-                        return BulkDeleteDocumentsResponse;
-                    })();
-    
                     v1.GetBackupRequest = (function() {
     
                         /**
@@ -6702,9 +6259,6 @@
                          * @property {string|null} [parent] RestoreDatabaseRequest parent
                          * @property {string|null} [databaseId] RestoreDatabaseRequest databaseId
                          * @property {string|null} [backup] RestoreDatabaseRequest backup
-                         * @property {google.protobuf.IEmpty|null} [useGoogleDefaultEncryption] RestoreDatabaseRequest useGoogleDefaultEncryption
-                         * @property {google.protobuf.IEmpty|null} [useBackupEncryption] RestoreDatabaseRequest useBackupEncryption
-                         * @property {string|null} [kmsKeyName] RestoreDatabaseRequest kmsKeyName
                          */
     
                         /**
@@ -6747,44 +6301,6 @@
                         RestoreDatabaseRequest.prototype.backup = "";
     
                         /**
-                         * RestoreDatabaseRequest useGoogleDefaultEncryption.
-                         * @member {google.protobuf.IEmpty|null|undefined} useGoogleDefaultEncryption
-                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
-                         * @instance
-                         */
-                        RestoreDatabaseRequest.prototype.useGoogleDefaultEncryption = null;
-    
-                        /**
-                         * RestoreDatabaseRequest useBackupEncryption.
-                         * @member {google.protobuf.IEmpty|null|undefined} useBackupEncryption
-                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
-                         * @instance
-                         */
-                        RestoreDatabaseRequest.prototype.useBackupEncryption = null;
-    
-                        /**
-                         * RestoreDatabaseRequest kmsKeyName.
-                         * @member {string|null|undefined} kmsKeyName
-                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
-                         * @instance
-                         */
-                        RestoreDatabaseRequest.prototype.kmsKeyName = null;
-    
-                        // OneOf field names bound to virtual getters and setters
-                        var $oneOfFields;
-    
-                        /**
-                         * RestoreDatabaseRequest encryptionConfig.
-                         * @member {"useGoogleDefaultEncryption"|"useBackupEncryption"|"kmsKeyName"|undefined} encryptionConfig
-                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
-                         * @instance
-                         */
-                        Object.defineProperty(RestoreDatabaseRequest.prototype, "encryptionConfig", {
-                            get: $util.oneOfGetter($oneOfFields = ["useGoogleDefaultEncryption", "useBackupEncryption", "kmsKeyName"]),
-                            set: $util.oneOfSetter($oneOfFields)
-                        });
-    
-                        /**
                          * Creates a RestoreDatabaseRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
@@ -6802,18 +6318,6 @@
                                 message.databaseId = String(object.databaseId);
                             if (object.backup != null)
                                 message.backup = String(object.backup);
-                            if (object.useGoogleDefaultEncryption != null) {
-                                if (typeof object.useGoogleDefaultEncryption !== "object")
-                                    throw TypeError(".google.firestore.admin.v1.RestoreDatabaseRequest.useGoogleDefaultEncryption: object expected");
-                                message.useGoogleDefaultEncryption = $root.google.protobuf.Empty.fromObject(object.useGoogleDefaultEncryption);
-                            }
-                            if (object.useBackupEncryption != null) {
-                                if (typeof object.useBackupEncryption !== "object")
-                                    throw TypeError(".google.firestore.admin.v1.RestoreDatabaseRequest.useBackupEncryption: object expected");
-                                message.useBackupEncryption = $root.google.protobuf.Empty.fromObject(object.useBackupEncryption);
-                            }
-                            if (object.kmsKeyName != null)
-                                message.kmsKeyName = String(object.kmsKeyName);
                             return message;
                         };
     
@@ -6841,21 +6345,6 @@
                                 object.databaseId = message.databaseId;
                             if (message.backup != null && message.hasOwnProperty("backup"))
                                 object.backup = message.backup;
-                            if (message.useGoogleDefaultEncryption != null && message.hasOwnProperty("useGoogleDefaultEncryption")) {
-                                object.useGoogleDefaultEncryption = $root.google.protobuf.Empty.toObject(message.useGoogleDefaultEncryption, options);
-                                if (options.oneofs)
-                                    object.encryptionConfig = "useGoogleDefaultEncryption";
-                            }
-                            if (message.useBackupEncryption != null && message.hasOwnProperty("useBackupEncryption")) {
-                                object.useBackupEncryption = $root.google.protobuf.Empty.toObject(message.useBackupEncryption, options);
-                                if (options.oneofs)
-                                    object.encryptionConfig = "useBackupEncryption";
-                            }
-                            if (message.kmsKeyName != null && message.hasOwnProperty("kmsKeyName")) {
-                                object.kmsKeyName = message.kmsKeyName;
-                                if (options.oneofs)
-                                    object.encryptionConfig = "kmsKeyName";
-                            }
                             return object;
                         };
     
@@ -8201,276 +7690,6 @@
                         };
     
                         return ImportDocumentsMetadata;
-                    })();
-    
-                    v1.BulkDeleteDocumentsMetadata = (function() {
-    
-                        /**
-                         * Properties of a BulkDeleteDocumentsMetadata.
-                         * @memberof google.firestore.admin.v1
-                         * @interface IBulkDeleteDocumentsMetadata
-                         * @property {google.protobuf.ITimestamp|null} [startTime] BulkDeleteDocumentsMetadata startTime
-                         * @property {google.protobuf.ITimestamp|null} [endTime] BulkDeleteDocumentsMetadata endTime
-                         * @property {google.firestore.admin.v1.OperationState|null} [operationState] BulkDeleteDocumentsMetadata operationState
-                         * @property {google.firestore.admin.v1.IProgress|null} [progressDocuments] BulkDeleteDocumentsMetadata progressDocuments
-                         * @property {google.firestore.admin.v1.IProgress|null} [progressBytes] BulkDeleteDocumentsMetadata progressBytes
-                         * @property {Array.<string>|null} [collectionIds] BulkDeleteDocumentsMetadata collectionIds
-                         * @property {Array.<string>|null} [namespaceIds] BulkDeleteDocumentsMetadata namespaceIds
-                         * @property {google.protobuf.ITimestamp|null} [snapshotTime] BulkDeleteDocumentsMetadata snapshotTime
-                         */
-    
-                        /**
-                         * Constructs a new BulkDeleteDocumentsMetadata.
-                         * @memberof google.firestore.admin.v1
-                         * @classdesc Represents a BulkDeleteDocumentsMetadata.
-                         * @implements IBulkDeleteDocumentsMetadata
-                         * @constructor
-                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsMetadata=} [properties] Properties to set
-                         */
-                        function BulkDeleteDocumentsMetadata(properties) {
-                            this.collectionIds = [];
-                            this.namespaceIds = [];
-                            if (properties)
-                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                    if (properties[keys[i]] != null)
-                                        this[keys[i]] = properties[keys[i]];
-                        }
-    
-                        /**
-                         * BulkDeleteDocumentsMetadata startTime.
-                         * @member {google.protobuf.ITimestamp|null|undefined} startTime
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @instance
-                         */
-                        BulkDeleteDocumentsMetadata.prototype.startTime = null;
-    
-                        /**
-                         * BulkDeleteDocumentsMetadata endTime.
-                         * @member {google.protobuf.ITimestamp|null|undefined} endTime
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @instance
-                         */
-                        BulkDeleteDocumentsMetadata.prototype.endTime = null;
-    
-                        /**
-                         * BulkDeleteDocumentsMetadata operationState.
-                         * @member {google.firestore.admin.v1.OperationState} operationState
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @instance
-                         */
-                        BulkDeleteDocumentsMetadata.prototype.operationState = 0;
-    
-                        /**
-                         * BulkDeleteDocumentsMetadata progressDocuments.
-                         * @member {google.firestore.admin.v1.IProgress|null|undefined} progressDocuments
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @instance
-                         */
-                        BulkDeleteDocumentsMetadata.prototype.progressDocuments = null;
-    
-                        /**
-                         * BulkDeleteDocumentsMetadata progressBytes.
-                         * @member {google.firestore.admin.v1.IProgress|null|undefined} progressBytes
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @instance
-                         */
-                        BulkDeleteDocumentsMetadata.prototype.progressBytes = null;
-    
-                        /**
-                         * BulkDeleteDocumentsMetadata collectionIds.
-                         * @member {Array.<string>} collectionIds
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @instance
-                         */
-                        BulkDeleteDocumentsMetadata.prototype.collectionIds = $util.emptyArray;
-    
-                        /**
-                         * BulkDeleteDocumentsMetadata namespaceIds.
-                         * @member {Array.<string>} namespaceIds
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @instance
-                         */
-                        BulkDeleteDocumentsMetadata.prototype.namespaceIds = $util.emptyArray;
-    
-                        /**
-                         * BulkDeleteDocumentsMetadata snapshotTime.
-                         * @member {google.protobuf.ITimestamp|null|undefined} snapshotTime
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @instance
-                         */
-                        BulkDeleteDocumentsMetadata.prototype.snapshotTime = null;
-    
-                        /**
-                         * Creates a BulkDeleteDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
-                         * @function fromObject
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @static
-                         * @param {Object.<string,*>} object Plain object
-                         * @returns {google.firestore.admin.v1.BulkDeleteDocumentsMetadata} BulkDeleteDocumentsMetadata
-                         */
-                        BulkDeleteDocumentsMetadata.fromObject = function fromObject(object) {
-                            if (object instanceof $root.google.firestore.admin.v1.BulkDeleteDocumentsMetadata)
-                                return object;
-                            var message = new $root.google.firestore.admin.v1.BulkDeleteDocumentsMetadata();
-                            if (object.startTime != null) {
-                                if (typeof object.startTime !== "object")
-                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.startTime: object expected");
-                                message.startTime = $root.google.protobuf.Timestamp.fromObject(object.startTime);
-                            }
-                            if (object.endTime != null) {
-                                if (typeof object.endTime !== "object")
-                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.endTime: object expected");
-                                message.endTime = $root.google.protobuf.Timestamp.fromObject(object.endTime);
-                            }
-                            switch (object.operationState) {
-                            default:
-                                if (typeof object.operationState === "number") {
-                                    message.operationState = object.operationState;
-                                    break;
-                                }
-                                break;
-                            case "OPERATION_STATE_UNSPECIFIED":
-                            case 0:
-                                message.operationState = 0;
-                                break;
-                            case "INITIALIZING":
-                            case 1:
-                                message.operationState = 1;
-                                break;
-                            case "PROCESSING":
-                            case 2:
-                                message.operationState = 2;
-                                break;
-                            case "CANCELLING":
-                            case 3:
-                                message.operationState = 3;
-                                break;
-                            case "FINALIZING":
-                            case 4:
-                                message.operationState = 4;
-                                break;
-                            case "SUCCESSFUL":
-                            case 5:
-                                message.operationState = 5;
-                                break;
-                            case "FAILED":
-                            case 6:
-                                message.operationState = 6;
-                                break;
-                            case "CANCELLED":
-                            case 7:
-                                message.operationState = 7;
-                                break;
-                            }
-                            if (object.progressDocuments != null) {
-                                if (typeof object.progressDocuments !== "object")
-                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.progressDocuments: object expected");
-                                message.progressDocuments = $root.google.firestore.admin.v1.Progress.fromObject(object.progressDocuments);
-                            }
-                            if (object.progressBytes != null) {
-                                if (typeof object.progressBytes !== "object")
-                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.progressBytes: object expected");
-                                message.progressBytes = $root.google.firestore.admin.v1.Progress.fromObject(object.progressBytes);
-                            }
-                            if (object.collectionIds) {
-                                if (!Array.isArray(object.collectionIds))
-                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.collectionIds: array expected");
-                                message.collectionIds = [];
-                                for (var i = 0; i < object.collectionIds.length; ++i)
-                                    message.collectionIds[i] = String(object.collectionIds[i]);
-                            }
-                            if (object.namespaceIds) {
-                                if (!Array.isArray(object.namespaceIds))
-                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.namespaceIds: array expected");
-                                message.namespaceIds = [];
-                                for (var i = 0; i < object.namespaceIds.length; ++i)
-                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
-                            }
-                            if (object.snapshotTime != null) {
-                                if (typeof object.snapshotTime !== "object")
-                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.snapshotTime: object expected");
-                                message.snapshotTime = $root.google.protobuf.Timestamp.fromObject(object.snapshotTime);
-                            }
-                            return message;
-                        };
-    
-                        /**
-                         * Creates a plain object from a BulkDeleteDocumentsMetadata message. Also converts values to other types if specified.
-                         * @function toObject
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @static
-                         * @param {google.firestore.admin.v1.BulkDeleteDocumentsMetadata} message BulkDeleteDocumentsMetadata
-                         * @param {$protobuf.IConversionOptions} [options] Conversion options
-                         * @returns {Object.<string,*>} Plain object
-                         */
-                        BulkDeleteDocumentsMetadata.toObject = function toObject(message, options) {
-                            if (!options)
-                                options = {};
-                            var object = {};
-                            if (options.arrays || options.defaults) {
-                                object.collectionIds = [];
-                                object.namespaceIds = [];
-                            }
-                            if (options.defaults) {
-                                object.startTime = null;
-                                object.endTime = null;
-                                object.operationState = options.enums === String ? "OPERATION_STATE_UNSPECIFIED" : 0;
-                                object.progressDocuments = null;
-                                object.progressBytes = null;
-                                object.snapshotTime = null;
-                            }
-                            if (message.startTime != null && message.hasOwnProperty("startTime"))
-                                object.startTime = $root.google.protobuf.Timestamp.toObject(message.startTime, options);
-                            if (message.endTime != null && message.hasOwnProperty("endTime"))
-                                object.endTime = $root.google.protobuf.Timestamp.toObject(message.endTime, options);
-                            if (message.operationState != null && message.hasOwnProperty("operationState"))
-                                object.operationState = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.operationState] === undefined ? message.operationState : $root.google.firestore.admin.v1.OperationState[message.operationState] : message.operationState;
-                            if (message.progressDocuments != null && message.hasOwnProperty("progressDocuments"))
-                                object.progressDocuments = $root.google.firestore.admin.v1.Progress.toObject(message.progressDocuments, options);
-                            if (message.progressBytes != null && message.hasOwnProperty("progressBytes"))
-                                object.progressBytes = $root.google.firestore.admin.v1.Progress.toObject(message.progressBytes, options);
-                            if (message.collectionIds && message.collectionIds.length) {
-                                object.collectionIds = [];
-                                for (var j = 0; j < message.collectionIds.length; ++j)
-                                    object.collectionIds[j] = message.collectionIds[j];
-                            }
-                            if (message.namespaceIds && message.namespaceIds.length) {
-                                object.namespaceIds = [];
-                                for (var j = 0; j < message.namespaceIds.length; ++j)
-                                    object.namespaceIds[j] = message.namespaceIds[j];
-                            }
-                            if (message.snapshotTime != null && message.hasOwnProperty("snapshotTime"))
-                                object.snapshotTime = $root.google.protobuf.Timestamp.toObject(message.snapshotTime, options);
-                            return object;
-                        };
-    
-                        /**
-                         * Converts this BulkDeleteDocumentsMetadata to JSON.
-                         * @function toJSON
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @instance
-                         * @returns {Object.<string,*>} JSON object
-                         */
-                        BulkDeleteDocumentsMetadata.prototype.toJSON = function toJSON() {
-                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                        };
-    
-                        /**
-                         * Gets the default type url for BulkDeleteDocumentsMetadata
-                         * @function getTypeUrl
-                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
-                         * @static
-                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                         * @returns {string} The default type url
-                         */
-                        BulkDeleteDocumentsMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                            if (typeUrlPrefix === undefined) {
-                                typeUrlPrefix = "type.googleapis.com";
-                            }
-                            return typeUrlPrefix + "/google.firestore.admin.v1.BulkDeleteDocumentsMetadata";
-                        };
-    
-                        return BulkDeleteDocumentsMetadata;
                     })();
     
                     v1.ExportDocumentsResponse = (function() {
@@ -21181,147 +20400,6 @@
                 values[valuesById[6] = "SATURDAY"] = "SATURDAY";
                 values[valuesById[7] = "SUNDAY"] = "SUNDAY";
                 return values;
-            })();
-    
-            type.TimeOfDay = (function() {
-    
-                /**
-                 * Properties of a TimeOfDay.
-                 * @memberof google.type
-                 * @interface ITimeOfDay
-                 * @property {number|null} [hours] TimeOfDay hours
-                 * @property {number|null} [minutes] TimeOfDay minutes
-                 * @property {number|null} [seconds] TimeOfDay seconds
-                 * @property {number|null} [nanos] TimeOfDay nanos
-                 */
-    
-                /**
-                 * Constructs a new TimeOfDay.
-                 * @memberof google.type
-                 * @classdesc Represents a TimeOfDay.
-                 * @implements ITimeOfDay
-                 * @constructor
-                 * @param {google.type.ITimeOfDay=} [properties] Properties to set
-                 */
-                function TimeOfDay(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * TimeOfDay hours.
-                 * @member {number} hours
-                 * @memberof google.type.TimeOfDay
-                 * @instance
-                 */
-                TimeOfDay.prototype.hours = 0;
-    
-                /**
-                 * TimeOfDay minutes.
-                 * @member {number} minutes
-                 * @memberof google.type.TimeOfDay
-                 * @instance
-                 */
-                TimeOfDay.prototype.minutes = 0;
-    
-                /**
-                 * TimeOfDay seconds.
-                 * @member {number} seconds
-                 * @memberof google.type.TimeOfDay
-                 * @instance
-                 */
-                TimeOfDay.prototype.seconds = 0;
-    
-                /**
-                 * TimeOfDay nanos.
-                 * @member {number} nanos
-                 * @memberof google.type.TimeOfDay
-                 * @instance
-                 */
-                TimeOfDay.prototype.nanos = 0;
-    
-                /**
-                 * Creates a TimeOfDay message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.type.TimeOfDay
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.type.TimeOfDay} TimeOfDay
-                 */
-                TimeOfDay.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.type.TimeOfDay)
-                        return object;
-                    var message = new $root.google.type.TimeOfDay();
-                    if (object.hours != null)
-                        message.hours = object.hours | 0;
-                    if (object.minutes != null)
-                        message.minutes = object.minutes | 0;
-                    if (object.seconds != null)
-                        message.seconds = object.seconds | 0;
-                    if (object.nanos != null)
-                        message.nanos = object.nanos | 0;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a TimeOfDay message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.type.TimeOfDay
-                 * @static
-                 * @param {google.type.TimeOfDay} message TimeOfDay
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                TimeOfDay.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.hours = 0;
-                        object.minutes = 0;
-                        object.seconds = 0;
-                        object.nanos = 0;
-                    }
-                    if (message.hours != null && message.hasOwnProperty("hours"))
-                        object.hours = message.hours;
-                    if (message.minutes != null && message.hasOwnProperty("minutes"))
-                        object.minutes = message.minutes;
-                    if (message.seconds != null && message.hasOwnProperty("seconds"))
-                        object.seconds = message.seconds;
-                    if (message.nanos != null && message.hasOwnProperty("nanos"))
-                        object.nanos = message.nanos;
-                    return object;
-                };
-    
-                /**
-                 * Converts this TimeOfDay to JSON.
-                 * @function toJSON
-                 * @memberof google.type.TimeOfDay
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                TimeOfDay.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * Gets the default type url for TimeOfDay
-                 * @function getTypeUrl
-                 * @memberof google.type.TimeOfDay
-                 * @static
-                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns {string} The default type url
-                 */
-                TimeOfDay.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                    if (typeUrlPrefix === undefined) {
-                        typeUrlPrefix = "type.googleapis.com";
-                    }
-                    return typeUrlPrefix + "/google.type.TimeOfDay";
-                };
-    
-                return TimeOfDay;
             })();
     
             type.LatLng = (function() {
