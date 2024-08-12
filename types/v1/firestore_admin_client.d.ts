@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/// <reference types="node" />
 import type * as gax from 'google-gax';
 import type {
   Callback,
@@ -356,6 +355,8 @@ export declare class FirestoreAdminClient {
    * @param {string} request.parent
    *   Required. A parent name of the form
    *   `projects/{project_id}`
+   * @param {boolean} request.showDeleted
+   *   If true, also returns deleted resources.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -971,7 +972,8 @@ export declare class FirestoreAdminClient {
    *   Required. Database to export. Should be of the form:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {string[]} request.collectionIds
-   *   Which collection ids to export. Unspecified means all collections.
+   *   Which collection ids to export. Unspecified means all collections. Each
+   *   collection id in this list must be unique.
    * @param {string} request.outputUriPrefix
    *   The output URI. Currently only supports Google Cloud Storage URIs of the
    *   form: `gs://BUCKET_NAME[/NAMESPACE_PATH]`, where `BUCKET_NAME` is the name
@@ -1076,7 +1078,7 @@ export declare class FirestoreAdminClient {
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {string[]} request.collectionIds
    *   Which collection ids to import. Unspecified means all collections included
-   *   in the import.
+   *   in the import. Each collection id in this list must be unique.
    * @param {string} request.inputUriPrefix
    *   Location of the exported files.
    *   This must match the output_uri_prefix of an ExportDocumentsResponse from
@@ -1154,6 +1156,103 @@ export declare class FirestoreAdminClient {
     LROperation<
       protos.google.protobuf.Empty,
       protos.google.firestore.admin.v1.ImportDocumentsMetadata
+    >
+  >;
+  /**
+   * Bulk deletes a subset of documents from Google Cloud Firestore.
+   * Documents created or updated after the underlying system starts to process
+   * the request will not be deleted. The bulk delete occurs in the background
+   * and its progress can be monitored and managed via the Operation resource
+   * that is created.
+   *
+   * For more details on bulk delete behavior, refer to:
+   * https://cloud.google.com/firestore/docs/manage-data/bulk-delete
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.name
+   *   Required. Database to operate. Should be of the form:
+   *   `projects/{project_id}/databases/{database_id}`.
+   * @param {string[]} [request.collectionIds]
+   *   Optional. IDs of the collection groups to delete. Unspecified means all
+   *   collection groups.
+   *
+   *   Each collection group in this list must be unique.
+   * @param {string[]} [request.namespaceIds]
+   *   Optional. Namespaces to delete.
+   *
+   *   An empty list means all namespaces. This is the recommended
+   *   usage for databases that don't use namespaces.
+   *
+   *   An empty string element represents the default namespace. This should be
+   *   used if the database has data in non-default namespaces, but doesn't want
+   *   to delete from them.
+   *
+   *   Each namespace in this list must be unique.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing
+   *   a long running operation. Its `promise()` method returns a promise
+   *   you can `await` for.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.bulk_delete_documents.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_BulkDeleteDocuments_async
+   */
+  bulkDeleteDocuments(
+    request?: protos.google.firestore.admin.v1.IBulkDeleteDocumentsRequest,
+    options?: CallOptions
+  ): Promise<
+    [
+      LROperation<
+        protos.google.firestore.admin.v1.IBulkDeleteDocumentsResponse,
+        protos.google.firestore.admin.v1.IBulkDeleteDocumentsMetadata
+      >,
+      protos.google.longrunning.IOperation | undefined,
+      {} | undefined,
+    ]
+  >;
+  bulkDeleteDocuments(
+    request: protos.google.firestore.admin.v1.IBulkDeleteDocumentsRequest,
+    options: CallOptions,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IBulkDeleteDocumentsResponse,
+        protos.google.firestore.admin.v1.IBulkDeleteDocumentsMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  bulkDeleteDocuments(
+    request: protos.google.firestore.admin.v1.IBulkDeleteDocumentsRequest,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IBulkDeleteDocumentsResponse,
+        protos.google.firestore.admin.v1.IBulkDeleteDocumentsMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  /**
+   * Check the status of the long running operation returned by `bulkDeleteDocuments()`.
+   * @param {String} name
+   *   The operation name that will be passed.
+   * @returns {Promise} - The promise which resolves to an object.
+   *   The decoded operation object has result and metadata field to get information from.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.bulk_delete_documents.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_BulkDeleteDocuments_async
+   */
+  checkBulkDeleteDocumentsProgress(
+    name: string
+  ): Promise<
+    LROperation<
+      protos.google.firestore.admin.v1.BulkDeleteDocumentsResponse,
+      protos.google.firestore.admin.v1.BulkDeleteDocumentsMetadata
     >
   >;
   /**
@@ -1399,7 +1498,7 @@ export declare class FirestoreAdminClient {
    *
    * The new database must be in the same cloud region or multi-region location
    * as the existing backup. This behaves similar to
-   * {@link protos.google.firestore.admin.v1.CreateDatabase|FirestoreAdmin.CreateDatabase}
+   * {@link protos.google.firestore.admin.v1.FirestoreAdmin.CreateDatabase|FirestoreAdmin.CreateDatabase}
    * except instead of creating a new empty database, a new database is created
    * with the database type, index configuration, and documents from an existing
    * backup.
@@ -1639,7 +1738,8 @@ export declare class FirestoreAdminClient {
    *   only supports listing fields that have been explicitly overridden. To issue
    *   this query, call
    *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
-   *   with a filter that includes `indexConfig.usesAncestorConfig:false` .
+   *   with a filter that includes `indexConfig.usesAncestorConfig:false` or
+   *   `ttlConfig:*`.
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
@@ -1698,7 +1798,8 @@ export declare class FirestoreAdminClient {
    *   only supports listing fields that have been explicitly overridden. To issue
    *   this query, call
    *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
-   *   with a filter that includes `indexConfig.usesAncestorConfig:false` .
+   *   with a filter that includes `indexConfig.usesAncestorConfig:false` or
+   *   `ttlConfig:*`.
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
@@ -1735,7 +1836,8 @@ export declare class FirestoreAdminClient {
    *   only supports listing fields that have been explicitly overridden. To issue
    *   this query, call
    *   {@link protos.google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}
-   *   with a filter that includes `indexConfig.usesAncestorConfig:false` .
+   *   with a filter that includes `indexConfig.usesAncestorConfig:false` or
+   *   `ttlConfig:*`.
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
