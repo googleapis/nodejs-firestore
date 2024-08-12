@@ -633,6 +633,34 @@
                             }
                           ]
                         },
+                        "BulkDeleteDocuments": {
+                          "requestType": "BulkDeleteDocumentsRequest",
+                          "responseType": "google.longrunning.Operation",
+                          "options": {
+                            "(google.api.http).post": "/v1/{name=projects/*/databases/*}:bulkDeleteDocuments",
+                            "(google.api.http).body": "*",
+                            "(google.api.method_signature)": "name",
+                            "(google.longrunning.operation_info).response_type": "BulkDeleteDocumentsResponse",
+                            "(google.longrunning.operation_info).metadata_type": "BulkDeleteDocumentsMetadata"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{name=projects/*/databases/*}:bulkDeleteDocuments",
+                                "body": "*"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            },
+                            {
+                              "(google.longrunning.operation_info)": {
+                                "response_type": "BulkDeleteDocumentsResponse",
+                                "metadata_type": "BulkDeleteDocumentsMetadata"
+                              }
+                            }
+                          ]
+                        },
                         "CreateDatabase": {
                           "requestType": "CreateDatabaseRequest",
                           "responseType": "google.longrunning.Operation",
@@ -934,6 +962,10 @@
                             "(google.api.field_behavior)": "REQUIRED",
                             "(google.api.resource_reference).child_type": "firestore.googleapis.com/Database"
                           }
+                        },
+                        "showDeleted": {
+                          "type": "bool",
+                          "id": 4
                         }
                       }
                     },
@@ -1308,6 +1340,37 @@
                         }
                       }
                     },
+                    "BulkDeleteDocumentsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Database"
+                          }
+                        },
+                        "collectionIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        },
+                        "namespaceIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        }
+                      }
+                    },
+                    "BulkDeleteDocumentsResponse": {
+                      "fields": {}
+                    },
                     "GetBackupRequest": {
                       "fields": {
                         "name": {
@@ -1566,6 +1629,44 @@
                         "namespaceIds": {
                           "rule": "repeated",
                           "type": "string",
+                          "id": 8
+                        }
+                      }
+                    },
+                    "BulkDeleteDocumentsMetadata": {
+                      "fields": {
+                        "startTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 1
+                        },
+                        "endTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2
+                        },
+                        "operationState": {
+                          "type": "OperationState",
+                          "id": 3
+                        },
+                        "progressDocuments": {
+                          "type": "Progress",
+                          "id": 4
+                        },
+                        "progressBytes": {
+                          "type": "Progress",
+                          "id": 5
+                        },
+                        "collectionIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 6
+                        },
+                        "namespaceIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 7
+                        },
+                        "snapshotTime": {
+                          "type": "google.protobuf.Timestamp",
                           "id": 8
                         }
                       }
