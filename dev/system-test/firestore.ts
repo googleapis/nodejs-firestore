@@ -443,7 +443,9 @@ describe('Firestore class', () => {
 
     const explainResults = await indexTestHelper
       .query(collectionReference)
-      .findNearest('embedding', FieldValue.vector([1, 3]), {
+      .findNearest({
+        vectorField: 'embedding',
+        queryVector: FieldValue.vector([1, 3]),
         limit: 10,
         distanceMeasure: 'COSINE',
       })
@@ -473,7 +475,9 @@ describe('Firestore class', () => {
 
     const explainResults = await indexTestHelper
       .query(collectionReference)
-      .findNearest('embedding', FieldValue.vector([1, 3]), {
+      .findNearest({
+        vectorField: 'embedding',
+        queryVector: FieldValue.vector([1, 3]),
         limit: 10,
         distanceMeasure: 'COSINE',
       })
@@ -1982,7 +1986,9 @@ describe('Query class', () => {
       const vectorQuery = indexTestHelper
         .query(collectionReference)
         .where('foo', '==', 'bar')
-        .findNearest('embedding', [10, 10], {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [10, 10],
           limit: 3,
           distanceMeasure: 'EUCLIDEAN',
         });
@@ -2012,7 +2018,9 @@ describe('Query class', () => {
       const vectorQuery = indexTestHelper
         .query(collectionReference)
         .where('foo', '==', 'bar')
-        .findNearest('embedding', [10, 10], {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [10, 10],
           limit: 3,
           distanceMeasure: 'COSINE',
         });
@@ -2054,7 +2062,9 @@ describe('Query class', () => {
       const vectorQuery = indexTestHelper
         .query(collectionReference)
         .where('foo', '==', 'bar')
-        .findNearest('embedding', [10, 10], {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [10, 10],
           limit: 3,
           distanceMeasure: 'DOT_PRODUCT',
         });
@@ -2098,7 +2108,9 @@ describe('Query class', () => {
         .query(collectionRef)
         .withConverter(fooConverter)
         .where('foo', '==', 'bar')
-        .findNearest('embedding', [10, 10], {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [10, 10],
           limit: 3,
           distanceMeasure: 'EUCLIDEAN',
         });
@@ -2130,7 +2142,9 @@ describe('Query class', () => {
       const vectorQuery = indexTestHelper
         .query(collectionRef)
         .where('foo', '==', 'bar')
-        .findNearest('embedding', [10, 10], {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [10, 10],
           limit: 100, // Intentionally large to get all matches.
           distanceMeasure: 'EUCLIDEAN',
         });
@@ -2163,7 +2177,9 @@ describe('Query class', () => {
       const vectorQuery = indexTestHelper
         .query(collectionRef)
         .where('foo', '==', 'bar')
-        .findNearest('embedding', [10, 10], {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [10, 10],
           limit: 3,
           distanceMeasure: 'EUCLIDEAN',
         });
@@ -2189,7 +2205,9 @@ describe('Query class', () => {
       const vectorQuery = indexTestHelper
         .query(collectionRef)
         .where('foo', '==', 'bar')
-        .findNearest('embedding', [10, 10], {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [10, 10],
           limit: 3,
           distanceMeasure: 'EUCLIDEAN',
         });
@@ -2213,7 +2231,9 @@ describe('Query class', () => {
 
       const vectorQuery = indexTestHelper
         .query(collectionReference)
-        .findNearest('nested.embedding', [10, 10], {
+        .findNearest({
+          vectorField: 'nested.embedding',
+          queryVector: [10, 10],
           limit: 3,
           distanceMeasure: 'EUCLIDEAN',
         });
@@ -2247,7 +2267,9 @@ describe('Query class', () => {
         .query(collectionReference)
         .where('foo', 'in', [1, 2, 3, 4, 5, 6])
         .select('foo')
-        .findNearest('embedding', [10, 10], {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [10, 10],
           limit: 10,
           distanceMeasure: 'EUCLIDEAN',
         });
@@ -2279,7 +2301,9 @@ describe('Query class', () => {
 
       const vectorQuery = indexTestHelper
         .query(collectionReference)
-        .findNearest('embedding', queryVector, {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: queryVector,
           limit: 1000,
           distanceMeasure: 'EUCLIDEAN',
         });
@@ -2289,6 +2313,72 @@ describe('Query class', () => {
       expect(
         (res.docs[0].get('embedding') as VectorValue).toArray()
       ).to.deep.equal(embeddingVector);
+    });
+
+    describe('preview API (deprecated)', () => {
+      it('supports findNearest with EUCLIDEAN', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
+
+        const collectionReference = await indexTestHelper.createTestDocs([
+          {foo: 'bar'},
+          {foo: 'bar', embedding: FieldValue.vector([10, 10])},
+          {foo: 'bar', embedding: FieldValue.vector([1, 1.1])},
+          {foo: 'x', embedding: FieldValue.vector([1, 1])},
+          {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+          {foo: 'bar', embedding: FieldValue.vector([-100, -100])},
+        ]);
+
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .where('foo', '==', 'bar')
+          .findNearest('embedding', [1, 1], {
+            limit: 3,
+            distanceMeasure: 'EUCLIDEAN',
+          });
+
+        const res = await vectorQuery.get();
+        expect(res.size).to.equal(3);
+        expect(
+          res.docs[0].get('embedding').isEqual(FieldValue.vector([1, 1.1]))
+        ).to.be.true;
+        expect(res.docs[1].get('embedding').isEqual(FieldValue.vector([10, 0])))
+          .to.be.true;
+        expect(
+          res.docs[2].get('embedding').isEqual(FieldValue.vector([10, 10]))
+        ).to.be.true;
+      });
+
+      it('supports findNearest with COSINE', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
+
+        const collectionReference = await indexTestHelper.createTestDocs([
+          {foo: 'bar'},
+          {foo: 'bar', embedding: FieldValue.vector([10, 10])},
+          {foo: 'bar', embedding: FieldValue.vector([1, 1.1])},
+          {foo: 'x', embedding: FieldValue.vector([1, 1])},
+          {foo: 'bar', embedding: FieldValue.vector([10, 0])},
+          {foo: 'bar', embedding: FieldValue.vector([-100, -100])},
+        ]);
+
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          .where('foo', '==', 'bar')
+          .findNearest('embedding', [1, 1], {
+            limit: 3,
+            distanceMeasure: 'COSINE',
+          });
+
+        const res = await vectorQuery.get();
+        expect(res.size).to.equal(3);
+        expect(
+          res.docs[0].get('embedding').isEqual(FieldValue.vector([10, 10]))
+        ).to.be.true;
+        expect(
+          res.docs[1].get('embedding').isEqual(FieldValue.vector([1, 1.1]))
+        ).to.be.true;
+        expect(res.docs[2].get('embedding').isEqual(FieldValue.vector([10, 0])))
+          .to.be.true;
+      });
     });
 
     describe('requesting computed distance', () => {
@@ -2305,7 +2395,11 @@ describe('Query class', () => {
 
         const vectorQuery = indexTestHelper
           .query(collectionReference)
-          .findNearest('embedding', [1, 0], 5, 'COSINE', {
+          .findNearest({
+            vectorField: 'embedding',
+            queryVector: [1, 0],
+            limit: 5,
+            distanceMeasure: 'COSINE',
             distanceResultField: 'distance',
           });
 
@@ -2338,7 +2432,11 @@ describe('Query class', () => {
 
         const vectorQuery = indexTestHelper
           .query(collectionReference)
-          .findNearest('embedding', [1, 0], 5, 'EUCLIDEAN', {
+          .findNearest({
+            vectorField: 'embedding',
+            queryVector: [1, 0],
+            limit: 5,
+            distanceMeasure: 'EUCLIDEAN',
             distanceResultField: 'distance',
           });
 
@@ -2378,7 +2476,11 @@ describe('Query class', () => {
 
         const vectorQuery = indexTestHelper
           .query(collectionReference)
-          .findNearest('embedding', [1, 0], 5, 'DOT_PRODUCT', {
+          .findNearest({
+            vectorField: 'embedding',
+            queryVector: [1, 0],
+            limit: 5,
+            distanceMeasure: 'DOT_PRODUCT',
             distanceResultField: 'distance',
           });
 
@@ -2419,7 +2521,11 @@ describe('Query class', () => {
 
         const vectorQuery = indexTestHelper
           .query(collectionReference)
-          .findNearest('embedding', [1, 0], 5, 'COSINE', {
+          .findNearest({
+            vectorField: 'embedding',
+            queryVector: [1, 0],
+            limit: 5,
+            distanceMeasure: 'COSINE',
             distanceResultField: 'distance',
           });
 
@@ -2447,7 +2553,11 @@ describe('Query class', () => {
 
         const vectorQuery = indexTestHelper
           .query(collectionReference)
-          .findNearest('embedding', [1, 0], 5, 'COSINE', {
+          .findNearest({
+            vectorField: 'embedding',
+            queryVector: [1, 0],
+            limit: 5,
+            distanceMeasure: 'COSINE',
             distanceThreshold: 1,
           });
 
@@ -2477,7 +2587,11 @@ describe('Query class', () => {
 
         const vectorQuery = indexTestHelper
           .query(collectionReference)
-          .findNearest('embedding', [1, 0], 5, 'EUCLIDEAN', {
+          .findNearest({
+            vectorField: 'embedding',
+            queryVector: [1, 0],
+            limit: 5,
+            distanceMeasure: 'EUCLIDEAN',
             distanceThreshold: 5,
           });
 
@@ -2507,7 +2621,11 @@ describe('Query class', () => {
 
         const vectorQuery = indexTestHelper
           .query(collectionReference)
-          .findNearest('embedding', [1, 0], 5, 'DOT_PRODUCT', {
+          .findNearest({
+            vectorField: 'embedding',
+            queryVector: [1, 0],
+            limit: 5,
+            distanceMeasure: 'DOT_PRODUCT',
             distanceThreshold: 1,
           });
 
@@ -2536,7 +2654,11 @@ describe('Query class', () => {
 
         const vectorQuery = indexTestHelper
           .query(collectionReference)
-          .findNearest('embedding', [1, 0], 5, 'DOT_PRODUCT', {
+          .findNearest({
+            vectorField: 'embedding',
+            queryVector: [1, 0],
+            limit: 5,
+            distanceMeasure: 'DOT_PRODUCT',
             distanceThreshold: 0.11,
             distanceResultField: 'foo',
           });
@@ -2568,7 +2690,11 @@ describe('Query class', () => {
 
         const vectorQuery = indexTestHelper
           .query(collectionReference)
-          .findNearest('embedding', [1, 0], 2, 'DOT_PRODUCT', {
+          .findNearest({
+            vectorField: 'embedding',
+            queryVector: [1, 0],
+            limit: 2,
+            distanceMeasure: 'DOT_PRODUCT',
             distanceThreshold: 0.0,
           });
 

@@ -56,11 +56,7 @@ export class VectorQuery<
    */
   constructor(
     private readonly _query: Query<AppModelType, DbModelType>,
-    private readonly vectorField: string | firestore.FieldPath,
-    private readonly queryVector: firestore.VectorValue | Array<number>,
-    private readonly limit: number,
-    private readonly distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
-    private readonly options: VectorQueryOptions
+    private readonly _options: VectorQueryOptions
   ) {
     this._queryUtil = new QueryUtil<
       AppModelType,
@@ -81,9 +77,19 @@ export class VectorQuery<
    * @internal
    */
   private get _rawVectorField(): string {
-    return typeof this.vectorField === 'string'
-      ? this.vectorField
-      : this.vectorField.toString();
+    return typeof this._options.vectorField === 'string'
+      ? this._options.vectorField
+      : this._options.vectorField.toString();
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  private get _rawDistanceResultField(): string | undefined {
+    return typeof this._options.vectorField === 'string'
+      ? this._options.vectorField
+      : this._options.vectorField.toString();
   }
 
   /**
@@ -91,9 +97,9 @@ export class VectorQuery<
    * @internal
    */
   private get _rawQueryVector(): Array<number> {
-    return Array.isArray(this.queryVector)
-      ? this.queryVector
-      : this.queryVector.toArray();
+    return Array.isArray(this._options.queryVector)
+      ? this._options.queryVector
+      : this._options.queryVector.toArray();
   }
 
   /**
@@ -172,23 +178,24 @@ export class VectorQuery<
   ): api.IRunQueryRequest {
     const queryProto = this._query.toProto(transactionOrReadTime);
 
-    const queryVector = Array.isArray(this.queryVector)
-      ? new VectorValue(this.queryVector)
-      : (this.queryVector as VectorValue);
+    const queryVector = Array.isArray(this._options.queryVector)
+      ? new VectorValue(this._options.queryVector)
+      : (this._options.queryVector as VectorValue);
 
     queryProto.structuredQuery!.findNearest = {
-      limit: {value: this.limit},
-      distanceMeasure: this.distanceMeasure,
+      limit: {value: this._options.limit},
+      distanceMeasure: this._options.distanceMeasure,
       vectorField: {
-        fieldPath: FieldPath.fromArgument(this.vectorField).formattedName,
+        fieldPath: FieldPath.fromArgument(this._options.vectorField)
+          .formattedName,
       },
       queryVector: queryVector._toProto(this._query._serializer),
-      distanceResultField: this.options?.distanceResultField
-        ? FieldPath.fromArgument(this.options!.distanceResultField!)
+      distanceResultField: this._options?.distanceResultField
+        ? FieldPath.fromArgument(this._options.distanceResultField!)
             .formattedName
         : undefined,
-      distanceThreshold: this.options?.distanceThreshold
-        ? {value: this.options?.distanceThreshold}
+      distanceThreshold: this._options?.distanceThreshold
+        ? {value: this._options?.distanceThreshold}
         : undefined,
     };
 
@@ -262,7 +269,10 @@ export class VectorQuery<
     return (
       this._rawVectorField === other._rawVectorField &&
       isPrimitiveArrayEqual(this._rawQueryVector, other._rawQueryVector) &&
-      this.options.isEqual(other.options)
+      this._options.limit === other._options.limit &&
+      this._options.distanceMeasure === other._options.distanceMeasure &&
+      this._options.distanceThreshold === other._options.distanceThreshold &&
+      this._rawDistanceResultField === other._rawDistanceResultField
     );
   }
 }

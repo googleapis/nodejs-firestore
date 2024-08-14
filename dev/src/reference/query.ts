@@ -631,7 +631,7 @@ export class Query<
    * when performing the query.
    *
    * @deprecated Use the new {@link findNearest} implementation
-   * accepting `limit` and `distanceMeasure` as independent arguments.
+   * accepting a single `options` param.
    */
   findNearest(
     vectorField: string | firestore.FieldPath,
@@ -660,90 +660,50 @@ export class Query<
    * const querySnapshot = await aggregateQuery.get();
    * querySnapshot.forEach(...);
    * ```
-   *
-   * @param vectorField - A string or {@link FieldPath} specifying the vector field to search on.
-   * @param queryVector - The {@link VectorValue} used to measure the distance from `vectorField` values in the documents.
-   * @param limit - Specifies the upper bound of documents to return, must be a positive integer with a maximum value of 1000
-   * @param distanceMeasure - Specifies what type of distance is calculated when performing the query.
-   * @param options - Options control the vector query.
-   *
-   * `distanceResultField` optionally specifies the name of a field that will be set on each returned DocumentSnapshot,
-   *  which will contain the computed distance for the document.
-   *
-   * `distanceThreshold` specifies a threshold for which no less similar documents will be returned. The behavior
-   *  of the specified `distanceMeasure` will affect the
-   *  meaning of the distance threshold.
-   *  For `distanceMeasure: "EUCLIDEAN"`, the meaning of `distanceThreshold` is:
-   *     SELECT docs WHERE euclidean_distance <= distanceThreshold
-   *  For `distanceMeasure: "COSINE"`, the meaning of `distanceThreshold` is:
-   *     SELECT docs WHERE cosine_distance <= distanceThreshold
-   *  For `distanceMeasure: "DOT_PRODUCT"`, the meaning of `distanceThreshold` is:
-   *     SELECT docs WHERE dot_product_distance >= distanceThreshold
+   * @param options - An argument specifying the behavior of the {@link VectorQuery} returned by this function.
+   * See {@link VectorQueryOptions}.
    */
   findNearest(
-    vectorField: string | firestore.FieldPath,
-    queryVector: firestore.VectorValue | Array<number>,
-    limit: number,
-    distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
-    options?: {
-      distanceResultField?: string | firestore.FieldPath;
-      distanceThreshold?: number;
-    }
+    options: VectorQueryOptions
   ): VectorQuery<AppModelType, DbModelType>;
 
   findNearest(
-    vectorField: string | firestore.FieldPath,
-    queryVector: firestore.VectorValue | Array<number>,
-    limitOrOptions:
-      | number
-      | {
-          limit?: number;
-          distanceMeasure?: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
-        },
-    distanceMeasure?: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
+    vectorFieldOrOptions: string | firestore.FieldPath | VectorQueryOptions,
+    queryVector?: firestore.VectorValue | Array<number>,
     options?: {
-      distanceResultField?: string | firestore.FieldPath;
-      distanceThreshold?: number;
+      limit?: number;
+      distanceMeasure?: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
     }
   ): VectorQuery<AppModelType, DbModelType> {
-    if (typeof limitOrOptions === 'number') {
-      return this._findNearest(
-        vectorField,
-        queryVector,
-        limitOrOptions,
-        distanceMeasure!,
-        options
-      );
+    if (
+      typeof vectorFieldOrOptions === 'string' ||
+      vectorFieldOrOptions instanceof FieldPath
+    ) {
+      const fnOptions: VectorQueryOptions = {
+        distanceMeasure: options!.distanceMeasure!,
+        limit: options!.limit!,
+        queryVector: queryVector!,
+        vectorField: vectorFieldOrOptions,
+      };
+      return this._findNearest(fnOptions);
     } else {
-      return this._findNearest(
-        vectorField,
-        queryVector,
-        limitOrOptions!.limit!,
-        limitOrOptions!.distanceMeasure!
-      );
+      return this._findNearest(vectorFieldOrOptions as VectorQueryOptions);
     }
   }
 
   _findNearest(
-    vectorField: string | firestore.FieldPath,
-    queryVector: firestore.VectorValue | Array<number>,
-    limit: number,
-    distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT',
-    options?: {
-      distanceResultField?: string | firestore.FieldPath;
-      distanceThreshold?: number;
-    }
+    options: VectorQueryOptions
   ): VectorQuery<AppModelType, DbModelType> {
-    validateFieldPath('vectorField', vectorField);
+    validateFieldPath('vectorField', options.vectorField);
 
-    if (limit <= 0) {
+    if (options.limit <= 0) {
       throw invalidArgumentMessage('limit', 'positive limit number');
     }
 
     if (
-      (Array.isArray(queryVector)
-        ? queryVector.length
-        : queryVector.toArray().length) === 0
+      (Array.isArray(options.queryVector)
+        ? options.queryVector.length
+        : options.queryVector.toArray().length) === 0
     ) {
       throw invalidArgumentMessage(
         'queryVector',
@@ -751,17 +711,7 @@ export class Query<
       );
     }
 
-    return new VectorQuery<AppModelType, DbModelType>(
-      this,
-      vectorField,
-      queryVector,
-      limit,
-      distanceMeasure,
-      new VectorQueryOptions(
-        options?.distanceResultField,
-        options?.distanceThreshold
-      )
-    );
+    return new VectorQuery<AppModelType, DbModelType>(this, options);
   }
 
   /**

@@ -103,6 +103,7 @@ export type {AggregateQuery} from './reference/aggregate-query';
 export type {AggregateQuerySnapshot} from './reference/aggregate-query-snapshot';
 export type {VectorQuery} from './reference/vector-query';
 export type {VectorQuerySnapshot} from './reference/vector-query-snapshot';
+export type {VectorQueryOptions} from './reference/vector-query-options';
 export {BulkWriter} from './bulk-writer';
 export type {BulkWriterError} from './bulk-writer';
 export type {BundleBuilder} from './bundle';
