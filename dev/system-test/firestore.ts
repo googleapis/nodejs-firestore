@@ -2537,6 +2537,45 @@ describe('Query class', () => {
           .to.be.true;
         expect(res.docs[0].get('distance')).to.equal(1);
       });
+
+      it.only('supports select queries', async () => {
+        const indexTestHelper = new IndexTestHelper(firestore);
+
+        const collectionReference = await indexTestHelper.setTestDocs({
+          '1': {foo: 'bar'},
+          '2': {foo: 'bar', embedding: FieldValue.vector([1, 0])},
+          '3': {foo: 'bar', embedding: FieldValue.vector([0, 1])},
+          '4': {foo: 'bar', embedding: FieldValue.vector([0, -0.1])},
+          '5': {foo: 'bar', embedding: FieldValue.vector([-1, 0])},
+        });
+
+        const vectorQuery = indexTestHelper
+          .query(collectionReference)
+          // value of `distanceResultField` must also be in select statement
+          .select('embedding', 'distance')
+          .findNearest({
+            vectorField: 'embedding',
+            queryVector: [1, 0],
+            limit: 5,
+            distanceMeasure: 'COSINE',
+            distanceResultField: 'distance',
+          });
+
+        const res = await vectorQuery.get();
+
+        expect(res.size).to.equal(4);
+
+        expect(res.docs[0].get('embedding').isEqual(FieldValue.vector([1, 0])))
+          .to.be.true;
+        expect(res.docs[0].get('distance')).to.equal(0);
+
+        expect(res.docs[1].get('distance')).to.equal(1);
+        expect(res.docs[2].get('distance')).to.equal(1);
+
+        expect(res.docs[3].get('embedding').isEqual(FieldValue.vector([-1, 0])))
+          .to.be.true;
+        expect(res.docs[3].get('distance')).to.equal(2);
+      });
     });
 
     describe('querying with distance threshold', () => {
