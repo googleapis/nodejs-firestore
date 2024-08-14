@@ -87,9 +87,11 @@ export class VectorQuery<
    * @internal
    */
   private get _rawDistanceResultField(): string | undefined {
-    return typeof this._options.vectorField === 'string'
-      ? this._options.vectorField
-      : this._options.vectorField.toString();
+    if (typeof this._options.distanceResultField === 'undefined') return;
+
+    return typeof this._options.distanceResultField === 'string'
+      ? this._options.distanceResultField
+      : this._options.distanceResultField.toString();
   }
 
   /**
