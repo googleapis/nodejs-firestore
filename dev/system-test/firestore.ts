@@ -2538,7 +2538,7 @@ describe('Query class', () => {
         expect(res.docs[0].get('distance')).to.equal(1);
       });
 
-      it.only('supports select queries', async () => {
+      it('supports select queries', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
