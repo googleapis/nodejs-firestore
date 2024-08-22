@@ -1,5 +1,6 @@
 import * as firestore from '@google-cloud/firestore';
 import {GoogleError, serializer} from 'google-gax';
+import {converter} from 'protobufjs';
 import {Duplex, Transform} from 'stream';
 import {google} from '../protos/firestore_v1_proto_api';
 
@@ -49,7 +50,8 @@ export class ExecutionUtil<
     /** @private */
     readonly _firestore: Firestore,
     /** @private */
-    readonly _serializer: Serializer
+    readonly _serializer: Serializer,
+    readonly _converter: firestore.FirestorePipelineConverter<AppModelType>
   ) {}
 
   _getResponse(
@@ -169,12 +171,12 @@ export class ExecutionUtil<
               }
 
               const ref = result.name
-                ? new DocumentReference<AppModelType, DbModelType>(
+                ? new DocumentReference(
                     this._firestore,
                     QualifiedResourcePath.fromSlashSeparatedString(result.name)
                   )
                 : undefined;
-              output.result = new PipelineResult(
+              output.result = new PipelineResult<AppModelType, DbModelType>(
                 this._serializer,
                 ref,
                 result.fields || undefined,
@@ -184,7 +186,8 @@ export class ExecutionUtil<
                   : undefined,
                 result.updateTime
                   ? Timestamp.fromProto(result.updateTime!)
-                  : undefined
+                  : undefined,
+                this._converter
               );
               return output;
             })

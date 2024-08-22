@@ -380,6 +380,10 @@ declare namespace FirebaseFirestore {
     fromFirestore(snapshot: QueryDocumentSnapshot): AppModelType;
   }
 
+  export interface FirestorePipelineConverter<AppModelType> {
+    fromFirestore(result: PipelineResult): AppModelType;
+  }
+
   /**
    * Settings used to directly configure a `Firestore` instance.
    */
@@ -1657,6 +1661,32 @@ declare namespace FirebaseFirestore {
      * @return An Object containing all fields in the document.
      */
     data(): AppModelType;
+  }
+
+  export class PipelineResult<
+    AppModelType = DocumentData,
+    DbModelType extends DocumentData = DocumentData,
+  > {
+    private constructor();
+
+    /**
+     * The time the document was created.
+     */
+    readonly createTime: Timestamp | undefined;
+
+    /**
+     * The time the document was last updated (at the time the snapshot was
+     * generated).
+     */
+    readonly updateTime: Timestamp | undefined;
+
+    /**
+     * Retrieves all fields in the document as an Object.
+     *
+     * @override
+     * @return An Object containing all fields in the document.
+     */
+    data(): AppModelType | undefined;
   }
 
   /**

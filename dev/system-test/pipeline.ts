@@ -1,6 +1,7 @@
 import {
   AggregateQuery,
   DocumentData,
+  FirestorePipelineConverter,
   QuerySnapshot,
   VectorValue,
 } from '@google-cloud/firestore';
@@ -78,14 +79,17 @@ describe.only('Pipeline class', () => {
     return randomCol;
   }
 
-  function expectResults(result: PipelineResult[], ...docs: string[]): void;
-  function expectResults(
-    result: PipelineResult[],
+  function expectResults<AppModelType>(
+    result: PipelineResult<AppModelType>[],
+    ...docs: string[]
+  ): void;
+  function expectResults<AppModelType>(
+    result: PipelineResult<AppModelType>[],
     ...data: DocumentData[]
   ): void;
 
-  function expectResults(
-    result: PipelineResult[],
+  function expectResults<AppModelType>(
+    result: PipelineResult<AppModelType>[],
     ...data: DocumentData[] | string[]
   ): void {
     expect(result.length).to.equal(data.length);
@@ -728,5 +732,38 @@ describe.only('Pipeline class', () => {
       {title: "The Hitchhiker's Guide to the Galaxy", 'awards.hugo': true},
       {title: 'Dune', 'awards.hugo': true}
     );
+  });
+
+  it('testPipelineConverters', async () => {
+    type AppModel = {myTitle: string; myAuthor: string; myPublished: number};
+    const converter: FirestorePipelineConverter<AppModel> = {
+      fromFirestore(result: FirebaseFirestore.PipelineResult): AppModel {
+        return {
+          myTitle: result.data()!.title as string,
+          myAuthor: result.data()!.author as string,
+          myPublished: result.data()!.published as number,
+        };
+      },
+    };
+
+    const results = await firestore
+      .pipeline()
+      .collection(randomCol.path)
+      .sort(Field.of('published').ascending())
+      .limit(2)
+      .withConverter(converter)
+      .execute();
+
+    const objs = results.map(r => r.data());
+    expect(objs[0]).to.deep.equal({
+      myAuthor: 'Jane Austen',
+      myPublished: 1813,
+      myTitle: 'Pride and Prejudice',
+    });
+    expect(objs[1]).to.deep.equal({
+      myAuthor: 'Fyodor Dostoevsky',
+      myPublished: 1866,
+      myTitle: 'Crime and Punishment',
+    });
   });
 });

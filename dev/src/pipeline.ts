@@ -1,3 +1,4 @@
+import {DocumentData} from '@google-cloud/firestore';
 import * as firestore from '@google-cloud/firestore';
 import * as deepEqual from 'fast-deep-equal';
 import {google} from '../protos/firestore_v1_proto_api';
@@ -36,7 +37,7 @@ import {
   Stage,
   Distinct,
 } from './stage';
-import {ApiMapValue, defaultConverter} from './types';
+import {ApiMapValue, defaultConverter, defaultPipelineConverter} from './types';
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 import IStructuredPipeline = google.firestore.v1.IStructuredPipeline;
@@ -110,7 +111,8 @@ export class Pipeline<
 > {
   constructor(
     private db: Firestore,
-    private stages: Stage[]
+    private stages: Stage[],
+    private converter: firestore.FirestorePipelineConverter<AppModelType> = defaultConverter()
   ) {}
 
   /**
@@ -570,6 +572,77 @@ export class Pipeline<
     return new Pipeline(this.db, copy);
   }
 
+  withConverter(converter: null): Pipeline;
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestorePipelineConverter<NewAppModelType>
+  ): Pipeline<NewAppModelType, NewDbModelType>;
+  /**
+   * Applies a custom data converter to this Query, allowing you to use your
+   * own custom model objects with Firestore. When you call get() on the
+   * returned Query, the provided converter will convert between Firestore
+   * data of type `NewDbModelType` and your custom type `NewAppModelType`.
+   *
+   * Using the converter allows you to specify generic type arguments when
+   * storing and retrieving objects from Firestore.
+   *
+   * Passing in `null` as the converter parameter removes the current
+   * converter.
+   *
+   * @example
+   * ```
+   * class Post {
+   *   constructor(readonly title: string, readonly author: string) {}
+   *
+   *   toString(): string {
+   *     return this.title + ', by ' + this.author;
+   *   }
+   * }
+   *
+   * const postConverter = {
+   *   toFirestore(post: Post): FirebaseFirestore.DocumentData {
+   *     return {title: post.title, author: post.author};
+   *   },
+   *   fromFirestore(
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
+   *   ): Post {
+   *     const data = snapshot.data();
+   *     return new Post(data.title, data.author);
+   *   }
+   * };
+   *
+   * const postSnap = await Firestore()
+   *   .collection('posts')
+   *   .withConverter(postConverter)
+   *   .doc().get();
+   * const post = postSnap.data();
+   * if (post !== undefined) {
+   *   post.title; // string
+   *   post.toString(); // Should be defined
+   *   post.someNonExistentProperty; // TS error
+   * }
+   *
+   * ```
+   * @param {FirestoreDataConverter | null} converter Converts objects to and
+   * from Firestore. Passing in `null` removes the current converter.
+   * @return A Query that uses the provided converter.
+   */
+  withConverter<
+    NewAppModelType,
+    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
+  >(
+    converter: firestore.FirestorePipelineConverter<NewAppModelType> | null
+  ): Pipeline<NewAppModelType, NewDbModelType> {
+    const copy = this.stages.map(s => s);
+    return new Pipeline<NewAppModelType, NewDbModelType>(
+      this.db,
+      copy,
+      converter ?? defaultPipelineConverter()
+    );
+  }
+
   /**
    * Executes this pipeline and returns a Promise to represent the asynchronous operation.
    *
@@ -604,7 +677,8 @@ export class Pipeline<
   execute(): Promise<Array<PipelineResult<AppModelType, DbModelType>>> {
     const util = new ExecutionUtil<AppModelType, DbModelType>(
       this.db,
-      this.db._serializer!
+      this.db._serializer!,
+      this.converter
     );
     return util._getResponse(this).then(result => result!);
   }
@@ -628,7 +702,8 @@ export class Pipeline<
   stream(): NodeJS.ReadableStream {
     const util = new ExecutionUtil<AppModelType, DbModelType>(
       this.db,
-      this.db._serializer!
+      this.db._serializer!,
+      this.converter
     );
     return util.stream(this);
   }
@@ -658,10 +733,9 @@ export class Pipeline<
 export class PipelineResult<
   AppModelType = firestore.DocumentData,
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
-> {
-  private readonly _ref:
-    | DocumentReference<AppModelType, DbModelType>
-    | undefined;
+> implements firestore.PipelineResult<AppModelType, DbModelType>
+{
+  private readonly _ref: DocumentReference | undefined;
   private _serializer: Serializer;
   public readonly _executionTime: Timestamp | undefined;
   public readonly _createTime: Timestamp | undefined;
@@ -682,7 +756,7 @@ export class PipelineResult<
    */
   constructor(
     serializer: Serializer,
-    ref?: DocumentReference<AppModelType, DbModelType>,
+    ref?: DocumentReference,
     /**
      * @internal
      * @private
@@ -690,7 +764,8 @@ export class PipelineResult<
     readonly _fieldsProto?: ApiMapValue,
     readTime?: Timestamp,
     createTime?: Timestamp,
-    updateTime?: Timestamp
+    updateTime?: Timestamp,
+    readonly converter: firestore.FirestorePipelineConverter<AppModelType> = defaultConverter()
   ) {
     this._ref = ref;
     this._serializer = serializer;
@@ -702,7 +777,7 @@ export class PipelineResult<
   /**
    * The reference of the document, if it is a document; otherwise `undefined`.
    */
-  get ref(): DocumentReference<AppModelType, DbModelType> | undefined {
+  get ref(): DocumentReference | undefined {
     return this._ref;
   }
 
@@ -778,18 +853,16 @@ export class PipelineResult<
 
     // We only want to use the converter and create a new QueryDocumentSnapshot
     // if a converter has been provided.
-    if (!!this.ref && this.ref._converter !== defaultConverter()) {
-      const untypedReference = new DocumentReference(
-        this.ref.firestore,
-        this.ref._path
-      );
-      return this.ref._converter.fromFirestore(
-        new QueryDocumentSnapshot(
-          untypedReference,
-          this._fieldsProto!,
-          this.executionTime,
-          this.createTime!,
-          this.updateTime!
+    if (!!this.converter && this.converter !== defaultPipelineConverter()) {
+      return this.converter.fromFirestore(
+        new PipelineResult<DocumentData, DocumentData>(
+          this._serializer,
+          this.ref,
+          this._fieldsProto,
+          this._executionTime,
+          this.createTime,
+          this.updateTime,
+          defaultPipelineConverter()
         )
       );
     } else {
