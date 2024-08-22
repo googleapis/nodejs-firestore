@@ -36,4 +36,7 @@ export class DisabledTraceUtil implements TraceUtil {
   currentSpan(): Span {
     return new Span();
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  recordProjectId(projectId: string): void {}
 }
