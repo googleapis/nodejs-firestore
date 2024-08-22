@@ -390,9 +390,9 @@ export function toPipelineFilterCondition(
       }
     } else if (f.isNullChecking()) {
       if (f.nullOp() === 'IS_NULL') {
-        return and(field.exists(), field.isNull());
+        return and(field.exists(), field.eq(null));
       } else {
-        return and(field.exists(), not(field.isNull()));
+        return and(field.exists(), not(field.eq(null)));
       }
     } else {
       // Comparison filters

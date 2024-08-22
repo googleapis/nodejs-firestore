@@ -9,6 +9,7 @@ import {
   Field,
   Fields,
   FilterCondition,
+  Function,
   Ordering,
   Selectable,
 } from './expression';
@@ -63,6 +64,46 @@ export class PipelineSource {
   }
 }
 
+/**
+ * The Pipeline class provides a flexible and expressive framework for building complex data
+ * transformation and query pipelines for Firestore.
+ *
+ * A pipeline takes data sources, such as Firestore collections or collection groups, and applies
+ * a series of stages that are chained together. Each stage takes the output from the previous stage
+ * (or the data source) and produces an output for the next stage (or as the final output of the
+ * pipeline).
+ *
+ * Expressions can be used within each stage to filter and transform data through the stage.
+ *
+ * NOTE: The chained stages do not prescribe exactly how Firestore will execute the pipeline.
+ * Instead, Firestore only guarantees that the result is the same as if the chained stages were
+ * executed in order.
+ *
+ * Usage Examples:
+ *
+ * ```typescript
+ * const db: Firestore; // Assumes a valid firestore instance.
+ *
+ * // Example 1: Select specific fields and rename 'rating' to 'bookRating'
+ * const results1 = await db.pipeline()
+ *     .collection("books")
+ *     .select("title", "author", Field.of("rating").as("bookRating"))
+ *     .execute();
+ *
+ * // Example 2: Filter documents where 'genre' is "Science Fiction" and 'published' is after 1950
+ * const results2 = await db.pipeline()
+ *     .collection("books")
+ *     .where(and(Field.of("genre").eq("Science Fiction"), Field.of("published").gt(1950)))
+ *     .execute();
+ *
+ * // Example 3: Calculate the average rating of books published after 1980
+ * const results3 = await db.pipeline()
+ *     .collection("books")
+ *     .where(Field.of("published").gt(1980))
+ *     .aggregate(avg(Field.of("rating")).as("averageRating"))
+ *     .execute();
+ * ```
+ */
 export class Pipeline<
   AppModelType = firestore.DocumentData,
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
@@ -72,13 +113,89 @@ export class Pipeline<
     private stages: Stage[]
   ) {}
 
+  /**
+   * Adds new fields to outputs from previous stages.
+   *
+   * This stage allows you to compute values on-the-fly based on existing data from previous
+   * stages or constants. You can use this to create new fields or overwrite existing ones (if there
+   * is name overlaps).
+   *
+   * The added fields are defined using {@link Selectable}s, which can be:
+   *
+   * - {@link Field}: References an existing document field.
+   * - {@link Function}: Performs a calculation using functions like `add`, `multiply` with
+   *   assigned aliases using {@link Expr#as}.
+   *
+   * Example:
+   *
+   * ```typescript
+   * firestore.pipeline().collection("books")
+   *   .addFields(
+   *     Field.of("rating").as("bookRating"), // Rename 'rating' to 'bookRating'
+   *     add(5, Field.of("quantity")).as("totalCost")  // Calculate 'totalCost'
+   *   );
+   * ```
+   *
+   * @param fields The fields to add to the documents, specified as {@link Selectable}s.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
   addFields(...fields: Selectable[]): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new AddField(this.selectablesToMap(fields)));
     return new Pipeline(this.db, copy);
   }
 
+  /**
+   * Selects a set of fields from the outputs of previous stages.
+   *
+   * <p>If no selections are provided, the output of this stage is empty. Use {@link
+   * com.google.cloud.firestore.Pipeline#addFields} instead if only additions are
+   * desired.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * firestore.collection("books")
+   *   .select("name", "address");
+   *
+   * // The above is a shorthand of this:
+   * firestore.pipeline().collection("books")
+   *    .select(Field.of("name"), Field.of("address"));
+   * ```
+   *
+   * @param fields The name of the fields to include in the output documents.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
   select(...fields: string[]): Pipeline;
+  /**
+   * Selects or creates a set of fields from the outputs of previous stages.
+   *
+   * <p>The selected fields are defined using {@link Selectable} expressions, which can be:
+   *
+   * <ul>
+   *   <li>{@link Field}: References an existing document field.</li>
+   *   <li>{@link Function}: Represents the result of a function with an assigned alias name using
+   *       {@link Expr#as}</li>
+   * </ul>
+   *
+   * <p>If no selections are provided, the output of this stage is empty. Use {@link
+   * com.google.cloud.firestore.Pipeline#addFields} instead if only additions are
+   * desired.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * firestore.pipeline().collection("books")
+   *   .select(
+   *     Field.of("name"),
+   *     Field.of("address").toUppercase().as("upperAddress"),
+   *   );
+   * ```
+   *
+   * @param selections The fields to include in the output documents, specified as {@link
+   *     Selectable} expressions.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
   select(...fields: Selectable[]): Pipeline;
   select(...fields: (Selectable | string)[]): Pipeline {
     const copy = this.stages.map(s => s);
@@ -108,31 +225,208 @@ export class Pipeline<
     return result;
   }
 
+  /**
+   * Filters the documents from previous stages to only include those matching the specified {@link
+   * FilterCondition}.
+   *
+   * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
+   * You can filter documents based on their field values, using implementations of {@link
+   * FilterCondition}, typically including but not limited to:
+   *
+   * <ul>
+   *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
+   *       Function#gt} (greater than), etc.</li>
+   *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
+   *   <li>advanced functions: {@link Function#regexMatch}, {@link
+   *       Function#arrayContains}, etc.</li>
+   * </ul>
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * firestore.pipeline().collection("books")
+   *   .where(
+   *     and(
+   *         gt(Field.of("rating"), 4.0),   // Filter for ratings greater than 4.0
+   *         Field.of("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+   *     )
+   *   );
+   * ```
+   *
+   * @param condition The {@link FilterCondition} to apply.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
   where(condition: FilterCondition & Expr): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new Where(condition));
     return new Pipeline(this.db, copy);
   }
 
+  /**
+   * Skips the first `offset` number of documents from the results of previous stages.
+   *
+   * <p>This stage is useful for implementing pagination in your pipelines, allowing you to retrieve
+   * results in chunks. It is typically used in conjunction with {@link #limit} to control the
+   * size of each page.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Retrieve the second page of 20 results
+   * firestore.pipeline().collection("books")
+   *     .sort(Field.of("published").descending())
+   *     .offset(20)  // Skip the first 20 results
+   *     .limit(20);   // Take the next 20 results
+   * ```
+   *
+   * @param offset The number of documents to skip.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
   offset(offset: number): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new Offset(offset));
     return new Pipeline(this.db, copy);
   }
 
+  /**
+   * Limits the maximum number of documents returned by previous stages to `limit`.
+   *
+   * <p>This stage is particularly useful when you want to retrieve a controlled subset of data from
+   * a potentially large result set. It's often used for:
+   *
+   * <ul>
+   *   <li>**Pagination:** In combination with {@link #offset} to retrieve specific pages of
+   *       results.</li>
+   *   <li>**Limiting Data Retrieval:** To prevent excessive data transfer and improve performance,
+   *       especially when dealing with large collections.</li>
+   * </ul>
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Limit the results to the top 10 highest-rated books
+   * firestore.pipeline().collection("books")
+   *     .sort(Field.of("rating").descending())
+   *     .limit(10);
+   * ```
+   *
+   * @param limit The maximum number of documents to return.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
   limit(limit: number): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new Limit(limit));
     return new Pipeline(this.db, copy);
   }
 
+  /**
+   * Returns a set of distinct field values from the inputs to this stage.
+   *
+   * <p>This stage run through the results from previous stages to include only results with unique
+   * combinations of values for the specified fields and produce these fields as the output.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Get a list of unique genres.
+   * firestore.pipeline().collection("books")
+   *     .distinct("genre");
+   * ```
+   *
+   * @param fields The fields to consider when determining distinct values.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  distinct(...fields: string[]): Pipeline;
+
+  /**
+   * Returns a set of distinct {@link Expr} values from the inputs to this stage.
+   *
+   * <p>This stage run through the results from previous stages to include only results with unique
+   * combinations of {@link Expr} values ({@link Field}, {@link Function}, etc).
+   *
+   * <p>The parameters to this stage are defined using {@link Selectable} expressions, which can be:
+   *
+   * <ul>
+   *   <li>{@link Field}: References an existing document field.</li>
+   *   <li>{@link Function}: Represents the result of a function with an assigned alias name using
+   *       {@link Expr#as}</li>
+   * </ul>
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Get a list of unique author names in uppercase and genre combinations.
+   * firestore.pipeline().collection("books")
+   *     .distinct(toUppercase(Field.of("author")).as("authorName"), Field.of("genre"))
+   *     .select("authorName");
+   * ```
+   *
+   * @param selectables The {@link Selectable} expressions to consider when determining distinct
+   *     value combinations.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  distinct(...selectables: Selectable[]): Pipeline;
   distinct(...groups: (string | Selectable)[]): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new Distinct(this.selectablesToMap(groups || [])));
     return new Pipeline(this.db, copy);
   }
 
+  /**
+   * Performs aggregation operations on the documents from previous stages.
+   *
+   * <p>This stage allows you to calculate aggregate values over a set of documents. You define the
+   * aggregations to perform using {@link AccumulatorTarget} expressions which are typically results of
+   * calling {@link Expr#as} on {@link Accumulator} instances.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Calculate the average rating and the total number of books
+   * firestore.pipeline().collection("books")
+   *     .aggregate(
+   *         Field.of("rating").avg().as("averageRating"),
+   *         countAll().as("totalBooks")
+   *     );
+   * ```
+   *
+   * @param accumulators The {@link AccumulatorTarget} expressions, each wrapping an {@link Accumulator}
+   *     and provide a name for the accumulated results.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
   aggregate(...accumulators: AccumulatorTarget[]): Pipeline;
+  /**
+   * Performs optionally grouped aggregation operations on the documents from previous stages.
+   *
+   * <p>This stage allows you to calculate aggregate values over a set of documents, optionally
+   * grouped by one or more fields or functions. You can specify:
+   *
+   * <ul>
+   *   <li>**Grouping Fields or Functions:** One or more fields or functions to group the documents
+   *       by. For each distinct combination of values in these fields, a separate group is created.
+   *       If no grouping fields are provided, a single group containing all documents is used. Not
+   *       specifying groups is the same as putting the entire inputs into one group.</li>
+   *   <li>**Accumulators:** One or more accumulation operations to perform within each group. These
+   *       are defined using {@link AccumulatorTarget} expressions, which are typically created by
+   *       calling {@link Expr#as} on {@link Accumulator} instances. Each aggregation
+   *       calculates a value (e.g., sum, average, count) based on the documents within its group.</li>
+   * </ul>
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Calculate the average rating for each genre.
+   * firestore.pipeline().collection("books")
+   *   .aggregate({
+   *       accumulators: [avg(Field.of("rating")).as("avg_rating")]
+   *       groups: ["genre"]
+   *       });
+   * ```
+   *
+   * @param aggregate An {@link Aggregate} object that specifies the grouping fields (if any) and
+   *     the aggregation operations to perform.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
   aggregate(options: {
     accumulators: AccumulatorTarget[];
     groups?: (string | Selectable)[];
@@ -198,6 +492,30 @@ export class Pipeline<
     return new Pipeline(this.db, copy);
   }
 
+  /**
+   * Sorts the documents from previous stages based on one or more {@link Ordering} criteria.
+   *
+   * <p>This stage allows you to order the results of your pipeline. You can specify multiple {@link
+   * Ordering} instances to sort by multiple fields in ascending or descending order. If documents
+   * have the same value for a field used for sorting, the next specified ordering will be used. If
+   * all orderings result in equal comparison, the documents are considered equal and the order is
+   * unspecified.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Sort books by rating in descending order, and then by title in ascending order for books
+   * // with the same rating
+   * firestore.pipeline().collection("books")
+   *     .sort(
+   *         Ordering.of(Field.of("rating")).descending(),
+   *         Ordering.of(Field.of("title"))  // Ascending order is the default
+   *     );
+   * ```
+   *
+   * @param orders One or more {@link Ordering} instances specifying the sorting criteria.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
   sort(...orderings: Ordering[]): Pipeline;
   sort(options: {
     orderings: Ordering[];
@@ -217,38 +535,72 @@ export class Pipeline<
     const copy = this.stages.map(s => s);
     // Option object
     if ('orderings' in optionsOrOrderings) {
-      copy.push(
-        new Sort(
-          optionsOrOrderings.orderings,
-          optionsOrOrderings.density ?? 'unspecified',
-          optionsOrOrderings.truncation ?? 'unspecified'
-        )
-      );
+      copy.push(new Sort(optionsOrOrderings.orderings));
     } else {
       // Ordering object
-      copy.push(
-        new Sort([optionsOrOrderings, ...rest], 'unspecified', 'unspecified')
-      );
+      copy.push(new Sort([optionsOrOrderings, ...rest]));
     }
 
     return new Pipeline(this.db, copy);
   }
 
-  paginate(pageSize: number, orderings?: Ordering[]): PaginatingPipeline {
-    const copy = this.stages.map(s => s);
-    return new PaginatingPipeline(
-      new Pipeline(this.db, copy),
-      pageSize,
-      orderings
-    );
-  }
-
+  /**
+   * Adds a generic stage to the pipeline.
+   *
+   * <p>This method provides a flexible way to extend the pipeline's functionality by adding custom
+   * stages. Each generic stage is defined by a unique `name` and a set of `params` that control its
+   * behavior.
+   *
+   * <p>Example (Assuming there is no "where" stage available in SDK):
+   *
+   * ```typescript
+   * // Assume we don't have a built-in "where" stage
+   * firestore.pipeline().collection("books")
+   *     .genericStage("where", [Field.of("published").lt(1900)]) // Custom "where" stage
+   *     .select("title", "author");
+   * ```
+   *
+   * @param name The unique name of the generic stage to add.
+   * @param params A list of parameters to configure the generic stage's behavior.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
   genericStage(name: string, params: any[]): Pipeline {
     const copy = this.stages.map(s => s);
     copy.push(new GenerateStage(name, params));
     return new Pipeline(this.db, copy);
   }
 
+  /**
+   * Executes this pipeline and returns a Promise to represent the asynchronous operation.
+   *
+   * <p>The returned Promise can be used to track the progress of the pipeline execution
+   * and retrieve the results (or handle any errors) asynchronously.
+   *
+   * <p>The pipeline results are returned as a list of {@link PipelineResult} objects. Each {@link
+   * PipelineResult} typically represents a single key/value map that has passed through all the
+   * stages of the pipeline, however this might differ depending on the stages involved in the
+   * pipeline. For example:
+   *
+   * <ul>
+   *   <li>If there are no stages or only transformation stages, each {@link PipelineResult}
+   *       represents a single document.</li>
+   *   <li>If there is an aggregation, only a single {@link PipelineResult} is returned,
+   *       representing the aggregated results over the entire dataset .</li>
+   *   <li>If there is an aggregation stage with grouping, each {@link PipelineResult} represents a
+   *       distinct group and its associated aggregated values.</li>
+   * </ul>
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * const futureResults = await firestore.pipeline().collection("books")
+   *     .where(gt(Field.of("rating"), 4.5))
+   *     .select("title", "author", "rating")
+   *     .execute();
+   * ```
+   *
+   * @return A Promise representing the asynchronous pipeline execution.
+   */
   execute(): Promise<Array<PipelineResult<AppModelType, DbModelType>>> {
     const util = new ExecutionUtil<AppModelType, DbModelType>(
       this.db,
@@ -257,6 +609,22 @@ export class Pipeline<
     return util._getResponse(this).then(result => result!);
   }
 
+  /**
+   * Executes this pipeline and streams the results as {@link PipelineResult}s.
+   *
+   * @returns {Stream.<PipelineResult>} A stream of
+   * PipelineResult.
+   *
+   * @example
+   * ```typescript
+   * firestore.pipeline().collection("books")
+   *     .where(gt(Field.of("rating"), 4.5))
+   *     .select("title", "author", "rating")
+   *     .stream()
+   *     .on('data', (pipelineResult) => {})
+   *     .on('end', () => {});
+   * ```
+   */
   stream(): NodeJS.ReadableStream {
     const util = new ExecutionUtil<AppModelType, DbModelType>(
       this.db,
@@ -280,61 +648,13 @@ export class Pipeline<
   }
 }
 
-class PaginatingPipeline {
-  constructor(
-    private pipeline: Pipeline,
-    private pageSize: number,
-    private orderings?: Ordering[]
-  ) {}
-
-  firstPage(): Pipeline {
-    return this.pipeline;
-  }
-
-  lastPage(): Pipeline {
-    return this.pipeline;
-  }
-
-  offset(): PaginatingPipeline {
-    return this;
-  }
-
-  limit(): PaginatingPipeline {
-    return this;
-  }
-
-  startAt(result: PipelineResult): PaginatingPipeline {
-    return this;
-  }
-
-  startAfter(result: PipelineResult): PaginatingPipeline {
-    return this;
-  }
-
-  endAt(result: PipelineResult): PaginatingPipeline {
-    return this;
-  }
-
-  endBefore(result: PipelineResult): PaginatingPipeline {
-    return this;
-  }
-
-  /**
-   * @internal
-   * @private
-   */
-  withEndCursor(arg0: QueryCursor): PaginatingPipeline {
-    throw new Error('Method not implemented.');
-  }
-  /**
-   * @internal
-   * @private
-   */
-  withStartCursor(arg0: QueryCursor): PaginatingPipeline {
-    throw new Error('Method not implemented.');
-  }
-}
-
+/**
+ * A PipelineResult contains data read from a Firestore Pipeline. The data can be extracted with the
+ * {@link #data()} or {@link #get(String)} methods.
+ *
+ * <p>If the PipelineResult represents a non-document result, `ref` will return a undefined
+ * value.
+ */
 export class PipelineResult<
   AppModelType = firestore.DocumentData,
   DbModelType extends firestore.DocumentData = firestore.DocumentData,
@@ -343,7 +663,7 @@ export class PipelineResult<
     | DocumentReference<AppModelType, DbModelType>
     | undefined;
   private _serializer: Serializer;
-  public readonly _readTime: Timestamp | undefined;
+  public readonly _executionTime: Timestamp | undefined;
   public readonly _createTime: Timestamp | undefined;
   public readonly _updateTime: Timestamp | undefined;
 
@@ -355,12 +675,10 @@ export class PipelineResult<
    * @param ref The reference to the document.
    * @param _fieldsProto The fields of the Firestore `Document` Protobuf backing
    * this document (or undefined if the document does not exist).
-   * @param readTime The time when this snapshot was read  (or undefined if
+   * @param readTime The time when this result was read  (or undefined if
    * the document exists only locally).
-   * @param createTime The time when the document was created (or undefined if
-   * the document does not exist).
-   * @param updateTime The time when the document was last updated (or undefined
-   * if the document does not exist).
+   * @param createTime The time when the document was created if the result is a document, undefined otherwise.
+   * @param updateTime The time when the document was last updated if the result is a document, undefined otherwise.
    */
   constructor(
     serializer: Serializer,
@@ -376,56 +694,34 @@ export class PipelineResult<
   ) {
     this._ref = ref;
     this._serializer = serializer;
-    this._readTime = readTime;
+    this._executionTime = readTime;
     this._createTime = createTime;
     this._updateTime = updateTime;
   }
 
+  /**
+   * The reference of the document, if it is a document; otherwise `undefined`.
+   */
   get ref(): DocumentReference<AppModelType, DbModelType> | undefined {
     return this._ref;
   }
 
   /**
-   * The ID of the document for which this DocumentSnapshot contains data.
+   * The ID of the document for which this PipelineResult contains data, if it is a document; otherwise `undefined`.
    *
    * @type {string}
-   * @name DocumentSnapshot#id
    * @readonly
    *
-   * @example
-   * ```
-   * let documentRef = firestore.doc('col/doc');
-   *
-   * documentRef.get().then((documentSnapshot) => {
-   *   if (documentSnapshot.exists) {
-   *     console.log(`Document found with name '${documentSnapshot.id}'`);
-   *   }
-   * });
-   * ```
    */
   get id(): string | undefined {
     return this._ref?.id;
   }
 
   /**
-   * The time the document was created. Undefined for documents that don't
-   * exist.
+   * The time the document was created. Undefined if this result is not a document.
    *
    * @type {Timestamp|undefined}
-   * @name DocumentSnapshot#createTime
    * @readonly
-   *
-   * @example
-   * ```
-   * let documentRef = firestore.doc('col/doc');
-   *
-   * documentRef.get().then(documentSnapshot => {
-   *   if (documentSnapshot.exists) {
-   *     let createTime = documentSnapshot.createTime;
-   *     console.log(`Document created at '${createTime.toDate()}'`);
-   *   }
-   * });
-   * ```
    */
   get createTime(): Timestamp | undefined {
     return this._createTime;
@@ -433,54 +729,31 @@ export class PipelineResult<
 
   /**
    * The time the document was last updated (at the time the snapshot was
-   * generated). Undefined for documents that don't exist.
+   * generated). Undefined if this result is not a document.
    *
    * @type {Timestamp|undefined}
-   * @name DocumentSnapshot#updateTime
    * @readonly
-   *
-   * @example
-   * ```
-   * let documentRef = firestore.doc('col/doc');
-   *
-   * documentRef.get().then(documentSnapshot => {
-   *   if (documentSnapshot.exists) {
-   *     let updateTime = documentSnapshot.updateTime;
-   *     console.log(`Document updated at '${updateTime.toDate()}'`);
-   *   }
-   * });
-   * ```
    */
   get updateTime(): Timestamp | undefined {
     return this._updateTime;
   }
 
   /**
-   * The time this snapshot was read.
+   * The time at which the pipeline producing this result is executed.
    *
    * @type {Timestamp}
-   * @name DocumentSnapshot#readTime
    * @readonly
    *
-   * @example
-   * ```
-   * let documentRef = firestore.doc('col/doc');
-   *
-   * documentRef.get().then(documentSnapshot => {
-   *   let readTime = documentSnapshot.readTime;
-   *   console.log(`Document read at '${readTime.toDate()}'`);
-   * });
-   * ```
    */
-  get readTime(): Timestamp {
-    if (this._readTime === undefined) {
+  get executionTime(): Timestamp {
+    if (this._executionTime === undefined) {
       throw new Error("Called 'readTime' on a local document");
     }
-    return this._readTime;
+    return this._executionTime;
   }
 
   /**
-   * Retrieves all fields in the document as an object. Returns 'undefined' if
+   * Retrieves all fields in the result as an object. Returns 'undefined' if
    * the document doesn't exist.
    *
    * @returns {T|undefined} An object containing all fields in the document or
@@ -488,10 +761,10 @@ export class PipelineResult<
    *
    * @example
    * ```
-   * let documentRef = firestore.doc('col/doc');
+   * let p = firestore.pipeline().collection('col');
    *
-   * documentRef.get().then(documentSnapshot => {
-   *   let data = documentSnapshot.data();
+   * p.execute().then(results => {
+   *   let data = results[0].data();
    *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
    * });
    * ```
@@ -514,7 +787,7 @@ export class PipelineResult<
         new QueryDocumentSnapshot(
           untypedReference,
           this._fieldsProto!,
-          this.readTime,
+          this.executionTime,
           this.createTime!,
           this.updateTime!
         )
@@ -538,12 +811,10 @@ export class PipelineResult<
    *
    * @example
    * ```
-   * let documentRef = firestore.doc('col/doc');
+   * let p = firestore.pipeline().collection('col');
    *
-   * documentRef.set({ a: { b: 'c' }}).then(() => {
-   *   return documentRef.get();
-   * }).then(documentSnapshot => {
-   *   let field = documentSnapshot.get('a.b');
+   * p.execute().then(results => {
+   *   let field = results[0].get('a.b');
    *   console.log(`Retrieved field value: ${field}`);
    * });
    * ```
@@ -595,11 +866,11 @@ export class PipelineResult<
   }
 
   /**
-   * Returns true if the document's data and path in this `DocumentSnapshot` is
+   * Returns true if the document's data and path in this `PipelineResult` is
    * equal to the provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `DocumentSnapshot` is equal to the provided
+   * @return {boolean} true if this `PipelineResult` is equal to the provided
    * value.
    */
   isEqual(other: PipelineResult<AppModelType, DbModelType>): boolean {

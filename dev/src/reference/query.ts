@@ -717,7 +717,7 @@ export class Query<
           break;
         }
       }
-      return Ordering.of(Field.of(fieldOrder.field), dir);
+      return new Ordering(Field.of(fieldOrder.field), dir || 'ascending');
     });
     if (orderings.length > 0) {
       pipeline = pipeline.sort({

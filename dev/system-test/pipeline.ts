@@ -36,7 +36,6 @@ import {
   lt,
   neq,
   not,
-  isNull,
   or,
   regexContains,
   regexMatch,
@@ -646,7 +645,7 @@ describe.only('Pipeline class', () => {
       .pipeline()
       .where(not(Field.of('rating').isNaN()))
       .select(
-        isNull('rating').as('ratingIsNull'),
+        Field.of('rating').eq(null).as('ratingIsNull'),
         not(Field.of('rating').isNaN()).as('ratingIsNotNaN')
       )
       .limit(1)

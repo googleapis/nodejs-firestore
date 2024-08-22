@@ -215,20 +215,12 @@ export class Select implements Stage {
 export class Sort implements Stage {
   name = 'sort';
 
-  constructor(
-    private orders: Ordering[],
-    private density: 'unspecified' | 'required',
-    private truncation: 'unspecified' | 'disabled'
-  ) {}
+  constructor(private orders: Ordering[]) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
       args: this.orders.map(o => o._toProto(serializer)),
-      options: {
-        density: serializer.encodeValue(this.density)!,
-        truncation: serializer.encodeValue(this.truncation)!,
-      },
     };
   }
 }

@@ -1332,7 +1332,7 @@ export class FirestoreClient {
     options.otherArgs.headers = options.otherArgs.headers || {};
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
-        parent: '',
+        parent: request.database ? `${request.database}/documents` : '',
       });
     this.initialize();
     return this.innerApiCalls.executePipeline(request, options);
