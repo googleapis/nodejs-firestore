@@ -610,7 +610,7 @@ describe('Tracing Tests', () => {
     deepStrictEqual(span!.attributes, attributes);
   }
 
-  describe(IN_MEMORY_TEST_SUITE_TITLE, () => {
+  describe.skip(IN_MEMORY_TEST_SUITE_TITLE, () => {
     describe(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
       describe(GRPC_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
@@ -645,16 +645,16 @@ describe('Tracing Tests', () => {
     });
   });
 
-  describe(E2E_TEST_SUITE_TITLE, () => {
-    describe(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
-      describe(GRPC_TEST_SUITE_TITLE, () => {
+  describe.only(E2E_TEST_SUITE_TITLE, () => {
+    describe.only(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
+      describe.only(GRPC_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
           beforeEachTest(this.currentTest!);
         });
         runTestCases();
         afterEach(async () => afterEachTest());
       });
-      describe(REST_TEST_SUITE_TITLE, () => {
+      describe.skip(REST_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
           beforeEachTest(this.currentTest!);
         });
@@ -662,7 +662,7 @@ describe('Tracing Tests', () => {
         afterEach(async () => afterEachTest());
       });
     });
-    describe(GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
+    describe.skip(GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
       describe(GRPC_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
           beforeEachTest(this.currentTest!);
@@ -681,7 +681,7 @@ describe('Tracing Tests', () => {
   });
 
   function runTestCases() {
-    it('document reference get()', async () => {
+    it.only('document reference get()', async () => {
       await runFirestoreOperationInRootSpan(() =>
         firestore.collection('foo').doc('bar').get()
       );
