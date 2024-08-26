@@ -1,3 +1,17 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import {
   AggregateQuery,
   DocumentData,
@@ -48,6 +62,7 @@ import {
   euclideanDistance,
   Constant,
   mapGet,
+  lte,
 } from '../src/expression';
 import {PipelineResult} from '../src/pipeline';
 import {verifyInstance} from '../test/util/helpers';
@@ -313,8 +328,9 @@ describe.only('Pipeline class', () => {
   });
 
   it('can select fields', async () => {
-    const results = await randomCol
+    const results = await firestore
       .pipeline()
+      .collection(randomCol.path)
       .select('title', 'author')
       .sort(Field.of('author').ascending())
       .execute();
@@ -359,8 +375,9 @@ describe.only('Pipeline class', () => {
   });
 
   it('offset and limits', async () => {
-    const results = await randomCol
+    const results = await firestore
       .pipeline()
+      .collection(randomCol.path)
       .sort(Field.of('author').ascending())
       .offset(5)
       .limit(3)
@@ -607,7 +624,7 @@ describe.only('Pipeline class', () => {
       .where(
         and(
           gt('rating', 4.2),
-          lt(Field.of('rating'), 4.5),
+          lte(Field.of('rating'), 4.5),
           neq('genre', 'Science Fiction')
         )
       )
