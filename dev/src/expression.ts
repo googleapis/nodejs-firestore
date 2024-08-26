@@ -1,3 +1,17 @@
+// Copyright 2024 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
@@ -13,6 +27,8 @@ import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 
 /**
+ * @beta
+ *
  * An interface that represents a selectable expression.
  */
 export interface Selectable {
@@ -20,6 +36,8 @@ export interface Selectable {
 }
 
 /**
+ * @beta
+ *
  * An interface that represents a filter condition.
  */
 export interface FilterCondition {
@@ -27,6 +45,8 @@ export interface FilterCondition {
 }
 
 /**
+ * @beta
+ *
  * An interface that represents an accumulator.
  */
 export interface Accumulator {
@@ -34,21 +54,29 @@ export interface Accumulator {
 }
 
 /**
+ * @beta
+ *
  * An accumulator target, which is an expression with an alias that also implements the Accumulator interface.
  */
 export type AccumulatorTarget = ExprWithAlias<Expr & Accumulator>;
 
 /**
+ * @beta
+ *
  * A filter expression, which is an expression that also implements the FilterCondition interface.
  */
 export type FilterExpr = Expr & FilterCondition;
 
 /**
+ * @beta
+ *
  * A selectable expression, which is an expression that also implements the Selectable interface.
  */
 export type SelectableExpr = Expr & Selectable;
 
 /**
+ * @beta
+ *
  * An enumeration of the different types of expressions.
  */
 export type ExprType =
@@ -59,6 +87,8 @@ export type ExprType =
   | 'ExprWithAlias';
 
 /**
+ * @beta
+ *
  * Represents an expression that can be evaluated to a value within the execution of a {@link
  * Pipeline}.
  *
@@ -1148,6 +1178,9 @@ export abstract class Expr {
   abstract _toProto(serializer: Serializer): api.IValue;
 }
 
+/**
+ * @beta
+ */
 export class ExprWithAlias<T extends Expr> extends Expr implements Selectable {
   exprType: ExprType = 'ExprWithAlias';
   selectable = true as const;
@@ -1164,6 +1197,9 @@ export class ExprWithAlias<T extends Expr> extends Expr implements Selectable {
   }
 }
 
+/**
+ * @internal
+ */
 class ListOfExprs extends Expr {
   exprType: ExprType = 'ListOfExprs';
   constructor(private exprs: Expr[]) {
@@ -1180,6 +1216,8 @@ class ListOfExprs extends Expr {
 }
 
 /**
+ * @beta
+ *
  * Represents a reference to a field in a Firestore document, or outputs of a {@link Pipeline} stage.
  *
  * <p>Field references are used to access document field values in expressions and to specify fields
@@ -1261,6 +1299,9 @@ export class Field extends Expr implements Selectable {
   }
 }
 
+/**
+ * @beta
+ */
 export class Fields extends Expr implements Selectable {
   exprType: ExprType = 'Field';
   selectable = true as const;
@@ -1291,6 +1332,8 @@ export class Fields extends Expr implements Selectable {
 }
 
 /**
+ * @beta
+ *
  * Represents a constant value that can be used in a Firestore pipeline expression.
  *
  * You can create a `Constant` instance using the static {@link #of} method:
@@ -1462,6 +1505,8 @@ export class Constant extends Expr {
 }
 
 /**
+ * @beta
+ *
  * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
  * execution.
  *
@@ -1487,6 +1532,9 @@ export class Function extends Expr {
   }
 }
 
+/**
+ * @beta
+ */
 export class Add extends Function {
   constructor(
     private left: Expr,
@@ -1496,6 +1544,9 @@ export class Add extends Function {
   }
 }
 
+/**
+ * @beta
+ */
 export class Subtract extends Function {
   constructor(
     private left: Expr,
@@ -1505,6 +1556,9 @@ export class Subtract extends Function {
   }
 }
 
+/**
+ * @beta
+ */
 export class Multiply extends Function {
   constructor(
     private left: Expr,
@@ -1514,6 +1568,9 @@ export class Multiply extends Function {
   }
 }
 
+/**
+ * @beta
+ */
 export class Divide extends Function {
   constructor(
     private left: Expr,
@@ -1523,6 +1580,9 @@ export class Divide extends Function {
   }
 }
 
+/**
+ * @beta
+ */
 export class Eq extends Function implements FilterCondition {
   constructor(
     private left: Expr,
@@ -1533,6 +1593,9 @@ export class Eq extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class Neq extends Function implements FilterCondition {
   constructor(
     private left: Expr,
@@ -1543,6 +1606,9 @@ class Neq extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class Lt extends Function implements FilterCondition {
   constructor(
     private left: Expr,
@@ -1553,6 +1619,9 @@ class Lt extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class Lte extends Function implements FilterCondition {
   constructor(
     private left: Expr,
@@ -1563,6 +1632,9 @@ class Lte extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class Gt extends Function implements FilterCondition {
   constructor(
     private left: Expr,
@@ -1573,6 +1645,9 @@ class Gt extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class Gte extends Function implements FilterCondition {
   constructor(
     private left: Expr,
@@ -1583,6 +1658,9 @@ class Gte extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class ArrayConcat extends Function {
   constructor(
     private array: Expr,
@@ -1592,6 +1670,9 @@ class ArrayConcat extends Function {
   }
 }
 
+/**
+ * @beta
+ */
 class ArrayContains extends Function implements FilterCondition {
   constructor(
     private array: Expr,
@@ -1602,6 +1683,9 @@ class ArrayContains extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class ArrayContainsAll extends Function implements FilterCondition {
   constructor(
     private array: Expr,
@@ -1612,6 +1696,9 @@ class ArrayContainsAll extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class ArrayContainsAny extends Function implements FilterCondition {
   constructor(
     private array: Expr,
@@ -1622,6 +1709,9 @@ class ArrayContainsAny extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class ArrayFilter extends Function {
   constructor(
     private array: Expr,
@@ -1631,12 +1721,18 @@ class ArrayFilter extends Function {
   }
 }
 
+/**
+ * @beta
+ */
 class ArrayLength extends Function {
   constructor(private array: Expr) {
     super('array_length', [array]);
   }
 }
 
+/**
+ * @beta
+ */
 class ArrayTransform extends Function {
   constructor(
     private array: Expr,
@@ -1646,12 +1742,18 @@ class ArrayTransform extends Function {
   }
 }
 
+/**
+ * @beta
+ */
 class ArrayElement extends Function {
   constructor() {
     super('array_element', []);
   }
 }
 
+/**
+ * @beta
+ */
 class In extends Function implements FilterCondition {
   constructor(
     private left: Expr,
@@ -1662,6 +1764,9 @@ class In extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class IsNan extends Function implements FilterCondition {
   constructor(private expr: Expr) {
     super('is_nan', [expr]);
@@ -1669,6 +1774,9 @@ class IsNan extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class Exists extends Function implements FilterCondition {
   constructor(private expr: Expr) {
     super('exists', [expr]);
@@ -1676,6 +1784,9 @@ class Exists extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class Not extends Function implements FilterCondition {
   constructor(private expr: Expr) {
     super('not', [expr]);
@@ -1683,6 +1794,9 @@ class Not extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class And extends Function implements FilterCondition {
   constructor(private conditions: FilterExpr[]) {
     super('and', conditions);
@@ -1691,6 +1805,9 @@ class And extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class Or extends Function implements FilterCondition {
   constructor(private conditions: FilterExpr[]) {
     super('or', conditions);
@@ -1698,6 +1815,9 @@ class Or extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class Xor extends Function implements FilterCondition {
   constructor(private conditions: FilterExpr[]) {
     super('xor', conditions);
@@ -1705,6 +1825,9 @@ class Xor extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class If extends Function implements FilterCondition {
   constructor(
     private condition: FilterExpr,
@@ -1716,12 +1839,18 @@ class If extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class Length extends Function {
   constructor(private expr: Expr) {
     super('length', [expr]);
   }
 }
 
+/**
+ * @beta
+ */
 class Like extends Function implements FilterCondition {
   constructor(
     private expr: Expr,
@@ -1732,6 +1861,9 @@ class Like extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class RegexContains extends Function implements FilterCondition {
   constructor(
     private expr: Expr,
@@ -1742,6 +1874,9 @@ class RegexContains extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class RegexMatch extends Function implements FilterCondition {
   constructor(
     private expr: Expr,
@@ -1752,6 +1887,9 @@ class RegexMatch extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class StartsWith extends Function implements FilterCondition {
   constructor(
     private expr: Expr,
@@ -1762,6 +1900,9 @@ class StartsWith extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class EndsWith extends Function implements FilterCondition {
   constructor(
     private expr: Expr,
@@ -1772,24 +1913,36 @@ class EndsWith extends Function implements FilterCondition {
   filterable = true as const;
 }
 
+/**
+ * @beta
+ */
 class ToLowercase extends Function {
   constructor(private expr: Expr) {
     super('to_lowercase', [expr]);
   }
 }
 
+/**
+ * @beta
+ */
 class ToUppercase extends Function {
   constructor(private expr: Expr) {
     super('to_uppercase', [expr]);
   }
 }
 
+/**
+ * @beta
+ */
 class Trim extends Function {
   constructor(private expr: Expr) {
     super('trim', [expr]);
   }
 }
 
+/**
+ * @beta
+ */
 class StrConcat extends Function {
   constructor(
     private first: Expr,
@@ -1799,12 +1952,18 @@ class StrConcat extends Function {
   }
 }
 
+/**
+ * @beta
+ */
 class MapGet extends Function {
   constructor(map: Expr, name: string) {
     super('map_get', [map, Constant.of(name)]);
   }
 }
 
+/**
+ * @beta
+ */
 class Count extends Function implements Accumulator {
   accumulator = true as const;
   constructor(
@@ -1815,6 +1974,9 @@ class Count extends Function implements Accumulator {
   }
 }
 
+/**
+ * @beta
+ */
 class Sum extends Function implements Accumulator {
   accumulator = true as const;
   constructor(
@@ -1825,6 +1987,9 @@ class Sum extends Function implements Accumulator {
   }
 }
 
+/**
+ * @beta
+ */
 class Avg extends Function implements Accumulator {
   accumulator = true as const;
   constructor(
@@ -1835,6 +2000,9 @@ class Avg extends Function implements Accumulator {
   }
 }
 
+/**
+ * @beta
+ */
 class Min extends Function implements Accumulator {
   accumulator = true as const;
   constructor(
@@ -1845,6 +2013,9 @@ class Min extends Function implements Accumulator {
   }
 }
 
+/**
+ * @beta
+ */
 class Max extends Function implements Accumulator {
   accumulator = true as const;
   constructor(
@@ -1855,6 +2026,9 @@ class Max extends Function implements Accumulator {
   }
 }
 
+/**
+ * @beta
+ */
 class CosineDistance extends Function {
   constructor(
     private vector1: Expr,
@@ -1864,6 +2038,9 @@ class CosineDistance extends Function {
   }
 }
 
+/**
+ * @beta
+ */
 class DotProductDistance extends Function {
   constructor(
     private vector1: Expr,
@@ -1873,6 +2050,9 @@ class DotProductDistance extends Function {
   }
 }
 
+/**
+ * @beta
+ */
 class EuclideanDistance extends Function {
   constructor(
     private vector1: Expr,
@@ -1883,6 +2063,8 @@ class EuclideanDistance extends Function {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that adds two expressions together.
  *
  * ```typescript
@@ -1897,6 +2079,8 @@ class EuclideanDistance extends Function {
 export function add(left: Expr, right: Expr): Add;
 
 /**
+ * @beta
+ *
  * Creates an expression that adds an expression to a constant value.
  *
  * ```typescript
@@ -1911,6 +2095,8 @@ export function add(left: Expr, right: Expr): Add;
 export function add(left: Expr, right: any): Add;
 
 /**
+ * @beta
+ *
  * Creates an expression that adds a field's value to an expression.
  *
  * ```typescript
@@ -1925,6 +2111,8 @@ export function add(left: Expr, right: any): Add;
 export function add(left: string, right: Expr): Add;
 
 /**
+ * @beta
+ *
  * Creates an expression that adds a field's value to a constant value.
  *
  * ```typescript
@@ -1944,6 +2132,8 @@ export function add(left: Expr | string, right: Expr | any): Add {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that subtracts two expressions.
  *
  * ```typescript
@@ -1958,6 +2148,8 @@ export function add(left: Expr | string, right: Expr | any): Add {
 export function subtract(left: Expr, right: Expr): Subtract;
 
 /**
+ * @beta
+ *
  * Creates an expression that subtracts a constant value from an expression.
  *
  * ```typescript
@@ -1972,6 +2164,8 @@ export function subtract(left: Expr, right: Expr): Subtract;
 export function subtract(left: Expr, right: any): Subtract;
 
 /**
+ * @beta
+ *
  * Creates an expression that subtracts an expression from a field's value.
  *
  * ```typescript
@@ -1986,6 +2180,8 @@ export function subtract(left: Expr, right: any): Subtract;
 export function subtract(left: string, right: Expr): Subtract;
 
 /**
+ * @beta
+ *
  * Creates an expression that subtracts a constant value from a field's value.
  *
  * ```typescript
@@ -2005,6 +2201,8 @@ export function subtract(left: Expr | string, right: Expr | any): Subtract {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that multiplies two expressions together.
  *
  * ```typescript
@@ -2019,6 +2217,8 @@ export function subtract(left: Expr | string, right: Expr | any): Subtract {
 export function multiply(left: Expr, right: Expr): Multiply;
 
 /**
+ * @beta
+ *
  * Creates an expression that multiplies an expression by a constant value.
  *
  * ```typescript
@@ -2033,6 +2233,8 @@ export function multiply(left: Expr, right: Expr): Multiply;
 export function multiply(left: Expr, right: any): Multiply;
 
 /**
+ * @beta
+ *
  * Creates an expression that multiplies a field's value by an expression.
  *
  * ```typescript
@@ -2047,6 +2249,8 @@ export function multiply(left: Expr, right: any): Multiply;
 export function multiply(left: string, right: Expr): Multiply;
 
 /**
+ * @beta
+ *
  * Creates an expression that multiplies a field's value by a constant value.
  *
  * ```typescript
@@ -2066,6 +2270,8 @@ export function multiply(left: Expr | string, right: Expr | any): Multiply {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that divides two expressions.
  *
  * ```typescript
@@ -2080,6 +2286,8 @@ export function multiply(left: Expr | string, right: Expr | any): Multiply {
 export function divide(left: Expr, right: Expr): Divide;
 
 /**
+ * @beta
+ *
  * Creates an expression that divides an expression by a constant value.
  *
  * ```typescript
@@ -2094,6 +2302,8 @@ export function divide(left: Expr, right: Expr): Divide;
 export function divide(left: Expr, right: any): Divide;
 
 /**
+ * @beta
+ *
  * Creates an expression that divides a field's value by an expression.
  *
  * ```typescript
@@ -2108,6 +2318,8 @@ export function divide(left: Expr, right: any): Divide;
 export function divide(left: string, right: Expr): Divide;
 
 /**
+ * @beta
+ *
  * Creates an expression that divides a field's value by a constant value.
  *
  * ```typescript
@@ -2127,6 +2339,8 @@ export function divide(left: Expr | string, right: Expr | any): Divide {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if two expressions are equal.
  *
  * ```typescript
@@ -2141,6 +2355,8 @@ export function divide(left: Expr | string, right: Expr | any): Divide {
 export function eq(left: Expr, right: Expr): Eq;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression is equal to a constant value.
  *
  * ```typescript
@@ -2155,6 +2371,8 @@ export function eq(left: Expr, right: Expr): Eq;
 export function eq(left: Expr, right: any): Eq;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is equal to an expression.
  *
  * ```typescript
@@ -2169,6 +2387,8 @@ export function eq(left: Expr, right: any): Eq;
 export function eq(left: string, right: Expr): Eq;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is equal to a constant value.
  *
  * ```typescript
@@ -2188,6 +2408,8 @@ export function eq(left: Expr | string, right: any): Eq {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if two expressions are not equal.
  *
  * ```typescript
@@ -2202,6 +2424,8 @@ export function eq(left: Expr | string, right: any): Eq {
 export function neq(left: Expr, right: Expr): Neq;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression is not equal to a constant value.
  *
  * ```typescript
@@ -2216,6 +2440,8 @@ export function neq(left: Expr, right: Expr): Neq;
 export function neq(left: Expr, right: any): Neq;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is not equal to an expression.
  *
  * ```typescript
@@ -2230,6 +2456,8 @@ export function neq(left: Expr, right: any): Neq;
 export function neq(left: string, right: Expr): Neq;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is not equal to a constant value.
  *
  * ```typescript
@@ -2249,6 +2477,8 @@ export function neq(left: Expr | string, right: any): Neq {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if the first expression is less than the second expression.
  *
  * ```typescript
@@ -2263,6 +2493,8 @@ export function neq(left: Expr | string, right: any): Neq {
 export function lt(left: Expr, right: Expr): Lt;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression is less than a constant value.
  *
  * ```typescript
@@ -2277,6 +2509,8 @@ export function lt(left: Expr, right: Expr): Lt;
 export function lt(left: Expr, right: any): Lt;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is less than an expression.
  *
  * ```typescript
@@ -2291,6 +2525,8 @@ export function lt(left: Expr, right: any): Lt;
 export function lt(left: string, right: Expr): Lt;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is less than a constant value.
  *
  * ```typescript
@@ -2310,6 +2546,8 @@ export function lt(left: Expr | string, right: any): Lt {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if the first expression is less than or equal to the second
  * expression.
  *
@@ -2325,6 +2563,8 @@ export function lt(left: Expr | string, right: any): Lt {
 export function lte(left: Expr, right: Expr): Lte;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression is less than or equal to a constant value.
  *
  * ```typescript
@@ -2353,6 +2593,8 @@ export function lte(left: Expr, right: any): Lte;
 export function lte(left: string, right: Expr): Lte;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is less than or equal to a constant value.
  *
  * ```typescript
@@ -2372,6 +2614,8 @@ export function lte(left: Expr | string, right: any): Lte {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if the first expression is greater than the second
  * expression.
  *
@@ -2387,6 +2631,8 @@ export function lte(left: Expr | string, right: any): Lte {
 export function gt(left: Expr, right: Expr): Gt;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression is greater than a constant value.
  *
  * ```typescript
@@ -2401,6 +2647,8 @@ export function gt(left: Expr, right: Expr): Gt;
 export function gt(left: Expr, right: any): Gt;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is greater than an expression.
  *
  * ```typescript
@@ -2415,6 +2663,8 @@ export function gt(left: Expr, right: any): Gt;
 export function gt(left: string, right: Expr): Gt;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is greater than a constant value.
  *
  * ```typescript
@@ -2434,6 +2684,8 @@ export function gt(left: Expr | string, right: any): Gt {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if the first expression is greater than or equal to the
  * second expression.
  *
@@ -2449,6 +2701,8 @@ export function gt(left: Expr | string, right: any): Gt {
 export function gte(left: Expr, right: Expr): Gte;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression is greater than or equal to a constant
  * value.
  *
@@ -2464,6 +2718,8 @@ export function gte(left: Expr, right: Expr): Gte;
 export function gte(left: Expr, right: any): Gte;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is greater than or equal to an expression.
  *
  * ```typescript
@@ -2478,6 +2734,8 @@ export function gte(left: Expr, right: any): Gte;
 export function gte(left: string, right: Expr): Gte;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is greater than or equal to a constant
  * value.
  *
@@ -2498,6 +2756,8 @@ export function gte(left: Expr | string, right: any): Gte {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that concatenates an array expression with other arrays.
  *
  * ```typescript
@@ -2512,6 +2772,8 @@ export function gte(left: Expr | string, right: any): Gte {
 export function arrayConcat(array: Expr, elements: Expr[]): ArrayConcat;
 
 /**
+ * @beta
+ *
  * Creates an expression that concatenates an array expression with other arrays and/or values.
  *
  * ```typescript
@@ -2526,6 +2788,8 @@ export function arrayConcat(array: Expr, elements: Expr[]): ArrayConcat;
 export function arrayConcat(array: Expr, elements: any[]): ArrayConcat;
 
 /**
+ * @beta
+ *
  * Creates an expression that concatenates a field's array value with other arrays.
  *
  * ```typescript
@@ -2540,6 +2804,8 @@ export function arrayConcat(array: Expr, elements: any[]): ArrayConcat;
 export function arrayConcat(array: string, elements: Expr[]): ArrayConcat;
 
 /**
+ * @beta
+ *
  * Creates an expression that concatenates a field's array value with other arrays and/or values.
  *
  * ```typescript
@@ -2564,6 +2830,8 @@ export function arrayConcat(
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an array expression contains a specific element.
  *
  * ```typescript
@@ -2578,6 +2846,8 @@ export function arrayConcat(
 export function arrayContains(array: Expr, element: Expr): ArrayContains;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an array expression contains a specific element.
  *
  * ```typescript
@@ -2592,6 +2862,8 @@ export function arrayContains(array: Expr, element: Expr): ArrayContains;
 export function arrayContains(array: Expr, element: any): ArrayContains;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's array value contains a specific element.
  *
  * ```typescript
@@ -2606,6 +2878,8 @@ export function arrayContains(array: Expr, element: any): ArrayContains;
 export function arrayContains(array: string, element: Expr): ArrayContains;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's array value contains a specific value.
  *
  * ```typescript
@@ -2628,6 +2902,8 @@ export function arrayContains(
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an array expression contains any of the specified
  * elements.
  *
@@ -2643,6 +2919,8 @@ export function arrayContains(
 export function arrayContainsAny(array: Expr, values: Expr[]): ArrayContainsAny;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an array expression contains any of the specified
  * elements.
  *
@@ -2658,6 +2936,8 @@ export function arrayContainsAny(array: Expr, values: Expr[]): ArrayContainsAny;
 export function arrayContainsAny(array: Expr, values: any[]): ArrayContainsAny;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's array value contains any of the specified
  * elements.
  *
@@ -2677,6 +2957,8 @@ export function arrayContainsAny(
 ): ArrayContainsAny;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's array value contains any of the specified
  * elements.
  *
@@ -2706,6 +2988,8 @@ export function arrayContainsAny(
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an array expression contains all the specified elements.
  *
  * ```typescript
@@ -2720,6 +3004,8 @@ export function arrayContainsAny(
 export function arrayContainsAll(array: Expr, values: Expr[]): ArrayContainsAll;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an array expression contains all the specified elements.
  *
  * ```typescript
@@ -2734,6 +3020,8 @@ export function arrayContainsAll(array: Expr, values: Expr[]): ArrayContainsAll;
 export function arrayContainsAll(array: Expr, values: any[]): ArrayContainsAll;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's array value contains all the specified values or
  * expressions.
  *
@@ -2752,6 +3040,8 @@ export function arrayContainsAll(
 ): ArrayContainsAll;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's array value contains all the specified values or
  * expressions.
  *
@@ -2780,6 +3070,8 @@ export function arrayContainsAll(
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that filters elements from an array expression using the given {@link
  * FilterExpr} and returns the filtered elements as a new array.
  *
@@ -2799,6 +3091,8 @@ export function arrayFilter(array: Expr, filter: FilterExpr): ArrayFilter {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that calculates the length of an array expression.
  *
  * ```typescript
@@ -2814,6 +3108,8 @@ export function arrayLength(array: Expr): ArrayLength {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that applies a transformation function to each element in an array
  * expression and returns the new array as the result of the evaluation.
  *
@@ -2836,6 +3132,8 @@ export function arrayTransform(
 }
 
 /**
+ * @beta
+ *
  * Returns an expression that represents an array element within an {@link ArrayFilter} or {@link
  * ArrayTransform} expression.
  *
@@ -2851,6 +3149,8 @@ export function arrayElement(): ArrayElement {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression is equal to any of the provided values or
  * expressions.
  *
@@ -2866,6 +3166,8 @@ export function arrayElement(): ArrayElement {
 export function inAny(element: Expr, others: Expr[]): In;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression is equal to any of the provided values or
  * expressions.
  *
@@ -2881,6 +3183,8 @@ export function inAny(element: Expr, others: Expr[]): In;
 export function inAny(element: Expr, others: any[]): In;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is equal to any of the provided values or
  * expressions.
  *
@@ -2896,6 +3200,8 @@ export function inAny(element: Expr, others: any[]): In;
 export function inAny(element: string, others: Expr[]): In;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is equal to any of the provided values or
  * expressions.
  *
@@ -2918,6 +3224,8 @@ export function inAny(element: Expr | string, others: any[]): In {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression is not equal to any of the provided values
  * or expressions.
  *
@@ -2933,6 +3241,8 @@ export function inAny(element: Expr | string, others: any[]): In {
 export function notInAny(element: Expr, others: Expr[]): Not;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression is not equal to any of the provided values
  * or expressions.
  *
@@ -2948,6 +3258,8 @@ export function notInAny(element: Expr, others: Expr[]): Not;
 export function notInAny(element: Expr, others: any[]): Not;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is not equal to any of the provided values
  * or expressions.
  *
@@ -2963,6 +3275,8 @@ export function notInAny(element: Expr, others: any[]): Not;
 export function notInAny(element: string, others: Expr[]): Not;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value is not equal to any of the provided values
  * or expressions.
  *
@@ -2985,6 +3299,8 @@ export function notInAny(element: Expr | string, others: any[]): Not {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that performs a logical 'AND' operation on multiple filter conditions.
  *
  * ```typescript
@@ -3002,6 +3318,8 @@ export function and(left: FilterExpr, ...right: FilterExpr[]): And {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that performs a logical 'OR' operation on multiple filter conditions.
  *
  * ```typescript
@@ -3019,6 +3337,8 @@ export function or(left: FilterExpr, ...right: FilterExpr[]): Or {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that performs a logical 'XOR' (exclusive OR) operation on multiple filter
  * conditions.
  *
@@ -3040,6 +3360,8 @@ export function xor(left: FilterExpr, ...right: FilterExpr[]): Xor {
 }
 
 /**
+ * @beta
+ *
  * Creates a conditional expression that evaluates to a 'then' expression if a condition is true
  * and an 'else' expression if the condition is false.
  *
@@ -3063,6 +3385,8 @@ export function ifFunction(
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that negates a filter condition.
  *
  * ```typescript
@@ -3078,6 +3402,8 @@ export function not(filter: FilterExpr): Not {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field exists.
  *
  * ```typescript
@@ -3091,6 +3417,8 @@ export function not(filter: FilterExpr): Not {
 export function exists(value: Expr): Exists;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field exists.
  *
  * ```typescript
@@ -3109,6 +3437,8 @@ export function exists(valueOrField: Expr | string): Exists {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if an expression evaluates to 'NaN' (Not a Number).
  *
  * ```typescript
@@ -3122,6 +3452,8 @@ export function exists(valueOrField: Expr | string): Exists {
 export function isNan(value: Expr): IsNan;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value evaluates to 'NaN' (Not a Number).
  *
  * ```typescript
@@ -3139,6 +3471,8 @@ export function isNan(value: Expr | string): IsNan {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that calculates the length of a string field.
  *
  * ```typescript
@@ -3152,6 +3486,8 @@ export function isNan(value: Expr | string): IsNan {
 export function length(field: string): Length;
 
 /**
+ * @beta
+ *
  * Creates an expression that calculates the length of a string expression.
  *
  * ```typescript
@@ -3169,6 +3505,8 @@ export function length(value: Expr | string): Length {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that performs a case-sensitive wildcard string comparison against a
  * field.
  *
@@ -3184,6 +3522,8 @@ export function length(value: Expr | string): Length {
 export function like(left: string, pattern: string): Like;
 
 /**
+ * @beta
+ *
  * Creates an expression that performs a case-sensitive wildcard string comparison against a
  * field.
  *
@@ -3199,6 +3539,8 @@ export function like(left: string, pattern: string): Like;
 export function like(left: string, pattern: Expr): Like;
 
 /**
+ * @beta
+ *
  * Creates an expression that performs a case-sensitive wildcard string comparison.
  *
  * ```typescript
@@ -3213,6 +3555,8 @@ export function like(left: string, pattern: Expr): Like;
 export function like(left: Expr, pattern: string): Like;
 
 /**
+ * @beta
+ *
  * Creates an expression that performs a case-sensitive wildcard string comparison.
  *
  * ```typescript
@@ -3232,6 +3576,8 @@ export function like(left: Expr | string, pattern: Expr | string): Like {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string field contains a specified regular expression as
  * a substring.
  *
@@ -3247,6 +3593,8 @@ export function like(left: Expr | string, pattern: Expr | string): Like {
 export function regexContains(left: string, pattern: string): RegexContains;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string field contains a specified regular expression as
  * a substring.
  *
@@ -3262,6 +3610,8 @@ export function regexContains(left: string, pattern: string): RegexContains;
 export function regexContains(left: string, pattern: Expr): RegexContains;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string expression contains a specified regular
  * expression as a substring.
  *
@@ -3277,6 +3627,8 @@ export function regexContains(left: string, pattern: Expr): RegexContains;
 export function regexContains(left: Expr, pattern: string): RegexContains;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string expression contains a specified regular
  * expression as a substring.
  *
@@ -3300,6 +3652,8 @@ export function regexContains(
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string field matches a specified regular expression.
  *
  * ```typescript
@@ -3314,6 +3668,8 @@ export function regexContains(
 export function regexMatch(left: string, pattern: string): RegexMatch;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string field matches a specified regular expression.
  *
  * ```typescript
@@ -3328,6 +3684,8 @@ export function regexMatch(left: string, pattern: string): RegexMatch;
 export function regexMatch(left: string, pattern: Expr): RegexMatch;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string expression matches a specified regular
  * expression.
  *
@@ -3343,6 +3701,8 @@ export function regexMatch(left: string, pattern: Expr): RegexMatch;
 export function regexMatch(left: Expr, pattern: string): RegexMatch;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string expression matches a specified regular
  * expression.
  *
@@ -3366,6 +3726,8 @@ export function regexMatch(
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value starts with a given prefix.
  *
  * ```typescript
@@ -3380,6 +3742,8 @@ export function regexMatch(
 export function startsWith(expr: string, prefix: string): StartsWith;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value starts with a given prefix.
  *
  * ```typescript
@@ -3394,6 +3758,8 @@ export function startsWith(expr: string, prefix: string): StartsWith;
 export function startsWith(expr: string, prefix: Expr): StartsWith;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string expression starts with a given prefix.
  *
  * ```typescript
@@ -3408,6 +3774,8 @@ export function startsWith(expr: string, prefix: Expr): StartsWith;
 export function startsWith(expr: Expr, prefix: string): StartsWith;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string expression starts with a given prefix.
  *
  * ```typescript
@@ -3430,6 +3798,8 @@ export function startsWith(
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value ends with a given postfix.
  *
  * ```typescript
@@ -3444,6 +3814,8 @@ export function startsWith(
 export function endsWith(expr: string, suffix: string): EndsWith;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a field's value ends with a given postfix.
  *
  * ```typescript
@@ -3458,6 +3830,8 @@ export function endsWith(expr: string, suffix: string): EndsWith;
 export function endsWith(expr: string, suffix: Expr): EndsWith;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string expression ends with a given postfix.
  *
  * ```typescript
@@ -3472,6 +3846,8 @@ export function endsWith(expr: string, suffix: Expr): EndsWith;
 export function endsWith(expr: Expr, suffix: string): EndsWith;
 
 /**
+ * @beta
+ *
  * Creates an expression that checks if a string expression ends with a given postfix.
  *
  * ```typescript
@@ -3491,6 +3867,8 @@ export function endsWith(expr: Expr | string, suffix: Expr | string): EndsWith {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that converts a string field to lowercase.
  *
  * ```typescript
@@ -3504,6 +3882,8 @@ export function endsWith(expr: Expr | string, suffix: Expr | string): EndsWith {
 export function toLowercase(expr: string): ToLowercase;
 
 /**
+ * @beta
+ *
  * Creates an expression that converts a string expression to lowercase.
  *
  * ```typescript
@@ -3520,6 +3900,8 @@ export function toLowercase(expr: Expr | string): ToLowercase {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that converts a string field to uppercase.
  *
  * ```typescript
@@ -3533,6 +3915,8 @@ export function toLowercase(expr: Expr | string): ToLowercase {
 export function toUppercase(expr: string): ToUppercase;
 
 /**
+ * @beta
+ *
  * Creates an expression that converts a string expression to uppercase.
  *
  * ```typescript
@@ -3549,6 +3933,8 @@ export function toUppercase(expr: Expr | string): ToUppercase {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that removes leading and trailing whitespace from a string field.
  *
  * ```typescript
@@ -3562,6 +3948,8 @@ export function toUppercase(expr: Expr | string): ToUppercase {
 export function trim(expr: string): Trim;
 
 /**
+ * @beta
+ *
  * Creates an expression that removes leading and trailing whitespace from a string expression.
  *
  * ```typescript
@@ -3578,6 +3966,8 @@ export function trim(expr: Expr | string): Trim {
 }
 
 /**
+ * @beta
+ *
  * Creates an expression that concatenates string functions, fields or constants together.
  *
  * ```typescript
@@ -3595,6 +3985,7 @@ export function strConcat(
 ): StrConcat;
 
 /**
+ * @beta
  * Creates an expression that concatenates string expressions together.
  *
  * ```typescript
@@ -3619,6 +4010,8 @@ export function strConcat(
 }
 
 /**
+ * @beta
+ *
  * Accesses a value from a map (object) field using the provided key.
  *
  * ```typescript
@@ -3633,6 +4026,8 @@ export function strConcat(
 export function mapGet(mapField: string, subField: string): MapGet;
 
 /**
+ * @beta
+ *
  * Accesses a value from a map (object) expression using the provided key.
  *
  * ```typescript
@@ -3653,6 +4048,8 @@ export function mapGet(fieldOrExpr: string | Expr, subField: string): MapGet {
 }
 
 /**
+ * @beta
+ *
  * Creates an aggregation that counts the total number of stage inputs.
  *
  * ```typescript
@@ -3667,6 +4064,8 @@ export function countAll(): Count {
 }
 
 /**
+ * @beta
+ *
  * Creates an aggregation that counts the number of stage inputs with valid evaluations of the
  * provided expression.
  *
@@ -3699,6 +4098,8 @@ export function count(value: Expr | string): Count {
 }
 
 /**
+ * @beta
+ *
  * Creates an aggregation that calculates the sum of values from an expression across multiple
  * stage inputs.
  *
@@ -3713,6 +4114,8 @@ export function count(value: Expr | string): Count {
 export function sum(value: Expr): Sum;
 
 /**
+ * @beta
+ *
  * Creates an aggregation that calculates the sum of a field's values across multiple stage
  * inputs.
  *
@@ -3731,6 +4134,8 @@ export function sum(value: Expr | string): Sum {
 }
 
 /**
+ * @beta
+ *
  * Creates an aggregation that calculates the average (mean) of values from an expression across
  * multiple stage inputs.
  *
@@ -3745,6 +4150,8 @@ export function sum(value: Expr | string): Sum {
 export function avg(value: Expr): Avg;
 
 /**
+ * @beta
+ *
  * Creates an aggregation that calculates the average (mean) of a field's values across multiple
  * stage inputs.
  *
@@ -3763,6 +4170,8 @@ export function avg(value: Expr | string): Avg {
 }
 
 /**
+ * @beta
+ *
  * Creates an aggregation that finds the minimum value of an expression across multiple stage
  * inputs.
  *
@@ -3777,6 +4186,8 @@ export function avg(value: Expr | string): Avg {
 export function min(value: Expr): Min;
 
 /**
+ * @beta
+ *
  * Creates an aggregation that finds the minimum value of a field across multiple stage inputs.
  *
  * ```typescript
@@ -3794,6 +4205,8 @@ export function min(value: Expr | string): Min {
 }
 
 /**
+ * @beta
+ *
  * Creates an aggregation that finds the maximum value of an expression across multiple stage
  * inputs.
  *
@@ -3808,6 +4221,8 @@ export function min(value: Expr | string): Min {
 export function max(value: Expr): Max;
 
 /**
+ * @beta
+ *
  * Creates an aggregation that finds the maximum value of a field across multiple stage inputs.
  *
  * ```typescript
@@ -3825,6 +4240,8 @@ export function max(value: Expr | string): Max {
 }
 
 /**
+ * @beta
+ *
  * Calculates the Cosine distance between a field's vector value and a double array.
  *
  * ```typescript
@@ -3839,6 +4256,8 @@ export function max(value: Expr | string): Max {
 export function cosineDistance(expr: string, other: number[]): CosineDistance;
 
 /**
+ * @beta
+ *
  * Calculates the Cosine distance between a field's vector value and a VectorValue.
  *
  * ```typescript
@@ -3856,6 +4275,8 @@ export function cosineDistance(
 ): CosineDistance;
 
 /**
+ * @beta
+ *
  * Calculates the Cosine distance between a field's vector value and a vector expression.
  *
  * ```typescript
@@ -3870,6 +4291,8 @@ export function cosineDistance(
 export function cosineDistance(expr: string, other: Expr): CosineDistance;
 
 /**
+ * @beta
+ *
  * Calculates the Cosine distance between a vector expression and a double array.
  *
  * ```typescript
@@ -3884,6 +4307,8 @@ export function cosineDistance(expr: string, other: Expr): CosineDistance;
 export function cosineDistance(expr: Expr, other: number[]): CosineDistance;
 
 /**
+ * @beta
+ *
  * Calculates the Cosine distance between a vector expression and a VectorValue.
  *
  * ```typescript
@@ -3898,6 +4323,8 @@ export function cosineDistance(expr: Expr, other: number[]): CosineDistance;
 export function cosineDistance(expr: Expr, other: VectorValue): CosineDistance;
 
 /**
+ * @beta
+ *
  * Calculates the Cosine distance between two vector expressions.
  *
  * ```typescript
@@ -3920,6 +4347,8 @@ export function cosineDistance(
 }
 
 /**
+ * @beta
+ *
  * Calculates the dot product distance between a field's vector value and a double array.
  *
  * ```typescript
@@ -3937,6 +4366,8 @@ export function dotProductDistance(
 ): DotProductDistance;
 
 /**
+ * @beta
+ *
  * Calculates the dot product distance between a field's vector value and a VectorValue.
  *
  * ```typescript
@@ -3954,6 +4385,8 @@ export function dotProductDistance(
 ): DotProductDistance;
 
 /**
+ * @beta
+ *
  * Calculates the dot product distance between a field's vector value and a vector expression.
  *
  * ```typescript
@@ -3971,6 +4404,8 @@ export function dotProductDistance(
 ): DotProductDistance;
 
 /**
+ * @beta
+ *
  * Calculates the dot product distance between a vector expression and a double array.
  *
  * ```typescript
@@ -3988,6 +4423,8 @@ export function dotProductDistance(
 ): DotProductDistance;
 
 /**
+ * @beta
+ *
  * Calculates the dot product distance between a vector expression and a VectorValue.
  *
  * ```typescript
@@ -4005,6 +4442,8 @@ export function dotProductDistance(
 ): DotProductDistance;
 
 /**
+ * @beta
+ *
  * Calculates the dot product distance between two vector expressions.
  *
  * ```typescript
@@ -4027,6 +4466,8 @@ export function dotProductDistance(
 }
 
 /**
+ * @beta
+ *
  * Calculates the Euclidean distance between a field's vector value and a double array.
  *
  * ```typescript
@@ -4044,6 +4485,8 @@ export function euclideanDistance(
 ): EuclideanDistance;
 
 /**
+ * @beta
+ *
  * Calculates the Euclidean distance between a field's vector value and a VectorValue.
  *
  * ```typescript
@@ -4061,6 +4504,8 @@ export function euclideanDistance(
 ): EuclideanDistance;
 
 /**
+ * @beta
+ *
  * Calculates the Euclidean distance between a field's vector value and a vector expression.
  *
  * ```typescript
@@ -4075,6 +4520,8 @@ export function euclideanDistance(
 export function euclideanDistance(expr: string, other: Expr): EuclideanDistance;
 
 /**
+ * @beta
+ *
  * Calculates the Euclidean distance between a vector expression and a double array.
  *
  * ```typescript
@@ -4093,6 +4540,8 @@ export function euclideanDistance(
 ): EuclideanDistance;
 
 /**
+ * @beta
+ *
  * Calculates the Euclidean distance between a vector expression and a VectorValue.
  *
  * ```typescript
@@ -4110,6 +4559,8 @@ export function euclideanDistance(
 ): EuclideanDistance;
 
 /**
+ * @beta
+ *
  * Calculates the Euclidean distance between two vector expressions.
  *
  * ```typescript
@@ -4132,6 +4583,8 @@ export function euclideanDistance(
 }
 
 /**
+ * @beta
+ *
  * Creates functions that work on the backend but do not exist in the SDK yet.
  *
  * ```typescript
@@ -4149,6 +4602,8 @@ export function genericFunction(name: string, params: Expr[]): Function {
 }
 
 /**
+ * @beta
+ *
  * Creates an {@link Ordering} that sorts documents in ascending order based on this expression.
  *
  * ```typescript
@@ -4165,6 +4620,8 @@ export function ascending(expr: Expr): Ordering {
 }
 
 /**
+ * @beta
+ *
  * Creates an {@link Ordering} that sorts documents in descending order based on this expression.
  *
  * ```typescript
@@ -4181,6 +4638,8 @@ export function descending(expr: Expr): Ordering {
 }
 
 /**
+ * @beta
+ *
  * Represents an ordering criterion for sorting documents in a Firestore pipeline.
  *
  * You create `Ordering` instances using the `ascending` and `descending` helper functions.
