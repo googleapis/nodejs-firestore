@@ -340,7 +340,7 @@ export class AggregateQuery<
     return runQueryRequest;
   }
 
-  toPipeline(): Pipeline {
+  pipeline(): Pipeline {
     const aggregates = mapToArray(
       this._aggregates,
       (aggregate, clientAlias) => {
@@ -351,8 +351,10 @@ export class AggregateQuery<
           return count(Field.of(aggregate._field)).as(clientAlias);
         } else if (aggregate.aggregateType === 'avg') {
           return avg(Field.of(aggregate._field!)).as(clientAlias);
-        } else {
+        } else if (aggregate.aggregateType === 'sum') {
           return sum(Field.of(aggregate._field!)).as(clientAlias);
+        } else {
+          throw new Error(`Unknown aggregate type ${aggregate.aggregateType}`);
         }
       }
     );

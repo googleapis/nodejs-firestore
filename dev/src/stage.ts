@@ -225,7 +225,7 @@ export class Sort implements Stage {
   }
 }
 
-export class GenerateStage implements Stage {
+export class GenericStage implements Stage {
   constructor(
     public name: string,
     params: any[]

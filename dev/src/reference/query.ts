@@ -720,11 +720,7 @@ export class Query<
       return new Ordering(Field.of(fieldOrder.field), dir || 'ascending');
     });
     if (orderings.length > 0) {
-      pipeline = pipeline.sort({
-        orderings: orderings,
-        density: 'required',
-        truncation: 'unspecified',
-      });
+      pipeline = pipeline.sort({orderings: orderings});
     }
 
     // Cursors, Limit and Offset

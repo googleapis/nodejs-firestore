@@ -999,7 +999,7 @@ export abstract class Expr {
     if (other instanceof Expr) {
       return new CosineDistance(this, other);
     } else {
-      return new CosineDistance(this, Constant.ofVector(other));
+      return new CosineDistance(this, Constant.vector(other));
     }
   }
 
@@ -1045,7 +1045,7 @@ export abstract class Expr {
     if (other instanceof Expr) {
       return new DotProductDistance(this, other);
     } else {
-      return new DotProductDistance(this, Constant.ofVector(other));
+      return new DotProductDistance(this, Constant.vector(other));
     }
   }
 
@@ -1091,7 +1091,7 @@ export abstract class Expr {
     if (other instanceof Expr) {
       return new EuclideanDistance(this, other);
     } else {
-      return new EuclideanDistance(this, Constant.ofVector(other));
+      return new EuclideanDistance(this, Constant.vector(other));
     }
   }
 
@@ -1444,7 +1444,7 @@ export class Constant extends Expr {
    * @param value The VectorValue value.
    * @return A new `Constant` instance.
    */
-  static ofVector(value: Array<number> | VectorValue): Constant {
+  static vector(value: Array<number> | VectorValue): Constant {
     if (value instanceof VectorValue) {
       return new Constant(value);
     } else {
@@ -3915,7 +3915,7 @@ export function cosineDistance(
   other: Expr | number[] | VectorValue
 ): CosineDistance {
   const expr1 = expr instanceof Expr ? expr : Field.of(expr);
-  const expr2 = other instanceof Expr ? other : Constant.ofVector(other);
+  const expr2 = other instanceof Expr ? other : Constant.vector(other);
   return new CosineDistance(expr1, expr2);
 }
 
@@ -4022,7 +4022,7 @@ export function dotProductDistance(
   other: Expr | number[] | VectorValue
 ): DotProductDistance {
   const expr1 = expr instanceof Expr ? expr : Field.of(expr);
-  const expr2 = other instanceof Expr ? other : Constant.ofVector(other);
+  const expr2 = other instanceof Expr ? other : Constant.vector(other);
   return new DotProductDistance(expr1, expr2);
 }
 
@@ -4127,7 +4127,7 @@ export function euclideanDistance(
   other: Expr | number[] | VectorValue
 ): EuclideanDistance {
   const expr1 = expr instanceof Expr ? expr : Field.of(expr);
-  const expr2 = other instanceof Expr ? other : Constant.ofVector(other);
+  const expr2 = other instanceof Expr ? other : Constant.vector(other);
   return new EuclideanDistance(expr1, expr2);
 }
 

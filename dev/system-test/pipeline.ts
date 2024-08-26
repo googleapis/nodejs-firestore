@@ -47,6 +47,7 @@ import {
   dotProductDistance,
   euclideanDistance,
   Constant,
+  mapGet,
 } from '../src/expression';
 import {PipelineResult} from '../src/pipeline';
 import {verifyInstance} from '../test/util/helpers';
@@ -126,7 +127,8 @@ describe.only('Pipeline class', () => {
         published: 1979,
         rating: 4.2,
         tags: ['comedy', 'space', 'adventure'],
-        awards: {hugo: true, nebula: false},
+        awards: {hugo: true, nebula: false, others: {unknown: {year: 1980}}},
+        nestedField: {'level.1': {'level.2': true}},
       },
       book2: {
         title: 'Pride and Prejudice',
@@ -429,9 +431,9 @@ describe.only('Pipeline class', () => {
     const results = await randomCol
       .pipeline()
       .select(
-        arrayFilter(Field.of('tags'), arrayElement().eq('comedy')).as(
-          'filteredTags'
-        )
+        Field.of('tags')
+          .arrayFilter(arrayElement().eq('comedy'))
+          .as('filteredTags')
       )
       .limit(1)
       .execute();
@@ -445,10 +447,9 @@ describe.only('Pipeline class', () => {
     const results = await randomCol
       .pipeline()
       .select(
-        arrayTransform(
-          Field.of('tags'),
-          arrayElement().strConcat('transformed')
-        ).as('transformedTags')
+        Field.of('tags')
+          .arrayTransform(arrayElement().strConcat('transformed'))
+          .as('transformedTags')
       )
       .limit(1)
       .execute();
@@ -662,14 +663,19 @@ describe.only('Pipeline class', () => {
       .pipeline()
       .select(
         Field.of('awards').mapGet('hugo').as('hugoAward'),
+        Field.of('awards').mapGet('others').as('others'),
         Field.of('title')
       )
       .where(eq('hugoAward', true))
       .execute();
     expectResults(
       results,
-      {hugoAward: true, title: "The Hitchhiker's Guide to the Galaxy"},
-      {hugoAward: true, title: 'Dune'}
+      {
+        hugoAward: true,
+        title: "The Hitchhiker's Guide to the Galaxy",
+        others: {unknown: {year: 1980}},
+      },
+      {hugoAward: true, title: 'Dune', others: null}
     );
   });
 
@@ -701,13 +707,13 @@ describe.only('Pipeline class', () => {
     const results = await randomCol
       .pipeline()
       .select(
-        cosineDistance(Constant.ofVector(sourceVector), targetVector).as(
+        cosineDistance(Constant.vector(sourceVector), targetVector).as(
           'cosineDistance'
         ),
-        dotProductDistance(Constant.ofVector(sourceVector), targetVector).as(
+        dotProductDistance(Constant.vector(sourceVector), targetVector).as(
           'dotProductDistance'
         ),
-        euclideanDistance(Constant.ofVector(sourceVector), targetVector).as(
+        euclideanDistance(Constant.vector(sourceVector), targetVector).as(
           'euclideanDistance'
         )
       )
@@ -731,6 +737,27 @@ describe.only('Pipeline class', () => {
       results,
       {title: "The Hitchhiker's Guide to the Galaxy", 'awards.hugo': true},
       {title: 'Dune', 'awards.hugo': true}
+    );
+  });
+
+  it('test mapGet with field name including . notation', async () => {
+    const results = await randomCol
+      .pipeline()
+      .where(eq('awards.hugo', true))
+      .select(
+        'title',
+        Field.of('nestedField.level.1'),
+        mapGet('nestedField', 'level.1').mapGet('level.2').as('nested')
+      )
+      .execute();
+    expectResults(
+      results,
+      {
+        title: "The Hitchhiker's Guide to the Galaxy",
+        'nestedField.level.`1`': null,
+        nested: true,
+      },
+      {title: 'Dune', 'nestedField.level.`1`': null, nested: null}
     );
   });
 

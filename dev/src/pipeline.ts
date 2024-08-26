@@ -29,7 +29,7 @@ import {
   Where,
   FindNearest,
   FindNearestOptions,
-  GenerateStage,
+  GenericStage,
   Limit,
   Offset,
   Select,
@@ -138,41 +138,20 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * @param fields The fields to add to the documents, specified as {@link Selectable}s.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  addFields(...fields: Selectable[]): Pipeline {
+  addFields(...fields: Selectable[]): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new AddField(this.selectablesToMap(fields)));
-    return new Pipeline(this.db, copy);
+    return new Pipeline(this.db, copy, this.converter);
   }
 
-  /**
-   * Selects a set of fields from the outputs of previous stages.
-   *
-   * <p>If no selections are provided, the output of this stage is empty. Use {@link
-   * com.google.cloud.firestore.Pipeline#addFields} instead if only additions are
-   * desired.
-   *
-   * <p>Example:
-   *
-   * ```typescript
-   * firestore.collection("books")
-   *   .select("name", "address");
-   *
-   * // The above is a shorthand of this:
-   * firestore.pipeline().collection("books")
-   *    .select(Field.of("name"), Field.of("address"));
-   * ```
-   *
-   * @param fields The name of the fields to include in the output documents.
-   * @return A new Pipeline object with this stage appended to the stage list.
-   */
-  select(...fields: string[]): Pipeline;
   /**
    * Selects or creates a set of fields from the outputs of previous stages.
    *
    * <p>The selected fields are defined using {@link Selectable} expressions, which can be:
    *
    * <ul>
-   *   <li>{@link Field}: References an existing document field.</li>
+   *   <li>{@code string}: Name of an existing field</li>
+   *   <li>{@link Field}: References an existing field.</li>
    *   <li>{@link Function}: Represents the result of a function with an assigned alias name using
    *       {@link Expr#as}</li>
    * </ul>
@@ -186,20 +165,20 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * ```typescript
    * firestore.pipeline().collection("books")
    *   .select(
-   *     Field.of("name"),
+   *     "firstName",
+   *     Field.of("lastName"),
    *     Field.of("address").toUppercase().as("upperAddress"),
    *   );
    * ```
    *
    * @param selections The fields to include in the output documents, specified as {@link
-   *     Selectable} expressions.
+   *     Selectable} expressions or {@code string} values representing field names.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  select(...fields: Selectable[]): Pipeline;
-  select(...fields: (Selectable | string)[]): Pipeline {
+  select(...fields: (Selectable | string)[]): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new Select(this.selectablesToMap(fields)));
-    return new Pipeline(this.db, copy);
+    return new Pipeline(this.db, copy, this.converter);
   }
 
   private selectablesToMap(
@@ -255,10 +234,10 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * @param condition The {@link FilterCondition} to apply.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  where(condition: FilterCondition & Expr): Pipeline {
+  where(condition: FilterCondition & Expr): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new Where(condition));
-    return new Pipeline(this.db, copy);
+    return new Pipeline(this.db, copy, this.converter);
   }
 
   /**
@@ -281,10 +260,10 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * @param offset The number of documents to skip.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  offset(offset: number): Pipeline {
+  offset(offset: number): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new Offset(offset));
-    return new Pipeline(this.db, copy);
+    return new Pipeline(this.db, copy, this.converter);
   }
 
   /**
@@ -312,30 +291,11 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * @param limit The maximum number of documents to return.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  limit(limit: number): Pipeline {
+  limit(limit: number): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new Limit(limit));
-    return new Pipeline(this.db, copy);
+    return new Pipeline(this.db, copy, this.converter);
   }
-
-  /**
-   * Returns a set of distinct field values from the inputs to this stage.
-   *
-   * <p>This stage run through the results from previous stages to include only results with unique
-   * combinations of values for the specified fields and produce these fields as the output.
-   *
-   * <p>Example:
-   *
-   * ```typescript
-   * // Get a list of unique genres.
-   * firestore.pipeline().collection("books")
-   *     .distinct("genre");
-   * ```
-   *
-   * @param fields The fields to consider when determining distinct values.
-   * @return A new {@code Pipeline} object with this stage appended to the stage list.
-   */
-  distinct(...fields: string[]): Pipeline;
 
   /**
    * Returns a set of distinct {@link Expr} values from the inputs to this stage.
@@ -343,9 +303,10 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * <p>This stage run through the results from previous stages to include only results with unique
    * combinations of {@link Expr} values ({@link Field}, {@link Function}, etc).
    *
-   * <p>The parameters to this stage are defined using {@link Selectable} expressions, which can be:
+   * <p>The parameters to this stage are defined using {@link Selectable} expressions or {@code string}s:
    *
    * <ul>
+   *   <li>{@code string}: Name of an existing field</li>
    *   <li>{@link Field}: References an existing document field.</li>
    *   <li>{@link Function}: Represents the result of a function with an assigned alias name using
    *       {@link Expr#as}</li>
@@ -356,19 +317,18 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * ```typescript
    * // Get a list of unique author names in uppercase and genre combinations.
    * firestore.pipeline().collection("books")
-   *     .distinct(toUppercase(Field.of("author")).as("authorName"), Field.of("genre"))
+   *     .distinct(toUppercase(Field.of("author")).as("authorName"), Field.of("genre"), "publishedAt")
    *     .select("authorName");
    * ```
    *
    * @param selectables The {@link Selectable} expressions to consider when determining distinct
-   *     value combinations.
+   *     value combinations or {@code string}s representing field names.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  distinct(...selectables: Selectable[]): Pipeline;
-  distinct(...groups: (string | Selectable)[]): Pipeline {
+  distinct(...groups: (string | Selectable)[]): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new Distinct(this.selectablesToMap(groups || [])));
-    return new Pipeline(this.db, copy);
+    return new Pipeline(this.db, copy, this.converter);
   }
 
   /**
@@ -393,7 +353,7 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    *     and provide a name for the accumulated results.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  aggregate(...accumulators: AccumulatorTarget[]): Pipeline;
+  aggregate(...accumulators: AccumulatorTarget[]): Pipeline<AppModelType>;
   /**
    * Performs optionally grouped aggregation operations on the documents from previous stages.
    *
@@ -429,13 +389,13 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
   aggregate(options: {
     accumulators: AccumulatorTarget[];
     groups?: (string | Selectable)[];
-  }): Pipeline;
+  }): Pipeline<AppModelType>;
   aggregate(
     optionsOrTarget:
       | AccumulatorTarget
       | {accumulators: AccumulatorTarget[]; groups?: (string | Selectable)[]},
     ...rest: AccumulatorTarget[]
-  ): Pipeline {
+  ): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     if ('accumulators' in optionsOrTarget) {
       copy.push(
@@ -462,29 +422,29 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
         )
       );
     }
-    return new Pipeline(this.db, copy);
+    return new Pipeline(this.db, copy, this.converter);
   }
 
   findNearest(
     field: string,
     vector: number[],
     options: FindNearestOptions
-  ): Pipeline;
+  ): Pipeline<AppModelType>;
   findNearest(
     field: Field,
     vector: FirebaseFirestore.VectorValue,
     options: FindNearestOptions
-  ): Pipeline;
+  ): Pipeline<AppModelType>;
   findNearest(
     field: string | Field,
     vector: FirebaseFirestore.VectorValue | number[],
     options: FindNearestOptions
-  ): Pipeline;
+  ): Pipeline<AppModelType>;
   findNearest(
     field: string | Field,
     vector: number[] | FirebaseFirestore.VectorValue,
     options: FindNearestOptions
-  ): Pipeline {
+  ): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     const fieldExpr = typeof field === 'string' ? Field.of(field) : field;
     copy.push(new FindNearest(fieldExpr, vector, options));
@@ -515,22 +475,16 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * @param orders One or more {@link Ordering} instances specifying the sorting criteria.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  sort(...orderings: Ordering[]): Pipeline;
-  sort(options: {
-    orderings: Ordering[];
-    density?: 'unspecified' | 'required';
-    truncation?: 'unspecified' | 'disabled';
-  }): Pipeline;
+  sort(...orderings: Ordering[]): Pipeline<AppModelType>;
+  sort(options: {orderings: Ordering[]}): Pipeline<AppModelType>;
   sort(
     optionsOrOrderings:
       | Ordering
       | {
           orderings: Ordering[];
-          density?: 'unspecified' | 'required';
-          truncation?: 'unspecified' | 'disabled';
         },
     ...rest: Ordering[]
-  ): Pipeline {
+  ): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     // Option object
     if ('orderings' in optionsOrOrderings) {
@@ -540,7 +494,7 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
       copy.push(new Sort([optionsOrOrderings, ...rest]));
     }
 
-    return new Pipeline(this.db, copy);
+    return new Pipeline(this.db, copy, this.converter);
   }
 
   /**
@@ -563,10 +517,10 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * @param params A list of parameters to configure the generic stage's behavior.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  genericStage(name: string, params: any[]): Pipeline {
+  genericStage(name: string, params: any[]): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
-    copy.push(new GenerateStage(name, params));
-    return new Pipeline(this.db, copy);
+    copy.push(new GenericStage(name, params));
+    return new Pipeline(this.db, copy, this.converter);
   }
 
   withConverter(converter: null): Pipeline;
@@ -811,7 +765,9 @@ export class PipelineResult<AppModelType = firestore.DocumentData>
    */
   get executionTime(): Timestamp {
     if (this._executionTime === undefined) {
-      throw new Error("Called 'readTime' on a local document");
+      throw new Error(
+        "'executionTime' is expected to exist, but it is undefined"
+      );
     }
     return this._executionTime;
   }
