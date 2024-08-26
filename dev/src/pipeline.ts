@@ -105,10 +105,7 @@ export class PipelineSource {
  *     .execute();
  * ```
  */
-export class Pipeline<
-  AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
-> {
+export class Pipeline<AppModelType = firestore.DocumentData> {
   constructor(
     private db: Firestore,
     private stages: Stage[],
@@ -573,12 +570,9 @@ export class Pipeline<
   }
 
   withConverter(converter: null): Pipeline;
-  withConverter<
-    NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
-  >(
+  withConverter<NewAppModelType>(
     converter: firestore.FirestorePipelineConverter<NewAppModelType>
-  ): Pipeline<NewAppModelType, NewDbModelType>;
+  ): Pipeline<NewAppModelType>;
   /**
    * Applies a custom data converter to this Query, allowing you to use your
    * own custom model objects with Firestore. When you call get() on the
@@ -629,14 +623,11 @@ export class Pipeline<
    * from Firestore. Passing in `null` removes the current converter.
    * @return A Query that uses the provided converter.
    */
-  withConverter<
-    NewAppModelType,
-    NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
-  >(
+  withConverter<NewAppModelType>(
     converter: firestore.FirestorePipelineConverter<NewAppModelType> | null
-  ): Pipeline<NewAppModelType, NewDbModelType> {
+  ): Pipeline<NewAppModelType> {
     const copy = this.stages.map(s => s);
-    return new Pipeline<NewAppModelType, NewDbModelType>(
+    return new Pipeline<NewAppModelType>(
       this.db,
       copy,
       converter ?? defaultPipelineConverter()
@@ -674,8 +665,8 @@ export class Pipeline<
    *
    * @return A Promise representing the asynchronous pipeline execution.
    */
-  execute(): Promise<Array<PipelineResult<AppModelType, DbModelType>>> {
-    const util = new ExecutionUtil<AppModelType, DbModelType>(
+  execute(): Promise<Array<PipelineResult<AppModelType>>> {
+    const util = new ExecutionUtil<AppModelType>(
       this.db,
       this.db._serializer!,
       this.converter
@@ -700,7 +691,7 @@ export class Pipeline<
    * ```
    */
   stream(): NodeJS.ReadableStream {
-    const util = new ExecutionUtil<AppModelType, DbModelType>(
+    const util = new ExecutionUtil<AppModelType>(
       this.db,
       this.db._serializer!,
       this.converter
@@ -730,10 +721,8 @@ export class Pipeline<
  * <p>If the PipelineResult represents a non-document result, `ref` will return a undefined
  * value.
  */
-export class PipelineResult<
-  AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
-> implements firestore.PipelineResult<AppModelType, DbModelType>
+export class PipelineResult<AppModelType = firestore.DocumentData>
+  implements firestore.PipelineResult<AppModelType>
 {
   private readonly _ref: DocumentReference | undefined;
   private _serializer: Serializer;
@@ -855,7 +844,7 @@ export class PipelineResult<
     // if a converter has been provided.
     if (!!this.converter && this.converter !== defaultPipelineConverter()) {
       return this.converter.fromFirestore(
-        new PipelineResult<DocumentData, DocumentData>(
+        new PipelineResult<DocumentData>(
           this._serializer,
           this.ref,
           this._fieldsProto,
@@ -946,7 +935,7 @@ export class PipelineResult<
    * @return {boolean} true if this `PipelineResult` is equal to the provided
    * value.
    */
-  isEqual(other: PipelineResult<AppModelType, DbModelType>): boolean {
+  isEqual(other: PipelineResult<AppModelType>): boolean {
     return (
       this === other ||
       (isOptionalEqual(this._ref, other._ref) &&

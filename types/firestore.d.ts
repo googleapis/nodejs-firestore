@@ -1663,10 +1663,7 @@ declare namespace FirebaseFirestore {
     data(): AppModelType;
   }
 
-  export class PipelineResult<
-    AppModelType = DocumentData,
-    DbModelType extends DocumentData = DocumentData,
-  > {
+  export class PipelineResult<AppModelType = DocumentData> {
     private constructor();
 
     /**

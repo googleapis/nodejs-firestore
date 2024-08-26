@@ -67,7 +67,7 @@ export interface PipelineStreamElement<
   transaction?: Uint8Array;
   executionTime?: Timestamp;
   explainMetrics?: ExplainMetrics;
-  result?: PipelineResult<AppModelType, DbModelType>;
+  result?: PipelineResult<AppModelType>;
 }
 
 /**

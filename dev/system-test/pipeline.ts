@@ -734,7 +734,7 @@ describe.only('Pipeline class', () => {
     );
   });
 
-  it('testPipelineConverters', async () => {
+  it('pipeline converter works', async () => {
     type AppModel = {myTitle: string; myAuthor: string; myPublished: number};
     const converter: FirestorePipelineConverter<AppModel> = {
       fromFirestore(result: FirebaseFirestore.PipelineResult): AppModel {

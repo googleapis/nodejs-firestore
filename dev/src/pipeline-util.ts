@@ -42,10 +42,7 @@ import api = protos.google.firestore.v1;
  * @private
  * @internal
  */
-export class ExecutionUtil<
-  AppModelType,
-  DbModelType extends firestore.DocumentData,
-> {
+export class ExecutionUtil<AppModelType> {
   constructor(
     /** @private */
     readonly _firestore: Firestore,
@@ -55,15 +52,15 @@ export class ExecutionUtil<
   ) {}
 
   _getResponse(
-    pipeline: Pipeline<AppModelType, DbModelType>,
+    pipeline: Pipeline<AppModelType>,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
-  ): Promise<Array<PipelineResult<AppModelType, DbModelType>> | undefined> {
+  ): Promise<Array<PipelineResult<AppModelType>> | undefined> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
     return new Promise((resolve, reject) => {
-      const results: Array<PipelineResult<AppModelType, DbModelType>> = [];
+      const results: Array<PipelineResult<AppModelType>> = [];
       const output: Omit<QueryResponse<never>, 'result'> & {
         executionTime?: Timestamp;
       } = {};
@@ -72,25 +69,22 @@ export class ExecutionUtil<
         .on('error', err => {
           reject(wrapError(err, stack));
         })
-        .on(
-          'data',
-          (data: PipelineStreamElement<AppModelType, DbModelType>[]) => {
-            for (const element of data) {
-              if (element.transaction) {
-                output.transaction = element.transaction;
-              }
-              if (element.executionTime) {
-                output.executionTime = element.executionTime;
-              }
-              if (element.explainMetrics) {
-                output.explainMetrics = element.explainMetrics;
-              }
-              if (element.result) {
-                results.push(element.result);
-              }
+        .on('data', (data: PipelineStreamElement<AppModelType>[]) => {
+          for (const element of data) {
+            if (element.transaction) {
+              output.transaction = element.transaction;
+            }
+            if (element.executionTime) {
+              output.executionTime = element.executionTime;
+            }
+            if (element.explainMetrics) {
+              output.explainMetrics = element.explainMetrics;
+            }
+            if (element.result) {
+              results.push(element.result);
             }
           }
-        )
+        })
         .on('end', () => {
           resolve(results);
         });
@@ -111,7 +105,7 @@ export class ExecutionUtil<
     return Date.now() - startTime >= totalTimeout;
   }
 
-  stream(pipeline: Pipeline<AppModelType, DbModelType>): NodeJS.ReadableStream {
+  stream(pipeline: Pipeline<AppModelType>): NodeJS.ReadableStream {
     const responseStream = this._stream(pipeline);
     const transform = new Transform({
       objectMode: true,
@@ -126,7 +120,7 @@ export class ExecutionUtil<
   }
 
   _stream(
-    pipeline: Pipeline<AppModelType, DbModelType>,
+    pipeline: Pipeline<AppModelType>,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
@@ -149,7 +143,7 @@ export class ExecutionUtil<
         }
 
         if (proto.results && proto.results.length === 0) {
-          const output: PipelineStreamElement<AppModelType, DbModelType> = {};
+          const output: PipelineStreamElement<AppModelType> = {};
           if (proto.transaction?.length) {
             output.transaction = proto.transaction;
           }
@@ -161,8 +155,7 @@ export class ExecutionUtil<
           callback(
             undefined,
             proto.results.map(result => {
-              const output: PipelineStreamElement<AppModelType, DbModelType> =
-                {};
+              const output: PipelineStreamElement<AppModelType> = {};
               if (proto.transaction?.length) {
                 output.transaction = proto.transaction;
               }
@@ -176,7 +169,7 @@ export class ExecutionUtil<
                     QualifiedResourcePath.fromSlashSeparatedString(result.name)
                   )
                 : undefined;
-              output.result = new PipelineResult<AppModelType, DbModelType>(
+              output.result = new PipelineResult<AppModelType>(
                 this._serializer,
                 ref,
                 result.fields || undefined,
