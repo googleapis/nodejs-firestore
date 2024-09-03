@@ -34,12 +34,12 @@ import {ExecutionUtil} from './pipeline-util';
 import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
 import {
-  AddField,
+  AddFields,
   Aggregate,
-  Collection,
-  CollectionGroup,
-  Database,
-  Documents,
+  CollectionSource,
+  CollectionGroupSource,
+  DatabaseSource,
+  DocumentsSource,
   Where,
   FindNearest,
   FindNearestOptions,
@@ -67,19 +67,19 @@ export class PipelineSource {
   constructor(private db: Firestore) {}
 
   collection(collectionPath: string): Pipeline {
-    return new Pipeline(this.db, [new Collection(collectionPath)]);
+    return new Pipeline(this.db, [new CollectionSource(collectionPath)]);
   }
 
   collectionGroup(collectionId: string): Pipeline {
-    return new Pipeline(this.db, [new CollectionGroup(collectionId)]);
+    return new Pipeline(this.db, [new CollectionGroupSource(collectionId)]);
   }
 
   database(): Pipeline {
-    return new Pipeline(this.db, [new Database()]);
+    return new Pipeline(this.db, [new DatabaseSource()]);
   }
 
   documents(docs: DocumentReference[]): Pipeline {
-    return new Pipeline(this.db, [Documents.of(docs)]);
+    return new Pipeline(this.db, [DocumentsSource.of(docs)]);
   }
 }
 
@@ -160,7 +160,7 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    */
   addFields(...fields: Selectable[]): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
-    copy.push(new AddField(this.selectablesToMap(fields)));
+    copy.push(new AddFields(this.selectablesToMap(fields)));
     return new Pipeline(this.db, copy, this.converter);
   }
 

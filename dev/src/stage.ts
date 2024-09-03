@@ -37,8 +37,8 @@ export interface Stage {
 /**
  * @beta
  */
-export class AddField implements Stage {
-  name = 'add_field';
+export class AddFields implements Stage {
+  name = 'add_fields';
 
   constructor(private fields: Map<string, Expr>) {}
 
@@ -91,7 +91,7 @@ export class Distinct implements Stage {
 /**
  * @beta
  */
-export class Collection implements Stage {
+export class CollectionSource implements Stage {
   name = 'collection';
 
   constructor(private collectionPath: string) {
@@ -111,7 +111,7 @@ export class Collection implements Stage {
 /**
  * @beta
  */
-export class CollectionGroup implements Stage {
+export class CollectionGroupSource implements Stage {
   name = 'collection_group';
 
   constructor(private collectionId: string) {}
@@ -127,7 +127,7 @@ export class CollectionGroup implements Stage {
 /**
  * @beta
  */
-export class Database implements Stage {
+export class DatabaseSource implements Stage {
   name = 'database';
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
@@ -140,13 +140,13 @@ export class Database implements Stage {
 /**
  * @beta
  */
-export class Documents implements Stage {
+export class DocumentsSource implements Stage {
   name = 'documents';
 
   constructor(private docPaths: string[]) {}
 
-  static of(refs: DocumentReference[]): Documents {
-    return new Documents(refs.map(ref => '/' + ref.path));
+  static of(refs: DocumentReference[]): DocumentsSource {
+    return new DocumentsSource(refs.map(ref => '/' + ref.path));
   }
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {

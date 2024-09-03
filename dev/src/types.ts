@@ -167,7 +167,7 @@ const defaultPipelineConverterObj: FirestorePipelineConverter<DocumentData> = {
 export function defaultPipelineConverter<
   AppModelType,
 >(): FirestorePipelineConverter<AppModelType> {
-  return defaultConverterObj as FirestoreDataConverter<AppModelType>;
+  return defaultPipelineConverterObj as FirestorePipelineConverter<AppModelType>;
 }
 
 /**

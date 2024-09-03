@@ -4360,10 +4360,7 @@ export function cosineDistance(
  * @param other The other vector (as an array of doubles) to calculate with.
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProduct(
-  expr: string,
-  other: number[]
-): DotProduct;
+export function dotProduct(expr: string, other: number[]): DotProduct;
 
 /**
  * @beta
@@ -4379,10 +4376,7 @@ export function dotProduct(
  * @param other The other vector (as a VectorValue) to calculate with.
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProduct(
-  expr: string,
-  other: VectorValue
-): DotProduct;
+export function dotProduct(expr: string, other: VectorValue): DotProduct;
 
 /**
  * @beta
@@ -4398,10 +4392,7 @@ export function dotProduct(
  * @param other The other vector (represented as an Expr) to calculate with.
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProduct(
-  expr: string,
-  other: Expr
-): DotProduct;
+export function dotProduct(expr: string, other: Expr): DotProduct;
 
 /**
  * @beta
@@ -4417,10 +4408,7 @@ export function dotProduct(
  * @param other The other vector (as an array of doubles) to calculate with.
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProduct(
-  expr: Expr,
-  other: number[]
-): DotProduct;
+export function dotProduct(expr: Expr, other: number[]): DotProduct;
 
 /**
  * @beta
@@ -4436,10 +4424,7 @@ export function dotProduct(
  * @param other The other vector (as a VectorValue) to calculate with.
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProduct(
-  expr: Expr,
-  other: VectorValue
-): DotProduct;
+export function dotProduct(expr: Expr, other: VectorValue): DotProduct;
 
 /**
  * @beta
