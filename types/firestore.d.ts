@@ -1677,6 +1677,8 @@ declare namespace FirebaseFirestore {
      */
     readonly updateTime: Timestamp | undefined;
 
+    readonly executionTime: Timestamp | undefined;
+
     /**
      * Retrieves all fields in the document as an Object.
      *

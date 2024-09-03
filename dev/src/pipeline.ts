@@ -129,7 +129,7 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
   constructor(
     private db: Firestore,
     private stages: Stage[],
-    private converter: firestore.FirestorePipelineConverter<AppModelType> = defaultConverter()
+    private converter: firestore.FirestorePipelineConverter<AppModelType> = defaultPipelineConverter()
   ) {}
 
   /**
@@ -730,7 +730,7 @@ export class PipelineResult<AppModelType = firestore.DocumentData>
     readTime?: Timestamp,
     createTime?: Timestamp,
     updateTime?: Timestamp,
-    readonly converter: firestore.FirestorePipelineConverter<AppModelType> = defaultConverter()
+    readonly converter: firestore.FirestorePipelineConverter<AppModelType> = defaultPipelineConverter()
   ) {
     this._ref = ref;
     this._serializer = serializer;

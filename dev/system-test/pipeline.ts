@@ -58,7 +58,7 @@ import {
   strConcat,
   subtract,
   cosineDistance,
-  dotProductDistance,
+  dotProduct,
   euclideanDistance,
   Constant,
   mapGet,
@@ -435,7 +435,7 @@ describe.only('Pipeline class', () => {
     const results = await randomCol
       .pipeline()
       .select(
-        Field.of('tags').arrayConcat('newTag1', 'newTag2').as('modifiedTags')
+        Field.of('tags').arrayConcat(['newTag1', 'newTag2']).as('modifiedTags')
       )
       .limit(1)
       .execute();
@@ -727,7 +727,7 @@ describe.only('Pipeline class', () => {
         cosineDistance(Constant.vector(sourceVector), targetVector).as(
           'cosineDistance'
         ),
-        dotProductDistance(Constant.vector(sourceVector), targetVector).as(
+        dotProduct(Constant.vector(sourceVector), targetVector).as(
           'dotProductDistance'
         ),
         euclideanDistance(Constant.vector(sourceVector), targetVector).as(

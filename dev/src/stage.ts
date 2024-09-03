@@ -26,11 +26,17 @@ import {VectorValue} from './field-value';
 import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
 
+/**
+ * @beta
+ */
 export interface Stage {
   name: string;
   _toProto(serializer: Serializer): api.Pipeline.IStage;
 }
 
+/**
+ * @beta
+ */
 export class AddField implements Stage {
   name = 'add_field';
 
@@ -44,6 +50,9 @@ export class AddField implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class Aggregate implements Stage {
   name = 'aggregate';
 
@@ -63,6 +72,9 @@ export class Aggregate implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class Distinct implements Stage {
   name = 'distinct';
 
@@ -76,6 +88,9 @@ export class Distinct implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class Collection implements Stage {
   name = 'collection';
 
@@ -93,6 +108,9 @@ export class Collection implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class CollectionGroup implements Stage {
   name = 'collection_group';
 
@@ -106,6 +124,9 @@ export class CollectionGroup implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class Database implements Stage {
   name = 'database';
 
@@ -116,6 +137,9 @@ export class Database implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class Documents implements Stage {
   name = 'documents';
 
@@ -135,6 +159,9 @@ export class Documents implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class Where implements Stage {
   name = 'where';
 
@@ -148,12 +175,18 @@ export class Where implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export interface FindNearestOptions {
   limit: number;
   distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
   distanceField?: string;
 }
 
+/**
+ * @beta
+ */
 export class FindNearest implements Stage {
   name = 'find_nearest';
 
@@ -187,6 +220,9 @@ export class FindNearest implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class Limit implements Stage {
   name = 'limit';
 
@@ -200,6 +236,9 @@ export class Limit implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class Offset implements Stage {
   name = 'offset';
 
@@ -213,6 +252,9 @@ export class Offset implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class Select implements Stage {
   name = 'select';
 
@@ -226,6 +268,9 @@ export class Select implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class Sort implements Stage {
   name = 'sort';
 
@@ -239,6 +284,9 @@ export class Sort implements Stage {
   }
 }
 
+/**
+ * @beta
+ */
 export class GenericStage implements Stage {
   constructor(
     public name: string,

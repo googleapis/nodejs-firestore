@@ -435,10 +435,10 @@ export abstract class Expr {
    * Field.of("items").arrayConcat(Field.of("otherItems"));
    * ```
    *
-   * @param values The array expressions to concatenate.
+   * @param arrays The array expressions to concatenate.
    * @return A new `Expr` representing the concatenated array.
    */
-  arrayConcat(...values: Expr[]): ArrayConcat;
+  arrayConcat(arrays: Expr[]): ArrayConcat;
 
   /**
    * Creates an expression that concatenates an array expression with one or more other arrays.
@@ -448,12 +448,12 @@ export abstract class Expr {
    * Field.of("tags").arrayConcat(Arrays.asList("newTag1", "newTag2"), Field.of("otherTag"));
    * ```
    *
-   * @param values The array expressions or values to concatenate.
+   * @param arrays The array expressions or values to concatenate.
    * @return A new `Expr` representing the concatenated array.
    */
-  arrayConcat(...values: any[]): ArrayConcat;
-  arrayConcat(...values: any[]): ArrayConcat {
-    const exprValues = values.map(value =>
+  arrayConcat(arrays: any[]): ArrayConcat;
+  arrayConcat(arrays: any[]): ArrayConcat {
+    const exprValues = arrays.map(value =>
       value instanceof Expr ? value : Constant.of(value)
     );
     return new ArrayConcat(this, exprValues);
@@ -1034,48 +1034,48 @@ export abstract class Expr {
   }
 
   /**
-   * Calculates the dot product distance between two vectors.
+   * Calculates the dot product between two vectors.
    *
    * ```typescript
-   * // Calculate the dot product distance between a feature vector and a target vector
-   * Field.of("features").dotProductDistance([0.5, 0.8, 0.2]);
+   * // Calculate the dot product between a feature vector and a target vector
+   * Field.of("features").dotProduct([0.5, 0.8, 0.2]);
    * ```
    *
-   * @param other The other vector (as an array of numbers) to compare against.
-   * @return A new `Expr` representing the dot product distance between the two vectors.
+   * @param other The other vector (as an array of numbers) to calculate with.
+   * @return A new `Expr` representing the dot product between the two vectors.
    */
-  dotProductDistance(other: Expr): DotProductDistance;
+  dotProduct(other: Expr): DotProduct;
 
   /**
-   * Calculates the dot product distance between two vectors.
+   * Calculates the dot product between two vectors.
    *
    * ```typescript
-   * // Calculate the dot product distance between a feature vector and a target vector
-   * Field.of("features").dotProductDistance(new VectorValue([0.5, 0.8, 0.2]));
+   * // Calculate the dot product between a feature vector and a target vector
+   * Field.of("features").dotProduct(new VectorValue([0.5, 0.8, 0.2]));
    * ```
    *
-   * @param other The other vector (as a VectorValue) to compare against.
-   * @return A new `Expr` representing the dot product distance between the two vectors.
+   * @param other The other vector (as an array of numbers) to calculate with.
+   * @return A new `Expr` representing the dot product between the two vectors.
    */
-  dotProductDistance(other: VectorValue): DotProductDistance;
+  dotProduct(other: VectorValue): DotProduct;
 
   /**
-   * Calculates the dot product distance between two vectors.
+   * Calculates the dot product between two vectors.
    *
    * ```typescript
-   * // Calculate the dot product distance between a feature vector and a target vector
-   * Field.of("features").dotProductDistance([0.5, 0.8, 0.2]);
+   * // Calculate the dot product between a feature vector and a target vector
+   * Field.of("features").dotProduct([0.5, 0.8, 0.2]);
    * ```
    *
-   * @param other The other vector (as an array of numbers) to compare against.
-   * @return A new `Expr` representing the dot product distance between the two vectors.
+   * @param other The other vector (as an array of numbers) to calculate with.
+   * @return A new `Expr` representing the dot product between the two vectors.
    */
-  dotProductDistance(other: number[]): DotProductDistance;
-  dotProductDistance(other: Expr | VectorValue | number[]): DotProductDistance {
+  dotProduct(other: number[]): DotProduct;
+  dotProduct(other: Expr | VectorValue | number[]): DotProduct {
     if (other instanceof Expr) {
-      return new DotProductDistance(this, other);
+      return new DotProduct(this, other);
     } else {
-      return new DotProductDistance(this, Constant.vector(other));
+      return new DotProduct(this, Constant.vector(other));
     }
   }
 
@@ -1087,7 +1087,7 @@ export abstract class Expr {
    * Field.of("location").euclideanDistance([37.7749, -122.4194]);
    * ```
    *
-   * @param other The other vector (as an array of numbers) to compare against.
+   * @param other The other vector (as an array of numbers) to calculate with.
    * @return A new `Expr` representing the Euclidean distance between the two vectors.
    */
   euclideanDistance(other: Expr): EuclideanDistance;
@@ -2041,7 +2041,7 @@ class CosineDistance extends Function {
 /**
  * @beta
  */
-class DotProductDistance extends Function {
+class DotProduct extends Function {
   constructor(
     private vector1: Expr,
     private vector2: Expr
@@ -4349,120 +4349,120 @@ export function cosineDistance(
 /**
  * @beta
  *
- * Calculates the dot product distance between a field's vector value and a double array.
+ * Calculates the dot product between a field's vector value and a double array.
  *
  * ```typescript
  * // Calculate the dot product distance between a feature vector and a target vector
- * dotProductDistance("features", [0.5, 0.8, 0.2]);
+ * dotProduct("features", [0.5, 0.8, 0.2]);
  * ```
  *
  * @param expr The name of the field containing the first vector.
- * @param other The other vector (as an array of doubles) to compare against.
- * @return A new {@code Expr} representing the dot product distance between the two vectors.
+ * @param other The other vector (as an array of doubles) to calculate with.
+ * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProductDistance(
+export function dotProduct(
   expr: string,
   other: number[]
-): DotProductDistance;
+): DotProduct;
 
 /**
  * @beta
  *
- * Calculates the dot product distance between a field's vector value and a VectorValue.
+ * Calculates the dot product between a field's vector value and a VectorValue.
  *
  * ```typescript
  * // Calculate the dot product distance between a feature vector and a target vector
- * dotProductDistance("features", new VectorValue([0.5, 0.8, 0.2]));
+ * dotProduct("features", new VectorValue([0.5, 0.8, 0.2]));
  * ```
  *
  * @param expr The name of the field containing the first vector.
- * @param other The other vector (as a VectorValue) to compare against.
- * @return A new {@code Expr} representing the dot product distance between the two vectors.
+ * @param other The other vector (as a VectorValue) to calculate with.
+ * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProductDistance(
+export function dotProduct(
   expr: string,
   other: VectorValue
-): DotProductDistance;
+): DotProduct;
 
 /**
  * @beta
  *
- * Calculates the dot product distance between a field's vector value and a vector expression.
+ * Calculates the dot product between a field's vector value and a vector expression.
  *
  * ```typescript
  * // Calculate the dot product distance between two document vectors: 'docVector1' and 'docVector2'
- * dotProductDistance("docVector1", Field.of("docVector2"));
+ * dotProduct("docVector1", Field.of("docVector2"));
  * ```
  *
  * @param expr The name of the field containing the first vector.
- * @param other The other vector (represented as an Expr) to compare against.
- * @return A new {@code Expr} representing the dot product distance between the two vectors.
+ * @param other The other vector (represented as an Expr) to calculate with.
+ * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProductDistance(
+export function dotProduct(
   expr: string,
   other: Expr
-): DotProductDistance;
+): DotProduct;
 
 /**
  * @beta
  *
- * Calculates the dot product distance between a vector expression and a double array.
+ * Calculates the dot product between a vector expression and a double array.
  *
  * ```typescript
- * // Calculate the dot product distance between a feature vector and a target vector
- * dotProductDistance(Field.of("features"), [0.5, 0.8, 0.2]);
+ * // Calculate the dot product between a feature vector and a target vector
+ * dotProduct(Field.of("features"), [0.5, 0.8, 0.2]);
  * ```
  *
- * @param expr The first vector (represented as an Expr) to compare against.
- * @param other The other vector (as an array of doubles) to compare against.
- * @return A new {@code Expr} representing the dot product distance between the two vectors.
+ * @param expr The first vector (represented as an Expr) to calculate with.
+ * @param other The other vector (as an array of doubles) to calculate with.
+ * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProductDistance(
+export function dotProduct(
   expr: Expr,
   other: number[]
-): DotProductDistance;
+): DotProduct;
 
 /**
  * @beta
  *
- * Calculates the dot product distance between a vector expression and a VectorValue.
+ * Calculates the dot product between a vector expression and a VectorValue.
  *
  * ```typescript
- * // Calculate the dot product distance between a feature vector and a target vector
- * dotProductDistance(Field.of("features"), new VectorValue([0.5, 0.8, 0.2]));
+ * // Calculate the dot product between a feature vector and a target vector
+ * dotProduct(Field.of("features"), new VectorValue([0.5, 0.8, 0.2]));
  * ```
  *
- * @param expr The first vector (represented as an Expr) to compare against.
- * @param other The other vector (as a VectorValue) to compare against.
- * @return A new {@code Expr} representing the dot product distance between the two vectors.
+ * @param expr The first vector (represented as an Expr) to calculate with.
+ * @param other The other vector (as a VectorValue) to calculate with.
+ * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProductDistance(
+export function dotProduct(
   expr: Expr,
   other: VectorValue
-): DotProductDistance;
+): DotProduct;
 
 /**
  * @beta
  *
- * Calculates the dot product distance between two vector expressions.
+ * Calculates the dot product between two vector expressions.
  *
  * ```typescript
- * // Calculate the dot product distance between two document vectors: 'docVector1' and 'docVector2'
- * dotProductDistance(Field.of("docVector1"), Field.of("docVector2"));
+ * // Calculate the dot product between two document vectors: 'docVector1' and 'docVector2'
+ * dotProduct(Field.of("docVector1"), Field.of("docVector2"));
  * ```
  *
- * @param expr The first vector (represented as an Expr) to compare against.
- * @param other The other vector (represented as an Expr) to compare against.
- * @return A new {@code Expr} representing the dot product distance between the two vectors.
+ * @param expr The first vector (represented as an Expr) to calculate with.
+ * @param other The other vector (represented as an Expr) to calculate with.
+ * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProductDistance(expr: Expr, other: Expr): DotProductDistance;
-export function dotProductDistance(
+export function dotProduct(expr: Expr, other: Expr): DotProduct;
+export function dotProduct(
   expr: Expr | string,
   other: Expr | number[] | VectorValue
-): DotProductDistance {
+): DotProduct {
   const expr1 = expr instanceof Expr ? expr : Field.of(expr);
   const expr2 = other instanceof Expr ? other : Constant.vector(other);
-  return new DotProductDistance(expr1, expr2);
+  return new DotProduct(expr1, expr2);
 }
 
 /**
