@@ -26,7 +26,7 @@ import {DocumentChange} from '../document-change';
 import {isPrimitiveArrayEqual} from '../util';
 import {QueryUtil} from './query-util';
 import {Query} from './query';
-import {FindNearestOptions} from './find-nearest-options';
+import {VectorQueryOptions} from './vector-query-options';
 import {VectorQuerySnapshot} from './vector-query-snapshot';
 import {ExplainResults} from '../query-profile';
 import {QueryResponse} from './types';
@@ -56,7 +56,7 @@ export class VectorQuery<
    */
   constructor(
     private readonly _query: Query<AppModelType, DbModelType>,
-    private readonly _options: FindNearestOptions
+    private readonly _options: VectorQueryOptions
   ) {
     this._queryUtil = new QueryUtil<
       AppModelType,

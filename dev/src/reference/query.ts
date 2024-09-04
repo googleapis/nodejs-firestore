@@ -37,7 +37,7 @@ import {FilterInternal} from './filter-internal';
 import {FieldFilterInternal} from './field-filter-internal';
 import {CompositeFilterInternal} from './composite-filter-internal';
 import {comparisonOperators, directionOperators} from './constants';
-import {FindNearestOptions} from './find-nearest-options';
+import {VectorQueryOptions} from './vector-query-options';
 import {DocumentReference} from './document-reference';
 import {QuerySnapshot} from './query-snapshot';
 import {Serializer} from '../serializer';
@@ -668,14 +668,14 @@ export class Query<
    * querySnapshot.forEach(...);
    * ```
    * @param options - An argument specifying the behavior of the {@link VectorQuery} returned by this function.
-   * See {@link FindNearestOptions}.
+   * See {@link VectorQueryOptions}.
    */
   findNearest(
-    options: FindNearestOptions
+    options: VectorQueryOptions
   ): VectorQuery<AppModelType, DbModelType>;
 
   findNearest(
-    vectorFieldOrOptions: string | firestore.FieldPath | FindNearestOptions,
+    vectorFieldOrOptions: string | firestore.FieldPath | VectorQueryOptions,
     queryVector?: firestore.VectorValue | Array<number>,
     options?: {
       limit?: number;
@@ -686,20 +686,20 @@ export class Query<
       typeof vectorFieldOrOptions === 'string' ||
       vectorFieldOrOptions instanceof FieldPath
     ) {
-      const fnOptions: FindNearestOptions = {
+      const vqOptions: VectorQueryOptions = {
         distanceMeasure: options!.distanceMeasure!,
         limit: options!.limit!,
         queryVector: queryVector!,
         vectorField: vectorFieldOrOptions,
       };
-      return this._findNearest(fnOptions);
+      return this._findNearest(vqOptions);
     } else {
-      return this._findNearest(vectorFieldOrOptions as FindNearestOptions);
+      return this._findNearest(vectorFieldOrOptions as VectorQueryOptions);
     }
   }
 
   _findNearest(
-    options: FindNearestOptions
+    options: VectorQueryOptions
   ): VectorQuery<AppModelType, DbModelType> {
     validateFieldPath('vectorField', options.vectorField);
 

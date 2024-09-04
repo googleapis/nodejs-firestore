@@ -40,7 +40,7 @@ import {
   ReadableSpan,
   TimedEvent,
 } from '@opentelemetry/sdk-trace-node';
-import {setLogFunction, Firestore} from '../src';
+import {Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
   ATTRIBUTE_KEY_DOC_COUNT,

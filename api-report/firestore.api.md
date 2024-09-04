@@ -748,16 +748,6 @@ export abstract class Filter {
     static where(fieldPath: string | firestore.FieldPath, opStr: firestore.WhereFilterOp, value: unknown): Filter;
 }
 
-// @public
-export interface FindNearestOptions {
-    distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
-    distanceResultField?: string | firestore.FieldPath;
-    distanceThreshold?: number;
-    limit: number;
-    queryVector: firestore.VectorValue | Array<number>;
-    vectorField: string | firestore.FieldPath;
-}
-
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 //
 // @public
@@ -1058,9 +1048,9 @@ export class Query<AppModelType = firestore.DocumentData, DbModelType extends fi
         limit: number;
         distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
     }): VectorQuery<AppModelType, DbModelType>;
-    findNearest(options: FindNearestOptions): VectorQuery<AppModelType, DbModelType>;
+    findNearest(options: VectorQueryOptions): VectorQuery<AppModelType, DbModelType>;
     // (undocumented)
-    _findNearest(options: FindNearestOptions): VectorQuery<AppModelType, DbModelType>;
+    _findNearest(options: VectorQueryOptions): VectorQuery<AppModelType, DbModelType>;
     // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
     // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@type" is not defined in this configuration
@@ -1469,7 +1459,7 @@ export class VectorQuery<AppModelType = firestore.DocumentData, DbModelType exte
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
     // @internal
-    constructor(_query: Query<AppModelType, DbModelType>, _options: FindNearestOptions);
+    constructor(_query: Query<AppModelType, DbModelType>, _options: VectorQueryOptions);
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
     // @internal
@@ -1497,6 +1487,16 @@ export class VectorQuery<AppModelType = firestore.DocumentData, DbModelType exte
     //
     // @internal
     toProto(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions, explainOptions?: firestore.ExplainOptions): api.IRunQueryRequest;
+}
+
+// @public
+export interface VectorQueryOptions {
+    distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
+    distanceResultField?: string | firestore.FieldPath;
+    distanceThreshold?: number;
+    limit: number;
+    queryVector: firestore.VectorValue | Array<number>;
+    vectorField: string | firestore.FieldPath;
 }
 
 // @public
