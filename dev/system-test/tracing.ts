@@ -30,7 +30,7 @@ import {
   Context as OpenTelemetryContext,
 } from '@opentelemetry/api';
 import {TraceExporter} from '@google-cloud/opentelemetry-cloud-trace-exporter';
-import {Settings} from '@google-cloud/firestore';
+import {setLogFunction, Settings} from '@google-cloud/firestore';
 import {
   AlwaysOnSampler,
   BatchSpanProcessor,
