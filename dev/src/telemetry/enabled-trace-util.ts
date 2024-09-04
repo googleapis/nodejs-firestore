@@ -30,6 +30,7 @@ import {ATTRIBUTE_SETTINGS_PREFIX, Attributes, TraceUtil} from './trace-util';
 import {interfaces} from '../v1/firestore_client_config.json';
 import {FirestoreClient} from '../v1';
 import {DEFAULT_DATABASE_ID} from '../path';
+import {DEFAULT_MAX_IDLE_CHANNELS} from '../index';
 const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 export class EnabledTraceUtil implements TraceUtil {
@@ -71,11 +72,9 @@ export class EnabledTraceUtil implements TraceUtil {
       this.settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.prefer_REST`] =
         settings.preferRest;
     }
-    if (settings.maxIdleChannels !== undefined) {
-      this.settingsAttributes[
-        `${ATTRIBUTE_SETTINGS_PREFIX}.max_idle_channels`
-      ] = settings.maxIdleChannels;
-    }
+
+    this.settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.max_idle_channels`] =
+      settings.maxIdleChannels ?? DEFAULT_MAX_IDLE_CHANNELS;
 
     const defaultRetrySettings = serviceConfig.retry_params.default;
     const customRetrySettings =

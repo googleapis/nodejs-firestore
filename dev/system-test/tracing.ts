@@ -681,7 +681,7 @@ describe('Tracing Tests', () => {
   });
 
   function runTestCases() {
-    it.only('document reference get()', async () => {
+    it('document reference get()', async () => {
       await runFirestoreOperationInRootSpan(() =>
         firestore.collection('foo').doc('bar').get()
       );
@@ -729,7 +729,7 @@ describe('Tracing Tests', () => {
       );
     });
 
-    it('document reference update()', async () => {
+    it.only('document reference update()', async () => {
       await runFirestoreOperationInRootSpan(() =>
         firestore.collection('foo').doc('bar').update('foo', 'bar2')
       );

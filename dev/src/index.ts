@@ -178,7 +178,7 @@ export const DEFAULT_MAX_TRANSACTION_ATTEMPTS = 5;
 /*!
  * The default number of idle GRPC channel to keep.
  */
-const DEFAULT_MAX_IDLE_CHANNELS = 1;
+export const DEFAULT_MAX_IDLE_CHANNELS = 1;
 
 /*!
  * The maximum number of concurrent requests supported by a single GRPC channel,
