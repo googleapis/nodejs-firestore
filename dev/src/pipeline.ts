@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
 import * as firestore from '@google-cloud/firestore';
 import * as deepEqual from 'fast-deep-equal';
 import {google} from '../protos/firestore_v1_proto_api';
@@ -445,29 +444,10 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
     return new Pipeline(this.db, copy, this.converter);
   }
 
-  findNearest(
-    field: string,
-    vector: number[],
-    options: FindNearestOptions
-  ): Pipeline<AppModelType>;
-  findNearest(
-    field: Field,
-    vector: FirebaseFirestore.VectorValue,
-    options: FindNearestOptions
-  ): Pipeline<AppModelType>;
-  findNearest(
-    field: string | Field,
-    vector: FirebaseFirestore.VectorValue | number[],
-    options: FindNearestOptions
-  ): Pipeline<AppModelType>;
-  findNearest(
-    field: string | Field,
-    vector: number[] | FirebaseFirestore.VectorValue,
-    options: FindNearestOptions
-  ): Pipeline<AppModelType> {
+  findNearest(options: FindNearestOptions): Pipeline<AppModelType>;
+  findNearest(options: FindNearestOptions): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
-    const fieldExpr = typeof field === 'string' ? Field.of(field) : field;
-    copy.push(new FindNearest(fieldExpr, vector, options));
+    copy.push(new FindNearest(options));
     return new Pipeline(this.db, copy);
   }
 
@@ -822,7 +802,7 @@ export class PipelineResult<AppModelType = firestore.DocumentData>
     // if a converter has been provided.
     if (!!this.converter && this.converter !== defaultPipelineConverter()) {
       return this.converter.fromFirestore(
-        new PipelineResult<DocumentData>(
+        new PipelineResult<firestore.DocumentData>(
           this._serializer,
           this.ref,
           this._fieldsProto,

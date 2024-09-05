@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as firestore from '@google-cloud/firestore';
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
@@ -179,8 +180,10 @@ export class Where implements Stage {
  * @beta
  */
 export interface FindNearestOptions {
-  limit: number;
+  field: Field;
+  vectorValue: firestore.VectorValue | number[];
   distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
+  limit?: number;
   distanceField?: string;
 }
 
@@ -190,18 +193,14 @@ export interface FindNearestOptions {
 export class FindNearest implements Stage {
   name = 'find_nearest';
 
-  constructor(
-    private property: Field,
-    private vector: FirebaseFirestore.VectorValue | number[],
-    private options: FindNearestOptions
-  ) {}
+  constructor(private _options: FindNearestOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     const options: {[k: string]: api.IValue} = {
-      limit: serializer.encodeValue(this.options.limit)!,
+      limit: serializer.encodeValue(this._options.limit)!,
     };
-    if (this.options.distanceField) {
-      options.distance_field = Field.of(this.options.distanceField)._toProto(
+    if (this._options.distanceField) {
+      options.distance_field = Field.of(this._options.distanceField)._toProto(
         serializer
       );
     }
@@ -209,11 +208,11 @@ export class FindNearest implements Stage {
     return {
       name: this.name,
       args: [
-        this.property._toProto(serializer),
-        this.vector instanceof VectorValue
-          ? serializer.encodeValue(this.vector)!
-          : serializer.encodeVector(this.vector as number[]),
-        serializer.encodeValue(this.options.distanceMeasure)!,
+        this._options.field._toProto(serializer),
+        this._options.vectorValue instanceof VectorValue
+          ? serializer.encodeValue(this._options.vectorValue)!
+          : serializer.encodeVector(this._options.vectorValue as number[]),
+        serializer.encodeValue(this._options.distanceMeasure)!,
       ],
       options,
     };

@@ -132,14 +132,19 @@ export class VectorQuery<
   }
 
   toPipeline(): Pipeline {
-    const options = {
+    const options: FindNearestOptions = {
+      field: Field.of(this.vectorField),
+      vectorValue: this.queryVector,
       limit: this.options.limit,
-      distanceMeasure: this.options.distanceMeasure.toLowerCase(),
-    } as FindNearestOptions;
+      distanceMeasure: this.options.distanceMeasure.toLowerCase() as
+        | 'cosine'
+        | 'euclidean'
+        | 'dot_product',
+    };
     return this.query
       .pipeline()
       .where(Field.of(this.vectorField).exists())
-      .findNearest(Field.of(this.vectorField), this.queryVector, options);
+      .findNearest(options);
   }
 
   _getResponse(

@@ -7100,8 +7100,10 @@ declare namespace FirebaseFirestore {
    * @beta
    */
   export interface FindNearestOptions {
-    limit: number;
+    field: Field;
+    vectorValue: VectorValue | number[];
     distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
+    limit?: number;
     distanceField?: string;
   }
 
@@ -7460,21 +7462,7 @@ declare namespace FirebaseFirestore {
       groups?: (string | Selectable)[];
     }): Pipeline<AppModelType>;
 
-    findNearest(
-      field: string,
-      vector: number[],
-      options: FindNearestOptions
-    ): Pipeline<AppModelType>;
-    findNearest(
-      field: Field,
-      vector: FirebaseFirestore.VectorValue,
-      options: FindNearestOptions
-    ): Pipeline<AppModelType>;
-    findNearest(
-      field: string | Field,
-      vector: FirebaseFirestore.VectorValue | number[],
-      options: FindNearestOptions
-    ): Pipeline<AppModelType>;
+    findNearest(options: FindNearestOptions): Pipeline<AppModelType>;
 
     /**
      * Sorts the documents from previous stages based on one or more {@link Ordering} criteria.
