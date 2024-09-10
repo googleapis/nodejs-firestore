@@ -548,6 +548,7 @@ declare namespace FirebaseFirestore {
      * @return The created `CollectionGroup`.
      */
     collectionGroup(collectionId: string): CollectionGroup;
+    pipeline(): PipelineSource;
 
     /**
      * Retrieves multiple documents from Firestore.
@@ -7161,29 +7162,6 @@ declare namespace FirebaseFirestore {
      * @return A new Pipeline object with the collection as the source.
      */
     collection(collectionPath: string): Pipeline;
-
-    /**
-     * Specifies the source as a collection group.
-     *
-     * @param collectionId The ID of the collection group.
-     * @return A new Pipeline object with the collection group as the source.
-     */
-    collectionGroup(collectionId: string): Pipeline;
-
-    /**
-     * Specifies the source as a database.
-     *
-     * @return A new Pipeline object with the database as the source.
-     */
-    database(): Pipeline;
-
-    /**
-     * Specifies the source as a set of documents.
-     *
-     * @param docs The document references.
-     * @return A new Pipeline object with the documents as the source.
-     */
-    documents(docs: DocumentReference[]): Pipeline;
   }
 
   /**

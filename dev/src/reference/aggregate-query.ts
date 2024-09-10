@@ -24,11 +24,7 @@ import * as firestore from '@google-cloud/firestore';
 import {Aggregate, AggregateSpec} from '../aggregate';
 import {
   AccumulatorTarget,
-  avg,
-  count,
-  countAll,
   Field,
-  sum,
 } from '../expression';
 import {Pipeline} from '../pipeline';
 import {Timestamp} from '../timestamp';
@@ -338,27 +334,6 @@ export class AggregateQuery<
     }
 
     return runQueryRequest;
-  }
-
-  pipeline(): Pipeline {
-    const aggregates = mapToArray(
-      this._aggregates,
-      (aggregate, clientAlias) => {
-        if (aggregate.aggregateType === 'count') {
-          if (aggregate._field === undefined) {
-            return countAll().as(clientAlias);
-          }
-          return count(Field.of(aggregate._field)).as(clientAlias);
-        } else if (aggregate.aggregateType === 'avg') {
-          return avg(Field.of(aggregate._field!)).as(clientAlias);
-        } else if (aggregate.aggregateType === 'sum') {
-          return sum(Field.of(aggregate._field!)).as(clientAlias);
-        } else {
-          throw new Error(`Unknown aggregate type ${aggregate.aggregateType}`);
-        }
-      }
-    );
-    return this._query.pipeline().aggregate(...aggregates);
   }
 
   /**

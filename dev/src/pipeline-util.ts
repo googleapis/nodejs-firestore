@@ -14,7 +14,6 @@
 
 import * as firestore from '@google-cloud/firestore';
 import {GoogleError, serializer} from 'google-gax';
-import {converter} from 'protobufjs';
 import {Duplex, Transform} from 'stream';
 import {google} from '../protos/firestore_v1_proto_api';
 
@@ -22,12 +21,8 @@ import * as protos from '../protos/firestore_v1_proto_api';
 import {
   Expr,
   FilterCondition,
-  and,
-  or,
-  isNan,
   Field,
-  not,
-  Constant,
+  Constant, eq,
 } from './expression';
 import Firestore, {DocumentReference, Timestamp} from './index';
 import {logger} from './logger';
@@ -390,78 +385,5 @@ export function toPipelineFilterCondition(
   f: FilterInternal,
   serializer: Serializer
 ): FilterCondition & Expr {
-  if (f instanceof FieldFilterInternal) {
-    const field = Field.of(f.field);
-    if (f.isNanChecking()) {
-      if (f.nanOp() === 'IS_NAN') {
-        return and(field.exists(), field.isNaN());
-      } else {
-        return and(field.exists(), not(field.isNaN()));
-      }
-    } else if (f.isNullChecking()) {
-      if (f.nullOp() === 'IS_NULL') {
-        return and(field.exists(), field.eq(null));
-      } else {
-        return and(field.exists(), not(field.eq(null)));
-      }
-    } else {
-      // Comparison filters
-      const value = isFirestoreValue(f.value)
-        ? f.value
-        : serializer.encodeValue(f.value);
-      switch (f.op) {
-        case 'LESS_THAN':
-          return and(field.exists(), field.lt(value));
-        case 'LESS_THAN_OR_EQUAL':
-          return and(field.exists(), field.lte(value));
-        case 'GREATER_THAN':
-          return and(field.exists(), field.gt(value));
-        case 'GREATER_THAN_OR_EQUAL':
-          return and(field.exists(), field.gte(value));
-        case 'EQUAL':
-          return and(field.exists(), field.eq(value));
-        case 'NOT_EQUAL':
-          return and(field.exists(), field.neq(value));
-        case 'ARRAY_CONTAINS':
-          return and(field.exists(), field.arrayContains(value));
-        case 'IN': {
-          const values = value?.arrayValue?.values?.map(val =>
-            Constant.of(val)
-          );
-          return and(field.exists(), field.in(...values!));
-        }
-        case 'ARRAY_CONTAINS_ANY': {
-          const values = value?.arrayValue?.values?.map(val =>
-            Constant.of(val)
-          );
-          return and(field.exists(), field.arrayContainsAny(values!));
-        }
-        case 'NOT_IN': {
-          const values = value?.arrayValue?.values?.map(val =>
-            Constant.of(val)
-          );
-          return and(field.exists(), not(field.in(...values!)));
-        }
-      }
-    }
-  } else if (f instanceof CompositeFilterInternal) {
-    switch (f._getOperator()) {
-      case 'AND': {
-        const conditions = f
-          .getFilters()
-          .map(f => toPipelineFilterCondition(f, serializer));
-        return and(conditions[0], ...conditions.slice(1));
-      }
-      case 'OR': {
-        const conditions = f
-          .getFilters()
-          .map(f => toPipelineFilterCondition(f, serializer));
-        return or(conditions[0], ...conditions.slice(1));
-      }
-    }
-  }
-
-  throw new Error(
-    `Failed to convert filter to pipeline conditions: ${f.toProto()}`
-  );
+  return eq("a", "b");
 }

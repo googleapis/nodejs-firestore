@@ -19,7 +19,6 @@ import api = protos.google.firestore.v1;
 import * as firestore from '@google-cloud/firestore';
 import {Field} from '../expression';
 import {Pipeline} from '../pipeline';
-import {FindNearestOptions} from '../stage';
 
 import {Timestamp} from '../timestamp';
 import {VectorValue} from '../field-value';
@@ -129,22 +128,6 @@ export class VectorQuery<
       throw new Error('No VectorQuerySnapshot result');
     }
     return result;
-  }
-
-  toPipeline(): Pipeline {
-    const options: FindNearestOptions = {
-      field: Field.of(this.vectorField),
-      vectorValue: this.queryVector,
-      limit: this.options.limit,
-      distanceMeasure: this.options.distanceMeasure.toLowerCase() as
-        | 'cosine'
-        | 'euclidean'
-        | 'dot_product',
-    };
-    return this.query
-      .pipeline()
-      .where(Field.of(this.vectorField).exists())
-      .findNearest(options);
   }
 
   _getResponse(
