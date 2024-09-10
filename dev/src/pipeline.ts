@@ -33,7 +33,8 @@ import {ExecutionUtil} from './pipeline-util';
 import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
 import {
-  CollectionSource,
+  AddFields, Aggregate,
+  CollectionSource, Distinct,
   Select,
   Stage,
 } from './stage';
@@ -49,7 +50,7 @@ import {isOptionalEqual} from './util';
  * Represents the source of a Firestore {@link Pipeline}.
  * @beta
  */
-export class PipelineSource {
+export class PipelineSource implements firestore.PipelineSource{
   constructor(private db: Firestore) {}
 
   collection(collectionPath: string): Pipeline {
@@ -99,14 +100,20 @@ export class PipelineSource {
  *     .execute();
  * ```
  */
-export class Pipeline<AppModelType = firestore.DocumentData> {
+export class Pipeline<AppModelType = firestore.DocumentData> implements firestore.Pipeline<AppModelType>{
   constructor(
     private db: Firestore,
     private stages: Stage[],
     private converter: firestore.FirestorePipelineConverter<AppModelType> = defaultPipelineConverter()
   ) {}
 
-  select(...fields: (Selectable | string)[]): Pipeline<AppModelType> {
+  addFields(...fields: firestore.Selectable[]): Pipeline<AppModelType> {
+    const copy = this.stages.map(s => s);
+    copy.push(new AddFields(this.selectablesToMap(fields)));
+    return new Pipeline(this.db, copy, this.converter);
+  }
+
+  select(...fields: (firestore.Selectable | string)[]): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new Select(this.selectablesToMap(fields)));
     return new Pipeline(this.db, copy, this.converter);
@@ -134,6 +141,51 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
     return result;
   }
 
+  distinct(...groups: (string | firestore.Selectable)[]): Pipeline<AppModelType> {
+    const copy = this.stages.map(s => s);
+    copy.push(new Distinct(this.selectablesToMap(groups || [])));
+    return new Pipeline(this.db, copy, this.converter);
+  }
+
+  aggregate(...accumulators: firestore.AccumulatorTarget[]): Pipeline<AppModelType>;
+  aggregate(options: {
+    accumulators: firestore.AccumulatorTarget[];
+    groups?: (string | Selectable)[];
+  }): Pipeline<AppModelType>;
+  aggregate(
+      optionsOrTarget:
+          | firestore.AccumulatorTarget
+          | {accumulators: firestore.AccumulatorTarget[]; groups?: (string | firestore.Selectable)[]},
+      ...rest: firestore.AccumulatorTarget[]
+  ): Pipeline<AppModelType> {
+    const copy = this.stages.map(s => s);
+    if ('accumulators' in optionsOrTarget) {
+      copy.push(
+          new Aggregate(
+              new Map<string, Accumulator>(
+                  optionsOrTarget.accumulators.map((target: firestore.AccumulatorTarget) => [
+                    (target as unknown as AccumulatorTarget).alias,
+                    (target as unknown as AccumulatorTarget).expr,
+                  ])
+              ),
+              this.selectablesToMap(optionsOrTarget.groups || [])
+          )
+      );
+    } else {
+      copy.push(
+          new Aggregate(
+              new Map<string, Accumulator>(
+                  [optionsOrTarget, ...rest].map(target => [
+                    (target as unknown as AccumulatorTarget).alias,
+                    (target as unknown as AccumulatorTarget).expr,
+                  ])
+              ),
+              new Map<string, Expr>()
+          )
+      );
+    }
+    return new Pipeline(this.db, copy, this.converter);
+  }
 
   withConverter(converter: null): Pipeline;
   withConverter<NewAppModelType>(

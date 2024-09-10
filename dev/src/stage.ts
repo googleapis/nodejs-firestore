@@ -38,6 +38,60 @@ export interface Stage {
 /**
  * @beta
  */
+export class AddFields implements Stage {
+  name = 'add_fields';
+
+  constructor(private fields: Map<string, Expr>) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [serializer.encodeValue(this.fields)!],
+    };
+  }
+}
+
+/**
+ * @beta
+ */
+export class Aggregate implements Stage {
+  name = 'aggregate';
+
+  constructor(
+      private accumulators: Map<string, Accumulator>,
+      private groups: Map<string, Expr>
+  ) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [
+        serializer.encodeValue(this.accumulators)!,
+        serializer.encodeValue(this.groups)!,
+      ],
+    };
+  }
+}
+
+/**
+ * @beta
+ */
+export class Distinct implements Stage {
+  name = 'distinct';
+
+  constructor(private groups: Map<string, Expr>) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [serializer.encodeValue(this.groups)!],
+    };
+  }
+}
+
+/**
+ * @beta
+ */
 export class CollectionSource implements Stage {
   name = 'collection';
 
