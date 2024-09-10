@@ -549,6 +549,8 @@ declare namespace FirebaseFirestore {
      */
     collectionGroup(collectionId: string): CollectionGroup;
 
+    pipeline(): PipelineSource;
+
     /**
      * Retrieves multiple documents from Firestore.
      *

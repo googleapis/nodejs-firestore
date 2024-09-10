@@ -166,12 +166,12 @@ export class DocumentsSource implements Stage {
 export class Where implements Stage {
   name = 'where';
 
-  constructor(private condition: FilterCondition & Expr) {}
+  constructor(private condition: firestore.FilterCondition & firestore.Expr) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: [this.condition._toProto(serializer)],
+      args: [(this.condition as unknown as Expr)._toProto(serializer)],
     };
   }
 }
@@ -180,7 +180,7 @@ export class Where implements Stage {
  * @beta
  */
 export interface FindNearestOptions {
-  field: Field;
+  field: firestore.Field;
   vectorValue: firestore.VectorValue | number[];
   distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
   limit?: number;
@@ -208,7 +208,7 @@ export class FindNearest implements Stage {
     return {
       name: this.name,
       args: [
-        this._options.field._toProto(serializer),
+        (this._options.field as unknown as Field)._toProto(serializer),
         this._options.vectorValue instanceof VectorValue
           ? serializer.encodeValue(this._options.vectorValue)!
           : serializer.encodeVector(this._options.vectorValue as number[]),

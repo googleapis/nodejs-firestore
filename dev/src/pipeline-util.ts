@@ -27,7 +27,7 @@ import {
   isNan,
   Field,
   not,
-  Constant,
+  Constant, AccumulatorTarget, ExprWithAlias, Accumulator,
 } from './expression';
 import Firestore, {DocumentReference, Timestamp} from './index';
 import {logger} from './logger';
@@ -47,6 +47,7 @@ import {
   requestTag,
   wrapError,
 } from './util';
+import {invalidArgumentMessage} from "./validate";
 import api = protos.google.firestore.v1;
 
 /**

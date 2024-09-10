@@ -50,19 +50,18 @@ import {
   Stage,
   Distinct,
 } from './stage';
-import {ApiMapValue, defaultConverter, defaultPipelineConverter} from './types';
+import {ApiMapValue, defaultPipelineConverter} from './types';
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 import IStructuredPipeline = google.firestore.v1.IStructuredPipeline;
 import IStage = google.firestore.v1.Pipeline.IStage;
-import {QueryCursor} from './reference/types';
 import {isOptionalEqual} from './util';
 
 /**
  * Represents the source of a Firestore {@link Pipeline}.
  * @beta
  */
-export class PipelineSource {
+export class PipelineSource implements firestore.PipelineSource{
   constructor(private db: Firestore) {}
 
   collection(collectionPath: string): Pipeline {
@@ -124,7 +123,7 @@ export class PipelineSource {
  *     .execute();
  * ```
  */
-export class Pipeline<AppModelType = firestore.DocumentData> {
+export class Pipeline<AppModelType = firestore.DocumentData> implements firestore.Pipeline<AppModelType> {
   constructor(
     private db: Firestore,
     private stages: Stage[],
@@ -157,7 +156,7 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * @param fields The fields to add to the documents, specified as {@link Selectable}s.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  addFields(...fields: Selectable[]): Pipeline<AppModelType> {
+  addFields(...fields: firestore.Selectable[]): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new AddFields(this.selectablesToMap(fields)));
     return new Pipeline(this.db, copy, this.converter);
@@ -194,9 +193,9 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    *     Selectable} expressions or {@code string} values representing field names.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  select(...fields: (Selectable | string)[]): Pipeline<AppModelType> {
+  select(...selections: (firestore.Selectable | string)[]): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
-    copy.push(new Select(this.selectablesToMap(fields)));
+    copy.push(new Select(this.selectablesToMap(selections)));
     return new Pipeline(this.db, copy, this.converter);
   }
 
@@ -253,7 +252,7 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * @param condition The {@link FilterCondition} to apply.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  where(condition: FilterCondition & Expr): Pipeline<AppModelType> {
+  where(condition: FilterCondition & firestore.Expr): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new Where(condition));
     return new Pipeline(this.db, copy, this.converter);
@@ -344,7 +343,7 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    *     value combinations or {@code string}s representing field names.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  distinct(...groups: (string | Selectable)[]): Pipeline<AppModelType> {
+  distinct(...groups: (string | firestore.Selectable)[]): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new Distinct(this.selectablesToMap(groups || [])));
     return new Pipeline(this.db, copy, this.converter);
@@ -372,7 +371,7 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    *     and provide a name for the accumulated results.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  aggregate(...accumulators: AccumulatorTarget[]): Pipeline<AppModelType>;
+  aggregate(...accumulators: firestore.AccumulatorTarget[]): Pipeline<AppModelType>;
   /**
    * Performs optionally grouped aggregation operations on the documents from previous stages.
    *
@@ -406,23 +405,23 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   aggregate(options: {
-    accumulators: AccumulatorTarget[];
+    accumulators: firestore.AccumulatorTarget[];
     groups?: (string | Selectable)[];
   }): Pipeline<AppModelType>;
   aggregate(
     optionsOrTarget:
-      | AccumulatorTarget
-      | {accumulators: AccumulatorTarget[]; groups?: (string | Selectable)[]},
-    ...rest: AccumulatorTarget[]
+      | firestore.AccumulatorTarget
+      | {accumulators: firestore.AccumulatorTarget[]; groups?: (string | firestore.Selectable)[]},
+    ...rest: firestore.AccumulatorTarget[]
   ): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     if ('accumulators' in optionsOrTarget) {
       copy.push(
         new Aggregate(
           new Map<string, Accumulator>(
-            optionsOrTarget.accumulators.map((target: AccumulatorTarget) => [
-              target.alias,
-              target.expr,
+            optionsOrTarget.accumulators.map((target: firestore.AccumulatorTarget) => [
+              (target as unknown as AccumulatorTarget).alias,
+              (target as unknown as AccumulatorTarget).expr,
             ])
           ),
           this.selectablesToMap(optionsOrTarget.groups || [])
@@ -433,8 +432,8 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
         new Aggregate(
           new Map<string, Accumulator>(
             [optionsOrTarget, ...rest].map(target => [
-              target.alias,
-              target.expr,
+              (target as unknown as AccumulatorTarget).alias,
+              (target as unknown as AccumulatorTarget).expr,
             ])
           ),
           new Map<string, Expr>()
@@ -444,8 +443,8 @@ export class Pipeline<AppModelType = firestore.DocumentData> {
     return new Pipeline(this.db, copy, this.converter);
   }
 
-  findNearest(options: FindNearestOptions): Pipeline<AppModelType>;
-  findNearest(options: FindNearestOptions): Pipeline<AppModelType> {
+  findNearest(options: firestore.FindNearestOptions): Pipeline<AppModelType>;
+  findNearest(options: firestore.FindNearestOptions): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new FindNearest(options));
     return new Pipeline(this.db, copy);

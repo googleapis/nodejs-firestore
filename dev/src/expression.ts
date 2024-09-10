@@ -103,7 +103,7 @@ export type ExprType =
  * The `Expr` class provides a fluent API for building expressions. You can chain together
  * method calls to create complex expressions.
  */
-export abstract class Expr {
+export abstract class Expr implements firestore.Expr{
   /**
    * Creates an expression that adds this expression to another expression.
    *
@@ -115,7 +115,7 @@ export abstract class Expr {
    * @param other The expression to add to this expression.
    * @return A new `Expr` representing the addition operation.
    */
-  add(other: Expr): Add;
+  add(other: firestore.Expr): Add;
 
   /**
    * Creates an expression that adds this expression to a constant value.
@@ -147,7 +147,7 @@ export abstract class Expr {
    * @param other The expression to subtract from this expression.
    * @return A new `Expr` representing the subtraction operation.
    */
-  subtract(other: Expr): Subtract;
+  subtract(other: firestore.Expr): Subtract;
 
   /**
    * Creates an expression that subtracts a constant value from this expression.
@@ -179,7 +179,7 @@ export abstract class Expr {
    * @param other The expression to multiply by.
    * @return A new `Expr` representing the multiplication operation.
    */
-  multiply(other: Expr): Multiply;
+  multiply(other: firestore.Expr): Multiply;
 
   /**
    * Creates an expression that multiplies this expression by a constant value.
@@ -211,7 +211,7 @@ export abstract class Expr {
    * @param other The expression to divide by.
    * @return A new `Expr` representing the division operation.
    */
-  divide(other: Expr): Divide;
+  divide(other: firestore.Expr): Divide;
 
   /**
    * Creates an expression that divides this expression by a constant value.
@@ -243,7 +243,7 @@ export abstract class Expr {
    * @param other The expression to compare for equality.
    * @return A new `Expr` representing the equality comparison.
    */
-  eq(other: Expr): Eq;
+  eq(other: firestore.Expr): Eq;
 
   /**
    * Creates an expression that checks if this expression is equal to a constant value.
@@ -275,7 +275,7 @@ export abstract class Expr {
    * @param other The expression to compare for inequality.
    * @return A new `Expr` representing the inequality comparison.
    */
-  neq(other: Expr): Neq;
+  neq(other: firestore.Expr): Neq;
 
   /**
    * Creates an expression that checks if this expression is not equal to a constant value.
@@ -307,7 +307,7 @@ export abstract class Expr {
    * @param other The expression to compare for less than.
    * @return A new `Expr` representing the less than comparison.
    */
-  lt(other: Expr): Lt;
+  lt(other: firestore.Expr): Lt;
 
   /**
    * Creates an expression that checks if this expression is less than a constant value.
@@ -340,7 +340,7 @@ export abstract class Expr {
    * @param other The expression to compare for less than or equal to.
    * @return A new `Expr` representing the less than or equal to comparison.
    */
-  lte(other: Expr): Lte;
+  lte(other: firestore.Expr): Lte;
 
   /**
    * Creates an expression that checks if this expression is less than or equal to a constant value.
@@ -372,7 +372,7 @@ export abstract class Expr {
    * @param other The expression to compare for greater than.
    * @return A new `Expr` representing the greater than comparison.
    */
-  gt(other: Expr): Gt;
+  gt(other: firestore.Expr): Gt;
 
   /**
    * Creates an expression that checks if this expression is greater than a constant value.
@@ -405,7 +405,7 @@ export abstract class Expr {
    * @param other The expression to compare for greater than or equal to.
    * @return A new `Expr` representing the greater than or equal to comparison.
    */
-  gte(other: Expr): Gte;
+  gte(other: firestore.Expr): Gte;
 
   /**
    * Creates an expression that checks if this expression is greater than or equal to a constant
@@ -438,7 +438,7 @@ export abstract class Expr {
    * @param arrays The array expressions to concatenate.
    * @return A new `Expr` representing the concatenated array.
    */
-  arrayConcat(arrays: Expr[]): ArrayConcat;
+  arrayConcat(arrays: firestore.Expr[]): ArrayConcat;
 
   /**
    * Creates an expression that concatenates an array expression with one or more other arrays.
@@ -470,7 +470,7 @@ export abstract class Expr {
    * @param element The element to search for in the array.
    * @return A new `Expr` representing the 'array_contains' comparison.
    */
-  arrayContains(element: Expr): ArrayContains;
+  arrayContains(element: firestore.Expr): ArrayContains;
 
   /**
    * Creates an expression that checks if an array contains a specific value.
@@ -502,7 +502,7 @@ export abstract class Expr {
    * @param values The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_all' comparison.
    */
-  arrayContainsAll(...values: Expr[]): ArrayContainsAll;
+  arrayContainsAll(...values: firestore.Expr[]): ArrayContainsAll;
 
   /**
    * Creates an expression that checks if an array contains all the specified elements.
@@ -534,7 +534,7 @@ export abstract class Expr {
    * @param values The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_any' comparison.
    */
-  arrayContainsAny(...values: Expr[]): ArrayContainsAny;
+  arrayContainsAny(...values: firestore.Expr[]): ArrayContainsAny;
 
   /**
    * Creates an expression that checks if an array contains any of the specified elements.
@@ -616,7 +616,7 @@ export abstract class Expr {
    * @param others The values or expressions to check against.
    * @return A new `Expr` representing the 'IN' comparison.
    */
-  in(...others: Expr[]): In;
+  in(...others: firestore.Expr[]): In;
 
   /**
    * Creates an expression that checks if this expression is equal to any of the provided values or
@@ -704,8 +704,8 @@ export abstract class Expr {
    * @param pattern The pattern to search for. You can use "%" as a wildcard character.
    * @return A new `Expr` representing the 'like' comparison.
    */
-  like(pattern: Expr): Like;
-  like(stringOrExpr: string | Expr): Like {
+  like(pattern: firestore.Expr): Like;
+  like(stringOrExpr: string | firestore.Expr): Like {
     if (stringOrExpr instanceof Expr) {
       return new Like(this, stringOrExpr);
     }
@@ -738,8 +738,8 @@ export abstract class Expr {
    * @param pattern The regular expression to use for the search.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  regexContains(pattern: Expr): RegexContains;
-  regexContains(stringOrExpr: string | Expr): RegexContains {
+  regexContains(pattern: firestore.Expr): RegexContains;
+  regexContains(stringOrExpr: string | firestore.Expr): RegexContains {
     if (stringOrExpr instanceof Expr) {
       return new RegexContains(this, stringOrExpr);
     }
@@ -770,8 +770,8 @@ export abstract class Expr {
    * @param pattern The regular expression to use for the match.
    * @return A new `Expr` representing the regular expression match.
    */
-  regexMatch(pattern: Expr): RegexMatch;
-  regexMatch(stringOrExpr: string | Expr): RegexMatch {
+  regexMatch(pattern: firestore.Expr): RegexMatch;
+  regexMatch(stringOrExpr: string | firestore.Expr): RegexMatch {
     if (stringOrExpr instanceof Expr) {
       return new RegexMatch(this, stringOrExpr);
     }
@@ -803,8 +803,8 @@ export abstract class Expr {
    * @param prefix The prefix expression to check for.
    * @return A new `Expr` representing the 'starts with' comparison.
    */
-  startsWith(prefix: Expr): StartsWith;
-  startsWith(stringOrExpr: string | Expr): StartsWith {
+  startsWith(prefix: firestore.Expr): StartsWith;
+  startsWith(stringOrExpr: string | firestore.Expr): StartsWith {
     if (stringOrExpr instanceof Expr) {
       return new StartsWith(this, stringOrExpr);
     }
@@ -836,8 +836,8 @@ export abstract class Expr {
    * @param suffix The postfix expression to check for.
    * @return A new `Expr` representing the 'ends with' comparison.
    */
-  endsWith(suffix: Expr): EndsWith;
-  endsWith(stringOrExpr: string | Expr): EndsWith {
+  endsWith(suffix: firestore.Expr): EndsWith;
+  endsWith(stringOrExpr: string | firestore.Expr): EndsWith {
     if (stringOrExpr instanceof Expr) {
       return new EndsWith(this, stringOrExpr);
     }
@@ -1000,7 +1000,7 @@ export abstract class Expr {
    * @param other The other vector (represented as an Expr) to compare against.
    * @return A new `Expr` representing the cosine distance between the two vectors.
    */
-  cosineDistance(other: Expr): CosineDistance;
+  cosineDistance(other: firestore.Expr): CosineDistance;
   /**
    * Calculates the Cosine distance between two vectors.
    *
@@ -1025,7 +1025,7 @@ export abstract class Expr {
    * @return A new `Expr` representing the Cosine distance between the two vectors.
    */
   cosineDistance(other: number[]): CosineDistance;
-  cosineDistance(other: Expr | VectorValue | number[]): CosineDistance {
+  cosineDistance(other: firestore.Expr | firestore.VectorValue | number[]): CosineDistance {
     if (other instanceof Expr) {
       return new CosineDistance(this, other);
     } else {
@@ -1044,7 +1044,7 @@ export abstract class Expr {
    * @param other The other vector (as an array of numbers) to calculate with.
    * @return A new `Expr` representing the dot product between the two vectors.
    */
-  dotProduct(other: Expr): DotProduct;
+  dotProduct(other: firestore.Expr): DotProduct;
 
   /**
    * Calculates the dot product between two vectors.
@@ -1071,7 +1071,7 @@ export abstract class Expr {
    * @return A new `Expr` representing the dot product between the two vectors.
    */
   dotProduct(other: number[]): DotProduct;
-  dotProduct(other: Expr | VectorValue | number[]): DotProduct {
+  dotProduct(other: firestore.Expr | firestore.VectorValue | number[]): DotProduct {
     if (other instanceof Expr) {
       return new DotProduct(this, other);
     } else {
@@ -1090,7 +1090,7 @@ export abstract class Expr {
    * @param other The other vector (as an array of numbers) to calculate with.
    * @return A new `Expr` representing the Euclidean distance between the two vectors.
    */
-  euclideanDistance(other: Expr): EuclideanDistance;
+  euclideanDistance(other: firestore.Expr): EuclideanDistance;
 
   /**
    * Calculates the Euclidean distance between two vectors.
@@ -1117,7 +1117,7 @@ export abstract class Expr {
    * @return A new `Expr` representing the Euclidean distance between the two vectors.
    */
   euclideanDistance(other: number[]): EuclideanDistance;
-  euclideanDistance(other: Expr | VectorValue | number[]): EuclideanDistance {
+  euclideanDistance(other: firestore.Expr | firestore.VectorValue | number[]): EuclideanDistance {
     if (other instanceof Expr) {
       return new EuclideanDistance(this, other);
     } else {
