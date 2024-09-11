@@ -296,7 +296,7 @@ describe.only('Pipeline class', () => {
   it('returns group and accumulate results', async () => {
     const results = await randomCol
       .pipeline()
-      .where(lt('published', 1984))
+      .where(lt(Field.of('published'), 1984))
       .aggregate({
         accumulators: [avg('rating').as('avg_rating')],
         groups: ['genre'],

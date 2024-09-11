@@ -103,7 +103,7 @@ export type ExprType =
  * The `Expr` class provides a fluent API for building expressions. You can chain together
  * method calls to create complex expressions.
  */
-export abstract class Expr implements firestore.Expr{
+export abstract class Expr implements firestore.Expr {
   /**
    * Creates an expression that adds this expression to another expression.
    *
@@ -570,8 +570,8 @@ export abstract class Expr implements firestore.Expr{
    * @param filter The {@link FilterCondition} to apply to the array elements.
    * @return A new `Expr` representing the filtered array.
    */
-  arrayFilter(filter: FilterExpr): ArrayFilter {
-    return new ArrayFilter(this, filter);
+  arrayFilter(filter: firestore.FilterExpr): ArrayFilter {
+    return new ArrayFilter(this, filter as unknown as FilterExpr);
   }
 
   /**
@@ -709,7 +709,7 @@ export abstract class Expr implements firestore.Expr{
     if (stringOrExpr instanceof Expr) {
       return new Like(this, stringOrExpr);
     }
-    return new Like(this, Constant.of(stringOrExpr));
+    return new Like(this, Constant.of(stringOrExpr as string));
   }
 
   /**
@@ -743,7 +743,7 @@ export abstract class Expr implements firestore.Expr{
     if (stringOrExpr instanceof Expr) {
       return new RegexContains(this, stringOrExpr);
     }
-    return new RegexContains(this, Constant.of(stringOrExpr));
+    return new RegexContains(this, Constant.of(stringOrExpr as string));
   }
 
   /**
@@ -775,7 +775,7 @@ export abstract class Expr implements firestore.Expr{
     if (stringOrExpr instanceof Expr) {
       return new RegexMatch(this, stringOrExpr);
     }
-    return new RegexMatch(this, Constant.of(stringOrExpr));
+    return new RegexMatch(this, Constant.of(stringOrExpr as string));
   }
 
   /**
@@ -808,7 +808,7 @@ export abstract class Expr implements firestore.Expr{
     if (stringOrExpr instanceof Expr) {
       return new StartsWith(this, stringOrExpr);
     }
-    return new StartsWith(this, Constant.of(stringOrExpr));
+    return new StartsWith(this, Constant.of(stringOrExpr as string));
   }
 
   /**
@@ -841,7 +841,7 @@ export abstract class Expr implements firestore.Expr{
     if (stringOrExpr instanceof Expr) {
       return new EndsWith(this, stringOrExpr);
     }
-    return new EndsWith(this, Constant.of(stringOrExpr));
+    return new EndsWith(this, Constant.of(stringOrExpr as string));
   }
 
   /**
@@ -1025,11 +1025,16 @@ export abstract class Expr implements firestore.Expr{
    * @return A new `Expr` representing the Cosine distance between the two vectors.
    */
   cosineDistance(other: number[]): CosineDistance;
-  cosineDistance(other: firestore.Expr | firestore.VectorValue | number[]): CosineDistance {
+  cosineDistance(
+    other: firestore.Expr | firestore.VectorValue | number[]
+  ): CosineDistance {
     if (other instanceof Expr) {
       return new CosineDistance(this, other);
     } else {
-      return new CosineDistance(this, Constant.vector(other));
+      return new CosineDistance(
+        this,
+        Constant.vector(other as VectorValue | number[])
+      );
     }
   }
 
@@ -1071,11 +1076,16 @@ export abstract class Expr implements firestore.Expr{
    * @return A new `Expr` representing the dot product between the two vectors.
    */
   dotProduct(other: number[]): DotProduct;
-  dotProduct(other: firestore.Expr | firestore.VectorValue | number[]): DotProduct {
+  dotProduct(
+    other: firestore.Expr | firestore.VectorValue | number[]
+  ): DotProduct {
     if (other instanceof Expr) {
       return new DotProduct(this, other);
     } else {
-      return new DotProduct(this, Constant.vector(other));
+      return new DotProduct(
+        this,
+        Constant.vector(other as VectorValue | number[])
+      );
     }
   }
 
@@ -1117,11 +1127,16 @@ export abstract class Expr implements firestore.Expr{
    * @return A new `Expr` representing the Euclidean distance between the two vectors.
    */
   euclideanDistance(other: number[]): EuclideanDistance;
-  euclideanDistance(other: firestore.Expr | firestore.VectorValue | number[]): EuclideanDistance {
+  euclideanDistance(
+    other: firestore.Expr | firestore.VectorValue | number[]
+  ): EuclideanDistance {
     if (other instanceof Expr) {
       return new EuclideanDistance(this, other);
     } else {
-      return new EuclideanDistance(this, Constant.vector(other));
+      return new EuclideanDistance(
+        this,
+        Constant.vector(other as VectorValue | number[])
+      );
     }
   }
 
@@ -1264,9 +1279,9 @@ export class Field extends Expr implements Selectable {
   static of(name: string): Field;
   static of(path: firestore.FieldPath): Field;
   static of(nameOrPath: string | firestore.FieldPath): Field;
-  static of(pipeline: Pipeline, name: string): Field;
+  static of(pipeline: firestore.Pipeline, name: string): Field;
   static of(
-    pipelineOrName: Pipeline | string | firestore.FieldPath,
+    pipelineOrName: firestore.Pipeline | string | firestore.FieldPath,
     name?: string
   ): Field {
     if (typeof pipelineOrName === 'string') {
@@ -1399,7 +1414,7 @@ export class Constant extends Expr {
    * @param value The GeoPoint value.
    * @return A new `Constant` instance.
    */
-  static of(value: GeoPoint): Constant;
+  static of(value: firestore.GeoPoint): Constant;
 
   /**
    * Creates a `Constant` instance for a Timestamp value.
@@ -1407,7 +1422,7 @@ export class Constant extends Expr {
    * @param value The Timestamp value.
    * @return A new `Constant` instance.
    */
-  static of(value: Timestamp): Constant;
+  static of(value: firestore.Timestamp): Constant;
 
   /**
    * Creates a `Constant` instance for a Date value.
@@ -1431,7 +1446,7 @@ export class Constant extends Expr {
    * @param value The DocumentReference value.
    * @return A new `Constant` instance.
    */
-  static of(value: DocumentReference): Constant;
+  static of(value: firestore.DocumentReference): Constant;
 
   /**
    * Creates a `Constant` instance for a Firestore proto value.
@@ -1463,7 +1478,7 @@ export class Constant extends Expr {
    * @param value The VectorValue value.
    * @return A new `Constant` instance.
    */
-  static of(value: VectorValue): Constant;
+  static of(value: firestore.VectorValue): Constant;
 
   /**
    * Creates a `Constant` instance for a Firestore proto value.
@@ -1487,11 +1502,11 @@ export class Constant extends Expr {
    * @param value The VectorValue value.
    * @return A new `Constant` instance.
    */
-  static vector(value: Array<number> | VectorValue): Constant {
+  static vector(value: Array<number> | firestore.VectorValue): Constant {
     if (value instanceof VectorValue) {
       return new Constant(value);
     } else {
-      return new Constant(new VectorValue(value));
+      return new Constant(new VectorValue(value as Array<number>));
     }
   }
 

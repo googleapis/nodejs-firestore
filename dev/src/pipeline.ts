@@ -61,7 +61,7 @@ import {isOptionalEqual} from './util';
  * Represents the source of a Firestore {@link Pipeline}.
  * @beta
  */
-export class PipelineSource implements firestore.PipelineSource{
+export class PipelineSource implements firestore.PipelineSource {
   constructor(private db: Firestore) {}
 
   collection(collectionPath: string): Pipeline {
@@ -123,7 +123,9 @@ export class PipelineSource implements firestore.PipelineSource{
  *     .execute();
  * ```
  */
-export class Pipeline<AppModelType = firestore.DocumentData> implements firestore.Pipeline<AppModelType> {
+export class Pipeline<AppModelType = firestore.DocumentData>
+  implements firestore.Pipeline<AppModelType>
+{
   constructor(
     private db: Firestore,
     private stages: Stage[],
@@ -193,7 +195,9 @@ export class Pipeline<AppModelType = firestore.DocumentData> implements firestor
    *     Selectable} expressions or {@code string} values representing field names.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  select(...selections: (firestore.Selectable | string)[]): Pipeline<AppModelType> {
+  select(
+    ...selections: (firestore.Selectable | string)[]
+  ): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new Select(this.selectablesToMap(selections)));
     return new Pipeline(this.db, copy, this.converter);
@@ -343,7 +347,9 @@ export class Pipeline<AppModelType = firestore.DocumentData> implements firestor
    *     value combinations or {@code string}s representing field names.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  distinct(...groups: (string | firestore.Selectable)[]): Pipeline<AppModelType> {
+  distinct(
+    ...groups: (string | firestore.Selectable)[]
+  ): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new Distinct(this.selectablesToMap(groups || [])));
     return new Pipeline(this.db, copy, this.converter);
@@ -371,7 +377,9 @@ export class Pipeline<AppModelType = firestore.DocumentData> implements firestor
    *     and provide a name for the accumulated results.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  aggregate(...accumulators: firestore.AccumulatorTarget[]): Pipeline<AppModelType>;
+  aggregate(
+    ...accumulators: firestore.AccumulatorTarget[]
+  ): Pipeline<AppModelType>;
   /**
    * Performs optionally grouped aggregation operations on the documents from previous stages.
    *
@@ -411,7 +419,10 @@ export class Pipeline<AppModelType = firestore.DocumentData> implements firestor
   aggregate(
     optionsOrTarget:
       | firestore.AccumulatorTarget
-      | {accumulators: firestore.AccumulatorTarget[]; groups?: (string | firestore.Selectable)[]},
+      | {
+          accumulators: firestore.AccumulatorTarget[];
+          groups?: (string | firestore.Selectable)[];
+        },
     ...rest: firestore.AccumulatorTarget[]
   ): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
@@ -419,10 +430,12 @@ export class Pipeline<AppModelType = firestore.DocumentData> implements firestor
       copy.push(
         new Aggregate(
           new Map<string, Accumulator>(
-            optionsOrTarget.accumulators.map((target: firestore.AccumulatorTarget) => [
-              (target as unknown as AccumulatorTarget).alias,
-              (target as unknown as AccumulatorTarget).expr,
-            ])
+            optionsOrTarget.accumulators.map(
+              (target: firestore.AccumulatorTarget) => [
+                (target as unknown as AccumulatorTarget).alias,
+                (target as unknown as AccumulatorTarget).expr,
+              ]
+            )
           ),
           this.selectablesToMap(optionsOrTarget.groups || [])
         )
