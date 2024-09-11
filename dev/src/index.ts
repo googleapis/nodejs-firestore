@@ -168,6 +168,7 @@ export {
   not,
   exists,
   isNan,
+  strLength,
   like,
   regexContains,
   regexMatch,

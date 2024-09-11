@@ -525,7 +525,7 @@ describe.only('Pipeline class', () => {
   it('testLength', async () => {
     const results = await randomCol
       .pipeline()
-      .select(Field.of('title').length().as('titleLength'), Field.of('title'))
+      .select(Field.of('title').strLength().as('titleLength'), Field.of('title'))
       .where(gt('titleLength', 20))
       .execute();
     expectResults(

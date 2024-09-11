@@ -3744,12 +3744,12 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Get the length of the 'name' field
-     * Field.of("name").length();
+     * Field.of("name").strLength();
      * ```
      *
      * @return A new `Expr` representing the length of the string.
      */
-    length(): Length;
+    strLength(): StrLength;
 
     /**
      * Creates an expression that performs a case-sensitive string comparison.
@@ -4569,7 +4569,7 @@ declare namespace FirebaseFirestore {
   /**
    * @beta
    */
-  export class Length extends Function {}
+  export class StrLength extends Function {}
 
   /**
    * @beta
@@ -5979,13 +5979,13 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Get the length of the 'name' field
-   * length("name");
+   * strLength("name");
    * ```
    *
    * @param field The name of the field containing the string.
    * @return A new {@code Expr} representing the length of the string.
    */
-  export function length(field: string): Length;
+  export function strLength(field: string): StrLength;
 
   /**
    * @beta
@@ -5994,13 +5994,13 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Get the length of the 'name' field
-   * length(Field.of("name"));
+   * strLength(Field.of("name"));
    * ```
    *
    * @param expr The expression representing the string to calculate the length of.
    * @return A new {@code Expr} representing the length of the string.
    */
-  export function length(expr: Expr): Length;
+  export function length(expr: Expr): StrLength;
 
   /**
    * @beta

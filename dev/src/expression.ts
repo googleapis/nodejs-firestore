@@ -671,13 +671,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Get the length of the 'name' field
-   * Field.of("name").length();
+   * Field.of("name").strLength();
    * ```
    *
    * @return A new `Expr` representing the length of the string.
    */
-  length(): Length {
-    return new Length(this);
+  strLength(): StrLength {
+    return new StrLength(this);
   }
 
   /**
@@ -1857,7 +1857,7 @@ class If extends Function implements FilterCondition {
 /**
  * @beta
  */
-class Length extends Function {
+class StrLength extends Function {
   constructor(private expr: Expr) {
     super('length', [expr]);
   }
@@ -3492,13 +3492,13 @@ export function isNan(value: Expr | string): IsNan {
  *
  * ```typescript
  * // Get the length of the 'name' field
- * length("name");
+ * strLength("name");
  * ```
  *
  * @param field The name of the field containing the string.
  * @return A new {@code Expr} representing the length of the string.
  */
-export function length(field: string): Length;
+export function strLength(field: string): StrLength;
 
 /**
  * @beta
@@ -3507,16 +3507,16 @@ export function length(field: string): Length;
  *
  * ```typescript
  * // Get the length of the 'name' field
- * length(Field.of("name"));
+ * strLength(Field.of("name"));
  * ```
  *
  * @param expr The expression representing the string to calculate the length of.
  * @return A new {@code Expr} representing the length of the string.
  */
-export function length(expr: Expr): Length;
-export function length(value: Expr | string): Length {
+export function strLength(expr: Expr): StrLength;
+export function strLength(value: Expr | string): StrLength {
   const valueExpr = value instanceof Expr ? value : Field.of(value);
-  return new Length(valueExpr);
+  return new StrLength(valueExpr);
 }
 
 /**
