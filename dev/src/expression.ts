@@ -1286,7 +1286,7 @@ export class Field extends Expr implements Selectable {
   ): Field {
     if (typeof pipelineOrName === 'string') {
       if (FieldPath.documentId().formattedName === pipelineOrName) {
-        return new Field(new FieldPath('__path__'));
+        return new Field(FieldPath.documentId());
       }
 
       return new Field(FieldPath.fromArgument(pipelineOrName));
