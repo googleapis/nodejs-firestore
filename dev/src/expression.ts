@@ -18,13 +18,10 @@ import api = protos.google.firestore.v1;
 import * as firestore from '@google-cloud/firestore';
 
 import {VectorValue} from './field-value';
-import {GeoPoint} from './geo-point';
 import {FieldPath} from './path';
 import {Pipeline} from './pipeline';
 import {isFirestoreValue} from './pipeline-util';
-import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
-import {Timestamp} from './timestamp';
 
 /**
  * @beta
@@ -230,6 +227,212 @@ export abstract class Expr implements firestore.Expr {
       return new Divide(this, other);
     }
     return new Divide(this, Constant.of(other));
+  }
+
+  /**
+   * Creates an expression that calculates the modulo (remainder) of dividing this expression by another expression.
+   *
+   * ```typescript
+   * // Calculate the remainder of dividing the 'value' field by the 'divisor' field
+   * Field.of("value").mod(Field.of("divisor"));
+   * ```
+   *
+   * @param other The expression to divide by.
+   * @return A new `Expr` representing the modulo operation.
+   */
+  mod(other: firestore.Expr): Mod;
+
+  /**
+   * Creates an expression that calculates the modulo (remainder) of dividing this expression by a constant value.
+   *
+   * ```typescript
+   * // Calculate the remainder of dividing the 'value' field by 10
+   * Field.of("value").mod(10);
+   * ```
+   *
+   * @param other The constant value to divide by.
+   * @return A new `Expr` representing the modulo operation.
+   */
+  mod(other: any): Mod;
+  mod(other: any): Mod {
+    if (other instanceof Expr) {
+      return new Mod(this, other);
+    }
+    return new Mod(this, Constant.of(other));
+  }
+
+  /**
+   * Creates an expression that applies a bitwise AND operation between this expression and another expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise AND of 'field1' and 'field2'.
+   * Field.of("field1").bitAnd(Field.of("field2"));
+   * ```
+   *
+   * @param other The right operand expression.
+   * @return A new {@code Expr} representing the bitwise AND operation.
+   */
+  bitAnd(other: firestore.Expr): BitAnd;
+
+  /**
+   * Creates an expression that applies a bitwise AND operation between this expression and a constant value.
+   *
+   * ```typescript
+   * // Calculate the bitwise AND of 'field1' and 0xFF.
+   * Field.of("field1").bitAnd(0xFF);
+   * ```
+   *
+   * @param other The right operand constant.
+   * @return A new {@code Expr} representing the bitwise AND operation.
+   */
+  bitAnd(other: any): BitAnd;
+  bitAnd(other: any): BitAnd {
+    if (other instanceof Expr) {
+      return new BitAnd(this, other);
+    }
+    return new BitAnd(this, Constant.of(other));
+  }
+
+  /**
+   * Creates an expression that applies a bitwise OR operation between this expression and another expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise OR of 'field1' and 'field2'.
+   * Field.of("field1").bitOr(Field.of("field2"));
+   * ```
+   *
+   * @param other The right operand expression.
+   * @return A new {@code Expr} representing the bitwise OR operation.
+   */
+  bitOr(other: firestore.Expr): BitOr;
+
+  /**
+   * Creates an expression that applies a bitwise OR operation between this expression and a constant value.
+   *
+   * ```typescript
+   * // Calculate the bitwise OR of 'field1' and 0xFF.
+   * Field.of("field1").bitOr(0xFF);
+   * ```
+   *
+   * @param other The right operand constant.
+   * @return A new {@code Expr} representing the bitwise OR operation.
+   */
+  bitOr(other: any): BitOr;
+  bitOr(other: any): BitOr {
+    if (other instanceof Expr) {
+      return new BitOr(this, other);
+    }
+    return new BitOr(this, Constant.of(other));
+  }
+
+  /**
+   * Creates an expression that applies a bitwise XOR operation between this expression and another expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise XOR of 'field1' and 'field2'.
+   * Field.of("field1").bitXor(Field.of("field2"));
+   * ```
+   *
+   * @param other The right operand expression.
+   * @return A new {@code Expr} representing the bitwise XOR operation.
+   */
+  bitXor(other: firestore.Expr): BitXor;
+
+  /**
+   * Creates an expression that applies a bitwise XOR operation between this expression and a constant value.
+   *
+   * ```typescript
+   * // Calculate the bitwise XOR of 'field1' and 0xFF.
+   * Field.of("field1").bitXor(0xFF);
+   * ```
+   *
+   * @param other The right operand constant.
+   * @return A new {@code Expr} representing the bitwise XOR operation.
+   */
+  bitXor(other: any): BitXor;
+  bitXor(other: any): BitXor {
+    if (other instanceof Expr) {
+      return new BitXor(this, other);
+    }
+    return new BitXor(this, Constant.of(other));
+  }
+
+  /**
+   * Creates an expression that applies a bitwise NOT operation to this expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise NOT of 'field1'.
+   * Field.of("field1").bitNot();
+   * ```
+   *
+   * @return A new {@code Expr} representing the bitwise NOT operation.
+   */
+  bitNot(): BitNot {
+    return new BitNot(this);
+  }
+
+  /**
+   * Creates an expression that applies a bitwise left shift operation between this expression and another expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
+   * Field.of("field1").bitLeftShift(Field.of("field2"));
+   * ```
+   *
+   * @param other The right operand expression representing the number of bits to shift.
+   * @return A new {@code Expr} representing the bitwise left shift operation.
+   */
+  bitLeftShift(other: firestore.Expr): BitLeftShift;
+
+  /**
+   * Creates an expression that applies a bitwise left shift operation between this expression and a constant value.
+   *
+   * ```typescript
+   * // Calculate the bitwise left shift of 'field1' by 2 bits.
+   * Field.of("field1").bitLeftShift(2);
+   * ```
+   *
+   * @param other The right operand constant representing the number of bits to shift.
+   * @return A new {@code Expr} representing the bitwise left shift operation.
+   */
+  bitLeftShift(other: number): BitLeftShift;
+  bitLeftShift(other: firestore.Expr | number): BitLeftShift {
+    if (typeof other === 'number') {
+      return new BitLeftShift(this, Constant.of(other));
+    }
+    return new BitLeftShift(this, other as Expr);
+  }
+
+  /**
+   * Creates an expression that applies a bitwise right shift operation between this expression and another expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
+   * Field.of("field1").bitRightShift(Field.of("field2"));
+   * ```
+   *
+   * @param other The right operand expression representing the number of bits to shift.
+   * @return A new {@code Expr} representing the bitwise right shift operation.
+   */
+  bitRightShift(other: firestore.Expr): BitRightShift;
+
+  /**
+   * Creates an expression that applies a bitwise right shift operation between this expression and a constant value.
+   *
+   * ```typescript
+   * // Calculate the bitwise right shift of 'field1' by 2 bits.
+   * Field.of("field1").bitRightShift(2);
+   * ```
+   *
+   * @param other The right operand constant representing the number of bits to shift.
+   * @return A new {@code Expr} representing the bitwise right shift operation.
+   */
+  bitRightShift(other: number): BitRightShift;
+  bitRightShift(other: firestore.Expr | number): BitRightShift {
+    if (typeof other === 'number') {
+      return new BitRightShift(this, Constant.of(other));
+    }
+    return new BitRightShift(this, other as Expr);
   }
 
   /**
@@ -557,24 +760,6 @@ export abstract class Expr implements firestore.Expr {
   }
 
   /**
-   * Creates an expression that filters elements from an array using the given {@link
-   * FilterCondition} and returns the filtered elements as a new array.
-   *
-   * ```typescript
-   * // Get items from the 'inventoryPrices' array where the array item is greater than 0
-   * // Note we use {@link Function#arrayElement} to represent array elements to construct a
-   * // filtering condition.
-   * Field.of("inventoryPrices").arrayFilter(arrayElement().gt(0));
-   * ```
-   *
-   * @param filter The {@link FilterCondition} to apply to the array elements.
-   * @return A new `Expr` representing the filtered array.
-   */
-  arrayFilter(filter: firestore.FilterExpr): ArrayFilter {
-    return new ArrayFilter(this, filter as unknown as FilterExpr);
-  }
-
-  /**
    * Creates an expression that calculates the length of an array.
    *
    * ```typescript
@@ -586,22 +771,6 @@ export abstract class Expr implements firestore.Expr {
    */
   arrayLength(): ArrayLength {
     return new ArrayLength(this);
-  }
-
-  /**
-   * Creates an expression that applies a transformation function to each element in an array and
-   * returns the new array as the result of the evaluation.
-   *
-   * ```typescript
-   * // Convert all strings in the 'names' array to uppercase
-   * Field.of("names").arrayTransform(arrayElement().toUppercase());
-   * ```
-   *
-   * @param transform The {@link Function} to apply to each array element.
-   * @return A new `Expr` representing the transformed array.
-   */
-  arrayTransform(transform: Function): ArrayTransform {
-    return new ArrayTransform(this, transform);
   }
 
   /**
@@ -667,17 +836,17 @@ export abstract class Expr implements firestore.Expr {
   }
 
   /**
-   * Creates an expression that calculates the length of a string.
+   * Creates an expression that calculates the character length of a string in UTF-8.
    *
    * ```typescript
-   * // Get the length of the 'name' field
-   * Field.of("name").strLength();
+   * // Get the character length of the 'name' field in its UTF-8 form.
+   * Field.of("name").charLength();
    * ```
    *
    * @return A new `Expr` representing the length of the string.
    */
-  strLength(): StrLength {
-    return new StrLength(this);
+  charLength(): CharLength {
+    return new CharLength(this);
   }
 
   /**
@@ -706,10 +875,10 @@ export abstract class Expr implements firestore.Expr {
    */
   like(pattern: firestore.Expr): Like;
   like(stringOrExpr: string | firestore.Expr): Like {
-    if (stringOrExpr instanceof Expr) {
-      return new Like(this, stringOrExpr);
+    if (typeof stringOrExpr === 'string') {
+      return new Like(this, Constant.of(stringOrExpr));
     }
-    return new Like(this, Constant.of(stringOrExpr as string));
+    return new Like(this, stringOrExpr as Expr);
   }
 
   /**
@@ -740,10 +909,10 @@ export abstract class Expr implements firestore.Expr {
    */
   regexContains(pattern: firestore.Expr): RegexContains;
   regexContains(stringOrExpr: string | firestore.Expr): RegexContains {
-    if (stringOrExpr instanceof Expr) {
-      return new RegexContains(this, stringOrExpr);
+    if (typeof stringOrExpr === 'string') {
+      return new RegexContains(this, Constant.of(stringOrExpr));
     }
-    return new RegexContains(this, Constant.of(stringOrExpr as string));
+    return new RegexContains(this, stringOrExpr as Expr);
   }
 
   /**
@@ -772,10 +941,10 @@ export abstract class Expr implements firestore.Expr {
    */
   regexMatch(pattern: firestore.Expr): RegexMatch;
   regexMatch(stringOrExpr: string | firestore.Expr): RegexMatch {
-    if (stringOrExpr instanceof Expr) {
-      return new RegexMatch(this, stringOrExpr);
+    if (typeof stringOrExpr === 'string') {
+      return new RegexMatch(this, Constant.of(stringOrExpr));
     }
-    return new RegexMatch(this, Constant.of(stringOrExpr as string));
+    return new RegexMatch(this, stringOrExpr as Expr);
   }
 
   /**
@@ -805,10 +974,10 @@ export abstract class Expr implements firestore.Expr {
    */
   startsWith(prefix: firestore.Expr): StartsWith;
   startsWith(stringOrExpr: string | firestore.Expr): StartsWith {
-    if (stringOrExpr instanceof Expr) {
-      return new StartsWith(this, stringOrExpr);
+    if (typeof stringOrExpr === 'string') {
+      return new StartsWith(this, Constant.of(stringOrExpr));
     }
-    return new StartsWith(this, Constant.of(stringOrExpr as string));
+    return new StartsWith(this, stringOrExpr as Expr);
   }
 
   /**
@@ -838,10 +1007,10 @@ export abstract class Expr implements firestore.Expr {
    */
   endsWith(suffix: firestore.Expr): EndsWith;
   endsWith(stringOrExpr: string | firestore.Expr): EndsWith {
-    if (stringOrExpr instanceof Expr) {
-      return new EndsWith(this, stringOrExpr);
+    if (typeof stringOrExpr === 'string') {
+      return new EndsWith(this, Constant.of(stringOrExpr));
     }
-    return new EndsWith(this, Constant.of(stringOrExpr as string));
+    return new EndsWith(this, stringOrExpr as Expr);
   }
 
   /**
@@ -849,13 +1018,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Convert the 'name' field to lowercase
-   * Field.of("name").toLowerCase();
+   * Field.of("name").toLower();
    * ```
    *
    * @return A new `Expr` representing the lowercase string.
    */
-  toLowercase(): ToLowercase {
-    return new ToLowercase(this);
+  toLower(): ToLower {
+    return new ToLower(this);
   }
 
   /**
@@ -863,13 +1032,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Convert the 'title' field to uppercase
-   * Field.of("title").toUpperCase();
+   * Field.of("title").toUpper();
    * ```
    *
    * @return A new `Expr` representing the uppercase string.
    */
-  toUppercase(): ToUppercase {
-    return new ToUppercase(this);
+  toUpper(): ToUpper {
+    return new ToUpper(this);
   }
 
   /**
@@ -897,9 +1066,129 @@ export abstract class Expr implements firestore.Expr {
    * @param elements The expressions (typically strings) to concatenate.
    * @return A new `Expr` representing the concatenated string.
    */
-  strConcat(...elements: (string | Expr)[]): StrConcat {
-    const exprs = elements.map(e => (e instanceof Expr ? e : Constant.of(e)));
+  strConcat(...elements: (string | firestore.Expr)[]): StrConcat {
+    const exprs = elements.map(e =>
+      typeof e === 'string' ? Constant.of(e) : (e as Expr)
+    );
     return new StrConcat(this, exprs);
+  }
+
+  /**
+   * Creates an expression that reverses this string expression.
+   *
+   * ```typescript
+   * // Reverse the value of the 'myString' field.
+   * Field.of("myString").reverse();
+   * ```
+   *
+   * @return A new {@code Expr} representing the reversed string.
+   */
+  reverse(): Reverse {
+    return new Reverse(this);
+  }
+
+  /**
+   * Creates an expression that replaces the first occurrence of a substring within this string expression with another substring.
+   *
+   * ```typescript
+   * // Replace the first occurrence of "hello" with "hi" in the 'message' field
+   * Field.of("message").replaceFirst("hello", "hi");
+   * ```
+   *
+   * @param find The substring to search for.
+   * @param replace The substring to replace the first occurrence of 'find' with.
+   * @return A new {@code Expr} representing the string with the first occurrence replaced.
+   */
+  replaceFirst(find: string, replace: string): firestore.ReplaceFirst;
+
+  /**
+   * Creates an expression that replaces the first occurrence of a substring within this string expression with another substring,
+   * where the substring to find and the replacement substring are specified by expressions.
+   *
+   * ```typescript
+   * // Replace the first occurrence of the value in 'findField' with the value in 'replaceField' in the 'message' field
+   * Field.of("message").replaceFirst(Field.of("findField"), Field.of("replaceField"));
+   * ```
+   *
+   * @param find The expression representing the substring to search for.
+   * @param replace The expression representing the substring to replace the first occurrence of 'find' with.
+   * @return A new {@code Expr} representing the string with the first occurrence replaced.
+   */
+  replaceFirst(
+    find: firestore.Expr,
+    replace: firestore.Expr
+  ): firestore.ReplaceFirst;
+  replaceFirst(
+    find: firestore.Expr | string,
+    replace: firestore.Expr | string
+  ): firestore.ReplaceFirst {
+    const normalizedFind = typeof find === 'string' ? Constant.of(find) : find;
+    const normalizedReplace =
+      typeof replace === 'string' ? Constant.of(replace) : replace;
+    return new ReplaceFirst(
+      this,
+      normalizedFind as Expr,
+      normalizedReplace as Expr
+    );
+  }
+
+  /**
+   * Creates an expression that replaces all occurrences of a substring within this string expression with another substring.
+   *
+   * ```typescript
+   * // Replace all occurrences of "hello" with "hi" in the 'message' field
+   * Field.of("message").replaceAll("hello", "hi");
+   * ```
+   *
+   * @param find The substring to search for.
+   * @param replace The substring to replace all occurrences of 'find' with.
+   * @return A new {@code Expr} representing the string with all occurrences replaced.
+   */
+  replaceAll(find: string, replace: string): firestore.ReplaceAll;
+
+  /**
+   * Creates an expression that replaces all occurrences of a substring within this string expression with another substring,
+   * where the substring to find and the replacement substring are specified by expressions.
+   *
+   * ```typescript
+   * // Replace all occurrences of the value in 'findField' with the value in 'replaceField' in the 'message' field
+   * Field.of("message").replaceAll(Field.of("findField"), Field.of("replaceField"));
+   * ```
+   *
+   * @param find The expression representing the substring to search for.
+   * @param replace The expression representing the substring to replace all occurrences of 'find' with.
+   * @return A new {@code Expr} representing the string with all occurrences replaced.
+   */
+  replaceAll(
+    find: firestore.Expr,
+    replace: firestore.Expr
+  ): firestore.ReplaceAll;
+  replaceAll(
+    find: firestore.Expr | string,
+    replace: firestore.Expr | string
+  ): firestore.ReplaceAll {
+    const normalizedFind = typeof find === 'string' ? Constant.of(find) : find;
+    const normalizedReplace =
+      typeof replace === 'string' ? Constant.of(replace) : replace;
+    return new ReplaceAll(
+      this,
+      normalizedFind as Expr,
+      normalizedReplace as Expr
+    );
+  }
+
+  /**
+   * Creates an expression that calculates the length of this string expression in bytes.
+   *
+   * ```typescript
+   * // Calculate the length of the 'myString' field in bytes.
+   * Field.of("myString").byteLength();
+   * ```
+   *
+   * @return A new {@code Expr} representing the length of the string in bytes.
+   */
+  byteLength(): firestore.ByteLength {
+    return new ByteLength(this);
   }
 
   /**
@@ -990,6 +1279,84 @@ export abstract class Expr implements firestore.Expr {
   }
 
   /**
+   * Creates an expression that returns the larger value between this expression and another expression, based on Firestore's value type ordering.
+   *
+   * ```typescript
+   * // Returns the larger value between the 'timestamp' field and the current timestamp.
+   * Field.of("timestamp").logicalMax(Function.currentTimestamp());
+   * ```
+   *
+   * @param other The expression to compare with.
+   * @return A new {@code Expr} representing the logical max operation.
+   */
+  logicalMax(other: firestore.Expr): firestore.LogicalMax;
+
+  /**
+   * Creates an expression that returns the larger value between this expression and a constant value, based on Firestore's value type ordering.
+   *
+   * ```typescript
+   * // Returns the larger value between the 'value' field and 10.
+   * Field.of("value").logicalMax(10);
+   * ```
+   *
+   * @param other The constant value to compare with.
+   * @return A new {@code Expr} representing the logical max operation.
+   */
+  logicalMax(other: any): firestore.LogicalMax;
+  logicalMax(other: any): firestore.LogicalMax {
+    if (other instanceof firestore.Expr) {
+      return new LogicalMax(this, other as Expr);
+    }
+    return new LogicalMax(this, Constant.of(other));
+  }
+
+  /**
+   * Creates an expression that returns the smaller value between this expression and another expression, based on Firestore's value type ordering.
+   *
+   * ```typescript
+   * // Returns the smaller value between the 'timestamp' field and the current timestamp.
+   * Field.of("timestamp").logicalMin(Function.currentTimestamp());
+   * ```
+   *
+   * @param other The expression to compare with.
+   * @return A new {@code Expr} representing the logical min operation.
+   */
+  logicalMin(other: firestore.Expr): firestore.LogicalMin;
+
+  /**
+   * Creates an expression that returns the smaller value between this expression and a constant value, based on Firestore's value type ordering.
+   *
+   * ```typescript
+   * // Returns the smaller value between the 'value' field and 10.
+   * Field.of("value").logicalMin(10);
+   * ```
+   *
+   * @param other The constant value to compare with.
+   * @return A new {@code Expr} representing the logical min operation.
+   */
+  logicalMin(other: any): firestore.LogicalMin;
+  logicalMin(other: any): firestore.LogicalMin {
+    if (other instanceof firestore.Expr) {
+      return new LogicalMin(this, other as Expr);
+    }
+    return new LogicalMin(this, Constant.of(other));
+  }
+
+  /**
+   * Creates an expression that calculates the length (number of dimensions) of this Firestore Vector expression.
+   *
+   * ```typescript
+   * // Get the vector length (dimension) of the field 'embedding'.
+   * Field.of("embedding").vectorLength();
+   * ```
+   *
+   * @return A new {@code Expr} representing the length of the vector.
+   */
+  vectorLength(): VectorLength {
+    return new VectorLength(this);
+  }
+
+  /**
    * Calculates the cosine distance between two vectors.
    *
    * ```typescript
@@ -1028,8 +1395,8 @@ export abstract class Expr implements firestore.Expr {
   cosineDistance(
     other: firestore.Expr | firestore.VectorValue | number[]
   ): CosineDistance {
-    if (other instanceof Expr) {
-      return new CosineDistance(this, other);
+    if (other instanceof firestore.Expr) {
+      return new CosineDistance(this, other as Expr);
     } else {
       return new CosineDistance(
         this,
@@ -1079,8 +1446,8 @@ export abstract class Expr implements firestore.Expr {
   dotProduct(
     other: firestore.Expr | firestore.VectorValue | number[]
   ): DotProduct {
-    if (other instanceof Expr) {
-      return new DotProduct(this, other);
+    if (other instanceof firestore.Expr) {
+      return new DotProduct(this, other as Expr);
     } else {
       return new DotProduct(
         this,
@@ -1130,14 +1497,209 @@ export abstract class Expr implements firestore.Expr {
   euclideanDistance(
     other: firestore.Expr | firestore.VectorValue | number[]
   ): EuclideanDistance {
-    if (other instanceof Expr) {
-      return new EuclideanDistance(this, other);
+    if (other instanceof firestore.Expr) {
+      return new EuclideanDistance(this, other as Expr);
     } else {
       return new EuclideanDistance(
         this,
         Constant.vector(other as VectorValue | number[])
       );
     }
+  }
+
+  /**
+   * Creates an expression that interprets this expression as the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
+   * and returns a timestamp.
+   *
+   * ```typescript
+   * // Interpret the 'microseconds' field as microseconds since epoch.
+   * Field.of("microseconds").unixMicrosToTimestamp();
+   * ```
+   *
+   * @return A new {@code Expr} representing the timestamp.
+   */
+  unixMicrosToTimestamp(): firestore.UnixMicrosToTimestamp {
+    return new UnixMicrosToTimestamp(this);
+  }
+
+  /**
+   * Creates an expression that converts this timestamp expression to the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+   *
+   * ```typescript
+   * // Convert the 'timestamp' field to microseconds since epoch.
+   * Field.of("timestamp").timestampToUnixMicros();
+   * ```
+   *
+   * @return A new {@code Expr} representing the number of microseconds since epoch.
+   */
+  timestampToUnixMicros(): firestore.TimestampToUnixMicros {
+    return new TimestampToUnixMicros(this);
+  }
+
+  /**
+   * Creates an expression that interprets this expression as the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
+   * and returns a timestamp.
+   *
+   * ```typescript
+   * // Interpret the 'milliseconds' field as milliseconds since epoch.
+   * Field.of("milliseconds").unixMillisToTimestamp();
+   * ```
+   *
+   * @return A new {@code Expr} representing the timestamp.
+   */
+  unixMillisToTimestamp(): firestore.UnixMillisToTimestamp {
+    return new UnixMillisToTimestamp(this);
+  }
+
+  /**
+   * Creates an expression that converts this timestamp expression to the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+   *
+   * ```typescript
+   * // Convert the 'timestamp' field to milliseconds since epoch.
+   * Field.of("timestamp").timestampToUnixMillis();
+   * ```
+   *
+   * @return A new {@code Expr} representing the number of milliseconds since epoch.
+   */
+  timestampToUnixMillis(): firestore.TimestampToUnixMillis {
+    return new TimestampToUnixMillis(this);
+  }
+
+  /**
+   * Creates an expression that interprets this expression as the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC)
+   * and returns a timestamp.
+   *
+   * ```typescript
+   * // Interpret the 'seconds' field as seconds since epoch.
+   * Field.of("seconds").unixSecondsToTimestamp();
+   * ```
+   *
+   * @return A new {@code Expr} representing the timestamp.
+   */
+  unixSecondsToTimestamp(): firestore.UnixSecondsToTimestamp {
+    return new UnixSecondsToTimestamp(this);
+  }
+
+  /**
+   * Creates an expression that converts this timestamp expression to the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+   *
+   * ```typescript
+   * // Convert the 'timestamp' field to seconds since epoch.
+   * Field.of("timestamp").timestampToUnixSeconds();
+   * ```
+   *
+   * @return A new {@code Expr} representing the number of seconds since epoch.
+   */
+  timestampToUnixSeconds(): firestore.TimestampToUnixSeconds {
+    return new TimestampToUnixSeconds(this);
+  }
+
+  /**
+   * Creates an expression that adds a specified amount of time to this timestamp expression.
+   *
+   * ```typescript
+   * // Add some duration determined by field 'unit' and 'amount' to the 'timestamp' field.
+   * Field.of("timestamp").timestampAdd(Field.of("unit"), Field.of("amount"));
+   * ```
+   *
+   * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
+   * @param amount The expression evaluates to amount of the unit.
+   * @return A new {@code Expr} representing the resulting timestamp.
+   */
+  timestampAdd(
+    unit: firestore.Expr,
+    amount: firestore.Expr
+  ): firestore.TimestampAdd;
+
+  /**
+   * Creates an expression that adds a specified amount of time to this timestamp expression.
+   *
+   * ```typescript
+   * // Add 1 day to the 'timestamp' field.
+   * Field.of("timestamp").timestampAdd("day", 1);
+   * ```
+   *
+   * @param unit The unit of time to add (e.g., "day", "hour").
+   * @param amount The amount of time to add.
+   * @return A new {@code Expr} representing the resulting timestamp.
+   */
+  timestampAdd(
+    unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
+    amount: number
+  ): firestore.TimestampAdd;
+  timestampAdd(
+    unit:
+      | firestore.Expr
+      | 'microsecond'
+      | 'millisecond'
+      | 'second'
+      | 'minute'
+      | 'hour'
+      | 'day',
+    amount: firestore.Expr | number
+  ): firestore.TimestampAdd {
+    const normalizedUnit = typeof unit === 'string' ? Constant.of(unit) : unit;
+    const normalizedAmount =
+      typeof amount === 'number' ? Constant.of(amount) : amount;
+    return new TimestampAdd(
+      this,
+      normalizedUnit as Expr,
+      normalizedAmount as Expr
+    );
+  }
+
+  /**
+   * Creates an expression that subtracts a specified amount of time from this timestamp expression.
+   *
+   * ```typescript
+   * // Subtract some duration determined by field 'unit' and 'amount' from the 'timestamp' field.
+   * Field.of("timestamp").timestampSub(Field.of("unit"), Field.of("amount"));
+   * ```
+   *
+   * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
+   * @param amount The expression evaluates to amount of the unit.
+   * @return A new {@code Expr} representing the resulting timestamp.
+   */
+  timestampSub(
+    unit: firestore.Expr,
+    amount: firestore.Expr
+  ): firestore.TimestampSub;
+
+  /**
+   * Creates an expression that subtracts a specified amount of time from this timestamp expression.
+   *
+   * ```typescript
+   * // Subtract 1 day from the 'timestamp' field.
+   * Field.of("timestamp").timestampSub("day", 1);
+   * ```
+   *
+   * @param unit The unit of time to subtract (e.g., "day", "hour").
+   * @param amount The amount of time to subtract.
+   * @return A new {@code Expr} representing the resulting timestamp.
+   */
+  timestampSub(
+    unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
+    amount: number
+  ): firestore.TimestampSub;
+  timestampSub(
+    unit:
+      | firestore.Expr
+      | 'microsecond'
+      | 'millisecond'
+      | 'second'
+      | 'minute'
+      | 'hour'
+      | 'day',
+    amount: firestore.Expr | number
+  ): firestore.TimestampSub {
+    const normalizedUnit = typeof unit === 'string' ? Constant.of(unit) : unit;
+    const normalizedAmount =
+      typeof amount === 'number' ? Constant.of(amount) : amount;
+    return new TimestampSub(
+      this,
+      normalizedUnit as Expr,
+      normalizedAmount as Expr
+    );
   }
 
   /**
@@ -1598,6 +2160,87 @@ export class Divide extends Function {
 /**
  * @beta
  */
+export class Mod extends Function {
+  constructor(
+    private left: Expr,
+    private right: Expr
+  ) {
+    super('mod', [left, right]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class BitAnd extends Function {
+  constructor(
+    private left: Expr,
+    private right: Expr
+  ) {
+    super('bit_and', [left, right]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class BitOr extends Function {
+  constructor(
+    private left: Expr,
+    private right: Expr
+  ) {
+    super('bit_or', [left, right]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class BitXor extends Function {
+  constructor(
+    private left: Expr,
+    private right: Expr
+  ) {
+    super('bit_xor', [left, right]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class BitNot extends Function {
+  constructor(private operand: Expr) {
+    super('bit_not', [operand]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class BitLeftShift extends Function {
+  constructor(
+    private left: Expr,
+    private right: Expr
+  ) {
+    super('bit_left_shift', [left, right]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class BitRightShift extends Function {
+  constructor(
+    private left: Expr,
+    private right: Expr
+  ) {
+    super('bit_right_shift', [left, right]);
+  }
+}
+
+/**
+ * @beta
+ */
 export class Eq extends Function implements FilterCondition {
   constructor(
     private left: Expr,
@@ -1688,6 +2331,15 @@ class ArrayConcat extends Function {
 /**
  * @beta
  */
+class ArrayReverse extends Function {
+  constructor(private array: Expr) {
+    super('array_reverse', [array]);
+  }
+}
+
+/**
+ * @beta
+ */
 class ArrayContains extends Function implements FilterCondition {
   constructor(
     private array: Expr,
@@ -1727,33 +2379,9 @@ class ArrayContainsAny extends Function implements FilterCondition {
 /**
  * @beta
  */
-class ArrayFilter extends Function {
-  constructor(
-    private array: Expr,
-    private filter: FilterExpr
-  ) {
-    super('array_filter', [array, filter]);
-  }
-}
-
-/**
- * @beta
- */
 class ArrayLength extends Function {
   constructor(private array: Expr) {
     super('array_length', [array]);
-  }
-}
-
-/**
- * @beta
- */
-class ArrayTransform extends Function {
-  constructor(
-    private array: Expr,
-    private transform: Function
-  ) {
-    super('array_transform', [array, transform]);
   }
 }
 
@@ -1857,9 +2485,77 @@ class If extends Function implements FilterCondition {
 /**
  * @beta
  */
-class StrLength extends Function {
-  constructor(private expr: Expr) {
-    super('length', [expr]);
+class LogicalMax extends Function {
+  constructor(
+    private left: Expr,
+    private right: Expr
+  ) {
+    super('logical_max', [left, right]);
+  }
+}
+
+/**
+ * @beta
+ */
+class LogicalMin extends Function {
+  constructor(
+    private left: Expr,
+    private right: Expr
+  ) {
+    super('logical_min', [left, right]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class Reverse extends Function {
+  constructor(private value: Expr) {
+    super('reverse', [value]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class ReplaceFirst extends Function {
+  constructor(
+    private value: Expr,
+    private find: Expr,
+    private replace: Expr
+  ) {
+    super('replace_first', [value, find, replace]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class ReplaceAll extends Function {
+  constructor(
+    private value: Expr,
+    private find: Expr,
+    private replace: Expr
+  ) {
+    super('replace_all', [value, find, replace]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class CharLength extends Function {
+  constructor(private value: Expr) {
+    super('char_length', [value]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class ByteLength extends Function {
+  constructor(private value: Expr) {
+    super('byte_length', [value]);
   }
 }
 
@@ -1931,18 +2627,18 @@ class EndsWith extends Function implements FilterCondition {
 /**
  * @beta
  */
-class ToLowercase extends Function {
+class ToLower extends Function {
   constructor(private expr: Expr) {
-    super('to_lowercase', [expr]);
+    super('to_lower', [expr]);
   }
 }
 
 /**
  * @beta
  */
-class ToUppercase extends Function {
+class ToUpper extends Function {
   constructor(private expr: Expr) {
-    super('to_uppercase', [expr]);
+    super('to_upper', [expr]);
   }
 }
 
@@ -2074,6 +2770,95 @@ class EuclideanDistance extends Function {
     private vector2: Expr
   ) {
     super('euclidean_distance', [vector1, vector2]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class VectorLength extends Function {
+  constructor(private value: Expr) {
+    super('vector_length', [value]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class UnixMicrosToTimestamp extends Function {
+  constructor(private input: Expr) {
+    super('unix_micros_to_timestamp', [input]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class TimestampToUnixMicros extends Function {
+  constructor(private input: Expr) {
+    super('timestamp_to_unix_micros', [input]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class UnixMillisToTimestamp extends Function {
+  constructor(private input: Expr) {
+    super('unix_millis_to_timestamp', [input]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class TimestampToUnixMillis extends Function {
+  constructor(private input: Expr) {
+    super('timestamp_to_unix_millis', [input]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class UnixSecondsToTimestamp extends Function {
+  constructor(private input: Expr) {
+    super('unix_seconds_to_timestamp', [input]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class TimestampToUnixSeconds extends Function {
+  constructor(private input: Expr) {
+    super('timestamp_to_unix_seconds', [input]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class TimestampAdd extends Function {
+  constructor(
+    private timestamp: Expr,
+    private unit: Expr,
+    private amount: Expr
+  ) {
+    super('timestamp_add', [timestamp, unit, amount]);
+  }
+}
+
+/**
+ * @beta
+ */
+export class TimestampSub extends Function {
+  constructor(
+    private timestamp: Expr,
+    private unit: Expr,
+    private amount: Expr
+  ) {
+    super('timestamp_sub', [timestamp, unit, amount]);
   }
 }
 
@@ -2351,6 +3136,461 @@ export function divide(left: Expr | string, right: Expr | any): Divide {
   const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
   const normalizedRight = right instanceof Expr ? right : Constant.of(right);
   return new Divide(normalizedLeft, normalizedRight);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that calculates the modulo (remainder) of dividing two expressions.
+ *
+ * ```typescript
+ * // Calculate the remainder of dividing 'field1' by 'field2'.
+ * mod(Field.of("field1"), Field.of("field2"));
+ * ```
+ *
+ * @param left The dividend expression.
+ * @param right The divisor expression.
+ * @return A new {@code Expr} representing the modulo operation.
+ */
+export function mod(left: Expr, right: Expr): Mod;
+
+/**
+ * @beta
+ *
+ * Creates an expression that calculates the modulo (remainder) of dividing an expression by a constant.
+ *
+ * ```typescript
+ * // Calculate the remainder of dividing 'field1' by 5.
+ * mod(Field.of("field1"), 5);
+ * ```
+ *
+ * @param left The dividend expression.
+ * @param right The divisor constant.
+ * @return A new {@code Expr} representing the modulo operation.
+ */
+export function mod(left: Expr, right: any): Mod;
+
+/**
+ * @beta
+ *
+ * Creates an expression that calculates the modulo (remainder) of dividing a field's value by an expression.
+ *
+ * ```typescript
+ * // Calculate the remainder of dividing 'field1' by 'field2'.
+ * mod("field1", Field.of("field2"));
+ * ```
+ *
+ * @param left The dividend field name.
+ * @param right The divisor expression.
+ * @return A new {@code Expr} representing the modulo operation.
+ */
+export function mod(left: string, right: Expr): Mod;
+
+/**
+ * @beta
+ *
+ * Creates an expression that calculates the modulo (remainder) of dividing a field's value by a constant.
+ *
+ * ```typescript
+ * // Calculate the remainder of dividing 'field1' by 5.
+ * mod("field1", 5);
+ * ```
+ *
+ * @param left The dividend field name.
+ * @param right The divisor constant.
+ * @return A new {@code Expr} representing the modulo operation.
+ */
+export function mod(left: string, right: any): Mod;
+export function mod(left: Expr | string, right: Expr | any): Mod {
+  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
+  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
+  return new Mod(normalizedLeft, normalizedRight);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise AND operation between two expressions.
+ *
+ * ```typescript
+ * // Calculate the bitwise AND of 'field1' and 'field2'.
+ * bitAnd(Field.of("field1"), Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand expression.
+ * @return A new {@code Expr} representing the bitwise AND operation.
+ */
+export function bitAnd(left: Expr, right: Expr): BitAnd;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise AND operation between an expression and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise AND of 'field1' and 0xFF.
+ * bitAnd(Field.of("field1"), 0xFF);
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand constant.
+ * @return A new {@code Expr} representing the bitwise AND operation.
+ */
+export function bitAnd(left: Expr, right: any): BitAnd;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise AND operation between a field and an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise AND of 'field1' and 'field2'.
+ * bitAnd("field1", Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand expression.
+ * @return A new {@code Expr} representing the bitwise AND operation.
+ */
+export function bitAnd(left: string, right: Expr): BitAnd;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise AND operation between a field and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise AND of 'field1' and 0xFF.
+ * bitAnd("field1", 0xFF);
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand constant.
+ * @return A new {@code Expr} representing the bitwise AND operation.
+ */
+export function bitAnd(left: string, right: any): BitAnd;
+export function bitAnd(left: Expr | string, right: Expr | any): BitAnd {
+  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
+  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
+  return new BitAnd(normalizedLeft, normalizedRight);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise OR operation between two expressions.
+ *
+ * ```typescript
+ * // Calculate the bitwise OR of 'field1' and 'field2'.
+ * bitOr(Field.of("field1"), Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand expression.
+ * @return A new {@code Expr} representing the bitwise OR operation.
+ */
+export function bitOr(left: Expr, right: Expr): BitOr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise OR operation between an expression and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise OR of 'field1' and 0xFF.
+ * bitOr(Field.of("field1"), 0xFF);
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand constant.
+ * @return A new {@code Expr} representing the bitwise OR operation.
+ */
+export function bitOr(left: Expr, right: any): BitOr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise OR operation between a field and an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise OR of 'field1' and 'field2'.
+ * bitOr("field1", Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand expression.
+ * @return A new {@code Expr} representing the bitwise OR operation.
+ */
+export function bitOr(left: string, right: Expr): BitOr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise OR operation between a field and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise OR of 'field1' and 0xFF.
+ * bitOr("field1", 0xFF);
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand constant.
+ * @return A new {@code Expr} representing the bitwise OR operation.
+ */
+export function bitOr(left: string, right: any): BitOr;
+export function bitOr(left: Expr | string, right: Expr | any): BitOr {
+  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
+  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
+  return new BitOr(normalizedLeft, normalizedRight);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise XOR operation between two expressions.
+ *
+ * ```typescript
+ * // Calculate the bitwise XOR of 'field1' and 'field2'.
+ * bitXor(Field.of("field1"), Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand expression.
+ * @return A new {@code Expr} representing the bitwise XOR operation.
+ */
+export function bitXor(left: Expr, right: Expr): BitXor;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise XOR operation between an expression and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise XOR of 'field1' and 0xFF.
+ * bitXor(Field.of("field1"), 0xFF);
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand constant.
+ * @return A new {@code Expr} representing the bitwise XOR operation.
+ */
+export function bitXor(left: Expr, right: any): BitXor;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise XOR operation between a field and an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise XOR of 'field1' and 'field2'.
+ * bitXor("field1", Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand expression.
+ * @return A new {@code Expr} representing the bitwise XOR operation.
+ */
+export function bitXor(left: string, right: Expr): BitXor;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise XOR operation between a field and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise XOR of 'field1' and 0xFF.
+ * bitXor("field1", 0xFF);
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand constant.
+ * @return A new {@code Expr} representing the bitwise XOR operation.
+ */
+export function bitXor(left: string, right: any): BitXor;
+export function bitXor(left: Expr | string, right: Expr | any): BitXor {
+  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
+  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
+  return new BitXor(normalizedLeft, normalizedRight);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise NOT operation to an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise NOT of 'field1'.
+ * bitNot(Field.of("field1"));
+ * ```
+ *
+ * @param operand The operand expression.
+ * @return A new {@code Expr} representing the bitwise NOT operation.
+ */
+export function bitNot(operand: Expr): BitNot;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise NOT operation to a field.
+ *
+ * ```typescript
+ * // Calculate the bitwise NOT of 'field1'.
+ * bitNot("field1");
+ * ```
+ *
+ * @param operand The operand field name.
+ * @return A new {@code Expr} representing the bitwise NOT operation.
+ */
+export function bitNot(operand: string): BitNot;
+export function bitNot(operand: Expr | string): BitNot {
+  const normalizedOperand =
+    typeof operand === 'string' ? Field.of(operand) : operand;
+  return new BitNot(normalizedOperand);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise left shift operation between two expressions.
+ *
+ * ```typescript
+ * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
+ * bitLeftShift(Field.of("field1"), Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand expression representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise left shift operation.
+ */
+export function bitLeftShift(left: Expr, right: Expr): BitLeftShift;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise left shift operation between an expression and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise left shift of 'field1' by 2 bits.
+ * bitLeftShift(Field.of("field1"), 2);
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand constant representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise left shift operation.
+ */
+export function bitLeftShift(left: Expr, right: any): BitLeftShift;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise left shift operation between a field and an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
+ * bitLeftShift("field1", Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand expression representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise left shift operation.
+ */
+export function bitLeftShift(left: string, right: Expr): BitLeftShift;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise left shift operation between a field and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise left shift of 'field1' by 2 bits.
+ * bitLeftShift("field1", 2);
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand constant representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise left shift operation.
+ */
+export function bitLeftShift(left: string, right: any): BitLeftShift;
+export function bitLeftShift(
+  left: Expr | string,
+  right: Expr | any
+): BitLeftShift {
+  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
+  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
+  return new BitLeftShift(normalizedLeft, normalizedRight);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise right shift operation between two expressions.
+ *
+ * ```typescript
+ * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
+ * bitRightShift(Field.of("field1"), Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand expression representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise right shift operation.
+ */
+export function bitRightShift(left: Expr, right: Expr): BitRightShift;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise right shift operation between an expression and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise right shift of 'field1' by 2 bits.
+ * bitRightShift(Field.of("field1"), 2);
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand constant representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise right shift operation.
+ */
+export function bitRightShift(left: Expr, right: any): BitRightShift;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise right shift operation between a field and an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
+ * bitRightShift("field1", Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand expression representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise right shift operation.
+ */
+export function bitRightShift(left: string, right: Expr): BitRightShift;
+
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise right shift operation between a field and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise right shift of 'field1' by 2 bits.
+ * bitRightShift("field1", 2);
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand constant representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise right shift operation.
+ */
+export function bitRightShift(left: string, right: any): BitRightShift;
+export function bitRightShift(
+  left: Expr | string,
+  right: Expr | any
+): BitRightShift {
+  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
+  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
+  return new BitRightShift(normalizedLeft, normalizedRight);
 }
 
 /**
@@ -3087,27 +4327,6 @@ export function arrayContainsAll(
 /**
  * @beta
  *
- * Creates an expression that filters elements from an array expression using the given {@link
- * FilterExpr} and returns the filtered elements as a new array.
- *
- * ```typescript
- * // Get items from the 'inventoryPrices' array where the array item is greater than 0
- * // Note we use {@link arrayElement} to represent array elements to construct a
- * // filtering condition.
- * arrayFilter(Field.of("inventoryPrices"), arrayElement().gt(0));
- * ```
- *
- * @param array The array expression to filter.
- * @param filter The {@link FilterExpr} to apply to the array elements.
- * @return A new {@code Expr} representing the filtered array.
- */
-export function arrayFilter(array: Expr, filter: FilterExpr): ArrayFilter {
-  return new ArrayFilter(array, filter);
-}
-
-/**
- * @beta
- *
  * Creates an expression that calculates the length of an array expression.
  *
  * ```typescript
@@ -3120,47 +4339,6 @@ export function arrayFilter(array: Expr, filter: FilterExpr): ArrayFilter {
  */
 export function arrayLength(array: Expr): ArrayLength {
   return new ArrayLength(array);
-}
-
-/**
- * @beta
- *
- * Creates an expression that applies a transformation function to each element in an array
- * expression and returns the new array as the result of the evaluation.
- *
- * ```typescript
- * // Convert all strings in the 'names' array to uppercase
- * // Note we use {@link arrayElement} to represent array elements to construct a
- * // transforming function.
- * arrayTransform(Field.of("names"), arrayElement().toUppercase());
- * ```
- *
- * @param array The array expression to transform.
- * @param transform The {@link Function} to apply to each array element.
- * @return A new {@code Expr} representing the transformed array.
- */
-export function arrayTransform(
-  array: Expr,
-  transform: Function
-): ArrayTransform {
-  return new ArrayTransform(array, transform);
-}
-
-/**
- * @beta
- *
- * Returns an expression that represents an array element within an {@link ArrayFilter} or {@link
- * ArrayTransform} expression.
- *
- * ```typescript
- * // Get items from the 'inventoryPrices' array where the array item is greater than 0
- * arrayFilter(Field.of("inventoryPrices"), arrayElement().gt(0));
- * ```
- *
- * @return A new {@code Expr} representing an array element.
- */
-export function arrayElement(): ArrayElement {
-  return new ArrayElement();
 }
 
 /**
@@ -3419,6 +4597,144 @@ export function not(filter: FilterExpr): Not {
 /**
  * @beta
  *
+ * Creates an expression that returns the larger value between two expressions, based on Firestore's value type ordering.
+ *
+ * ```typescript
+ * // Returns the larger value between the 'field1' field and the 'field2' field.
+ * logicalMax(Field.of("field1"), Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand expression.
+ * @return A new {@code Expr} representing the logical max operation.
+ */
+export function logicalMax(left: Expr, right: Expr): LogicalMax;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the larger value between an expression and a constant value, based on Firestore's value type ordering.
+ *
+ * ```typescript
+ * // Returns the larger value between the 'value' field and 10.
+ * logicalMax(Field.of("value"), 10);
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand constant.
+ * @return A new {@code Expr} representing the logical max operation.
+ */
+export function logicalMax(left: Expr, right: any): LogicalMax;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the larger value between a field and an expression, based on Firestore's value type ordering.
+ *
+ * ```typescript
+ * // Returns the larger value between the 'field1' field and the 'field2' field.
+ * logicalMax("field1", Field.of('field2'));
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand expression.
+ * @return A new {@code Expr} representing the logical max operation.
+ */
+export function logicalMax(left: string, right: Expr): LogicalMax;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the larger value between a field and a constant value, based on Firestore's value type ordering.
+ *
+ * ```typescript
+ * // Returns the larger value between the 'value' field and 10.
+ * logicalMax("value", 10);
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand constant.
+ * @return A new {@code Expr} representing the logical max operation.
+ */
+export function logicalMax(left: string, right: any): LogicalMax;
+export function logicalMax(left: Expr | string, right: Expr | any): LogicalMax {
+  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
+  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
+  return new LogicalMax(normalizedLeft, normalizedRight);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the smaller value between two expressions, based on Firestore's value type ordering.
+ *
+ * ```typescript
+ * // Returns the smaller value between the 'field1' field and the 'field2' field.
+ * logicalMin(Field.of("field1"), Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand expression.
+ * @return A new {@code Expr} representing the logical min operation.
+ */
+export function logicalMin(left: Expr, right: Expr): LogicalMin;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the smaller value between an expression and a constant value, based on Firestore's value type ordering.
+ *
+ * ```typescript
+ * // Returns the smaller value between the 'value' field and 10.
+ * logicalMin(Field.of("value"), 10);
+ * ```
+ *
+ * @param left The left operand expression.
+ * @param right The right operand constant.
+ * @return A new {@code Expr} representing the logical min operation.
+ */
+export function logicalMin(left: Expr, right: any): LogicalMin;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the smaller value between a field and an expression, based on Firestore's value type ordering.
+ *
+ * ```typescript
+ * // Returns the smaller value between the 'field1' field and the 'field2' field.
+ * logicalMin("field1", Field.of("field2"));
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand expression.
+ * @return A new {@code Expr} representing the logical min operation.
+ */
+export function logicalMin(left: string, right: Expr): LogicalMin;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the smaller value between a field and a constant value, based on Firestore's value type ordering.
+ *
+ * ```typescript
+ * // Returns the smaller value between the 'value' field and 10.
+ * logicalMin("value", 10);
+ * ```
+ *
+ * @param left The left operand field name.
+ * @param right The right operand constant.
+ * @return A new {@code Expr} representing the logical min operation.
+ */
+export function logicalMin(left: string, right: any): LogicalMin;
+export function logicalMin(left: Expr | string, right: Expr | any): LogicalMin {
+  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
+  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
+  return new LogicalMin(normalizedLeft, normalizedRight);
+}
+
+/**
+ * @beta
+ *
  * Creates an expression that checks if a field exists.
  *
  * ```typescript
@@ -3488,35 +4804,249 @@ export function isNan(value: Expr | string): IsNan {
 /**
  * @beta
  *
- * Creates an expression that calculates the length of a string field.
+ * Creates an expression that reverses a string.
  *
  * ```typescript
- * // Get the length of the 'name' field
+ * // Reverse the value of the 'myString' field.
+ * reverse(Field.of("myString"));
+ * ```
+ *
+ * @param expr The expression representing the string to reverse.
+ * @return A new {@code Expr} representing the reversed string.
+ */
+export function reverse(expr: Expr): Reverse;
+
+/**
+ * @beta
+ *
+ * Creates an expression that reverses a string represented by a field.
+ *
+ * ```typescript
+ * // Reverse the value of the 'myString' field.
+ * reverse("myString");
+ * ```
+ *
+ * @param field The name of the field representing the string to reverse.
+ * @return A new {@code Expr} representing the reversed string.
+ */
+export function reverse(field: string): Reverse;
+export function reverse(expr: Expr | string): Reverse {
+  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
+  return new Reverse(normalizedExpr);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that replaces the first occurrence of a substring within a string with another substring.
+ *
+ * ```typescript
+ * // Replace the first occurrence of "hello" with "hi" in the 'message' field.
+ * replaceFirst(Field.of("message"), "hello", "hi");
+ * ```
+ *
+ * @param value The expression representing the string to perform the replacement on.
+ * @param find The substring to search for.
+ * @param replace The substring to replace the first occurrence of 'find' with.
+ * @return A new {@code Expr} representing the string with the first occurrence replaced.
+ */
+export function replaceFirst(
+  value: Expr,
+  find: string,
+  replace: string
+): ReplaceFirst;
+
+/**
+ * @beta
+ *
+ * Creates an expression that replaces the first occurrence of a substring within a string with another substring,
+ * where the substring to find and the replacement substring are specified by expressions.
+ *
+ * ```typescript
+ * // Replace the first occurrence of the value in 'findField' with the value in 'replaceField' in the 'message' field.
+ * replaceFirst(Field.of("message"), Field.of("findField"), Field.of("replaceField"));
+ * ```
+ *
+ * @param value The expression representing the string to perform the replacement on.
+ * @param find The expression representing the substring to search for.
+ * @param replace The expression representing the substring to replace the first occurrence of 'find' with.
+ * @return A new {@code Expr} representing the string with the first occurrence replaced.
+ */
+export function replaceFirst(
+  value: Expr,
+  find: Expr,
+  replace: Expr
+): ReplaceFirst;
+
+/**
+ * @beta
+ *
+ * Creates an expression that replaces the first occurrence of a substring within a string represented by a field with another substring.
+ *
+ * ```typescript
+ * // Replace the first occurrence of "hello" with "hi" in the 'message' field.
+ * replaceFirst("message", "hello", "hi");
+ * ```
+ *
+ * @param field The name of the field representing the string to perform the replacement on.
+ * @param find The substring to search for.
+ * @param replace The substring to replace the first occurrence of 'find' with.
+ * @return A new {@code Expr} representing the string with the first occurrence replaced.
+ */
+export function replaceFirst(
+  field: string,
+  find: string,
+  replace: string
+): ReplaceFirst;
+export function replaceFirst(
+  value: Expr | string,
+  find: Expr | string,
+  replace: Expr | string
+): ReplaceFirst {
+  const normalizedValue = typeof value === 'string' ? Field.of(value) : value;
+  const normalizedFind = typeof find === 'string' ? Constant.of(find) : find;
+  const normalizedReplace =
+    typeof replace === 'string' ? Constant.of(replace) : replace;
+  return new ReplaceFirst(normalizedValue, normalizedFind, normalizedReplace);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that replaces all occurrences of a substring within a string with another substring.
+ *
+ * ```typescript
+ * // Replace all occurrences of "hello" with "hi" in the 'message' field.
+ * replaceAll(Field.of("message"), "hello", "hi");
+ * ```
+ *
+ * @param value The expression representing the string to perform the replacement on.
+ * @param find The substring to search for.
+ * @param replace The substring to replace all occurrences of 'find' with.
+ * @return A new {@code Expr} representing the string with all occurrences replaced.
+ */
+export function replaceAll(
+  value: Expr,
+  find: string,
+  replace: string
+): ReplaceAll;
+
+/**
+ * @beta
+ *
+ * Creates an expression that replaces all occurrences of a substring within a string with another substring,
+ * where the substring to find and the replacement substring are specified by expressions.
+ *
+ * ```typescript
+ * // Replace all occurrences of the value in 'findField' with the value in 'replaceField' in the 'message' field.
+ * replaceAll(Field.of("message"), Field.of("findField"), Field.of("replaceField"));
+ * ```
+ *
+ * @param value The expression representing the string to perform the replacement on.
+ * @param find The expression representing the substring to search for.
+ * @param replace The expression representing the substring to replace all occurrences of 'find' with.
+ * @return A new {@code Expr} representing the string with all occurrences replaced.
+ */
+export function replaceAll(value: Expr, find: Expr, replace: Expr): ReplaceAll;
+
+/**
+ * @beta
+ *
+ * Creates an expression that replaces all occurrences of a substring within a string represented by a field with another substring.
+ *
+ * ```typescript
+ * // Replace all occurrences of "hello" with "hi" in the 'message' field.
+ * replaceAll("message", "hello", "hi");
+ * ```
+ *
+ * @param field The name of the field representing the string to perform the replacement on.
+ * @param find The substring to search for.
+ * @param replace The substring to replace all occurrences of 'find' with.
+ * @return A new {@code Expr} representing the string with all occurrences replaced.
+ */
+export function replaceAll(
+  field: string,
+  find: string,
+  replace: string
+): ReplaceAll;
+export function replaceAll(
+  value: Expr | string,
+  find: Expr | string,
+  replace: Expr | string
+): ReplaceAll {
+  const normalizedValue = typeof value === 'string' ? Field.of(value) : value;
+  const normalizedFind = typeof find === 'string' ? Constant.of(find) : find;
+  const normalizedReplace =
+    typeof replace === 'string' ? Constant.of(replace) : replace;
+  return new ReplaceAll(normalizedValue, normalizedFind, normalizedReplace);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that calculates the byte length of a string in UTF-8, or just the length of a Blob.
+ *
+ * ```typescript
+ * // Calculate the length of the 'myString' field in bytes.
+ * byteLength(Field.of("myString"));
+ * ```
+ *
+ * @param expr The expression representing the string.
+ * @return A new {@code Expr} representing the length of the string in bytes.
+ */
+export function byteLength(expr: Expr): ByteLength;
+
+/**
+ * @beta
+ *
+ * Creates an expression that calculates the length of a string represented by a field in UTF-8 bytes, or just the length of a Blob.
+ *
+ * ```typescript
+ * // Calculate the length of the 'myString' field in bytes.
+ * byteLength("myString");
+ * ```
+ *
+ * @param field The name of the field representing the string.
+ * @return A new {@code Expr} representing the length of the string in bytes.
+ */
+export function byteLength(field: string): ByteLength;
+export function byteLength(expr: Expr | string): ByteLength {
+  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
+  return new ByteLength(normalizedExpr);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that calculates the character length of a string field in UTF8.
+ *
+ * ```typescript
+ * // Get the character length of the 'name' field in UTF-8.
  * strLength("name");
  * ```
  *
  * @param field The name of the field containing the string.
  * @return A new {@code Expr} representing the length of the string.
  */
-export function strLength(field: string): StrLength;
+export function charLength(field: string): CharLength;
 
 /**
  * @beta
  *
- * Creates an expression that calculates the length of a string expression.
+ * Creates an expression that calculates the character length of a string expression in UTF-8.
  *
  * ```typescript
- * // Get the length of the 'name' field
+ * // Get the character length of the 'name' field in UTF-8.
  * strLength(Field.of("name"));
  * ```
  *
  * @param expr The expression representing the string to calculate the length of.
  * @return A new {@code Expr} representing the length of the string.
  */
-export function strLength(expr: Expr): StrLength;
-export function strLength(value: Expr | string): StrLength {
+export function charLength(expr: Expr): CharLength;
+export function charLength(value: Expr | string): CharLength {
   const valueExpr = value instanceof Expr ? value : Field.of(value);
-  return new StrLength(valueExpr);
+  return new CharLength(valueExpr);
 }
 
 /**
@@ -3888,13 +5418,13 @@ export function endsWith(expr: Expr | string, suffix: Expr | string): EndsWith {
  *
  * ```typescript
  * // Convert the 'name' field to lowercase
- * toLowercase("name");
+ * toLower("name");
  * ```
  *
  * @param expr The name of the field containing the string.
  * @return A new {@code Expr} representing the lowercase string.
  */
-export function toLowercase(expr: string): ToLowercase;
+export function toLower(expr: string): ToLower;
 
 /**
  * @beta
@@ -3903,15 +5433,15 @@ export function toLowercase(expr: string): ToLowercase;
  *
  * ```typescript
  * // Convert the 'name' field to lowercase
- * toLowercase(Field.of("name"));
+ * toLower(Field.of("name"));
  * ```
  *
  * @param expr The expression representing the string to convert to lowercase.
  * @return A new {@code Expr} representing the lowercase string.
  */
-export function toLowercase(expr: Expr): ToLowercase;
-export function toLowercase(expr: Expr | string): ToLowercase {
-  return new ToLowercase(expr instanceof Expr ? expr : Field.of(expr));
+export function toLower(expr: Expr): ToLower;
+export function toLower(expr: Expr | string): ToLower {
+  return new ToLower(expr instanceof Expr ? expr : Field.of(expr));
 }
 
 /**
@@ -3921,13 +5451,13 @@ export function toLowercase(expr: Expr | string): ToLowercase {
  *
  * ```typescript
  * // Convert the 'title' field to uppercase
- * toUppercase("title");
+ * toUpper("title");
  * ```
  *
  * @param expr The name of the field containing the string.
  * @return A new {@code Expr} representing the uppercase string.
  */
-export function toUppercase(expr: string): ToUppercase;
+export function toUpper(expr: string): ToUpper;
 
 /**
  * @beta
@@ -3942,9 +5472,9 @@ export function toUppercase(expr: string): ToUppercase;
  * @param expr The expression representing the string to convert to uppercase.
  * @return A new {@code Expr} representing the uppercase string.
  */
-export function toUppercase(expr: Expr): ToUppercase;
-export function toUppercase(expr: Expr | string): ToUppercase {
-  return new ToUppercase(expr instanceof Expr ? expr : Field.of(expr));
+export function toUpper(expr: Expr): ToUpper;
+export function toUpper(expr: Expr | string): ToUpper {
+  return new ToUpper(expr instanceof Expr ? expr : Field.of(expr));
 }
 
 /**
@@ -4580,6 +6110,434 @@ export function euclideanDistance(
   const expr1 = expr instanceof Expr ? expr : Field.of(expr);
   const expr2 = other instanceof Expr ? other : Constant.vector(other);
   return new EuclideanDistance(expr1, expr2);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that calculates the length of a Firestore Vector.
+ *
+ * ```typescript
+ * // Get the vector length (dimension) of the field 'embedding'.
+ * vectorLength(Field.of("embedding"));
+ * ```
+ *
+ * @param expr The expression representing the Firestore Vector.
+ * @return A new {@code Expr} representing the length of the array.
+ */
+export function vectorLength(expr: Expr): VectorLength;
+
+/**
+ * @beta
+ *
+ * Creates an expression that calculates the length of a Firestore Vector represented by a field.
+ *
+ * ```typescript
+ * // Get the vector length (dimension) of the field 'embedding'.
+ * vectorLength("embedding");
+ * ```
+ *
+ * @param field The name of the field representing the Firestore Vector.
+ * @return A new {@code Expr} representing the length of the array.
+ */
+export function vectorLength(field: string): VectorLength;
+export function vectorLength(expr: Expr | string): VectorLength {
+  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
+  return new VectorLength(normalizedExpr);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that interprets an expression as the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
+ * and returns a timestamp.
+ *
+ * ```typescript
+ * // Interpret the 'microseconds' field as microseconds since epoch.
+ * unixMicrosToTimestamp(Field.of("microseconds"));
+ * ```
+ *
+ * @param expr The expression representing the number of microseconds since epoch.
+ * @return A new {@code Expr} representing the timestamp.
+ */
+export function unixMicrosToTimestamp(expr: Expr): UnixMicrosToTimestamp;
+
+/**
+ * @beta
+ *
+ * Creates an expression that interprets a field's value as the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
+ * and returns a timestamp.
+ *
+ * ```typescript
+ * // Interpret the 'microseconds' field as microseconds since epoch.
+ * unixMicrosToTimestamp("microseconds");
+ * ```
+ *
+ * @param field The name of the field representing the number of microseconds since epoch.
+ * @return A new {@code Expr} representing the timestamp.
+ */
+export function unixMicrosToTimestamp(field: string): UnixMicrosToTimestamp;
+export function unixMicrosToTimestamp(
+  expr: Expr | string
+): UnixMicrosToTimestamp {
+  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
+  return new UnixMicrosToTimestamp(normalizedExpr);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that converts a timestamp expression to the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+ *
+ * ```typescript
+ * // Convert the 'timestamp' field to microseconds since epoch.
+ * timestampToUnixMicros(Field.of("timestamp"));
+ * ```
+ *
+ * @param expr The expression representing the timestamp.
+ * @return A new {@code Expr} representing the number of microseconds since epoch.
+ */
+export function timestampToUnixMicros(expr: Expr): TimestampToUnixMicros;
+
+/**
+ * @beta
+ *
+ * Creates an expression that converts a timestamp field to the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+ *
+ * ```typescript
+ * // Convert the 'timestamp' field to microseconds since epoch.
+ * timestampToUnixMicros("timestamp");
+ * ```
+ *
+ * @param field The name of the field representing the timestamp.
+ * @return A new {@code Expr} representing the number of microseconds since epoch.
+ */
+export function timestampToUnixMicros(field: string): TimestampToUnixMicros;
+export function timestampToUnixMicros(
+  expr: Expr | string
+): TimestampToUnixMicros {
+  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
+  return new TimestampToUnixMicros(normalizedExpr);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that interprets an expression as the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
+ * and returns a timestamp.
+ *
+ * ```typescript
+ * // Interpret the 'milliseconds' field as milliseconds since epoch.
+ * unixMillisToTimestamp(Field.of("milliseconds"));
+ * ```
+ *
+ * @param expr The expression representing the number of milliseconds since epoch.
+ * @return A new {@code Expr} representing the timestamp.
+ */
+export function unixMillisToTimestamp(expr: Expr): UnixMillisToTimestamp;
+
+/**
+ * @beta
+ *
+ * Creates an expression that interprets a field's value as the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
+ * and returns a timestamp.
+ *
+ * ```typescript
+ * // Interpret the 'milliseconds' field as milliseconds since epoch.
+ * unixMillisToTimestamp("milliseconds");
+ * ```
+ *
+ * @param field The name of the field representing the number of milliseconds since epoch.
+ * @return A new {@code Expr} representing the timestamp.
+ */
+export function unixMillisToTimestamp(field: string): UnixMillisToTimestamp;
+export function unixMillisToTimestamp(
+  expr: Expr | string
+): UnixMillisToTimestamp {
+  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
+  return new UnixMillisToTimestamp(normalizedExpr);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that converts a timestamp expression to the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+ *
+ * ```typescript
+ * // Convert the 'timestamp' field to milliseconds since epoch.
+ * timestampToUnixMillis(Field.of("timestamp"));
+ * ```
+ *
+ * @param expr The expression representing the timestamp.
+ * @return A new {@code Expr} representing the number of milliseconds since epoch.
+ */
+export function timestampToUnixMillis(expr: Expr): TimestampToUnixMillis;
+
+/**
+ * @beta
+ *
+ * Creates an expression that converts a timestamp field to the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+ *
+ * ```typescript
+ * // Convert the 'timestamp' field to milliseconds since epoch.
+ * timestampToUnixMillis("timestamp");
+ * ```
+ *
+ * @param field The name of the field representing the timestamp.
+ * @return A new {@code Expr} representing the number of milliseconds since epoch.
+ */
+export function timestampToUnixMillis(field: string): TimestampToUnixMillis;
+export function timestampToUnixMillis(
+  expr: Expr | string
+): TimestampToUnixMillis {
+  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
+  return new TimestampToUnixMillis(normalizedExpr);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that interprets an expression as the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC)
+ * and returns a timestamp.
+ *
+ * ```typescript
+ * // Interpret the 'seconds' field as seconds since epoch.
+ * unixSecondsToTimestamp(Field.of("seconds"));
+ * ```
+ *
+ * @param expr The expression representing the number of seconds since epoch.
+ * @return A new {@code Expr} representing the timestamp.
+ */
+export function unixSecondsToTimestamp(expr: Expr): UnixSecondsToTimestamp;
+
+/**
+ * @beta
+ *
+ * Creates an expression that interprets a field's value as the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC)
+ * and returns a timestamp.
+ *
+ * ```typescript
+ * // Interpret the 'seconds' field as seconds since epoch.
+ * unixSecondsToTimestamp("seconds");
+ * ```
+ *
+ * @param field The name of the field representing the number of seconds since epoch.
+ * @return A new {@code Expr} representing the timestamp.
+ */
+export function unixSecondsToTimestamp(field: string): UnixSecondsToTimestamp;
+export function unixSecondsToTimestamp(
+  expr: Expr | string
+): UnixSecondsToTimestamp {
+  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
+  return new UnixSecondsToTimestamp(normalizedExpr);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that converts a timestamp expression to the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+ *
+ * ```typescript
+ * // Convert the 'timestamp' field to seconds since epoch.
+ * timestampToUnixSeconds(Field.of("timestamp"));
+ * ```
+ *
+ * @param expr The expression representing the timestamp.
+ * @return A new {@code Expr} representing the number of seconds since epoch.
+ */
+export function timestampToUnixSeconds(expr: Expr): TimestampToUnixSeconds;
+
+/**
+ * @beta
+ *
+ * Creates an expression that converts a timestamp field to the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+ *
+ * ```typescript
+ * // Convert the 'timestamp' field to seconds since epoch.
+ * timestampToUnixSeconds("timestamp");
+ * ```
+ *
+ * @param field The name of the field representing the timestamp.
+ * @return A new {@code Expr} representing the number of seconds since epoch.
+ */
+export function timestampToUnixSeconds(field: string): TimestampToUnixSeconds;
+export function timestampToUnixSeconds(
+  expr: Expr | string
+): TimestampToUnixSeconds {
+  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
+  return new TimestampToUnixSeconds(normalizedExpr);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that adds a specified amount of time to a timestamp.
+ *
+ * ```typescript
+ * // Add some duration determined by field 'unit' and 'amount' to the 'timestamp' field.
+ * timestampAdd(Field.of("timestamp"), Field.of("unit"), Field.of("amount"));
+ * ```
+ *
+ * @param timestamp The expression representing the timestamp.
+ * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
+ * @param amount The expression evaluates to amount of the unit.
+ * @return A new {@code Expr} representing the resulting timestamp.
+ */
+export function timestampAdd(
+  timestamp: Expr,
+  unit: Expr,
+  amount: Expr
+): TimestampAdd;
+
+/**
+ * @beta
+ *
+ * Creates an expression that adds a specified amount of time to a timestamp.
+ *
+ * ```typescript
+ * // Add 1 day to the 'timestamp' field.
+ * timestampAdd(Field.of("timestamp"), "day", 1);
+ * ```
+ *
+ * @param timestamp The expression representing the timestamp.
+ * @param unit The unit of time to add (e.g., "day", "hour").
+ * @param amount The amount of time to add.
+ * @return A new {@code Expr} representing the resulting timestamp.
+ */
+export function timestampAdd(
+  timestamp: Expr,
+  unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
+  amount: number
+): TimestampAdd;
+
+/**
+ * @beta
+ *
+ * Creates an expression that adds a specified amount of time to a timestamp represented by a field.
+ *
+ * ```typescript
+ * // Add 1 day to the 'timestamp' field.
+ * timestampAdd("timestamp", "day", 1);
+ * ```
+ *
+ * @param field The name of the field representing the timestamp.
+ * @param unit The unit of time to add (e.g., "day", "hour").
+ * @param amount The amount of time to add.
+ * @return A new {@code Expr} representing the resulting timestamp.
+ */
+export function timestampAdd(
+  field: string,
+  unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
+  amount: number
+): TimestampAdd;
+export function timestampAdd(
+  timestamp: Expr | string,
+  unit:
+    | Expr
+    | 'microsecond'
+    | 'millisecond'
+    | 'second'
+    | 'minute'
+    | 'hour'
+    | 'day',
+  amount: Expr | number
+): TimestampAdd {
+  const normalizedTimestamp =
+    typeof timestamp === 'string' ? Field.of(timestamp) : timestamp;
+  const normalizedUnit = unit instanceof Expr ? unit : Constant.of(unit);
+  const normalizedAmount =
+    typeof amount === 'number' ? Constant.of(amount) : amount;
+  return new TimestampAdd(
+    normalizedTimestamp,
+    normalizedUnit,
+    normalizedAmount
+  );
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that subtracts a specified amount of time from a timestamp.
+ *
+ * ```typescript
+ * // Subtract some duration determined by field 'unit' and 'amount' from the 'timestamp' field.
+ * timestampSub(Field.of("timestamp"), Field.of("unit"), Field.of("amount"));
+ * ```
+ *
+ * @param timestamp The expression representing the timestamp.
+ * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
+ * @param amount The expression evaluates to amount of the unit.
+ * @return A new {@code Expr} representing the resulting timestamp.
+ */
+export function timestampSub(
+  timestamp: Expr,
+  unit: Expr,
+  amount: Expr
+): TimestampSub;
+
+/**
+ * @beta
+ *
+ * Creates an expression that subtracts a specified amount of time from a timestamp.
+ *
+ * ```typescript
+ * // Subtract 1 day from the 'timestamp' field.
+ * timestampSub(Field.of("timestamp"), "day", 1);
+ * ```
+ *
+ * @param timestamp The expression representing the timestamp.
+ * @param unit The unit of time to subtract (e.g., "day", "hour").
+ * @param amount The amount of time to subtract.
+ * @return A new {@code Expr} representing the resulting timestamp.
+ */
+export function timestampSub(
+  timestamp: Expr,
+  unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
+  amount: number
+): TimestampSub;
+
+/**
+ * @beta
+ *
+ * Creates an expression that subtracts a specified amount of time from a timestamp represented by a field.
+ *
+ * ```typescript
+ * // Subtract 1 day from the 'timestamp' field.
+ * timestampSub("timestamp", "day", 1);
+ * ```
+ *
+ * @param field The name of the field representing the timestamp.
+ * @param unit The unit of time to subtract (e.g., "day", "hour").
+ * @param amount The amount of time to subtract.
+ * @return A new {@code Expr} representing the resulting timestamp.
+ */
+export function timestampSub(
+  field: string,
+  unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
+  amount: number
+): TimestampSub;
+export function timestampSub(
+  timestamp: Expr | string,
+  unit:
+    | Expr
+    | 'microsecond'
+    | 'millisecond'
+    | 'second'
+    | 'minute'
+    | 'hour'
+    | 'day',
+  amount: Expr | number
+): TimestampSub {
+  const normalizedTimestamp =
+    typeof timestamp === 'string' ? Field.of(timestamp) : timestamp;
+  const normalizedUnit = unit instanceof Expr ? unit : Constant.of(unit);
+  const normalizedAmount =
+    typeof amount === 'number' ? Constant.of(amount) : amount;
+  return new TimestampSub(
+    normalizedTimestamp,
+    normalizedUnit,
+    normalizedAmount
+  );
 }
 
 /**

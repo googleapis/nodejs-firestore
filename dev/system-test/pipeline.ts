@@ -38,9 +38,6 @@ import {
   and,
   arrayContains,
   arrayContainsAny,
-  arrayElement,
-  arrayFilter,
-  arrayTransform,
   avg,
   countAll,
   endsWith,
@@ -284,7 +281,7 @@ describe.only('Pipeline class', () => {
     const results = await randomCol
       .pipeline()
       .where(lt('published', 1900))
-      .distinct(Field.of('genre').toLowercase().as('lower_genre'))
+      .distinct(Field.of('genre').toLower().as('lower_genre'))
       .execute();
     expectResults(
       results,
@@ -444,41 +441,6 @@ describe.only('Pipeline class', () => {
     });
   });
 
-  it('arrayFilter works', async () => {
-    const results = await randomCol
-      .pipeline()
-      .select(
-        Field.of('tags')
-          .arrayFilter(arrayElement().eq('comedy'))
-          .as('filteredTags')
-      )
-      .limit(1)
-      .execute();
-
-    expectResults(results, {
-      filteredTags: ['comedy'],
-    });
-  });
-
-  it('arrayTransform works', async () => {
-    const results = await randomCol
-      .pipeline()
-      .select(
-        Field.of('tags')
-          .arrayTransform(arrayElement().strConcat('transformed'))
-          .as('transformedTags')
-      )
-      .limit(1)
-      .execute();
-    expectResults(results, {
-      transformedTags: [
-        'comedytransformed',
-        'spacetransformed',
-        'adventuretransformed',
-      ],
-    });
-  });
-
   it('testStrConcat', async () => {
     const results = await randomCol
       .pipeline()
@@ -525,7 +487,10 @@ describe.only('Pipeline class', () => {
   it('testLength', async () => {
     const results = await randomCol
       .pipeline()
-      .select(Field.of('title').strLength().as('titleLength'), Field.of('title'))
+      .select(
+        Field.of('title').charLength().as('titleLength'),
+        Field.of('title')
+      )
       .where(gt('titleLength', 20))
       .execute();
     expectResults(
@@ -541,7 +506,7 @@ describe.only('Pipeline class', () => {
   it('testToLowercase', async () => {
     const results = await randomCol
       .pipeline()
-      .select(Field.of('title').toLowercase().as('lowercaseTitle'))
+      .select(Field.of('title').toLower().as('lowercaseTitle'))
       .limit(1)
       .execute();
     expectResults(results, {
@@ -552,7 +517,7 @@ describe.only('Pipeline class', () => {
   it('testToUppercase', async () => {
     const results = await randomCol
       .pipeline()
-      .select(Field.of('author').toUppercase().as('uppercaseAuthor'))
+      .select(Field.of('author').toUpper().as('uppercaseAuthor'))
       .limit(1)
       .execute();
     expectResults(results, {uppercaseAuthor: 'DOUGLAS ADAMS'});
