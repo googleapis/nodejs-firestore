@@ -3407,147 +3407,147 @@ declare namespace FirebaseFirestore {
      */
     mod(other: any): Mod;
 
-    /**
-     * Creates an expression that applies a bitwise AND operation between this expression and another expression.
-     *
-     * ```typescript
-     * // Calculate the bitwise AND of 'field1' and 'field2'.
-     * Field.of("field1").bitAnd(Field.of("field2"));
-     * ```
-     *
-     * @param other The right operand expression.
-     * @return A new {@code Expr} representing the bitwise AND operation.
-     */
-    bitAnd(other: Expr): BitAnd;
-
-    /**
-     * Creates an expression that applies a bitwise AND operation between this expression and a constant value.
-     *
-     * ```typescript
-     * // Calculate the bitwise AND of 'field1' and 0xFF.
-     * Field.of("field1").bitAnd(0xFF);
-     * ```
-     *
-     * @param other The right operand constant.
-     * @return A new {@code Expr} representing the bitwise AND operation.
-     */
-    bitAnd(other: any): BitAnd;
-
-    /**
-     * Creates an expression that applies a bitwise OR operation between this expression and another expression.
-     *
-     * ```typescript
-     * // Calculate the bitwise OR of 'field1' and 'field2'.
-     * Field.of("field1").bitOr(Field.of("field2"));
-     * ```
-     *
-     * @param other The right operand expression.
-     * @return A new {@code Expr} representing the bitwise OR operation.
-     */
-    bitOr(other: Expr): BitOr;
-
-    /**
-     * Creates an expression that applies a bitwise OR operation between this expression and a constant value.
-     *
-     * ```typescript
-     * // Calculate the bitwise OR of 'field1' and 0xFF.
-     * Field.of("field1").bitOr(0xFF);
-     * ```
-     *
-     * @param other The right operand constant.
-     * @return A new {@code Expr} representing the bitwise OR operation.
-     */
-    bitOr(other: any): BitOr;
-
-    /**
-     * Creates an expression that applies a bitwise XOR operation between this expression and another expression.
-     *
-     * ```typescript
-     * // Calculate the bitwise XOR of 'field1' and 'field2'.
-     * Field.of("field1").bitXor(Field.of("field2"));
-     * ```
-     *
-     * @param other The right operand expression.
-     * @return A new {@code Expr} representing the bitwise XOR operation.
-     */
-    bitXor(other: Expr): BitXor;
-
-    /**
-     * Creates an expression that applies a bitwise XOR operation between this expression and a constant value.
-     *
-     * ```typescript
-     * // Calculate the bitwise XOR of 'field1' and 0xFF.
-     * Field.of("field1").bitXor(0xFF);
-     * ```
-     *
-     * @param other The right operand constant.
-     * @return A new {@code Expr} representing the bitwise XOR operation.
-     */
-    bitXor(other: any): BitXor;
-
-    /**
-     * Creates an expression that applies a bitwise NOT operation to this expression.
-     *
-     * ```typescript
-     * // Calculate the bitwise NOT of 'field1'.
-     * Field.of("field1").bitNot();
-     * ```
-     *
-     * @return A new {@code Expr} representing the bitwise NOT operation.
-     */
-    bitNot(): BitNot;
-
-    /**
-     * Creates an expression that applies a bitwise left shift operation between this expression and another expression.
-     *
-     * ```typescript
-     * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
-     * Field.of("field1").bitLeftShift(Field.of("field2"));
-     * ```
-     *
-     * @param other The right operand expression representing the number of bits to shift.
-     * @return A new {@code Expr} representing the bitwise left shift operation.
-     */
-    bitLeftShift(other: Expr): BitLeftShift;
-
-    /**
-     * Creates an expression that applies a bitwise left shift operation between this expression and a constant value.
-     *
-     * ```typescript
-     * // Calculate the bitwise left shift of 'field1' by 2 bits.
-     * Field.of("field1").bitLeftShift(2);
-     * ```
-     *
-     * @param other The right operand constant representing the number of bits to shift.
-     * @return A new {@code Expr} representing the bitwise left shift operation.
-     */
-    bitLeftShift(other: number): BitLeftShift;
-
-    /**
-     * Creates an expression that applies a bitwise right shift operation between this expression and another expression.
-     *
-     * ```typescript
-     * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
-     * Field.of("field1").bitRightShift(Field.of("field2"));
-     * ```
-     *
-     * @param other The right operand expression representing the number of bits to shift.
-     * @return A new {@code Expr} representing the bitwise right shift operation.
-     */
-    bitRightShift(other: Expr): BitRightShift;
-
-    /**
-     * Creates an expression that applies a bitwise right shift operation between this expression and a constant value.
-     *
-     * ```typescript
-     * // Calculate the bitwise right shift of 'field1' by 2 bits.
-     * Field.of("field1").bitRightShift(2);
-     * ```
-     *
-     * @param other The right operand constant representing the number of bits to shift.
-     * @return A new {@code Expr} representing the bitwise right shift operation.
-     */
-    bitRightShift(other: number): BitRightShift;
+    // /**
+    //  * Creates an expression that applies a bitwise AND operation between this expression and another expression.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise AND of 'field1' and 'field2'.
+    //  * Field.of("field1").bitAnd(Field.of("field2"));
+    //  * ```
+    //  *
+    //  * @param other The right operand expression.
+    //  * @return A new {@code Expr} representing the bitwise AND operation.
+    //  */
+    // bitAnd(other: Expr): BitAnd;
+    //
+    // /**
+    //  * Creates an expression that applies a bitwise AND operation between this expression and a constant value.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise AND of 'field1' and 0xFF.
+    //  * Field.of("field1").bitAnd(0xFF);
+    //  * ```
+    //  *
+    //  * @param other The right operand constant.
+    //  * @return A new {@code Expr} representing the bitwise AND operation.
+    //  */
+    // bitAnd(other: any): BitAnd;
+    //
+    // /**
+    //  * Creates an expression that applies a bitwise OR operation between this expression and another expression.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise OR of 'field1' and 'field2'.
+    //  * Field.of("field1").bitOr(Field.of("field2"));
+    //  * ```
+    //  *
+    //  * @param other The right operand expression.
+    //  * @return A new {@code Expr} representing the bitwise OR operation.
+    //  */
+    // bitOr(other: Expr): BitOr;
+    //
+    // /**
+    //  * Creates an expression that applies a bitwise OR operation between this expression and a constant value.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise OR of 'field1' and 0xFF.
+    //  * Field.of("field1").bitOr(0xFF);
+    //  * ```
+    //  *
+    //  * @param other The right operand constant.
+    //  * @return A new {@code Expr} representing the bitwise OR operation.
+    //  */
+    // bitOr(other: any): BitOr;
+    //
+    // /**
+    //  * Creates an expression that applies a bitwise XOR operation between this expression and another expression.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise XOR of 'field1' and 'field2'.
+    //  * Field.of("field1").bitXor(Field.of("field2"));
+    //  * ```
+    //  *
+    //  * @param other The right operand expression.
+    //  * @return A new {@code Expr} representing the bitwise XOR operation.
+    //  */
+    // bitXor(other: Expr): BitXor;
+    //
+    // /**
+    //  * Creates an expression that applies a bitwise XOR operation between this expression and a constant value.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise XOR of 'field1' and 0xFF.
+    //  * Field.of("field1").bitXor(0xFF);
+    //  * ```
+    //  *
+    //  * @param other The right operand constant.
+    //  * @return A new {@code Expr} representing the bitwise XOR operation.
+    //  */
+    // bitXor(other: any): BitXor;
+    //
+    // /**
+    //  * Creates an expression that applies a bitwise NOT operation to this expression.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise NOT of 'field1'.
+    //  * Field.of("field1").bitNot();
+    //  * ```
+    //  *
+    //  * @return A new {@code Expr} representing the bitwise NOT operation.
+    //  */
+    // bitNot(): BitNot;
+    //
+    // /**
+    //  * Creates an expression that applies a bitwise left shift operation between this expression and another expression.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
+    //  * Field.of("field1").bitLeftShift(Field.of("field2"));
+    //  * ```
+    //  *
+    //  * @param other The right operand expression representing the number of bits to shift.
+    //  * @return A new {@code Expr} representing the bitwise left shift operation.
+    //  */
+    // bitLeftShift(other: Expr): BitLeftShift;
+    //
+    // /**
+    //  * Creates an expression that applies a bitwise left shift operation between this expression and a constant value.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise left shift of 'field1' by 2 bits.
+    //  * Field.of("field1").bitLeftShift(2);
+    //  * ```
+    //  *
+    //  * @param other The right operand constant representing the number of bits to shift.
+    //  * @return A new {@code Expr} representing the bitwise left shift operation.
+    //  */
+    // bitLeftShift(other: number): BitLeftShift;
+    //
+    // /**
+    //  * Creates an expression that applies a bitwise right shift operation between this expression and another expression.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
+    //  * Field.of("field1").bitRightShift(Field.of("field2"));
+    //  * ```
+    //  *
+    //  * @param other The right operand expression representing the number of bits to shift.
+    //  * @return A new {@code Expr} representing the bitwise right shift operation.
+    //  */
+    // bitRightShift(other: Expr): BitRightShift;
+    //
+    // /**
+    //  * Creates an expression that applies a bitwise right shift operation between this expression and a constant value.
+    //  *
+    //  * ```typescript
+    //  * // Calculate the bitwise right shift of 'field1' by 2 bits.
+    //  * Field.of("field1").bitRightShift(2);
+    //  * ```
+    //  *
+    //  * @param other The right operand constant representing the number of bits to shift.
+    //  * @return A new {@code Expr} representing the bitwise right shift operation.
+    //  */
+    // bitRightShift(other: number): BitRightShift;
 
     /**
      * Creates an expression that checks if this expression is equal to another expression.
@@ -4860,35 +4860,35 @@ declare namespace FirebaseFirestore {
    */
   export class Mod extends Function {}
 
-  /**
-   * @beta
-   */
-  export class BitAnd extends Function {}
-
-  /**
-   * @beta
-   */
-  export class BitOr extends Function {}
-
-  /**
-   * @beta
-   */
-  export class BitXor extends Function {}
-
-  /**
-   * @beta
-   */
-  export class BitNot extends Function {}
-
-  /**
-   * @beta
-   */
-  export class BitLeftShift extends Function {}
-
-  /**
-   * @beta
-   */
-  export class BitRightShift extends Function {}
+  // /**
+  //  * @beta
+  //  */
+  // export class BitAnd extends Function {}
+  //
+  // /**
+  //  * @beta
+  //  */
+  // export class BitOr extends Function {}
+  //
+  // /**
+  //  * @beta
+  //  */
+  // export class BitXor extends Function {}
+  //
+  // /**
+  //  * @beta
+  //  */
+  // export class BitNot extends Function {}
+  //
+  // /**
+  //  * @beta
+  //  */
+  // export class BitLeftShift extends Function {}
+  //
+  // /**
+  //  * @beta
+  //  */
+  // export class BitRightShift extends Function {}
 
   /**
    * @beta
@@ -5529,355 +5529,355 @@ declare namespace FirebaseFirestore {
    */
   export function mod(left: string, right: any): Mod;
 
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise AND operation between two expressions.
-   *
-   * ```typescript
-   * // Calculate the bitwise AND of 'field1' and 'field2'.
-   * bitAnd(Field.of("field1"), Field.of("field2"));
-   * ```
-   *
-   * @param left The left operand expression.
-   * @param right The right operand expression.
-   * @return A new {@code Expr} representing the bitwise AND operation.
-   */
-  export function bitAnd(left: Expr, right: Expr): BitAnd;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise AND operation between an expression and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise AND of 'field1' and 0xFF.
-   * bitAnd(Field.of("field1"), 0xFF);
-   * ```
-   *
-   * @param left The left operand expression.
-   * @param right The right operand constant.
-   * @return A new {@code Expr} representing the bitwise AND operation.
-   */
-  export function bitAnd(left: Expr, right: any): BitAnd;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise AND operation between a field and an expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise AND of 'field1' and 'field2'.
-   * bitAnd("field1", Field.of("field2"));
-   * ```
-   *
-   * @param left The left operand field name.
-   * @param right The right operand expression.
-   * @return A new {@code Expr} representing the bitwise AND operation.
-   */
-  export function bitAnd(left: string, right: Expr): BitAnd;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise AND operation between a field and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise AND of 'field1' and 0xFF.
-   * bitAnd("field1", 0xFF);
-   * ```
-   *
-   * @param left The left operand field name.
-   * @param right The right operand constant.
-   * @return A new {@code Expr} representing the bitwise AND operation.
-   */
-  export function bitAnd(left: string, right: any): BitAnd;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise OR operation between two expressions.
-   *
-   * ```typescript
-   * // Calculate the bitwise OR of 'field1' and 'field2'.
-   * bitOr(Field.of("field1"), Field.of("field2"));
-   * ```
-   *
-   * @param left The left operand expression.
-   * @param right The right operand expression.
-   * @return A new {@code Expr} representing the bitwise OR operation.
-   */
-  export function bitOr(left: Expr, right: Expr): BitOr;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise OR operation between an expression and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise OR of 'field1' and 0xFF.
-   * bitOr(Field.of("field1"), 0xFF);
-   * ```
-   *
-   * @param left The left operand expression.
-   * @param right The right operand constant.
-   * @return A new {@code Expr} representing the bitwise OR operation.
-   */
-  export function bitOr(left: Expr, right: any): BitOr;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise OR operation between a field and an expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise OR of 'field1' and 'field2'.
-   * bitOr("field1", Field.of("field2"));
-   * ```
-   *
-   * @param left The left operand field name.
-   * @param right The right operand expression.
-   * @return A new {@code Expr} representing the bitwise OR operation.
-   */
-  export function bitOr(left: string, right: Expr): BitOr;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise OR operation between a field and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise OR of 'field1' and 0xFF.
-   * bitOr("field1", 0xFF);
-   * ```
-   *
-   * @param left The left operand field name.
-   * @param right The right operand constant.
-   * @return A new {@code Expr} representing the bitwise OR operation.
-   */
-  export function bitOr(left: string, right: any): BitOr;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise XOR operation between two expressions.
-   *
-   * ```typescript
-   * // Calculate the bitwise XOR of 'field1' and 'field2'.
-   * bitXor(Field.of("field1"), Field.of("field2"));
-   * ```
-   *
-   * @param left The left operand expression.
-   * @param right The right operand expression.
-   * @return A new {@code Expr} representing the bitwise XOR operation.
-   */
-  export function bitXor(left: Expr, right: Expr): BitXor;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise XOR operation between an expression and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise XOR of 'field1' and 0xFF.
-   * bitXor(Field.of("field1"), 0xFF);
-   * ```
-   *
-   * @param left The left operand expression.
-   * @param right The right operand constant.
-   * @return A new {@code Expr} representing the bitwise XOR operation.
-   */
-  export function bitXor(left: Expr, right: any): BitXor;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise XOR operation between a field and an expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise XOR of 'field1' and 'field2'.
-   * bitXor("field1", Field.of("field2"));
-   * ```
-   *
-   * @param left The left operand field name.
-   * @param right The right operand expression.
-   * @return A new {@code Expr} representing the bitwise XOR operation.
-   */
-  export function bitXor(left: string, right: Expr): BitXor;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise XOR operation between a field and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise XOR of 'field1' and 0xFF.
-   * bitXor("field1", 0xFF);
-   * ```
-   *
-   * @param left The left operand field name.
-   * @param right The right operand constant.
-   * @return A new {@code Expr} representing the bitwise XOR operation.
-   */
-  export function bitXor(left: string, right: any): BitXor;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise NOT operation to an expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise NOT of 'field1'.
-   * bitNot(Field.of("field1"));
-   * ```
-   *
-   * @param operand The operand expression.
-   * @return A new {@code Expr} representing the bitwise NOT operation.
-   */
-  export function bitNot(operand: Expr): BitNot;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise NOT operation to a field.
-   *
-   * ```typescript
-   * // Calculate the bitwise NOT of 'field1'.
-   * bitNot("field1");
-   * ```
-   *
-   * @param operand The operand field name.
-   * @return A new {@code Expr} representing the bitwise NOT operation.
-   */
-  export function bitNot(operand: string): BitNot;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise left shift operation between two expressions.
-   *
-   * ```typescript
-   * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
-   * bitLeftShift(Field.of("field1"), Field.of("field2"));
-   * ```
-   *
-   * @param left The left operand expression.
-   * @param right The right operand expression representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise left shift operation.
-   */
-  export function bitLeftShift(left: Expr, right: Expr): BitLeftShift;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise left shift operation between an expression and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise left shift of 'field1' by 2 bits.
-   * bitLeftShift(Field.of("field1"), 2);
-   * ```
-   *
-   * @param left The left operand expression.
-   * @param right The right operand constant representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise left shift operation.
-   */
-  export function bitLeftShift(left: Expr, right: any): BitLeftShift;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise left shift operation between a field and an expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
-   * bitLeftShift("field1", Field.of("field2"));
-   * ```
-   *
-   * @param left The left operand field name.
-   * @param right The right operand expression representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise left shift operation.
-   */
-  export function bitLeftShift(left: string, right: Expr): BitLeftShift;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise left shift operation between a field and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise left shift of 'field1' by 2 bits.
-   * bitLeftShift("field1", 2);
-   * ```
-   *
-   * @param left The left operand field name.
-   * @param right The right operand constant representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise left shift operation.
-   */
-  export function bitLeftShift(left: string, right: any): BitLeftShift;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise right shift operation between two expressions.
-   *
-   * ```typescript
-   * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
-   * bitRightShift(Field.of("field1"), Field.of("field2"));
-   * ```
-   *
-   * @param left The left operand expression.
-   * @param right The right operand expression representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise right shift operation.
-   */
-  export function bitRightShift(left: Expr, right: Expr): BitRightShift;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise right shift operation between an expression and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise right shift of 'field1' by 2 bits.
-   * bitRightShift(Field.of("field1"), 2);
-   * ```
-   *
-   * @param left The left operand expression.
-   * @param right The right operand constant representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise right shift operation.
-   */
-  export function bitRightShift(left: Expr, right: any): BitRightShift;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise right shift operation between a field and an expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
-   * bitRightShift("field1", Field.of("field2"));
-   * ```
-   *
-   * @param left The left operand field name.
-   * @param right The right operand expression representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise right shift operation.
-   */
-  export function bitRightShift(left: string, right: Expr): BitRightShift;
-
-  /**
-   * @beta
-   *
-   * Creates an expression that applies a bitwise right shift operation between a field and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise right shift of 'field1' by 2 bits.
-   * bitRightShift("field1", 2);
-   * ```
-   *
-   * @param left The left operand field name.
-   * @param right The right operand constant representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise right shift operation.
-   */
-  export function bitRightShift(left: string, right: any): BitRightShift;
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise AND operation between two expressions.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise AND of 'field1' and 'field2'.
+  //  * bitAnd(Field.of("field1"), Field.of("field2"));
+  //  * ```
+  //  *
+  //  * @param left The left operand expression.
+  //  * @param right The right operand expression.
+  //  * @return A new {@code Expr} representing the bitwise AND operation.
+  //  */
+  // export function bitAnd(left: Expr, right: Expr): BitAnd;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise AND operation between an expression and a constant.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise AND of 'field1' and 0xFF.
+  //  * bitAnd(Field.of("field1"), 0xFF);
+  //  * ```
+  //  *
+  //  * @param left The left operand expression.
+  //  * @param right The right operand constant.
+  //  * @return A new {@code Expr} representing the bitwise AND operation.
+  //  */
+  // export function bitAnd(left: Expr, right: any): BitAnd;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise AND operation between a field and an expression.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise AND of 'field1' and 'field2'.
+  //  * bitAnd("field1", Field.of("field2"));
+  //  * ```
+  //  *
+  //  * @param left The left operand field name.
+  //  * @param right The right operand expression.
+  //  * @return A new {@code Expr} representing the bitwise AND operation.
+  //  */
+  // export function bitAnd(left: string, right: Expr): BitAnd;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise AND operation between a field and a constant.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise AND of 'field1' and 0xFF.
+  //  * bitAnd("field1", 0xFF);
+  //  * ```
+  //  *
+  //  * @param left The left operand field name.
+  //  * @param right The right operand constant.
+  //  * @return A new {@code Expr} representing the bitwise AND operation.
+  //  */
+  // export function bitAnd(left: string, right: any): BitAnd;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise OR operation between two expressions.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise OR of 'field1' and 'field2'.
+  //  * bitOr(Field.of("field1"), Field.of("field2"));
+  //  * ```
+  //  *
+  //  * @param left The left operand expression.
+  //  * @param right The right operand expression.
+  //  * @return A new {@code Expr} representing the bitwise OR operation.
+  //  */
+  // export function bitOr(left: Expr, right: Expr): BitOr;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise OR operation between an expression and a constant.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise OR of 'field1' and 0xFF.
+  //  * bitOr(Field.of("field1"), 0xFF);
+  //  * ```
+  //  *
+  //  * @param left The left operand expression.
+  //  * @param right The right operand constant.
+  //  * @return A new {@code Expr} representing the bitwise OR operation.
+  //  */
+  // export function bitOr(left: Expr, right: any): BitOr;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise OR operation between a field and an expression.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise OR of 'field1' and 'field2'.
+  //  * bitOr("field1", Field.of("field2"));
+  //  * ```
+  //  *
+  //  * @param left The left operand field name.
+  //  * @param right The right operand expression.
+  //  * @return A new {@code Expr} representing the bitwise OR operation.
+  //  */
+  // export function bitOr(left: string, right: Expr): BitOr;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise OR operation between a field and a constant.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise OR of 'field1' and 0xFF.
+  //  * bitOr("field1", 0xFF);
+  //  * ```
+  //  *
+  //  * @param left The left operand field name.
+  //  * @param right The right operand constant.
+  //  * @return A new {@code Expr} representing the bitwise OR operation.
+  //  */
+  // export function bitOr(left: string, right: any): BitOr;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise XOR operation between two expressions.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise XOR of 'field1' and 'field2'.
+  //  * bitXor(Field.of("field1"), Field.of("field2"));
+  //  * ```
+  //  *
+  //  * @param left The left operand expression.
+  //  * @param right The right operand expression.
+  //  * @return A new {@code Expr} representing the bitwise XOR operation.
+  //  */
+  // export function bitXor(left: Expr, right: Expr): BitXor;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise XOR operation between an expression and a constant.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise XOR of 'field1' and 0xFF.
+  //  * bitXor(Field.of("field1"), 0xFF);
+  //  * ```
+  //  *
+  //  * @param left The left operand expression.
+  //  * @param right The right operand constant.
+  //  * @return A new {@code Expr} representing the bitwise XOR operation.
+  //  */
+  // export function bitXor(left: Expr, right: any): BitXor;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise XOR operation between a field and an expression.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise XOR of 'field1' and 'field2'.
+  //  * bitXor("field1", Field.of("field2"));
+  //  * ```
+  //  *
+  //  * @param left The left operand field name.
+  //  * @param right The right operand expression.
+  //  * @return A new {@code Expr} representing the bitwise XOR operation.
+  //  */
+  // export function bitXor(left: string, right: Expr): BitXor;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise XOR operation between a field and a constant.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise XOR of 'field1' and 0xFF.
+  //  * bitXor("field1", 0xFF);
+  //  * ```
+  //  *
+  //  * @param left The left operand field name.
+  //  * @param right The right operand constant.
+  //  * @return A new {@code Expr} representing the bitwise XOR operation.
+  //  */
+  // export function bitXor(left: string, right: any): BitXor;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise NOT operation to an expression.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise NOT of 'field1'.
+  //  * bitNot(Field.of("field1"));
+  //  * ```
+  //  *
+  //  * @param operand The operand expression.
+  //  * @return A new {@code Expr} representing the bitwise NOT operation.
+  //  */
+  // export function bitNot(operand: Expr): BitNot;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise NOT operation to a field.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise NOT of 'field1'.
+  //  * bitNot("field1");
+  //  * ```
+  //  *
+  //  * @param operand The operand field name.
+  //  * @return A new {@code Expr} representing the bitwise NOT operation.
+  //  */
+  // export function bitNot(operand: string): BitNot;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise left shift operation between two expressions.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
+  //  * bitLeftShift(Field.of("field1"), Field.of("field2"));
+  //  * ```
+  //  *
+  //  * @param left The left operand expression.
+  //  * @param right The right operand expression representing the number of bits to shift.
+  //  * @return A new {@code Expr} representing the bitwise left shift operation.
+  //  */
+  // export function bitLeftShift(left: Expr, right: Expr): BitLeftShift;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise left shift operation between an expression and a constant.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise left shift of 'field1' by 2 bits.
+  //  * bitLeftShift(Field.of("field1"), 2);
+  //  * ```
+  //  *
+  //  * @param left The left operand expression.
+  //  * @param right The right operand constant representing the number of bits to shift.
+  //  * @return A new {@code Expr} representing the bitwise left shift operation.
+  //  */
+  // export function bitLeftShift(left: Expr, right: any): BitLeftShift;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise left shift operation between a field and an expression.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
+  //  * bitLeftShift("field1", Field.of("field2"));
+  //  * ```
+  //  *
+  //  * @param left The left operand field name.
+  //  * @param right The right operand expression representing the number of bits to shift.
+  //  * @return A new {@code Expr} representing the bitwise left shift operation.
+  //  */
+  // export function bitLeftShift(left: string, right: Expr): BitLeftShift;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise left shift operation between a field and a constant.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise left shift of 'field1' by 2 bits.
+  //  * bitLeftShift("field1", 2);
+  //  * ```
+  //  *
+  //  * @param left The left operand field name.
+  //  * @param right The right operand constant representing the number of bits to shift.
+  //  * @return A new {@code Expr} representing the bitwise left shift operation.
+  //  */
+  // export function bitLeftShift(left: string, right: any): BitLeftShift;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise right shift operation between two expressions.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
+  //  * bitRightShift(Field.of("field1"), Field.of("field2"));
+  //  * ```
+  //  *
+  //  * @param left The left operand expression.
+  //  * @param right The right operand expression representing the number of bits to shift.
+  //  * @return A new {@code Expr} representing the bitwise right shift operation.
+  //  */
+  // export function bitRightShift(left: Expr, right: Expr): BitRightShift;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise right shift operation between an expression and a constant.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise right shift of 'field1' by 2 bits.
+  //  * bitRightShift(Field.of("field1"), 2);
+  //  * ```
+  //  *
+  //  * @param left The left operand expression.
+  //  * @param right The right operand constant representing the number of bits to shift.
+  //  * @return A new {@code Expr} representing the bitwise right shift operation.
+  //  */
+  // export function bitRightShift(left: Expr, right: any): BitRightShift;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise right shift operation between a field and an expression.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
+  //  * bitRightShift("field1", Field.of("field2"));
+  //  * ```
+  //  *
+  //  * @param left The left operand field name.
+  //  * @param right The right operand expression representing the number of bits to shift.
+  //  * @return A new {@code Expr} representing the bitwise right shift operation.
+  //  */
+  // export function bitRightShift(left: string, right: Expr): BitRightShift;
+  //
+  // /**
+  //  * @beta
+  //  *
+  //  * Creates an expression that applies a bitwise right shift operation between a field and a constant.
+  //  *
+  //  * ```typescript
+  //  * // Calculate the bitwise right shift of 'field1' by 2 bits.
+  //  * bitRightShift("field1", 2);
+  //  * ```
+  //  *
+  //  * @param left The left operand field name.
+  //  * @param right The right operand constant representing the number of bits to shift.
+  //  * @return A new {@code Expr} representing the bitwise right shift operation.
+  //  */
+  // export function bitRightShift(left: string, right: any): BitRightShift;
 
   /**
    * @beta
