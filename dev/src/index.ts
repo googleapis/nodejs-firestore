@@ -169,6 +169,7 @@ export {
   like,
   regexContains,
   regexMatch,
+  strContains,
   startsWith,
   endsWith,
   toLower,

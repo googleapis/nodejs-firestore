@@ -3970,6 +3970,32 @@ declare namespace FirebaseFirestore {
     regexMatch(pattern: Expr): RegexMatch;
 
     /**
+     * Creates an expression that checks if this string expression contains a specified substring.
+     *
+     * ```typescript
+     * // Check if the 'description' field contains "example".
+     * Field.of("description").strContains("example");
+     * ```
+     *
+     * @param substring The substring to search for.
+     * @return A new {@code Expr} representing the 'contains' comparison.
+     */
+    strContains(substring: string): StrContains;
+
+    /**
+     * Creates an expression that checks if this string expression contains the string represented by another expression.
+     *
+     * ```typescript
+     * // Check if the 'description' field contains the value of the 'keyword' field.
+     * Field.of("description").strContains(Field.of("keyword"));
+     * ```
+     *
+     * @param expr The expression representing the substring to search for.
+     * @return A new {@code Expr} representing the 'contains' comparison.
+     */
+    strContains(expr: Expr): StrContains;
+
+    /**
      * Creates an expression that checks if a string starts with a given prefix.
      *
      * ```typescript
@@ -5052,6 +5078,13 @@ declare namespace FirebaseFirestore {
    * @beta
    */
   export class RegexMatch extends Function implements FilterCondition {
+    filterable: true;
+  }
+
+  /**
+   * @beta
+   */
+  export class StrContains extends Function implements FilterCondition {
     filterable: true;
   }
 
@@ -7447,6 +7480,70 @@ declare namespace FirebaseFirestore {
    * @return A new {@code Expr} representing the regular expression match.
    */
   export function regexMatch(left: Expr, pattern: Expr): RegexMatch;
+
+  /**
+   * @beta
+   *
+   * Creates an expression that checks if a string field contains a specified substring.
+   *
+   * ```typescript
+   * // Check if the 'description' field contains "example".
+   * strContains("description", "example");
+   * ```
+   *
+   * @param left The name of the field containing the string.
+   * @param substring The substring to search for.
+   * @return A new {@code Expr} representing the 'contains' comparison.
+   */
+  export function strContains(left: string, substring: string): StrContains;
+
+  /**
+   * @beta
+   *
+   * Creates an expression that checks if a string field contains a substring specified by an expression.
+   *
+   * ```typescript
+   * // Check if the 'description' field contains the value of the 'keyword' field.
+   * strContains("description", Field.of("keyword"));
+   * ```
+   *
+   * @param left The name of the field containing the string.
+   * @param substring The expression representing the substring to search for.
+   * @return A new {@code Expr} representing the 'contains' comparison.
+   */
+  export function strContains(left: string, substring: Expr): StrContains;
+
+  /**
+   * @beta
+   *
+   * Creates an expression that checks if a string expression contains a specified substring.
+   *
+   * ```typescript
+   * // Check if the 'description' field contains "example".
+   * strContains(Field.of("description"), "example");
+   * ```
+   *
+   * @param left The expression representing the string to perform the comparison on.
+   * @param substring The substring to search for.
+   * @return A new {@code Expr} representing the 'contains' comparison.
+   */
+  export function strContains(left: Expr, substring: string): StrContains;
+
+  /**
+   * @beta
+   *
+   * Creates an expression that checks if a string expression contains a substring specified by another expression.
+   *
+   * ```typescript
+   * // Check if the 'description' field contains the value of the 'keyword' field.
+   * strContains(Field.of("description"), Field.of("keyword"));
+   * ```
+   *
+   * @param left The expression representing the string to perform the comparison on.
+   * @param substring The expression representing the substring to search for.
+   * @return A new {@code Expr} representing the 'contains' comparison.
+   */
+  export function strContains(left: Expr, substring: Expr): StrContains;
 
   /**
    * @beta
