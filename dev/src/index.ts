@@ -179,7 +179,7 @@ export const DEFAULT_MAX_TRANSACTION_ATTEMPTS = 5;
 /*!
  * The default number of idle GRPC channel to keep.
  */
-const DEFAULT_MAX_IDLE_CHANNELS = 1;
+export const DEFAULT_MAX_IDLE_CHANNELS = 1;
 
 /*!
  * The maximum number of concurrent requests supported by a single GRPC channel,
@@ -589,7 +589,6 @@ export class Firestore implements firestore.Firestore {
     }
 
     this.validateAndApplySettings({...settings, ...libraryHeader});
-
     this._traceUtil = this.newTraceUtilInstance(this._settings);
 
     const retryConfig = serviceConfig.retry_params.default;
@@ -696,6 +695,7 @@ export class Firestore implements firestore.Firestore {
 
     const mergedSettings = {...this._settings, ...settings};
     this.validateAndApplySettings(mergedSettings);
+    this._traceUtil = this.newTraceUtilInstance(this._settings);
     this._settingsFrozen = true;
   }
 
@@ -789,7 +789,6 @@ export class Firestore implements firestore.Firestore {
       return temp;
     };
     this._serializer = new Serializer(this);
-    this._traceUtil = this.newTraceUtilInstance(this._settings);
   }
 
   private newTraceUtilInstance(settings: firestore.Settings): TraceUtil {
@@ -809,10 +808,6 @@ export class Firestore implements firestore.Firestore {
     }
 
     if (createEnabledInstance) {
-      // Re-use the existing EnabledTraceUtil if one has been created.
-      if (this._traceUtil && this._traceUtil instanceof EnabledTraceUtil) {
-        return this._traceUtil;
-      }
       return new EnabledTraceUtil(settings);
     } else {
       return new DisabledTraceUtil();
@@ -1550,6 +1545,10 @@ export class Firestore implements firestore.Firestore {
           'Detected project ID: %s',
           this._projectId
         );
+
+        // If the project ID was undefined when the TraceUtil was set up, we
+        // need to record it.
+        this._traceUtil.recordProjectId(this.projectId);
       } catch (err) {
         logger(
           'Firestore.initializeIfNeeded',
