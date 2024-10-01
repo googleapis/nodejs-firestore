@@ -145,7 +145,7 @@ service Firestore {
   rpc ExecutePipeline(ExecutePipelineRequest)
       returns (stream ExecutePipelineResponse) {
     option (google.api.http) = {
-      post: "/v1beta1/{database=projects/*/databases/*}:executePipeline"
+      post: "/v1/{database=projects/*/databases/*}/documents:executePipeline"
       body: "*"
     };
   }

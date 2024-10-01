@@ -1965,13 +1965,13 @@
                       "responseType": "ExecutePipelineResponse",
                       "responseStream": true,
                       "options": {
-                        "(google.api.http).post": "/v1beta1/{database=projects/*/databases/*}:executePipeline",
+                        "(google.api.http).post": "/v1/{database=projects/*/databases/*}/documents:executePipeline",
                         "(google.api.http).body": "*"
                       },
                       "parsedOptions": [
                         {
                           "(google.api.http)": {
-                            "post": "/v1beta1/{database=projects/*/databases/*}:executePipeline",
+                            "post": "/v1/{database=projects/*/databases/*}/documents:executePipeline",
                             "body": "*"
                           }
                         }
