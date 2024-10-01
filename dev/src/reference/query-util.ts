@@ -338,8 +338,10 @@ export class QueryUtil<
                   // the query cursor. Note that we do not use backoff here. The
                   // call to `requestStream()` will backoff should the restart
                   // fail before delivering any results.
-                  let newQuery: Query<AppModelType, DbModelType> = query;
-                  if (this._queryOptions.limit) {
+                  let newQuery: Query<AppModelType, DbModelType>;
+                  if (!this._queryOptions.limit) {
+                    newQuery = query;
+                  } else {
                     const newLimit =
                       this._queryOptions.limit - numDocumentsReceived;
                     if (

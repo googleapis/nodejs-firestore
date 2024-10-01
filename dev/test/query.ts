@@ -56,7 +56,6 @@ import {GoogleError, Status} from 'google-gax';
 import api = google.firestore.v1;
 import protobuf = google.protobuf;
 import {Filter} from '../src/filter';
-import {Deferred} from '../src/util';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -3583,7 +3582,8 @@ describe('query resumption', () => {
   function* getDocResponsesFollowedByError(
     documentIds: string[],
     numDocs: number,
-    startAtEnd: boolean
+    error: Error,
+    startAtEnd?: boolean
   ): Generator<api.IRunQueryResponse | Error> {
     assert(numDocs <= documentIds.length);
     const sliced = startAtEnd
@@ -3596,57 +3596,97 @@ describe('query resumption', () => {
     for (const runQueryResponse of runQueryResponses) {
       yield runQueryResponse;
     }
-    const retryableError = new GoogleError('simulated retryable error');
-    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
-    yield retryableError;
+    yield error;
   }
 
-  // Returns the documents from the given `documentIds` that match the `startAt`
-  // (or `endAt`) and the `limit` (if any) of the given request.
-  function* getDocResponsesForRequest(
+  // Returns the documents from the given `documentIds` starting at the cursor
+  // determined by `startAt` (or `endAt`) in the request. It will continue to
+  // return documents until either the request `limit` is reached or `numDocs`
+  // (if provided) is reached. If an `error` is provided, it will return the
+  // given error after the docs are returned.
+  function* getDocResponsesForRequestHelper(
     request: api.IRunQueryRequest,
-    documentIds: string[]
-  ): Generator<api.IRunQueryResponse> {
+    documentIds: string[],
+    numDocs?: number,
+    error?: Error
+  ): Generator<api.IRunQueryResponse | Error> {
+    let begin: number | null | undefined;
+    let end: number | null | undefined;
+    let reverseOrder: boolean;
     if (request.structuredQuery?.startAt) {
-      const startAtDocumentIndex = getStartAtDocumentIndex(
-        request,
-        documentIds
-      );
-      if (startAtDocumentIndex === null) {
+      begin = getStartAtDocumentIndex(request, documentIds);
+      if (begin === null) {
         throw new Error('the request should specify a valid startAt');
       }
-
-      let end: number | undefined = undefined;
-      if (request.structuredQuery?.limit?.value) {
-        end = startAtDocumentIndex + request.structuredQuery?.limit!.value;
+      if (request.structuredQuery.limit?.value) {
+        end = begin + request.structuredQuery.limit.value;
+      } else {
+        end = undefined;
       }
-
-      const runQueryResponses = documentIds
-        .slice(startAtDocumentIndex, end)
-        .map(documentId => result(documentId));
-      for (const runQueryResponse of runQueryResponses) {
-        yield runQueryResponse;
-      }
+      reverseOrder = false;
     } else if (request.structuredQuery?.endAt) {
-      const endAtDocumentIndex = getEndAtDocumentIndex(request, documentIds);
-      if (endAtDocumentIndex === null) {
+      end = getEndAtDocumentIndex(request, documentIds);
+      if (end === null) {
         throw new Error('the request should specify a valid endAt');
       }
-
-      let begin: number | undefined = undefined;
-      if (request.structuredQuery?.limit?.value) {
-        begin = endAtDocumentIndex - request.structuredQuery?.limit!.value;
+      if (request.structuredQuery.limit?.value) {
+        begin = end - request.structuredQuery.limit.value;
+      } else {
+        begin = undefined;
       }
-
-      const runQueryResponses = documentIds
-        .slice(begin, endAtDocumentIndex)
-        .map(documentId => result(documentId));
-      for (const runQueryResponse of runQueryResponses.reverse()) {
-        yield runQueryResponse;
-      }
+      reverseOrder = true;
     } else {
       throw new Error('the request does not specify a valid startAt or endAt');
     }
+
+    const runQueryResponses = documentIds
+      .slice(begin, end)
+      .map(documentId => result(documentId));
+
+    let numDocsReturned = 0;
+    for (const runQueryResponse of reverseOrder
+      ? runQueryResponses.reverse()
+      : runQueryResponses) {
+      // If `numDocs` is provided, stop iterating when it is reached.
+      if (numDocs && numDocsReturned === numDocs) {
+        break;
+      }
+      numDocsReturned++;
+      yield runQueryResponse;
+    }
+
+    // If `error` is provided, emit it after all the docs.
+    if (error) {
+      yield error;
+    }
+  }
+
+  // Returns the documents from the given `documentIds` starting at the cursor
+  // determined by `startAt` (or `endAt`) in the request. It will continue to
+  // return documents until `numDocs` or request `limit` (if any) is reached.
+  // It will then return the given error.
+  function* getNumDocResponsesForRequestFollowedByError(
+    request: api.IRunQueryRequest,
+    documentIds: string[],
+    numDocs: number,
+    error: Error
+  ): Generator<api.IRunQueryResponse | Error> {
+    yield* getDocResponsesForRequestHelper(
+      request,
+      documentIds,
+      numDocs,
+      error
+    );
+  }
+
+  // Returns the documents from the given `documentIds` starting at the cursor
+  // determined by `startAt` (or `endAt`) in the request. It will continue to
+  // return documents until the request `limit` is reached (if any).
+  function* getDocResponsesForRequest(
+    request: api.IRunQueryRequest,
+    documentIds: string[]
+  ): Generator<api.IRunQueryResponse | Error> {
+    yield* getDocResponsesForRequestHelper(request, documentIds);
   }
 
   // Finds the index in `documentIds` of the document referred to in the
@@ -3694,15 +3734,8 @@ describe('query resumption', () => {
   it('results should not be double produced on retryable error with back pressure', async () => {
     // Generate the IDs of the documents that will match the query.
     const documentIds = Array.from(new Array(500), (_, index) => `doc${index}`);
-
-    // A mock replacement for Query._isPermanentRpcError which (a) resolves
-    // a promise once invoked and (b) treats a specific error "domain" as
-    // non-retryable.
-    function mockIsPermanentRpcError(err: GoogleError): boolean {
-      mockIsPermanentRpcError.invoked.resolve(true);
-      return err?.domain !== RETRYABLE_ERROR_DOMAIN;
-    }
-    mockIsPermanentRpcError.invoked = new Deferred();
+    const retryableError = new GoogleError('simulated retryable error');
+    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
 
     // Set up the mocked responses from Watch.
     let requestNum = 0;
@@ -3715,8 +3748,8 @@ describe('query resumption', () => {
             return stream(
               ...getDocResponsesFollowedByError(
                 documentIds,
-                250,
-                /*startAtEnd*/ false
+                documentIds.length / 2,
+                retryableError
               )
             );
           case 2:
@@ -3728,18 +3761,14 @@ describe('query resumption', () => {
       },
     };
 
-    // Create an async iterator to get the result set but DO NOT iterate over
-    // it immediately. Instead, allow the responses to pile up and fill the
-    // buffers. Once isPermanentError() is invoked, indicating that the first
-    // request has failed and is about to be retried, collect the results from
-    // the async iterator into an array.
+    // Create an async iterator to get the result set.
     firestore = await createInstance(overrides);
     const query = firestore.collection('collectionId');
-    query._queryUtil._isPermanentRpcError = mockIsPermanentRpcError;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    query._queryUtil._isPermanentRpcError = (err, methodName) => false;
     const iterator = query
       .stream()
       [Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
-    await mockIsPermanentRpcError.invoked.promise;
     const snapshots = await collect(iterator);
 
     // Verify that the async iterator returned the correct documents and,
@@ -3751,6 +3780,8 @@ describe('query resumption', () => {
   it('resuming queries with a cursor should respect the original query limit', async () => {
     // Generate the IDs of the documents that will match the query.
     const documentIds = Array.from(new Array(500), (_, index) => `doc${index}`);
+    const retryableError = new GoogleError('simulated retryable error');
+    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
 
     // Set up the mocked responses from Watch.
     let requestNum = 0;
@@ -3762,8 +3793,8 @@ describe('query resumption', () => {
             return stream(
               ...getDocResponsesFollowedByError(
                 documentIds,
-                250,
-                /*startAtEnd*/ false
+                documentIds.length / 2,
+                retryableError
               )
             );
           case 2:
@@ -3795,6 +3826,8 @@ describe('query resumption', () => {
   it('resuming queries with a cursor should respect the original query limitToLast', async () => {
     // Generate the IDs of the documents that will match the query.
     const documentIds = Array.from(new Array(500), (_, index) => `doc${index}`);
+    const retryableError = new GoogleError('simulated retryable error');
+    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
 
     // Set up the mocked responses from Watch.
     let requestNum = 0;
@@ -3806,11 +3839,131 @@ describe('query resumption', () => {
             return stream(
               ...getDocResponsesFollowedByError(
                 documentIds,
-                250,
+                documentIds.length / 2,
+                retryableError,
                 /*startAtEnd*/ true
               )
             );
           case 2:
+            return stream(...getDocResponsesForRequest(request!, documentIds));
+          default:
+            throw new Error(`should never get here (requestNum=${requestNum})`);
+        }
+      },
+    };
+
+    // `stream()` cannot be called for `limitToLast` queries. We can, however,
+    // test using the `.get()` method which does some additional processing.
+    const limit = 300;
+    firestore = await createInstance(overrides);
+    const query = firestore
+      .collection('collectionId')
+      .orderBy(FieldPath.documentId())
+      .limitToLast(limit);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    query._queryUtil._isPermanentRpcError = (err, methodName) => false;
+    const snapshots = await query.get();
+
+    // Verify that we got the correct number of results, and the results match
+    // the documents we expect.
+    const actualDocumentIds = snapshots.docs.map(snapshot => snapshot.id);
+    expect(actualDocumentIds.length).to.eql(limit);
+    // slice(-limit) returns the last `limit` documents in the array.
+    expect(actualDocumentIds).to.eql(documentIds.slice(-limit));
+  });
+
+  it('resuming queries with multiple failures should respect the original limit', async () => {
+    // Generate the IDs of the documents that will match the query.
+    const documentIds = Array.from(new Array(600), (_, index) => `doc${index}`);
+    const retryableError = new GoogleError('simulated retryable error');
+    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
+
+    // Set up the mocked responses from Watch.
+    let requestNum = 0;
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        requestNum++;
+        switch (requestNum) {
+          case 1:
+            // Get the first 60 documents followed by a retryable error.
+            return stream(
+              ...getDocResponsesFollowedByError(
+                documentIds,
+                documentIds.length / 10,
+                retryableError
+              )
+            );
+          case 2:
+            // Get the another 120 documents followed by a retryable error.
+            return stream(
+              ...getNumDocResponsesForRequestFollowedByError(
+                request!,
+                documentIds,
+                documentIds.length / 5,
+                retryableError
+              )
+            );
+          case 3:
+            // Get the rest of the documents.
+            return stream(...getDocResponsesForRequest(request!, documentIds));
+          default:
+            throw new Error(`should never get here (requestNum=${requestNum})`);
+        }
+      },
+    };
+
+    // Create an async iterator to get the result set.
+    const limit = 300;
+    firestore = await createInstance(overrides);
+    const query = firestore.collection('collectionId').limit(limit);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    query._queryUtil._isPermanentRpcError = (err, methodName) => false;
+    const iterator = query
+      .stream()
+      [Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
+    const snapshots = await collect(iterator);
+
+    // Verify that we got the correct number of results, and the results match
+    // the documents we expect.
+    const actualDocumentIds = snapshots.map(snapshot => snapshot.id);
+    expect(actualDocumentIds.length).to.eql(limit);
+    expect(actualDocumentIds).to.eql(documentIds.slice(0, limit));
+  });
+
+  it('resuming queries with multiple failures should respect the original limitToLast', async () => {
+    // Generate the IDs of the documents that will match the query.
+    const documentIds = Array.from(new Array(600), (_, index) => `doc${index}`);
+    const retryableError = new GoogleError('simulated retryable error');
+    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
+
+    // Set up the mocked responses from Watch.
+    let requestNum = 0;
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        requestNum++;
+        switch (requestNum) {
+          case 1:
+            // Get the first 60 documents followed by a retryable error.
+            return stream(
+              ...getDocResponsesFollowedByError(
+                documentIds,
+                documentIds.length / 10,
+                retryableError,
+                /*startAtEnd*/ true
+              )
+            );
+          case 2:
+            // Get the another 120 documents followed by a retryable error.
+            return stream(
+              ...getNumDocResponsesForRequestFollowedByError(
+                request!,
+                documentIds,
+                documentIds.length / 5,
+                retryableError
+              )
+            );
+          case 3:
+            // Get the rest of the documents.
             return stream(...getDocResponsesForRequest(request!, documentIds));
           default:
             throw new Error(`should never get here (requestNum=${requestNum})`);
