@@ -1336,7 +1336,7 @@ export abstract class Expr implements firestore.Expr {
    */
   logicalMax(other: any): firestore.LogicalMax;
   logicalMax(other: any): firestore.LogicalMax {
-    if (other instanceof firestore.Expr) {
+    if (other instanceof Expr) {
       return new LogicalMax(this, other as Expr);
     }
     return new LogicalMax(this, Constant.of(other));
@@ -1368,7 +1368,7 @@ export abstract class Expr implements firestore.Expr {
    */
   logicalMin(other: any): firestore.LogicalMin;
   logicalMin(other: any): firestore.LogicalMin {
-    if (other instanceof firestore.Expr) {
+    if (other instanceof Expr) {
       return new LogicalMin(this, other as Expr);
     }
     return new LogicalMin(this, Constant.of(other));
@@ -1427,7 +1427,7 @@ export abstract class Expr implements firestore.Expr {
   cosineDistance(
     other: firestore.Expr | firestore.VectorValue | number[]
   ): CosineDistance {
-    if (other instanceof firestore.Expr) {
+    if (other instanceof Expr) {
       return new CosineDistance(this, other as Expr);
     } else {
       return new CosineDistance(
@@ -1478,7 +1478,7 @@ export abstract class Expr implements firestore.Expr {
   dotProduct(
     other: firestore.Expr | firestore.VectorValue | number[]
   ): DotProduct {
-    if (other instanceof firestore.Expr) {
+    if (other instanceof Expr) {
       return new DotProduct(this, other as Expr);
     } else {
       return new DotProduct(
@@ -1529,7 +1529,7 @@ export abstract class Expr implements firestore.Expr {
   euclideanDistance(
     other: firestore.Expr | firestore.VectorValue | number[]
   ): EuclideanDistance {
-    if (other instanceof firestore.Expr) {
+    if (other instanceof Expr) {
       return new EuclideanDistance(this, other as Expr);
     } else {
       return new EuclideanDistance(
