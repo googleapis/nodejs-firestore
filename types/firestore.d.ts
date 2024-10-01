@@ -9167,8 +9167,8 @@ declare namespace FirebaseFirestore {
      * // with the same rating
      * firestore.pipeline().collection("books")
      *     .sort(
-     *         Ordering.of(Field.of("rating")).descending(),
-     *         Ordering.of(Field.of("title"))  // Ascending order is the default
+     *         Field.of("rating").descending(),
+     *         Field.of("title").ascending()
      *     );
      * ```
      *
