@@ -3564,7 +3564,6 @@ describe('collectionGroup queries', () => {
 
 describe('query resumption', () => {
   let firestore: Firestore;
-  const RETRYABLE_ERROR_DOMAIN = 'RETRYABLE_ERROR_DOMAIN';
 
   beforeEach(() => {
     setTimeoutHandler(setImmediate);
@@ -3604,11 +3603,13 @@ describe('query resumption', () => {
   // return documents until either the request `limit` is reached or `numDocs`
   // (if provided) is reached. If an `error` is provided, it will return the
   // given error after the docs are returned.
-  function* getDocResponsesForRequestHelper(
+  function* getDocResponsesForRequest(
     request: api.IRunQueryRequest,
     documentIds: string[],
-    numDocs?: number,
-    error?: Error
+    options?: {
+      numDocs?: number;
+      error?: Error;
+    }
   ): Generator<api.IRunQueryResponse | Error> {
     let begin: number | null | undefined;
     let end: number | null | undefined;
@@ -3648,7 +3649,7 @@ describe('query resumption', () => {
       ? runQueryResponses.reverse()
       : runQueryResponses) {
       // If `numDocs` is provided, stop iterating when it is reached.
-      if (numDocs && numDocsReturned === numDocs) {
+      if (options?.numDocs && numDocsReturned === options.numDocs) {
         break;
       }
       numDocsReturned++;
@@ -3656,37 +3657,9 @@ describe('query resumption', () => {
     }
 
     // If `error` is provided, emit it after all the docs.
-    if (error) {
-      yield error;
+    if (options?.error) {
+      yield options.error;
     }
-  }
-
-  // Returns the documents from the given `documentIds` starting at the cursor
-  // determined by `startAt` (or `endAt`) in the request. It will continue to
-  // return documents until `numDocs` or request `limit` (if any) is reached.
-  // It will then return the given error.
-  function* getNumDocResponsesForRequestFollowedByError(
-    request: api.IRunQueryRequest,
-    documentIds: string[],
-    numDocs: number,
-    error: Error
-  ): Generator<api.IRunQueryResponse | Error> {
-    yield* getDocResponsesForRequestHelper(
-      request,
-      documentIds,
-      numDocs,
-      error
-    );
-  }
-
-  // Returns the documents from the given `documentIds` starting at the cursor
-  // determined by `startAt` (or `endAt`) in the request. It will continue to
-  // return documents until the request `limit` is reached (if any).
-  function* getDocResponsesForRequest(
-    request: api.IRunQueryRequest,
-    documentIds: string[]
-  ): Generator<api.IRunQueryResponse | Error> {
-    yield* getDocResponsesForRequestHelper(request, documentIds);
   }
 
   // Finds the index in `documentIds` of the document referred to in the
@@ -3734,8 +3707,6 @@ describe('query resumption', () => {
   it('results should not be double produced on retryable error with back pressure', async () => {
     // Generate the IDs of the documents that will match the query.
     const documentIds = Array.from(new Array(500), (_, index) => `doc${index}`);
-    const retryableError = new GoogleError('simulated retryable error');
-    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
 
     // Set up the mocked responses from Watch.
     let requestNum = 0;
@@ -3749,7 +3720,7 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 2,
-                retryableError
+                new GoogleError('simulated retryable error')
               )
             );
           case 2:
@@ -3764,8 +3735,7 @@ describe('query resumption', () => {
     // Create an async iterator to get the result set.
     firestore = await createInstance(overrides);
     const query = firestore.collection('collectionId');
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    query._queryUtil._isPermanentRpcError = (err, methodName) => false;
+    query._queryUtil._isPermanentRpcError = () => false;
     const iterator = query
       .stream()
       [Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
@@ -3780,8 +3750,6 @@ describe('query resumption', () => {
   it('resuming queries with a cursor should respect the original query limit', async () => {
     // Generate the IDs of the documents that will match the query.
     const documentIds = Array.from(new Array(500), (_, index) => `doc${index}`);
-    const retryableError = new GoogleError('simulated retryable error');
-    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
 
     // Set up the mocked responses from Watch.
     let requestNum = 0;
@@ -3794,7 +3762,7 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 2,
-                retryableError
+                new GoogleError('simulated retryable error')
               )
             );
           case 2:
@@ -3809,8 +3777,7 @@ describe('query resumption', () => {
     const limit = 300;
     firestore = await createInstance(overrides);
     const query = firestore.collection('collectionId').limit(limit);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    query._queryUtil._isPermanentRpcError = (err, methodName) => false;
+    query._queryUtil._isPermanentRpcError = () => false;
     const iterator = query
       .stream()
       [Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
@@ -3826,8 +3793,6 @@ describe('query resumption', () => {
   it('resuming queries with a cursor should respect the original query limitToLast', async () => {
     // Generate the IDs of the documents that will match the query.
     const documentIds = Array.from(new Array(500), (_, index) => `doc${index}`);
-    const retryableError = new GoogleError('simulated retryable error');
-    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
 
     // Set up the mocked responses from Watch.
     let requestNum = 0;
@@ -3840,7 +3805,7 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 2,
-                retryableError,
+                new GoogleError('simulated retryable error'),
                 /*startAtEnd*/ true
               )
             );
@@ -3860,8 +3825,7 @@ describe('query resumption', () => {
       .collection('collectionId')
       .orderBy(FieldPath.documentId())
       .limitToLast(limit);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    query._queryUtil._isPermanentRpcError = (err, methodName) => false;
+    query._queryUtil._isPermanentRpcError = () => false;
     const snapshots = await query.get();
 
     // Verify that we got the correct number of results, and the results match
@@ -3875,8 +3839,6 @@ describe('query resumption', () => {
   it('resuming queries with multiple failures should respect the original limit', async () => {
     // Generate the IDs of the documents that will match the query.
     const documentIds = Array.from(new Array(600), (_, index) => `doc${index}`);
-    const retryableError = new GoogleError('simulated retryable error');
-    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
 
     // Set up the mocked responses from Watch.
     let requestNum = 0;
@@ -3890,18 +3852,16 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 10,
-                retryableError
+                new GoogleError('simulated retryable error')
               )
             );
           case 2:
             // Get the another 120 documents followed by a retryable error.
             return stream(
-              ...getNumDocResponsesForRequestFollowedByError(
-                request!,
-                documentIds,
-                documentIds.length / 5,
-                retryableError
-              )
+              ...getDocResponsesForRequest(request!, documentIds, {
+                numDocs: documentIds.length / 5,
+                error: new GoogleError('simulated retryable error'),
+              })
             );
           case 3:
             // Get the rest of the documents.
@@ -3916,8 +3876,7 @@ describe('query resumption', () => {
     const limit = 300;
     firestore = await createInstance(overrides);
     const query = firestore.collection('collectionId').limit(limit);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    query._queryUtil._isPermanentRpcError = (err, methodName) => false;
+    query._queryUtil._isPermanentRpcError = () => false;
     const iterator = query
       .stream()
       [Symbol.asyncIterator]() as AsyncIterator<QueryDocumentSnapshot>;
@@ -3933,8 +3892,6 @@ describe('query resumption', () => {
   it('resuming queries with multiple failures should respect the original limitToLast', async () => {
     // Generate the IDs of the documents that will match the query.
     const documentIds = Array.from(new Array(600), (_, index) => `doc${index}`);
-    const retryableError = new GoogleError('simulated retryable error');
-    retryableError.domain = RETRYABLE_ERROR_DOMAIN;
 
     // Set up the mocked responses from Watch.
     let requestNum = 0;
@@ -3948,19 +3905,17 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 10,
-                retryableError,
+                new GoogleError('simulated retryable error'),
                 /*startAtEnd*/ true
               )
             );
           case 2:
             // Get the another 120 documents followed by a retryable error.
             return stream(
-              ...getNumDocResponsesForRequestFollowedByError(
-                request!,
-                documentIds,
-                documentIds.length / 5,
-                retryableError
-              )
+              ...getDocResponsesForRequest(request!, documentIds, {
+                numDocs: documentIds.length / 5,
+                error: new GoogleError('simulated retryable error'),
+              })
             );
           case 3:
             // Get the rest of the documents.
@@ -3979,8 +3934,7 @@ describe('query resumption', () => {
       .collection('collectionId')
       .orderBy(FieldPath.documentId())
       .limitToLast(limit);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    query._queryUtil._isPermanentRpcError = (err, methodName) => false;
+    query._queryUtil._isPermanentRpcError = () => false;
     const snapshots = await query.get();
 
     // Verify that we got the correct number of results, and the results match
