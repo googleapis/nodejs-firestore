@@ -1886,7 +1886,7 @@ export class Field extends Expr implements Selectable {
       return new Field(FieldPath.fromArgument(pipelineOrName));
     } else if (pipelineOrName instanceof FieldPath) {
       if (FieldPath.documentId().isEqual(pipelineOrName)) {
-        return new Field(new FieldPath('__path__'));
+        return new Field(FieldPath.documentId());
       }
       return new Field(pipelineOrName);
     } else {
