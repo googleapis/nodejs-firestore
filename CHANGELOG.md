@@ -4,6 +4,15 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.10.0](https://github.com/googleapis/nodejs-firestore/compare/v7.9.0...v7.10.0) (2024-09-05)
+
+
+### Features
+
+* Expose proto changes for the bulk delete api ([23ce891](https://github.com/googleapis/nodejs-firestore/commit/23ce89175ce315648ce9af3994cba0decc48ba47))
+* Expose the proto changes to support FindNearest.distance_result_field parameter and the FindNearest.distance_threshold parameter ([23ce891](https://github.com/googleapis/nodejs-firestore/commit/23ce89175ce315648ce9af3994cba0decc48ba47))
+* Return computed distance and set distance thresholds on VectorQueries ([#2090](https://github.com/googleapis/nodejs-firestore/issues/2090)) ([b5ca84f](https://github.com/googleapis/nodejs-firestore/commit/b5ca84f076ca0668e90ca3fc7dd878f732ccd956))
+
 ## [7.9.0](https://github.com/googleapis/nodejs-firestore/compare/v7.8.0...v7.9.0) (2024-06-25)
 
 
