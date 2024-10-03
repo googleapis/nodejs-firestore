@@ -44,6 +44,7 @@ import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
   ATTRIBUTE_KEY_DOC_COUNT,
+  ATTRIBUTE_SETTINGS_PREFIX,
   SPAN_NAME_AGGREGATION_QUERY_GET,
   SPAN_NAME_BATCH_COMMIT,
   SPAN_NAME_BATCH_GET_DOCUMENTS,
@@ -66,7 +67,6 @@ import {
   SPAN_NAME_TRANSACTION_RUN,
 } from '../src/telemetry/trace-util';
 import {AsyncLocalStorageContextManager} from '@opentelemetry/context-async-hooks';
-import {deepStrictEqual} from 'assert';
 import {cloudtrace_v1, auth as gAuth} from '@googleapis/cloudtrace';
 import Schema$Trace = cloudtrace_v1.Schema$Trace;
 import Schema$TraceSpan = cloudtrace_v1.Schema$TraceSpan;
@@ -304,6 +304,43 @@ describe('Tracing Tests', () => {
     }
 
     firestore = new Firestore(settings);
+  }
+
+  function getSettingsAttributes(): Attributes {
+    const settingsAttributes: Attributes = {};
+    settingsAttributes['otel.scope.name'] = require('../../package.json').name;
+    settingsAttributes['otel.scope.version'] =
+      require('../../package.json').version;
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.database_id`] =
+      firestore.databaseId;
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.host`] =
+      'firestore.googleapis.com:443';
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.prefer_REST`] =
+      testConfig.preferRest;
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.max_idle_channels`] = 1;
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.initial_retry_delay`] =
+      '0.1s';
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.initial_rpc_timeout`] =
+      '60s';
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.total_timeout`] = '600s';
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.max_retry_delay`] = '60s';
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.max_rpc_timeout`] = '60s';
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.retry_delay_multiplier`] =
+      '1.3';
+    settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.rpc_timeout_multiplier`] =
+      '1';
+
+    // Project ID is not set on the Firestore object until _after_ the first
+    // operation is done. Therefore, the spans that are created _before_ the
+    // first operation do not contain a project ID.
+    try {
+      const projectId = firestore.projectId;
+      settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.project_id`] = projectId;
+    } catch (e) {
+      // Project ID has not been set yet.
+    }
+
+    return settingsAttributes;
   }
 
   // Take a function and runs it inside a new root span. This makes it possible to
@@ -588,7 +625,26 @@ describe('Tracing Tests', () => {
         parentSpan.traceId,
         `'${childSpan.name}' and '${parentSpan.name}' spans do not belong to the same trace`
       );
-      // TODO(tracing): expect that each span has the needed attributes.
+
+      // The Cloud Trace API does not return span attributes and events.
+      if (!testConfig.e2e) {
+        const settingsAttributes = getSettingsAttributes();
+        for (const attributesKey in settingsAttributes) {
+          if (
+            attributesKey.endsWith('.project_id') &&
+            i + 1 !== matchingSpanHierarchy.length
+          ) {
+            // Project ID is not set on the Firestore object until _after_ the first
+            // operation is done. Therefore, the spans that are created _before_ the
+            // first operation do not contain a project ID. So, we'll just compare
+            // this attribute on the leaf spans.
+          } else {
+            expect(childSpan.attributes[attributesKey]).to.be.equal(
+              settingsAttributes[attributesKey]
+            );
+          }
+        }
+      }
     }
   }
 
@@ -597,7 +653,7 @@ describe('Tracing Tests', () => {
     spanName: string,
     attributes: Attributes
   ): void {
-    // TODO(tracing): The current Cloud Trace API does not return span attributes and events.
+    // The Cloud Trace API does not return span attributes and events.
     if (testConfig.e2e) {
       return;
     }
@@ -606,8 +662,14 @@ describe('Tracing Tests', () => {
     const span = getSpanByName(spanName);
     expect(span).to.not.be.null;
 
-    // Assert that the attributes are the same.
-    deepStrictEqual(span!.attributes, attributes);
+    // Assert that the expected attributes are present in the span attributes.
+    // Note that the span attributes may be a superset of the attributes passed
+    // to this function.
+    for (const attributesKey in attributes) {
+      expect(span!.attributes[attributesKey]).to.be.equal(
+        attributes[attributesKey]
+      );
+    }
   }
 
   describe(IN_MEMORY_TEST_SUITE_TITLE, () => {
