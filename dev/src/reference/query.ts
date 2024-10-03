@@ -620,7 +620,7 @@ export class Query<
    * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
    * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
    *
-   * const querySnapshot = await aggregateQuery.get();
+   * const querySnapshot = await vectorQuery.get();
    * querySnapshot.forEach(...);
    * ```
    *
