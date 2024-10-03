@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.10.1](https://github.com/googleapis/nodejs-firestore/compare/v7.10.0...v7.10.1) (2024-10-03)
+
+
+### Bug Fixes
+
+* Use correct limit when retrying a limit query stream with a cursor ([#2203](https://github.com/googleapis/nodejs-firestore/issues/2203)) ([ab94092](https://github.com/googleapis/nodejs-firestore/commit/ab94092c2375501dd2998a458fc8a449793c9e69))
+
 ## [7.10.0](https://github.com/googleapis/nodejs-firestore/compare/v7.9.0...v7.10.0) (2024-09-05)
 
 
