@@ -564,6 +564,15 @@ describe.only('Pipeline class', () => {
     expect(results.length).to.equal(5);
   });
 
+  it('testQueryByDocumentReference', async () => {
+    const results = await randomCol
+      .pipeline()
+      .where(eq(Field.of(FieldPath.documentId()), randomCol.doc('book1')))
+      .select('title')
+      .execute();
+    expectResults(results, {title: "The Hitchhiker's Guide to the Galaxy"});
+  });
+
   it('testArithmeticOperations', async () => {
     const results = await randomCol
       .pipeline()
