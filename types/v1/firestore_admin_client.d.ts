@@ -972,8 +972,8 @@ export declare class FirestoreAdminClient {
    *   Required. Database to export. Should be of the form:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {string[]} request.collectionIds
-   *   Which collection ids to export. Unspecified means all collections. Each
-   *   collection id in this list must be unique.
+   *   Which collection IDs to export. Unspecified means all collections. Each
+   *   collection ID in this list must be unique.
    * @param {string} request.outputUriPrefix
    *   The output URI. Currently only supports Google Cloud Storage URIs of the
    *   form: `gs://BUCKET_NAME[/NAMESPACE_PATH]`, where `BUCKET_NAME` is the name
@@ -1077,8 +1077,8 @@ export declare class FirestoreAdminClient {
    *   Required. Database to import into. Should be of the form:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {string[]} request.collectionIds
-   *   Which collection ids to import. Unspecified means all collections included
-   *   in the import. Each collection id in this list must be unique.
+   *   Which collection IDs to import. Unspecified means all collections included
+   *   in the import. Each collection ID in this list must be unique.
    * @param {string} request.inputUriPrefix
    *   Location of the exported files.
    *   This must match the output_uri_prefix of an ExportDocumentsResponse from
@@ -1273,7 +1273,7 @@ export declare class FirestoreAdminClient {
    *   with first character a letter and the last a letter or a number. Must not
    *   be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
    *
-   *   "(default)" database id is also valid.
+   *   "(default)" database ID is also valid.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1519,19 +1519,28 @@ export declare class FirestoreAdminClient {
    *   `projects/{project_id}`.
    * @param {string} request.databaseId
    *   Required. The ID to use for the database, which will become the final
-   *   component of the database's resource name. This database id must not be
+   *   component of the database's resource name. This database ID must not be
    *   associated with an existing database.
    *
    *   This value should be 4-63 characters. Valid characters are /{@link protos.0-9|a-z}-/
    *   with first character a letter and the last a letter or a number. Must not
    *   be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
    *
-   *   "(default)" database id is also valid.
+   *   "(default)" database ID is also valid.
    * @param {string} request.backup
    *   Required. Backup to restore from. Must be from the same project as the
    *   parent.
    *
+   *   The restored database will be created in the same location as the source
+   *   backup.
+   *
    *   Format is: `projects/{project_id}/locations/{location}/backups/{backup}`
+   * @param {google.firestore.admin.v1.Database.EncryptionConfig} [request.encryptionConfig]
+   *   Optional. Encryption configuration for the restored database.
+   *
+   *   If this field is not specified, the restored database will use
+   *   the same encryption configuration as the backup, namely
+   *   {@link protos.google.firestore.admin.v1.Database.EncryptionConfig.use_source_encryption|use_source_encryption}.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.

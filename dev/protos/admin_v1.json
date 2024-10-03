@@ -1,4 +1,7 @@
 {
+  "options": {
+    "syntax": "proto3"
+  },
   "nested": {
     "google": {
       "nested": {
@@ -145,6 +148,13 @@
                             "(google.api.field_behavior)": "OUTPUT_ONLY"
                           }
                         },
+                        "deleteTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 7,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
                         "locationId": {
                           "type": "string",
                           "id": 9
@@ -190,6 +200,27 @@
                           "type": "DeleteProtectionState",
                           "id": 22
                         },
+                        "cmekConfig": {
+                          "type": "CmekConfig",
+                          "id": 23,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        },
+                        "previousId": {
+                          "type": "string",
+                          "id": 25,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "sourceInfo": {
+                          "type": "SourceInfo",
+                          "id": 26,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
                         "etag": {
                           "type": "string",
                           "id": 99
@@ -230,6 +261,104 @@
                             "DELETE_PROTECTION_STATE_UNSPECIFIED": 0,
                             "DELETE_PROTECTION_DISABLED": 1,
                             "DELETE_PROTECTION_ENABLED": 2
+                          }
+                        },
+                        "CmekConfig": {
+                          "fields": {
+                            "kmsKeyName": {
+                              "type": "string",
+                              "id": 1,
+                              "options": {
+                                "(google.api.field_behavior)": "REQUIRED"
+                              }
+                            },
+                            "activeKeyVersion": {
+                              "rule": "repeated",
+                              "type": "string",
+                              "id": 2,
+                              "options": {
+                                "(google.api.field_behavior)": "OUTPUT_ONLY"
+                              }
+                            }
+                          }
+                        },
+                        "SourceInfo": {
+                          "oneofs": {
+                            "source": {
+                              "oneof": [
+                                "backup"
+                              ]
+                            }
+                          },
+                          "fields": {
+                            "backup": {
+                              "type": "BackupSource",
+                              "id": 1
+                            },
+                            "operation": {
+                              "type": "string",
+                              "id": 3,
+                              "options": {
+                                "(google.api.resource_reference).type": "firestore.googleapis.com/Operation"
+                              }
+                            }
+                          },
+                          "nested": {
+                            "BackupSource": {
+                              "fields": {
+                                "backup": {
+                                  "type": "string",
+                                  "id": 1,
+                                  "options": {
+                                    "(google.api.resource_reference).type": "firestore.googleapis.com/Backup"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "EncryptionConfig": {
+                          "oneofs": {
+                            "encryptionType": {
+                              "oneof": [
+                                "googleDefaultEncryption",
+                                "useSourceEncryption",
+                                "customerManagedEncryption"
+                              ]
+                            }
+                          },
+                          "fields": {
+                            "googleDefaultEncryption": {
+                              "type": "GoogleDefaultEncryptionOptions",
+                              "id": 1
+                            },
+                            "useSourceEncryption": {
+                              "type": "SourceEncryptionOptions",
+                              "id": 2
+                            },
+                            "customerManagedEncryption": {
+                              "type": "CustomerManagedEncryptionOptions",
+                              "id": 3
+                            }
+                          },
+                          "nested": {
+                            "GoogleDefaultEncryptionOptions": {
+                              "fields": {}
+                            },
+                            "SourceEncryptionOptions": {
+                              "fields": {}
+                            },
+                            "CustomerManagedEncryptionOptions": {
+                              "fields": {
+                                "kmsKeyName": {
+                                  "type": "string",
+                                  "id": 1,
+                                  "options": {
+                                    "(google.api.field_behavior)": "REQUIRED"
+                                  }
+                                }
+                              }
+                            }
                           }
                         }
                       }
@@ -1445,6 +1574,13 @@
                             "(google.api.field_behavior)": "REQUIRED",
                             "(google.api.resource_reference).type": "firestore.googleapis.com/Backup"
                           }
+                        },
+                        "encryptionConfig": {
+                          "type": "Database.EncryptionConfig",
+                          "id": 9,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
                         }
                       }
                     },
@@ -2176,6 +2312,20 @@
                 "common": {
                   "type": "CommonLanguageSettings",
                   "id": 1
+                },
+                "experimentalFeatures": {
+                  "type": "ExperimentalFeatures",
+                  "id": 2
+                }
+              },
+              "nested": {
+                "ExperimentalFeatures": {
+                  "fields": {
+                    "restAsyncIoEnabled": {
+                      "type": "bool",
+                      "id": 1
+                    }
+                  }
                 }
               }
             },
