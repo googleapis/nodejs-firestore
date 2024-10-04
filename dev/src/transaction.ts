@@ -261,6 +261,40 @@ export class Transaction implements firestore.Transaction {
     );
   }
 
+  /**
+   * @beta
+   *
+   * Executes this pipeline and returns a Promise to represent the asynchronous operation.
+   *
+   * <p>The returned Promise can be used to track the progress of the pipeline execution
+   * and retrieve the results (or handle any errors) asynchronously.
+   *
+   * <p>The pipeline results are returned as a list of {@link PipelineResult} objects. Each {@link
+   * PipelineResult} typically represents a single key/value map that has passed through all the
+   * stages of the pipeline, however this might differ depending on the stages involved in the
+   * pipeline. For example:
+   *
+   * <ul>
+   *   <li>If there are no stages or only transformation stages, each {@link PipelineResult}
+   *       represents a single document.</li>
+   *   <li>If there is an aggregation, only a single {@link PipelineResult} is returned,
+   *       representing the aggregated results over the entire dataset .</li>
+   *   <li>If there is an aggregation stage with grouping, each {@link PipelineResult} represents a
+   *       distinct group and its associated aggregated values.</li>
+   * </ul>
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * const futureResults = await transaction
+   *   .execute(
+   *     firestore.pipeline().collection("books")
+   *       .where(gt(Field.of("rating"), 4.5))
+   *       .select("title", "author", "rating"));
+   * ```
+   *
+   * @return A Promise representing the asynchronous pipeline execution.
+   */
   execute<AppModelType>(
     pipeline: firestore.Pipeline<AppModelType>
   ): Promise<Array<PipelineResult<AppModelType>>> {
