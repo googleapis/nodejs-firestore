@@ -40,7 +40,11 @@ import {CompositeFilterInternal} from './reference/composite-filter-internal';
 import {NOOP_MESSAGE} from './reference/constants';
 import {FieldFilterInternal} from './reference/field-filter-internal';
 import {FilterInternal} from './reference/filter-internal';
-import {PipelineStreamElement, QueryResponse} from './reference/types';
+import {
+  PipelineResponse,
+  PipelineStreamElement,
+  QueryResponse,
+} from './reference/types';
 import {Serializer} from './serializer';
 import {
   Deferred,
@@ -50,7 +54,6 @@ import {
   requestTag,
   wrapError,
 } from './util';
-import {invalidArgumentMessage} from './validate';
 import api = protos.google.firestore.v1;
 
 /**
@@ -73,15 +76,13 @@ export class ExecutionUtil<AppModelType> {
     pipeline: Pipeline<AppModelType>,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
-  ): Promise<Array<PipelineResult<AppModelType>> | undefined> {
+  ): Promise<PipelineResponse<AppModelType>> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
     return new Promise((resolve, reject) => {
-      const results: Array<PipelineResult<AppModelType>> = [];
-      const output: Omit<QueryResponse<never>, 'result'> & {
-        executionTime?: Timestamp;
-      } = {};
+      const result: Array<PipelineResult<AppModelType>> = [];
+      const output: PipelineResponse<AppModelType> = {};
 
       this._stream(pipeline, transactionOrReadTime, explainOptions)
         .on('error', err => {
@@ -99,12 +100,13 @@ export class ExecutionUtil<AppModelType> {
               output.explainMetrics = element.explainMetrics;
             }
             if (element.result) {
-              results.push(element.result);
+              result.push(element.result);
             }
           }
         })
         .on('end', () => {
-          resolve(results);
+          output.result = result;
+          resolve(output);
         });
     });
   }

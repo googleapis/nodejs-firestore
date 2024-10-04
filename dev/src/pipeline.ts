@@ -31,6 +31,7 @@ import Firestore, {FieldPath, QueryDocumentSnapshot, Timestamp} from './index';
 import {validateFieldPath} from './path';
 import {ExecutionUtil} from './pipeline-util';
 import {DocumentReference} from './reference/document-reference';
+import {PipelineResponse} from './reference/types';
 import {Serializer} from './serializer';
 import {
   AddFields,
@@ -632,12 +633,21 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @return A Promise representing the asynchronous pipeline execution.
    */
   execute(): Promise<Array<PipelineResult<AppModelType>>> {
+    return this._execute().then(response => response.result || []);
+  }
+
+  _execute(
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
+    explainOptions?: FirebaseFirestore.ExplainOptions
+  ): Promise<PipelineResponse<AppModelType>> {
     const util = new ExecutionUtil<AppModelType>(
       this.db,
       this.db._serializer!,
       this.converter
     );
-    return util._getResponse(this).then(result => result!);
+    return util
+      ._getResponse(this, transactionOrReadTime, explainOptions)
+      .then(result => result!);
   }
 
   /**
@@ -673,10 +683,21 @@ export class Pipeline<AppModelType = firestore.DocumentData>
       stage._toProto(this.db._serializer!)
     );
     const structuredPipeline: IStructuredPipeline = {pipeline: {stages}};
-    return {
+    const executePipelineRequest: api.IExecutePipelineRequest = {
       database: this.db.formattedName,
       structuredPipeline,
     };
+
+    if (transactionOrReadTime instanceof Uint8Array) {
+      executePipelineRequest.transaction = transactionOrReadTime;
+    } else if (transactionOrReadTime instanceof Timestamp) {
+      executePipelineRequest.readTime =
+        transactionOrReadTime.toProto().timestampValue;
+    } else if (transactionOrReadTime) {
+      executePipelineRequest.newTransaction = transactionOrReadTime;
+    }
+
+    return executePipelineRequest;
   }
 }
 

@@ -808,6 +808,10 @@ declare namespace FirebaseFirestore {
       >
     ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>>;
 
+    execute<AppModelType>(
+        pipeline: Pipeline<AppModelType>
+    ): Promise<Array<PipelineResult<AppModelType>>>;
+
     /**
      * Create the document referred to by the provided `DocumentReference`.
      * The operation will fail the transaction if a document exists at the

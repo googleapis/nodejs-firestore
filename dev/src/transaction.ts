@@ -22,6 +22,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshot} from './document';
 import {DEFAULT_MAX_TRANSACTION_ATTEMPTS, Firestore, WriteBatch} from './index';
+import {Pipeline, PipelineResult} from './pipeline';
 import {Timestamp} from './timestamp';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
@@ -258,6 +259,20 @@ export class Transaction implements firestore.Transaction {
       parseGetAllArguments(documentRefsOrReadOptions),
       this.getBatchFn
     );
+  }
+
+  execute<AppModelType>(
+    pipeline: firestore.Pipeline<AppModelType>
+  ): Promise<Array<PipelineResult<AppModelType>>> {
+    if (this._writeBatch && !this._writeBatch.isEmpty) {
+      throw new Error(READ_AFTER_WRITE_ERROR_MSG);
+    }
+
+    if (pipeline instanceof Pipeline) {
+      return this.withLazyStartedTransaction(pipeline, this.executePipelineFn);
+    }
+
+    throw new Error('Value for argument "pipeline" must be a Pipeline');
   }
 
   /**
@@ -736,6 +751,18 @@ export class Transaction implements firestore.Transaction {
     result: Awaited<ReturnType<TQuery['_get']>>['result'];
   }> {
     return query._get(opts);
+  }
+
+  private async executePipelineFn<AppModelType>(
+    pipeline: Pipeline<AppModelType>,
+    opts: Uint8Array | api.ITransactionOptions | Timestamp
+  ): Promise<{
+    transaction?: Uint8Array;
+    result: Array<PipelineResult<AppModelType>>;
+  }> {
+    const {transaction, result, explainMetrics, executionTime} =
+      await pipeline._execute(opts);
+    return {transaction, result: result || []};
   }
 }
 

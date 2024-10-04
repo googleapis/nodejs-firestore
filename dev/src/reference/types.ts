@@ -70,6 +70,13 @@ export interface PipelineStreamElement<
   result?: PipelineResult<AppModelType>;
 }
 
+export interface PipelineResponse<AppModelType = firestore.DocumentData> {
+  transaction?: Uint8Array;
+  executionTime?: Timestamp;
+  explainMetrics?: ExplainMetrics;
+  result?: Array<PipelineResult<AppModelType>>;
+}
+
 /**
  * onSnapshot() callback that receives a QuerySnapshot.
  *

@@ -784,4 +784,29 @@ describe.only('Pipeline class', () => {
       myTitle: 'Crime and Punishment',
     });
   });
+
+  it('run pipeline as part of a transaction', async () => {
+    const pipeline = randomCol
+      .pipeline()
+      .where(eq('awards.hugo', true))
+      .select('title', 'awards.hugo');
+
+    await firestore.runTransaction(async transaction => {
+      const results = await transaction.execute(pipeline);
+      expectResults(
+        results,
+        {title: "The Hitchhiker's Guide to the Galaxy", 'awards.hugo': true},
+        {title: 'Dune', 'awards.hugo': true}
+      );
+
+      transaction.update(randomCol.doc('book1'), {foo: 'bar'});
+    });
+
+    const result = await randomCol
+      .pipeline()
+      .where(eq('foo', 'bar'))
+      .select('title', Field.of(FieldPath.documentId()))
+      .execute();
+    expectResults(result, {title: "The Hitchhiker's Guide to the Galaxy"});
+  });
 });
