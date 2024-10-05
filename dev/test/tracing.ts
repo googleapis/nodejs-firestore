@@ -33,38 +33,8 @@ describe('Firestore Tracing Controls', () => {
     }
   });
 
-  it('default firestore settings have tracing disabled', async () => {
+  it('default firestore settings have tracing enabled', async () => {
     const firestore = await createInstance();
-    expect(firestore._traceUtil instanceof DisabledTraceUtil).to.be.true;
-  });
-
-  it('no openTelemetryOptions results in tracing disabled', async () => {
-    const firestore = await createInstance(undefined, {
-      openTelemetryOptions: undefined,
-    });
-    expect(firestore._traceUtil instanceof DisabledTraceUtil).to.be.true;
-  });
-
-  it('openTelemetryOptions.enableTracing controls the tracing feature', async () => {
-    let firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
-        enableTracing: undefined,
-      },
-    });
-    expect(firestore._traceUtil instanceof DisabledTraceUtil).to.be.true;
-
-    firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
-        enableTracing: false,
-      },
-    });
-    expect(firestore._traceUtil instanceof DisabledTraceUtil).to.be.true;
-
-    firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
-        enableTracing: true,
-      },
-    });
     expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
   });
 
@@ -94,54 +64,6 @@ describe('Firestore Tracing Controls', () => {
     process.env.FIRESTORE_ENABLE_TRACING = 'ON';
     const firestore = await createInstance(undefined, {
       openTelemetryOptions: undefined,
-    });
-    expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
-  });
-
-  it('env var disabled, with openTelemetryOptions.enableTracing', async () => {
-    process.env.FIRESTORE_ENABLE_TRACING = 'OFF';
-    let firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
-        enableTracing: undefined,
-      },
-    });
-    expect(firestore._traceUtil instanceof DisabledTraceUtil).to.be.true;
-
-    firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
-        enableTracing: false,
-      },
-    });
-    expect(firestore._traceUtil instanceof DisabledTraceUtil).to.be.true;
-
-    firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
-        enableTracing: true,
-      },
-    });
-    expect(firestore._traceUtil instanceof DisabledTraceUtil).to.be.true;
-  });
-
-  it('env var enabled, with openTelemetryOptions.enableTracing', async () => {
-    process.env.FIRESTORE_ENABLE_TRACING = 'ON';
-    let firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
-        enableTracing: undefined,
-      },
-    });
-    expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
-
-    firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
-        enableTracing: false,
-      },
-    });
-    expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
-
-    firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
-        enableTracing: true,
-      },
     });
     expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
   });
