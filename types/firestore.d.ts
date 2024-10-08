@@ -21,6 +21,8 @@
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
 
+import {TracerProvider} from '@opentelemetry/api';
+
 declare namespace FirebaseFirestore {
   /** Alias for `any` but used where a Firestore field value would be provided. */
   export type DocumentFieldValue = any;
@@ -470,12 +472,14 @@ declare namespace FirebaseFirestore {
   /** Options to configure telemetry collection. */
   export interface FirestoreOpenTelemetryOptions {
     /**
-     * Set this to your desired OpenTelemetry TracerProvider instance in order for
-     * this SDK to create trace spans. You can also disable tracing by passing a
-     * `NoopTracerProvider` here, or by setting the `FIRESTORE_ENABLE_TRACING=OFF`
-     * environment variable.
+     * The SDK will use this TracerProvider to create spans. If not provided,
+     * the SDK will attempt to use the Global TracerProvider if one has been
+     * registered. In the absence of both, the SDK will not create trace spans.
+     * If a Global TracerProvider has been registered, one can still disable
+     * span creation by this SDK by passing in a "no-op" tracer provider here,
+     * or by setting the `FIRESTORE_ENABLE_TRACING=OFF` environment variable.
      */
-    tracerProvider?: any;
+    tracerProvider?: TracerProvider;
   }
 
   /** Options to configure a read-only transaction. */

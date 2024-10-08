@@ -17,11 +17,16 @@ import {createInstance} from './util/helpers';
 import {expect} from 'chai';
 import {DisabledTraceUtil} from '../src/telemetry/disabled-trace-util';
 import {EnabledTraceUtil} from '../src/telemetry/enabled-trace-util';
+import {NodeTracerProvider} from '@opentelemetry/sdk-trace-node';
+import { ProxyTracerProvider, trace, TracerProvider } from "@opentelemetry/api";
+import {rename} from 'fs';
 
-describe('Firestore Tracing Controls', () => {
+describe.only('Firestore Tracing Controls', () => {
   let originalEnvVarValue: string | undefined;
 
   beforeEach(() => {
+    // Remove any prior global OpenTelemetry registrations.
+    trace.disable();
     originalEnvVarValue = process.env.FIRESTORE_ENABLE_TRACING;
   });
 
@@ -66,5 +71,70 @@ describe('Firestore Tracing Controls', () => {
       openTelemetryOptions: undefined,
     });
     expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
+  });
+
+  it('env var disabled, with tracerProvider', async () => {
+    process.env.FIRESTORE_ENABLE_TRACING = 'OFF';
+    const firestore = await createInstance(undefined, {
+      openTelemetryOptions: {
+        tracerProvider: new NodeTracerProvider(),
+      },
+    });
+    expect(firestore._traceUtil instanceof DisabledTraceUtil).to.be.true;
+  });
+
+  it('env var enabled, with tracerProvider', async () => {
+    process.env.FIRESTORE_ENABLE_TRACING = 'ON';
+    const firestore = await createInstance(undefined, {
+      openTelemetryOptions: {
+        tracerProvider: new NodeTracerProvider(),
+      },
+    });
+    expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
+  });
+
+  it('uses the tracerProvider passed to it', async () => {
+    const myTracerProvider = new NodeTracerProvider();
+
+    // Make another tracer provider the global tracer provider.
+    const globalTracerProvider = new NodeTracerProvider();
+    globalTracerProvider.register();
+
+    const firestore = await createInstance(undefined, {
+      openTelemetryOptions: {
+        tracerProvider: myTracerProvider,
+      },
+    });
+
+    // Make sure the SDK uses the one that was given to it, not the global one.
+    expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
+    expect(
+      // @ts-ignore: Accessing private member for testing
+      (firestore._traceUtil as EnabledTraceUtil)._tracerProvider ===
+        myTracerProvider
+    ).to.be.true;
+    expect(
+      // @ts-ignore: Accessing private member for testing
+      (firestore._traceUtil as EnabledTraceUtil)._tracerProvider !==
+        globalTracerProvider
+    ).to.be.true;
+  });
+
+  it('uses the global tracerProvider if nothing was passed to it', async () => {
+    // Make another tracer provider the global tracer provider.
+    const globalTracerProvider = new NodeTracerProvider();
+    globalTracerProvider.register();
+
+    const firestore = await createInstance();
+
+    // Make sure the SDK uses the one that was given to it, not the global one.
+    expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
+
+    const enabledTraceUtil: EnabledTraceUtil =
+      firestore._traceUtil as EnabledTraceUtil;
+    // @ts-ignore: Accessing private member for testing
+    const tracerProviderUsed = enabledTraceUtil._tracerProvider;
+    const actual = (tracerProviderUsed as ProxyTracerProvider).getDelegate();
+    expect(actual === globalTracerProvider).to.be.true;
   });
 });

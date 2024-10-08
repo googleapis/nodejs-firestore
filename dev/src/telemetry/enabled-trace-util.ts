@@ -22,6 +22,7 @@ import {
   trace,
   Tracer,
   Span as OpenTelemetrySpan,
+  TracerProvider,
 } from '@opentelemetry/api';
 
 import {Span} from './span';
@@ -37,6 +38,9 @@ export class EnabledTraceUtil implements TraceUtil {
   private tracer: Tracer;
   private settingsAttributes: Attributes;
 
+  // Visible for testing
+  private _tracerProvider: TracerProvider;
+
   constructor(settings: Settings) {
     let tracerProvider = settings.openTelemetryOptions?.tracerProvider;
 
@@ -48,6 +52,7 @@ export class EnabledTraceUtil implements TraceUtil {
 
     const libVersion = require('../../../package.json').version;
     const libName = require('../../../package.json').name;
+    this._tracerProvider = tracerProvider;
     this.tracer = tracerProvider.getTracer(libName, libVersion);
 
     this.settingsAttributes = {};
