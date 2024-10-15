@@ -17,11 +17,12 @@
 import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
+import * as types from '../../../types/firestore';
+import firestore = types.FirebaseFirestore;
+
 import {Timestamp} from '../timestamp';
 import {ExplainMetrics} from '../query-profile';
 import {QueryDocumentSnapshot} from '../document';
-
-import * as firestore from '@google-cloud/firestore';
 
 export interface QueryStreamElement<
   AppModelType = firestore.DocumentData,

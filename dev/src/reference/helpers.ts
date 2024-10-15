@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
+import * as types from '../../../types/firestore';
+import firestore = types.FirebaseFirestore;
+
 import {invalidArgumentMessage, validateEnumValue} from '../validate';
 import {validateUserInput} from '../serializer';
 import {DocumentReference} from './document-reference';

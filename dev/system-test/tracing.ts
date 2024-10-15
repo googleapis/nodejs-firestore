@@ -30,7 +30,7 @@ import {
   Context as OpenTelemetryContext,
 } from '@opentelemetry/api';
 import {TraceExporter} from '@google-cloud/opentelemetry-cloud-trace-exporter';
-import {Settings} from '@google-cloud/firestore';
+import {FirebaseFirestore} from '../../types/firestore';
 import {
   AlwaysOnSampler,
   BatchSpanProcessor,
@@ -283,7 +283,7 @@ describe('Tracing Tests', () => {
     customSpanContext = getNewSpanContext();
     customContext = trace.setSpanContext(ROOT_CONTEXT, customSpanContext);
 
-    const settings: Settings = {
+    const settings: FirebaseFirestore.Settings = {
       preferRest: testConfig.preferRest,
       openTelemetryOptions: getOpenTelemetryOptions(tracerProvider),
     };

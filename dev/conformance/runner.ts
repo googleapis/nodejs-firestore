@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
-
 import * as duplexify from 'duplexify';
 
 import {it, xit, describe} from 'mocha';
@@ -47,6 +45,7 @@ import {
 } from '../test/util/helpers';
 
 import api = proto.google.firestore.v1;
+import {FirebaseFirestore} from '../../types/firestore';
 
 // TODO(mrschmidt): Create Protobuf .d.ts file for the conformance proto
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -183,7 +182,9 @@ const convertInput = {
       args.push(
         DocumentSnapshot.fromObject(
           docRef(cursor.docSnapshot.path),
-          convertInput.argument(cursor.docSnapshot.jsonData) as DocumentData
+          convertInput.argument(
+            cursor.docSnapshot.jsonData
+          ) as FirebaseFirestore.DocumentData
         )
       );
     } else {
@@ -406,7 +407,7 @@ function runTest(spec: ConformanceProto) {
         }
       }
       return docRef(setSpec.docRefPath).set(
-        convertInput.argument(spec.jsonData) as DocumentData,
+        convertInput.argument(spec.jsonData) as FirebaseFirestore.DocumentData,
         setOption
       );
     });
@@ -416,7 +417,7 @@ function runTest(spec: ConformanceProto) {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
       return docRef(spec.docRefPath).create(
-        convertInput.argument(spec.jsonData) as DocumentData
+        convertInput.argument(spec.jsonData) as FirebaseFirestore.DocumentData
       );
     });
   };

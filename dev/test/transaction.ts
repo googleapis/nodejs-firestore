@@ -35,10 +35,7 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
-import {
-  ReadOnlyTransactionOptions,
-  ReadWriteTransactionOptions,
-} from '@google-cloud/firestore';
+import {FirebaseFirestore} from '../../types/firestore';
 
 use(chaiAsPromised);
 
@@ -357,7 +354,9 @@ function backoff(maxDelay?: boolean): TransactionStep {
  * Asserts that the given transaction function issues the expected requests.
  */
 function runTransaction<T>(
-  transactionOptions: ReadWriteTransactionOptions | ReadOnlyTransactionOptions,
+  transactionOptions:
+    | FirebaseFirestore.ReadWriteTransactionOptions
+    | FirebaseFirestore.ReadOnlyTransactionOptions,
   transactionCallback: (
     transaction: Transaction,
     docRef: DocumentReference

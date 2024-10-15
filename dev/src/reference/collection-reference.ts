@@ -17,7 +17,9 @@
 import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
-import * as firestore from '@google-cloud/firestore';
+import * as types from '../../../types/firestore';
+import firestore = types.FirebaseFirestore;
+
 import {
   QualifiedResourcePath,
   ResourcePath,

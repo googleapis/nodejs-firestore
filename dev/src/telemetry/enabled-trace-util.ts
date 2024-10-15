@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Settings} from '@google-cloud/firestore';
+import * as types from '../../../types/firestore';
+import firestore = types.FirebaseFirestore;
 
 import {
   context,
@@ -37,7 +38,7 @@ export class EnabledTraceUtil implements TraceUtil {
   private tracer: Tracer;
   private settingsAttributes: Attributes;
 
-  constructor(settings: Settings) {
+  constructor(settings: firestore.Settings) {
     let tracerProvider = settings.openTelemetryOptions?.tracerProvider;
 
     // If a TracerProvider has not been given to us, we try to use the global one.

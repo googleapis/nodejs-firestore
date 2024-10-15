@@ -12,15 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  QueryDocumentSnapshot,
-  DocumentReference,
-  WithFieldValue,
-  DocumentData,
-  PartialWithFieldValue,
-  FirestoreDataConverter,
-  SetOptions,
-} from '@google-cloud/firestore';
+import {FirebaseFirestore} from '../../types/firestore';
 
 describe('FirestoreTypeConverter', () => {
   it('converter has the minimal typing information', () => {
@@ -32,7 +24,7 @@ describe('FirestoreTypeConverter', () => {
       toFirestore(obj: MyModelType) {
         return {a: obj.stringProperty, b: obj.numberProperty};
       },
-      fromFirestore(snapshot: QueryDocumentSnapshot) {
+      fromFirestore(snapshot: FirebaseFirestore.QueryDocumentSnapshot) {
         return {
           stringProperty: snapshot.data().a,
           numberProperty: snapshot.data().b,
@@ -54,10 +46,14 @@ describe('FirestoreTypeConverter', () => {
       numberProperty: number;
     }
     const converter = {
-      toFirestore(obj: WithFieldValue<MyModelType>): DocumentData {
+      toFirestore(
+        obj: FirebaseFirestore.WithFieldValue<MyModelType>
+      ): FirebaseFirestore.DocumentData {
         return {a: obj.stringProperty, b: obj.numberProperty};
       },
-      fromFirestore(snapshot: QueryDocumentSnapshot): MyModelType {
+      fromFirestore(
+        snapshot: FirebaseFirestore.QueryDocumentSnapshot
+      ): MyModelType {
         return {
           stringProperty: snapshot.data().a,
           numberProperty: snapshot.data().b,
@@ -78,18 +74,21 @@ describe('FirestoreTypeConverter', () => {
       stringProperty: string;
       numberProperty: number;
     }
-    const converter: FirestoreDataConverter<MyModelType, DocumentData> = {
+    const converter: FirebaseFirestore.FirestoreDataConverter<
+      MyModelType,
+      FirebaseFirestore.DocumentData
+    > = {
       toFirestore(
-        modelObject: PartialWithFieldValue<MyModelType>,
-        options?: SetOptions
-      ): DocumentData {
+        modelObject: FirebaseFirestore.PartialWithFieldValue<MyModelType>,
+        options?: FirebaseFirestore.SetOptions
+      ): FirebaseFirestore.DocumentData {
         if (options === undefined) {
           return {
             a: modelObject.stringProperty,
             b: modelObject.numberProperty,
           };
         }
-        const result: DocumentData = {};
+        const result: FirebaseFirestore.DocumentData = {};
         if ('stringProperty' in modelObject) {
           result.a = modelObject.stringProperty;
         }
@@ -98,7 +97,9 @@ describe('FirestoreTypeConverter', () => {
         }
         return result;
       },
-      fromFirestore(snapshot: QueryDocumentSnapshot): MyModelType {
+      fromFirestore(
+        snapshot: FirebaseFirestore.QueryDocumentSnapshot
+      ): MyModelType {
         return {
           stringProperty: snapshot.data().a,
           numberProperty: snapshot.data().b,
@@ -119,11 +120,11 @@ describe('FirestoreTypeConverter', () => {
       stringProperty: string;
       numberProperty: number;
     }
-    const converter: FirestoreDataConverter<MyModelType> = {
-      toFirestore(obj: WithFieldValue<MyModelType>) {
+    const converter: FirebaseFirestore.FirestoreDataConverter<MyModelType> = {
+      toFirestore(obj: FirebaseFirestore.WithFieldValue<MyModelType>) {
         return {a: obj.stringProperty, b: obj.numberProperty};
       },
-      fromFirestore(snapshot: QueryDocumentSnapshot) {
+      fromFirestore(snapshot: FirebaseFirestore.QueryDocumentSnapshot) {
         return {
           stringProperty: snapshot.data().a,
           numberProperty: snapshot.data().b,
@@ -148,11 +149,14 @@ describe('FirestoreTypeConverter', () => {
       a: string;
       b: number;
     }
-    const converter: FirestoreDataConverter<MyModelType, MyDbType> = {
-      toFirestore(obj: WithFieldValue<MyModelType>) {
+    const converter: FirebaseFirestore.FirestoreDataConverter<
+      MyModelType,
+      MyDbType
+    > = {
+      toFirestore(obj: FirebaseFirestore.WithFieldValue<MyModelType>) {
         return {a: obj.stringProperty, b: obj.numberProperty};
       },
-      fromFirestore(snapshot: QueryDocumentSnapshot) {
+      fromFirestore(snapshot: FirebaseFirestore.QueryDocumentSnapshot) {
         return {
           stringProperty: snapshot.data().a,
           numberProperty: snapshot.data().b,
@@ -233,7 +237,9 @@ describe('FirestoreTypeConverter', () => {
  * code block to this function to exercise the compiler but the code will not
  * actually be executed at runtime.
  */
-function neverCall<T>(_: (docRef: DocumentReference) => T): void {
+function neverCall<T>(
+  _: (docRef: FirebaseFirestore.DocumentReference) => T
+): void {
   _; // Trick eslint into thinking that `_` is used.
 }
 
@@ -246,5 +252,5 @@ function neverCall<T>(_: (docRef: DocumentReference) => T): void {
  */
 declare function fakeConverter<
   AppModelType,
-  DbModelType extends DocumentData,
->(): FirestoreDataConverter<AppModelType, DbModelType>;
+  DbModelType extends FirebaseFirestore.DocumentData,
+>(): FirebaseFirestore.FirestoreDataConverter<AppModelType, DbModelType>;

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
-
+import {FirebaseFirestore} from '../../types/firestore';
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
@@ -67,7 +66,7 @@ use(chaiAsPromised);
 
 function snapshot(
   relativePath: string,
-  data: DocumentData
+  data: FirebaseFirestore.DocumentData
 ): Promise<DocumentSnapshot> {
   return createInstance().then(firestore => {
     const path = QualifiedResourcePath.fromSlashSeparatedString(
