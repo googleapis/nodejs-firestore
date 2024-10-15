@@ -12,17 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  DocumentData,
-  ExplainMetrics,
-  PartialWithFieldValue,
-  QuerySnapshot,
-  SetOptions,
-  Settings,
-  VectorValue,
-  WithFieldValue,
-} from '@google-cloud/firestore';
-
+import {FirebaseFirestore} from '../../types/firestore';
 import {afterEach, before, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
@@ -101,8 +91,10 @@ if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
 }
 
-function getTestRoot(settings: Settings = {}): CollectionReference {
-  const internalSettings: Settings = {};
+function getTestRoot(
+  settings: FirebaseFirestore.Settings = {}
+): CollectionReference {
+  const internalSettings: FirebaseFirestore.Settings = {};
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }
@@ -260,7 +252,7 @@ describe('Firestore class', () => {
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
     let totalResponses = 0;
     let totalDocuments = 0;
-    let metrics: ExplainMetrics | null = null;
+    let metrics: FirebaseFirestore.ExplainMetrics | null = null;
     const stream = randomCol.explainStream();
     const promise = new Promise<boolean>((resolve, reject) => {
       stream.on('data', data => {
@@ -295,7 +287,7 @@ describe('Firestore class', () => {
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
     let totalResponses = 0;
     let totalDocuments = 0;
-    let metrics: ExplainMetrics | null = null;
+    let metrics: FirebaseFirestore.ExplainMetrics | null = null;
     const stream = randomCol.explainStream({analyze: false});
     const promise = new Promise<boolean>((resolve, reject) => {
       stream.on('data', data => {
@@ -330,7 +322,7 @@ describe('Firestore class', () => {
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
     let totalResponses = 0;
     let totalDocuments = 0;
-    let metrics: ExplainMetrics | null = null;
+    let metrics: FirebaseFirestore.ExplainMetrics | null = null;
     const stream = randomCol
       .where('foo', '==', 1)
       .explainStream({analyze: true});
@@ -668,7 +660,8 @@ describe('Firestore class', () => {
         desiredPartitionCount
       );
 
-      const documents: QueryDocumentSnapshot<DocumentData>[] = [];
+      const documents: QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[] =
+        [];
       for (const partition of partitions) {
         let partitionedQuery: Query = collectionGroup.orderBy(
           FieldPath.documentId()
@@ -1628,7 +1621,9 @@ describe('DocumentReference class', () => {
 
     it('handles query snapshots with converters', async () => {
       const setupDeferred = new Deferred<void>();
-      const resultsDeferred = new Deferred<QuerySnapshot<Post>>();
+      const resultsDeferred = new Deferred<
+        FirebaseFirestore.QuerySnapshot<Post>
+      >();
       const ref = randomCol.doc('doc').withConverter(postConverter);
       const unsubscribe = randomCol
         .where('title', '==', 'post')
@@ -1665,7 +1660,7 @@ describe('DocumentReference class', () => {
   it('supports primitive types with valid converter', async () => {
     type Primitive = number;
     const primitiveConverter = {
-      toFirestore(value: Primitive): DocumentData {
+      toFirestore(value: Primitive): FirebaseFirestore.DocumentData {
         return {value};
       },
       fromFirestore(snapshot: QueryDocumentSnapshot): Primitive {
@@ -1676,7 +1671,7 @@ describe('DocumentReference class', () => {
 
     type ArrayValue = number[];
     const arrayConverter = {
-      toFirestore(value: ArrayValue): DocumentData {
+      toFirestore(value: ArrayValue): FirebaseFirestore.DocumentData {
         return {values: value};
       },
       fromFirestore(snapshot: QueryDocumentSnapshot): ArrayValue {
@@ -1789,7 +1784,9 @@ describe('runs query on a large collection', () => {
     firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
 
-    const promises: Array<Promise<DocumentReference<DocumentData>>> = [];
+    const promises: Array<
+      Promise<DocumentReference<FirebaseFirestore.DocumentData>>
+    > = [];
     for (let i = 0; i < 1000; i++) {
       promises.push(randomCol.add({foo: 'a'}));
     }
@@ -1850,7 +1847,7 @@ describe('Query class', () => {
   };
 
   async function addDocs(
-    ...docs: DocumentData[]
+    ...docs: FirebaseFirestore.DocumentData[]
   ): Promise<DocumentReference[]> {
     let id = 0; // Guarantees consistent ordering for the first documents
     const refs: DocumentReference[] = [];
@@ -1863,8 +1860,8 @@ describe('Query class', () => {
   }
 
   async function testCollectionWithDocs(docs: {
-    [id: string]: DocumentData;
-  }): Promise<CollectionReference<DocumentData>> {
+    [id: string]: FirebaseFirestore.DocumentData;
+  }): Promise<CollectionReference<FirebaseFirestore.DocumentData>> {
     for (const id in docs) {
       const ref = randomCol.doc(id);
       await ref.set(docs[id]);
@@ -1872,12 +1869,18 @@ describe('Query class', () => {
     return randomCol;
   }
 
-  function expectDocs(result: QuerySnapshot, ...docs: string[]): void;
-  function expectDocs(result: QuerySnapshot, ...data: DocumentData[]): void;
+  function expectDocs(
+    result: FirebaseFirestore.QuerySnapshot,
+    ...docs: string[]
+  ): void;
+  function expectDocs(
+    result: FirebaseFirestore.QuerySnapshot,
+    ...data: FirebaseFirestore.DocumentData[]
+  ): void;
 
   function expectDocs(
-    result: QuerySnapshot,
-    ...data: DocumentData[] | string[]
+    result: FirebaseFirestore.QuerySnapshot,
+    ...data: FirebaseFirestore.DocumentData[] | string[]
   ): void {
     expect(result.size).to.equal(data.length);
 
@@ -2091,7 +2094,7 @@ describe('Query class', () => {
       }
 
       const fooConverter = {
-        toFirestore(d: FooDistance): DocumentData {
+        toFirestore(d: FooDistance): FirebaseFirestore.DocumentData {
           return {title: d.foo, embedding: FieldValue.vector(d.embedding)};
         },
         fromFirestore(snapshot: QueryDocumentSnapshot): FooDistance {
@@ -2311,7 +2314,7 @@ describe('Query class', () => {
       const res = await vectorQuery.get();
       expect(res.size).to.equal(1);
       expect(
-        (res.docs[0].get('embedding') as VectorValue).toArray()
+        (res.docs[0].get('embedding') as FirebaseFirestore.VectorValue).toArray()
       ).to.deep.equal(embeddingVector);
     });
 
@@ -3645,9 +3648,10 @@ describe('Query class', () => {
       doc: DocumentSnapshot;
     }
 
-    const currentDeferred = new DeferredPromise<QuerySnapshot>();
+    const currentDeferred =
+      new DeferredPromise<FirebaseFirestore.QuerySnapshot>();
 
-    const snapshot = (id: string, data: DocumentData) => {
+    const snapshot = (id: string, data: FirebaseFirestore.DocumentData) => {
       const ref = randomCol.doc(id);
       const fields = ref.firestore._serializer!.encodeFields(data);
       return randomCol.firestore.snapshot_(
@@ -3666,7 +3670,7 @@ describe('Query class', () => {
     const docChange = (
       type: string,
       id: string,
-      data: DocumentData
+      data: FirebaseFirestore.DocumentData
     ): ExpectedChange => {
       return {
         type,
@@ -3674,11 +3678,11 @@ describe('Query class', () => {
       };
     };
 
-    const added = (id: string, data: DocumentData) =>
+    const added = (id: string, data: FirebaseFirestore.DocumentData) =>
       docChange('added', id, data);
-    const modified = (id: string, data: DocumentData) =>
+    const modified = (id: string, data: FirebaseFirestore.DocumentData) =>
       docChange('modified', id, data);
-    const removed = (id: string, data: DocumentData) =>
+    const removed = (id: string, data: FirebaseFirestore.DocumentData) =>
       docChange('removed', id, data);
 
     function resetPromise() {
@@ -3688,7 +3692,7 @@ describe('Query class', () => {
       });
     }
 
-    function waitForSnapshot(): Promise<QuerySnapshot> {
+    function waitForSnapshot(): Promise<FirebaseFirestore.QuerySnapshot> {
       return currentDeferred.promise!.then(snapshot => {
         resetPromise();
         return snapshot;
@@ -3696,7 +3700,7 @@ describe('Query class', () => {
     }
 
     function snapshotsEqual(
-      actual: QuerySnapshot,
+      actual: FirebaseFirestore.QuerySnapshot,
       expected: {docs: DocumentSnapshot[]; docChanges: ExpectedChange[]}
     ) {
       let i;
@@ -4711,7 +4715,7 @@ describe('Aggregation queries', () => {
   afterEach(() => verifyInstance(firestore));
 
   async function addTestDocs(docs: {
-    [key: string]: DocumentData;
+    [key: string]: FirebaseFirestore.DocumentData;
   }): Promise<Awaited<WriteResult>[]> {
     const sets: Array<Promise<WriteResult>> = [];
     Object.keys(docs).forEach(key => {
@@ -4818,7 +4822,7 @@ describe('Aggregation queries', () => {
     };
     const throwingConverter = {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      toFirestore(obj: never): DocumentData {
+      toFirestore(obj: never): FirebaseFirestore.DocumentData {
         throw new Error('should never be called');
       },
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -6782,7 +6786,7 @@ describe('WriteBatch class', () => {
 
 describe('QuerySnapshot class', () => {
   let firestore: Firestore;
-  let querySnapshot: Promise<QuerySnapshot>;
+  let querySnapshot: Promise<FirebaseFirestore.QuerySnapshot>;
 
   beforeEach(() => {
     const randomCol = getTestRoot();
@@ -7329,7 +7333,7 @@ describe('Types test', () => {
   }
 
   const testConverter = {
-    toFirestore(testObj: WithFieldValue<TestObject>) {
+    toFirestore(testObj: FirebaseFirestore.WithFieldValue<TestObject>) {
       return {...testObj};
     },
     fromFirestore(snapshot: QueryDocumentSnapshot): TestObject {
@@ -7363,8 +7367,8 @@ describe('Types test', () => {
   describe('Nested partial support', () => {
     const testConverterMerge = {
       toFirestore(
-        testObj: PartialWithFieldValue<TestObject>,
-        options?: SetOptions
+        testObj: FirebaseFirestore.PartialWithFieldValue<TestObject>,
+        options?: FirebaseFirestore.SetOptions
       ) {
         if (options) {
           expect(testObj).to.not.be.an.instanceOf(TestObject);
@@ -7503,8 +7507,8 @@ describe('Types test', () => {
   describe('NestedPartial', () => {
     const testConverterMerge = {
       toFirestore(
-        testObj: PartialWithFieldValue<TestObject>,
-        options?: SetOptions
+        testObj: FirebaseFirestore.PartialWithFieldValue<TestObject>,
+        options?: FirebaseFirestore.SetOptions
       ) {
         if (options) {
           expect(testObj).to.not.be.an.instanceOf(TestObject);
@@ -7742,13 +7746,13 @@ describe('Types test', () => {
 
     describe('used as a type', () => {
       class ObjectWrapper<T> {
-        withFieldValueT(value: WithFieldValue<T>): WithFieldValue<T> {
+        withFieldValueT(value: FirebaseFirestore.WithFieldValue<T>): FirebaseFirestore.WithFieldValue<T> {
           return value;
         }
 
         withPartialFieldValueT(
-          value: PartialWithFieldValue<T>
-        ): PartialWithFieldValue<T> {
+          value: FirebaseFirestore.PartialWithFieldValue<T>
+        ): FirebaseFirestore.PartialWithFieldValue<T> {
           return value;
         }
 
@@ -7851,7 +7855,7 @@ describe('Types test', () => {
       }
 
       const testConverterOptional = {
-        toFirestore(testObj: WithFieldValue<TestObjectOptional>) {
+        toFirestore(testObj: FirebaseFirestore.WithFieldValue<TestObjectOptional>) {
           return {...testObj};
         },
         fromFirestore(snapshot: QueryDocumentSnapshot): TestObjectOptional {
@@ -7891,7 +7895,7 @@ describe('Types test', () => {
       }
 
       const testConverterOptional = {
-        toFirestore(testObj: WithFieldValue<TestObjectOptional>) {
+        toFirestore(testObj: FirebaseFirestore.WithFieldValue<TestObjectOptional>) {
           return {...testObj};
         },
         fromFirestore(snapshot: QueryDocumentSnapshot): TestObjectOptional {
@@ -7925,7 +7929,7 @@ describe('Types test', () => {
       }
 
       const testConverterUnion = {
-        toFirestore(testObj: WithFieldValue<TestObjectUnion>) {
+        toFirestore(testObj: FirebaseFirestore.WithFieldValue<TestObjectUnion>) {
           return {...testObj};
         },
         fromFirestore(snapshot: QueryDocumentSnapshot): TestObjectUnion {

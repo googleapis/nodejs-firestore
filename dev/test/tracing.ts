@@ -172,17 +172,4 @@ describe('Firestore Tracing Controls', () => {
     const actual = (tracerProviderUsed as ProxyTracerProvider).getDelegate();
     expect(actual === globalTracerProvider).to.be.true;
   });
-
-  it('Generates an error if the given tracerProvider is not valid', async () => {
-    try {
-      await createInstance(undefined, {
-        openTelemetryOptions: {tracerProvider: 123},
-      });
-    } catch (e) {
-      expect(
-        e.toString() ===
-          "the given value for 'tracerProvider' does not implement the TracerProvider interface"
-      );
-    }
-  });
 });

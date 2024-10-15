@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
-
 import {google} from '../protos/firestore_v1_proto_api';
 import {Serializable} from './serializer';
 import {validateNumber} from './validate';
 
 import api = google.firestore.v1;
+
+import * as types from '../../types/firestore';
+import firestore = types.FirebaseFirestore;
 
 /**
  * An immutable object representing a geographic location in Firestore. The

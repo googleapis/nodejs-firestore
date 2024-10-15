@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Settings} from '@google-cloud/firestore';
+import * as types from '../../../types/firestore';
+import firestore = types.FirebaseFirestore;
 
 import {
   context,
@@ -45,7 +46,7 @@ export class EnabledTraceUtil implements TraceUtil {
   // Visible for testing
   tracerProvider: TracerProvider;
 
-  constructor(settings: Settings) {
+  constructor(settings: firestore.Settings) {
     let provider: TracerProvider | undefined =
       settings.openTelemetryOptions?.tracerProvider;
 
@@ -61,13 +62,7 @@ export class EnabledTraceUtil implements TraceUtil {
 
     const libVersion = require('../../../package.json').version;
     const libName = require('../../../package.json').name;
-    try {
-      this.tracer = this.tracerProvider.getTracer(libName, libVersion);
-    } catch (e) {
-      throw new Error(
-        "the given value for 'tracerProvider' does not implement the TracerProvider interface."
-      );
-    }
+    this.tracer = this.tracerProvider.getTracer(libName, libVersion);
 
     this.settingsAttributes = {};
     this.settingsAttributes['otel.scope.name'] = libName;

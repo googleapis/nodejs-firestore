@@ -17,10 +17,12 @@
 import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
+import * as types from '../../../types/firestore';
+import firestore = types.FirebaseFirestore;
+
 import * as assert from 'assert';
 import * as deepEqual from 'fast-deep-equal';
 
-import * as firestore from '@google-cloud/firestore';
 import {Aggregate, AggregateSpec} from '../aggregate';
 import {Timestamp} from '../timestamp';
 import {mapToArray, requestTag, wrapError} from '../util';

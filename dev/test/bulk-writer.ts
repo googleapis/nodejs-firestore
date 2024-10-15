@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {BulkWriterOptions, DocumentData} from '@google-cloud/firestore';
-
+import {FirebaseFirestore} from '../../types/firestore';
 import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect} from 'chai';
 import {GoogleError, Status} from 'google-gax';
@@ -1048,7 +1047,7 @@ describe('BulkWriter', () => {
 
     class Boo {}
     const booConverter = {
-      toFirestore(): DocumentData {
+      toFirestore(): FirebaseFirestore.DocumentData {
         return {foo: 'boo'};
       },
       fromFirestore(): Boo {
@@ -1058,7 +1057,7 @@ describe('BulkWriter', () => {
 
     class Moo {}
     const mooConverter = {
-      toFirestore(): DocumentData {
+      toFirestore(): FirebaseFirestore.DocumentData {
         return {foo: 'moo'};
       },
       fromFirestore(): Moo {
@@ -1127,7 +1126,7 @@ describe('BulkWriter', () => {
   describe('Timeout handler tests', () => {
     // Return success responses for all requests.
     function instantiateInstance(
-      options?: BulkWriterOptions
+      options?: FirebaseFirestore.BulkWriterOptions
     ): Promise<BulkWriter> {
       const overrides: ApiOverride = {
         batchWrite: request => {

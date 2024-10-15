@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  FirestoreDataConverter,
-  QueryDocumentSnapshot,
-  DocumentData,
-  WithFieldValue,
-} from '@google-cloud/firestore';
+import * as types from '../../types/firestore';
+import firestore = types.FirebaseFirestore;
 
 import {CallOptions} from 'google-gax';
 import {Duplex} from 'stream';
@@ -122,14 +118,19 @@ export type RBTree = any;
  * @private
  * @internal
  */
-const defaultConverterObj: FirestoreDataConverter<DocumentData> = {
-  toFirestore(modelObject: WithFieldValue<DocumentData>): DocumentData {
-    return modelObject;
-  },
-  fromFirestore(snapshot: QueryDocumentSnapshot): DocumentData {
-    return snapshot.data()!;
-  },
-};
+const defaultConverterObj: firestore.FirestoreDataConverter<firestore.DocumentData> =
+  {
+    toFirestore(
+      modelObject: firestore.WithFieldValue<firestore.DocumentData>
+    ): firestore.DocumentData {
+      return modelObject;
+    },
+    fromFirestore(
+      snapshot: firestore.QueryDocumentSnapshot
+    ): firestore.DocumentData {
+      return snapshot.data()!;
+    },
+  };
 
 /**
  * A default converter to use when none is provided.
@@ -138,9 +139,9 @@ const defaultConverterObj: FirestoreDataConverter<DocumentData> = {
  */
 export function defaultConverter<
   AppModelType,
-  DbModelType extends DocumentData,
->(): FirestoreDataConverter<AppModelType, DbModelType> {
-  return defaultConverterObj as FirestoreDataConverter<
+  DbModelType extends firestore.DocumentData,
+>(): firestore.FirestoreDataConverter<AppModelType, DbModelType> {
+  return defaultConverterObj as firestore.FirestoreDataConverter<
     AppModelType,
     DbModelType
   >;

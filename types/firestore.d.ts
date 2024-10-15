@@ -21,6 +21,8 @@
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
 
+import {TracerProvider} from '@opentelemetry/api';
+
 declare namespace FirebaseFirestore {
   /** Alias for `any` but used where a Firestore field value would be provided. */
   export type DocumentFieldValue = any;
@@ -485,7 +487,7 @@ declare namespace FirebaseFirestore {
      * this client's span creation by passing in a "no-op" tracer provider here,
      * or by setting the `FIRESTORE_ENABLE_TRACING=OFF` environment variable.
      */
-    tracerProvider?: any;
+    tracerProvider?: TracerProvider;
   }
 
   /** Options to configure a read-only transaction. */
