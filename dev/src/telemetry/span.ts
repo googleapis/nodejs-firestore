@@ -17,6 +17,10 @@
 import {Span as OpenTelemetrySpan} from '@opentelemetry/api';
 import {Attributes} from './trace-util';
 
+/**
+ * @private
+ * @internal
+ */
 export class Span {
   constructor(private span?: OpenTelemetrySpan) {}
 

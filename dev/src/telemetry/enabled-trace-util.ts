@@ -22,6 +22,7 @@ import {
   trace,
   Tracer,
   Span as OpenTelemetrySpan,
+  TracerProvider,
 } from '@opentelemetry/api';
 
 import {Span} from './span';
@@ -33,22 +34,40 @@ import {DEFAULT_DATABASE_ID} from '../path';
 import {DEFAULT_MAX_IDLE_CHANNELS} from '../index';
 const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
+/**
+ * @private
+ * @internal
+ */
 export class EnabledTraceUtil implements TraceUtil {
   private tracer: Tracer;
   private settingsAttributes: Attributes;
 
+  // Visible for testing
+  tracerProvider: TracerProvider;
+
   constructor(settings: Settings) {
-    let tracerProvider = settings.openTelemetryOptions?.tracerProvider;
+    let provider: TracerProvider | undefined =
+      settings.openTelemetryOptions?.tracerProvider;
 
     // If a TracerProvider has not been given to us, we try to use the global one.
-    if (!tracerProvider) {
+    if (!provider) {
       const {trace} = require('@opentelemetry/api');
-      tracerProvider = trace.getTracerProvider();
+      provider = trace.getTracerProvider();
     }
+
+    // At this point provider is guaranteed to be defined because
+    // `trace.getTracerProvider()` does not return null or undefined.
+    this.tracerProvider = provider!;
 
     const libVersion = require('../../../package.json').version;
     const libName = require('../../../package.json').name;
-    this.tracer = tracerProvider.getTracer(libName, libVersion);
+    try {
+      this.tracer = this.tracerProvider.getTracer(libName, libVersion);
+    } catch (e) {
+      throw new Error(
+        "the given value for 'tracerProvider' does not implement the TracerProvider interface."
+      );
+    }
 
     this.settingsAttributes = {};
     this.settingsAttributes['otel.scope.name'] = libName;
