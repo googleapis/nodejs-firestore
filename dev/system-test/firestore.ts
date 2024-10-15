@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {
+  AggregateQuery,
   DocumentData,
   ExplainMetrics,
   PartialWithFieldValue,
@@ -21,8 +22,7 @@ import {
   Settings,
   VectorValue,
   WithFieldValue,
-} from '@google-cloud/firestore';
-
+} from '../../types/firestore';
 import {afterEach, before, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
@@ -4398,8 +4398,8 @@ describe('count queries', () => {
 
   function countTests(
     runQueryAndExpectCount: (
-      query: FirebaseFirestore.AggregateQuery<{
-        count: FirebaseFirestore.AggregateField<number>;
+      query: AggregateQuery<{
+        count: AggregateField<number>;
       }>,
       expectedCount: number
     ) => Promise<void>
@@ -4550,8 +4550,8 @@ describe('count queries using aggregate api', () => {
 
   function countTests(
     runQueryAndExpectCount: (
-      query: FirebaseFirestore.AggregateQuery<{
-        count: FirebaseFirestore.AggregateField<number>;
+      query: AggregateQuery<{
+        count: AggregateField<number>;
       }>,
       expectedCount: number
     ) => Promise<void>

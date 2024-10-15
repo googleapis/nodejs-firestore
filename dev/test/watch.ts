@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
-
 import * as duplexify from 'duplexify';
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
@@ -44,6 +42,7 @@ import {Serializer} from '../src/serializer';
 import {WATCH_IDLE_TIMEOUT_MS} from '../src/watch';
 import {createInstance, InvalidApiUsage, verifyInstance} from './util/helpers';
 import api = google.firestore.v1;
+import {DocumentData} from '../../types/firestore';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(null);

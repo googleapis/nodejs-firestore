@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
+import * as firestore from '../../types/firestore';
 
 /**
  * A `Filter` represents a restriction on one or more field values and can

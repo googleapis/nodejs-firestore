@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
+import * as firestore from '../../types/firestore';
+
 import {google} from '../protos/firestore_v1_proto_api';
 import {Serializer} from './serializer';
 import IPlanSummary = google.firestore.v1.IPlanSummary;

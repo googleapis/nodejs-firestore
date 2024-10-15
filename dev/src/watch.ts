@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
+import * as firestore from '../../types/firestore';
 
 import * as assert from 'assert';
 import * as rbtree from 'functional-red-black-tree';
@@ -33,7 +33,6 @@ import {defaultConverter, RBTree} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
-import {DocumentData} from '@google-cloud/firestore';
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -73,7 +72,7 @@ const ChangeType: {[k: string]: DocumentChangeType} = {
  */
 const DOCUMENT_WATCH_COMPARATOR: <
   AppModelType,
-  DbModelType extends DocumentData,
+  DbModelType extends firestore.DocumentData,
 >(
   doc1: QueryDocumentSnapshot<AppModelType, DbModelType>,
   doc2: QueryDocumentSnapshot<AppModelType, DbModelType>

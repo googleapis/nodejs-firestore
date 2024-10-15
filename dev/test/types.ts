@@ -13,14 +13,14 @@
 // limitations under the License.
 
 import {
-  QueryDocumentSnapshot,
-  DocumentReference,
-  WithFieldValue,
   DocumentData,
-  PartialWithFieldValue,
+  DocumentReference,
   FirestoreDataConverter,
+  PartialWithFieldValue,
+  QueryDocumentSnapshot,
   SetOptions,
-} from '@google-cloud/firestore';
+  WithFieldValue,
+} from '../../types/firestore';
 
 describe('FirestoreTypeConverter', () => {
   it('converter has the minimal typing information', () => {

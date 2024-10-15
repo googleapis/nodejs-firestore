@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
-
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 
@@ -35,6 +33,7 @@ import {
   verifyInstance,
   Post,
 } from './util/helpers';
+import {DocumentData} from '../../types/firestore';
 
 const REQUEST_TIME = 'REQUEST_TIME';
 
