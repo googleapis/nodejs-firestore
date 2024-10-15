@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
-
+import * as types from '../../types/firestore';
+import firestore = types.FirebaseFirestore;
 import type {CallOptions, ClientOptions} from 'google-gax';
 import type * as googleGax from 'google-gax';
 import type * as googleGaxFallback from 'google-gax/build/src/fallback';
@@ -792,8 +792,7 @@ export class Firestore implements firestore.Firestore {
   }
 
   private newTraceUtilInstance(settings: firestore.Settings): TraceUtil {
-    // Take the tracing option from the settings.
-    let createEnabledInstance = settings.openTelemetryOptions?.enableTracing;
+    let createEnabledInstance = true;
 
     // The environment variable can override options to enable/disable telemetry collection.
     if ('FIRESTORE_ENABLE_TRACING' in process.env) {

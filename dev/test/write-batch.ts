@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
-
+import {FirebaseFirestore} from '../../types/firestore';
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 
@@ -82,7 +81,7 @@ describe('set() method', () => {
 
   it('requires the correct converter for Partial usage', async () => {
     const converter = {
-      toFirestore(post: Post): DocumentData {
+      toFirestore(post: Post): FirebaseFirestore.DocumentData {
         return {title: post.title, author: post.author};
       },
       fromFirestore(snapshot: QueryDocumentSnapshot): Post {

@@ -16,9 +16,18 @@
 
 import {Span} from './span';
 
+/**
+ * @private
+ * @internal
+ */
 export interface Attributes {
   [attributeKey: string]: AttributeValue | undefined;
 }
+
+/**
+ * @private
+ * @internal
+ */
 export declare type AttributeValue =
   | string
   | number
@@ -67,6 +76,10 @@ export const ATTRIBUTE_KEY_TRANSACTION_TYPE = 'transaction_type';
 export const ATTRIBUTE_KEY_ATTEMPTS_ALLOWED = 'attempts_allowed';
 export const ATTRIBUTE_KEY_ATTEMPTS_REMAINING = 'attempts_remaining';
 
+/**
+ * @private
+ * @internal
+ */
 export interface TraceUtil {
   startActiveSpan<F extends (span: Span) => unknown>(
     name: string,

@@ -12,12 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  DocumentData,
-  Settings,
-  SetOptions,
-  PartialWithFieldValue,
-} from '@google-cloud/firestore';
+import {FirebaseFirestore} from '../../../types/firestore';
 
 import {expect} from 'chai';
 import * as extend from 'extend';
@@ -62,7 +57,7 @@ export type ApiOverride = Partial<GapicClient>;
  */
 export function createInstance(
   apiOverrides?: ApiOverride,
-  firestoreSettings?: Settings
+  firestoreSettings?: FirebaseFirestore.Settings
 ): Promise<Firestore> {
   const initializationOptions = {
     ...{projectId: PROJECT_ID, sslCreds: SSL_CREDENTIALS!},
@@ -381,7 +376,7 @@ export class Post {
 
 /** Converts Post objects to and from Firestore in tests. */
 export const postConverter = {
-  toFirestore(post: Post): DocumentData {
+  toFirestore(post: Post): FirebaseFirestore.DocumentData {
     return {title: post.title, author: post.author};
   },
   fromFirestore(snapshot: QueryDocumentSnapshot): Post {
@@ -392,15 +387,15 @@ export const postConverter = {
 
 export const postConverterMerge = {
   toFirestore(
-    post: PartialWithFieldValue<Post>,
-    options?: SetOptions
-  ): DocumentData {
+    post: FirebaseFirestore.PartialWithFieldValue<Post>,
+    options?: FirebaseFirestore.SetOptions
+  ): FirebaseFirestore.DocumentData {
     if (options) {
       expect(post).to.not.be.an.instanceOf(Post);
     } else {
       expect(post).to.be.an.instanceof(Post);
     }
-    const result: DocumentData = {};
+    const result: FirebaseFirestore.DocumentData = {};
     if (post.title) result.title = post.title;
     if (post.author) result.author = post.author;
     return result;

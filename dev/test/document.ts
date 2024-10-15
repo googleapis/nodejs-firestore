@@ -49,7 +49,7 @@ import {
   verifyInstance,
   writeResult,
 } from './util/helpers';
-import {Precondition} from '@google-cloud/firestore';
+import {FirebaseFirestore} from '../../types/firestore';
 
 const PROJECT_ID = 'test-project';
 
@@ -1802,9 +1802,9 @@ describe('update document', () => {
 
   it('with invalid last update time precondition', () => {
     expect(() => {
-      const malformedPrecondition: Precondition = {
+      const malformedPrecondition: FirebaseFirestore.Precondition = {
         lastUpdateTime: 'foo',
-      } as unknown as Precondition;
+      } as unknown as FirebaseFirestore.Precondition;
       firestore
         .doc('collectionId/documentId')
         .update({foo: 'bar'}, malformedPrecondition);

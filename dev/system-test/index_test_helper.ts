@@ -26,12 +26,7 @@ import {
 } from '../src';
 import {autoId} from '../src/util';
 
-import {
-  DocumentData,
-  QuerySnapshot,
-  WithFieldValue,
-  UpdateData,
-} from '@google-cloud/firestore';
+import {FirebaseFirestore} from '../../types/firestore';
 export const INDEX_TEST_COLLECTION = 'index-test-collection';
 
 /**
@@ -60,7 +55,7 @@ export class IndexTestHelper {
 
   // Runs a test with specified documents in the INDEX_TEST_COLLECTION.
   async setTestDocs(docs: {
-    [key: string]: DocumentData;
+    [key: string]: FirebaseFirestore.DocumentData;
   }): Promise<CollectionReference> {
     const testDocs = this.prepareTestDocuments(docs);
     const collectionRef = this.db.collection(INDEX_TEST_COLLECTION);
@@ -72,15 +67,16 @@ export class IndexTestHelper {
   }
 
   // Runs a test with specified documents in the INDEX_TEST_COLLECTION.
-  async createTestDocs(docs: DocumentData[]): Promise<CollectionReference> {
+  async createTestDocs(
+    docs: FirebaseFirestore.DocumentData[]
+  ): Promise<CollectionReference> {
     // convert docsArray without IDs to a map with IDs
-    const docsMap = docs.reduce<{[key: string]: DocumentData}>(
-      (result, doc) => {
-        result[autoId()] = doc;
-        return result;
-      },
-      {}
-    );
+    const docsMap = docs.reduce<{
+      [key: string]: FirebaseFirestore.DocumentData;
+    }>((result, doc) => {
+      result[autoId()] = doc;
+      return result;
+    }, {});
     return this.setTestDocs(docsMap);
   }
 
@@ -100,7 +96,9 @@ export class IndexTestHelper {
   }
 
   // Adds test-specific fields to a document, including the testId and expiration date.
-  addTestSpecificFieldsToDoc(doc: DocumentData): DocumentData {
+  addTestSpecificFieldsToDoc(
+    doc: FirebaseFirestore.DocumentData
+  ): FirebaseFirestore.DocumentData {
     return {
       ...doc,
       [this.TEST_ID_FIELD]: this.testId,
@@ -112,16 +110,20 @@ export class IndexTestHelper {
   }
 
   // Remove test-specific fields from a document, including the testId and expiration date.
-  private removeTestSpecificFieldsFromDoc(doc: DocumentData): void {
+  private removeTestSpecificFieldsFromDoc(
+    doc: FirebaseFirestore.DocumentData
+  ): void {
     doc._document?.data?.delete(new FieldPath(this.TEST_ID_FIELD));
     doc._document?.data?.delete(new FieldPath(this.TTL_FIELD));
   }
 
   // Helper method to hash document keys and add test-specific fields for the provided documents.
-  private prepareTestDocuments(docs: {[key: string]: DocumentData}): {
-    [key: string]: DocumentData;
+  private prepareTestDocuments(docs: {
+    [key: string]: FirebaseFirestore.DocumentData;
+  }): {
+    [key: string]: FirebaseFirestore.DocumentData;
   } {
-    const result: {[key: string]: DocumentData} = {};
+    const result: {[key: string]: FirebaseFirestore.DocumentData} = {};
     for (const key in docs) {
       // eslint-disable-next-line no-prototype-builtins
       if (docs.hasOwnProperty(key)) {
@@ -161,7 +163,7 @@ export class IndexTestHelper {
   ): Promise<DocumentReference<T>> {
     const processedData = this.addTestSpecificFieldsToDoc(
       data
-    ) as WithFieldValue<T>;
+    ) as FirebaseFirestore.WithFieldValue<T>;
     return reference.add(processedData);
   }
 
@@ -172,13 +174,13 @@ export class IndexTestHelper {
   ): Promise<void> {
     const processedData = this.addTestSpecificFieldsToDoc(
       data
-    ) as WithFieldValue<T>;
+    ) as FirebaseFirestore.WithFieldValue<T>;
     await reference.set(processedData);
   }
 
-  async updateDoc<T, DbModelType extends DocumentData>(
+  async updateDoc<T, DbModelType extends FirebaseFirestore.DocumentData>(
     reference: DocumentReference<T, DbModelType>,
-    data: UpdateData<DbModelType>
+    data: FirebaseFirestore.UpdateData<DbModelType>
   ): Promise<void> {
     await reference.update(data);
   }
@@ -195,7 +197,9 @@ export class IndexTestHelper {
   }
 
   // Retrieves multiple documents from Firestore with test-specific fields removed.
-  async getDocs<T>(query_: Query<T>): Promise<QuerySnapshot<T>> {
+  async getDocs<T>(
+    query_: Query<T>
+  ): Promise<FirebaseFirestore.QuerySnapshot<T>> {
     const querySnapshot = await this.query(query_).get();
     querySnapshot.forEach(doc => {
       this.removeTestSpecificFieldsFromDoc(doc);

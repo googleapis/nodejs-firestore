@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
+import {FirebaseFirestore} from '../../types/firestore';
 
 import * as duplexify from 'duplexify';
 import {describe, it, beforeEach, afterEach} from 'mocha';
@@ -141,7 +141,7 @@ function snapshotsEqual(
  */
 function snapshot(
   ref: DocumentReference,
-  data: DocumentData
+  data: FirebaseFirestore.DocumentData
 ): QueryDocumentSnapshot {
   const snapshot = new DocumentSnapshotBuilder(ref);
   snapshot.fieldsProto = ref.firestore._serializer!.encodeFields(data);
@@ -157,16 +157,16 @@ function snapshot(
 function docChange(
   type: DocumentChangeType,
   ref: DocumentReference,
-  data: DocumentData
+  data: FirebaseFirestore.DocumentData
 ): {type: DocumentChangeType; doc: QueryDocumentSnapshot} {
   return {type, doc: snapshot(ref, data)};
 }
 
-const added = (ref: DocumentReference, data: DocumentData) =>
+const added = (ref: DocumentReference, data: FirebaseFirestore.DocumentData) =>
   docChange('added', ref, data);
-const modified = (ref: DocumentReference, data: DocumentData) =>
+const modified = (ref: DocumentReference, data: FirebaseFirestore.DocumentData) =>
   docChange('modified', ref, data);
-const removed = (ref: DocumentReference, data: DocumentData) =>
+const removed = (ref: DocumentReference, data: FirebaseFirestore.DocumentData) =>
   docChange('removed', ref, data);
 
 function verifyRequest<T>(actual: T, expected: T): void {
@@ -476,7 +476,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
    * @param ref The document reference.
    * @param data The data for the doc in proto JSON format.
    */
-  sendDoc(ref: DocumentReference, data: DocumentData): void {
+  sendDoc(ref: DocumentReference, data: FirebaseFirestore.DocumentData): void {
     this.streamHelper.write({
       documentChange: {
         document: {
@@ -496,7 +496,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
    * @param ref The document reference.
    * @param data The data for the doc in proto JSON format.
    */
-  sendDocRemove(ref: DocumentReference, data: DocumentData): void {
+  sendDocRemove(ref: DocumentReference, data: FirebaseFirestore.DocumentData): void {
     this.streamHelper.write({
       documentChange: {
         document: {

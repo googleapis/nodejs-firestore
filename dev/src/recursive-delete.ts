@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as firestore from '@google-cloud/firestore';
+
+import * as types from '../../types/firestore';
+import firestore = types.FirebaseFirestore;
 
 import * as assert from 'assert';
 

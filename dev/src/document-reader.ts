@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import * as types from '../../types/firestore';
+import firestore = types.FirebaseFirestore;
+
 import {DocumentSnapshot, DocumentSnapshotBuilder} from './document';
 import {DocumentReference} from './reference/document-reference';
 import {FieldPath} from './path';
@@ -22,10 +25,12 @@ import {google} from '../protos/firestore_v1_proto_api';
 import {logger} from './logger';
 import {Firestore} from './index';
 import {Timestamp} from './timestamp';
-import {DocumentData} from '@google-cloud/firestore';
 import api = google.firestore.v1;
 
-interface BatchGetResponse<AppModelType, DbModelType extends DocumentData> {
+interface BatchGetResponse<
+  AppModelType,
+  DbModelType extends firestore.DocumentData,
+> {
   result: Array<DocumentSnapshot<AppModelType, DbModelType>>;
   /**
    * The transaction that was started as part of this request. Will only be if
@@ -41,7 +46,10 @@ interface BatchGetResponse<AppModelType, DbModelType extends DocumentData> {
  * @private
  * @internal
  */
-export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
+export class DocumentReader<
+  AppModelType,
+  DbModelType extends firestore.DocumentData,
+> {
   private readonly outstandingDocuments = new Set<string>();
   private readonly retrievedDocuments = new Map<string, DocumentSnapshot>();
   private retrievedTransactionId?: Uint8Array;
@@ -166,7 +174,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
           this.retrievedTransactionId = response.transaction;
         }
 
-        let snapshot: DocumentSnapshot<DocumentData> | undefined;
+        let snapshot: DocumentSnapshot<firestore.DocumentData> | undefined;
         if (response.found) {
           logger(
             'DocumentReader.fetchDocuments',

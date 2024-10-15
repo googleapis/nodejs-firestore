@@ -30,7 +30,7 @@ import {
   Context as OpenTelemetryContext,
 } from '@opentelemetry/api';
 import {TraceExporter} from '@google-cloud/opentelemetry-cloud-trace-exporter';
-import {Settings} from '@google-cloud/firestore';
+import {FirebaseFirestore} from '../../types/firestore';
 import {
   AlwaysOnSampler,
   BatchSpanProcessor,
@@ -95,13 +95,6 @@ diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 setLogFunction((msg: string) => {
   console.log(`LOG: ${msg}`);
 });
-
-// TODO(tracing): This should be moved to firestore.d.ts when we want to
-//  release the feature.
-export interface FirestoreOpenTelemetryOptions {
-  enableTracing?: boolean;
-  tracerProvider?: any;
-}
 
 interface TestConfig {
   // In-Memory tests check trace correctness by inspecting traces in memory by
@@ -190,9 +183,8 @@ describe('Tracing Tests', () => {
 
   function getOpenTelemetryOptions(
     tracerProvider: TracerProvider
-  ): FirestoreOpenTelemetryOptions {
-    const options: FirestoreOpenTelemetryOptions = {
-      enableTracing: true,
+  ): FirebaseFirestore.FirestoreOpenTelemetryOptions {
+    const options: FirebaseFirestore.FirestoreOpenTelemetryOptions = {
       tracerProvider: undefined,
     };
 
@@ -283,7 +275,7 @@ describe('Tracing Tests', () => {
     customSpanContext = getNewSpanContext();
     customContext = trace.setSpanContext(ROOT_CONTEXT, customSpanContext);
 
-    const settings: Settings = {
+    const settings: FirebaseFirestore.Settings = {
       preferRest: testConfig.preferRest,
       openTelemetryOptions: getOpenTelemetryOptions(tracerProvider),
     };
@@ -920,6 +912,7 @@ describe('Tracing Tests', () => {
       await runFirestoreOperationInRootSpan(async () => {
         const query = firestore.collectionGroup('foo');
         let numPartitions = 0;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const partition of query.getPartitions(3)) {
           numPartitions++;
         }

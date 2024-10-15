@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Settings} from '@google-cloud/firestore';
+import * as types from '../../../types/firestore';
+import firestore = types.FirebaseFirestore;
 
 import {
   context,
@@ -22,6 +23,7 @@ import {
   trace,
   Tracer,
   Span as OpenTelemetrySpan,
+  TracerProvider,
 } from '@opentelemetry/api';
 
 import {Span} from './span';
@@ -33,22 +35,34 @@ import {DEFAULT_DATABASE_ID} from '../path';
 import {DEFAULT_MAX_IDLE_CHANNELS} from '../index';
 const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
+/**
+ * @private
+ * @internal
+ */
 export class EnabledTraceUtil implements TraceUtil {
   private tracer: Tracer;
   private settingsAttributes: Attributes;
 
-  constructor(settings: Settings) {
-    let tracerProvider = settings.openTelemetryOptions?.tracerProvider;
+  // Visible for testing
+  tracerProvider: TracerProvider;
+
+  constructor(settings: firestore.Settings) {
+    let provider: TracerProvider | undefined =
+      settings.openTelemetryOptions?.tracerProvider;
 
     // If a TracerProvider has not been given to us, we try to use the global one.
-    if (!tracerProvider) {
+    if (!provider) {
       const {trace} = require('@opentelemetry/api');
-      tracerProvider = trace.getTracerProvider();
+      provider = trace.getTracerProvider();
     }
+
+    // At this point provider is guaranteed to be defined because
+    // `trace.getTracerProvider()` does not return null or undefined.
+    this.tracerProvider = provider!;
 
     const libVersion = require('../../../package.json').version;
     const libName = require('../../../package.json').name;
-    this.tracer = tracerProvider.getTracer(libName, libVersion);
+    this.tracer = this.tracerProvider.getTracer(libName, libVersion);
 
     this.settingsAttributes = {};
     this.settingsAttributes['otel.scope.name'] = libName;

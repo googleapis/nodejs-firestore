@@ -12,12 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  CollectionGroup,
-  DocumentData,
-  QueryPartition,
-} from '@google-cloud/firestore';
-
+import {FirebaseFirestore} from '../../types/firestore';
 import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
@@ -93,10 +88,13 @@ describe('Partition Query', () => {
   });
 
   async function getPartitions(
-    collectionGroup: CollectionGroup<DocumentData>,
+    collectionGroup: FirebaseFirestore.CollectionGroup<FirebaseFirestore.DocumentData>,
     desiredPartitionsCount: number
-  ): Promise<QueryPartition<DocumentData>[]> {
-    const partitions: QueryPartition<DocumentData>[] = [];
+  ): Promise<
+    FirebaseFirestore.QueryPartition<FirebaseFirestore.DocumentData>[]
+  > {
+    const partitions: FirebaseFirestore.QueryPartition<FirebaseFirestore.DocumentData>[] =
+      [];
     for await (const partition of collectionGroup.getPartitions(
       desiredPartitionsCount
     )) {

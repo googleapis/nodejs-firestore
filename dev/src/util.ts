@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@google-cloud/firestore';
+import * as types from '../../types/firestore';
+import firestore = types.FirebaseFirestore;
 
 import {randomBytes} from 'crypto';
 import type {CallSettings, ClientConfig, GoogleError} from 'google-gax';
@@ -105,7 +106,7 @@ export function isObject(value: unknown): value is {[k: string]: unknown} {
  * @param input The argument to verify.
  * @returns 'true' if the input can be a treated as a plain object.
  */
-export function isPlainObject(input: unknown): input is DocumentData {
+export function isPlainObject(input: unknown): input is firestore.DocumentData {
   return (
     isObject(input) &&
     (Object.getPrototypeOf(input) === Object.prototype ||

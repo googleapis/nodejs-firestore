@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
+import * as types from '../../types/firestore';
+import firestore = types.FirebaseFirestore;
+
 import * as protos from '../protos/firestore_v1_proto_api';
 
 import {QueryPartition} from './query-partition';
