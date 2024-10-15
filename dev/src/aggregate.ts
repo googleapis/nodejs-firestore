@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
+import * as firestore from '../../types/firestore';
 
 import {FieldPath} from './path';
 import {google} from '../protos/firestore_v1_proto_api';

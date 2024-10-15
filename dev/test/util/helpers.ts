@@ -12,13 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  DocumentData,
-  Settings,
-  SetOptions,
-  PartialWithFieldValue,
-} from '@google-cloud/firestore';
-
 import {expect} from 'chai';
 import * as extend from 'extend';
 import {JSONStreamIterator} from 'length-prefixed-json-stream';
@@ -33,6 +26,12 @@ import {ClientPool} from '../../src/pool';
 import {GapicClient} from '../../src/types';
 
 import api = proto.google.firestore.v1;
+import {
+  DocumentData,
+  PartialWithFieldValue,
+  SetOptions,
+  Settings,
+} from '../../../types/firestore';
 
 let SSL_CREDENTIALS: grpc.ChannelCredentials | null = null;
 if (!isPreferRest()) {

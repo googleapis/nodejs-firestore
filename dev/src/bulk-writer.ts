@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as firestore from '@google-cloud/firestore';
 
+import * as firestore from '../../types/firestore';
 import * as assert from 'assert';
 import type {GoogleError} from 'google-gax';
 
@@ -47,7 +47,7 @@ import {logger} from './logger';
 import {StatusCode} from './status-code';
 
 // eslint-disable-next-line no-undef
-import GrpcStatus = FirebaseFirestore.GrpcStatus;
+import GrpcStatus = firestore.GrpcStatus;
 import api = google.firestore.v1;
 import {
   ATTRIBUTE_KEY_DOC_COUNT,

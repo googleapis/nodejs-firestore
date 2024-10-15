@@ -12,12 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  CollectionGroup,
-  DocumentData,
-  QueryPartition,
-} from '@google-cloud/firestore';
-
 import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
@@ -37,6 +31,11 @@ import {
 use(chaiAsPromised);
 
 import api = google.firestore.v1;
+import {
+  CollectionGroup,
+  DocumentData,
+  QueryPartition,
+} from '../../types/firestore';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -106,7 +105,7 @@ describe('Partition Query', () => {
   }
 
   function verifyPartition(
-    partition: FirebaseFirestore.QueryPartition,
+    partition: QueryPartition,
     startAt: string | null,
     endBefore: string | null
   ) {

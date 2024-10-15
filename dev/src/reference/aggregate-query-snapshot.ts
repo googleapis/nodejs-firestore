@@ -16,7 +16,7 @@
 
 import * as deepEqual from 'fast-deep-equal';
 
-import * as firestore from '@google-cloud/firestore';
+import * as firestore from '../../../types/firestore';
 import {Timestamp} from '../timestamp';
 import {AggregateQuery} from './aggregate-query';
 
