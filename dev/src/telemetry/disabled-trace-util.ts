@@ -16,6 +16,10 @@
 import {Attributes, TraceUtil} from './trace-util';
 import {Span} from './span';
 
+/**
+ * @private
+ * @internal
+ */
 export class DisabledTraceUtil implements TraceUtil {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startSpan(name: string): Span {
