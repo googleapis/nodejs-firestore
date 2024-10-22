@@ -477,13 +477,12 @@ declare namespace FirebaseFirestore {
    */
   export interface FirestoreOpenTelemetryOptions {
     /**
-     * The SDK will use this OpenTelemetry TracerProvider to create spans.
-     * If not provided, the SDK will attempt to use the Global TracerProvider if
-     * one has been registered. In the absence of both, the SDK will not create
-     * trace spans.
-     * Even if a Global TracerProvider has been registered, one can still disable
-     * this client's span creation by passing in a "no-op" tracer provider here,
-     * or by setting the `FIRESTORE_ENABLE_TRACING=OFF` environment variable.
+     * The OpenTelemetry TracerProvider instance that the SDK should use to
+     * create trace spans. If not provided, the SDK will use the Global TracerProvider.
+     *
+     * Even if a Global TracerProvider has been registered, users can still
+     * disable this client's span creation by passing in a "no-op" tracer provider
+     * here, or by setting the `FIRESTORE_ENABLE_TRACING=OFF` environment variable.
      */
     tracerProvider?: any;
   }
