@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
-
+import * as firestore from '../../types/firestore';
 import * as deepEqual from 'fast-deep-equal';
-
 import * as assert from 'assert';
 
 import {google} from '../protos/firestore_v1_proto_api';

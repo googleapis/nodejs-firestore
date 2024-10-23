@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {BulkWriterOptions, DocumentData} from '@google-cloud/firestore';
-
 import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect} from 'chai';
 import {GoogleError, Status} from 'google-gax';
@@ -55,6 +53,7 @@ import {
   verifyInstance,
 } from './util/helpers';
 import api = proto.google.firestore.v1;
+import {BulkWriterOptions, DocumentData} from '../../types/firestore';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(null);

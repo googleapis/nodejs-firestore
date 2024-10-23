@@ -3274,6 +3274,4 @@ declare namespace FirebaseFirestore {
   }
 }
 
-declare module '@google-cloud/firestore' {
-  export = FirebaseFirestore;
-}
+export = FirebaseFirestore;

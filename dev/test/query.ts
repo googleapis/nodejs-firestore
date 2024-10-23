@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
-
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
@@ -56,6 +54,7 @@ import {GoogleError, Status} from 'google-gax';
 import api = google.firestore.v1;
 import protobuf = google.protobuf;
 import {Filter} from '../src/filter';
+import {DocumentData} from '../../types/firestore';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;

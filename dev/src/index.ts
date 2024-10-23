@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
-
+import * as firestore from '../../types/firestore';
 import type {CallOptions, ClientOptions} from 'google-gax';
 import type * as googleGax from 'google-gax';
 import type * as googleGaxFallback from 'google-gax/build/src/fallback';

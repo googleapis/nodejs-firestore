@@ -38,7 +38,7 @@ import api = proto.google.firestore.v1;
 import {
   ReadOnlyTransactionOptions,
   ReadWriteTransactionOptions,
-} from '@google-cloud/firestore';
+} from '../../types/firestore';
 
 use(chaiAsPromised);
 

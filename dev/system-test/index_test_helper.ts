@@ -25,13 +25,13 @@ import {
   Timestamp,
 } from '../src';
 import {autoId} from '../src/util';
-
 import {
   DocumentData,
   QuerySnapshot,
-  WithFieldValue,
   UpdateData,
-} from '@google-cloud/firestore';
+  WithFieldValue,
+} from '../../types/firestore';
+
 export const INDEX_TEST_COLLECTION = 'index-test-collection';
 
 /**
@@ -74,13 +74,12 @@ export class IndexTestHelper {
   // Runs a test with specified documents in the INDEX_TEST_COLLECTION.
   async createTestDocs(docs: DocumentData[]): Promise<CollectionReference> {
     // convert docsArray without IDs to a map with IDs
-    const docsMap = docs.reduce<{[key: string]: DocumentData}>(
-      (result, doc) => {
-        result[autoId()] = doc;
-        return result;
-      },
-      {}
-    );
+    const docsMap = docs.reduce<{
+      [key: string]: DocumentData;
+    }>((result, doc) => {
+      result[autoId()] = doc;
+      return result;
+    }, {});
     return this.setTestDocs(docsMap);
   }
 

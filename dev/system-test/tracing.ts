@@ -30,7 +30,6 @@ import {
   Context as OpenTelemetryContext,
 } from '@opentelemetry/api';
 import {TraceExporter} from '@google-cloud/opentelemetry-cloud-trace-exporter';
-import {Settings} from '@google-cloud/firestore';
 import {
   AlwaysOnSampler,
   BatchSpanProcessor,
@@ -71,6 +70,7 @@ import {cloudtrace_v1, auth as gAuth} from '@googleapis/cloudtrace';
 import Schema$Trace = cloudtrace_v1.Schema$Trace;
 import Schema$TraceSpan = cloudtrace_v1.Schema$TraceSpan;
 import {logger} from '../src/logger';
+import {Settings} from '../../types/firestore';
 
 use(chaiAsPromised);
 

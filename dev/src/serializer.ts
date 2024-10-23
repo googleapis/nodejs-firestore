@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@google-cloud/firestore';
-
+import * as firestore from '../../types/firestore';
 import * as proto from '../protos/firestore_v1_proto_api';
 
 import {DeleteTransform, FieldTransform, VectorValue} from './field-value';
@@ -83,7 +82,7 @@ export class Serializer {
    * @param obj The object to encode.
    * @returns The Firestore 'Fields' representation
    */
-  encodeFields(obj: DocumentData): ApiMapValue {
+  encodeFields(obj: firestore.DocumentData): ApiMapValue {
     const fields: ApiMapValue = {};
 
     for (const prop of Object.keys(obj)) {
@@ -299,7 +298,7 @@ export class Serializer {
       case 'mapValue': {
         const fields = proto.mapValue!.fields;
         if (fields) {
-          const obj: DocumentData = {};
+          const obj: firestore.DocumentData = {};
           for (const prop of Object.keys(fields)) {
             obj[prop] = this.decodeValue(fields[prop]);
           }
