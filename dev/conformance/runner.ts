@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
-
 import * as duplexify from 'duplexify';
 
 import {it, xit, describe} from 'mocha';
@@ -47,6 +45,7 @@ import {
 } from '../test/util/helpers';
 
 import api = proto.google.firestore.v1;
+import {DocumentData} from '../../types/firestore';
 
 // TODO(mrschmidt): Create Protobuf .d.ts file for the conformance proto
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
+import * as firestore from '../../types/firestore';
 
 import {QueryDocumentSnapshot} from './document';
 

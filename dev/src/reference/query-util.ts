@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import * as firestore from '@google-cloud/firestore';
+import * as firestore from '../../../types/firestore';
+
 import {GoogleError} from 'google-gax';
 import {Duplex, Transform} from 'stream';
 

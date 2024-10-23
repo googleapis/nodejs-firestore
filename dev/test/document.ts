@@ -49,7 +49,7 @@ import {
   verifyInstance,
   writeResult,
 } from './util/helpers';
-import {Precondition} from '@google-cloud/firestore';
+import {Precondition} from '../../types/firestore';
 
 const PROJECT_ID = 'test-project';
 

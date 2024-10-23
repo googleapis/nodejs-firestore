@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import * as firestore from '../../../types/firestore';
 import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 import * as deepEqual from 'fast-deep-equal';
 
-import * as firestore from '@google-cloud/firestore';
 import {ResourcePath} from '../path';
 import {defaultConverter} from '../types';
 import {FilterInternal} from './filter-internal';
