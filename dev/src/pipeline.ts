@@ -50,6 +50,7 @@ import {
   Sort,
   Stage,
   Distinct,
+  RemoveFields,
 } from './stage';
 import {ApiMapValue, defaultPipelineConverter} from './types';
 import * as protos from '../protos/firestore_v1_proto_api';
@@ -162,6 +163,35 @@ export class Pipeline<AppModelType = firestore.DocumentData>
   addFields(...fields: firestore.Selectable[]): Pipeline<AppModelType> {
     const copy = this.stages.map(s => s);
     copy.push(new AddFields(this.selectablesToMap(fields)));
+    return new Pipeline(this.db, copy, this.converter);
+  }
+
+  /**
+   * Remove fields from outputs of previous stages.
+   *
+   * Example:
+   *
+   * ```typescript
+   * firestore.pipeline().collection("books")
+   *   // removes field 'rating' and 'cost' from the previous stage outputs.
+   *   .removeFields(
+   *     Field.of("rating"),
+   *     "cost"
+   *   );
+   * ```
+   *
+   * @param fields The fields to remove.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
+  removeFields(
+    ...fields: (firestore.Field | string)[]
+  ): Pipeline<AppModelType> {
+    const copy = this.stages.map(s => s);
+    copy.push(
+      new RemoveFields(
+        fields.map(f => (typeof f === 'string' ? Field.of(f) : (f as Field)))
+      )
+    );
     return new Pipeline(this.db, copy, this.converter);
   }
 

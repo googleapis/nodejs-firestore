@@ -54,6 +54,22 @@ export class AddFields implements Stage {
 /**
  * @beta
  */
+export class RemoveFields implements Stage {
+  name = 'remove_fields';
+
+  constructor(private fields: Field[]) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: this.fields.map(f => serializer.encodeValue(f)!),
+    };
+  }
+}
+
+/**
+ * @beta
+ */
 export class Aggregate implements Stage {
   name = 'aggregate';
 

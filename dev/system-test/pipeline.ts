@@ -324,6 +324,61 @@ describe.only('Pipeline class', () => {
     });
   });
 
+  it('can add and remove fields', async () => {
+    const results = await firestore
+      .pipeline()
+      .collection(randomCol.path)
+      .addFields(
+        strConcat(Field.of('author'), '_', Field.of('title')).as(
+          'author_title'
+        ),
+        strConcat(Field.of('title'), '_', Field.of('author')).as('title_author')
+      )
+      .removeFields(
+        'title_author',
+        'tags',
+        'awards',
+        'rating',
+        'title',
+        'published',
+        'genre',
+        'nestedField'
+      )
+      .sort(Field.of('author_title').ascending())
+      .execute();
+    expectResults(
+      results,
+      {
+        author_title: "Douglas Adams_The Hitchhiker's Guide to the Galaxy",
+        author: 'Douglas Adams',
+      },
+      {
+        author_title: 'F. Scott Fitzgerald_The Great Gatsby',
+        author: 'F. Scott Fitzgerald',
+      },
+      {author_title: 'Frank Herbert_Dune', author: 'Frank Herbert'},
+      {
+        author_title: 'Fyodor Dostoevsky_Crime and Punishment',
+        author: 'Fyodor Dostoevsky',
+      },
+      {
+        author_title: 'Gabriel García Márquez_One Hundred Years of Solitude',
+        author: 'Gabriel García Márquez',
+      },
+      {author_title: 'George Orwell_1984', author: 'George Orwell'},
+      {author_title: 'Harper Lee_To Kill a Mockingbird', author: 'Harper Lee'},
+      {
+        author_title: 'J.R.R. Tolkien_The Lord of the Rings',
+        author: 'J.R.R. Tolkien',
+      },
+      {author_title: 'Jane Austen_Pride and Prejudice', author: 'Jane Austen'},
+      {
+        author_title: "Margaret Atwood_The Handmaid's Tale",
+        author: 'Margaret Atwood',
+      }
+    );
+  });
+
   it('can select fields', async () => {
     const results = await firestore
       .pipeline()
