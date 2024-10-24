@@ -8773,6 +8773,13 @@ declare namespace FirebaseFirestore {
   /**
    * @beta
    */
+  export class RemoveFields implements Stage {
+    name: string;
+  }
+
+  /**
+   * @beta
+   */
   export class Aggregate implements Stage {
     name: string;
   }
@@ -8981,6 +8988,25 @@ declare namespace FirebaseFirestore {
      * @return A new Pipeline object with this stage appended to the stage list.
      */
     addFields(...fields: Selectable[]): Pipeline<AppModelType>;
+
+    /**
+     * Remove fields from outputs of previous stages.
+     *
+     * Example:
+     *
+     * ```typescript
+     * firestore.pipeline().collection("books")
+     *   // removes field 'rating' and 'cost' from the previous stage outputs.
+     *   .removeFields(
+     *     Field.of("rating"),
+     *     "cost"
+     *   );
+     * ```
+     *
+     * @param fields The fields to remove.
+     * @return A new Pipeline object with this stage appended to the stage list.
+     */
+    removeFields(...fields: (Field | string)[]): Pipeline<AppModelType>;
 
     /**
      * Selects or creates a set of fields from the outputs of previous stages.
