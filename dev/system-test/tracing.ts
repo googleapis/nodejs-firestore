@@ -652,7 +652,7 @@ describe('Tracing Tests', () => {
 
     // Expect that the span exists first.
     const span = getSpanByName(spanName);
-    expect(span).to.not.be.null;
+    expect(span, `Could not find the span named ${spanName}`).to.not.be.null;
 
     // Assert that the expected attributes are present in the span attributes.
     // Note that the span attributes may be a superset of the attributes passed
@@ -661,6 +661,29 @@ describe('Tracing Tests', () => {
       expect(span!.attributes[attributesKey]).to.be.equal(
         attributes[attributesKey]
       );
+    }
+  }
+
+  // Ensures that the given span exists and has the given attributes.
+  function expectSpanHasEvents(spanName: string, eventNames: string[]): void {
+    // The Cloud Trace API does not return span attributes and events.
+    if (testConfig.e2e) {
+      return;
+    }
+
+    // Expect that the span exists first.
+    const span = getSpanByName(spanName);
+    expect(span, `Could not find the span named ${spanName}`).to.not.be.null;
+
+    // Assert that the expected attributes are present in the span attributes.
+    // Note that the span attributes may be a superset of the attributes passed
+    // to this function.
+    if (span?.events) {
+      const numEvents = eventNames.length;
+      expect(numEvents).to.equal(span.events.length);
+      for (let i = 0; i < numEvents; ++i) {
+        expect(span.events[i].name).to.equal(eventNames[i]);
+      }
     }
   }
 
@@ -745,6 +768,11 @@ describe('Tracing Tests', () => {
         SPAN_NAME_DOC_REF_GET,
         SPAN_NAME_BATCH_GET_DOCUMENTS
       );
+      expectSpanHasEvents(SPAN_NAME_BATCH_GET_DOCUMENTS, [
+        'Firestore.batchGetDocuments: Start',
+        'Firestore.batchGetDocuments: First response received',
+        'Firestore.batchGetDocuments: Completed',
+      ]);
     });
 
     it('document reference create()', async () => {
@@ -812,6 +840,11 @@ describe('Tracing Tests', () => {
       );
       await waitForCompletedSpans(2);
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_AGGREGATION_QUERY_GET);
+      expectSpanHasEvents(SPAN_NAME_AGGREGATION_QUERY_GET, [
+        'Firestore.runAggregationQuery: Start',
+        'Firestore.runAggregationQuery: First response received',
+        'Firestore.runAggregationQuery: Completed',
+      ]);
     });
 
     it('collection reference add()', async () => {
@@ -844,6 +877,13 @@ describe('Tracing Tests', () => {
       );
       await waitForCompletedSpans(2);
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_QUERY_GET);
+      expectSpanHasEvents(SPAN_NAME_QUERY_GET, [
+        'RunQuery',
+        'Firestore.runQuery: Start',
+        'Firestore.runQuery: First response received',
+        'Firestore.runQuery: Received RunQueryResponse.Done.',
+        'Firestore.runQuery: Completed',
+      ]);
     });
 
     it('firestore getAll()', async () => {
@@ -854,6 +894,11 @@ describe('Tracing Tests', () => {
       );
       await waitForCompletedSpans(2);
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_BATCH_GET_DOCUMENTS);
+      expectSpanHasEvents(SPAN_NAME_BATCH_GET_DOCUMENTS, [
+        'Firestore.batchGetDocuments: Start',
+        'Firestore.batchGetDocuments: First response received',
+        'Firestore.batchGetDocuments: Completed',
+      ]);
     });
 
     it('transaction', async () => {
