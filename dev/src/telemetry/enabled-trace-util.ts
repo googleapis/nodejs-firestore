@@ -65,7 +65,7 @@ export class EnabledTraceUtil implements TraceUtil {
       this.tracer = this.tracerProvider.getTracer(libName, libVersion);
     } catch (e) {
       throw new Error(
-        "the given value for 'tracerProvider' does not implement the TracerProvider interface."
+        "The object provided for 'tracerProvider' does not conform to the TracerProvider interface."
       );
     }
 

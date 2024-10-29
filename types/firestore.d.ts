@@ -482,7 +482,7 @@ declare namespace FirebaseFirestore {
      *
      * Even if a Global TracerProvider has been registered, users can still
      * disable this client's span creation by passing in a "no-op" tracer provider
-     * here, or by setting the `FIRESTORE_ENABLE_TRACING=OFF` environment variable.
+     * here, or by setting the `FIRESTORE_ENABLE_TRACING` environment variable to `OFF` or `FALSE`.
      */
     tracerProvider?: any;
   }

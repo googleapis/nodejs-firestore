@@ -181,7 +181,7 @@ describe('Firestore Tracing Controls', () => {
     } catch (e) {
       expect(
         e.toString() ===
-          "the given value for 'tracerProvider' does not implement the TracerProvider interface"
+          "The object provided for 'tracerProvider' does not conform to the TracerProvider interface."
       );
     }
   });
