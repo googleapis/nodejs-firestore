@@ -20,7 +20,7 @@ import {ApiMapValue, ProtobufJsValue} from './types';
 import {validateObject} from './validate';
 
 import api = google.firestore.v1;
-import {RESERVED_MAP_KEY, RESERVED_MAP_KEY_VECTOR_VALUE} from './map-type';
+import {RESERVED_MAP_KEY, RESERVED_MAP_KEY_VECTOR_VALUE, RESERVED_MAX_KEY, RESERVED_MIN_KEY} from './map-type';
 
 /*!
  * @module firestore/convert
@@ -174,6 +174,10 @@ export function detectValueType(proto: ProtobufJsValue): string {
         fields[RESERVED_MAP_KEY].stringValue === RESERVED_MAP_KEY_VECTOR_VALUE
       ) {
         valueType = 'vectorValue';
+      } else if (props.indexOf(RESERVED_MIN_KEY) !== -1) {
+        valueType = 'minKeyValue';
+      } else if (props.indexOf(RESERVED_MAX_KEY) !== -1) {
+        valueType = 'maxKeyValue';
       }
     }
   }
@@ -261,7 +265,9 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
       };
     }
     case 'mapValue':
-    case 'vectorValue': {
+    case 'vectorValue':
+    case 'minKeyValue':
+    case 'maxKeyValue': {
       const mapValue: ApiMapValue = {};
       const fields = fieldValue.mapValue!.fields;
       if (fields) {

@@ -17,3 +17,6 @@
 export const RESERVED_MAP_KEY = '__type__';
 export const RESERVED_MAP_KEY_VECTOR_VALUE = '__vector__';
 export const VECTOR_MAP_VECTORS_KEY = 'value';
+
+export const RESERVED_MIN_KEY = '__min__';
+export const RESERVED_MAX_KEY = '__max__';

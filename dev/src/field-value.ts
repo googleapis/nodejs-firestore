@@ -84,6 +84,64 @@ export class VectorValue implements firestore.VectorValue {
 }
 
 /**
+ * Represents the Firestore "Min Key" data type.
+ *
+ * @class MinKey
+ */
+export class MinKey implements firestore.MinKey {
+  private static MIN_KEY_VALUE_INSTANCE = new MinKey();
+
+  private constructor() {}
+
+  /**
+   * @private
+   * @internal
+   */
+  static instance(): MinKey {
+    return MinKey.MIN_KEY_VALUE_INSTANCE;
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _toProto(serializer: Serializer): api.IValue {
+    return serializer.encodeMinKey();
+  }
+}
+
+/**
+ * Represents the Firestore "Max Key" data type.
+ *
+ * @class MaxKey
+ */
+export class MaxKey implements firestore.MaxKey {
+  private static MAX_KEY_VALUE_INSTANCE = new MaxKey();
+
+  /**
+   * @private
+   * @internal
+   */
+  private constructor() {}
+
+  /**
+   * @private
+   * @internal
+   */
+  static instance(): MaxKey {
+    return MaxKey.MAX_KEY_VALUE_INSTANCE;
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _toProto(serializer: Serializer): api.IValue {
+    return serializer.encodeMaxKey();
+  }
+}
+
+/**
  * Sentinel values that can be used when writing documents with set(), create()
  * or update().
  *
@@ -102,6 +160,24 @@ export class FieldValue implements firestore.FieldValue {
    */
   static vector(values?: number[]): VectorValue {
     return new VectorValue(values);
+  }
+
+  /**
+   * Returns a `MinKey` instance.
+   *
+   * @returns The `MinKey` instance.
+   */
+  static minKey(): MinKey {
+    return MinKey.instance();
+  }
+
+  /**
+   * Returns a `MaxKeuy` instance.
+   *
+   * @returns The `MaxKeuy` instance.
+   */
+  static maxKey(): MaxKey {
+    return MaxKey.instance();
   }
 
   /**

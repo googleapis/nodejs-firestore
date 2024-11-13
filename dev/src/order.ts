@@ -26,6 +26,7 @@ import api = google.firestore.v1;
  */
 enum TypeOrder {
   NULL = 0,
+  MIN_KEY = 0,
   BOOLEAN = 1,
   NUMBER = 2,
   TIMESTAMP = 3,
@@ -36,6 +37,7 @@ enum TypeOrder {
   ARRAY = 8,
   VECTOR = 9,
   OBJECT = 10,
+  MAX_KEY = 11,
 }
 
 /*!
@@ -48,6 +50,8 @@ function typeOrder(val: api.IValue): TypeOrder {
   switch (valueType) {
     case 'nullValue':
       return TypeOrder.NULL;
+    case 'minKeyValue':
+      return TypeOrder.MIN_KEY;
     case 'integerValue':
       return TypeOrder.NUMBER;
     case 'doubleValue':
@@ -70,6 +74,8 @@ function typeOrder(val: api.IValue): TypeOrder {
       return TypeOrder.OBJECT;
     case 'vectorValue':
       return TypeOrder.VECTOR;
+    case 'maxKeyValue':
+      return TypeOrder.MAX_KEY;
     default:
       throw new Error('Unexpected value type: ' + valueType);
   }

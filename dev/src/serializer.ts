@@ -18,7 +18,13 @@ import {DocumentData} from '@google-cloud/firestore';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
-import {DeleteTransform, FieldTransform, VectorValue} from './field-value';
+import {
+  DeleteTransform,
+  FieldTransform,
+  MaxKey,
+  MinKey,
+  VectorValue,
+} from './field-value';
 import {detectGoogleProtobufValueType, detectValueType} from './convert';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
@@ -32,6 +38,8 @@ import api = proto.google.firestore.v1;
 import {
   RESERVED_MAP_KEY,
   RESERVED_MAP_KEY_VECTOR_VALUE,
+  RESERVED_MAX_KEY,
+  RESERVED_MIN_KEY,
   VECTOR_MAP_VECTORS_KEY,
 } from './map-type';
 
@@ -173,7 +181,11 @@ export class Serializer {
       };
     }
 
-    if (val instanceof VectorValue) {
+    if (
+      val instanceof VectorValue ||
+      val instanceof MinKey ||
+      val instanceof MaxKey
+    ) {
       return val._toProto(this);
     }
 
@@ -252,6 +264,38 @@ export class Serializer {
   }
 
   /**
+   * @private
+   */
+  encodeMinKey(): api.IValue {
+    // A Firestore Vector is a map with reserved key/value pairs.
+    return {
+      mapValue: {
+        fields: {
+          [RESERVED_MIN_KEY]: {
+            nullValue: 'NULL_VALUE',
+          },
+        },
+      },
+    };
+  }
+
+  /**
+   * @private
+   */
+  encodeMaxKey(): api.IValue {
+    // A Firestore Vector is a map with reserved key/value pairs.
+    return {
+      mapValue: {
+        fields: {
+          [RESERVED_MAX_KEY]: {
+            nullValue: 'NULL_VALUE',
+          },
+        },
+      },
+    };
+  }
+
+  /**
    * Decodes a single Firestore 'Value' Protobuf.
    *
    * @private
@@ -311,6 +355,12 @@ export class Serializer {
       case 'vectorValue': {
         const fields = proto.mapValue!.fields!;
         return VectorValue._fromProto(fields[VECTOR_MAP_VECTORS_KEY]);
+      }
+      case 'minKeyValue': {
+        return MinKey.instance();
+      }
+      case 'maxKeyValue': {
+        return MaxKey.instance();
       }
       case 'geoPointValue': {
         return GeoPoint.fromProto(proto.geoPointValue!);
@@ -483,7 +533,11 @@ export function validateUserInput(
           'If you want to ignore undefined values, enable `ignoreUndefinedProperties`.'
       );
     }
-  } else if (value instanceof VectorValue) {
+  } else if (
+    value instanceof VectorValue ||
+    value instanceof MinKey ||
+    value instanceof MaxKey
+  ) {
     // OK
   } else if (value instanceof DeleteTransform) {
     if (inArray) {

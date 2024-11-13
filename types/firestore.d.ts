@@ -2750,6 +2750,16 @@ declare namespace FirebaseFirestore {
     isEqual(other: VectorValue): boolean;
   }
 
+  /** Represent a "Min Key" type in Firestore documents. */
+  export class MinKey {
+    private constructor();
+  }
+
+  /** Represent a "Max Key" type in Firestore documents. */
+  export class MaxKey {
+    private constructor();
+  }
+
   /**
    * Sentinel values that can be used when writing document fields with set(),
    * create() or update().
@@ -2824,6 +2834,16 @@ declare namespace FirebaseFirestore {
      * @return A new `VectorValue` constructed with a copy of the given array of number.
      */
     static vector(values?: number[]): VectorValue;
+
+    /**
+     * @return A new `MinKey` value instance.
+     */
+    static minKey(): MinKey;
+
+    /**
+     * @return A new `MaxKey` value instance.
+     */
+    static maxKey(): MaxKey;
 
     /**
      * Returns true if this `FieldValue` is equal to the provided one.
