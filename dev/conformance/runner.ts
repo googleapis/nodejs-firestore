@@ -530,6 +530,7 @@ function normalizeTimestamp(obj: {[key: string]: {}}) {
     if (fieldNames.includes(key) && typeof obj[key] === 'string') {
       obj[key] = convertTimestamp(obj[key] as string);
     } else if (typeof obj[key] === 'object') {
+      // @ts-ignore
       normalizeTimestamp(obj[key]);
     }
   }
@@ -576,6 +577,7 @@ function normalizeInt32Value(obj: {[key: string]: {}}, parent = '') {
         value: obj[key],
       };
     } else if (typeof obj[key] === 'object') {
+      // @ts-ignore
       normalizeInt32Value(obj[key], key);
     }
   }
