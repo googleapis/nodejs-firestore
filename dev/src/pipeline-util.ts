@@ -434,7 +434,7 @@ export function toPipelineFilterCondition(
           const values = value?.arrayValue?.values?.map(val =>
             Constant.of(val)
           );
-          return and(field.exists(), field.in(...values!));
+          return and(field.exists(), field.eqAny(...values!));
         }
         case 'ARRAY_CONTAINS_ANY': {
           const values = value?.arrayValue?.values?.map(val =>
@@ -446,7 +446,7 @@ export function toPipelineFilterCondition(
           const values = value?.arrayValue?.values?.map(val =>
             Constant.of(val)
           );
-          return and(field.exists(), not(field.in(...values!)));
+          return and(field.exists(), field.notEqAny(...values!));
         }
       }
     }
