@@ -864,4 +864,39 @@ describe.only('Pipeline class', () => {
       .execute();
     expectResults(result, {title: "The Hitchhiker's Guide to the Galaxy"});
   });
+
+  it('run pipeline with sample limit of 3', async () => {
+    const results = await randomCol.pipeline().sample(3).execute();
+    expect(results.length).to.equal(3);
+  });
+
+  it('run pipeline with sample limit of {documents: 3}', async () => {
+    const results = await randomCol.pipeline().sample({documents: 3}).execute();
+    expect(results.length).to.equal(3);
+  });
+
+  it('run pipeline with sample limit of {percentage: 0.6}', async () => {
+    const results = await randomCol
+      .pipeline()
+      .sample({percentage: 0.6})
+      .execute();
+    expect(results.length).to.equal(6);
+  });
+
+  it('run pipeline with union', async () => {
+    const results = await randomCol
+      .pipeline()
+      .union(randomCol.pipeline())
+      .execute();
+    expect(results.length).to.equal(20);
+  });
+
+  it('run pipeline with unnest', async () => {
+    const results = await randomCol
+      .pipeline()
+      .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+      .unnest('tags')
+      .execute();
+    expect(results.length).to.equal(3);
+  });
 });
