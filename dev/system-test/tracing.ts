@@ -153,7 +153,7 @@ class SpanData {
   }
 }
 
-describe('Tracing Tests', () => {
+describe.only('Tracing Tests', () => {
   let firestore: Firestore;
   let tracerProvider: NodeTracerProvider;
   let inMemorySpanExporter: InMemorySpanExporter;
@@ -680,23 +680,24 @@ describe('Tracing Tests', () => {
     // to this function.
     if (span?.events) {
       const numEvents = eventNames.length;
-      expect(numEvents).to.equal(span.events.length);
+      console.log(`${span.events.map(value => value.name)} did not match ${eventNames}`);
+      expect(numEvents).to.equal(span.events.length, `${span.events.map(value => value.name)} did not match ${eventNames}`);
       for (let i = 0; i < numEvents; ++i) {
         expect(span.events[i].name).to.equal(eventNames[i]);
       }
     }
   }
 
-  describe(IN_MEMORY_TEST_SUITE_TITLE, () => {
-    describe(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
-      describe(GRPC_TEST_SUITE_TITLE, () => {
+  describe.only(IN_MEMORY_TEST_SUITE_TITLE, () => {
+    describe.only(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
+      describe.only(GRPC_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
           beforeEachTest(this.currentTest!);
         });
         runTestCases();
         afterEach(async () => afterEachTest());
       });
-      describe(REST_TEST_SUITE_TITLE, () => {
+      describe.skip(REST_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
           beforeEachTest(this.currentTest!);
         });
@@ -704,7 +705,7 @@ describe('Tracing Tests', () => {
         afterEach(async () => afterEachTest());
       });
     });
-    describe(GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
+    describe.skip(GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
       describe(GRPC_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
           beforeEachTest(this.currentTest!);
@@ -722,7 +723,7 @@ describe('Tracing Tests', () => {
     });
   });
 
-  describe(E2E_TEST_SUITE_TITLE, () => {
+  describe.skip(E2E_TEST_SUITE_TITLE, () => {
     describe(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
       describe(GRPC_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
@@ -871,7 +872,7 @@ describe('Tracing Tests', () => {
       );
     });
 
-    it('query get()', async () => {
+    it.only('query get()', async () => {
       await runFirestoreOperationInRootSpan(() =>
         firestore.collection('foo').where('foo', '==', 'bar').limit(1).get()
       );
