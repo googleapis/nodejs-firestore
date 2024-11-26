@@ -465,7 +465,7 @@ declare namespace FirebaseFirestore {
      * Settings related to telemetry collection by this client.
      * @beta
      */
-    openTelemetryOptions?: FirestoreOpenTelemetryOptions;
+    openTelemetry?: FirestoreOpenTelemetryOptions;
 
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }

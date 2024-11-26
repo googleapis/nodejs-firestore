@@ -56,44 +56,44 @@ describe('Firestore Tracing Controls', () => {
     expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
   });
 
-  it('no openTelemetryOptions, no env var', async () => {
+  it('no openTelemetry settings, no env var', async () => {
     const firestore = await createInstance(undefined, {
-      openTelemetryOptions: undefined,
+      openTelemetry: undefined,
     });
     expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
 
     const firestore2 = await createInstance(undefined, {
-      openTelemetryOptions: {
+      openTelemetry: {
         tracerProvider: undefined,
       },
     });
     expect(firestore2._traceUtil instanceof EnabledTraceUtil).to.be.true;
   });
 
-  it('no openTelemetryOptions, env var disabled', async () => {
+  it('no openTelemetry settings, env var disabled', async () => {
     process.env.FIRESTORE_ENABLE_TRACING = 'OFF';
     const firestore = await createInstance(undefined, {
-      openTelemetryOptions: undefined,
+      openTelemetry: undefined,
     });
     expect(firestore._traceUtil instanceof DisabledTraceUtil).to.be.true;
 
     const firestore2 = await createInstance(undefined, {
-      openTelemetryOptions: {
+      openTelemetry: {
         tracerProvider: undefined,
       },
     });
     expect(firestore2._traceUtil instanceof DisabledTraceUtil).to.be.true;
   });
 
-  it('no openTelemetryOptions, env var enabled', async () => {
+  it('no openTelemetry settings, env var enabled', async () => {
     process.env.FIRESTORE_ENABLE_TRACING = 'ON';
     const firestore = await createInstance(undefined, {
-      openTelemetryOptions: undefined,
+      openTelemetry: undefined,
     });
     expect(firestore._traceUtil instanceof EnabledTraceUtil).to.be.true;
 
     const firestore2 = await createInstance(undefined, {
-      openTelemetryOptions: {
+      openTelemetry: {
         tracerProvider: undefined,
       },
     });
@@ -102,7 +102,7 @@ describe('Firestore Tracing Controls', () => {
 
   it('valid tracerProvider, no env var', async () => {
     const firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
+      openTelemetry: {
         tracerProvider: new NodeTracerProvider(),
       },
     });
@@ -112,7 +112,7 @@ describe('Firestore Tracing Controls', () => {
   it('valid tracerProvider, env var disabled', async () => {
     process.env.FIRESTORE_ENABLE_TRACING = 'OFF';
     const firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
+      openTelemetry: {
         tracerProvider: new NodeTracerProvider(),
       },
     });
@@ -122,7 +122,7 @@ describe('Firestore Tracing Controls', () => {
   it('valid tracerProvider, env var enabled', async () => {
     process.env.FIRESTORE_ENABLE_TRACING = 'ON';
     const firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
+      openTelemetry: {
         tracerProvider: new NodeTracerProvider(),
       },
     });
@@ -137,7 +137,7 @@ describe('Firestore Tracing Controls', () => {
     globalTracerProvider.register();
 
     const firestore = await createInstance(undefined, {
-      openTelemetryOptions: {
+      openTelemetry: {
         tracerProvider: myTracerProvider,
       },
     });
@@ -176,7 +176,7 @@ describe('Firestore Tracing Controls', () => {
   it('Generates an error if the given tracerProvider is not valid', async () => {
     try {
       await createInstance(undefined, {
-        openTelemetryOptions: {tracerProvider: 123},
+        openTelemetry: {tracerProvider: 123},
       });
     } catch (e) {
       expect(

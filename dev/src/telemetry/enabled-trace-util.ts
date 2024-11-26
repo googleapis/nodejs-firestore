@@ -47,7 +47,7 @@ export class EnabledTraceUtil implements TraceUtil {
 
   constructor(settings: Settings) {
     let provider: TracerProvider | undefined =
-      settings.openTelemetryOptions?.tracerProvider;
+      settings.openTelemetry?.tracerProvider;
 
     // If a TracerProvider has not been given to us, we try to use the global one.
     if (!provider) {

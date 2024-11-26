@@ -277,7 +277,7 @@ describe('Tracing Tests', () => {
 
     const settings: Settings = {
       preferRest: testConfig.preferRest,
-      openTelemetryOptions: getOpenTelemetryOptions(tracerProvider),
+      openTelemetry: getOpenTelemetryOptions(tracerProvider),
     };
 
     // Named-database tests use an environment variable to specify the database ID. Add it to the settings.
