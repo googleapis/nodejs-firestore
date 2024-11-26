@@ -680,7 +680,6 @@ describe.only('Tracing Tests', () => {
     // to this function.
     if (span?.events) {
       const numEvents = eventNames.length;
-      console.log(`${span.events.map(value => value.name)} did not match ${eventNames}`);
       expect(numEvents).to.equal(span.events.length, `${span.events.map(value => value.name)} did not match ${eventNames}`);
       for (let i = 0; i < numEvents; ++i) {
         expect(span.events[i].name).to.equal(eventNames[i]);
@@ -688,16 +687,16 @@ describe.only('Tracing Tests', () => {
     }
   }
 
-  describe.only(IN_MEMORY_TEST_SUITE_TITLE, () => {
-    describe.only(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
-      describe.only(GRPC_TEST_SUITE_TITLE, () => {
+  describe(IN_MEMORY_TEST_SUITE_TITLE, () => {
+    describe(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
+      describe(GRPC_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
           beforeEachTest(this.currentTest!);
         });
         runTestCases();
         afterEach(async () => afterEachTest());
       });
-      describe.skip(REST_TEST_SUITE_TITLE, () => {
+      describe(REST_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
           beforeEachTest(this.currentTest!);
         });
@@ -705,7 +704,7 @@ describe.only('Tracing Tests', () => {
         afterEach(async () => afterEachTest());
       });
     });
-    describe.skip(GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
+    describe(GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
       describe(GRPC_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
           beforeEachTest(this.currentTest!);
@@ -723,7 +722,7 @@ describe.only('Tracing Tests', () => {
     });
   });
 
-  describe.skip(E2E_TEST_SUITE_TITLE, () => {
+  describe(E2E_TEST_SUITE_TITLE, () => {
     describe(NON_GLOBAL_OTEL_TEST_SUITE_TITLE, () => {
       describe(GRPC_TEST_SUITE_TITLE, () => {
         beforeEach(function () {
@@ -872,7 +871,7 @@ describe.only('Tracing Tests', () => {
       );
     });
 
-    it.only('query get()', async () => {
+    it('query get()', async () => {
       await runFirestoreOperationInRootSpan(() =>
         firestore.collection('foo').where('foo', '==', 'bar').limit(1).get()
       );
@@ -882,7 +881,6 @@ describe.only('Tracing Tests', () => {
         'RunQuery',
         'Firestore.runQuery: Start',
         'Firestore.runQuery: First response received',
-        'Firestore.runQuery: Received RunQueryResponse.Done.',
         'Firestore.runQuery: Completed',
       ]);
     });
