@@ -4735,22 +4735,6 @@ declare namespace FirebaseFirestore {
 
   /**
    * @beta
-   */
-  export class Fields extends Expr implements Selectable {
-    exprType: ExprType;
-    selectable: true;
-    static of(name: string, ...others: string[]): Fields;
-    static ofAll(): Fields;
-    /**
-     * Returns the list of fields.
-     *
-     * @return The list of fields.
-     */
-    fieldList(): Field[];
-  }
-
-  /**
-   * @beta
    *
    * Represents a constant value that can be used in a Firestore pipeline expression.
    *
@@ -8832,7 +8816,7 @@ declare namespace FirebaseFirestore {
    * @beta
    */
   export interface FindNearestOptions {
-    field: Field;
+    field: Field | string;
     vectorValue: VectorValue | number[];
     distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
     limit?: number;
@@ -8863,6 +8847,28 @@ declare namespace FirebaseFirestore {
   /**
    * @beta
    */
+  export class Replace implements Stage {
+    name: string;
+  }
+
+  /**
+   * @beta
+   */
+  export class Sample implements Stage {
+    name: string;
+  }
+
+  /**
+   * @beta
+   */
+  export interface SampleOptions {
+    limit: number;
+    mode: 'documents' | 'percent';
+  }
+
+  /**
+   * @beta
+   */
   export class Select implements Stage {
     name: string;
   }
@@ -8872,6 +8878,28 @@ declare namespace FirebaseFirestore {
    */
   export class Sort implements Stage {
     name: string;
+  }
+
+  /**
+   * @beta
+   */
+  export class Union implements Stage {
+    name: string;
+  }
+
+  /**
+   * @beta
+   */
+  export class Unnest implements Stage {
+    name: string;
+  }
+
+  /**
+   * @beta
+   */
+  export interface UnnestOptions {
+    field: Selectable | string;
+    indexField?: string;
   }
 
   /**
@@ -9216,6 +9244,83 @@ declare namespace FirebaseFirestore {
     findNearest(options: FindNearestOptions): Pipeline<AppModelType>;
 
     /**
+     * Fully overwrites all fields in a document with those coming from a nested map.
+     *
+     * <p>This stage allows you to emit a map value as a document. Each key of the map becomes a field
+     * on the document that contains the corresponding value.
+     *
+     * <p>Example:
+     *
+     * <pre>{@code
+     * // Input.
+     * // {
+     * //  "name": "John Doe Jr.",
+     * //  "parents": {
+     * //    "father": "John Doe Sr.",
+     * //    "mother": "Jane Doe"
+     * // }
+     *
+     * // Emit parents as document.
+     * firestore.pipeline().collection("people").replace(Field.of("parents"));
+     *
+     * // Output
+     * // {
+     * //  "father": "John Doe Sr.",
+     * //  "mother": "Jane Doe"
+     * // }
+     * }</pre>
+     *
+     * @param field The {@link Selectable} field containing the nested map.
+     * @return A new {@code Pipeline} object with this stage appended to the stage list.
+     */
+    replace(field: Selectable | string): Pipeline<AppModelType>;
+
+    /**
+     * Performs a pseudo-random sampling of the documents from the previous stage.
+     *
+     * <p>This stage will filter documents pseudo-randomly. The parameter specifies how number of
+     * documents to be returned.
+     *
+     * <p>Examples:
+     *
+     * <pre>{@code
+     * // Sample 25 books, if available.
+     * firestore.pipeline().collection("books")
+     *     .sample(25);
+     * }
+     * </pre>
+     *
+     * @param documents The number of documents to sample.
+     * @return A new {@code Pipeline} object with this stage appended to the stage list.
+     */
+    sample(documents: number): Pipeline<AppModelType>;
+
+    /**
+     * Performs a pseudo-random sampling of the documents from the previous stage.
+     *
+     * <p>This stage will filter documents pseudo-randomly. The 'options' parameter specifies how
+     * sampling will be performed. See {@code SampleOptions} for more information.
+     *
+     * <p>Examples:
+     *
+     * // Sample 10 books, if available.
+     * firestore.pipeline().collection("books")
+     *     .sample({ documents: 10 });
+     *
+     * // Sample 50% of books.
+     * firestore.pipeline().collection("books")
+     *     .sample({ percentage: 0.5 });
+     * }
+     * </pre>
+     *
+     * @param options The {@code SampleOptions} specifies how sampling is performed.
+     * @return A new {@code Pipeline} object with this stage appended to the stage list.
+     */
+    sample(
+      options: {percentage: number} | {documents: number}
+    ): Pipeline<AppModelType>;
+
+    /**
      * Sorts the documents from previous stages based on one or more {@link Ordering} criteria.
      *
      * <p>This stage allows you to order the results of your pipeline. You can specify multiple {@link
@@ -9241,6 +9346,59 @@ declare namespace FirebaseFirestore {
      */
     sort(...orderings: Ordering[]): Pipeline<AppModelType>;
     sort(options: {orderings: Ordering[]}): Pipeline<AppModelType>;
+
+    /**
+     * Performs union of all documents from two pipelines, including duplicates.
+     *
+     * <p>This stage will pass through documents from previous stage, and also pass through documents
+     * from previous stage of the `other` {@code Pipeline} given in parameter. The order of documents
+     * emitted from this stage is undefined.
+     *
+     * <p>Example:
+     *
+     * <pre>{@code
+     * // Emit documents from books collection and magazines collection.
+     * firestore.pipeline().collection("books")
+     *     .union(firestore.pipeline().collection("magazines"));
+     * }</pre>
+     *
+     * @param other The other {@code Pipeline} that is part of union.
+     * @return A new {@code Pipeline} object with this stage appended to the stage list.
+     */
+    union(other: Pipeline<AppModelType>): Pipeline<AppModelType>;
+
+    /**
+     * Produces a document for each element in array found in previous stage document.
+     *
+     * <p>For each previous stage document, this stage will emit zero or more augmented documents. The
+     * input array found in the previous stage document field specified by the `fieldName` parameter,
+     * will for each input array element produce an augmented document. The input array element will
+     * augment the previous stage document by replacing the field specified by `fieldName` parameter
+     * with the element value.
+     *
+     * <p>In other words, the field containing the input array will be removed from the augmented
+     * document and replaced by the corresponding array element.
+     *
+     * <p>Example:
+     *
+     * <pre>{@code
+     * // Input:
+     * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": [ "comedy", "space", "adventure" ], ... }
+     *
+     * // Emit a book document for each tag of the book.
+     * firestore.pipeline().collection("books")
+     *     .unnest("tags");
+     *
+     * // Output:
+     * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": "comedy", ... }
+     * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": "space", ... }
+     * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": "adventure", ... }
+     * }</pre>
+     *
+     * @param field The name of the field containing the array.
+     * @return A new {@code Pipeline} object with this stage appended to the stage list.
+     */
+    unnest(field: Selectable | string): Pipeline<AppModelType>;
 
     /**
      * Adds a generic stage to the pipeline.

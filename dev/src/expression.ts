@@ -1910,38 +1910,6 @@ export class Field extends Expr implements Selectable {
 
 /**
  * @beta
- */
-export class Fields extends Expr implements Selectable {
-  exprType: ExprType = 'Field';
-  selectable = true as const;
-
-  private constructor(private fields: Field[]) {
-    super();
-  }
-
-  static of(name: string, ...others: string[]): Fields {
-    return new Fields([Field.of(name), ...others.map(Field.of)]);
-  }
-
-  static ofAll(): Fields {
-    return new Fields([]);
-  }
-
-  fieldList(): Field[] {
-    return this.fields.map(f => f);
-  }
-
-  _toProto(serializer: Serializer): api.IValue {
-    return {
-      arrayValue: {
-        values: this.fields.map(f => f._toProto(serializer)),
-      },
-    };
-  }
-}
-
-/**
- * @beta
  *
  * Represents a constant value that can be used in a Firestore pipeline expression.
  *
