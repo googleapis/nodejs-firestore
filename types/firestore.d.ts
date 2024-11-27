@@ -3875,7 +3875,7 @@ declare namespace FirebaseFirestore {
      * @param others The values or expressions to check against.
      * @return A new `Expr` representing the 'IN' comparison.
      */
-    in(...others: Expr[]): In;
+    eqAny(...others: Expr[]): EqAny;
 
     /**
      * Creates an expression that checks if this expression is equal to any of the provided values or
@@ -3889,7 +3889,7 @@ declare namespace FirebaseFirestore {
      * @param others The values or expressions to check against.
      * @return A new `Expr` representing the 'IN' comparison.
      */
-    in(...others: any[]): In;
+    eqAny(...others: any[]): EqAny;
 
     /**
      * Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
@@ -4274,76 +4274,76 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Find the lowest price of all products
-     * Field.of("price").min().as("lowestPrice");
+     * Field.of("price").minimum().as("lowestPrice");
      * ```
      *
-     * @return A new `Accumulator` representing the 'min' aggregation.
+     * @return A new `Accumulator` representing the 'minimum' aggregation.
      */
-    min(): Min;
+    minimum(): Minimum;
 
     /**
      * Creates an aggregation that finds the maximum value of a field across multiple stage inputs.
      *
      * ```typescript
      * // Find the highest score in a leaderboard
-     * Field.of("score").max().as("highestScore");
+     * Field.of("score").maximum().as("highestScore");
      * ```
      *
-     * @return A new `Accumulator` representing the 'max' aggregation.
+     * @return A new `Accumulator` representing the 'maximum' aggregation.
      */
-    max(): Max;
+    maximum(): Maximim;
 
     /**
      * Creates an expression that returns the larger value between this expression and another expression, based on Firestore's value type ordering.
      *
      * ```typescript
      * // Returns the larger value between the 'timestamp' field and the current timestamp.
-     * Field.of("timestamp").logicalMax(Function.currentTimestamp());
+     * Field.of("timestamp").logicalMaximum(Function.currentTimestamp());
      * ```
      *
      * @param other The expression to compare with.
-     * @return A new {@code Expr} representing the logical max operation.
+     * @return A new {@code Expr} representing the logical maximum operation.
      */
-    logicalMax(other: Expr): LogicalMax;
+    logicalMaximum(other: Expr): LogicalMaximum;
 
     /**
      * Creates an expression that returns the larger value between this expression and a constant value, based on Firestore's value type ordering.
      *
      * ```typescript
      * // Returns the larger value between the 'value' field and 10.
-     * Field.of("value").logicalMax(10);
+     * Field.of("value").logicalMaximum(10);
      * ```
      *
      * @param other The constant value to compare with.
-     * @return A new {@code Expr} representing the logical max operation.
+     * @return A new {@code Expr} representing the logical maximum operation.
      */
-    logicalMax(other: any): LogicalMax;
+    logicalMaximum(other: any): LogicalMaximum;
 
     /**
      * Creates an expression that returns the smaller value between this expression and another expression, based on Firestore's value type ordering.
      *
      * ```typescript
      * // Returns the smaller value between the 'timestamp' field and the current timestamp.
-     * Field.of("timestamp").logicalMin(Function.currentTimestamp());
+     * Field.of("timestamp").logicalMinimum(Function.currentTimestamp());
      * ```
      *
      * @param other The expression to compare with.
-     * @return A new {@code Expr} representing the logical min operation.
+     * @return A new {@code Expr} representing the logical minimum operation.
      */
-    logicalMin(other: Expr): LogicalMin;
+    logicalMinimum(other: Expr): LogicalMinimum;
 
     /**
      * Creates an expression that returns the smaller value between this expression and a constant value, based on Firestore's value type ordering.
      *
      * ```typescript
      * // Returns the smaller value between the 'value' field and 10.
-     * Field.of("value").logicalMin(10);
+     * Field.of("value").logicalMinimum(10);
      * ```
      *
      * @param other The constant value to compare with.
-     * @return A new {@code Expr} representing the logical min operation.
+     * @return A new {@code Expr} representing the logical minimum operation.
      */
-    logicalMin(other: any): LogicalMin;
+    logicalMinimum(other: any): LogicalMinimum;
 
     /**
      * Creates an expression that calculates the length (number of dimensions) of this Firestore Vector expression.
@@ -5014,7 +5014,7 @@ declare namespace FirebaseFirestore {
   /**
    * @beta
    */
-  export class In extends Function implements FilterCondition {
+  export class EqAny extends Function implements FilterCondition {
     filterable: true;
   }
 
@@ -5070,12 +5070,12 @@ declare namespace FirebaseFirestore {
   /**
    * @beta
    */
-  export class LogicalMax extends Function {}
+  export class LogicalMaximum extends Function {}
 
   /**
    * @beta
    */
-  export class LogicalMin extends Function {}
+  export class LogicalMinimum extends Function {}
 
   /**
    * @beta
@@ -5193,14 +5193,14 @@ declare namespace FirebaseFirestore {
   /**
    * @beta
    */
-  export class Min extends Function implements Accumulator {
+  export class Minimum extends Function implements Accumulator {
     accumulator: true;
   }
 
   /**
    * @beta
    */
-  export class Max extends Function implements Accumulator {
+  export class Maximim extends Function implements Accumulator {
     accumulator: true;
   }
 
@@ -6632,14 +6632,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-   * inAny(Field.of("category"), [Constant.of("Electronics"), Field.of("primaryType")]);
+   * eqAny(Field.of("category"), [Constant.of("Electronics"), Field.of("primaryType")]);
    * ```
    *
    * @param element The expression to compare.
    * @param others The values to check against.
    * @return A new {@code Expr} representing the 'IN' comparison.
    */
-  export function inAny(element: Expr, others: Expr[]): In;
+  export function eqAny(element: Expr, others: Expr[]): EqAny;
 
   /**
    * @beta
@@ -6649,14 +6649,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-   * inAny(Field.of("category"), ["Electronics", Field.of("primaryType")]);
+   * eqAny(Field.of("category"), ["Electronics", Field.of("primaryType")]);
    * ```
    *
    * @param element The expression to compare.
    * @param others The values to check against.
    * @return A new {@code Expr} representing the 'IN' comparison.
    */
-  export function inAny(element: Expr, others: any[]): In;
+  export function eqAny(element: Expr, others: any[]): EqAny;
 
   /**
    * @beta
@@ -6666,14 +6666,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-   * inAny("category", [Constant.of("Electronics"), Field.of("primaryType")]);
+   * eqAny("category", [Constant.of("Electronics"), Field.of("primaryType")]);
    * ```
    *
    * @param element The field to compare.
    * @param others The values to check against.
    * @return A new {@code Expr} representing the 'IN' comparison.
    */
-  export function inAny(element: string, others: Expr[]): In;
+  export function eqAny(element: string, others: Expr[]): EqAny;
 
   /**
    * @beta
@@ -6683,14 +6683,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-   * inAny("category", ["Electronics", Field.of("primaryType")]);
+   * eqAny("category", ["Electronics", Field.of("primaryType")]);
    * ```
    *
    * @param element The field to compare.
    * @param others The values to check against.
    * @return A new {@code Expr} representing the 'IN' comparison.
    */
-  export function inAny(element: string, others: any[]): In;
+  export function eqAny(element: string, others: any[]): EqAny;
 
   /**
    * @beta
@@ -6700,14 +6700,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-   * notInAny(Field.of("status"), [Constant.of("pending"), Field.of("rejectedStatus")]);
+   * notEqAny(Field.of("status"), [Constant.of("pending"), Field.of("rejectedStatus")]);
    * ```
    *
    * @param element The expression to compare.
    * @param others The values to check against.
    * @return A new {@code Expr} representing the 'NOT IN' comparison.
    */
-  export function notInAny(element: Expr, others: Expr[]): Not;
+  export function notEqAny(element: Expr, others: Expr[]): NotEqAny;
 
   /**
    * @beta
@@ -6717,14 +6717,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-   * notInAny(Field.of("status"), ["pending", Field.of("rejectedStatus")]);
+   * notEqAny(Field.of("status"), ["pending", Field.of("rejectedStatus")]);
    * ```
    *
    * @param element The expression to compare.
    * @param others The values to check against.
    * @return A new {@code Expr} representing the 'NOT IN' comparison.
    */
-  export function notInAny(element: Expr, others: any[]): Not;
+  export function notEqAny(element: Expr, others: any[]): NotEqAny;
 
   /**
    * @beta
@@ -6734,14 +6734,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-   * notInAny("status", [Constant.of("pending"), Field.of("rejectedStatus")]);
+   * notEqAny("status", [Constant.of("pending"), Field.of("rejectedStatus")]);
    * ```
    *
    * @param element The field name to compare.
    * @param others The values to check against.
    * @return A new {@code Expr} representing the 'NOT IN' comparison.
    */
-  export function notInAny(element: string, others: Expr[]): Not;
+  export function notEqAny(element: string, others: Expr[]): NotEqAny;
 
   /**
    * @beta
@@ -6751,14 +6751,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-   * notInAny("status", ["pending", Field.of("rejectedStatus")]);
+   * notEqAny("status", ["pending", Field.of("rejectedStatus")]);
    * ```
    *
    * @param element The field name to compare.
    * @param others The values to check against.
    * @return A new {@code Expr} representing the 'NOT IN' comparison.
    */
-  export function notInAny(element: string, others: any[]): Not;
+  export function notEqAny(element: string, others: any[]): NotEqAny;
 
   /**
    * @beta
@@ -6823,7 +6823,7 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
-   * ifFunction(
+   * cond(
    *     gt("age", 18), Constant.of("Adult"), Constant.of("Minor"));
    * ```
    *
@@ -6860,14 +6860,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Returns the larger value between the 'timestamp' field and the current timestamp.
-   * logicalMax(Field.of("timestamp"), Function.currentTimestamp());
+   * logicalMaximum(Field.of("timestamp"), Function.currentTimestamp());
    * ```
    *
    * @param left The left operand expression.
    * @param right The right operand expression.
-   * @return A new {@code Expr} representing the logical max operation.
+   * @return A new {@code Expr} representing the logical maximum operation.
    */
-  export function logicalMax(left: Expr, right: Expr): LogicalMax;
+  export function logicalMaximum(left: Expr, right: Expr): LogicalMaximum;
 
   /**
    * @beta
@@ -6876,14 +6876,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Returns the larger value between the 'value' field and 10.
-   * logicalMax(Field.of("value"), 10);
+   * logicalMaximum(Field.of("value"), 10);
    * ```
    *
    * @param left The left operand expression.
    * @param right The right operand constant.
-   * @return A new {@code Expr} representing the logical max operation.
+   * @return A new {@code Expr} representing the logical maximum operation.
    */
-  export function logicalMax(left: Expr, right: any): LogicalMax;
+  export function logicalMaximum(left: Expr, right: any): LogicalMaximum;
 
   /**
    * @beta
@@ -6892,14 +6892,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Returns the larger value between the 'timestamp' field and the current timestamp.
-   * logicalMax("timestamp", Function.currentTimestamp());
+   * logicalMaximum("timestamp", Function.currentTimestamp());
    * ```
    *
    * @param left The left operand field name.
    * @param right The right operand expression.
-   * @return A new {@code Expr} representing the logical max operation.
+   * @return A new {@code Expr} representing the logical maximum operation.
    */
-  export function logicalMax(left: string, right: Expr): LogicalMax;
+  export function logicalMaximum(left: string, right: Expr): LogicalMaximum;
 
   /**
    * @beta
@@ -6908,14 +6908,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Returns the larger value between the 'value' field and 10.
-   * logicalMax("value", 10);
+   * logicalMaximum("value", 10);
    * ```
    *
    * @param left The left operand field name.
    * @param right The right operand constant.
-   * @return A new {@code Expr} representing the logical max operation.
+   * @return A new {@code Expr} representing the logical maximum operation.
    */
-  export function logicalMax(left: string, right: any): LogicalMax;
+  export function logicalMaximum(left: string, right: any): LogicalMaximum;
 
   /**
    * @beta
@@ -6924,14 +6924,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Returns the smaller value between the 'timestamp' field and the current timestamp.
-   * logicalMin(Field.of("timestamp"), Function.currentTimestamp());
+   * logicalMinimum(Field.of("timestamp"), Function.currentTimestamp());
    * ```
    *
    * @param left The left operand expression.
    * @param right The right operand expression.
-   * @return A new {@code Expr} representing the logical min operation.
+   * @return A new {@code Expr} representing the logical minimum operation.
    */
-  export function logicalMin(left: Expr, right: Expr): LogicalMin;
+  export function logicalMinimum(left: Expr, right: Expr): LogicalMinimum;
 
   /**
    * @beta
@@ -6940,14 +6940,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Returns the smaller value between the 'value' field and 10.
-   * logicalMin(Field.of("value"), 10);
+   * logicalMinimum(Field.of("value"), 10);
    * ```
    *
    * @param left The left operand expression.
    * @param right The right operand constant.
-   * @return A new {@code Expr} representing the logical min operation.
+   * @return A new {@code Expr} representing the logical minimum operation.
    */
-  export function logicalMin(left: Expr, right: any): LogicalMin;
+  export function logicalMinimum(left: Expr, right: any): LogicalMinimum;
 
   /**
    * @beta
@@ -6956,14 +6956,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Returns the smaller value between the 'timestamp' field and the current timestamp.
-   * logicalMin("timestamp", Function.currentTimestamp());
+   * logicalMinimum("timestamp", Function.currentTimestamp());
    * ```
    *
    * @param left The left operand field name.
    * @param right The right operand expression.
-   * @return A new {@code Expr} representing the logical min operation.
+   * @return A new {@code Expr} representing the logical minimum operation.
    */
-  export function logicalMin(left: string, right: Expr): LogicalMin;
+  export function logicalMinimum(left: string, right: Expr): LogicalMinimum;
 
   /**
    * @beta
@@ -6972,14 +6972,14 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Returns the smaller value between the 'value' field and 10.
-   * logicalMin("value", 10);
+   * logicalMinimum("value", 10);
    * ```
    *
    * @param left The left operand field name.
    * @param right The right operand constant.
-   * @return A new {@code Expr} representing the logical min operation.
+   * @return A new {@code Expr} representing the logical minimum operation.
    */
-  export function logicalMin(left: string, right: any): LogicalMin;
+  export function logicalMinimum(left: string, right: any): LogicalMinimum;
 
   /**
    * @beta
@@ -7970,13 +7970,13 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Find the lowest price of all products
-   * min(Field.of("price")).as("lowestPrice");
+   * minimum(Field.of("price")).as("lowestPrice");
    * ```
    *
    * @param value The expression to find the minimum value of.
-   * @return A new {@code Accumulator} representing the 'min' aggregation.
+   * @return A new {@code Accumulator} representing the 'minimum' aggregation.
    */
-  export function min(value: Expr): Min;
+  export function minimum(value: Expr): Minimum;
 
   /**
    * @beta
@@ -7985,13 +7985,13 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Find the lowest price of all products
-   * min("price").as("lowestPrice");
+   * minimum("price").as("lowestPrice");
    * ```
    *
    * @param value The name of the field to find the minimum value of.
-   * @return A new {@code Accumulator} representing the 'min' aggregation.
+   * @return A new {@code Accumulator} representing the 'minimum' aggregation.
    */
-  export function min(value: string): Min;
+  export function minimum(value: string): Minimum;
 
   /**
    * @beta
@@ -8001,13 +8001,13 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Find the highest score in a leaderboard
-   * max(Field.of("score")).as("highestScore");
+   * maximum(Field.of("score")).as("highestScore");
    * ```
    *
    * @param value The expression to find the maximum value of.
-   * @return A new {@code Accumulator} representing the 'max' aggregation.
+   * @return A new {@code Accumulator} representing the 'maximum' aggregation.
    */
-  export function max(value: Expr): Max;
+  export function maximum(value: Expr): Maximim;
 
   /**
    * @beta
@@ -8016,13 +8016,13 @@ declare namespace FirebaseFirestore {
    *
    * ```typescript
    * // Find the highest score in a leaderboard
-   * max("score").as("highestScore");
+   * maximum("score").as("highestScore");
    * ```
    *
    * @param value The name of the field to find the maximum value of.
-   * @return A new {@code Accumulator} representing the 'max' aggregation.
+   * @return A new {@code Accumulator} representing the 'maximum' aggregation.
    */
-  export function max(value: string): Max;
+  export function maximum(value: string): Maximim;
 
   /**
    * @beta

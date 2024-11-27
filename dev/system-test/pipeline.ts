@@ -13,25 +13,22 @@
 // limitations under the License.
 
 import {
-  AggregateQuery,
   DocumentData,
   FirestorePipelineConverter,
   QuerySnapshot,
-  VectorValue,
 } from '@google-cloud/firestore';
 
 import {expect} from 'chai';
-import {afterEach, beforeEach, describe, it} from 'mocha';
+import {afterEach, describe, it} from 'mocha';
 import {
   CollectionReference,
   DocumentReference,
-  DocumentSnapshot,
   FieldPath,
-  FieldValue,
-  Filter,
   Firestore,
+  logicalMinimum,
+  logicalMaximum,
   Query,
-  QueryDocumentSnapshot,
+  cond,
 } from '../src';
 import {
   add,
@@ -60,6 +57,8 @@ import {
   Constant,
   mapGet,
   lte,
+  eqAny,
+  notEqAny,
 } from '../src/expression';
 import {PipelineResult} from '../src/pipeline';
 import {verifyInstance} from '../test/util/helpers';
@@ -258,7 +257,7 @@ describe.only('Pipeline class', () => {
       .aggregate(
         countAll().as('count'),
         avg('rating').as('avg_rating'),
-        Field.of('rating').max().as('max_rating')
+        Field.of('rating').maximum().as('max_rating')
       )
       .execute();
     expectResults(result, {count: 2, avg_rating: 4.4, max_rating: 4.6});
@@ -277,7 +276,8 @@ describe.only('Pipeline class', () => {
     ).to.be.rejected;
   });
 
-  it('returns distinct values as expected', async () => {
+  // toLower not impelemented
+  it.skip('returns distinct values as expected', async () => {
     const results = await randomCol
       .pipeline()
       .where(lt('published', 1900))
@@ -295,26 +295,27 @@ describe.only('Pipeline class', () => {
       .pipeline()
       .where(lt(Field.of('published'), 1984))
       .aggregate({
-        accumulators: [avg('rating').as('avg_rating')],
+        accumulators: [avg('rating').as('avgRating')],
         groups: ['genre'],
       })
-      .where(gt('avg_rating', 4.3))
+      .where(gt('avgRating', 4.3))
+      .sort(Field.of('avgRating').descending())
       .execute();
     expectResults(
       results,
-      {avg_rating: 4.7, genre: 'Fantasy'},
-      {avg_rating: 4.5, genre: 'Romance'},
-      {avg_rating: 4.4, genre: 'Science Fiction'}
+      {avgRating: 4.7, genre: 'Fantasy'},
+      {avgRating: 4.5, genre: 'Romance'},
+      {avgRating: 4.4, genre: 'Science Fiction'}
     );
   });
 
-  it('returns min and max accumulations', async () => {
+  it('returns minimum and maximum accumulations', async () => {
     const results = await randomCol
       .pipeline()
       .aggregate(
         countAll().as('count'),
-        Field.of('rating').max().as('max_rating'),
-        Field.of('published').min().as('min_published')
+        Field.of('rating').maximum().as('max_rating'),
+        Field.of('published').minimum().as('min_published')
       )
       .execute();
     expectResults(results, {
@@ -443,6 +444,95 @@ describe.only('Pipeline class', () => {
     );
   });
 
+  it('logical min works', async () => {
+    const results = await randomCol
+      .pipeline()
+      .select(
+        'title',
+        logicalMinimum(Constant.of(1960), Field.of('published')).as(
+          'published-safe'
+        )
+      )
+      .sort(Field.of('title').ascending())
+      .limit(3)
+      .execute();
+    expectResults(
+      results,
+      {title: '1984', 'published-safe': 1949},
+      {title: 'Crime and Punishment', 'published-safe': 1866},
+      {title: 'Dune', 'published-safe': 1960}
+    );
+  });
+
+  it('logical max works', async () => {
+    const results = await randomCol
+      .pipeline()
+      .select(
+        'title',
+        logicalMaximum(Constant.of(1960), Field.of('published')).as(
+          'published-safe'
+        )
+      )
+      .sort(Field.of('title').ascending())
+      .limit(3)
+      .execute();
+    expectResults(
+      results,
+      {title: '1984', 'published-safe': 1960},
+      {title: 'Crime and Punishment', 'published-safe': 1960},
+      {title: 'Dune', 'published-safe': 1965}
+    );
+  });
+
+  it('cond works', async () => {
+    const results = await randomCol
+      .pipeline()
+      .select(
+        'title',
+        cond(
+          lt(Field.of('published'), 1960),
+          Constant.of(1960),
+          Field.of('published')
+        ).as('published-safe')
+      )
+      .sort(Field.of('title').ascending())
+      .limit(3)
+      .execute();
+    expectResults(
+      results,
+      {title: '1984', 'published-safe': 1960},
+      {title: 'Crime and Punishment', 'published-safe': 1960},
+      {title: 'Dune', 'published-safe': 1965}
+    );
+  });
+
+  it('eqAny works', async () => {
+    const results = await randomCol
+      .pipeline()
+      .where(eqAny('published', [1979, 1999, 1967]))
+      .select('title')
+      .execute();
+    expectResults(
+      results,
+      {title: "The Hitchhiker's Guide to the Galaxy"},
+      {title: 'One Hundred Years of Solitude'}
+    );
+  });
+
+  it('notEqAny works', async () => {
+    const results = await randomCol
+      .pipeline()
+      .where(
+        notEqAny(
+          'published',
+          [1965, 1925, 1949, 1960, 1866, 1985, 1954, 1967, 1979]
+        )
+      )
+      .select('title')
+      .execute();
+    expectResults(results, {title: 'Pride and Prejudice'});
+  });
+
   it('arrayContains works', async () => {
     const results = await randomCol
       .pipeline()
@@ -483,7 +573,8 @@ describe.only('Pipeline class', () => {
     expect(results.length).to.equal(10);
   });
 
-  it('arrayConcat works', async () => {
+  // array_concat not implemented
+  it.skip('arrayConcat works', async () => {
     const results = await randomCol
       .pipeline()
       .select(
@@ -547,18 +638,33 @@ describe.only('Pipeline class', () => {
         Field.of('title')
       )
       .where(gt('titleLength', 20))
+      .sort(Field.of('title').ascending())
       .execute();
+
     expectResults(
       results,
-      {titleLength: 32, title: "The Hitchhiker's Guide to the Galaxy"},
+
       {
-        titleLength: 27,
+        titleLength: 29,
         title: 'One Hundred Years of Solitude',
+      },
+      {
+        titleLength: 36,
+        title: "The Hitchhiker's Guide to the Galaxy",
+      },
+      {
+        titleLength: 21,
+        title: 'The Lord of the Rings',
+      },
+      {
+        titleLength: 21,
+        title: 'To Kill a Mockingbird',
       }
     );
   });
 
-  it('testToLowercase', async () => {
+  // to_lower not implemented
+  it.skip('testToLowercase', async () => {
     const results = await randomCol
       .pipeline()
       .select(Field.of('title').toLower().as('lowercaseTitle'))
@@ -569,7 +675,8 @@ describe.only('Pipeline class', () => {
     });
   });
 
-  it('testToUppercase', async () => {
+  // to_upper not implemented
+  it.skip('testToUppercase', async () => {
     const results = await randomCol
       .pipeline()
       .select(Field.of('author').toUpper().as('uppercaseAuthor'))
@@ -578,7 +685,8 @@ describe.only('Pipeline class', () => {
     expectResults(results, {uppercaseAuthor: 'DOUGLAS ADAMS'});
   });
 
-  it('testTrim', async () => {
+  // trim not implemented
+  it.skip('testTrim', async () => {
     const results = await randomCol
       .pipeline()
       .addFields(strConcat(' ', Field.of('title'), ' ').as('spacedTitle'))
