@@ -881,7 +881,6 @@ describe('Tracing Tests', () => {
         'RunQuery',
         'Firestore.runQuery: Start',
         'Firestore.runQuery: First response received',
-        'Firestore.runQuery: Received RunQueryResponse.Done.',
         'Firestore.runQuery: Completed',
       ]);
     });
