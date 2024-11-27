@@ -105,6 +105,21 @@ export class Serializer {
    * @param val The object to encode
    * @returns The Firestore Proto or null if we are deleting a field.
    */
+  encodeValue(val: FieldTransform | undefined): null;
+  encodeValue(
+    val:
+      | string
+      | boolean
+      | number
+      | bigint
+      | Date
+      | null
+      | Buffer
+      | Uint8Array
+      | VectorValue
+      | Map<string, unknown>
+  ): api.IValue;
+  encodeValue(val: unknown): api.IValue | null;
   encodeValue(val: unknown): api.IValue | null {
     if (val instanceof FieldTransform) {
       return null;

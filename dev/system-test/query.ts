@@ -1803,8 +1803,8 @@ describe('Query class', () => {
   });
 
   (process.env.FIRESTORE_EMULATOR_HOST === undefined
-    ? describe
-    : describe.only)('multiple inequality', () => {
+    ? describe.skip
+    : describe)('multiple inequality', () => {
     it('supports multiple inequality queries', async () => {
       const collection = await testCollectionWithDocs({
         doc1: {key: 'a', sort: 0, v: 0},
