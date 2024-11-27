@@ -156,7 +156,6 @@ export class ExecutionUtil<AppModelType> {
         enc,
         callback
       ) => {
-        console.log(`Pipeline response: ${JSON.stringify(proto, null, 2)}`);
         if (proto === NOOP_MESSAGE) {
           callback(undefined);
           return;
