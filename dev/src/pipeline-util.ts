@@ -219,10 +219,6 @@ export class ExecutionUtil<AppModelType> {
           explainOptions
         );
 
-        console.log(
-          `Executing pipeline: \n ${JSON.stringify(request, null, 2)}`
-        );
-
         let streamActive: Deferred<boolean>;
         do {
           streamActive = new Deferred<boolean>();

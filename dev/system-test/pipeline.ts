@@ -64,7 +64,7 @@ import {PipelineResult} from '../src/pipeline';
 import {verifyInstance} from '../test/util/helpers';
 import {DeferredPromise, getTestRoot} from './firestore';
 
-describe.only('Pipeline class', () => {
+describe('Pipeline class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
