@@ -143,17 +143,17 @@ export class VectorQuery<
 
   toPipeline(): Pipeline {
     const options: FindNearestOptions = {
-      field: Field.of(this.vectorField),
-      vectorValue: this.queryVector,
-      limit: this.options.limit,
-      distanceMeasure: this.options.distanceMeasure.toLowerCase() as
+      field: Field.of(this._options.vectorField),
+      vectorValue: this._options.queryVector,
+      limit: this._options.limit,
+      distanceMeasure: this._options.distanceMeasure.toLowerCase() as
         | 'cosine'
         | 'euclidean'
         | 'dot_product',
     };
     return this.query
       .pipeline()
-      .where(Field.of(this.vectorField).exists())
+      .where(Field.of(this._options.vectorField).exists())
       .findNearest(options);
   }
 

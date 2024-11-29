@@ -5073,6 +5073,13 @@ declare namespace FirebaseFirestore {
   /**
    * @beta
    */
+  export class NotEqAny extends Function implements FilterCondition {
+    filterable: true;
+  }
+
+  /**
+   * @beta
+   */
   export class IsNan extends Function implements FilterCondition {
     filterable: true;
   }
