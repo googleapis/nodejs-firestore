@@ -30,6 +30,10 @@ import {Query} from './query';
 import Firestore from '../index';
 import {DocumentReference} from './document-reference';
 import {QueryOptions} from './query-options';
+import {
+  SPAN_NAME_COL_REF_ADD,
+  SPAN_NAME_COL_REF_LIST_DOCUMENTS,
+} from '../telemetry/trace-util';
 
 /**
  * A CollectionReference object can be used for adding documents, getting
@@ -164,41 +168,46 @@ export class CollectionReference<
   listDocuments(): Promise<
     Array<DocumentReference<AppModelType, DbModelType>>
   > {
-    const tag = requestTag();
-    return this.firestore.initializeIfNeeded(tag).then(() => {
-      const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
-        this.firestore.projectId,
-        this.firestore.databaseId
-      );
-
-      const request: api.IListDocumentsRequest = {
-        parent: parentPath.formattedName,
-        collectionId: this.id,
-        showMissing: true,
-        // Setting `pageSize` to an arbitrarily large value lets the backend cap
-        // the page size (currently to 300). Note that the backend rejects
-        // MAX_INT32 (b/146883794).
-        pageSize: Math.pow(2, 16) - 1,
-        mask: {fieldPaths: []},
-      };
-
-      return this.firestore
-        .request<api.IListDocumentsRequest, api.IDocument[]>(
-          'listDocuments',
-          request,
-          tag
-        )
-        .then(documents => {
-          // Note that the backend already orders these documents by name,
-          // so we do not need to manually sort them.
-          return documents.map(doc => {
-            const path = QualifiedResourcePath.fromSlashSeparatedString(
-              doc.name!
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_COL_REF_LIST_DOCUMENTS,
+      () => {
+        const tag = requestTag();
+        return this.firestore.initializeIfNeeded(tag).then(() => {
+          const parentPath =
+            this._queryOptions.parentPath.toQualifiedResourcePath(
+              this.firestore.projectId,
+              this.firestore.databaseId
             );
-            return this.doc(path.id!);
-          });
+
+          const request: api.IListDocumentsRequest = {
+            parent: parentPath.formattedName,
+            collectionId: this.id,
+            showMissing: true,
+            // Setting `pageSize` to an arbitrarily large value lets the backend cap
+            // the page size (currently to 300). Note that the backend rejects
+            // MAX_INT32 (b/146883794).
+            pageSize: Math.pow(2, 16) - 1,
+            mask: {fieldPaths: []},
+          };
+
+          return this.firestore
+            .request<
+              api.IListDocumentsRequest,
+              api.IDocument[]
+            >('listDocuments', request, tag)
+            .then(documents => {
+              // Note that the backend already orders these documents by name,
+              // so we do not need to manually sort them.
+              return documents.map(doc => {
+                const path = QualifiedResourcePath.fromSlashSeparatedString(
+                  doc.name!
+                );
+                return this.doc(path.id!);
+              });
+            });
         });
-    });
+      }
+    );
   }
 
   doc(): DocumentReference<AppModelType, DbModelType>;
@@ -265,16 +274,21 @@ export class CollectionReference<
   add(
     data: firestore.WithFieldValue<AppModelType>
   ): Promise<DocumentReference<AppModelType, DbModelType>> {
-    const firestoreData = this._queryOptions.converter.toFirestore(data);
-    validateDocumentData(
-      'data',
-      firestoreData,
-      /*allowDeletes=*/ false,
-      this._allowUndefined
-    );
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_COL_REF_ADD,
+      () => {
+        const firestoreData = this._queryOptions.converter.toFirestore(data);
+        validateDocumentData(
+          'data',
+          firestoreData,
+          /*allowDeletes=*/ false,
+          this._allowUndefined
+        );
 
-    const documentRef = this.doc();
-    return documentRef.create(data).then(() => documentRef);
+        const documentRef = this.doc();
+        return documentRef.create(data).then(() => documentRef);
+      }
+    );
   }
 
   /**
