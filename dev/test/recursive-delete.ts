@@ -226,7 +226,7 @@ describe('recursiveDelete() method:', () => {
                 'LESS_THAN',
                 endAt('root')
               ),
-              limit(RECURSIVE_DELETE_MAX_PENDING_OPS)
+              limit(RECURSIVE_DELETE_MAX_PENDING_OPS - 1)
             );
             return stream();
           }

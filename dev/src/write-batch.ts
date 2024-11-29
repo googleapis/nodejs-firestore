@@ -48,6 +48,11 @@ import {
 import {StatusCode} from './status-code';
 
 import api = google.firestore.v1;
+import {
+  ATTRIBUTE_KEY_DOC_COUNT,
+  ATTRIBUTE_KEY_IS_TRANSACTIONAL,
+  SPAN_NAME_BATCH_COMMIT,
+} from './telemetry/trace-util';
 
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
@@ -113,7 +118,7 @@ export type PendingWriteOp = () => api.IWrite;
  * @class WriteBatch
  */
 export class WriteBatch implements firestore.WriteBatch {
-  private readonly _firestore: Firestore;
+  protected readonly _firestore: Firestore;
   private readonly _serializer: Serializer;
   private readonly _allowUndefined: boolean;
 
@@ -571,26 +576,35 @@ export class WriteBatch implements firestore.WriteBatch {
    * ```
    */
   commit(): Promise<WriteResult[]> {
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_BATCH_COMMIT,
+      async () => {
+        // Capture the error stack to preserve stack tracing across async calls.
+        const stack = Error().stack!;
 
-    // Commits should also be retried when they fail with status code ABORTED.
-    const retryCodes = [StatusCode.ABORTED, ...getRetryCodes('commit')];
+        // Commits should also be retried when they fail with status code ABORTED.
+        const retryCodes = [StatusCode.ABORTED, ...getRetryCodes('commit')];
 
-    return this._commit<api.CommitRequest, api.CommitResponse>({retryCodes})
-      .then(response => {
-        return (response.writeResults || []).map(
-          writeResult =>
-            new WriteResult(
-              Timestamp.fromProto(
-                writeResult.updateTime || response.commitTime!
-              )
-            )
-        );
-      })
-      .catch(err => {
-        throw wrapError(err, stack);
-      });
+        return this._commit<api.CommitRequest, api.CommitResponse>({retryCodes})
+          .then(response => {
+            return (response.writeResults || []).map(
+              writeResult =>
+                new WriteResult(
+                  Timestamp.fromProto(
+                    writeResult.updateTime || response.commitTime!
+                  )
+                )
+            );
+          })
+          .catch(err => {
+            throw wrapError(err, stack);
+          });
+      },
+      {
+        [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: false,
+        [ATTRIBUTE_KEY_DOC_COUNT]: this._opCount,
+      }
+    );
   }
 
   /**

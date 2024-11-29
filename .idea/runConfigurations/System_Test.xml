@@ -10,8 +10,8 @@
     </envs>
     <ui>bdd</ui>
     <extra-mocha-options>--require ts-node/register/type-check --no-cache --timeout 60000</extra-mocha-options>
-    <test-kind>TEST_FILE</test-kind>
-    <test-file>$PROJECT_DIR$/dev/system-test/firestore.ts</test-file>
+    <test-kind>PATTERN</test-kind>
+    <test-pattern>$PROJECT_DIR$/dev/system-test/*.js $PROJECT_DIR$/dev/system-test/*.ts</test-pattern>
     <method v="2" />
   </configuration>
 </component>

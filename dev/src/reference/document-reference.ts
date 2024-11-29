@@ -27,6 +27,14 @@ import {requestTag} from '../util';
 import {validateFunction, validateMinNumberOfArguments} from '../validate';
 import {DocumentWatch} from '../watch';
 import {DocumentSnapshotBuilder} from '../document';
+import {
+  SPAN_NAME_DOC_REF_CREATE,
+  SPAN_NAME_DOC_REF_DELETE,
+  SPAN_NAME_DOC_REF_GET,
+  SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
+  SPAN_NAME_DOC_REF_SET,
+  SPAN_NAME_DOC_REF_UPDATE,
+} from '../telemetry/trace-util';
 
 /**
  * A DocumentReference refers to a document location in a Firestore database
@@ -198,7 +206,12 @@ export class DocumentReference<
    * ```
    */
   get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
-    return this._firestore.getAll(this).then(([result]) => result);
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_DOC_REF_GET,
+      () => {
+        return this._firestore.getAll(this).then(([result]) => result);
+      }
+    );
   }
 
   /**
@@ -247,35 +260,39 @@ export class DocumentReference<
    * ```
    */
   listCollections(): Promise<Array<CollectionReference>> {
-    const tag = requestTag();
-    return this.firestore.initializeIfNeeded(tag).then(() => {
-      const request: api.IListCollectionIdsRequest = {
-        parent: this.formattedName,
-        // Setting `pageSize` to an arbitrarily large value lets the backend cap
-        // the page size (currently to 300). Note that the backend rejects
-        // MAX_INT32 (b/146883794).
-        pageSize: Math.pow(2, 16) - 1,
-      };
-      return this._firestore
-        .request<api.IListCollectionIdsRequest, string[]>(
-          'listCollectionIds',
-          request,
-          tag
-        )
-        .then(collectionIds => {
-          const collections: Array<CollectionReference> = [];
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
+      () => {
+        const tag = requestTag();
+        return this.firestore.initializeIfNeeded(tag).then(() => {
+          const request: api.IListCollectionIdsRequest = {
+            parent: this.formattedName,
+            // Setting `pageSize` to an arbitrarily large value lets the backend cap
+            // the page size (currently to 300). Note that the backend rejects
+            // MAX_INT32 (b/146883794).
+            pageSize: Math.pow(2, 16) - 1,
+          };
+          return this._firestore
+            .request<
+              api.IListCollectionIdsRequest,
+              string[]
+            >('listCollectionIds', request, tag)
+            .then(collectionIds => {
+              const collections: Array<CollectionReference> = [];
 
-          // We can just sort this list using the default comparator since it
-          // will only contain collection ids.
-          collectionIds.sort();
+              // We can just sort this list using the default comparator since it
+              // will only contain collection ids.
+              collectionIds.sort();
 
-          for (const collectionId of collectionIds) {
-            collections.push(this.collection(collectionId));
-          }
+              for (const collectionId of collectionIds) {
+                collections.push(this.collection(collectionId));
+              }
 
-          return collections;
+              return collections;
+            });
         });
-    });
+      }
+    );
   }
 
   /**
@@ -300,11 +317,16 @@ export class DocumentReference<
    * ```
    */
   create(data: firestore.WithFieldValue<AppModelType>): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-      .create(this, data)
-      .commit()
-      .then(([writeResult]) => writeResult);
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_DOC_REF_CREATE,
+      () => {
+        const writeBatch = new WriteBatch(this._firestore);
+        return writeBatch
+          .create(this, data)
+          .commit()
+          .then(([writeResult]) => writeResult);
+      }
+    );
   }
 
   /**
@@ -333,11 +355,16 @@ export class DocumentReference<
    * ```
    */
   delete(precondition?: firestore.Precondition): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-      .delete(this, precondition)
-      .commit()
-      .then(([writeResult]) => writeResult);
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_DOC_REF_DELETE,
+      () => {
+        const writeBatch = new WriteBatch(this._firestore);
+        return writeBatch
+          .delete(this, precondition)
+          .commit()
+          .then(([writeResult]) => writeResult);
+      }
+    );
   }
 
   set(
@@ -379,16 +406,21 @@ export class DocumentReference<
     data: firestore.PartialWithFieldValue<AppModelType>,
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
-    let writeBatch = new WriteBatch(this._firestore);
-    if (options) {
-      writeBatch = writeBatch.set(this, data, options);
-    } else {
-      writeBatch = writeBatch.set(
-        this,
-        data as firestore.WithFieldValue<AppModelType>
-      );
-    }
-    return writeBatch.commit().then(([writeResult]) => writeResult);
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_DOC_REF_SET,
+      () => {
+        let writeBatch = new WriteBatch(this._firestore);
+        if (options) {
+          writeBatch = writeBatch.set(this, data, options);
+        } else {
+          writeBatch = writeBatch.set(
+            this,
+            data as firestore.WithFieldValue<AppModelType>
+          );
+        }
+        return writeBatch.commit().then(([writeResult]) => writeResult);
+      }
+    );
   }
 
   /**
@@ -432,14 +464,19 @@ export class DocumentReference<
       unknown | string | firestore.FieldPath | firestore.Precondition
     >
   ): Promise<WriteResult> {
-    // eslint-disable-next-line prefer-rest-params
-    validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_DOC_REF_UPDATE,
+      () => {
+        // eslint-disable-next-line prefer-rest-params
+        validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
-    const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-      .update(this, dataOrField, ...preconditionOrValues)
-      .commit()
-      .then(([writeResult]) => writeResult);
+        const writeBatch = new WriteBatch(this._firestore);
+        return writeBatch
+          .update(this, dataOrField, ...preconditionOrValues)
+          .commit()
+          .then(([writeResult]) => writeResult);
+      }
+    );
   }
 
   /**

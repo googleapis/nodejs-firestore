@@ -49,6 +49,10 @@ import {StatusCode} from './status-code';
 // eslint-disable-next-line no-undef
 import GrpcStatus = FirebaseFirestore.GrpcStatus;
 import api = google.firestore.v1;
+import {
+  ATTRIBUTE_KEY_DOC_COUNT,
+  SPAN_NAME_BULK_WRITER_COMMIT,
+} from './telemetry/trace-util';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -243,55 +247,63 @@ class BulkCommitBatch extends WriteBatch {
   }
 
   async bulkCommit(options: {requestTag?: string} = {}): Promise<void> {
-    const tag = options?.requestTag ?? requestTag();
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_BULK_WRITER_COMMIT,
+      async () => {
+        const tag = options?.requestTag ?? requestTag();
 
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
+        // Capture the error stack to preserve stack tracing across async calls.
+        const stack = Error().stack!;
 
-    let response: api.IBatchWriteResponse;
-    try {
-      logger(
-        'BulkCommitBatch.bulkCommit',
-        tag,
-        `Sending next batch with ${this._opCount} writes`
-      );
-      const retryCodes = getRetryCodes('batchWrite');
-      response = await this._commit<
-        api.BatchWriteRequest,
-        api.BatchWriteResponse
-      >({retryCodes, methodName: 'batchWrite', requestTag: tag});
-    } catch (err) {
-      // Map the failure to each individual write's result.
-      const ops = Array.from({length: this.pendingOps.length});
-      response = {
-        writeResults: ops.map(() => {
-          return {};
-        }),
-        status: ops.map(() => err),
-      };
-    }
-
-    for (let i = 0; i < (response.writeResults || []).length; ++i) {
-      // Since delete operations currently do not have write times, use a
-      // sentinel Timestamp value.
-      // TODO(b/158502664): Use actual delete timestamp.
-      const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
-
-      const status = (response.status || [])[i];
-      if (status.code === StatusCode.OK) {
-        const updateTime = Timestamp.fromProto(
-          response.writeResults![i].updateTime || DELETE_TIMESTAMP_SENTINEL
-        );
-        this.pendingOps[i].onSuccess(new WriteResult(updateTime));
-      } else {
-        const error =
-          new (require('google-gax/build/src/fallback').GoogleError)(
-            status.message || undefined
+        let response: api.IBatchWriteResponse;
+        try {
+          logger(
+            'BulkCommitBatch.bulkCommit',
+            tag,
+            `Sending next batch with ${this._opCount} writes`
           );
-        error.code = status.code as number;
-        this.pendingOps[i].onError(wrapError(error, stack));
+          const retryCodes = getRetryCodes('batchWrite');
+          response = await this._commit<
+            api.BatchWriteRequest,
+            api.BatchWriteResponse
+          >({retryCodes, methodName: 'batchWrite', requestTag: tag});
+        } catch (err) {
+          // Map the failure to each individual write's result.
+          const ops = Array.from({length: this.pendingOps.length});
+          response = {
+            writeResults: ops.map(() => {
+              return {};
+            }),
+            status: ops.map(() => err),
+          };
+        }
+
+        for (let i = 0; i < (response.writeResults || []).length; ++i) {
+          // Since delete operations currently do not have write times, use a
+          // sentinel Timestamp value.
+          // TODO(b/158502664): Use actual delete timestamp.
+          const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
+
+          const status = (response.status || [])[i];
+          if (status.code === StatusCode.OK) {
+            const updateTime = Timestamp.fromProto(
+              response.writeResults![i].updateTime || DELETE_TIMESTAMP_SENTINEL
+            );
+            this.pendingOps[i].onSuccess(new WriteResult(updateTime));
+          } else {
+            const error =
+              new (require('google-gax/build/src/fallback').GoogleError)(
+                status.message || undefined
+              );
+            error.code = status.code as number;
+            this.pendingOps[i].onError(wrapError(error, stack));
+          }
+        }
+      },
+      {
+        [ATTRIBUTE_KEY_DOC_COUNT]: this._opCount,
       }
-    }
+    );
   }
 
   /**

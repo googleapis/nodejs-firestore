@@ -40,6 +40,11 @@ import {NOOP_MESSAGE} from './constants';
 
 import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
+import {
+  ATTRIBUTE_KEY_IS_RETRY_WITH_CURSOR,
+  ATTRIBUTE_KEY_IS_TRANSACTIONAL,
+  SPAN_NAME_RUN_QUERY,
+} from '../telemetry/trace-util';
 
 export class QueryUtil<
   AppModelType,
@@ -176,6 +181,7 @@ export class QueryUtil<
     const startTime = Date.now();
     const isExplain = explainOptions !== undefined;
 
+    let numDocumentsReceived = 0;
     let lastReceivedDocument: QueryDocumentSnapshot<
       AppModelType,
       DbModelType
@@ -234,6 +240,7 @@ export class QueryUtil<
           );
         }
 
+        ++numDocumentsReceived;
         callback(undefined, output);
 
         if (proto.done) {
@@ -254,10 +261,19 @@ export class QueryUtil<
         // catch below.
         let request = query.toProto(transactionOrReadTime, explainOptions);
 
+        let isRetryRequestWithCursor = false;
         let streamActive: Deferred<boolean>;
         do {
           streamActive = new Deferred<boolean>();
           const methodName = 'runQuery';
+
+          this._firestore._traceUtil
+            .currentSpan()
+            .addEvent(SPAN_NAME_RUN_QUERY, {
+              [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: !!request.transaction,
+              [ATTRIBUTE_KEY_IS_RETRY_WITH_CURSOR]: isRetryRequestWithCursor,
+            });
+
           backendStream = await this._firestore.requestStream(
             methodName,
             /* bidirectional= */ false,
@@ -274,7 +290,7 @@ export class QueryUtil<
             if (
               !isExplain &&
               !transactionOrReadTime &&
-              !this._isPermanentRpcError(err, 'runQuery')
+              !this._isPermanentRpcError(err, methodName)
             ) {
               logger(
                 'QueryUtil._stream',
@@ -282,6 +298,12 @@ export class QueryUtil<
                 'Query failed with retryable stream error:',
                 err
               );
+
+              this._firestore._traceUtil
+                .currentSpan()
+                .addEvent(`${SPAN_NAME_RUN_QUERY}: Retryable Error.`, {
+                  'error.message': err.message,
+                });
 
               // Enqueue a "no-op" write into the stream and wait for it to be
               // read by the downstream consumer. This ensures that all enqueued
@@ -297,6 +319,12 @@ export class QueryUtil<
                   stream.destroy(err);
                   streamActive.resolve(/* active= */ false);
                 } else if (lastReceivedDocument && retryWithCursor) {
+                  if (query instanceof VectorQuery) {
+                    throw new Error(
+                      'Unimplemented: Vector query does not support cursors yet.'
+                    );
+                  }
+
                   logger(
                     'Query._stream',
                     tag,
@@ -304,16 +332,36 @@ export class QueryUtil<
                       'documents, so the stream is being retried.'
                   );
 
+                  isRetryRequestWithCursor = true;
+
                   // Restart the query but use the last document we received as
                   // the query cursor. Note that we do not use backoff here. The
                   // call to `requestStream()` will backoff should the restart
                   // fail before delivering any results.
+                  let newQuery: Query<AppModelType, DbModelType>;
+                  if (!this._queryOptions.limit) {
+                    newQuery = query;
+                  } else {
+                    const newLimit =
+                      this._queryOptions.limit - numDocumentsReceived;
+                    if (
+                      this._queryOptions.limitType === undefined ||
+                      this._queryOptions.limitType === LimitType.First
+                    ) {
+                      newQuery = query.limit(newLimit);
+                    } else {
+                      newQuery = query.limitToLast(newLimit);
+                    }
+                  }
+
                   if (this._queryOptions.requireConsistency) {
-                    request = query
+                    request = newQuery
                       .startAfter(lastReceivedDocument)
                       .toProto(lastReceivedDocument.readTime);
                   } else {
-                    request = query.startAfter(lastReceivedDocument).toProto();
+                    request = newQuery
+                      .startAfter(lastReceivedDocument)
+                      .toProto();
                   }
 
                   // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
@@ -338,6 +386,13 @@ export class QueryUtil<
                 'Query failed with stream error:',
                 err
               );
+
+              this._firestore._traceUtil
+                .currentSpan()
+                .addEvent(`${SPAN_NAME_RUN_QUERY}: Error.`, {
+                  'error.message': err.message,
+                });
+
               stream.destroy(err);
               streamActive.resolve(/* active= */ false);
             }

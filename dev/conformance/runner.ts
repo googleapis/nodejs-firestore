@@ -524,14 +524,14 @@ function runTest(spec: ConformanceProto) {
  * as strings to a proper protobuf type since protobufJS does not support it at
  * the moment.
  */
-function normalizeTimestamp(obj: {[key: string]: {}}) {
+function normalizeTimestamp(obj: Record<string, unknown>) {
   const fieldNames = ['updateTime', 'createTime', 'readTime'];
   for (const key of Object.keys(obj)) {
     if (fieldNames.includes(key) && typeof obj[key] === 'string') {
       obj[key] = convertTimestamp(obj[key] as string);
     } else if (typeof obj[key] === 'object') {
       // @ts-ignore
-      normalizeTimestamp(obj[key]);
+      normalizeTimestamp(obj[key] as Record<string, unknown>);
     }
   }
 }
@@ -564,7 +564,7 @@ function convertTimestamp(text: string): {[key: string]: number} {
  * Value type, but the 'limit' field in 'query' has Int32Value type, resulting
  * in the need for an extra layer of specificity.
  */
-function normalizeInt32Value(obj: {[key: string]: {}}, parent = '') {
+function normalizeInt32Value(obj: Record<string, unknown>, parent = '') {
   const fieldNames = ['limit'];
   const parentNames = ['query'];
   for (const key of Object.keys(obj)) {
@@ -578,7 +578,7 @@ function normalizeInt32Value(obj: {[key: string]: {}}, parent = '') {
       };
     } else if (typeof obj[key] === 'object') {
       // @ts-ignore
-      normalizeInt32Value(obj[key], key);
+      normalizeInt32Value(obj[key] as Record<string, object>, key);
     }
   }
 }
