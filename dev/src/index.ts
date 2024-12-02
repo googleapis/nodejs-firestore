@@ -797,8 +797,7 @@ export class Firestore implements firestore.Firestore {
   }
 
   private newTraceUtilInstance(settings: firestore.Settings): TraceUtil {
-    // Take the tracing option from the settings.
-    let createEnabledInstance = settings.openTelemetryOptions?.enableTracing;
+    let createEnabledInstance = true;
 
     // The environment variable can override options to enable/disable telemetry collection.
     if ('FIRESTORE_ENABLE_TRACING' in process.env) {
