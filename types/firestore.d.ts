@@ -20,6 +20,7 @@
 
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
+
 declare namespace FirebaseFirestore {
   /** Alias for `any` but used where a Firestore field value would be provided. */
   export type DocumentFieldValue = any;
@@ -460,7 +461,30 @@ declare namespace FirebaseFirestore {
      */
     preferRest?: boolean;
 
+    /**
+     * Settings related to telemetry collection by this client.
+     * @beta
+     */
+    openTelemetry?: FirestoreOpenTelemetryOptions;
+
     [key: string]: any; // Accept other properties, such as GRPC settings.
+  }
+
+  /**
+   * Options to configure telemetry collection.
+   * This is a 'beta' interface and may change in backwards incompatible ways.
+   * @beta
+   */
+  export interface FirestoreOpenTelemetryOptions {
+    /**
+     * The OpenTelemetry TracerProvider instance that the SDK should use to
+     * create trace spans. If not provided, the SDK will use the Global TracerProvider.
+     *
+     * Even if a Global TracerProvider has been registered, users can still
+     * disable this client's span creation by passing in a "no-op" tracer provider
+     * here, or by setting the `FIRESTORE_ENABLE_TRACING` environment variable to `OFF` or `FALSE`.
+     */
+    tracerProvider?: any;
   }
 
   /** Options to configure a read-only transaction. */
@@ -2035,11 +2059,11 @@ declare namespace FirebaseFirestore {
      * `vectorField` against the given `queryVector` and returns the top documents that are closest
      * to the `queryVector`.
      *
-     * Only documents whose `vectorField` field is a `VectorValue` of the same dimension as `queryVector`
+     * Only documents whose `vectorField` field is a {@link VectorValue} of the same dimension as `queryVector`
      * participate in the query, all other documents are ignored.
      *
      * @example
-     * ```typescript
+     * ```
      * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
      * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
      *
@@ -2047,11 +2071,14 @@ declare namespace FirebaseFirestore {
      * querySnapshot.forEach(...);
      * ```
      *
-     * @param vectorField The field path this vector query executes on.
-     * @param queryVector The vector value used to measure the distance from `vectorField` values in the documents.
-     * @param options Options control the vector query. `limit` specifies the upper bound of documents to return, must
-     * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is
-     * calculated when performing the query.
+     * @param vectorField - A string or {@link FieldPath} specifying the vector field to search on.
+     * @param queryVector - The {@link VectorValue} used to measure the distance from `vectorField` values in the documents.
+     * @param options - Options control the vector query. `limit` specifies the upper bound of documents to return, must
+     * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is calculated
+     * when performing the query.
+     *
+     * @deprecated Use the new {@link findNearest} implementation
+     * accepting a single `options` param.
      */
     findNearest(
       vectorField: string | FieldPath,
@@ -2060,6 +2087,38 @@ declare namespace FirebaseFirestore {
         limit: number;
         distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
       }
+    ): VectorQuery<AppModelType, DbModelType>;
+
+    /**
+     * Returns a query that can perform vector distance (similarity) search with given parameters.
+     *
+     * The returned query, when executed, performs a distance (similarity) search on the specified
+     * `vectorField` against the given `queryVector` and returns the top documents that are closest
+     * to the `queryVector`.
+     *
+     * Only documents whose `vectorField` field is a {@link VectorValue} of the same dimension as `queryVector`
+     * participate in the query, all other documents are ignored.
+     *
+     * @example
+     * ```
+     * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
+     * const vectorQuery = col.findNearest({
+     *     vectorField: 'embedding',
+     *     queryVector: [41, 42],
+     *     limit: 10,
+     *     distanceMeasure: 'EUCLIDEAN',
+     *     distanceResultField: 'distance',
+     *     distanceThreshold: 0.125
+     * });
+     *
+     * const querySnapshot = await aggregateQuery.get();
+     * querySnapshot.forEach(...);
+     * ```
+     * @param options - An argument specifying the behavior of the {@link VectorQuery} returned by this function.
+     * See {@link VectorQueryOptions}.
+     */
+    findNearest(
+      options: VectorQueryOptions
     ): VectorQuery<AppModelType, DbModelType>;
 
     /**
@@ -3191,6 +3250,50 @@ declare namespace FirebaseFirestore {
      * if the query was not executed.
      */
     readonly snapshot: T | null;
+  }
+
+  /**
+   * Specifies the behavior of the {@link VectorQuery} generated by a call to {@link Query.findNearest}.
+   */
+  export interface VectorQueryOptions {
+    /**
+     * A string or {@link FieldPath} specifying the vector field to search on.
+     */
+    vectorField: string | FieldPath;
+
+    /**
+     * The {@link VectorValue} used to measure the distance from `vectorField` values in the documents.
+     */
+    queryVector: VectorValue | Array<number>;
+
+    /**
+     * Specifies the upper bound of documents to return, must be a positive integer with a maximum value of 1000.
+     */
+    limit: number;
+
+    /**
+     * Specifies what type of distance is calculated when performing the query.
+     */
+    distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
+
+    /**
+     * Optionally specifies the name of a field that will be set on each returned DocumentSnapshot,
+     * which will contain the computed distance for the document.
+     */
+    distanceResultField?: string | FieldPath;
+
+    /**
+     * Specifies a threshold for which no less similar documents will be returned. The behavior
+     * of the specified `distanceMeasure` will affect the meaning of the distance threshold.
+     *
+     *  - For `distanceMeasure: "EUCLIDEAN"`, the meaning of `distanceThreshold` is:
+     *     SELECT docs WHERE euclidean_distance <= distanceThreshold
+     *  - For `distanceMeasure: "COSINE"`, the meaning of `distanceThreshold` is:
+     *     SELECT docs WHERE cosine_distance <= distanceThreshold
+     *  - For `distanceMeasure: "DOT_PRODUCT"`, the meaning of `distanceThreshold` is:
+     *     SELECT docs WHERE dot_product_distance >= distanceThreshold
+     */
+    distanceThreshold?: number;
   }
 }
 

@@ -16,9 +16,18 @@
 
 import {Span} from './span';
 
+/**
+ * @private
+ * @internal
+ */
 export interface Attributes {
   [attributeKey: string]: AttributeValue | undefined;
 }
+
+/**
+ * @private
+ * @internal
+ */
 export declare type AttributeValue =
   | string
   | number
@@ -57,6 +66,8 @@ export const SPAN_NAME_TRANSACTION_COMMIT = 'Transaction.Commit';
 export const SPAN_NAME_BATCH_COMMIT = 'Batch.Commit';
 export const SPAN_NAME_PARTITION_QUERY = 'PartitionQuery';
 export const SPAN_NAME_BULK_WRITER_COMMIT = 'BulkWriter.Commit';
+export const ATTRIBUTE_SERVICE_PREFIX = 'gcp.firestore';
+export const ATTRIBUTE_SETTINGS_PREFIX = `${ATTRIBUTE_SERVICE_PREFIX}.settings`;
 export const ATTRIBUTE_KEY_DOC_COUNT = 'doc_count';
 export const ATTRIBUTE_KEY_IS_TRANSACTIONAL = 'transactional';
 export const ATTRIBUTE_KEY_NUM_RESPONSES = 'response_count';
@@ -65,6 +76,10 @@ export const ATTRIBUTE_KEY_TRANSACTION_TYPE = 'transaction_type';
 export const ATTRIBUTE_KEY_ATTEMPTS_ALLOWED = 'attempts_allowed';
 export const ATTRIBUTE_KEY_ATTEMPTS_REMAINING = 'attempts_remaining';
 
+/**
+ * @private
+ * @internal
+ */
 export interface TraceUtil {
   startActiveSpan<F extends (span: Span) => unknown>(
     name: string,
@@ -74,4 +89,6 @@ export interface TraceUtil {
   startSpan(name: string): Span;
 
   currentSpan(): Span;
+
+  recordProjectId(projectId: string): void;
 }

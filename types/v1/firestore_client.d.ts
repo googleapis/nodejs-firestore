@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/// <reference types="node" />
 import type * as gax from 'google-gax';
 import type {
   Callback,

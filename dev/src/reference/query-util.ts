@@ -180,7 +180,9 @@ export class QueryUtil<
     const tag = requestTag();
     const startTime = Date.now();
     const isExplain = explainOptions !== undefined;
+    const methodName = 'runQuery';
 
+    let numDocumentsReceived = 0;
     let lastReceivedDocument: QueryDocumentSnapshot<
       AppModelType,
       DbModelType
@@ -239,10 +241,16 @@ export class QueryUtil<
           );
         }
 
+        ++numDocumentsReceived;
         callback(undefined, output);
 
         if (proto.done) {
           logger('QueryUtil._stream', tag, 'Trigger Logical Termination.');
+          this._firestore._traceUtil
+            .currentSpan()
+            .addEvent(
+              `Firestore.${methodName}: Received RunQueryResponse.Done.`
+            );
           backendStream.unpipe(stream);
           backendStream.resume();
           backendStream.end();
@@ -263,7 +271,6 @@ export class QueryUtil<
         let streamActive: Deferred<boolean>;
         do {
           streamActive = new Deferred<boolean>();
-          const methodName = 'runQuery';
 
           this._firestore._traceUtil
             .currentSpan()
@@ -317,6 +324,12 @@ export class QueryUtil<
                   stream.destroy(err);
                   streamActive.resolve(/* active= */ false);
                 } else if (lastReceivedDocument && retryWithCursor) {
+                  if (query instanceof VectorQuery) {
+                    throw new Error(
+                      'Unimplemented: Vector query does not support cursors yet.'
+                    );
+                  }
+
                   logger(
                     'Query._stream',
                     tag,
@@ -330,12 +343,30 @@ export class QueryUtil<
                   // the query cursor. Note that we do not use backoff here. The
                   // call to `requestStream()` will backoff should the restart
                   // fail before delivering any results.
+                  let newQuery: Query<AppModelType, DbModelType>;
+                  if (!this._queryOptions.limit) {
+                    newQuery = query;
+                  } else {
+                    const newLimit =
+                      this._queryOptions.limit - numDocumentsReceived;
+                    if (
+                      this._queryOptions.limitType === undefined ||
+                      this._queryOptions.limitType === LimitType.First
+                    ) {
+                      newQuery = query.limit(newLimit);
+                    } else {
+                      newQuery = query.limitToLast(newLimit);
+                    }
+                  }
+
                   if (this._queryOptions.requireConsistency) {
-                    request = query
+                    request = newQuery
                       .startAfter(lastReceivedDocument)
                       .toProto(lastReceivedDocument.readTime);
                   } else {
-                    request = query.startAfter(lastReceivedDocument).toProto();
+                    request = newQuery
+                      .startAfter(lastReceivedDocument)
+                      .toProto();
                   }
 
                   // Set lastReceivedDocument to null before each retry attempt to ensure the retry makes progress
