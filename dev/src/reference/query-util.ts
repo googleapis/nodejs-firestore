@@ -180,6 +180,7 @@ export class QueryUtil<
     const tag = requestTag();
     const startTime = Date.now();
     const isExplain = explainOptions !== undefined;
+    const methodName = 'runQuery';
 
     let numDocumentsReceived = 0;
     let lastReceivedDocument: QueryDocumentSnapshot<
@@ -245,6 +246,11 @@ export class QueryUtil<
 
         if (proto.done) {
           logger('QueryUtil._stream', tag, 'Trigger Logical Termination.');
+          this._firestore._traceUtil
+            .currentSpan()
+            .addEvent(
+              `Firestore.${methodName}: Received RunQueryResponse.Done.`
+            );
           backendStream.unpipe(stream);
           backendStream.resume();
           backendStream.end();
@@ -265,7 +271,6 @@ export class QueryUtil<
         let streamActive: Deferred<boolean>;
         do {
           streamActive = new Deferred<boolean>();
-          const methodName = 'runQuery';
 
           this._firestore._traceUtil
             .currentSpan()
