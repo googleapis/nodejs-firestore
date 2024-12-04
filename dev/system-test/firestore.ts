@@ -2382,7 +2382,7 @@ describe('Query class', () => {
     });
 
     describe('requesting computed distance', () => {
-      it('supports COSINE distance', async () => {
+      it('supports requesting computed COSINE distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2419,7 +2419,7 @@ describe('Query class', () => {
         expect(res.docs[3].get('distance')).to.equal(2);
       });
 
-      it('supports EUCLIDEAN distance', async () => {
+      it('supports requesting computed EUCLIDEAN distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2463,7 +2463,7 @@ describe('Query class', () => {
         expect(res.docs[3].get('distance')).to.equal(100);
       });
 
-      it('supports DOT_PRODUCT distance', async () => {
+      it('supports requesting computed DOT_PRODUCT distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2538,7 +2538,7 @@ describe('Query class', () => {
         expect(res.docs[0].get('distance')).to.equal(1);
       });
 
-      it('supports select queries', async () => {
+      it('supports requesting computed distance in select queries', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2579,7 +2579,7 @@ describe('Query class', () => {
     });
 
     describe('querying with distance threshold', () => {
-      it('supports COSINE distance', async () => {
+      it('supports querying with distance threshold using COSINE distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2613,7 +2613,7 @@ describe('Query class', () => {
         ).to.be.true;
       });
 
-      it('supports EUCLIDEAN distance', async () => {
+      it('supports querying with distance threshold using EUCLIDEAN distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2647,7 +2647,7 @@ describe('Query class', () => {
           .to.be.true;
       });
 
-      it('supports DOT_PRODUCT distance', async () => {
+      it('supports querying with distance threshold using DOT_PRODUCT distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2680,7 +2680,7 @@ describe('Query class', () => {
         ).to.be.true;
       });
 
-      it('works with distance threshold', async () => {
+      it('works with distance result field', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
