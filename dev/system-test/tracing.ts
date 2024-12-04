@@ -433,7 +433,12 @@ describe('Tracing Tests', () => {
     if (success) {
       buildSpanMaps();
     }
-    expect(spanIdToSpanData.size).to.equal(
+
+    // Tests are able to perform some Firestore operations inside
+    // `runFirestoreOperationInRootSpan`, and some Firestore operations outside
+    // of it. Therefore, if a given test intends to capture some (but not all) spans,
+    // the in-memory trace will have more spans than `numExpectedSpans`.
+    expect(spanIdToSpanData.size).to.greaterThanOrEqual(
       numExpectedSpans,
       `Could not find expected number of spans (${numExpectedSpans})`
     );
@@ -812,6 +817,10 @@ describe('Tracing Tests', () => {
     });
 
     it('document reference update()', async () => {
+      // Make sure the document exists before updating it.
+      // Perform the `set` operation outside of the root span.
+      await firestore.collection('foo').doc('bar').set({foo: 'bar'});
+
       await runFirestoreOperationInRootSpan(() =>
         firestore.collection('foo').doc('bar').update('foo', 'bar2')
       );
