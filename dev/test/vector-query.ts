@@ -224,7 +224,7 @@ describe('Vector(findNearest) query interface', () => {
         .isEqual(
           queryB.findNearest({
             vectorField: 'embedding',
-            queryVector: [40, 42],
+            queryVector: [40, 41, 42],
             distanceMeasure: 'COSINE',
             limit: 1000,
           })
