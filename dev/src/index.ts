@@ -588,6 +588,11 @@ export class Firestore implements firestore.Firestore {
       libraryHeader.libVersion += ' fire/' + settings.firebaseVersion;
     }
 
+    if (settings && settings.firebaseAdminVersion) {
+      libraryHeader.libVersion +=
+        ' fire-admin/' + settings.firebaseAdminVersion;
+    }
+
     this.validateAndApplySettings({...settings, ...libraryHeader});
     this._traceUtil = this.newTraceUtilInstance(this._settings);
 
