@@ -4,6 +4,24 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.11.0](https://github.com/googleapis/nodejs-firestore/compare/v7.10.0...v7.11.0) (2024-12-05)
+
+
+### Features
+
+* [proto] add Database.CmekConfig and Database.cmek_config (information about CMEK enablement) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] add Database.delete_time (the time a database was deleted, if it ever was) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] add Database.previous_id (if a database was deleted, what ID it was using beforehand) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] add Database.SourceInfo and Database.source_info (information about database provenance, specifically for restored databases) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] allow specifying an encryption_config when restoring a database ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* Enable tracing via OpenTelemetry. ([#2218](https://github.com/googleapis/nodejs-firestore/issues/2218)) ([1ddb62e](https://github.com/googleapis/nodejs-firestore/commit/1ddb62ed67e93ca2c265556bb5e504d207a639a8))
+* Support `fire-admin` tag for Admin Node SDK ([#2238](https://github.com/googleapis/nodejs-firestore/issues/2238)) ([#2252](https://github.com/googleapis/nodejs-firestore/issues/2252)) ([1339dc2](https://github.com/googleapis/nodejs-firestore/commit/1339dc20e3ffc065f5f79a82baaa67deda76fb36))
+
+
+### Bug Fixes
+
+* Use correct limit when retrying a limit query stream with a cursor ([#2203](https://github.com/googleapis/nodejs-firestore/issues/2203)) ([ab94092](https://github.com/googleapis/nodejs-firestore/commit/ab94092c2375501dd2998a458fc8a449793c9e69))
+
 ## [7.10.0](https://github.com/googleapis/nodejs-firestore/compare/v7.9.0...v7.10.0) (2024-09-05)
 
 
