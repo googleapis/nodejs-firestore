@@ -8038,6 +8038,9 @@ export namespace google {
 
             /** PythonSettings common */
             common?: (google.api.ICommonLanguageSettings|null);
+
+            /** PythonSettings experimentalFeatures */
+            experimentalFeatures?: (google.api.PythonSettings.IExperimentalFeatures|null);
         }
 
         /** Represents a PythonSettings. */
@@ -8051,6 +8054,9 @@ export namespace google {
 
             /** PythonSettings common. */
             public common?: (google.api.ICommonLanguageSettings|null);
+
+            /** PythonSettings experimentalFeatures. */
+            public experimentalFeatures?: (google.api.PythonSettings.IExperimentalFeatures|null);
 
             /**
              * Creates a PythonSettings message from a plain object. Also converts values to their respective internal types.
@@ -8079,6 +8085,57 @@ export namespace google {
              * @returns The default type url
              */
             public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace PythonSettings {
+
+            /** Properties of an ExperimentalFeatures. */
+            interface IExperimentalFeatures {
+
+                /** ExperimentalFeatures restAsyncIoEnabled */
+                restAsyncIoEnabled?: (boolean|null);
+            }
+
+            /** Represents an ExperimentalFeatures. */
+            class ExperimentalFeatures implements IExperimentalFeatures {
+
+                /**
+                 * Constructs a new ExperimentalFeatures.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.api.PythonSettings.IExperimentalFeatures);
+
+                /** ExperimentalFeatures restAsyncIoEnabled. */
+                public restAsyncIoEnabled: boolean;
+
+                /**
+                 * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExperimentalFeatures
+                 */
+                public static fromObject(object: { [k: string]: any }): google.api.PythonSettings.ExperimentalFeatures;
+
+                /**
+                 * Creates a plain object from an ExperimentalFeatures message. Also converts values to other types if specified.
+                 * @param message ExperimentalFeatures
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.api.PythonSettings.ExperimentalFeatures, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExperimentalFeatures to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExperimentalFeatures
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
         }
 
         /** Properties of a NodeSettings. */

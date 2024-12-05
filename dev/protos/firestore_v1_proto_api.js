@@ -13973,6 +13973,7 @@
                  * @memberof google.api
                  * @interface IPythonSettings
                  * @property {google.api.ICommonLanguageSettings|null} [common] PythonSettings common
+                 * @property {google.api.PythonSettings.IExperimentalFeatures|null} [experimentalFeatures] PythonSettings experimentalFeatures
                  */
     
                 /**
@@ -13999,6 +14000,14 @@
                 PythonSettings.prototype.common = null;
     
                 /**
+                 * PythonSettings experimentalFeatures.
+                 * @member {google.api.PythonSettings.IExperimentalFeatures|null|undefined} experimentalFeatures
+                 * @memberof google.api.PythonSettings
+                 * @instance
+                 */
+                PythonSettings.prototype.experimentalFeatures = null;
+    
+                /**
                  * Creates a PythonSettings message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.PythonSettings
@@ -14014,6 +14023,11 @@
                         if (typeof object.common !== "object")
                             throw TypeError(".google.api.PythonSettings.common: object expected");
                         message.common = $root.google.api.CommonLanguageSettings.fromObject(object.common);
+                    }
+                    if (object.experimentalFeatures != null) {
+                        if (typeof object.experimentalFeatures !== "object")
+                            throw TypeError(".google.api.PythonSettings.experimentalFeatures: object expected");
+                        message.experimentalFeatures = $root.google.api.PythonSettings.ExperimentalFeatures.fromObject(object.experimentalFeatures);
                     }
                     return message;
                 };
@@ -14031,10 +14045,14 @@
                     if (!options)
                         options = {};
                     var object = {};
-                    if (options.defaults)
+                    if (options.defaults) {
                         object.common = null;
+                        object.experimentalFeatures = null;
+                    }
                     if (message.common != null && message.hasOwnProperty("common"))
                         object.common = $root.google.api.CommonLanguageSettings.toObject(message.common, options);
+                    if (message.experimentalFeatures != null && message.hasOwnProperty("experimentalFeatures"))
+                        object.experimentalFeatures = $root.google.api.PythonSettings.ExperimentalFeatures.toObject(message.experimentalFeatures, options);
                     return object;
                 };
     
@@ -14063,6 +14081,104 @@
                     }
                     return typeUrlPrefix + "/google.api.PythonSettings";
                 };
+    
+                PythonSettings.ExperimentalFeatures = (function() {
+    
+                    /**
+                     * Properties of an ExperimentalFeatures.
+                     * @memberof google.api.PythonSettings
+                     * @interface IExperimentalFeatures
+                     * @property {boolean|null} [restAsyncIoEnabled] ExperimentalFeatures restAsyncIoEnabled
+                     */
+    
+                    /**
+                     * Constructs a new ExperimentalFeatures.
+                     * @memberof google.api.PythonSettings
+                     * @classdesc Represents an ExperimentalFeatures.
+                     * @implements IExperimentalFeatures
+                     * @constructor
+                     * @param {google.api.PythonSettings.IExperimentalFeatures=} [properties] Properties to set
+                     */
+                    function ExperimentalFeatures(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * ExperimentalFeatures restAsyncIoEnabled.
+                     * @member {boolean} restAsyncIoEnabled
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @instance
+                     */
+                    ExperimentalFeatures.prototype.restAsyncIoEnabled = false;
+    
+                    /**
+                     * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.api.PythonSettings.ExperimentalFeatures} ExperimentalFeatures
+                     */
+                    ExperimentalFeatures.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.api.PythonSettings.ExperimentalFeatures)
+                            return object;
+                        var message = new $root.google.api.PythonSettings.ExperimentalFeatures();
+                        if (object.restAsyncIoEnabled != null)
+                            message.restAsyncIoEnabled = Boolean(object.restAsyncIoEnabled);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an ExperimentalFeatures message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @static
+                     * @param {google.api.PythonSettings.ExperimentalFeatures} message ExperimentalFeatures
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ExperimentalFeatures.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults)
+                            object.restAsyncIoEnabled = false;
+                        if (message.restAsyncIoEnabled != null && message.hasOwnProperty("restAsyncIoEnabled"))
+                            object.restAsyncIoEnabled = message.restAsyncIoEnabled;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ExperimentalFeatures to JSON.
+                     * @function toJSON
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ExperimentalFeatures.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for ExperimentalFeatures
+                     * @function getTypeUrl
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    ExperimentalFeatures.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.api.PythonSettings.ExperimentalFeatures";
+                    };
+    
+                    return ExperimentalFeatures;
+                })();
     
                 return PythonSettings;
             })();

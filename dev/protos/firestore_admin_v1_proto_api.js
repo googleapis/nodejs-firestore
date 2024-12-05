@@ -479,6 +479,7 @@
                          * @property {string|null} [uid] Database uid
                          * @property {google.protobuf.ITimestamp|null} [createTime] Database createTime
                          * @property {google.protobuf.ITimestamp|null} [updateTime] Database updateTime
+                         * @property {google.protobuf.ITimestamp|null} [deleteTime] Database deleteTime
                          * @property {string|null} [locationId] Database locationId
                          * @property {google.firestore.admin.v1.Database.DatabaseType|null} [type] Database type
                          * @property {google.firestore.admin.v1.Database.ConcurrencyMode|null} [concurrencyMode] Database concurrencyMode
@@ -488,6 +489,9 @@
                          * @property {google.firestore.admin.v1.Database.AppEngineIntegrationMode|null} [appEngineIntegrationMode] Database appEngineIntegrationMode
                          * @property {string|null} [keyPrefix] Database keyPrefix
                          * @property {google.firestore.admin.v1.Database.DeleteProtectionState|null} [deleteProtectionState] Database deleteProtectionState
+                         * @property {google.firestore.admin.v1.Database.ICmekConfig|null} [cmekConfig] Database cmekConfig
+                         * @property {string|null} [previousId] Database previousId
+                         * @property {google.firestore.admin.v1.Database.ISourceInfo|null} [sourceInfo] Database sourceInfo
                          * @property {string|null} [etag] Database etag
                          */
     
@@ -537,6 +541,14 @@
                          * @instance
                          */
                         Database.prototype.updateTime = null;
+    
+                        /**
+                         * Database deleteTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} deleteTime
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.deleteTime = null;
     
                         /**
                          * Database locationId.
@@ -611,6 +623,30 @@
                         Database.prototype.deleteProtectionState = 0;
     
                         /**
+                         * Database cmekConfig.
+                         * @member {google.firestore.admin.v1.Database.ICmekConfig|null|undefined} cmekConfig
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.cmekConfig = null;
+    
+                        /**
+                         * Database previousId.
+                         * @member {string} previousId
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.previousId = "";
+    
+                        /**
+                         * Database sourceInfo.
+                         * @member {google.firestore.admin.v1.Database.ISourceInfo|null|undefined} sourceInfo
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.sourceInfo = null;
+    
+                        /**
                          * Database etag.
                          * @member {string} etag
                          * @memberof google.firestore.admin.v1.Database
@@ -643,6 +679,11 @@
                                 if (typeof object.updateTime !== "object")
                                     throw TypeError(".google.firestore.admin.v1.Database.updateTime: object expected");
                                 message.updateTime = $root.google.protobuf.Timestamp.fromObject(object.updateTime);
+                            }
+                            if (object.deleteTime != null) {
+                                if (typeof object.deleteTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.deleteTime: object expected");
+                                message.deleteTime = $root.google.protobuf.Timestamp.fromObject(object.deleteTime);
                             }
                             if (object.locationId != null)
                                 message.locationId = String(object.locationId);
@@ -762,6 +803,18 @@
                                 message.deleteProtectionState = 2;
                                 break;
                             }
+                            if (object.cmekConfig != null) {
+                                if (typeof object.cmekConfig !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.cmekConfig: object expected");
+                                message.cmekConfig = $root.google.firestore.admin.v1.Database.CmekConfig.fromObject(object.cmekConfig);
+                            }
+                            if (object.previousId != null)
+                                message.previousId = String(object.previousId);
+                            if (object.sourceInfo != null) {
+                                if (typeof object.sourceInfo !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.sourceInfo: object expected");
+                                message.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.fromObject(object.sourceInfo);
+                            }
                             if (object.etag != null)
                                 message.etag = String(object.etag);
                             return message;
@@ -785,6 +838,7 @@
                                 object.uid = "";
                                 object.createTime = null;
                                 object.updateTime = null;
+                                object.deleteTime = null;
                                 object.locationId = "";
                                 object.type = options.enums === String ? "DATABASE_TYPE_UNSPECIFIED" : 0;
                                 object.concurrencyMode = options.enums === String ? "CONCURRENCY_MODE_UNSPECIFIED" : 0;
@@ -794,6 +848,9 @@
                                 object.keyPrefix = "";
                                 object.pointInTimeRecoveryEnablement = options.enums === String ? "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED" : 0;
                                 object.deleteProtectionState = options.enums === String ? "DELETE_PROTECTION_STATE_UNSPECIFIED" : 0;
+                                object.cmekConfig = null;
+                                object.previousId = "";
+                                object.sourceInfo = null;
                                 object.etag = "";
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
@@ -804,6 +861,8 @@
                                 object.createTime = $root.google.protobuf.Timestamp.toObject(message.createTime, options);
                             if (message.updateTime != null && message.hasOwnProperty("updateTime"))
                                 object.updateTime = $root.google.protobuf.Timestamp.toObject(message.updateTime, options);
+                            if (message.deleteTime != null && message.hasOwnProperty("deleteTime"))
+                                object.deleteTime = $root.google.protobuf.Timestamp.toObject(message.deleteTime, options);
                             if (message.locationId != null && message.hasOwnProperty("locationId"))
                                 object.locationId = message.locationId;
                             if (message.type != null && message.hasOwnProperty("type"))
@@ -822,6 +881,12 @@
                                 object.pointInTimeRecoveryEnablement = options.enums === String ? $root.google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement[message.pointInTimeRecoveryEnablement] === undefined ? message.pointInTimeRecoveryEnablement : $root.google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement[message.pointInTimeRecoveryEnablement] : message.pointInTimeRecoveryEnablement;
                             if (message.deleteProtectionState != null && message.hasOwnProperty("deleteProtectionState"))
                                 object.deleteProtectionState = options.enums === String ? $root.google.firestore.admin.v1.Database.DeleteProtectionState[message.deleteProtectionState] === undefined ? message.deleteProtectionState : $root.google.firestore.admin.v1.Database.DeleteProtectionState[message.deleteProtectionState] : message.deleteProtectionState;
+                            if (message.cmekConfig != null && message.hasOwnProperty("cmekConfig"))
+                                object.cmekConfig = $root.google.firestore.admin.v1.Database.CmekConfig.toObject(message.cmekConfig, options);
+                            if (message.previousId != null && message.hasOwnProperty("previousId"))
+                                object.previousId = message.previousId;
+                            if (message.sourceInfo != null && message.hasOwnProperty("sourceInfo"))
+                                object.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.toObject(message.sourceInfo, options);
                             if (message.etag != null && message.hasOwnProperty("etag"))
                                 object.etag = message.etag;
                             return object;
@@ -933,6 +998,767 @@
                             values[valuesById[1] = "DELETE_PROTECTION_DISABLED"] = "DELETE_PROTECTION_DISABLED";
                             values[valuesById[2] = "DELETE_PROTECTION_ENABLED"] = "DELETE_PROTECTION_ENABLED";
                             return values;
+                        })();
+    
+                        Database.CmekConfig = (function() {
+    
+                            /**
+                             * Properties of a CmekConfig.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @interface ICmekConfig
+                             * @property {string|null} [kmsKeyName] CmekConfig kmsKeyName
+                             * @property {Array.<string>|null} [activeKeyVersion] CmekConfig activeKeyVersion
+                             */
+    
+                            /**
+                             * Constructs a new CmekConfig.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @classdesc Represents a CmekConfig.
+                             * @implements ICmekConfig
+                             * @constructor
+                             * @param {google.firestore.admin.v1.Database.ICmekConfig=} [properties] Properties to set
+                             */
+                            function CmekConfig(properties) {
+                                this.activeKeyVersion = [];
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * CmekConfig kmsKeyName.
+                             * @member {string} kmsKeyName
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @instance
+                             */
+                            CmekConfig.prototype.kmsKeyName = "";
+    
+                            /**
+                             * CmekConfig activeKeyVersion.
+                             * @member {Array.<string>} activeKeyVersion
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @instance
+                             */
+                            CmekConfig.prototype.activeKeyVersion = $util.emptyArray;
+    
+                            /**
+                             * Creates a CmekConfig message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.Database.CmekConfig} CmekConfig
+                             */
+                            CmekConfig.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.Database.CmekConfig)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.Database.CmekConfig();
+                                if (object.kmsKeyName != null)
+                                    message.kmsKeyName = String(object.kmsKeyName);
+                                if (object.activeKeyVersion) {
+                                    if (!Array.isArray(object.activeKeyVersion))
+                                        throw TypeError(".google.firestore.admin.v1.Database.CmekConfig.activeKeyVersion: array expected");
+                                    message.activeKeyVersion = [];
+                                    for (var i = 0; i < object.activeKeyVersion.length; ++i)
+                                        message.activeKeyVersion[i] = String(object.activeKeyVersion[i]);
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a CmekConfig message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @static
+                             * @param {google.firestore.admin.v1.Database.CmekConfig} message CmekConfig
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            CmekConfig.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.arrays || options.defaults)
+                                    object.activeKeyVersion = [];
+                                if (options.defaults)
+                                    object.kmsKeyName = "";
+                                if (message.kmsKeyName != null && message.hasOwnProperty("kmsKeyName"))
+                                    object.kmsKeyName = message.kmsKeyName;
+                                if (message.activeKeyVersion && message.activeKeyVersion.length) {
+                                    object.activeKeyVersion = [];
+                                    for (var j = 0; j < message.activeKeyVersion.length; ++j)
+                                        object.activeKeyVersion[j] = message.activeKeyVersion[j];
+                                }
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this CmekConfig to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            CmekConfig.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for CmekConfig
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            CmekConfig.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Database.CmekConfig";
+                            };
+    
+                            return CmekConfig;
+                        })();
+    
+                        Database.SourceInfo = (function() {
+    
+                            /**
+                             * Properties of a SourceInfo.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @interface ISourceInfo
+                             * @property {google.firestore.admin.v1.Database.SourceInfo.IBackupSource|null} [backup] SourceInfo backup
+                             * @property {string|null} [operation] SourceInfo operation
+                             */
+    
+                            /**
+                             * Constructs a new SourceInfo.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @classdesc Represents a SourceInfo.
+                             * @implements ISourceInfo
+                             * @constructor
+                             * @param {google.firestore.admin.v1.Database.ISourceInfo=} [properties] Properties to set
+                             */
+                            function SourceInfo(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * SourceInfo backup.
+                             * @member {google.firestore.admin.v1.Database.SourceInfo.IBackupSource|null|undefined} backup
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @instance
+                             */
+                            SourceInfo.prototype.backup = null;
+    
+                            /**
+                             * SourceInfo operation.
+                             * @member {string} operation
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @instance
+                             */
+                            SourceInfo.prototype.operation = "";
+    
+                            // OneOf field names bound to virtual getters and setters
+                            var $oneOfFields;
+    
+                            /**
+                             * SourceInfo source.
+                             * @member {"backup"|undefined} source
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @instance
+                             */
+                            Object.defineProperty(SourceInfo.prototype, "source", {
+                                get: $util.oneOfGetter($oneOfFields = ["backup"]),
+                                set: $util.oneOfSetter($oneOfFields)
+                            });
+    
+                            /**
+                             * Creates a SourceInfo message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.Database.SourceInfo} SourceInfo
+                             */
+                            SourceInfo.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.Database.SourceInfo)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.Database.SourceInfo();
+                                if (object.backup != null) {
+                                    if (typeof object.backup !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Database.SourceInfo.backup: object expected");
+                                    message.backup = $root.google.firestore.admin.v1.Database.SourceInfo.BackupSource.fromObject(object.backup);
+                                }
+                                if (object.operation != null)
+                                    message.operation = String(object.operation);
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a SourceInfo message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @static
+                             * @param {google.firestore.admin.v1.Database.SourceInfo} message SourceInfo
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            SourceInfo.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.operation = "";
+                                if (message.backup != null && message.hasOwnProperty("backup")) {
+                                    object.backup = $root.google.firestore.admin.v1.Database.SourceInfo.BackupSource.toObject(message.backup, options);
+                                    if (options.oneofs)
+                                        object.source = "backup";
+                                }
+                                if (message.operation != null && message.hasOwnProperty("operation"))
+                                    object.operation = message.operation;
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this SourceInfo to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            SourceInfo.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for SourceInfo
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            SourceInfo.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Database.SourceInfo";
+                            };
+    
+                            SourceInfo.BackupSource = (function() {
+    
+                                /**
+                                 * Properties of a BackupSource.
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo
+                                 * @interface IBackupSource
+                                 * @property {string|null} [backup] BackupSource backup
+                                 */
+    
+                                /**
+                                 * Constructs a new BackupSource.
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo
+                                 * @classdesc Represents a BackupSource.
+                                 * @implements IBackupSource
+                                 * @constructor
+                                 * @param {google.firestore.admin.v1.Database.SourceInfo.IBackupSource=} [properties] Properties to set
+                                 */
+                                function BackupSource(properties) {
+                                    if (properties)
+                                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                            if (properties[keys[i]] != null)
+                                                this[keys[i]] = properties[keys[i]];
+                                }
+    
+                                /**
+                                 * BackupSource backup.
+                                 * @member {string} backup
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo.BackupSource
+                                 * @instance
+                                 */
+                                BackupSource.prototype.backup = "";
+    
+                                /**
+                                 * Creates a BackupSource message from a plain object. Also converts values to their respective internal types.
+                                 * @function fromObject
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo.BackupSource
+                                 * @static
+                                 * @param {Object.<string,*>} object Plain object
+                                 * @returns {google.firestore.admin.v1.Database.SourceInfo.BackupSource} BackupSource
+                                 */
+                                BackupSource.fromObject = function fromObject(object) {
+                                    if (object instanceof $root.google.firestore.admin.v1.Database.SourceInfo.BackupSource)
+                                        return object;
+                                    var message = new $root.google.firestore.admin.v1.Database.SourceInfo.BackupSource();
+                                    if (object.backup != null)
+                                        message.backup = String(object.backup);
+                                    return message;
+                                };
+    
+                                /**
+                                 * Creates a plain object from a BackupSource message. Also converts values to other types if specified.
+                                 * @function toObject
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo.BackupSource
+                                 * @static
+                                 * @param {google.firestore.admin.v1.Database.SourceInfo.BackupSource} message BackupSource
+                                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                 * @returns {Object.<string,*>} Plain object
+                                 */
+                                BackupSource.toObject = function toObject(message, options) {
+                                    if (!options)
+                                        options = {};
+                                    var object = {};
+                                    if (options.defaults)
+                                        object.backup = "";
+                                    if (message.backup != null && message.hasOwnProperty("backup"))
+                                        object.backup = message.backup;
+                                    return object;
+                                };
+    
+                                /**
+                                 * Converts this BackupSource to JSON.
+                                 * @function toJSON
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo.BackupSource
+                                 * @instance
+                                 * @returns {Object.<string,*>} JSON object
+                                 */
+                                BackupSource.prototype.toJSON = function toJSON() {
+                                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                };
+    
+                                /**
+                                 * Gets the default type url for BackupSource
+                                 * @function getTypeUrl
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo.BackupSource
+                                 * @static
+                                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns {string} The default type url
+                                 */
+                                BackupSource.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                    if (typeUrlPrefix === undefined) {
+                                        typeUrlPrefix = "type.googleapis.com";
+                                    }
+                                    return typeUrlPrefix + "/google.firestore.admin.v1.Database.SourceInfo.BackupSource";
+                                };
+    
+                                return BackupSource;
+                            })();
+    
+                            return SourceInfo;
+                        })();
+    
+                        Database.EncryptionConfig = (function() {
+    
+                            /**
+                             * Properties of an EncryptionConfig.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @interface IEncryptionConfig
+                             * @property {google.firestore.admin.v1.Database.EncryptionConfig.IGoogleDefaultEncryptionOptions|null} [googleDefaultEncryption] EncryptionConfig googleDefaultEncryption
+                             * @property {google.firestore.admin.v1.Database.EncryptionConfig.ISourceEncryptionOptions|null} [useSourceEncryption] EncryptionConfig useSourceEncryption
+                             * @property {google.firestore.admin.v1.Database.EncryptionConfig.ICustomerManagedEncryptionOptions|null} [customerManagedEncryption] EncryptionConfig customerManagedEncryption
+                             */
+    
+                            /**
+                             * Constructs a new EncryptionConfig.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @classdesc Represents an EncryptionConfig.
+                             * @implements IEncryptionConfig
+                             * @constructor
+                             * @param {google.firestore.admin.v1.Database.IEncryptionConfig=} [properties] Properties to set
+                             */
+                            function EncryptionConfig(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * EncryptionConfig googleDefaultEncryption.
+                             * @member {google.firestore.admin.v1.Database.EncryptionConfig.IGoogleDefaultEncryptionOptions|null|undefined} googleDefaultEncryption
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @instance
+                             */
+                            EncryptionConfig.prototype.googleDefaultEncryption = null;
+    
+                            /**
+                             * EncryptionConfig useSourceEncryption.
+                             * @member {google.firestore.admin.v1.Database.EncryptionConfig.ISourceEncryptionOptions|null|undefined} useSourceEncryption
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @instance
+                             */
+                            EncryptionConfig.prototype.useSourceEncryption = null;
+    
+                            /**
+                             * EncryptionConfig customerManagedEncryption.
+                             * @member {google.firestore.admin.v1.Database.EncryptionConfig.ICustomerManagedEncryptionOptions|null|undefined} customerManagedEncryption
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @instance
+                             */
+                            EncryptionConfig.prototype.customerManagedEncryption = null;
+    
+                            // OneOf field names bound to virtual getters and setters
+                            var $oneOfFields;
+    
+                            /**
+                             * EncryptionConfig encryptionType.
+                             * @member {"googleDefaultEncryption"|"useSourceEncryption"|"customerManagedEncryption"|undefined} encryptionType
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @instance
+                             */
+                            Object.defineProperty(EncryptionConfig.prototype, "encryptionType", {
+                                get: $util.oneOfGetter($oneOfFields = ["googleDefaultEncryption", "useSourceEncryption", "customerManagedEncryption"]),
+                                set: $util.oneOfSetter($oneOfFields)
+                            });
+    
+                            /**
+                             * Creates an EncryptionConfig message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.Database.EncryptionConfig} EncryptionConfig
+                             */
+                            EncryptionConfig.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.Database.EncryptionConfig)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.Database.EncryptionConfig();
+                                if (object.googleDefaultEncryption != null) {
+                                    if (typeof object.googleDefaultEncryption !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Database.EncryptionConfig.googleDefaultEncryption: object expected");
+                                    message.googleDefaultEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions.fromObject(object.googleDefaultEncryption);
+                                }
+                                if (object.useSourceEncryption != null) {
+                                    if (typeof object.useSourceEncryption !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Database.EncryptionConfig.useSourceEncryption: object expected");
+                                    message.useSourceEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions.fromObject(object.useSourceEncryption);
+                                }
+                                if (object.customerManagedEncryption != null) {
+                                    if (typeof object.customerManagedEncryption !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Database.EncryptionConfig.customerManagedEncryption: object expected");
+                                    message.customerManagedEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions.fromObject(object.customerManagedEncryption);
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from an EncryptionConfig message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @static
+                             * @param {google.firestore.admin.v1.Database.EncryptionConfig} message EncryptionConfig
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            EncryptionConfig.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (message.googleDefaultEncryption != null && message.hasOwnProperty("googleDefaultEncryption")) {
+                                    object.googleDefaultEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions.toObject(message.googleDefaultEncryption, options);
+                                    if (options.oneofs)
+                                        object.encryptionType = "googleDefaultEncryption";
+                                }
+                                if (message.useSourceEncryption != null && message.hasOwnProperty("useSourceEncryption")) {
+                                    object.useSourceEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions.toObject(message.useSourceEncryption, options);
+                                    if (options.oneofs)
+                                        object.encryptionType = "useSourceEncryption";
+                                }
+                                if (message.customerManagedEncryption != null && message.hasOwnProperty("customerManagedEncryption")) {
+                                    object.customerManagedEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions.toObject(message.customerManagedEncryption, options);
+                                    if (options.oneofs)
+                                        object.encryptionType = "customerManagedEncryption";
+                                }
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this EncryptionConfig to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            EncryptionConfig.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for EncryptionConfig
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            EncryptionConfig.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Database.EncryptionConfig";
+                            };
+    
+                            EncryptionConfig.GoogleDefaultEncryptionOptions = (function() {
+    
+                                /**
+                                 * Properties of a GoogleDefaultEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @interface IGoogleDefaultEncryptionOptions
+                                 */
+    
+                                /**
+                                 * Constructs a new GoogleDefaultEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @classdesc Represents a GoogleDefaultEncryptionOptions.
+                                 * @implements IGoogleDefaultEncryptionOptions
+                                 * @constructor
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.IGoogleDefaultEncryptionOptions=} [properties] Properties to set
+                                 */
+                                function GoogleDefaultEncryptionOptions(properties) {
+                                    if (properties)
+                                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                            if (properties[keys[i]] != null)
+                                                this[keys[i]] = properties[keys[i]];
+                                }
+    
+                                /**
+                                 * Creates a GoogleDefaultEncryptionOptions message from a plain object. Also converts values to their respective internal types.
+                                 * @function fromObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions
+                                 * @static
+                                 * @param {Object.<string,*>} object Plain object
+                                 * @returns {google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions} GoogleDefaultEncryptionOptions
+                                 */
+                                GoogleDefaultEncryptionOptions.fromObject = function fromObject(object) {
+                                    if (object instanceof $root.google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions)
+                                        return object;
+                                    return new $root.google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions();
+                                };
+    
+                                /**
+                                 * Creates a plain object from a GoogleDefaultEncryptionOptions message. Also converts values to other types if specified.
+                                 * @function toObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions
+                                 * @static
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions} message GoogleDefaultEncryptionOptions
+                                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                 * @returns {Object.<string,*>} Plain object
+                                 */
+                                GoogleDefaultEncryptionOptions.toObject = function toObject() {
+                                    return {};
+                                };
+    
+                                /**
+                                 * Converts this GoogleDefaultEncryptionOptions to JSON.
+                                 * @function toJSON
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions
+                                 * @instance
+                                 * @returns {Object.<string,*>} JSON object
+                                 */
+                                GoogleDefaultEncryptionOptions.prototype.toJSON = function toJSON() {
+                                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                };
+    
+                                /**
+                                 * Gets the default type url for GoogleDefaultEncryptionOptions
+                                 * @function getTypeUrl
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions
+                                 * @static
+                                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns {string} The default type url
+                                 */
+                                GoogleDefaultEncryptionOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                    if (typeUrlPrefix === undefined) {
+                                        typeUrlPrefix = "type.googleapis.com";
+                                    }
+                                    return typeUrlPrefix + "/google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions";
+                                };
+    
+                                return GoogleDefaultEncryptionOptions;
+                            })();
+    
+                            EncryptionConfig.SourceEncryptionOptions = (function() {
+    
+                                /**
+                                 * Properties of a SourceEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @interface ISourceEncryptionOptions
+                                 */
+    
+                                /**
+                                 * Constructs a new SourceEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @classdesc Represents a SourceEncryptionOptions.
+                                 * @implements ISourceEncryptionOptions
+                                 * @constructor
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.ISourceEncryptionOptions=} [properties] Properties to set
+                                 */
+                                function SourceEncryptionOptions(properties) {
+                                    if (properties)
+                                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                            if (properties[keys[i]] != null)
+                                                this[keys[i]] = properties[keys[i]];
+                                }
+    
+                                /**
+                                 * Creates a SourceEncryptionOptions message from a plain object. Also converts values to their respective internal types.
+                                 * @function fromObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions
+                                 * @static
+                                 * @param {Object.<string,*>} object Plain object
+                                 * @returns {google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions} SourceEncryptionOptions
+                                 */
+                                SourceEncryptionOptions.fromObject = function fromObject(object) {
+                                    if (object instanceof $root.google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions)
+                                        return object;
+                                    return new $root.google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions();
+                                };
+    
+                                /**
+                                 * Creates a plain object from a SourceEncryptionOptions message. Also converts values to other types if specified.
+                                 * @function toObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions
+                                 * @static
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions} message SourceEncryptionOptions
+                                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                 * @returns {Object.<string,*>} Plain object
+                                 */
+                                SourceEncryptionOptions.toObject = function toObject() {
+                                    return {};
+                                };
+    
+                                /**
+                                 * Converts this SourceEncryptionOptions to JSON.
+                                 * @function toJSON
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions
+                                 * @instance
+                                 * @returns {Object.<string,*>} JSON object
+                                 */
+                                SourceEncryptionOptions.prototype.toJSON = function toJSON() {
+                                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                };
+    
+                                /**
+                                 * Gets the default type url for SourceEncryptionOptions
+                                 * @function getTypeUrl
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions
+                                 * @static
+                                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns {string} The default type url
+                                 */
+                                SourceEncryptionOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                    if (typeUrlPrefix === undefined) {
+                                        typeUrlPrefix = "type.googleapis.com";
+                                    }
+                                    return typeUrlPrefix + "/google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions";
+                                };
+    
+                                return SourceEncryptionOptions;
+                            })();
+    
+                            EncryptionConfig.CustomerManagedEncryptionOptions = (function() {
+    
+                                /**
+                                 * Properties of a CustomerManagedEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @interface ICustomerManagedEncryptionOptions
+                                 * @property {string|null} [kmsKeyName] CustomerManagedEncryptionOptions kmsKeyName
+                                 */
+    
+                                /**
+                                 * Constructs a new CustomerManagedEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @classdesc Represents a CustomerManagedEncryptionOptions.
+                                 * @implements ICustomerManagedEncryptionOptions
+                                 * @constructor
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.ICustomerManagedEncryptionOptions=} [properties] Properties to set
+                                 */
+                                function CustomerManagedEncryptionOptions(properties) {
+                                    if (properties)
+                                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                            if (properties[keys[i]] != null)
+                                                this[keys[i]] = properties[keys[i]];
+                                }
+    
+                                /**
+                                 * CustomerManagedEncryptionOptions kmsKeyName.
+                                 * @member {string} kmsKeyName
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions
+                                 * @instance
+                                 */
+                                CustomerManagedEncryptionOptions.prototype.kmsKeyName = "";
+    
+                                /**
+                                 * Creates a CustomerManagedEncryptionOptions message from a plain object. Also converts values to their respective internal types.
+                                 * @function fromObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions
+                                 * @static
+                                 * @param {Object.<string,*>} object Plain object
+                                 * @returns {google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions} CustomerManagedEncryptionOptions
+                                 */
+                                CustomerManagedEncryptionOptions.fromObject = function fromObject(object) {
+                                    if (object instanceof $root.google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions)
+                                        return object;
+                                    var message = new $root.google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions();
+                                    if (object.kmsKeyName != null)
+                                        message.kmsKeyName = String(object.kmsKeyName);
+                                    return message;
+                                };
+    
+                                /**
+                                 * Creates a plain object from a CustomerManagedEncryptionOptions message. Also converts values to other types if specified.
+                                 * @function toObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions
+                                 * @static
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions} message CustomerManagedEncryptionOptions
+                                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                 * @returns {Object.<string,*>} Plain object
+                                 */
+                                CustomerManagedEncryptionOptions.toObject = function toObject(message, options) {
+                                    if (!options)
+                                        options = {};
+                                    var object = {};
+                                    if (options.defaults)
+                                        object.kmsKeyName = "";
+                                    if (message.kmsKeyName != null && message.hasOwnProperty("kmsKeyName"))
+                                        object.kmsKeyName = message.kmsKeyName;
+                                    return object;
+                                };
+    
+                                /**
+                                 * Converts this CustomerManagedEncryptionOptions to JSON.
+                                 * @function toJSON
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions
+                                 * @instance
+                                 * @returns {Object.<string,*>} JSON object
+                                 */
+                                CustomerManagedEncryptionOptions.prototype.toJSON = function toJSON() {
+                                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                };
+    
+                                /**
+                                 * Gets the default type url for CustomerManagedEncryptionOptions
+                                 * @function getTypeUrl
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions
+                                 * @static
+                                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns {string} The default type url
+                                 */
+                                CustomerManagedEncryptionOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                    if (typeUrlPrefix === undefined) {
+                                        typeUrlPrefix = "type.googleapis.com";
+                                    }
+                                    return typeUrlPrefix + "/google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions";
+                                };
+    
+                                return CustomerManagedEncryptionOptions;
+                            })();
+    
+                            return EncryptionConfig;
                         })();
     
                         return Database;
@@ -6532,6 +7358,7 @@
                          * @property {string|null} [parent] RestoreDatabaseRequest parent
                          * @property {string|null} [databaseId] RestoreDatabaseRequest databaseId
                          * @property {string|null} [backup] RestoreDatabaseRequest backup
+                         * @property {google.firestore.admin.v1.Database.IEncryptionConfig|null} [encryptionConfig] RestoreDatabaseRequest encryptionConfig
                          */
     
                         /**
@@ -6574,6 +7401,14 @@
                         RestoreDatabaseRequest.prototype.backup = "";
     
                         /**
+                         * RestoreDatabaseRequest encryptionConfig.
+                         * @member {google.firestore.admin.v1.Database.IEncryptionConfig|null|undefined} encryptionConfig
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
+                         * @instance
+                         */
+                        RestoreDatabaseRequest.prototype.encryptionConfig = null;
+    
+                        /**
                          * Creates a RestoreDatabaseRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
@@ -6591,6 +7426,11 @@
                                 message.databaseId = String(object.databaseId);
                             if (object.backup != null)
                                 message.backup = String(object.backup);
+                            if (object.encryptionConfig != null) {
+                                if (typeof object.encryptionConfig !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.RestoreDatabaseRequest.encryptionConfig: object expected");
+                                message.encryptionConfig = $root.google.firestore.admin.v1.Database.EncryptionConfig.fromObject(object.encryptionConfig);
+                            }
                             return message;
                         };
     
@@ -6611,6 +7451,7 @@
                                 object.parent = "";
                                 object.databaseId = "";
                                 object.backup = "";
+                                object.encryptionConfig = null;
                             }
                             if (message.parent != null && message.hasOwnProperty("parent"))
                                 object.parent = message.parent;
@@ -6618,6 +7459,8 @@
                                 object.databaseId = message.databaseId;
                             if (message.backup != null && message.hasOwnProperty("backup"))
                                 object.backup = message.backup;
+                            if (message.encryptionConfig != null && message.hasOwnProperty("encryptionConfig"))
+                                object.encryptionConfig = $root.google.firestore.admin.v1.Database.EncryptionConfig.toObject(message.encryptionConfig, options);
                             return object;
                         };
     
@@ -11244,6 +12087,7 @@
                  * @memberof google.api
                  * @interface IPythonSettings
                  * @property {google.api.ICommonLanguageSettings|null} [common] PythonSettings common
+                 * @property {google.api.PythonSettings.IExperimentalFeatures|null} [experimentalFeatures] PythonSettings experimentalFeatures
                  */
     
                 /**
@@ -11270,6 +12114,14 @@
                 PythonSettings.prototype.common = null;
     
                 /**
+                 * PythonSettings experimentalFeatures.
+                 * @member {google.api.PythonSettings.IExperimentalFeatures|null|undefined} experimentalFeatures
+                 * @memberof google.api.PythonSettings
+                 * @instance
+                 */
+                PythonSettings.prototype.experimentalFeatures = null;
+    
+                /**
                  * Creates a PythonSettings message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.PythonSettings
@@ -11285,6 +12137,11 @@
                         if (typeof object.common !== "object")
                             throw TypeError(".google.api.PythonSettings.common: object expected");
                         message.common = $root.google.api.CommonLanguageSettings.fromObject(object.common);
+                    }
+                    if (object.experimentalFeatures != null) {
+                        if (typeof object.experimentalFeatures !== "object")
+                            throw TypeError(".google.api.PythonSettings.experimentalFeatures: object expected");
+                        message.experimentalFeatures = $root.google.api.PythonSettings.ExperimentalFeatures.fromObject(object.experimentalFeatures);
                     }
                     return message;
                 };
@@ -11302,10 +12159,14 @@
                     if (!options)
                         options = {};
                     var object = {};
-                    if (options.defaults)
+                    if (options.defaults) {
                         object.common = null;
+                        object.experimentalFeatures = null;
+                    }
                     if (message.common != null && message.hasOwnProperty("common"))
                         object.common = $root.google.api.CommonLanguageSettings.toObject(message.common, options);
+                    if (message.experimentalFeatures != null && message.hasOwnProperty("experimentalFeatures"))
+                        object.experimentalFeatures = $root.google.api.PythonSettings.ExperimentalFeatures.toObject(message.experimentalFeatures, options);
                     return object;
                 };
     
@@ -11334,6 +12195,104 @@
                     }
                     return typeUrlPrefix + "/google.api.PythonSettings";
                 };
+    
+                PythonSettings.ExperimentalFeatures = (function() {
+    
+                    /**
+                     * Properties of an ExperimentalFeatures.
+                     * @memberof google.api.PythonSettings
+                     * @interface IExperimentalFeatures
+                     * @property {boolean|null} [restAsyncIoEnabled] ExperimentalFeatures restAsyncIoEnabled
+                     */
+    
+                    /**
+                     * Constructs a new ExperimentalFeatures.
+                     * @memberof google.api.PythonSettings
+                     * @classdesc Represents an ExperimentalFeatures.
+                     * @implements IExperimentalFeatures
+                     * @constructor
+                     * @param {google.api.PythonSettings.IExperimentalFeatures=} [properties] Properties to set
+                     */
+                    function ExperimentalFeatures(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * ExperimentalFeatures restAsyncIoEnabled.
+                     * @member {boolean} restAsyncIoEnabled
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @instance
+                     */
+                    ExperimentalFeatures.prototype.restAsyncIoEnabled = false;
+    
+                    /**
+                     * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.api.PythonSettings.ExperimentalFeatures} ExperimentalFeatures
+                     */
+                    ExperimentalFeatures.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.api.PythonSettings.ExperimentalFeatures)
+                            return object;
+                        var message = new $root.google.api.PythonSettings.ExperimentalFeatures();
+                        if (object.restAsyncIoEnabled != null)
+                            message.restAsyncIoEnabled = Boolean(object.restAsyncIoEnabled);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an ExperimentalFeatures message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @static
+                     * @param {google.api.PythonSettings.ExperimentalFeatures} message ExperimentalFeatures
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ExperimentalFeatures.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults)
+                            object.restAsyncIoEnabled = false;
+                        if (message.restAsyncIoEnabled != null && message.hasOwnProperty("restAsyncIoEnabled"))
+                            object.restAsyncIoEnabled = message.restAsyncIoEnabled;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ExperimentalFeatures to JSON.
+                     * @function toJSON
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ExperimentalFeatures.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for ExperimentalFeatures
+                     * @function getTypeUrl
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    ExperimentalFeatures.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.api.PythonSettings.ExperimentalFeatures";
+                    };
+    
+                    return ExperimentalFeatures;
+                })();
     
                 return PythonSettings;
             })();
