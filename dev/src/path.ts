@@ -150,6 +150,10 @@ abstract class Path<T> {
   /**
    * Compare the current path against another Path object.
    *
+   * Compare the current path against another Path object. Paths are compared segment by segment,
+   * prioritizing numeric IDs (e.g., "__id123__") in numeric ascending order, followed by string
+   * segments in lexicographical order.
+   *
    * @private
    * @internal
    * @param other The path to compare to.
@@ -158,20 +162,50 @@ abstract class Path<T> {
   compareTo(other: Path<T>): number {
     const len = Math.min(this.segments.length, other.segments.length);
     for (let i = 0; i < len; i++) {
-      if (this.segments[i] < other.segments[i]) {
+      const comparison = this.compareSegments(
+        this.segments[i],
+        other.segments[i]
+      );
+      if (comparison !== 0) {
+        return comparison;
+      }
+    }
+    return this.segments.length - other.segments.length;
+  }
+
+  private compareSegments(lhs: string, rhs: string): number {
+    const isLhsNumeric = this.isNumericId(lhs);
+    const isRhsNumeric = this.isNumericId(rhs);
+
+    if (isLhsNumeric && !isRhsNumeric) {
+      // Only lhs is numeric
+      return -1;
+    } else if (!isLhsNumeric && isRhsNumeric) {
+      // Only rhs is numeric
+      return 1;
+    } else if (isLhsNumeric && isRhsNumeric) {
+      // both numeric
+      return this.extractNumericId(lhs) - this.extractNumericId(rhs);
+    } else {
+      // both non-numeric
+      if (lhs < rhs) {
         return -1;
       }
-      if (this.segments[i] > other.segments[i]) {
+      if (lhs > rhs) {
         return 1;
       }
+      return 0;
     }
-    if (this.segments.length < other.segments.length) {
-      return -1;
-    }
-    if (this.segments.length > other.segments.length) {
-      return 1;
-    }
-    return 0;
+  }
+
+  // Checks if a segment is a numeric ID (starts with "__id" and ends with "__").
+  private isNumericId(segment: string): boolean {
+    return segment.startsWith('__id') && segment.endsWith('__');
+  }
+
+  //  Extracts the numeric value from a numeric ID segment.
+  private extractNumericId(segment: string): number {
+    return parseInt(segment.substring(4, segment.length - 2), 10);
   }
 
   /**
