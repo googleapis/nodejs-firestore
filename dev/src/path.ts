@@ -170,7 +170,7 @@ abstract class Path<T> {
         return comparison;
       }
     }
-    return this.segments.length - other.segments.length;
+    return Math.sign(this.segments.length - other.segments.length);
   }
 
   private compareSegments(lhs: string, rhs: string): number {
@@ -185,7 +185,7 @@ abstract class Path<T> {
       return 1;
     } else if (isLhsNumeric && isRhsNumeric) {
       // both numeric
-      return this.extractNumericId(lhs) - this.extractNumericId(rhs);
+      return Math.sign(this.extractNumericId(lhs) - this.extractNumericId(rhs));
     } else {
       // both non-numeric
       if (lhs < rhs) {
