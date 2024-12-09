@@ -633,6 +633,34 @@
                             }
                           ]
                         },
+                        "BulkDeleteDocuments": {
+                          "requestType": "BulkDeleteDocumentsRequest",
+                          "responseType": "google.longrunning.Operation",
+                          "options": {
+                            "(google.api.http).post": "/v1/{name=projects/*/databases/*}:bulkDeleteDocuments",
+                            "(google.api.http).body": "*",
+                            "(google.api.method_signature)": "name",
+                            "(google.longrunning.operation_info).response_type": "BulkDeleteDocumentsResponse",
+                            "(google.longrunning.operation_info).metadata_type": "BulkDeleteDocumentsMetadata"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{name=projects/*/databases/*}:bulkDeleteDocuments",
+                                "body": "*"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            },
+                            {
+                              "(google.longrunning.operation_info)": {
+                                "response_type": "BulkDeleteDocumentsResponse",
+                                "metadata_type": "BulkDeleteDocumentsMetadata"
+                              }
+                            }
+                          ]
+                        },
                         "CreateDatabase": {
                           "requestType": "CreateDatabaseRequest",
                           "responseType": "google.longrunning.Operation",
@@ -934,6 +962,10 @@
                             "(google.api.field_behavior)": "REQUIRED",
                             "(google.api.resource_reference).child_type": "firestore.googleapis.com/Database"
                           }
+                        },
+                        "showDeleted": {
+                          "type": "bool",
+                          "id": 4
                         }
                       }
                     },
@@ -1308,6 +1340,37 @@
                         }
                       }
                     },
+                    "BulkDeleteDocumentsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Database"
+                          }
+                        },
+                        "collectionIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        },
+                        "namespaceIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        }
+                      }
+                    },
+                    "BulkDeleteDocumentsResponse": {
+                      "fields": {}
+                    },
                     "GetBackupRequest": {
                       "fields": {
                         "name": {
@@ -1566,6 +1629,44 @@
                         "namespaceIds": {
                           "rule": "repeated",
                           "type": "string",
+                          "id": 8
+                        }
+                      }
+                    },
+                    "BulkDeleteDocumentsMetadata": {
+                      "fields": {
+                        "startTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 1
+                        },
+                        "endTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2
+                        },
+                        "operationState": {
+                          "type": "OperationState",
+                          "id": 3
+                        },
+                        "progressDocuments": {
+                          "type": "Progress",
+                          "id": 4
+                        },
+                        "progressBytes": {
+                          "type": "Progress",
+                          "id": 5
+                        },
+                        "collectionIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 6
+                        },
+                        "namespaceIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 7
+                        },
+                        "snapshotTime": {
+                          "type": "google.protobuf.Timestamp",
                           "id": 8
                         }
                       }
@@ -2230,7 +2331,6 @@
             "Edition": {
               "values": {
                 "EDITION_UNKNOWN": 0,
-                "EDITION_LEGACY": 900,
                 "EDITION_PROTO2": 998,
                 "EDITION_PROTO3": 999,
                 "EDITION_2023": 1000,
@@ -2956,10 +3056,6 @@
                   "type": "FeatureSet",
                   "id": 21
                 },
-                "featureSupport": {
-                  "type": "FeatureSupport",
-                  "id": 22
-                },
                 "uninterpretedOption": {
                   "rule": "repeated",
                   "type": "UninterpretedOption",
@@ -3027,26 +3123,6 @@
                     "value": {
                       "type": "string",
                       "id": 2
-                    }
-                  }
-                },
-                "FeatureSupport": {
-                  "fields": {
-                    "editionIntroduced": {
-                      "type": "Edition",
-                      "id": 1
-                    },
-                    "editionDeprecated": {
-                      "type": "Edition",
-                      "id": 2
-                    },
-                    "deprecationWarning": {
-                      "type": "string",
-                      "id": 3
-                    },
-                    "editionRemoved": {
-                      "type": "Edition",
-                      "id": 4
                     }
                   }
                 }
@@ -3272,7 +3348,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_2023",
                     "edition_defaults.value": "EXPLICIT"
                   }
@@ -3283,7 +3358,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_PROTO3",
                     "edition_defaults.value": "OPEN"
                   }
@@ -3294,7 +3368,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_PROTO3",
                     "edition_defaults.value": "PACKED"
                   }
@@ -3305,7 +3378,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_PROTO3",
                     "edition_defaults.value": "VERIFY"
                   }
@@ -3316,7 +3388,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_PROTO2",
                     "edition_defaults.value": "LENGTH_PREFIXED"
                   }
@@ -3327,7 +3398,6 @@
                   "options": {
                     "retention": "RETENTION_RUNTIME",
                     "targets": "TARGET_TYPE_FILE",
-                    "feature_support.edition_introduced": "EDITION_2023",
                     "edition_defaults.edition": "EDITION_PROTO3",
                     "edition_defaults.value": "ALLOW"
                   }
@@ -3336,7 +3406,15 @@
               "extensions": [
                 [
                   1000,
-                  9994
+                  1000
+                ],
+                [
+                  1001,
+                  1001
+                ],
+                [
+                  1002,
+                  1002
                 ],
                 [
                   9995,
@@ -3422,13 +3500,9 @@
                       "type": "Edition",
                       "id": 3
                     },
-                    "overridableFeatures": {
+                    "features": {
                       "type": "FeatureSet",
-                      "id": 4
-                    },
-                    "fixedFeatures": {
-                      "type": "FeatureSet",
-                      "id": 5
+                      "id": 2
                     }
                   }
                 }

@@ -2390,6 +2390,39 @@
                          */
     
                         /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#bulkDeleteDocuments}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef BulkDeleteDocumentsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.longrunning.Operation} [response] Operation
+                         */
+    
+                        /**
+                         * Calls BulkDeleteDocuments.
+                         * @function bulkDeleteDocuments
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsRequest} request BulkDeleteDocumentsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.BulkDeleteDocumentsCallback} callback Node-style callback called with the error, if any, and Operation
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.bulkDeleteDocuments = function bulkDeleteDocuments(request, callback) {
+                            return this.rpcCall(bulkDeleteDocuments, $root.google.firestore.admin.v1.BulkDeleteDocumentsRequest, $root.google.longrunning.Operation, request, callback);
+                        }, "name", { value: "BulkDeleteDocuments" });
+    
+                        /**
+                         * Calls BulkDeleteDocuments.
+                         * @function bulkDeleteDocuments
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsRequest} request BulkDeleteDocumentsRequest message or plain object
+                         * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
                          * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createDatabase}.
                          * @memberof google.firestore.admin.v1.FirestoreAdmin
                          * @typedef CreateDatabaseCallback
@@ -2861,6 +2894,7 @@
                          * @memberof google.firestore.admin.v1
                          * @interface IListDatabasesRequest
                          * @property {string|null} [parent] ListDatabasesRequest parent
+                         * @property {boolean|null} [showDeleted] ListDatabasesRequest showDeleted
                          */
     
                         /**
@@ -2887,6 +2921,14 @@
                         ListDatabasesRequest.prototype.parent = "";
     
                         /**
+                         * ListDatabasesRequest showDeleted.
+                         * @member {boolean} showDeleted
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @instance
+                         */
+                        ListDatabasesRequest.prototype.showDeleted = false;
+    
+                        /**
                          * Creates a ListDatabasesRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.ListDatabasesRequest
@@ -2900,6 +2942,8 @@
                             var message = new $root.google.firestore.admin.v1.ListDatabasesRequest();
                             if (object.parent != null)
                                 message.parent = String(object.parent);
+                            if (object.showDeleted != null)
+                                message.showDeleted = Boolean(object.showDeleted);
                             return message;
                         };
     
@@ -2916,10 +2960,14 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.defaults)
+                            if (options.defaults) {
                                 object.parent = "";
+                                object.showDeleted = false;
+                            }
                             if (message.parent != null && message.hasOwnProperty("parent"))
                                 object.parent = message.parent;
+                            if (message.showDeleted != null && message.hasOwnProperty("showDeleted"))
+                                object.showDeleted = message.showDeleted;
                             return object;
                         };
     
@@ -5822,6 +5870,231 @@
                         return ImportDocumentsRequest;
                     })();
     
+                    v1.BulkDeleteDocumentsRequest = (function() {
+    
+                        /**
+                         * Properties of a BulkDeleteDocumentsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IBulkDeleteDocumentsRequest
+                         * @property {string|null} [name] BulkDeleteDocumentsRequest name
+                         * @property {Array.<string>|null} [collectionIds] BulkDeleteDocumentsRequest collectionIds
+                         * @property {Array.<string>|null} [namespaceIds] BulkDeleteDocumentsRequest namespaceIds
+                         */
+    
+                        /**
+                         * Constructs a new BulkDeleteDocumentsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a BulkDeleteDocumentsRequest.
+                         * @implements IBulkDeleteDocumentsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsRequest=} [properties] Properties to set
+                         */
+                        function BulkDeleteDocumentsRequest(properties) {
+                            this.collectionIds = [];
+                            this.namespaceIds = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * BulkDeleteDocumentsRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
+                         * @instance
+                         */
+                        BulkDeleteDocumentsRequest.prototype.name = "";
+    
+                        /**
+                         * BulkDeleteDocumentsRequest collectionIds.
+                         * @member {Array.<string>} collectionIds
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
+                         * @instance
+                         */
+                        BulkDeleteDocumentsRequest.prototype.collectionIds = $util.emptyArray;
+    
+                        /**
+                         * BulkDeleteDocumentsRequest namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
+                         * @instance
+                         */
+                        BulkDeleteDocumentsRequest.prototype.namespaceIds = $util.emptyArray;
+    
+                        /**
+                         * Creates a BulkDeleteDocumentsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.BulkDeleteDocumentsRequest} BulkDeleteDocumentsRequest
+                         */
+                        BulkDeleteDocumentsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.BulkDeleteDocumentsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.BulkDeleteDocumentsRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            if (object.collectionIds) {
+                                if (!Array.isArray(object.collectionIds))
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsRequest.collectionIds: array expected");
+                                message.collectionIds = [];
+                                for (var i = 0; i < object.collectionIds.length; ++i)
+                                    message.collectionIds[i] = String(object.collectionIds[i]);
+                            }
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsRequest.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a BulkDeleteDocumentsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.BulkDeleteDocumentsRequest} message BulkDeleteDocumentsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        BulkDeleteDocumentsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults) {
+                                object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.collectionIds && message.collectionIds.length) {
+                                object.collectionIds = [];
+                                for (var j = 0; j < message.collectionIds.length; ++j)
+                                    object.collectionIds[j] = message.collectionIds[j];
+                            }
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this BulkDeleteDocumentsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        BulkDeleteDocumentsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for BulkDeleteDocumentsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        BulkDeleteDocumentsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.BulkDeleteDocumentsRequest";
+                        };
+    
+                        return BulkDeleteDocumentsRequest;
+                    })();
+    
+                    v1.BulkDeleteDocumentsResponse = (function() {
+    
+                        /**
+                         * Properties of a BulkDeleteDocumentsResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IBulkDeleteDocumentsResponse
+                         */
+    
+                        /**
+                         * Constructs a new BulkDeleteDocumentsResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a BulkDeleteDocumentsResponse.
+                         * @implements IBulkDeleteDocumentsResponse
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsResponse=} [properties] Properties to set
+                         */
+                        function BulkDeleteDocumentsResponse(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Creates a BulkDeleteDocumentsResponse message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.BulkDeleteDocumentsResponse} BulkDeleteDocumentsResponse
+                         */
+                        BulkDeleteDocumentsResponse.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.BulkDeleteDocumentsResponse)
+                                return object;
+                            return new $root.google.firestore.admin.v1.BulkDeleteDocumentsResponse();
+                        };
+    
+                        /**
+                         * Creates a plain object from a BulkDeleteDocumentsResponse message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
+                         * @static
+                         * @param {google.firestore.admin.v1.BulkDeleteDocumentsResponse} message BulkDeleteDocumentsResponse
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        BulkDeleteDocumentsResponse.toObject = function toObject() {
+                            return {};
+                        };
+    
+                        /**
+                         * Converts this BulkDeleteDocumentsResponse to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        BulkDeleteDocumentsResponse.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for BulkDeleteDocumentsResponse
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        BulkDeleteDocumentsResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.BulkDeleteDocumentsResponse";
+                        };
+    
+                        return BulkDeleteDocumentsResponse;
+                    })();
+    
                     v1.GetBackupRequest = (function() {
     
                         /**
@@ -7690,6 +7963,276 @@
                         };
     
                         return ImportDocumentsMetadata;
+                    })();
+    
+                    v1.BulkDeleteDocumentsMetadata = (function() {
+    
+                        /**
+                         * Properties of a BulkDeleteDocumentsMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IBulkDeleteDocumentsMetadata
+                         * @property {google.protobuf.ITimestamp|null} [startTime] BulkDeleteDocumentsMetadata startTime
+                         * @property {google.protobuf.ITimestamp|null} [endTime] BulkDeleteDocumentsMetadata endTime
+                         * @property {google.firestore.admin.v1.OperationState|null} [operationState] BulkDeleteDocumentsMetadata operationState
+                         * @property {google.firestore.admin.v1.IProgress|null} [progressDocuments] BulkDeleteDocumentsMetadata progressDocuments
+                         * @property {google.firestore.admin.v1.IProgress|null} [progressBytes] BulkDeleteDocumentsMetadata progressBytes
+                         * @property {Array.<string>|null} [collectionIds] BulkDeleteDocumentsMetadata collectionIds
+                         * @property {Array.<string>|null} [namespaceIds] BulkDeleteDocumentsMetadata namespaceIds
+                         * @property {google.protobuf.ITimestamp|null} [snapshotTime] BulkDeleteDocumentsMetadata snapshotTime
+                         */
+    
+                        /**
+                         * Constructs a new BulkDeleteDocumentsMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a BulkDeleteDocumentsMetadata.
+                         * @implements IBulkDeleteDocumentsMetadata
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsMetadata=} [properties] Properties to set
+                         */
+                        function BulkDeleteDocumentsMetadata(properties) {
+                            this.collectionIds = [];
+                            this.namespaceIds = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata startTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} startTime
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.startTime = null;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata endTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} endTime
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.endTime = null;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata operationState.
+                         * @member {google.firestore.admin.v1.OperationState} operationState
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.operationState = 0;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata progressDocuments.
+                         * @member {google.firestore.admin.v1.IProgress|null|undefined} progressDocuments
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.progressDocuments = null;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata progressBytes.
+                         * @member {google.firestore.admin.v1.IProgress|null|undefined} progressBytes
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.progressBytes = null;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata collectionIds.
+                         * @member {Array.<string>} collectionIds
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.collectionIds = $util.emptyArray;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.namespaceIds = $util.emptyArray;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata snapshotTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} snapshotTime
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.snapshotTime = null;
+    
+                        /**
+                         * Creates a BulkDeleteDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.BulkDeleteDocumentsMetadata} BulkDeleteDocumentsMetadata
+                         */
+                        BulkDeleteDocumentsMetadata.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.BulkDeleteDocumentsMetadata)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.BulkDeleteDocumentsMetadata();
+                            if (object.startTime != null) {
+                                if (typeof object.startTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.startTime: object expected");
+                                message.startTime = $root.google.protobuf.Timestamp.fromObject(object.startTime);
+                            }
+                            if (object.endTime != null) {
+                                if (typeof object.endTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.endTime: object expected");
+                                message.endTime = $root.google.protobuf.Timestamp.fromObject(object.endTime);
+                            }
+                            switch (object.operationState) {
+                            default:
+                                if (typeof object.operationState === "number") {
+                                    message.operationState = object.operationState;
+                                    break;
+                                }
+                                break;
+                            case "OPERATION_STATE_UNSPECIFIED":
+                            case 0:
+                                message.operationState = 0;
+                                break;
+                            case "INITIALIZING":
+                            case 1:
+                                message.operationState = 1;
+                                break;
+                            case "PROCESSING":
+                            case 2:
+                                message.operationState = 2;
+                                break;
+                            case "CANCELLING":
+                            case 3:
+                                message.operationState = 3;
+                                break;
+                            case "FINALIZING":
+                            case 4:
+                                message.operationState = 4;
+                                break;
+                            case "SUCCESSFUL":
+                            case 5:
+                                message.operationState = 5;
+                                break;
+                            case "FAILED":
+                            case 6:
+                                message.operationState = 6;
+                                break;
+                            case "CANCELLED":
+                            case 7:
+                                message.operationState = 7;
+                                break;
+                            }
+                            if (object.progressDocuments != null) {
+                                if (typeof object.progressDocuments !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.progressDocuments: object expected");
+                                message.progressDocuments = $root.google.firestore.admin.v1.Progress.fromObject(object.progressDocuments);
+                            }
+                            if (object.progressBytes != null) {
+                                if (typeof object.progressBytes !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.progressBytes: object expected");
+                                message.progressBytes = $root.google.firestore.admin.v1.Progress.fromObject(object.progressBytes);
+                            }
+                            if (object.collectionIds) {
+                                if (!Array.isArray(object.collectionIds))
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.collectionIds: array expected");
+                                message.collectionIds = [];
+                                for (var i = 0; i < object.collectionIds.length; ++i)
+                                    message.collectionIds[i] = String(object.collectionIds[i]);
+                            }
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
+                            if (object.snapshotTime != null) {
+                                if (typeof object.snapshotTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.snapshotTime: object expected");
+                                message.snapshotTime = $root.google.protobuf.Timestamp.fromObject(object.snapshotTime);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a BulkDeleteDocumentsMetadata message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.BulkDeleteDocumentsMetadata} message BulkDeleteDocumentsMetadata
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        BulkDeleteDocumentsMetadata.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults) {
+                                object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
+                            if (options.defaults) {
+                                object.startTime = null;
+                                object.endTime = null;
+                                object.operationState = options.enums === String ? "OPERATION_STATE_UNSPECIFIED" : 0;
+                                object.progressDocuments = null;
+                                object.progressBytes = null;
+                                object.snapshotTime = null;
+                            }
+                            if (message.startTime != null && message.hasOwnProperty("startTime"))
+                                object.startTime = $root.google.protobuf.Timestamp.toObject(message.startTime, options);
+                            if (message.endTime != null && message.hasOwnProperty("endTime"))
+                                object.endTime = $root.google.protobuf.Timestamp.toObject(message.endTime, options);
+                            if (message.operationState != null && message.hasOwnProperty("operationState"))
+                                object.operationState = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.operationState] === undefined ? message.operationState : $root.google.firestore.admin.v1.OperationState[message.operationState] : message.operationState;
+                            if (message.progressDocuments != null && message.hasOwnProperty("progressDocuments"))
+                                object.progressDocuments = $root.google.firestore.admin.v1.Progress.toObject(message.progressDocuments, options);
+                            if (message.progressBytes != null && message.hasOwnProperty("progressBytes"))
+                                object.progressBytes = $root.google.firestore.admin.v1.Progress.toObject(message.progressBytes, options);
+                            if (message.collectionIds && message.collectionIds.length) {
+                                object.collectionIds = [];
+                                for (var j = 0; j < message.collectionIds.length; ++j)
+                                    object.collectionIds[j] = message.collectionIds[j];
+                            }
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
+                            if (message.snapshotTime != null && message.hasOwnProperty("snapshotTime"))
+                                object.snapshotTime = $root.google.protobuf.Timestamp.toObject(message.snapshotTime, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this BulkDeleteDocumentsMetadata to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for BulkDeleteDocumentsMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        BulkDeleteDocumentsMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.BulkDeleteDocumentsMetadata";
+                        };
+    
+                        return BulkDeleteDocumentsMetadata;
                     })();
     
                     v1.ExportDocumentsResponse = (function() {
@@ -11804,7 +12347,6 @@
              * @name google.protobuf.Edition
              * @enum {string}
              * @property {string} EDITION_UNKNOWN=EDITION_UNKNOWN EDITION_UNKNOWN value
-             * @property {string} EDITION_LEGACY=EDITION_LEGACY EDITION_LEGACY value
              * @property {string} EDITION_PROTO2=EDITION_PROTO2 EDITION_PROTO2 value
              * @property {string} EDITION_PROTO3=EDITION_PROTO3 EDITION_PROTO3 value
              * @property {string} EDITION_2023=EDITION_2023 EDITION_2023 value
@@ -11819,7 +12361,6 @@
             protobuf.Edition = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
                 values[valuesById[0] = "EDITION_UNKNOWN"] = "EDITION_UNKNOWN";
-                values[valuesById[900] = "EDITION_LEGACY"] = "EDITION_LEGACY";
                 values[valuesById[998] = "EDITION_PROTO2"] = "EDITION_PROTO2";
                 values[valuesById[999] = "EDITION_PROTO3"] = "EDITION_PROTO3";
                 values[valuesById[1000] = "EDITION_2023"] = "EDITION_2023";
@@ -12079,10 +12620,6 @@
                     case "EDITION_UNKNOWN":
                     case 0:
                         message.edition = 0;
-                        break;
-                    case "EDITION_LEGACY":
-                    case 900:
-                        message.edition = 900;
                         break;
                     case "EDITION_PROTO2":
                     case 998:
@@ -15113,7 +15650,6 @@
                  * @property {Array.<google.protobuf.FieldOptions.OptionTargetType>|null} [targets] FieldOptions targets
                  * @property {Array.<google.protobuf.FieldOptions.IEditionDefault>|null} [editionDefaults] FieldOptions editionDefaults
                  * @property {google.protobuf.IFeatureSet|null} [features] FieldOptions features
-                 * @property {google.protobuf.FieldOptions.IFeatureSupport|null} [featureSupport] FieldOptions featureSupport
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] FieldOptions uninterpretedOption
                  * @property {Array.<google.api.FieldBehavior>|null} [".google.api.fieldBehavior"] FieldOptions .google.api.fieldBehavior
                  * @property {google.api.IResourceReference|null} [".google.api.resourceReference"] FieldOptions .google.api.resourceReference
@@ -15233,14 +15769,6 @@
                  * @instance
                  */
                 FieldOptions.prototype.features = null;
-    
-                /**
-                 * FieldOptions featureSupport.
-                 * @member {google.protobuf.FieldOptions.IFeatureSupport|null|undefined} featureSupport
-                 * @memberof google.protobuf.FieldOptions
-                 * @instance
-                 */
-                FieldOptions.prototype.featureSupport = null;
     
                 /**
                  * FieldOptions uninterpretedOption.
@@ -15418,11 +15946,6 @@
                             throw TypeError(".google.protobuf.FieldOptions.features: object expected");
                         message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
                     }
-                    if (object.featureSupport != null) {
-                        if (typeof object.featureSupport !== "object")
-                            throw TypeError(".google.protobuf.FieldOptions.featureSupport: object expected");
-                        message.featureSupport = $root.google.protobuf.FieldOptions.FeatureSupport.fromObject(object.featureSupport);
-                    }
                     if (object.uninterpretedOption) {
                         if (!Array.isArray(object.uninterpretedOption))
                             throw TypeError(".google.protobuf.FieldOptions.uninterpretedOption: array expected");
@@ -15520,7 +16043,6 @@
                         object.debugRedact = false;
                         object.retention = options.enums === String ? "RETENTION_UNKNOWN" : 0;
                         object.features = null;
-                        object.featureSupport = null;
                         object[".google.api.resourceReference"] = null;
                     }
                     if (message.ctype != null && message.hasOwnProperty("ctype"))
@@ -15553,8 +16075,6 @@
                     }
                     if (message.features != null && message.hasOwnProperty("features"))
                         object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
-                    if (message.featureSupport != null && message.hasOwnProperty("featureSupport"))
-                        object.featureSupport = $root.google.protobuf.FieldOptions.FeatureSupport.toObject(message.featureSupport, options);
                     if (message.uninterpretedOption && message.uninterpretedOption.length) {
                         object.uninterpretedOption = [];
                         for (var j = 0; j < message.uninterpretedOption.length; ++j)
@@ -15738,10 +16258,6 @@
                         case 0:
                             message.edition = 0;
                             break;
-                        case "EDITION_LEGACY":
-                        case 900:
-                            message.edition = 900;
-                            break;
                         case "EDITION_PROTO2":
                         case 998:
                             message.edition = 998;
@@ -15839,309 +16355,6 @@
                     };
     
                     return EditionDefault;
-                })();
-    
-                FieldOptions.FeatureSupport = (function() {
-    
-                    /**
-                     * Properties of a FeatureSupport.
-                     * @memberof google.protobuf.FieldOptions
-                     * @interface IFeatureSupport
-                     * @property {google.protobuf.Edition|null} [editionIntroduced] FeatureSupport editionIntroduced
-                     * @property {google.protobuf.Edition|null} [editionDeprecated] FeatureSupport editionDeprecated
-                     * @property {string|null} [deprecationWarning] FeatureSupport deprecationWarning
-                     * @property {google.protobuf.Edition|null} [editionRemoved] FeatureSupport editionRemoved
-                     */
-    
-                    /**
-                     * Constructs a new FeatureSupport.
-                     * @memberof google.protobuf.FieldOptions
-                     * @classdesc Represents a FeatureSupport.
-                     * @implements IFeatureSupport
-                     * @constructor
-                     * @param {google.protobuf.FieldOptions.IFeatureSupport=} [properties] Properties to set
-                     */
-                    function FeatureSupport(properties) {
-                        if (properties)
-                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                if (properties[keys[i]] != null)
-                                    this[keys[i]] = properties[keys[i]];
-                    }
-    
-                    /**
-                     * FeatureSupport editionIntroduced.
-                     * @member {google.protobuf.Edition} editionIntroduced
-                     * @memberof google.protobuf.FieldOptions.FeatureSupport
-                     * @instance
-                     */
-                    FeatureSupport.prototype.editionIntroduced = 0;
-    
-                    /**
-                     * FeatureSupport editionDeprecated.
-                     * @member {google.protobuf.Edition} editionDeprecated
-                     * @memberof google.protobuf.FieldOptions.FeatureSupport
-                     * @instance
-                     */
-                    FeatureSupport.prototype.editionDeprecated = 0;
-    
-                    /**
-                     * FeatureSupport deprecationWarning.
-                     * @member {string} deprecationWarning
-                     * @memberof google.protobuf.FieldOptions.FeatureSupport
-                     * @instance
-                     */
-                    FeatureSupport.prototype.deprecationWarning = "";
-    
-                    /**
-                     * FeatureSupport editionRemoved.
-                     * @member {google.protobuf.Edition} editionRemoved
-                     * @memberof google.protobuf.FieldOptions.FeatureSupport
-                     * @instance
-                     */
-                    FeatureSupport.prototype.editionRemoved = 0;
-    
-                    /**
-                     * Creates a FeatureSupport message from a plain object. Also converts values to their respective internal types.
-                     * @function fromObject
-                     * @memberof google.protobuf.FieldOptions.FeatureSupport
-                     * @static
-                     * @param {Object.<string,*>} object Plain object
-                     * @returns {google.protobuf.FieldOptions.FeatureSupport} FeatureSupport
-                     */
-                    FeatureSupport.fromObject = function fromObject(object) {
-                        if (object instanceof $root.google.protobuf.FieldOptions.FeatureSupport)
-                            return object;
-                        var message = new $root.google.protobuf.FieldOptions.FeatureSupport();
-                        switch (object.editionIntroduced) {
-                        default:
-                            if (typeof object.editionIntroduced === "number") {
-                                message.editionIntroduced = object.editionIntroduced;
-                                break;
-                            }
-                            break;
-                        case "EDITION_UNKNOWN":
-                        case 0:
-                            message.editionIntroduced = 0;
-                            break;
-                        case "EDITION_LEGACY":
-                        case 900:
-                            message.editionIntroduced = 900;
-                            break;
-                        case "EDITION_PROTO2":
-                        case 998:
-                            message.editionIntroduced = 998;
-                            break;
-                        case "EDITION_PROTO3":
-                        case 999:
-                            message.editionIntroduced = 999;
-                            break;
-                        case "EDITION_2023":
-                        case 1000:
-                            message.editionIntroduced = 1000;
-                            break;
-                        case "EDITION_2024":
-                        case 1001:
-                            message.editionIntroduced = 1001;
-                            break;
-                        case "EDITION_1_TEST_ONLY":
-                        case 1:
-                            message.editionIntroduced = 1;
-                            break;
-                        case "EDITION_2_TEST_ONLY":
-                        case 2:
-                            message.editionIntroduced = 2;
-                            break;
-                        case "EDITION_99997_TEST_ONLY":
-                        case 99997:
-                            message.editionIntroduced = 99997;
-                            break;
-                        case "EDITION_99998_TEST_ONLY":
-                        case 99998:
-                            message.editionIntroduced = 99998;
-                            break;
-                        case "EDITION_99999_TEST_ONLY":
-                        case 99999:
-                            message.editionIntroduced = 99999;
-                            break;
-                        case "EDITION_MAX":
-                        case 2147483647:
-                            message.editionIntroduced = 2147483647;
-                            break;
-                        }
-                        switch (object.editionDeprecated) {
-                        default:
-                            if (typeof object.editionDeprecated === "number") {
-                                message.editionDeprecated = object.editionDeprecated;
-                                break;
-                            }
-                            break;
-                        case "EDITION_UNKNOWN":
-                        case 0:
-                            message.editionDeprecated = 0;
-                            break;
-                        case "EDITION_LEGACY":
-                        case 900:
-                            message.editionDeprecated = 900;
-                            break;
-                        case "EDITION_PROTO2":
-                        case 998:
-                            message.editionDeprecated = 998;
-                            break;
-                        case "EDITION_PROTO3":
-                        case 999:
-                            message.editionDeprecated = 999;
-                            break;
-                        case "EDITION_2023":
-                        case 1000:
-                            message.editionDeprecated = 1000;
-                            break;
-                        case "EDITION_2024":
-                        case 1001:
-                            message.editionDeprecated = 1001;
-                            break;
-                        case "EDITION_1_TEST_ONLY":
-                        case 1:
-                            message.editionDeprecated = 1;
-                            break;
-                        case "EDITION_2_TEST_ONLY":
-                        case 2:
-                            message.editionDeprecated = 2;
-                            break;
-                        case "EDITION_99997_TEST_ONLY":
-                        case 99997:
-                            message.editionDeprecated = 99997;
-                            break;
-                        case "EDITION_99998_TEST_ONLY":
-                        case 99998:
-                            message.editionDeprecated = 99998;
-                            break;
-                        case "EDITION_99999_TEST_ONLY":
-                        case 99999:
-                            message.editionDeprecated = 99999;
-                            break;
-                        case "EDITION_MAX":
-                        case 2147483647:
-                            message.editionDeprecated = 2147483647;
-                            break;
-                        }
-                        if (object.deprecationWarning != null)
-                            message.deprecationWarning = String(object.deprecationWarning);
-                        switch (object.editionRemoved) {
-                        default:
-                            if (typeof object.editionRemoved === "number") {
-                                message.editionRemoved = object.editionRemoved;
-                                break;
-                            }
-                            break;
-                        case "EDITION_UNKNOWN":
-                        case 0:
-                            message.editionRemoved = 0;
-                            break;
-                        case "EDITION_LEGACY":
-                        case 900:
-                            message.editionRemoved = 900;
-                            break;
-                        case "EDITION_PROTO2":
-                        case 998:
-                            message.editionRemoved = 998;
-                            break;
-                        case "EDITION_PROTO3":
-                        case 999:
-                            message.editionRemoved = 999;
-                            break;
-                        case "EDITION_2023":
-                        case 1000:
-                            message.editionRemoved = 1000;
-                            break;
-                        case "EDITION_2024":
-                        case 1001:
-                            message.editionRemoved = 1001;
-                            break;
-                        case "EDITION_1_TEST_ONLY":
-                        case 1:
-                            message.editionRemoved = 1;
-                            break;
-                        case "EDITION_2_TEST_ONLY":
-                        case 2:
-                            message.editionRemoved = 2;
-                            break;
-                        case "EDITION_99997_TEST_ONLY":
-                        case 99997:
-                            message.editionRemoved = 99997;
-                            break;
-                        case "EDITION_99998_TEST_ONLY":
-                        case 99998:
-                            message.editionRemoved = 99998;
-                            break;
-                        case "EDITION_99999_TEST_ONLY":
-                        case 99999:
-                            message.editionRemoved = 99999;
-                            break;
-                        case "EDITION_MAX":
-                        case 2147483647:
-                            message.editionRemoved = 2147483647;
-                            break;
-                        }
-                        return message;
-                    };
-    
-                    /**
-                     * Creates a plain object from a FeatureSupport message. Also converts values to other types if specified.
-                     * @function toObject
-                     * @memberof google.protobuf.FieldOptions.FeatureSupport
-                     * @static
-                     * @param {google.protobuf.FieldOptions.FeatureSupport} message FeatureSupport
-                     * @param {$protobuf.IConversionOptions} [options] Conversion options
-                     * @returns {Object.<string,*>} Plain object
-                     */
-                    FeatureSupport.toObject = function toObject(message, options) {
-                        if (!options)
-                            options = {};
-                        var object = {};
-                        if (options.defaults) {
-                            object.editionIntroduced = options.enums === String ? "EDITION_UNKNOWN" : 0;
-                            object.editionDeprecated = options.enums === String ? "EDITION_UNKNOWN" : 0;
-                            object.deprecationWarning = "";
-                            object.editionRemoved = options.enums === String ? "EDITION_UNKNOWN" : 0;
-                        }
-                        if (message.editionIntroduced != null && message.hasOwnProperty("editionIntroduced"))
-                            object.editionIntroduced = options.enums === String ? $root.google.protobuf.Edition[message.editionIntroduced] === undefined ? message.editionIntroduced : $root.google.protobuf.Edition[message.editionIntroduced] : message.editionIntroduced;
-                        if (message.editionDeprecated != null && message.hasOwnProperty("editionDeprecated"))
-                            object.editionDeprecated = options.enums === String ? $root.google.protobuf.Edition[message.editionDeprecated] === undefined ? message.editionDeprecated : $root.google.protobuf.Edition[message.editionDeprecated] : message.editionDeprecated;
-                        if (message.deprecationWarning != null && message.hasOwnProperty("deprecationWarning"))
-                            object.deprecationWarning = message.deprecationWarning;
-                        if (message.editionRemoved != null && message.hasOwnProperty("editionRemoved"))
-                            object.editionRemoved = options.enums === String ? $root.google.protobuf.Edition[message.editionRemoved] === undefined ? message.editionRemoved : $root.google.protobuf.Edition[message.editionRemoved] : message.editionRemoved;
-                        return object;
-                    };
-    
-                    /**
-                     * Converts this FeatureSupport to JSON.
-                     * @function toJSON
-                     * @memberof google.protobuf.FieldOptions.FeatureSupport
-                     * @instance
-                     * @returns {Object.<string,*>} JSON object
-                     */
-                    FeatureSupport.prototype.toJSON = function toJSON() {
-                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                    };
-    
-                    /**
-                     * Gets the default type url for FeatureSupport
-                     * @function getTypeUrl
-                     * @memberof google.protobuf.FieldOptions.FeatureSupport
-                     * @static
-                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                     * @returns {string} The default type url
-                     */
-                    FeatureSupport.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                        if (typeUrlPrefix === undefined) {
-                            typeUrlPrefix = "type.googleapis.com";
-                        }
-                        return typeUrlPrefix + "/google.protobuf.FieldOptions.FeatureSupport";
-                    };
-    
-                    return FeatureSupport;
                 })();
     
                 return FieldOptions;
@@ -17846,10 +18059,6 @@
                     case 0:
                         message.minimumEdition = 0;
                         break;
-                    case "EDITION_LEGACY":
-                    case 900:
-                        message.minimumEdition = 900;
-                        break;
                     case "EDITION_PROTO2":
                     case 998:
                         message.minimumEdition = 998;
@@ -17901,10 +18110,6 @@
                     case "EDITION_UNKNOWN":
                     case 0:
                         message.maximumEdition = 0;
-                        break;
-                    case "EDITION_LEGACY":
-                    case 900:
-                        message.maximumEdition = 900;
                         break;
                     case "EDITION_PROTO2":
                     case 998:
@@ -18014,8 +18219,7 @@
                      * @memberof google.protobuf.FeatureSetDefaults
                      * @interface IFeatureSetEditionDefault
                      * @property {google.protobuf.Edition|null} [edition] FeatureSetEditionDefault edition
-                     * @property {google.protobuf.IFeatureSet|null} [overridableFeatures] FeatureSetEditionDefault overridableFeatures
-                     * @property {google.protobuf.IFeatureSet|null} [fixedFeatures] FeatureSetEditionDefault fixedFeatures
+                     * @property {google.protobuf.IFeatureSet|null} [features] FeatureSetEditionDefault features
                      */
     
                     /**
@@ -18042,20 +18246,12 @@
                     FeatureSetEditionDefault.prototype.edition = 0;
     
                     /**
-                     * FeatureSetEditionDefault overridableFeatures.
-                     * @member {google.protobuf.IFeatureSet|null|undefined} overridableFeatures
+                     * FeatureSetEditionDefault features.
+                     * @member {google.protobuf.IFeatureSet|null|undefined} features
                      * @memberof google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault
                      * @instance
                      */
-                    FeatureSetEditionDefault.prototype.overridableFeatures = null;
-    
-                    /**
-                     * FeatureSetEditionDefault fixedFeatures.
-                     * @member {google.protobuf.IFeatureSet|null|undefined} fixedFeatures
-                     * @memberof google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault
-                     * @instance
-                     */
-                    FeatureSetEditionDefault.prototype.fixedFeatures = null;
+                    FeatureSetEditionDefault.prototype.features = null;
     
                     /**
                      * Creates a FeatureSetEditionDefault message from a plain object. Also converts values to their respective internal types.
@@ -18079,10 +18275,6 @@
                         case "EDITION_UNKNOWN":
                         case 0:
                             message.edition = 0;
-                            break;
-                        case "EDITION_LEGACY":
-                        case 900:
-                            message.edition = 900;
                             break;
                         case "EDITION_PROTO2":
                         case 998:
@@ -18125,15 +18317,10 @@
                             message.edition = 2147483647;
                             break;
                         }
-                        if (object.overridableFeatures != null) {
-                            if (typeof object.overridableFeatures !== "object")
-                                throw TypeError(".google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault.overridableFeatures: object expected");
-                            message.overridableFeatures = $root.google.protobuf.FeatureSet.fromObject(object.overridableFeatures);
-                        }
-                        if (object.fixedFeatures != null) {
-                            if (typeof object.fixedFeatures !== "object")
-                                throw TypeError(".google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault.fixedFeatures: object expected");
-                            message.fixedFeatures = $root.google.protobuf.FeatureSet.fromObject(object.fixedFeatures);
+                        if (object.features != null) {
+                            if (typeof object.features !== "object")
+                                throw TypeError(".google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault.features: object expected");
+                            message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
                         }
                         return message;
                     };
@@ -18152,16 +18339,13 @@
                             options = {};
                         var object = {};
                         if (options.defaults) {
+                            object.features = null;
                             object.edition = options.enums === String ? "EDITION_UNKNOWN" : 0;
-                            object.overridableFeatures = null;
-                            object.fixedFeatures = null;
                         }
+                        if (message.features != null && message.hasOwnProperty("features"))
+                            object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
                         if (message.edition != null && message.hasOwnProperty("edition"))
                             object.edition = options.enums === String ? $root.google.protobuf.Edition[message.edition] === undefined ? message.edition : $root.google.protobuf.Edition[message.edition] : message.edition;
-                        if (message.overridableFeatures != null && message.hasOwnProperty("overridableFeatures"))
-                            object.overridableFeatures = $root.google.protobuf.FeatureSet.toObject(message.overridableFeatures, options);
-                        if (message.fixedFeatures != null && message.hasOwnProperty("fixedFeatures"))
-                            object.fixedFeatures = $root.google.protobuf.FeatureSet.toObject(message.fixedFeatures, options);
                         return object;
                     };
     

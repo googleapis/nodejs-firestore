@@ -39,6 +39,10 @@ import {AggregateQuerySnapshot} from './aggregate-query-snapshot';
 import {Query} from './query';
 import {Readable, Transform} from 'stream';
 import {QueryResponse, QuerySnapshotResponse} from './types';
+import {
+  SPAN_NAME_AGGREGATION_QUERY_GET,
+  SPAN_NAME_RUN_AGGREGATION_QUERY,
+} from '../telemetry/trace-util';
 
 /**
  * A query that calculates aggregations over an underlying query.
@@ -90,8 +94,13 @@ export class AggregateQuery<
   async get(): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
-    const {result} = await this._get();
-    return result;
+    return this._query._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_AGGREGATION_QUERY_GET,
+      async () => {
+        const {result} = await this._get();
+        return result;
+      }
+    );
   }
 
   /**
@@ -254,6 +263,13 @@ export class AggregateQuery<
             'AggregateQuery failed with stream error:',
             err
           );
+
+          this._query._firestore._traceUtil
+            .currentSpan()
+            .addEvent(`${SPAN_NAME_RUN_AGGREGATION_QUERY}: Error.`, {
+              'error.message': err.message,
+            });
+
           stream.destroy(err);
         });
         backendStream.resume();
