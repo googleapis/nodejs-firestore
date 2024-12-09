@@ -156,7 +156,6 @@ export class ExecutionUtil<AppModelType> {
         enc,
         callback
       ) => {
-        console.log(`Pipeline response: ${JSON.stringify(proto, null, 2)}`);
         if (proto === NOOP_MESSAGE) {
           callback(undefined);
           return;
@@ -218,10 +217,6 @@ export class ExecutionUtil<AppModelType> {
         const request = pipeline._toProto(
           transactionOrReadTime,
           explainOptions
-        );
-
-        console.log(
-          `Executing pipeline: \n ${JSON.stringify(request, null, 2)}`
         );
 
         let streamActive: Deferred<boolean>;

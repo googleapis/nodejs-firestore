@@ -147,7 +147,6 @@ export {
   Expr,
   ExprWithAlias,
   Field,
-  Fields,
   Constant,
   Function,
   Ordering,

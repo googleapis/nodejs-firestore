@@ -196,7 +196,7 @@ export class Where implements Stage {
  * @beta
  */
 export interface FindNearestOptions {
-  field: firestore.Field;
+  field: firestore.Field | string;
   vectorValue: firestore.VectorValue | number[];
   distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
   limit?: number;
@@ -224,13 +224,88 @@ export class FindNearest implements Stage {
     return {
       name: this.name,
       args: [
-        (this._options.field as unknown as Field)._toProto(serializer),
+        (typeof this._options.field === 'string'
+          ? Field.of(this._options.field)
+          : (this._options.field as unknown as Field)
+        )._toProto(serializer),
         this._options.vectorValue instanceof VectorValue
           ? serializer.encodeValue(this._options.vectorValue)!
           : serializer.encodeVector(this._options.vectorValue as number[]),
         serializer.encodeValue(this._options.distanceMeasure)!,
       ],
       options,
+    };
+  }
+}
+
+/**
+ * @beta
+ */
+export interface SampleOptions {
+  limit: number;
+  mode: 'documents' | 'percent';
+}
+
+/**
+ * @beta
+ */
+export class Sample implements Stage {
+  name = 'sample';
+
+  constructor(private _options: SampleOptions) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [
+        serializer.encodeValue(this._options.limit)!,
+        serializer.encodeValue(this._options.mode)!,
+      ],
+    };
+  }
+}
+
+/**
+ * @beta
+ */
+export class Union implements Stage {
+  name = 'union';
+
+  constructor(private _other: FirebaseFirestore.Pipeline<unknown>) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [serializer.encodeValue(this._other)!],
+    };
+  }
+}
+
+/**
+ * @beta
+ */
+export interface UnnestOptions {
+  field: firestore.Selectable | string;
+  indexField?: string;
+}
+
+/**
+ * @beta
+ */
+export class Unnest implements Stage {
+  name = 'unnest';
+
+  constructor(private options: UnnestOptions) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    const args = [serializer.encodeValue(this.options.field)!];
+    const indexField = this.options.indexField;
+    if (indexField) {
+      args.push(serializer.encodeValue(indexField));
+    }
+    return {
+      name: this.name,
+      args: args,
     };
   }
 }
@@ -263,6 +338,31 @@ export class Offset implements Stage {
     return {
       name: this.name,
       args: [serializer.encodeValue(this.offset)!],
+    };
+  }
+}
+
+/**
+ * @beta
+ */
+export class Replace implements Stage {
+  name = 'replace';
+
+  constructor(
+    private field: Expr,
+    private mode:
+      | 'full_replace'
+      | 'merge_prefer_nest'
+      | 'merge_prefer_parent' = 'full_replace'
+  ) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [
+        serializer.encodeValue(this.field)!,
+        serializer.encodeValue(this.mode),
+      ],
     };
   }
 }
