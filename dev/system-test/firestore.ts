@@ -3915,7 +3915,6 @@ describe('Query class', () => {
 
     it('snapshot listener sorts query by DocumentId same way as server', async () => {
       const batch = firestore.batch();
-
       batch.set(randomCol.doc('A'), {a: 1});
       batch.set(randomCol.doc('a'), {a: 1});
       batch.set(randomCol.doc('Aa'), {a: 1});
@@ -3923,14 +3922,22 @@ describe('Query class', () => {
       batch.set(randomCol.doc('12'), {a: 1});
       batch.set(randomCol.doc('__id7__'), {a: 1});
       batch.set(randomCol.doc('__id12__'), {a: 1});
+      batch.set(randomCol.doc('__id-2__'), {a: 1});
       batch.set(randomCol.doc('__id1_'), {a: 1});
       batch.set(randomCol.doc('_id1__'), {a: 1});
+      // largest long number
+      batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
+      // smallest long number
+      batch.set(randomCol.doc('__id-9223372036854775808__'), {a: 1});
       await batch.commit();
 
       const query = randomCol.orderBy(FieldPath.documentId());
       const expectedDocs = [
+        '__id-9223372036854775808__',
+        '__id-2__',
         '__id7__',
         '__id12__',
+        '__id9223372036854775807__',
         '12',
         '7',
         'A',
@@ -3959,7 +3966,6 @@ describe('Query class', () => {
 
     it('snapshot listener sorts filtered query by DocumentId same way as server', async () => {
       const batch = firestore.batch();
-
       batch.set(randomCol.doc('A'), {a: 1});
       batch.set(randomCol.doc('a'), {a: 1});
       batch.set(randomCol.doc('Aa'), {a: 1});
@@ -3967,15 +3973,26 @@ describe('Query class', () => {
       batch.set(randomCol.doc('12'), {a: 1});
       batch.set(randomCol.doc('__id7__'), {a: 1});
       batch.set(randomCol.doc('__id12__'), {a: 1});
+      batch.set(randomCol.doc('__id-2__'), {a: 1});
       batch.set(randomCol.doc('__id1_'), {a: 1});
       batch.set(randomCol.doc('_id1__'), {a: 1});
+      // largest long number
+      batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
+      // smallest long number
+      batch.set(randomCol.doc('__id-9223372036854775808__'), {a: 1});
       await batch.commit();
 
       const query = randomCol
         .where(FieldPath.documentId(), '>', '__id7__')
         .where(FieldPath.documentId(), '<=', 'A')
         .orderBy(FieldPath.documentId());
-      const expectedDocs = ['__id12__', '12', '7', 'A'];
+      const expectedDocs = [
+        '__id12__',
+        '__id9223372036854775807__',
+        '12',
+        '7',
+        'A',
+      ];
 
       const getSnapshot = await query.get();
       expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
