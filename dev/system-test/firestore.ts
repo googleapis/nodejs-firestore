@@ -3927,16 +3927,20 @@ describe('Query class', () => {
       batch.set(randomCol.doc('_id1__'), {a: 1});
       // largest long number
       batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
+      batch.set(randomCol.doc('__id9223372036854775806__'), {a: 1});
       // smallest long number
       batch.set(randomCol.doc('__id-9223372036854775808__'), {a: 1});
+      batch.set(randomCol.doc('__id-9223372036854775807__'), {a: 1});
       await batch.commit();
 
       const query = randomCol.orderBy(FieldPath.documentId());
       const expectedDocs = [
         '__id-9223372036854775808__',
+        '__id-9223372036854775807__',
         '__id-2__',
         '__id7__',
         '__id12__',
+        '__id9223372036854775806__',
         '__id9223372036854775807__',
         '12',
         '7',
@@ -3956,7 +3960,6 @@ describe('Query class', () => {
 
       const watchSnapshot = await waitForSnapshot();
       // Compare the snapshot (including sort order) of a snapshot
-      // from Query.onSnapshot() to an actual snapshot from Query.get()
       snapshotsEqual(watchSnapshot, {
         docs: getSnapshot.docs,
         docChanges: getSnapshot.docChanges(),
@@ -3978,8 +3981,10 @@ describe('Query class', () => {
       batch.set(randomCol.doc('_id1__'), {a: 1});
       // largest long number
       batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
+      batch.set(randomCol.doc('__id9223372036854775806__'), {a: 1});
       // smallest long number
       batch.set(randomCol.doc('__id-9223372036854775808__'), {a: 1});
+      batch.set(randomCol.doc('__id-9223372036854775807__'), {a: 1});
       await batch.commit();
 
       const query = randomCol
@@ -3988,6 +3993,7 @@ describe('Query class', () => {
         .orderBy(FieldPath.documentId());
       const expectedDocs = [
         '__id12__',
+        '__id9223372036854775806__',
         '__id9223372036854775807__',
         '12',
         '7',
@@ -4003,7 +4009,6 @@ describe('Query class', () => {
 
       const watchSnapshot = await waitForSnapshot();
       // Compare the snapshot (including sort order) of a snapshot
-      // from Query.onSnapshot() to an actual snapshot from Query.get()
       snapshotsEqual(watchSnapshot, {
         docs: getSnapshot.docs,
         docChanges: getSnapshot.docChanges(),

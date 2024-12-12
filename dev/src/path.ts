@@ -185,16 +185,13 @@ abstract class Path<T> {
       return 1;
     } else if (isLhsNumeric && isRhsNumeric) {
       // both numeric
-      return Math.sign(this.extractNumericId(lhs) - this.extractNumericId(rhs));
+      return this.compareNumbers(
+        this.extractNumericId(lhs),
+        this.extractNumericId(rhs)
+      );
     } else {
       // both non-numeric
-      if (lhs < rhs) {
-        return -1;
-      }
-      if (lhs > rhs) {
-        return 1;
-      }
-      return 0;
+      return this.compareStrings(lhs, rhs);
     }
   }
 
@@ -203,9 +200,29 @@ abstract class Path<T> {
     return segment.startsWith('__id') && segment.endsWith('__');
   }
 
-  //  Extracts the numeric value from a numeric ID segment.
-  private extractNumericId(segment: string): number {
-    return parseInt(segment.substring(4, segment.length - 2), 10);
+  //  Extracts the long number from a numeric ID segment.
+  private extractNumericId(segment: string): bigint {
+    return BigInt(segment.substring(4, segment.length - 2));
+  }
+
+  private compareNumbers(lhs: bigint, rhs: bigint): number {
+    if (lhs < rhs) {
+      return -1;
+    } else if (lhs > rhs) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  private compareStrings(lhs: string, rhs: string): number {
+    if (lhs < rhs) {
+      return -1;
+    } else if (lhs > rhs) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   /**
