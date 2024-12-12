@@ -68,9 +68,23 @@ describe('ResourcePath', () => {
 
 describe('FieldPath', () => {
   it('encodes field names', () => {
-    const components = [['foo'], ['foo', 'bar'], ['.', '`'], ['\\']];
+    const components = [
+      ['foo'],
+      ['foo', 'bar'],
+      ['.', '`'],
+      ['\\'],
+      ['\\\\'],
+      ['``'],
+    ];
 
-    const results = ['foo', 'foo.bar', '`.`.`\\``', '`\\\\`'];
+    const results = [
+      'foo',
+      'foo.bar',
+      '`.`.`\\``',
+      '`\\\\`',
+      '`\\\\\\\\`',
+      '`\\`\\``',
+    ];
 
     for (let i = 0; i < components.length; ++i) {
       expect(new FieldPath(...components[i]).toString()).to.equal(results[i]);

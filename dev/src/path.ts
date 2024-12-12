@@ -621,7 +621,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
       .map(str => {
         return UNESCAPED_FIELD_NAME_RE.test(str)
           ? str
-          : '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
+          : '`' + str.replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`';
       })
       .join('.');
   }
