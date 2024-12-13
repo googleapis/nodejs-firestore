@@ -170,10 +170,7 @@ abstract class Path<T> {
         return comparison;
       }
     }
-    return this.compareNumbers(
-      BigInt(this.segments.length),
-      BigInt(other.segments.length)
-    );
+    return Math.sign(this.segments.length - other.segments.length);
   }
 
   private compareSegments(lhs: string, rhs: string): number {
