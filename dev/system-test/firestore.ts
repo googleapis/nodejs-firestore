@@ -3925,6 +3925,7 @@ describe('Query class', () => {
       batch.set(randomCol.doc('__id-2__'), {a: 1});
       batch.set(randomCol.doc('__id1_'), {a: 1});
       batch.set(randomCol.doc('_id1__'), {a: 1});
+      batch.set(randomCol.doc('__id'), {a: 1});
       // largest long number
       batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
       batch.set(randomCol.doc('__id9223372036854775806__'), {a: 1});
@@ -3946,6 +3947,7 @@ describe('Query class', () => {
         '7',
         'A',
         'Aa',
+        '__id',
         '__id1_',
         '_id1__',
         'a',
@@ -3979,6 +3981,7 @@ describe('Query class', () => {
       batch.set(randomCol.doc('__id-2__'), {a: 1});
       batch.set(randomCol.doc('__id1_'), {a: 1});
       batch.set(randomCol.doc('_id1__'), {a: 1});
+      batch.set(randomCol.doc('__id'), {a: 1});
       // largest long number
       batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
       batch.set(randomCol.doc('__id9223372036854775806__'), {a: 1});
