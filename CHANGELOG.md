@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.11.1](https://github.com/googleapis/nodejs-firestore/compare/v7.11.0...v7.11.1) (2024-12-17)
+
+
+### Bug Fixes
+
+* Correctly escape field paths with multiple backslashes or backticks ([#2259](https://github.com/googleapis/nodejs-firestore/issues/2259)) ([#2261](https://github.com/googleapis/nodejs-firestore/issues/2261)) ([7056ba7](https://github.com/googleapis/nodejs-firestore/commit/7056ba76040b9369d86c57838ef938c9d9ef73d8))
+* Sort document reference by long type id  ([#2257](https://github.com/googleapis/nodejs-firestore/issues/2257)) ([3fd0de9](https://github.com/googleapis/nodejs-firestore/commit/3fd0de93076adfe17aaae9e0a9b732bcae52d594))
+
 ## [7.11.0](https://github.com/googleapis/nodejs-firestore/compare/v7.10.0...v7.11.0) (2024-12-05)
 
 
