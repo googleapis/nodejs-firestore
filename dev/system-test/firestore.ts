@@ -4021,11 +4021,19 @@ describe('Query class', () => {
 
     it('snapshot listener sorts cross type numbers same way as server', async () => {
       const batch = firestore.batch();
-      batch.set(randomCol.doc('longMin'), {value: BigInt('-9223372036854775808')});// this gets converted to number and looses precision
-      batch.set(randomCol.doc('longMax'), {value: BigInt('9223372036854775807')});
+      batch.set(randomCol.doc('longMin'), {
+        value: BigInt('-9223372036854775808'),
+      }); // this gets converted to number and looses precision
+      batch.set(randomCol.doc('longMax'), {
+        value: BigInt('9223372036854775807'),
+      });
       batch.set(randomCol.doc('NaN'), {value: NaN});
-      batch.set(randomCol.doc('maxSafeInteger'), {value: Number.MAX_SAFE_INTEGER});
-      batch.set(randomCol.doc('minSafeInteger'), {value: Number.MIN_SAFE_INTEGER});
+      batch.set(randomCol.doc('maxSafeInteger'), {
+        value: Number.MAX_SAFE_INTEGER,
+      });
+      batch.set(randomCol.doc('minSafeInteger'), {
+        value: Number.MIN_SAFE_INTEGER,
+      });
       batch.set(randomCol.doc('maxValue'), {value: Number.MAX_VALUE});
       batch.set(randomCol.doc('negativeMaxValue'), {value: -Number.MAX_VALUE});
       batch.set(randomCol.doc('minValue'), {value: Number.MIN_VALUE});
@@ -4034,13 +4042,12 @@ describe('Query class', () => {
       batch.set(randomCol.doc('positiveInfinity'), {value: Infinity});
       await batch.commit();
 
-      const query = randomCol
-          .orderBy('value');
+      const query = randomCol.orderBy('value');
 
       const getSnapshot = await query.get();
 
       const unsubscribe = query.onSnapshot(snapshot =>
-          currentDeferred.resolve(snapshot)
+        currentDeferred.resolve(snapshot)
       );
 
       const watchSnapshot = await waitForSnapshot();
