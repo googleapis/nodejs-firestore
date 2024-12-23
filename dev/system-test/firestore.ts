@@ -4019,7 +4019,7 @@ describe('Query class', () => {
       unsubscribe();
     });
 
-    it.only('snapshot listener sorts cross type numbers same way as server', async () => {
+    it('snapshot listener sorts cross type numbers same way as server', async () => {
       const batch = firestore.batch();
       batch.set(randomCol.doc('longMin'), {value: BigInt('-9223372036854775808')});// this gets converted to number and looses precision
       batch.set(randomCol.doc('longMax'), {value: BigInt('9223372036854775807')});
