@@ -248,6 +248,16 @@ function compareVectors(left: ApiMapValue, right: ApiMapValue): number {
   return compareArrays(leftArray, rightArray);
 }
 
+function stringToUTF8Bytes(str: string): Uint8Array {
+  return new TextEncoder().encode(str);
+}
+
+function compareUTF8bytes(left: string, right: string): number {
+  const leftBytes = stringToUTF8Bytes(left);
+  const rightBytes = stringToUTF8Bytes(right);
+  return Buffer.compare(Buffer.from(leftBytes), Buffer.from(rightBytes));
+}
+
 /*!
  * @private
  * @internal
@@ -269,7 +279,7 @@ export function compare(left: api.IValue, right: api.IValue): number {
     case TypeOrder.BOOLEAN:
       return primitiveComparator(left.booleanValue!, right.booleanValue!);
     case TypeOrder.STRING:
-      return primitiveComparator(left.stringValue!, right.stringValue!);
+      return compareUTF8bytes(left.stringValue!, right.stringValue!);
     case TypeOrder.NUMBER:
       return compareNumberProtos(left, right);
     case TypeOrder.TIMESTAMP:

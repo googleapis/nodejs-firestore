@@ -4084,6 +4084,36 @@ describe('Query class', () => {
         docChanges: expectedChanges,
       });
     });
+
+    it('snapshot listener sorts query by unicode strings same way as server', async () => {
+      const collection = await testCollectionWithDocs({
+        a: {value: 'Łukasiewicz'},
+        b: {value: 'Sierpiński'},
+        c: {value: '岩澤'},
+        d: {value: '🄟'},
+        e: {value: 'Ｐ'},
+        f: {value: '︒'},
+        g: {value: '🐵'},
+      });
+
+      const query = collection.orderBy("value");
+      const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
+
+      const getSnapshot = await query.get();
+      expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+      const unsubscribe = query.onSnapshot(snapshot =>
+        currentDeferred.resolve(snapshot)
+      );
+
+      const watchSnapshot = await waitForSnapshot();
+      // Compare the snapshot (including sort order) of a snapshot
+      snapshotsEqual(watchSnapshot, {
+        docs: getSnapshot.docs,
+        docChanges: getSnapshot.docChanges(),
+      });
+      unsubscribe();
+    });
   });
 
   (process.env.FIRESTORE_EMULATOR_HOST === undefined
