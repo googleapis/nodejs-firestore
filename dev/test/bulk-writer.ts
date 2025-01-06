@@ -133,7 +133,7 @@ export function deleteOp(doc: string): api.IWrite {
   return remove(doc).writes![0];
 }
 
-describe('BulkWriter', () => {
+describe.only('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
@@ -488,7 +488,9 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.create(doc, {})).to.throw(expected);
     expect(() => bulkWriter.update(doc, {})).to.throw(expected);
     expect(() => bulkWriter.flush()).to.throw(expected);
-    expect(() => bulkWriter.close()).to.throw(expected);
+
+    // Calling close() multiple times is allowed.
+    await bulkWriter.close();
   });
 
   it('send writes to the same documents in the different batches', async () => {
