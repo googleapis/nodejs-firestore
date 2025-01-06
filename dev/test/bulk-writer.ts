@@ -133,7 +133,7 @@ export function deleteOp(doc: string): api.IWrite {
   return remove(doc).writes![0];
 }
 
-describe.only('BulkWriter', () => {
+describe('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
