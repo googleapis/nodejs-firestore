@@ -17,6 +17,7 @@
 import * as firestore from '@google-cloud/firestore';
 
 import {google} from '../protos/firestore_v1_proto_api';
+import {compareUtf8Strings} from './order';
 
 import {isObject} from './util';
 import {
@@ -191,7 +192,7 @@ abstract class Path<T> {
       );
     } else {
       // both non-numeric
-      return this.compareStrings(lhs, rhs);
+      return compareUtf8Strings(lhs, rhs);
     }
   }
 
