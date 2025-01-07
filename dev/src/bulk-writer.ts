@@ -399,13 +399,13 @@ export class BulkWriter {
   private _lastOp: Promise<void> = Promise.resolve();
 
   /**
-   * Whether this BulkWriter instance has started to close. Afterwards, no
-   * new operations can be enqueued, except for retry operations scheduled by
-   * the error handler.
+   * When this BulkWriter instance has started to close, a flush promise is
+   * saved. Afterwards, no new operations can be enqueued, except for retry
+   * operations scheduled by the error handler.
    * @private
    * @internal
    */
-  private _closing = false;
+  private _closePromise: Promise<void> | undefined;
 
   /**
    * Rate limiter used to throttle requests as per the 500/50/5 rule.
@@ -921,11 +921,11 @@ export class BulkWriter {
    * ```
    */
   close(): Promise<void> {
-    this._verifyNotClosed();
-    this.firestore._decrementBulkWritersCount();
-    const flushPromise = this.flush();
-    this._closing = true;
-    return flushPromise;
+    if (!this._closePromise) {
+      this._closePromise = this.flush();
+      this.firestore._decrementBulkWritersCount();
+    }
+    return this._closePromise;
   }
 
   /**
@@ -934,7 +934,7 @@ export class BulkWriter {
    * @internal
    */
   _verifyNotClosed(): void {
-    if (this._closing) {
+    if (this._closePromise) {
       throw new Error('BulkWriter has already been closed.');
     }
   }
