@@ -1487,7 +1487,11 @@ export class Firestore implements firestore.Firestore {
    *
    * @return A Promise that resolves when the client is terminated.
    */
-  terminate(): Promise<void> {
+  async terminate(): Promise<void> {
+    if (this._bulkWriter) {
+      await this._bulkWriter.close();
+      this._bulkWriter = undefined;
+    }
     if (this.registeredListenersCount > 0 || this.bulkWritersCount > 0) {
       return Promise.reject(
         'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +

@@ -7125,7 +7125,11 @@ describe('BulkWriter class', () => {
     writer = firestore.bulkWriter();
   });
 
-  afterEach(() => verifyInstance(firestore));
+  afterEach(async () => {
+    await writer.close();
+    await verifyInstance(firestore);
+    await firestore.terminate();
+  });
 
   it('has create() method', async () => {
     const ref = randomCol.doc('doc1');
@@ -7289,6 +7293,7 @@ describe('BulkWriter class', () => {
       });
       await firestore.recursiveDelete(randomCol, bulkWriter);
       expect(callbackCount).to.equal(6);
+      await bulkWriter.close();
     });
   });
 
