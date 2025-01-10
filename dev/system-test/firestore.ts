@@ -4086,7 +4086,7 @@ describe('Query class', () => {
     });
 
     describe('sort unicode strings', () => {
-      it('snapshot listener sorts query by unicode strings same as server', async () => {
+      it('snapshot listener sorts unicode strings same as server', async () => {
         const collection = await testCollectionWithDocs({
           a: {value: 'Łukasiewicz'},
           b: {value: 'Sierpiński'},
@@ -4106,9 +4106,7 @@ describe('Query class', () => {
         const unsubscribe = query.onSnapshot(snapshot =>
           currentDeferred.resolve(snapshot)
         );
-
         const watchSnapshot = await waitForSnapshot();
-        // Compare the snapshot (including sort order) of a snapshot
         snapshotsEqual(watchSnapshot, {
           docs: getSnapshot.docs,
           docChanges: getSnapshot.docChanges(),
@@ -4116,7 +4114,7 @@ describe('Query class', () => {
         unsubscribe();
       });
 
-      it('snapshot listener sorts query by unicode strings in array same as server', async () => {
+      it('snapshot listener sorts unicode strings in array same as server', async () => {
         const collection = await testCollectionWithDocs({
           a: {value: ['Łukasiewicz']},
           b: {value: ['Sierpiński']},
@@ -4136,7 +4134,6 @@ describe('Query class', () => {
         const unsubscribe = query.onSnapshot(snapshot =>
           currentDeferred.resolve(snapshot)
         );
-
         const watchSnapshot = await waitForSnapshot();
         snapshotsEqual(watchSnapshot, {
           docs: getSnapshot.docs,
@@ -4145,7 +4142,7 @@ describe('Query class', () => {
         unsubscribe();
       });
 
-      it('snapshot listener sorts query by unicode strings in map same as server', async () => {
+      it('snapshot listener sorts unicode strings in map same as server', async () => {
         const collection = await testCollectionWithDocs({
           a: {value: {foo: 'Łukasiewicz'}},
           b: {value: {foo: 'Sierpiński'}},
@@ -4165,16 +4162,15 @@ describe('Query class', () => {
         const unsubscribe = query.onSnapshot(snapshot =>
           currentDeferred.resolve(snapshot)
         );
-
         const watchSnapshot = await waitForSnapshot();
-        // Compare the snapshot (including sort order) of a snapshot
         snapshotsEqual(watchSnapshot, {
           docs: getSnapshot.docs,
           docChanges: getSnapshot.docChanges(),
         });
         unsubscribe();
       });
-      it('snapshot listener sorts query by unicode strings in map key same as server', async () => {
+
+      it('snapshot listener sorts unicode strings in map key same as server', async () => {
         const collection = await testCollectionWithDocs({
           a: {value: {Łukasiewicz: true}},
           b: {value: {Sierpiński: true}},
@@ -4194,9 +4190,7 @@ describe('Query class', () => {
         const unsubscribe = query.onSnapshot(snapshot =>
           currentDeferred.resolve(snapshot)
         );
-
         const watchSnapshot = await waitForSnapshot();
-        // Compare the snapshot (including sort order) of a snapshot
         snapshotsEqual(watchSnapshot, {
           docs: getSnapshot.docs,
           docChanges: getSnapshot.docChanges(),
@@ -4204,7 +4198,7 @@ describe('Query class', () => {
         unsubscribe();
       });
 
-      it('snapshot listener sorts query by unicode strings in document key same as server', async () => {
+      it('snapshot listener sorts unicode strings in document key same as server', async () => {
         const collection = await testCollectionWithDocs({
           Łukasiewicz: {value: true},
           Sierpiński: {value: true},
@@ -4215,7 +4209,7 @@ describe('Query class', () => {
           '🐵': {value: true},
         });
 
-        const query = collection.orderBy('value');
+        const query = collection.orderBy(FieldPath.documentId());
         const expectedDocs = [
           'Sierpiński',
           'Łukasiewicz',
@@ -4232,9 +4226,7 @@ describe('Query class', () => {
         const unsubscribe = query.onSnapshot(snapshot =>
           currentDeferred.resolve(snapshot)
         );
-
         const watchSnapshot = await waitForSnapshot();
-        // Compare the snapshot (including sort order) of a snapshot
         snapshotsEqual(watchSnapshot, {
           docs: getSnapshot.docs,
           docChanges: getSnapshot.docChanges(),

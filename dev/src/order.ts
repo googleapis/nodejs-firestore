@@ -252,6 +252,11 @@ function stringToUTF8Bytes(str: string): Uint8Array {
   return new TextEncoder().encode(str);
 }
 
+/*!
+ * Compare strings in UTF-8 encoded byte order
+ * @private
+ * @internal
+ */
 export function compareUtf8Strings(left: string, right: string): number {
   const leftBytes = stringToUTF8Bytes(left);
   const rightBytes = stringToUTF8Bytes(right);
