@@ -9410,6 +9410,40 @@ declare namespace FirebaseFirestore {
     unnest(field: Selectable | string): Pipeline<AppModelType>;
 
     /**
+     * Produces a document for each element in array found in previous stage document.
+     *
+     * <p>For each previous stage document, this stage will emit zero or more augmented documents. The
+     * input array found in the previous stage document field specified by the `fieldName` parameter,
+     * will for each input array element produce an augmented document. The input array element will
+     * augment the previous stage document by replacing the field specified by `fieldName` parameter
+     * with the element value.
+     *
+     * <p>In other words, the field containing the input array will be removed from the augmented
+     * document and replaced by the corresponding array element.
+     *
+     * <p>Example:
+     *
+     * ```typescript
+     * // Input:
+     * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': [ 'comedy', 'space', 'adventure' ], ... }
+     *
+     * // Emit a book document for each tag of the book.
+     * firestore.pipeline().collection('books')
+     *     .unnest({ field: 'tags', UnnestOptions.indexField('tagIndex'));
+     *
+     * // Output:
+     * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 0, 'tags': 'comedy', ... }
+     * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 1, 'tags': 'space', ... }
+     * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 2, 'tags': 'adventure', ... }
+     * ```
+     *
+     * @param fieldName The name of the field containing the array.
+     * @param options The {@code UnnestOptions} options.
+     * @return A new {@code Pipeline} object with this stage appended to the stage list.
+     */
+    unnest(options: UnnestOptions): Pipeline<AppModelType>;
+
+    /**
      * Adds a generic stage to the pipeline.
      *
      * <p>This method provides a flexible way to extend the pipeline's functionality by adding custom
