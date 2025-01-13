@@ -214,10 +214,20 @@ export class ExecutionUtil<AppModelType> {
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = pipeline._toProto(
-          transactionOrReadTime,
-          explainOptions
-        );
+        const request: api.IExecutePipelineRequest = {
+          database: this._firestore.formattedName,
+          structuredPipeline: {
+            pipeline: pipeline._toProto(),
+          },
+        };
+
+        if (transactionOrReadTime instanceof Uint8Array) {
+          request.transaction = transactionOrReadTime;
+        } else if (transactionOrReadTime instanceof Timestamp) {
+          request.readTime = transactionOrReadTime.toProto().timestampValue;
+        } else if (transactionOrReadTime) {
+          request.newTransaction = transactionOrReadTime;
+        }
 
         let streamActive: Deferred<boolean>;
         do {

@@ -498,6 +498,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * //  'parents': {
    * //    'father': 'John Doe Sr.',
    * //    'mother': 'Jane Doe'
+   * //   }
    * // }
    *
    * // Emit parents as document.
@@ -513,9 +514,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @param field The {@link Selectable} field containing the nested map.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  replace(
-    field: firestore.Selectable | string
-  ): FirebaseFirestore.Pipeline<AppModelType> {
+  replace(field: firestore.Selectable | string): Pipeline<AppModelType> {
     return this._addStage(
       new Replace(this.selectableToExpr(field), 'full_replace')
     );
@@ -552,7 +551,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @param documents The number of documents to sample..
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  sample(documents: number): FirebaseFirestore.Pipeline<AppModelType>;
+  sample(documents: number): Pipeline<AppModelType>;
 
   /**
    * Performs a pseudo-random sampling of the documents from the previous stage.
@@ -577,10 +576,10 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    */
   sample(
     options: {percentage: number} | {documents: number}
-  ): FirebaseFirestore.Pipeline<AppModelType>;
+  ): Pipeline<AppModelType>;
   sample(
     documentsOrOptions: number | {percentage: number} | {documents: number}
-  ): FirebaseFirestore.Pipeline<AppModelType> {
+  ): Pipeline<AppModelType> {
     if (typeof documentsOrOptions === 'number') {
       return this._addStage(
         new Sample({limit: documentsOrOptions, mode: 'documents'})
@@ -614,9 +613,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @param other The other {@code Pipeline} that is part of union.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  union(
-    other: FirebaseFirestore.Pipeline<AppModelType>
-  ): FirebaseFirestore.Pipeline<AppModelType> {
+  union(other: Pipeline<AppModelType>): Pipeline<AppModelType> {
     return this._addStage(new Union(other));
   }
 
@@ -651,9 +648,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @param field The name of the field containing the array.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  unnest(
-    field: FirebaseFirestore.Selectable | string
-  ): FirebaseFirestore.Pipeline<AppModelType>;
+  unnest(field: FirebaseFirestore.Selectable | string): Pipeline<AppModelType>;
 
   /**
    * Produces a document for each element in array found in previous stage document.
@@ -687,10 +682,10 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @param options The {@code UnnestOptions} options.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  unnest(options: UnnestOptions): FirebaseFirestore.Pipeline<AppModelType>;
+  unnest(options: UnnestOptions): Pipeline<AppModelType>;
   unnest(
     fieldOrOptions: FirebaseFirestore.Selectable | string | UnnestOptions
-  ): FirebaseFirestore.Pipeline<AppModelType> {
+  ): Pipeline<AppModelType> {
     if (typeof fieldOrOptions === 'string' || 'selectable' in fieldOrOptions) {
       return this._addStage(new Unnest({field: fieldOrOptions}));
     } else {
@@ -904,29 +899,11 @@ export class Pipeline<AppModelType = firestore.DocumentData>
     return util.stream(this);
   }
 
-  _toProto(
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: FirebaseFirestore.ExplainOptions
-  ): api.IExecutePipelineRequest {
+  _toProto(): api.IPipeline {
     const stages: IStage[] = this.stages.map(stage =>
       stage._toProto(this.db._serializer!)
     );
-    const structuredPipeline: IStructuredPipeline = {pipeline: {stages}};
-    const executePipelineRequest: api.IExecutePipelineRequest = {
-      database: this.db.formattedName,
-      structuredPipeline,
-    };
-
-    if (transactionOrReadTime instanceof Uint8Array) {
-      executePipelineRequest.transaction = transactionOrReadTime;
-    } else if (transactionOrReadTime instanceof Timestamp) {
-      executePipelineRequest.readTime =
-        transactionOrReadTime.toProto().timestampValue;
-    } else if (transactionOrReadTime) {
-      executePipelineRequest.newTransaction = transactionOrReadTime;
-    }
-
-    return executePipelineRequest;
+    return {stages};
   }
 }
 

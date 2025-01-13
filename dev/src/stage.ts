@@ -26,6 +26,7 @@ import {
 import {VectorValue} from './field-value';
 import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
+import {Pipeline} from './pipeline';
 
 /**
  * @beta
@@ -271,12 +272,12 @@ export class Sample implements Stage {
 export class Union implements Stage {
   name = 'union';
 
-  constructor(private _other: FirebaseFirestore.Pipeline<unknown>) {}
+  constructor(private _other: Pipeline<unknown>) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: [serializer.encodeValue(this._other)!],
+      args: [serializer.encodeValue(this._other)],
     };
   }
 }
