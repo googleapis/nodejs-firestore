@@ -491,7 +491,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * <p>Example:
    *
-   * <pre>{@code
+   * ```typescript
    * // Input.
    * // {
    * //  'name': 'John Doe Jr.',
@@ -508,7 +508,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * //  'father': 'John Doe Sr.',
    * //  'mother': 'Jane Doe'
    * // }
-   * }</pre>
+   * ```
    *
    * @param field The {@link Selectable} field containing the nested map.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
@@ -543,12 +543,11 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * <p>Examples:
    *
-   * <pre>{@code
+   * ```typescript
    * // Sample 25 books, if available.
    * firestore.pipeline().collection('books')
    *     .sample(25);
-   * }
-   * </pre>
+   * ```
    *
    * @param documents The number of documents to sample..
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
@@ -606,11 +605,11 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * <p>Example:
    *
-   * <pre>{@code
+   * ```typescript
    * // Emit documents from books collection and magazines collection.
    * firestore.pipeline().collection('books')
    *     .union(firestore.pipeline().collection('magazines'));
-   * }</pre>
+   * ```
    *
    * @param other The other {@code Pipeline} that is part of union.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
@@ -635,7 +634,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * <p>Example:
    *
-   * <pre>{@code
+   * ```typescript
    * // Input:
    * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': [ 'comedy', 'space', 'adventure' ], ... }
    *
@@ -647,7 +646,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': 'comedy', ... }
    * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': 'space', ... }
    * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': 'adventure', ... }
-   * }</pre>
+   * ```
    *
    * @param field The name of the field containing the array.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
@@ -670,7 +669,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * <p>Example:
    *
-   * <pre>{@code
+   * ```typescript
    * // Input:
    * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': [ 'comedy', 'space', 'adventure' ], ... }
    *
@@ -682,7 +681,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 0, 'tags': 'comedy', ... }
    * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 1, 'tags': 'space', ... }
    * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 2, 'tags': 'adventure', ... }
-   * }</pre>
+   * ```
    *
    * @param fieldName The name of the field containing the array.
    * @param options The {@code UnnestOptions} options.
