@@ -8906,6 +8906,7 @@ declare namespace FirebaseFirestore {
    */
   export interface UnnestOptions {
     field: Selectable | string;
+    alias: Field | string;
     indexField?: string;
   }
 
@@ -9399,15 +9400,17 @@ declare namespace FirebaseFirestore {
      *     .unnest("tags");
      *
      * // Output:
-     * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": "comedy", ... }
-     * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": "space", ... }
-     * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": "adventure", ... }
+     * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "comedy", ... }
+     * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "space", ... }
+     * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "adventure", ... }
      * ```
      *
      * @param field The name of the field containing the array.
+     * @param alias The alias field is used as the field name for each element within the output array. The alias does
+     * not overwrite the original field unless the field names match.
      * @return A new {@code Pipeline} object with this stage appended to the stage list.
      */
-    unnest(field: Selectable | string): Pipeline<AppModelType>;
+    unnest(field: Selectable | string, alias: string): Pipeline<AppModelType>;
 
     /**
      * Produces a document for each element in array found in previous stage document.
@@ -9429,15 +9432,14 @@ declare namespace FirebaseFirestore {
      *
      * // Emit a book document for each tag of the book.
      * firestore.pipeline().collection('books')
-     *     .unnest({ field: 'tags', UnnestOptions.indexField('tagIndex'));
+     *     .unnest({ field: 'tags', alias: 'tag', UnnestOptions.indexField('tagIndex')});
      *
      * // Output:
-     * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 0, 'tags': 'comedy', ... }
-     * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 1, 'tags': 'space', ... }
-     * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 2, 'tags': 'adventure', ... }
+     * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 0, 'tag': 'comedy', ... }
+     * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 1, 'tag': 'space', ... }
+     * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 2, 'tag': 'adventure', ... }
      * ```
      *
-     * @param fieldName The name of the field containing the array.
      * @param options The {@code UnnestOptions} options.
      * @return A new {@code Pipeline} object with this stage appended to the stage list.
      */

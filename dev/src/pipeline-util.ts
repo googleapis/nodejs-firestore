@@ -397,6 +397,20 @@ export function isFirestoreValue(obj: any): obj is api.IValue {
   return false;
 }
 
+export function selectableToExpr(
+  selectable: firestore.Selectable | string
+): Expr {
+  if (typeof selectable === 'string') {
+    return Field.of(selectable);
+  } else if (selectable instanceof Field) {
+    return selectable;
+  } else if (selectable instanceof ExprWithAlias) {
+    return selectable.expr;
+  } else {
+    throw new Error('unexpected selectable: ' + selectable);
+  }
+}
+
 export function toPipelineFilterCondition(
   f: FilterInternal,
   serializer: Serializer

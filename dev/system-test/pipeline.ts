@@ -62,7 +62,7 @@ import {
 } from '../src/expression';
 import {PipelineResult} from '../src/pipeline';
 import {verifyInstance} from '../test/util/helpers';
-import {DeferredPromise, getTestRoot} from './firestore';
+import {getTestRoot} from './firestore';
 
 describe('Pipeline class', () => {
   let firestore: Firestore;
@@ -973,6 +973,26 @@ describe('Pipeline class', () => {
     expectResults(result, {title: "The Hitchhiker's Guide to the Galaxy"});
   });
 
+  it('run pipleine with replace', async () => {
+    const results = await randomCol
+      .pipeline()
+      .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+      .replace('awards')
+      .execute();
+    expectResults(results, {
+      title: "The Hitchhiker's Guide to the Galaxy",
+      author: 'Douglas Adams',
+      genre: 'Science Fiction',
+      published: 1979,
+      rating: 4.2,
+      tags: ['comedy', 'space', 'adventure'],
+      hugo: true,
+      nebula: false,
+      others: {unknown: {year: 1980}},
+      nestedField: {'level.1': {'level.2': true}},
+    });
+  });
+
   it('run pipeline with sample limit of 3', async () => {
     const results = await randomCol.pipeline().sample(3).execute();
     expect(results.length).to.equal(3);
@@ -997,7 +1017,6 @@ describe('Pipeline class', () => {
       .union(randomCol.pipeline())
       .sort(Field.of(FieldPath.documentId()).ascending())
       .execute();
-    expect(results.length).to.equal(20);
     expectResults(
       results,
       'book01',
@@ -1027,8 +1046,43 @@ describe('Pipeline class', () => {
     const results = await randomCol
       .pipeline()
       .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
-      .unnest('tags')
+      .unnest('tags', 'tag')
       .execute();
-    expect(results.length).to.equal(3);
+    expectResults(
+      results,
+      {
+        title: "The Hitchhiker's Guide to the Galaxy",
+        author: 'Douglas Adams',
+        genre: 'Science Fiction',
+        published: 1979,
+        rating: 4.2,
+        tags: ['comedy', 'space', 'adventure'],
+        tag: 'comedy',
+        awards: {hugo: true, nebula: false, others: {unknown: {year: 1980}}},
+        nestedField: {'level.1': {'level.2': true}},
+      },
+      {
+        title: "The Hitchhiker's Guide to the Galaxy",
+        author: 'Douglas Adams',
+        genre: 'Science Fiction',
+        published: 1979,
+        rating: 4.2,
+        tags: ['comedy', 'space', 'adventure'],
+        tag: 'space',
+        awards: {hugo: true, nebula: false, others: {unknown: {year: 1980}}},
+        nestedField: {'level.1': {'level.2': true}},
+      },
+      {
+        title: "The Hitchhiker's Guide to the Galaxy",
+        author: 'Douglas Adams',
+        genre: 'Science Fiction',
+        published: 1979,
+        rating: 4.2,
+        tags: ['comedy', 'space', 'adventure'],
+        tag: 'adventure',
+        awards: {hugo: true, nebula: false, others: {unknown: {year: 1980}}},
+        nestedField: {'level.1': {'level.2': true}},
+      }
+    );
   });
 });

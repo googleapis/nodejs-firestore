@@ -22,11 +22,13 @@ import {
   Field,
   FilterCondition,
   Ordering,
+  Selectable,
 } from './expression';
 import {VectorValue} from './field-value';
 import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
 import {Pipeline} from './pipeline';
+import {selectableToExpr} from './pipeline-util';
 
 /**
  * @beta
@@ -287,6 +289,7 @@ export class Union implements Stage {
  */
 export interface UnnestOptions {
   field: firestore.Selectable | string;
+  alias: firestore.Field | string;
   indexField?: string;
 }
 
@@ -299,15 +302,25 @@ export class Unnest implements Stage {
   constructor(private options: UnnestOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
-    const args = [serializer.encodeValue(this.options.field)!];
-    const indexField = this.options.indexField;
+    const args: api.IValue[] = [
+      selectableToExpr(this.options.field)._toProto(serializer),
+      selectableToExpr(this.options.alias)._toProto(serializer),
+    ];
+    const indexField = this.options?.indexField;
     if (indexField) {
-      args.push(serializer.encodeValue(indexField));
+      return {
+        name: this.name,
+        args: args,
+        options: {
+          indexField: serializer.encodeValue(indexField),
+        },
+      };
+    } else {
+      return {
+        name: this.name,
+        args: args,
+      };
     }
-    return {
-      name: this.name,
-      args: args,
-    };
   }
 }
 

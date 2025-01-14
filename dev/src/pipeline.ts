@@ -28,7 +28,7 @@ import {
 } from './expression';
 import Firestore, {FieldPath, QueryDocumentSnapshot, Timestamp} from './index';
 import {validateFieldPath} from './path';
-import {ExecutionUtil} from './pipeline-util';
+import {ExecutionUtil, selectableToExpr} from './pipeline-util';
 import {DocumentReference} from './reference/document-reference';
 import {PipelineResponse} from './reference/types';
 import {Serializer} from './serializer';
@@ -515,23 +515,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   replace(field: firestore.Selectable | string): Pipeline<AppModelType> {
-    return this._addStage(
-      new Replace(this.selectableToExpr(field), 'full_replace')
-    );
-  }
-
-  private selectableToExpr(
-    selectable: FirebaseFirestore.Selectable | string
-  ): Expr {
-    if (typeof selectable === 'string') {
-      return Field.of(selectable);
-    } else if (selectable instanceof Field) {
-      return selectable;
-    } else if (selectable instanceof ExprWithAlias) {
-      return selectable.expr;
-    } else {
-      throw new Error('unexpected selectable: ' + selectable);
-    }
+    return this._addStage(new Replace(selectableToExpr(field), 'full_replace'));
   }
 
   /**
@@ -637,18 +621,23 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * // Emit a book document for each tag of the book.
    * firestore.pipeline().collection('books')
-   *     .unnest('tags');
+   *     .unnest('tags', 'tag');
    *
    * // Output:
-   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': 'comedy', ... }
-   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': 'space', ... }
-   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': 'adventure', ... }
+   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tag': 'comedy', ... }
+   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tag': 'space', ... }
+   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tag': 'adventure', ... }
    * ```
    *
    * @param field The name of the field containing the array.
+   * @param alias The alias field is used as the field name for each element within the output array. The alias does
+   * not overwrite the original field unless the field names match.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  unnest(field: FirebaseFirestore.Selectable | string): Pipeline<AppModelType>;
+  unnest(
+    field: firestore.Selectable | string,
+    alias: Field | string
+  ): Pipeline<AppModelType>;
 
   /**
    * Produces a document for each element in array found in previous stage document.
@@ -670,26 +659,33 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * // Emit a book document for each tag of the book.
    * firestore.pipeline().collection('books')
-   *     .unnest({ field: 'tags', UnnestOptions.indexField('tagIndex'));
+   *     .unnest({ field: 'tags', alias: 'tag', UnnestOptions.indexField('tagIndex')});
    *
    * // Output:
-   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 0, 'tags': 'comedy', ... }
-   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 1, 'tags': 'space', ... }
-   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 2, 'tags': 'adventure', ... }
+   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 0, 'tag': 'comedy', ... }
+   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 1, 'tag': 'space', ... }
+   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 2, 'tag': 'adventure', ... }
    * ```
    *
    * @param fieldName The name of the field containing the array.
+   * @param alias The name of the field containing the array.
    * @param options The {@code UnnestOptions} options.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   unnest(options: UnnestOptions): Pipeline<AppModelType>;
   unnest(
-    fieldOrOptions: FirebaseFirestore.Selectable | string | UnnestOptions
+    fieldOrOptions: firestore.Selectable | string | UnnestOptions,
+    alias?: Field | string
   ): Pipeline<AppModelType> {
-    if (typeof fieldOrOptions === 'string' || 'selectable' in fieldOrOptions) {
-      return this._addStage(new Unnest({field: fieldOrOptions}));
+    if (alias) {
+      return this._addStage(
+        new Unnest({
+          field: <firestore.Selectable | string>fieldOrOptions,
+          alias: alias,
+        })
+      );
     } else {
-      return this._addStage(new Unnest(fieldOrOptions));
+      return this._addStage(new Unnest(<UnnestOptions>fieldOrOptions));
     }
   }
 
