@@ -19,6 +19,7 @@ import {
   QuerySnapshot,
   SetOptions,
   Settings,
+  VectorValue,
   WithFieldValue,
 } from '@google-cloud/firestore';
 
