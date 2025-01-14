@@ -9382,12 +9382,13 @@ declare namespace FirebaseFirestore {
      *
      * <p>For each previous stage document, this stage will emit zero or more augmented documents. The
      * input array found in the previous stage document field specified by the `fieldName` parameter,
-     * will for each input array element produce an augmented document. The input array element will
-     * augment the previous stage document by replacing the field specified by `fieldName` parameter
-     * with the element value.
+     * will emit an augmented document for each input array element. The input array element will
+     * augment the previous stage document by setting the `alias` field  with the array element value.
      *
-     * <p>In other words, the field containing the input array will be removed from the augmented
-     * document and replaced by the corresponding array element.
+     * <p>When `fieldName` evaluates to a non-array value (ex: number, null, absent), then the stage becomes a no-op for
+     * the current input document, returning it as is with the `alias` field absent.
+     *
+     * <p>No documents are emitted when `fieldName` evaluates to an empty array.
      *
      * <p>Example:
      *
@@ -9417,12 +9418,13 @@ declare namespace FirebaseFirestore {
      *
      * <p>For each previous stage document, this stage will emit zero or more augmented documents. The
      * input array found in the previous stage document field specified by the `fieldName` parameter,
-     * will for each input array element produce an augmented document. The input array element will
-     * augment the previous stage document by replacing the field specified by `fieldName` parameter
-     * with the element value.
+     * will emit an augmented document for each input array element. The input array element will
+     * augment the previous stage document by setting the `alias` field  with the array element value.
      *
-     * <p>In other words, the field containing the input array will be removed from the augmented
-     * document and replaced by the corresponding array element.
+     * <p>When `fieldName` evaluates to a non-array value (ex: number, null, absent), then the stage becomes a no-op for
+     * the current input document, returning it as is with the `alias` field absent and `indexField` set to null.
+     *
+     * <p>No documents are emitted when `fieldName` evaluates to an empty array.
      *
      * <p>Example:
      *

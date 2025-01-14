@@ -606,27 +606,28 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * <p>For each previous stage document, this stage will emit zero or more augmented documents. The
    * input array found in the previous stage document field specified by the `fieldName` parameter,
-   * will for each input array element produce an augmented document. The input array element will
-   * augment the previous stage document by replacing the field specified by `fieldName` parameter
-   * with the element value.
+   * will emit an augmented document for each input array element. The input array element will
+   * augment the previous stage document by setting the `alias` field  with the array element value.
    *
-   * <p>In other words, the field containing the input array will be removed from the augmented
-   * document and replaced by the corresponding array element.
+   * <p>When `fieldName` evaluates to a non-array value (ex: number, null, absent), then the stage becomes a no-op for
+   * the current input document, returning it as is with the `alias` field absent.
+   *
+   * <p>No documents are emitted when `fieldName` evaluates to an empty array.
    *
    * <p>Example:
    *
    * ```typescript
    * // Input:
-   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': [ 'comedy', 'space', 'adventure' ], ... }
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": [ "comedy", "space", "adventure" ], ... }
    *
    * // Emit a book document for each tag of the book.
-   * firestore.pipeline().collection('books')
-   *     .unnest('tags', 'tag');
+   * firestore.pipeline().collection("books")
+   *     .unnest("tags");
    *
    * // Output:
-   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tag': 'comedy', ... }
-   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tag': 'space', ... }
-   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tag': 'adventure', ... }
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "comedy", ... }
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "space", ... }
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "adventure", ... }
    * ```
    *
    * @param field The name of the field containing the array.
@@ -644,12 +645,13 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * <p>For each previous stage document, this stage will emit zero or more augmented documents. The
    * input array found in the previous stage document field specified by the `fieldName` parameter,
-   * will for each input array element produce an augmented document. The input array element will
-   * augment the previous stage document by replacing the field specified by `fieldName` parameter
-   * with the element value.
+   * will emit an augmented document for each input array element. The input array element will
+   * augment the previous stage document by setting the `alias` field  with the array element value.
    *
-   * <p>In other words, the field containing the input array will be removed from the augmented
-   * document and replaced by the corresponding array element.
+   * <p>When `fieldName` evaluates to a non-array value (ex: number, null, absent), then the stage becomes a no-op for
+   * the current input document, returning it as is with the `alias` field absent and `indexField` set to null.
+   *
+   * <p>No documents are emitted when `fieldName` evaluates to an empty array.
    *
    * <p>Example:
    *
@@ -667,8 +669,6 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 2, 'tag': 'adventure', ... }
    * ```
    *
-   * @param fieldName The name of the field containing the array.
-   * @param alias The name of the field containing the array.
    * @param options The {@code UnnestOptions} options.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
