@@ -495,6 +495,12 @@ abstract class Watch<
                 'Closing inactive stream'
               );
               backendStream.emit('end');
+              backendStream.on('error', () => {
+                // Note that emitting 'end' above does not prevent the Duplex
+                // from receiving potential errors from the backend. Since the
+                // stream is no longer active (`isActive` is false), we
+                // swallow / ignore any errors it may receive.
+              });
               return;
             }
             logger('Watch.initStream', this.requestTag, 'Opened new stream');
