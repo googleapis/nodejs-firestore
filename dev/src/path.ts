@@ -191,7 +191,7 @@ abstract class Path<T> {
         this.extractNumericId(rhs)
       );
     } else {
-      // both string
+      // both non-numeric
       return compareUtf8Strings(lhs, rhs);
     }
   }

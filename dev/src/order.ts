@@ -248,7 +248,7 @@ function compareVectors(left: ApiMapValue, right: ApiMapValue): number {
   return compareArrays(leftArray, rightArray);
 }
 
-function stringToUTF8Bytes(str: string): Uint8Array {
+function stringToUtf8Bytes(str: string): Uint8Array {
   return new TextEncoder().encode(str);
 }
 
@@ -258,8 +258,8 @@ function stringToUTF8Bytes(str: string): Uint8Array {
  * @internal
  */
 export function compareUtf8Strings(left: string, right: string): number {
-  const leftBytes = stringToUTF8Bytes(left);
-  const rightBytes = stringToUTF8Bytes(right);
+  const leftBytes = stringToUtf8Bytes(left);
+  const rightBytes = stringToUtf8Bytes(right);
   return compareBlobs(Buffer.from(leftBytes), Buffer.from(rightBytes));
 }
 
