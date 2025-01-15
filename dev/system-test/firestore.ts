@@ -993,6 +993,66 @@ describe('DocumentReference class', () => {
       });
   });
 
+  it('supports minimum()', () => {
+    const baseData = {min: 2};
+    const updateData = {min: FieldValue.minimum(1)};
+    const expectedData = {min: 1};
+
+    const ref = randomCol.doc('doc');
+    return ref
+      .set(baseData)
+      .then(() => ref.update(updateData))
+      .then(() => ref.get())
+      .then(doc => {
+        expect(doc.data()).to.deep.equal(expectedData);
+      });
+  });
+
+  it('supports minimum() with set() with merge', () => {
+    const baseData = {min: 2};
+    const updateData = {min: FieldValue.minimum(1)};
+    const expectedData = {min: 1};
+
+    const ref = randomCol.doc('doc');
+    return ref
+      .set(baseData)
+      .then(() => ref.set(updateData, {merge: true}))
+      .then(() => ref.get())
+      .then(doc => {
+        expect(doc.data()).to.deep.equal(expectedData);
+      });
+  });
+
+  it('supports maximum()', () => {
+    const baseData = {max: 1};
+    const updateData = {max: FieldValue.maximum(2)};
+    const expectedData = {max: 2};
+
+    const ref = randomCol.doc('doc');
+    return ref
+      .set(baseData)
+      .then(() => ref.update(updateData))
+      .then(() => ref.get())
+      .then(doc => {
+        expect(doc.data()).to.deep.equal(expectedData);
+      });
+  });
+
+  it('supports maximum() with set() with merge', () => {
+    const baseData = {max: 1};
+    const updateData = {max: FieldValue.maximum(2)};
+    const expectedData = {max: 2};
+
+    const ref = randomCol.doc('doc');
+    return ref
+      .set(baseData)
+      .then(() => ref.set(updateData, {merge: true}))
+      .then(() => ref.get())
+      .then(doc => {
+        expect(doc.data()).to.deep.equal(expectedData);
+      });
+  });
+
   it('supports arrayUnion()', () => {
     const baseObject = {
       a: [],
@@ -7582,6 +7642,8 @@ describe('Types test', () => {
       readonly nested: {
         innerNested: {
           innerNestedNum: number;
+          innerNestedMin: number;
+          innerNestedMax: number;
         };
         innerArr: number[];
         timestamp: Timestamp;
@@ -7605,6 +7667,8 @@ describe('Types test', () => {
     nested: {
       innerNested: {
         innerNestedNum: 2,
+        innerNestedMin: 2,
+        innerNestedMax: 0,
       },
       innerArr: FieldValue.arrayUnion(2),
       timestamp: FieldValue.serverTimestamp(),
@@ -7650,6 +7714,8 @@ describe('Types test', () => {
           nested: {
             innerNested: {
               innerNestedNum: FieldValue.increment(1),
+              innerNestedMin: FieldValue.minimum(1),
+              innerNestedMax: FieldValue.maximum(1),
             },
             innerArr: FieldValue.arrayUnion(2),
             timestamp: FieldValue.serverTimestamp(),
@@ -7688,6 +7754,10 @@ describe('Types test', () => {
             innerNested: {
               // @ts-expect-error Should fail to transpile.
               innerNestedNum: 'string',
+              // @ts-expect-error Should fail to transpile.
+              innerNestedMin: 'string',
+              // @ts-expect-error Should fail to transpile.
+              innerNestedMax: 'string',
             },
             // @ts-expect-error Should fail to transpile.
             innerArr: null,
@@ -7736,6 +7806,8 @@ describe('Types test', () => {
           nested: {
             innerNested: {
               innerNestedNum: FieldValue.increment(1),
+              innerNestedMin: FieldValue.minimum(1),
+              innerNestedMax: FieldValue.maximum(1),
             },
             innerArr: FieldValue.arrayUnion(2),
             timestamp: FieldValue.serverTimestamp(),
@@ -7752,6 +7824,8 @@ describe('Types test', () => {
           nested: {
             innerNested: {
               innerNestedNum: FieldValue.increment(1),
+              innerNestedMin: FieldValue.minimum(1),
+              innerNestedMax: FieldValue.maximum(1),
             },
             timestamp: FieldValue.serverTimestamp(),
           },
@@ -7790,6 +7864,8 @@ describe('Types test', () => {
           nested: {
             innerNested: {
               innerNestedNum: FieldValue.increment(1),
+              innerNestedMin: FieldValue.minimum(1),
+              innerNestedMax: FieldValue.maximum(1),
             },
             innerArr: FieldValue.arrayUnion(2),
             timestamp: FieldValue.serverTimestamp(),
@@ -7828,6 +7904,10 @@ describe('Types test', () => {
             innerNested: {
               // @ts-expect-error Should fail to transpile.
               innerNestedNum: 'string',
+              // @ts-expect-error Should fail to transpile.
+              innerNestedMin: 'string',
+              // @ts-expect-error Should fail to transpile.
+              innerNestedMax: 'string',
             },
             // @ts-expect-error Should fail to transpile.
             innerArr: null,
@@ -7879,6 +7959,8 @@ describe('Types test', () => {
         nested: {
           innerNested: {
             innerNestedNum: FieldValue.increment(1),
+            innerNestedMin: FieldValue.minimum(1),
+            innerNestedMax: FieldValue.maximum(1),
           },
           innerArr: FieldValue.arrayUnion(2),
           timestamp: FieldValue.serverTimestamp(),
@@ -7895,6 +7977,8 @@ describe('Types test', () => {
         nested: {
           innerNested: {
             innerNestedNum: FieldValue.increment(1),
+            innerNestedMin: FieldValue.minimum(1),
+            innerNestedMax: FieldValue.maximum(1),
           },
           innerArr: FieldValue.arrayUnion(2),
           timestamp: FieldValue.serverTimestamp(),
@@ -7912,6 +7996,8 @@ describe('Types test', () => {
         nested: {
           innerNested: {
             innerNestedNum: FieldValue.increment(1),
+            innerNestedMin: FieldValue.minimum(1),
+            innerNestedMax: FieldValue.maximum(1),
           },
           timestamp: FieldValue.serverTimestamp(),
         },
@@ -7929,6 +8015,10 @@ describe('Types test', () => {
           innerNested: {
             // @ts-expect-error Should fail to transpile.
             innerNestedNum: 'string',
+            // @ts-expect-error Should fail to transpile.
+            innerNestedMin: 'string',
+            // @ts-expect-error Should fail to transpile.
+            innerNestedMax: 'string',
           },
           innerArr: FieldValue.arrayUnion(2),
           timestamp: FieldValue.serverTimestamp(),
@@ -7948,6 +8038,8 @@ describe('Types test', () => {
         nested: {
           innerNested: {
             innerNestedNum: 2,
+            innerNestedMin: 2,
+            innerNestedMax: 0,
           },
           innerArr: FieldValue.arrayUnion(2),
           timestamp: FieldValue.serverTimestamp(),
@@ -7964,6 +8056,8 @@ describe('Types test', () => {
             // @ts-expect-error Should fail to transpile.
             nonexistent: 'string',
             innerNestedNum: 2,
+            innerNestedMin: 2,
+            innerNestedMax: 0,
           },
           innerArr: FieldValue.arrayUnion(2),
           timestamp: FieldValue.serverTimestamp(),
@@ -8268,6 +8362,8 @@ describe('Types test', () => {
         nested: {
           innerNested: {
             innerNestedNum: 2,
+            innerNestedMin: 2,
+            innerNestedMax: 0,
           },
           innerArr: [],
           timestamp: FieldValue.serverTimestamp(),
@@ -8286,6 +8382,8 @@ describe('Types test', () => {
         nested: {
           innerNested: {
             innerNestedNum: FieldValue.increment(1),
+            innerNestedMin: FieldValue.minimum(1),
+            innerNestedMax: FieldValue.maximum(1),
           },
           innerArr: FieldValue.arrayUnion(2),
           timestamp: FieldValue.serverTimestamp(),
@@ -8299,6 +8397,8 @@ describe('Types test', () => {
           nested: {
             innerNested: {
               innerNestedNum: FieldValue.increment(1),
+              innerNestedMin: FieldValue.minimum(1),
+              innerNestedMax: FieldValue.maximum(1),
             },
             innerArr: FieldValue.arrayUnion(2),
             timestamp: FieldValue.serverTimestamp(),
@@ -8316,6 +8416,8 @@ describe('Types test', () => {
         outerArr: [],
         nested: {
           'innerNested.innerNestedNum': FieldValue.increment(1),
+          'innerNested.innerNestedMin': FieldValue.minimum(1),
+          'innerNested.innerNestedMax': FieldValue.maximum(1),
           innerArr: FieldValue.arrayUnion(2),
           timestamp: FieldValue.serverTimestamp(),
         },
@@ -8333,6 +8435,8 @@ describe('Types test', () => {
           nested: {
             innerNested: {
               innerNestedNum: FieldValue.increment(1),
+              innerNestedMin: FieldValue.minimum(1),
+              innerNestedMax: FieldValue.maximum(1),
             },
             innerArr: FieldValue.arrayUnion(2),
             timestamp: FieldValue.serverTimestamp(),
@@ -8346,6 +8450,8 @@ describe('Types test', () => {
             nested: {
               innerNested: {
                 innerNestedNum: FieldValue.increment(1),
+                innerNestedMin: FieldValue.minimum(1),
+                innerNestedMax: FieldValue.maximum(1),
               },
               innerArr: FieldValue.arrayUnion(2),
               timestamp: FieldValue.serverTimestamp(),
@@ -8365,6 +8471,8 @@ describe('Types test', () => {
           nested: {
             innerNested: {
               innerNestedNum: FieldValue.increment(1),
+              innerNestedMin: FieldValue.minimum(1),
+              innerNestedMax: FieldValue.maximum(1),
             },
             innerArr: FieldValue.arrayUnion(2),
             timestamp: FieldValue.serverTimestamp(),
