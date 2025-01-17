@@ -450,6 +450,19 @@ export declare class FirestoreAdminClient {
    *   Use `{location} = '-'` to list backups from all locations for the given
    *   project. This allows listing backups from a single location or from all
    *   locations.
+   * @param {string} request.filter
+   *   An expression that filters the list of returned backups.
+   *
+   *   A filter expression consists of a field name, a comparison operator, and a
+   *   value for filtering.
+   *   The value must be a string, a number, or a boolean. The comparison operator
+   *   must be one of: `<`, `>`, `<=`, `>=`, `!=`, `=`, or `:`.
+   *   Colon `:` is the contains operator. Filter rules are not case sensitive.
+   *
+   *   The following fields in the {@link protos.google.firestore.admin.v1.Backup|Backup} are
+   *   eligible for filtering:
+   *
+   *     * `database_uid` (supports `=` only)
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
