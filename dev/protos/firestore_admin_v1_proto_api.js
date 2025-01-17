@@ -7026,6 +7026,7 @@
                          * @memberof google.firestore.admin.v1
                          * @interface IListBackupsRequest
                          * @property {string|null} [parent] ListBackupsRequest parent
+                         * @property {string|null} [filter] ListBackupsRequest filter
                          */
     
                         /**
@@ -7052,6 +7053,14 @@
                         ListBackupsRequest.prototype.parent = "";
     
                         /**
+                         * ListBackupsRequest filter.
+                         * @member {string} filter
+                         * @memberof google.firestore.admin.v1.ListBackupsRequest
+                         * @instance
+                         */
+                        ListBackupsRequest.prototype.filter = "";
+    
+                        /**
                          * Creates a ListBackupsRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.ListBackupsRequest
@@ -7065,6 +7074,8 @@
                             var message = new $root.google.firestore.admin.v1.ListBackupsRequest();
                             if (object.parent != null)
                                 message.parent = String(object.parent);
+                            if (object.filter != null)
+                                message.filter = String(object.filter);
                             return message;
                         };
     
@@ -7081,10 +7092,14 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.defaults)
+                            if (options.defaults) {
                                 object.parent = "";
+                                object.filter = "";
+                            }
                             if (message.parent != null && message.hasOwnProperty("parent"))
                                 object.parent = message.parent;
+                            if (message.filter != null && message.hasOwnProperty("filter"))
+                                object.filter = message.filter;
                             return object;
                         };
     

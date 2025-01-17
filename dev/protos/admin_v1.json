@@ -1521,6 +1521,10 @@
                             "(google.api.field_behavior)": "REQUIRED",
                             "(google.api.resource_reference).type": "firestore.googleapis.com/Location"
                           }
+                        },
+                        "filter": {
+                          "type": "string",
+                          "id": 2
                         }
                       }
                     },

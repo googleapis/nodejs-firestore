@@ -3219,6 +3219,9 @@ export namespace google {
 
                     /** ListBackupsRequest parent */
                     parent?: (string|null);
+
+                    /** ListBackupsRequest filter */
+                    filter?: (string|null);
                 }
 
                 /** Represents a ListBackupsRequest. */
@@ -3232,6 +3235,9 @@ export namespace google {
 
                     /** ListBackupsRequest parent. */
                     public parent: string;
+
+                    /** ListBackupsRequest filter. */
+                    public filter: string;
 
                     /**
                      * Creates a ListBackupsRequest message from a plain object. Also converts values to their respective internal types.
