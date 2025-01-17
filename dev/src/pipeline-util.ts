@@ -156,7 +156,6 @@ export class ExecutionUtil<AppModelType> {
         enc,
         callback
       ) => {
-        console.log(`Pipeline response: ${JSON.stringify(proto, null, 2)}`);
         if (proto === NOOP_MESSAGE) {
           callback(undefined);
           return;
@@ -215,14 +214,20 @@ export class ExecutionUtil<AppModelType> {
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = pipeline._toProto(
-          transactionOrReadTime,
-          explainOptions
-        );
+        const request: api.IExecutePipelineRequest = {
+          database: this._firestore.formattedName,
+          structuredPipeline: {
+            pipeline: pipeline._toProto(),
+          },
+        };
 
-        console.log(
-          `Executing pipeline: \n ${JSON.stringify(request, null, 2)}`
-        );
+        if (transactionOrReadTime instanceof Uint8Array) {
+          request.transaction = transactionOrReadTime;
+        } else if (transactionOrReadTime instanceof Timestamp) {
+          request.readTime = transactionOrReadTime.toProto().timestampValue;
+        } else if (transactionOrReadTime) {
+          request.newTransaction = transactionOrReadTime;
+        }
 
         let streamActive: Deferred<boolean>;
         do {
@@ -390,6 +395,20 @@ export function isFirestoreValue(obj: any): obj is api.IValue {
   }
 
   return false;
+}
+
+export function selectableToExpr(
+  selectable: firestore.Selectable | string
+): Expr {
+  if (typeof selectable === 'string') {
+    return Field.of(selectable);
+  } else if (selectable instanceof Field) {
+    return selectable;
+  } else if (selectable instanceof ExprWithAlias) {
+    return selectable.expr;
+  } else {
+    throw new Error('unexpected selectable: ' + selectable);
+  }
 }
 
 export function toPipelineFilterCondition(

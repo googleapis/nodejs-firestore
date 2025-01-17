@@ -62,9 +62,9 @@ import {
 } from '../src/expression';
 import {PipelineResult} from '../src/pipeline';
 import {verifyInstance} from '../test/util/helpers';
-import {DeferredPromise, getTestRoot} from './firestore';
+import {getTestRoot} from './firestore';
 
-describe.only('Pipeline class', () => {
+describe('Pipeline class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
@@ -104,8 +104,6 @@ describe.only('Pipeline class', () => {
     result: PipelineResult<AppModelType>[],
     ...data: DocumentData[] | string[]
   ): void {
-    expect(result.length).to.equal(data.length);
-
     if (data.length > 0) {
       if (typeof data[0] === 'string') {
         const actualIds = result.map(result => result.ref?.id);
@@ -115,6 +113,8 @@ describe.only('Pipeline class', () => {
           expect(r.data()).to.deep.equal(data.shift());
         });
       }
+    } else {
+      expect(result.length).to.equal(data.length);
     }
   }
 
@@ -131,7 +131,7 @@ describe.only('Pipeline class', () => {
 
   async function setupBookDocs(): Promise<CollectionReference<DocumentData>> {
     const bookDocs: {[id: string]: DocumentData} = {
-      book1: {
+      book01: {
         title: "The Hitchhiker's Guide to the Galaxy",
         author: 'Douglas Adams',
         genre: 'Science Fiction',
@@ -141,7 +141,7 @@ describe.only('Pipeline class', () => {
         awards: {hugo: true, nebula: false, others: {unknown: {year: 1980}}},
         nestedField: {'level.1': {'level.2': true}},
       },
-      book2: {
+      book02: {
         title: 'Pride and Prejudice',
         author: 'Jane Austen',
         genre: 'Romance',
@@ -150,7 +150,7 @@ describe.only('Pipeline class', () => {
         tags: ['classic', 'social commentary', 'love'],
         awards: {none: true},
       },
-      book3: {
+      book03: {
         title: 'One Hundred Years of Solitude',
         author: 'Gabriel García Márquez',
         genre: 'Magical Realism',
@@ -159,7 +159,7 @@ describe.only('Pipeline class', () => {
         tags: ['family', 'history', 'fantasy'],
         awards: {nobel: true, nebula: false},
       },
-      book4: {
+      book04: {
         title: 'The Lord of the Rings',
         author: 'J.R.R. Tolkien',
         genre: 'Fantasy',
@@ -168,7 +168,7 @@ describe.only('Pipeline class', () => {
         tags: ['adventure', 'magic', 'epic'],
         awards: {hugo: false, nebula: false},
       },
-      book5: {
+      book05: {
         title: "The Handmaid's Tale",
         author: 'Margaret Atwood',
         genre: 'Dystopian',
@@ -177,7 +177,7 @@ describe.only('Pipeline class', () => {
         tags: ['feminism', 'totalitarianism', 'resistance'],
         awards: {'arthur c. clarke': true, 'booker prize': false},
       },
-      book6: {
+      book06: {
         title: 'Crime and Punishment',
         author: 'Fyodor Dostoevsky',
         genre: 'Psychological Thriller',
@@ -186,7 +186,7 @@ describe.only('Pipeline class', () => {
         tags: ['philosophy', 'crime', 'redemption'],
         awards: {none: true},
       },
-      book7: {
+      book07: {
         title: 'To Kill a Mockingbird',
         author: 'Harper Lee',
         genre: 'Southern Gothic',
@@ -195,7 +195,7 @@ describe.only('Pipeline class', () => {
         tags: ['racism', 'injustice', 'coming-of-age'],
         awards: {pulitzer: true},
       },
-      book8: {
+      book08: {
         title: '1984',
         author: 'George Orwell',
         genre: 'Dystopian',
@@ -204,7 +204,7 @@ describe.only('Pipeline class', () => {
         tags: ['surveillance', 'totalitarianism', 'propaganda'],
         awards: {prometheus: true},
       },
-      book9: {
+      book09: {
         title: 'The Great Gatsby',
         author: 'F. Scott Fitzgerald',
         genre: 'Modernist',
@@ -730,7 +730,7 @@ describe.only('Pipeline class', () => {
   it('testQueryByDocumentReference', async () => {
     const results = await randomCol
       .pipeline()
-      .where(eq(Field.of(FieldPath.documentId()), randomCol.doc('book1')))
+      .where(eq(Field.of(FieldPath.documentId()), randomCol.doc('book01')))
       .select('title')
       .execute();
     expectResults(results, {title: "The Hitchhiker's Guide to the Galaxy"});
@@ -962,7 +962,7 @@ describe.only('Pipeline class', () => {
         {title: 'Dune', 'awards.hugo': true}
       );
 
-      transaction.update(randomCol.doc('book1'), {foo: 'bar'});
+      transaction.update(randomCol.doc('book01'), {foo: 'bar'});
     });
 
     const result = await randomCol
@@ -971,5 +971,118 @@ describe.only('Pipeline class', () => {
       .select('title', Field.of(FieldPath.documentId()))
       .execute();
     expectResults(result, {title: "The Hitchhiker's Guide to the Galaxy"});
+  });
+
+  it('run pipleine with replace', async () => {
+    const results = await randomCol
+      .pipeline()
+      .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+      .replace('awards')
+      .execute();
+    expectResults(results, {
+      title: "The Hitchhiker's Guide to the Galaxy",
+      author: 'Douglas Adams',
+      genre: 'Science Fiction',
+      published: 1979,
+      rating: 4.2,
+      tags: ['comedy', 'space', 'adventure'],
+      hugo: true,
+      nebula: false,
+      others: {unknown: {year: 1980}},
+      nestedField: {'level.1': {'level.2': true}},
+    });
+  });
+
+  it('run pipeline with sample limit of 3', async () => {
+    const results = await randomCol.pipeline().sample(3).execute();
+    expect(results.length).to.equal(3);
+  });
+
+  it('run pipeline with sample limit of {documents: 3}', async () => {
+    const results = await randomCol.pipeline().sample({documents: 3}).execute();
+    expect(results.length).to.equal(3);
+  });
+
+  it('run pipeline with sample limit of {percentage: 0.6}', async () => {
+    const results = await randomCol
+      .pipeline()
+      .sample({percentage: 0.6})
+      .execute();
+    expect(results.length).to.equal(6);
+  });
+
+  it('run pipeline with union', async () => {
+    const results = await randomCol
+      .pipeline()
+      .union(randomCol.pipeline())
+      .sort(Field.of(FieldPath.documentId()).ascending())
+      .execute();
+    expectResults(
+      results,
+      'book01',
+      'book01',
+      'book02',
+      'book02',
+      'book03',
+      'book03',
+      'book04',
+      'book04',
+      'book05',
+      'book05',
+      'book06',
+      'book06',
+      'book07',
+      'book07',
+      'book08',
+      'book08',
+      'book09',
+      'book09',
+      'book10',
+      'book10'
+    );
+  });
+
+  it('run pipeline with unnest', async () => {
+    const results = await randomCol
+      .pipeline()
+      .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+      .unnest('tags', 'tag')
+      .execute();
+    expectResults(
+      results,
+      {
+        title: "The Hitchhiker's Guide to the Galaxy",
+        author: 'Douglas Adams',
+        genre: 'Science Fiction',
+        published: 1979,
+        rating: 4.2,
+        tags: ['comedy', 'space', 'adventure'],
+        tag: 'comedy',
+        awards: {hugo: true, nebula: false, others: {unknown: {year: 1980}}},
+        nestedField: {'level.1': {'level.2': true}},
+      },
+      {
+        title: "The Hitchhiker's Guide to the Galaxy",
+        author: 'Douglas Adams',
+        genre: 'Science Fiction',
+        published: 1979,
+        rating: 4.2,
+        tags: ['comedy', 'space', 'adventure'],
+        tag: 'space',
+        awards: {hugo: true, nebula: false, others: {unknown: {year: 1980}}},
+        nestedField: {'level.1': {'level.2': true}},
+      },
+      {
+        title: "The Hitchhiker's Guide to the Galaxy",
+        author: 'Douglas Adams',
+        genre: 'Science Fiction',
+        published: 1979,
+        rating: 4.2,
+        tags: ['comedy', 'space', 'adventure'],
+        tag: 'adventure',
+        awards: {hugo: true, nebula: false, others: {unknown: {year: 1980}}},
+        nestedField: {'level.1': {'level.2': true}},
+      }
+    );
   });
 });

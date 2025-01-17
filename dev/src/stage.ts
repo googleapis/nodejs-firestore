@@ -22,10 +22,13 @@ import {
   Field,
   FilterCondition,
   Ordering,
+  Selectable,
 } from './expression';
 import {VectorValue} from './field-value';
 import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
+import {Pipeline} from './pipeline';
+import {selectableToExpr} from './pipeline-util';
 
 /**
  * @beta
@@ -196,7 +199,7 @@ export class Where implements Stage {
  * @beta
  */
 export interface FindNearestOptions {
-  field: firestore.Field;
+  field: firestore.Field | string;
   vectorValue: firestore.VectorValue | number[];
   distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
   limit?: number;
@@ -224,7 +227,10 @@ export class FindNearest implements Stage {
     return {
       name: this.name,
       args: [
-        (this._options.field as unknown as Field)._toProto(serializer),
+        (typeof this._options.field === 'string'
+          ? Field.of(this._options.field)
+          : (this._options.field as unknown as Field)
+        )._toProto(serializer),
         this._options.vectorValue instanceof VectorValue
           ? serializer.encodeValue(this._options.vectorValue)!
           : serializer.encodeVector(this._options.vectorValue as number[]),
@@ -232,6 +238,89 @@ export class FindNearest implements Stage {
       ],
       options,
     };
+  }
+}
+
+/**
+ * @beta
+ */
+export interface SampleOptions {
+  limit: number;
+  mode: 'documents' | 'percent';
+}
+
+/**
+ * @beta
+ */
+export class Sample implements Stage {
+  name = 'sample';
+
+  constructor(private _options: SampleOptions) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [
+        serializer.encodeValue(this._options.limit)!,
+        serializer.encodeValue(this._options.mode)!,
+      ],
+    };
+  }
+}
+
+/**
+ * @beta
+ */
+export class Union implements Stage {
+  name = 'union';
+
+  constructor(private _other: Pipeline<unknown>) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [serializer.encodeValue(this._other)],
+    };
+  }
+}
+
+/**
+ * @beta
+ */
+export interface UnnestOptions {
+  field: firestore.Selectable | string;
+  alias: firestore.Field | string;
+  indexField?: string;
+}
+
+/**
+ * @beta
+ */
+export class Unnest implements Stage {
+  name = 'unnest';
+
+  constructor(private options: UnnestOptions) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    const args: api.IValue[] = [
+      selectableToExpr(this.options.field)._toProto(serializer),
+      selectableToExpr(this.options.alias)._toProto(serializer),
+    ];
+    const indexField = this.options?.indexField;
+    if (indexField) {
+      return {
+        name: this.name,
+        args: args,
+        options: {
+          indexField: serializer.encodeValue(indexField),
+        },
+      };
+    } else {
+      return {
+        name: this.name,
+        args: args,
+      };
+    }
   }
 }
 
@@ -263,6 +352,31 @@ export class Offset implements Stage {
     return {
       name: this.name,
       args: [serializer.encodeValue(this.offset)!],
+    };
+  }
+}
+
+/**
+ * @beta
+ */
+export class Replace implements Stage {
+  name = 'replace';
+
+  constructor(
+    private field: Expr,
+    private mode:
+      | 'full_replace'
+      | 'merge_prefer_nest'
+      | 'merge_prefer_parent' = 'full_replace'
+  ) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [
+        serializer.encodeValue(this.field)!,
+        serializer.encodeValue(this.mode),
+      ],
     };
   }
 }

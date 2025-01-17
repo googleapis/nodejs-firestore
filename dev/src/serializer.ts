@@ -27,6 +27,7 @@ import {Timestamp} from './timestamp';
 import {ApiMapValue, ValidationOptions} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
+import {Pipeline} from './pipeline';
 
 import api = proto.google.firestore.v1;
 import {
@@ -105,6 +106,22 @@ export class Serializer {
    * @param val The object to encode
    * @returns The Firestore Proto or null if we are deleting a field.
    */
+  encodeValue(val: FieldTransform | undefined): null;
+  encodeValue(
+    val:
+      | string
+      | boolean
+      | number
+      | bigint
+      | Date
+      | null
+      | Buffer
+      | Uint8Array
+      | VectorValue
+      | Map<string, unknown>
+      | Pipeline<unknown>
+  ): api.IValue;
+  encodeValue(val: unknown): api.IValue | null;
   encodeValue(val: unknown): api.IValue | null {
     if (val instanceof FieldTransform) {
       return null;
@@ -175,6 +192,12 @@ export class Serializer {
 
     if (val instanceof VectorValue) {
       return val._toProto(this);
+    }
+
+    if (val instanceof Pipeline) {
+      return {
+        pipelineValue: val._toProto(),
+      };
     }
 
     if (isObject(val)) {

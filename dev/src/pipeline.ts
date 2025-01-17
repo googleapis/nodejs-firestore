@@ -21,7 +21,6 @@ import {
   Expr,
   ExprWithAlias,
   Field,
-  Fields,
   FilterCondition,
   Function,
   Ordering,
@@ -29,7 +28,7 @@ import {
 } from './expression';
 import Firestore, {FieldPath, QueryDocumentSnapshot, Timestamp} from './index';
 import {validateFieldPath} from './path';
-import {ExecutionUtil} from './pipeline-util';
+import {ExecutionUtil, selectableToExpr} from './pipeline-util';
 import {DocumentReference} from './reference/document-reference';
 import {PipelineResponse} from './reference/types';
 import {Serializer} from './serializer';
@@ -51,6 +50,12 @@ import {
   Stage,
   Distinct,
   RemoveFields,
+  Replace,
+  Sample,
+  SampleOptions,
+  Union,
+  Unnest,
+  UnnestOptions,
 } from './stage';
 import {ApiMapValue, defaultPipelineConverter} from './types';
 import * as protos from '../protos/firestore_v1_proto_api';
@@ -107,21 +112,21 @@ export class PipelineSource implements firestore.PipelineSource {
  *
  * // Example 1: Select specific fields and rename 'rating' to 'bookRating'
  * const results1 = await db.pipeline()
- *     .collection("books")
- *     .select("title", "author", Field.of("rating").as("bookRating"))
+ *     .collection('books')
+ *     .select('title', 'author', Field.of('rating').as('bookRating'))
  *     .execute();
  *
- * // Example 2: Filter documents where 'genre' is "Science Fiction" and 'published' is after 1950
+ * // Example 2: Filter documents where 'genre' is 'Science Fiction' and 'published' is after 1950
  * const results2 = await db.pipeline()
- *     .collection("books")
- *     .where(and(Field.of("genre").eq("Science Fiction"), Field.of("published").gt(1950)))
+ *     .collection('books')
+ *     .where(and(Field.of('genre').eq('Science Fiction'), Field.of('published').gt(1950)))
  *     .execute();
  *
  * // Example 3: Calculate the average rating of books published after 1980
  * const results3 = await db.pipeline()
- *     .collection("books")
- *     .where(Field.of("published").gt(1980))
- *     .aggregate(avg(Field.of("rating")).as("averageRating"))
+ *     .collection('books')
+ *     .where(Field.of('published').gt(1980))
+ *     .aggregate(avg(Field.of('rating')).as('averageRating'))
  *     .execute();
  * ```
  */
@@ -133,6 +138,12 @@ export class Pipeline<AppModelType = firestore.DocumentData>
     private stages: Stage[],
     private converter: firestore.FirestorePipelineConverter<AppModelType> = defaultPipelineConverter()
   ) {}
+
+  private _addStage(stage: Stage): Pipeline<AppModelType> {
+    const copy = this.stages.map(s => s);
+    copy.push(stage);
+    return new Pipeline(this.db, copy, this.converter);
+  }
 
   /**
    * Adds new fields to outputs from previous stages.
@@ -150,10 +161,10 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * Example:
    *
    * ```typescript
-   * firestore.pipeline().collection("books")
+   * firestore.pipeline().collection('books')
    *   .addFields(
-   *     Field.of("rating").as("bookRating"), // Rename 'rating' to 'bookRating'
-   *     add(5, Field.of("quantity")).as("totalCost")  // Calculate 'totalCost'
+   *     Field.of('rating').as('bookRating'), // Rename 'rating' to 'bookRating'
+   *     add(5, Field.of('quantity')).as('totalCost')  // Calculate 'totalCost'
    *   );
    * ```
    *
@@ -161,9 +172,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   addFields(...fields: firestore.Selectable[]): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
-    copy.push(new AddFields(this.selectablesToMap(fields)));
-    return new Pipeline(this.db, copy, this.converter);
+    return this._addStage(new AddFields(this.selectablesToMap(fields)));
   }
 
   /**
@@ -172,11 +181,11 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * Example:
    *
    * ```typescript
-   * firestore.pipeline().collection("books")
+   * firestore.pipeline().collection('books')
    *   // removes field 'rating' and 'cost' from the previous stage outputs.
    *   .removeFields(
-   *     Field.of("rating"),
-   *     "cost"
+   *     Field.of('rating'),
+   *     'cost'
    *   );
    * ```
    *
@@ -186,13 +195,11 @@ export class Pipeline<AppModelType = firestore.DocumentData>
   removeFields(
     ...fields: (firestore.Field | string)[]
   ): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
-    copy.push(
+    return this._addStage(
       new RemoveFields(
         fields.map(f => (typeof f === 'string' ? Field.of(f) : (f as Field)))
       )
     );
-    return new Pipeline(this.db, copy, this.converter);
   }
 
   /**
@@ -214,11 +221,11 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * <p>Example:
    *
    * ```typescript
-   * firestore.pipeline().collection("books")
+   * firestore.pipeline().collection('books')
    *   .select(
-   *     "firstName",
-   *     Field.of("lastName"),
-   *     Field.of("address").toUppercase().as("upperAddress"),
+   *     'firstName',
+   *     Field.of('lastName'),
+   *     Field.of('address').toUppercase().as('upperAddress'),
    *   );
    * ```
    *
@@ -229,9 +236,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
   select(
     ...selections: (firestore.Selectable | string)[]
   ): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
-    copy.push(new Select(this.selectablesToMap(selections)));
-    return new Pipeline(this.db, copy, this.converter);
+    return this._addStage(new Select(this.selectablesToMap(selections)));
   }
 
   private selectablesToMap(
@@ -243,14 +248,11 @@ export class Pipeline<AppModelType = firestore.DocumentData>
         result.set(selectable as string, Field.of(selectable));
       } else if (selectable instanceof Field) {
         result.set((selectable as Field).fieldName(), selectable);
-      } else if (selectable instanceof Fields) {
-        const fields = selectable as Fields;
-        for (const field of fields.fieldList()) {
-          result.set(field.fieldName(), field);
-        }
       } else if (selectable instanceof ExprWithAlias) {
         const expr = selectable as ExprWithAlias<Expr>;
         result.set(expr.alias, expr.expr);
+      } else {
+        throw new Error('unexpected selectable: ' + selectable);
       }
     }
     return result;
@@ -260,7 +262,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * Filters the documents from previous stages to only include those matching the specified {@link
    * FilterCondition}.
    *
-   * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
+   * <p>This stage allows you to apply conditions to the data, similar to a 'WHERE' clause in SQL.
    * You can filter documents based on their field values, using implementations of {@link
    * FilterCondition}, typically including but not limited to:
    *
@@ -275,11 +277,11 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * <p>Example:
    *
    * ```typescript
-   * firestore.pipeline().collection("books")
+   * firestore.pipeline().collection('books')
    *   .where(
    *     and(
-   *         gt(Field.of("rating"), 4.0),   // Filter for ratings greater than 4.0
-   *         Field.of("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+   *         gt(Field.of('rating'), 4.0),   // Filter for ratings greater than 4.0
+   *         Field.of('genre').eq('Science Fiction') // Equivalent to gt('genre', 'Science Fiction')
    *     )
    *   );
    * ```
@@ -288,9 +290,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   where(condition: FilterCondition & firestore.Expr): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
-    copy.push(new Where(condition));
-    return new Pipeline(this.db, copy, this.converter);
+    return this._addStage(new Where(condition));
   }
 
   /**
@@ -304,8 +304,8 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * ```typescript
    * // Retrieve the second page of 20 results
-   * firestore.pipeline().collection("books")
-   *     .sort(Field.of("published").descending())
+   * firestore.pipeline().collection('books')
+   *     .sort(Field.of('published').descending())
    *     .offset(20)  // Skip the first 20 results
    *     .limit(20);   // Take the next 20 results
    * ```
@@ -314,9 +314,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   offset(offset: number): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
-    copy.push(new Offset(offset));
-    return new Pipeline(this.db, copy, this.converter);
+    return this._addStage(new Offset(offset));
   }
 
   /**
@@ -336,8 +334,8 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * ```typescript
    * // Limit the results to the top 10 highest-rated books
-   * firestore.pipeline().collection("books")
-   *     .sort(Field.of("rating").descending())
+   * firestore.pipeline().collection('books')
+   *     .sort(Field.of('rating').descending())
    *     .limit(10);
    * ```
    *
@@ -345,9 +343,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   limit(limit: number): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
-    copy.push(new Limit(limit));
-    return new Pipeline(this.db, copy, this.converter);
+    return this._addStage(new Limit(limit));
   }
 
   /**
@@ -369,21 +365,19 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * ```typescript
    * // Get a list of unique author names in uppercase and genre combinations.
-   * firestore.pipeline().collection("books")
-   *     .distinct(toUppercase(Field.of("author")).as("authorName"), Field.of("genre"), "publishedAt")
-   *     .select("authorName");
+   * firestore.pipeline().collection('books')
+   *     .distinct(toUppercase(Field.of('author')).as('authorName'), Field.of('genre'), 'publishedAt')
+   *     .select('authorName');
    * ```
    *
-   * @param selectables The {@link Selectable} expressions to consider when determining distinct
+   * @param groups The {@link Selectable} expressions to consider when determining distinct
    *     value combinations or {@code string}s representing field names.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   distinct(
     ...groups: (string | firestore.Selectable)[]
   ): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
-    copy.push(new Distinct(this.selectablesToMap(groups || [])));
-    return new Pipeline(this.db, copy, this.converter);
+    return this._addStage(new Distinct(this.selectablesToMap(groups || [])));
   }
 
   /**
@@ -397,10 +391,10 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * ```typescript
    * // Calculate the average rating and the total number of books
-   * firestore.pipeline().collection("books")
+   * firestore.pipeline().collection('books')
    *     .aggregate(
-   *         Field.of("rating").avg().as("averageRating"),
-   *         countAll().as("totalBooks")
+   *         Field.of('rating').avg().as('averageRating'),
+   *         countAll().as('totalBooks')
    *     );
    * ```
    *
@@ -432,10 +426,10 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * ```typescript
    * // Calculate the average rating for each genre.
-   * firestore.pipeline().collection("books")
+   * firestore.pipeline().collection('books')
    *   .aggregate({
-   *       accumulators: [avg(Field.of("rating")).as("avg_rating")]
-   *       groups: ["genre"]
+   *       accumulators: [avg(Field.of('rating')).as('avg_rating')],
+   *       groups: ['genre']
    *       });
    * ```
    *
@@ -456,9 +450,8 @@ export class Pipeline<AppModelType = firestore.DocumentData>
         },
     ...rest: firestore.AccumulatorTarget[]
   ): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
     if ('accumulators' in optionsOrTarget) {
-      copy.push(
+      return this._addStage(
         new Aggregate(
           new Map<string, Accumulator>(
             optionsOrTarget.accumulators.map(
@@ -472,7 +465,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
         )
       );
     } else {
-      copy.push(
+      return this._addStage(
         new Aggregate(
           new Map<string, Accumulator>(
             [optionsOrTarget, ...rest].map(target => [
@@ -484,14 +477,216 @@ export class Pipeline<AppModelType = firestore.DocumentData>
         )
       );
     }
-    return new Pipeline(this.db, copy, this.converter);
   }
 
-  findNearest(options: firestore.FindNearestOptions): Pipeline<AppModelType>;
   findNearest(options: firestore.FindNearestOptions): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
-    copy.push(new FindNearest(options));
-    return new Pipeline(this.db, copy);
+    return this._addStage(new FindNearest(options));
+  }
+
+  /**
+   * Fully overwrites all fields in a document with those coming from a nested map.
+   *
+   * <p>This stage allows you to emit a map value as a document. Each key of the map becomes a field
+   * on the document that contains the corresponding value.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Input.
+   * // {
+   * //  'name': 'John Doe Jr.',
+   * //  'parents': {
+   * //    'father': 'John Doe Sr.',
+   * //    'mother': 'Jane Doe'
+   * //   }
+   * // }
+   *
+   * // Emit parents as document.
+   * firestore.pipeline().collection('people').replace(Field.of('parents'));
+   *
+   * // Output
+   * // {
+   * //  'father': 'John Doe Sr.',
+   * //  'mother': 'Jane Doe'
+   * // }
+   * ```
+   *
+   * @param field The {@link Selectable} field containing the nested map.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  replace(field: firestore.Selectable | string): Pipeline<AppModelType> {
+    return this._addStage(new Replace(selectableToExpr(field), 'full_replace'));
+  }
+
+  /**
+   * Performs a pseudo-random sampling of the documents from the previous stage.
+   *
+   * <p>This stage will filter documents pseudo-randomly. The parameter specifies how number of
+   * documents to be returned.
+   *
+   * <p>Examples:
+   *
+   * ```typescript
+   * // Sample 25 books, if available.
+   * firestore.pipeline().collection('books')
+   *     .sample(25);
+   * ```
+   *
+   * @param documents The number of documents to sample..
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  sample(documents: number): Pipeline<AppModelType>;
+
+  /**
+   * Performs a pseudo-random sampling of the documents from the previous stage.
+   *
+   * <p>This stage will filter documents pseudo-randomly. The 'options' parameter specifies how
+   * sampling will be performed. See {@code SampleOptions} for more information.
+   *
+   * <p>Examples:
+   *
+   * // Sample 10 books, if available.
+   * firestore.pipeline().collection("books")
+   *     .sample({ documents: 10 });
+   *
+   * // Sample 50% of books.
+   * firestore.pipeline().collection("books")
+   *     .sample({ percentage: 0.5 });
+   * }
+   * </pre>
+   *
+   * @param options The {@code SampleOptions} specifies how sampling is performed.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  sample(
+    options: {percentage: number} | {documents: number}
+  ): Pipeline<AppModelType>;
+  sample(
+    documentsOrOptions: number | {percentage: number} | {documents: number}
+  ): Pipeline<AppModelType> {
+    if (typeof documentsOrOptions === 'number') {
+      return this._addStage(
+        new Sample({limit: documentsOrOptions, mode: 'documents'})
+      );
+    } else if ('percentage' in documentsOrOptions) {
+      return this._addStage(
+        new Sample({limit: documentsOrOptions.percentage, mode: 'percent'})
+      );
+    } else {
+      return this._addStage(
+        new Sample({limit: documentsOrOptions.documents, mode: 'documents'})
+      );
+    }
+  }
+
+  /**
+   * Performs union of all documents from two pipelines, including duplicates.
+   *
+   * <p>This stage will pass through documents from previous stage, and also pass through documents
+   * from previous stage of the `other` {@code Pipeline} given in parameter. The order of documents
+   * emitted from this stage is undefined.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Emit documents from books collection and magazines collection.
+   * firestore.pipeline().collection('books')
+   *     .union(firestore.pipeline().collection('magazines'));
+   * ```
+   *
+   * @param other The other {@code Pipeline} that is part of union.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  union(other: Pipeline<AppModelType>): Pipeline<AppModelType> {
+    return this._addStage(new Union(other));
+  }
+
+  /**
+   * Produces a document for each element in array found in previous stage document.
+   *
+   * <p>For each previous stage document, this stage will emit zero or more augmented documents. The
+   * input array found in the previous stage document field specified by the `fieldName` parameter,
+   * will emit an augmented document for each input array element. The input array element will
+   * augment the previous stage document by setting the `alias` field  with the array element value.
+   *
+   * <p>When `fieldName` evaluates to a non-array value (ex: number, null, absent), then the stage becomes a no-op for
+   * the current input document, returning it as is with the `alias` field absent.
+   *
+   * <p>No documents are emitted when `fieldName` evaluates to an empty array.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Input:
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": [ "comedy", "space", "adventure" ], ... }
+   *
+   * // Emit a book document for each tag of the book.
+   * firestore.pipeline().collection("books")
+   *     .unnest("tags");
+   *
+   * // Output:
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "comedy", ... }
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "space", ... }
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "adventure", ... }
+   * ```
+   *
+   * @param field The name of the field containing the array.
+   * @param alias The alias field is used as the field name for each element within the output array. The alias does
+   * not overwrite the original field unless the field names match.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  unnest(
+    field: firestore.Selectable | string,
+    alias: Field | string
+  ): Pipeline<AppModelType>;
+
+  /**
+   * Produces a document for each element in array found in previous stage document.
+   *
+   * <p>For each previous stage document, this stage will emit zero or more augmented documents. The
+   * input array found in the previous stage document field specified by the `fieldName` parameter,
+   * will emit an augmented document for each input array element. The input array element will
+   * augment the previous stage document by setting the `alias` field  with the array element value.
+   *
+   * <p>When `fieldName` evaluates to a non-array value (ex: number, null, absent), then the stage becomes a no-op for
+   * the current input document, returning it as is with the `alias` field absent and `indexField` set to null.
+   *
+   * <p>No documents are emitted when `fieldName` evaluates to an empty array.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Input:
+   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tags': [ 'comedy', 'space', 'adventure' ], ... }
+   *
+   * // Emit a book document for each tag of the book.
+   * firestore.pipeline().collection('books')
+   *     .unnest({ field: 'tags', alias: 'tag', UnnestOptions.indexField('tagIndex')});
+   *
+   * // Output:
+   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 0, 'tag': 'comedy', ... }
+   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 1, 'tag': 'space', ... }
+   * // { 'title': 'The Hitchhiker's Guide to the Galaxy', 'tagIndex': 2, 'tag': 'adventure', ... }
+   * ```
+   *
+   * @param options The {@code UnnestOptions} options.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  unnest(options: UnnestOptions): Pipeline<AppModelType>;
+  unnest(
+    fieldOrOptions: firestore.Selectable | string | UnnestOptions,
+    alias?: Field | string
+  ): Pipeline<AppModelType> {
+    if (alias) {
+      return this._addStage(
+        new Unnest({
+          field: <firestore.Selectable | string>fieldOrOptions,
+          alias: alias,
+        })
+      );
+    } else {
+      return this._addStage(new Unnest(<UnnestOptions>fieldOrOptions));
+    }
   }
 
   /**
@@ -508,10 +703,10 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * ```typescript
    * // Sort books by rating in descending order, and then by title in ascending order for books
    * // with the same rating
-   * firestore.pipeline().collection("books")
+   * firestore.pipeline().collection('books')
    *     .sort(
-   *         Field.of("rating").descending(),
-   *         Field.of("title").ascending()
+   *         Field.of('rating').descending(),
+   *         Field.of('title').ascending()
    *     );
    * ```
    *
@@ -528,16 +723,13 @@ export class Pipeline<AppModelType = firestore.DocumentData>
         },
     ...rest: Ordering[]
   ): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
     // Option object
     if ('orderings' in optionsOrOrderings) {
-      copy.push(new Sort(optionsOrOrderings.orderings));
+      return this._addStage(new Sort(optionsOrOrderings.orderings));
     } else {
       // Ordering object
-      copy.push(new Sort([optionsOrOrderings, ...rest]));
+      return this._addStage(new Sort([optionsOrOrderings, ...rest]));
     }
-
-    return new Pipeline(this.db, copy, this.converter);
   }
 
   /**
@@ -547,13 +739,13 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * stages. Each generic stage is defined by a unique `name` and a set of `params` that control its
    * behavior.
    *
-   * <p>Example (Assuming there is no "where" stage available in SDK):
+   * <p>Example (Assuming there is no 'where' stage available in SDK):
    *
    * ```typescript
-   * // Assume we don't have a built-in "where" stage
-   * firestore.pipeline().collection("books")
-   *     .genericStage("where", [Field.of("published").lt(1900)]) // Custom "where" stage
-   *     .select("title", "author");
+   * // Assume we don't have a built-in 'where' stage
+   * firestore.pipeline().collection('books')
+   *     .genericStage('where', [Field.of('published').lt(1900)]) // Custom 'where' stage
+   *     .select('title', 'author');
    * ```
    *
    * @param name The unique name of the generic stage to add.
@@ -561,9 +753,7 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   genericStage(name: string, params: any[]): Pipeline<AppModelType> {
-    const copy = this.stages.map(s => s);
-    copy.push(new GenericStage(name, params));
-    return new Pipeline(this.db, copy, this.converter);
+    return this._addStage(new GenericStage(name, params));
   }
 
   withConverter(converter: null): Pipeline;
@@ -654,9 +844,9 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    * <p>Example:
    *
    * ```typescript
-   * const futureResults = await firestore.pipeline().collection("books")
-   *     .where(gt(Field.of("rating"), 4.5))
-   *     .select("title", "author", "rating")
+   * const futureResults = await firestore.pipeline().collection('books')
+   *     .where(gt(Field.of('rating'), 4.5))
+   *     .select('title', 'author', 'rating')
    *     .execute();
    * ```
    *
@@ -688,9 +878,9 @@ export class Pipeline<AppModelType = firestore.DocumentData>
    *
    * @example
    * ```typescript
-   * firestore.pipeline().collection("books")
-   *     .where(gt(Field.of("rating"), 4.5))
-   *     .select("title", "author", "rating")
+   * firestore.pipeline().collection('books')
+   *     .where(gt(Field.of('rating'), 4.5))
+   *     .select('title', 'author', 'rating')
    *     .stream()
    *     .on('data', (pipelineResult) => {})
    *     .on('end', () => {});
@@ -705,29 +895,11 @@ export class Pipeline<AppModelType = firestore.DocumentData>
     return util.stream(this);
   }
 
-  _toProto(
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: FirebaseFirestore.ExplainOptions
-  ): api.IExecutePipelineRequest {
+  _toProto(): api.IPipeline {
     const stages: IStage[] = this.stages.map(stage =>
       stage._toProto(this.db._serializer!)
     );
-    const structuredPipeline: IStructuredPipeline = {pipeline: {stages}};
-    const executePipelineRequest: api.IExecutePipelineRequest = {
-      database: this.db.formattedName,
-      structuredPipeline,
-    };
-
-    if (transactionOrReadTime instanceof Uint8Array) {
-      executePipelineRequest.transaction = transactionOrReadTime;
-    } else if (transactionOrReadTime instanceof Timestamp) {
-      executePipelineRequest.readTime =
-        transactionOrReadTime.toProto().timestampValue;
-    } else if (transactionOrReadTime) {
-      executePipelineRequest.newTransaction = transactionOrReadTime;
-    }
-
-    return executePipelineRequest;
+    return {stages};
   }
 }
 
