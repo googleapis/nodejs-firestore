@@ -4084,6 +4084,156 @@ describe('Query class', () => {
         docChanges: expectedChanges,
       });
     });
+
+    describe('sort unicode strings', () => {
+      it('snapshot listener sorts unicode strings same as server', async () => {
+        const collection = await testCollectionWithDocs({
+          a: {value: 'Łukasiewicz'},
+          b: {value: 'Sierpiński'},
+          c: {value: '岩澤'},
+          d: {value: '🄟'},
+          e: {value: 'Ｐ'},
+          f: {value: '︒'},
+          g: {value: '🐵'},
+        });
+
+        const query = collection.orderBy('value');
+        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
+
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot)
+        );
+        const watchSnapshot = await waitForSnapshot();
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      });
+
+      it('snapshot listener sorts unicode strings in array same as server', async () => {
+        const collection = await testCollectionWithDocs({
+          a: {value: ['Łukasiewicz']},
+          b: {value: ['Sierpiński']},
+          c: {value: ['岩澤']},
+          d: {value: ['🄟']},
+          e: {value: ['Ｐ']},
+          f: {value: ['︒']},
+          g: {value: ['🐵']},
+        });
+
+        const query = collection.orderBy('value');
+        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
+
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot)
+        );
+        const watchSnapshot = await waitForSnapshot();
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      });
+
+      it('snapshot listener sorts unicode strings in map same as server', async () => {
+        const collection = await testCollectionWithDocs({
+          a: {value: {foo: 'Łukasiewicz'}},
+          b: {value: {foo: 'Sierpiński'}},
+          c: {value: {foo: '岩澤'}},
+          d: {value: {foo: '🄟'}},
+          e: {value: {foo: 'Ｐ'}},
+          f: {value: {foo: '︒'}},
+          g: {value: {foo: '🐵'}},
+        });
+
+        const query = collection.orderBy('value');
+        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
+
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot)
+        );
+        const watchSnapshot = await waitForSnapshot();
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      });
+
+      it('snapshot listener sorts unicode strings in map key same as server', async () => {
+        const collection = await testCollectionWithDocs({
+          a: {value: {Łukasiewicz: true}},
+          b: {value: {Sierpiński: true}},
+          c: {value: {岩澤: true}},
+          d: {value: {'🄟': true}},
+          e: {value: {Ｐ: true}},
+          f: {value: {'︒': true}},
+          g: {value: {'🐵': true}},
+        });
+
+        const query = collection.orderBy('value');
+        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
+
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot)
+        );
+        const watchSnapshot = await waitForSnapshot();
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      });
+
+      it('snapshot listener sorts unicode strings in document key same as server', async () => {
+        const collection = await testCollectionWithDocs({
+          Łukasiewicz: {value: true},
+          Sierpiński: {value: true},
+          岩澤: {value: true},
+          '🄟': {value: true},
+          Ｐ: {value: true},
+          '︒': {value: true},
+          '🐵': {value: true},
+        });
+
+        const query = collection.orderBy(FieldPath.documentId());
+        const expectedDocs = [
+          'Sierpiński',
+          'Łukasiewicz',
+          '岩澤',
+          '︒',
+          'Ｐ',
+          '🄟',
+          '🐵',
+        ];
+
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot)
+        );
+        const watchSnapshot = await waitForSnapshot();
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      });
+    });
   });
 
   (process.env.FIRESTORE_EMULATOR_HOST === undefined
