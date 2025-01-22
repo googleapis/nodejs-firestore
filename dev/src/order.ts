@@ -214,7 +214,7 @@ function compareObjects(left: ApiMapValue, right: ApiMapValue): number {
   leftKeys.sort();
   rightKeys.sort();
   for (let i = 0; i < leftKeys.length && i < rightKeys.length; i++) {
-    const keyComparison = primitiveComparator(leftKeys[i], rightKeys[i]);
+    const keyComparison = compareUtf8Strings(leftKeys[i], rightKeys[i]);
     if (keyComparison !== 0) {
       return keyComparison;
     }
@@ -248,6 +248,21 @@ function compareVectors(left: ApiMapValue, right: ApiMapValue): number {
   return compareArrays(leftArray, rightArray);
 }
 
+function stringToUtf8Bytes(str: string): Uint8Array {
+  return new TextEncoder().encode(str);
+}
+
+/*!
+ * Compare strings in UTF-8 encoded byte order
+ * @private
+ * @internal
+ */
+export function compareUtf8Strings(left: string, right: string): number {
+  const leftBytes = stringToUtf8Bytes(left);
+  const rightBytes = stringToUtf8Bytes(right);
+  return compareBlobs(Buffer.from(leftBytes), Buffer.from(rightBytes));
+}
+
 /*!
  * @private
  * @internal
@@ -269,7 +284,7 @@ export function compare(left: api.IValue, right: api.IValue): number {
     case TypeOrder.BOOLEAN:
       return primitiveComparator(left.booleanValue!, right.booleanValue!);
     case TypeOrder.STRING:
-      return primitiveComparator(left.stringValue!, right.stringValue!);
+      return compareUtf8Strings(left.stringValue!, right.stringValue!);
     case TypeOrder.NUMBER:
       return compareNumberProtos(left, right);
     case TypeOrder.TIMESTAMP:
