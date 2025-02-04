@@ -20,7 +20,17 @@ import {ApiMapValue, ProtobufJsValue} from './types';
 import {validateObject} from './validate';
 
 import api = google.firestore.v1;
-import {RESERVED_MAP_KEY, RESERVED_MAP_KEY_VECTOR_VALUE} from './map-type';
+import {
+  RESERVED_BSON_BINARY_KEY,
+  RESERVED_INT32_KEY,
+  RESERVED_MAP_KEY,
+  RESERVED_MAP_KEY_VECTOR_VALUE,
+  RESERVED_MAX_KEY,
+  RESERVED_MIN_KEY,
+  RESERVED_BSON_OBJECT_ID_KEY,
+  RESERVED_REGEX_KEY,
+  RESERVED_BSON_TIMESTAMP_KEY,
+} from './map-type';
 
 /*!
  * @module firestore/convert
@@ -174,6 +184,20 @@ export function detectValueType(proto: ProtobufJsValue): string {
         fields[RESERVED_MAP_KEY].stringValue === RESERVED_MAP_KEY_VECTOR_VALUE
       ) {
         valueType = 'vectorValue';
+      } else if (props.indexOf(RESERVED_MIN_KEY) !== -1) {
+        valueType = 'minKeyValue';
+      } else if (props.indexOf(RESERVED_MAX_KEY) !== -1) {
+        valueType = 'maxKeyValue';
+      } else if (props.indexOf(RESERVED_REGEX_KEY) !== -1) {
+        valueType = 'regexValue';
+      } else if (props.indexOf(RESERVED_BSON_OBJECT_ID_KEY) !== -1) {
+        valueType = 'bsonObjectIdValue';
+      } else if (props.indexOf(RESERVED_INT32_KEY) !== -1) {
+        valueType = 'int32Value';
+      } else if (props.indexOf(RESERVED_BSON_TIMESTAMP_KEY) !== -1) {
+        valueType = 'bsonTimestampValue';
+      } else if (props.indexOf(RESERVED_BSON_BINARY_KEY) !== -1) {
+        valueType = 'bsonBinaryValue';
       }
     }
   }
@@ -261,7 +285,14 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
       };
     }
     case 'mapValue':
-    case 'vectorValue': {
+    case 'vectorValue':
+    case 'regexValue':
+    case 'bsonObjectIdValue':
+    case 'bsonBinaryValue':
+    case 'int32Value':
+    case 'bsonTimestampValue':
+    case 'minKeyValue':
+    case 'maxKeyValue': {
       const mapValue: ApiMapValue = {};
       const fields = fieldValue.mapValue!.fields;
       if (fields) {

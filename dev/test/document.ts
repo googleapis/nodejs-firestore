@@ -508,6 +508,223 @@ describe('serialize document', () => {
       });
     });
   });
+
+  it('is able to translate MinKey to internal representation', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'myMinKey', {
+              mapValue: {
+                fields: {
+                  __min__: {
+                    nullValue: 'NULL_VALUE',
+                  },
+                },
+              },
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        myMinKey: FieldValue.minKey(),
+      });
+    });
+  });
+
+  it('is able to translate MaxKey to internal representation', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'myMaxKey', {
+              mapValue: {
+                fields: {
+                  __max__: {
+                    nullValue: 'NULL_VALUE',
+                  },
+                },
+              },
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        myMaxKey: FieldValue.maxKey(),
+      });
+    });
+  });
+
+  it('is able to translate regex to internal representation', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'myRegexValue', {
+              mapValue: {
+                fields: {
+                  __regex__: {
+                    mapValue: {
+                      fields: {
+                        pattern: {
+                          stringValue: 'foo',
+                        },
+                        options: {
+                          stringValue: 'bar',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        myRegexValue: FieldValue.regex('foo', 'bar'),
+      });
+    });
+  });
+
+  it('is able to translate objectId to internal representation', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'myObjectIdValue', {
+              mapValue: {
+                fields: {
+                  __oid__: {
+                    stringValue: 'foo',
+                  },
+                },
+              },
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        myObjectIdValue: FieldValue.bsonObjectId('foo'),
+      });
+    });
+  });
+
+  it('is able to translate int32 to internal representation', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'myInt32', {
+              mapValue: {
+                fields: {
+                  __int__: {
+                    integerValue: 12345,
+                  },
+                },
+              },
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        myInt32: FieldValue.int32(12345),
+      });
+    });
+  });
+
+  it('is able to translate request timestamp to internal representation', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'myBsonTimestamp', {
+              mapValue: {
+                fields: {
+                  __request_timestamp__: {
+                    mapValue: {
+                      fields: {
+                        seconds: {
+                          integerValue: 12345,
+                        },
+                        increment: {
+                          integerValue: 67,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        myBsonTimestamp: FieldValue.bsonTimestamp(12345, 67),
+      });
+    });
+  });
+
+  it('is able to translate bson binary data to internal representation', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'myBsonBinaryData', {
+              mapValue: {
+                fields: {
+                  __binary__: {
+                    bytesValue: new Uint8Array([250, 1, 2, 3]),
+                  },
+                },
+              },
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        myBsonBinaryData: FieldValue.bsonBinaryData(
+          250,
+          Buffer.from([1, 2, 3])
+        ),
+      });
+    });
+  });
 });
 
 describe('deserialize document', () => {

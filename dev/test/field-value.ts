@@ -15,7 +15,14 @@
 import {describe, it} from 'mocha';
 import {expect} from 'chai';
 
-import {FieldValue} from '../src';
+import {
+  FieldValue,
+  BsonBinaryData,
+  BsonObjectId,
+  BsonTimestampValue,
+  Int32Value,
+  RegexValue,
+} from '../src';
 import {
   ApiOverride,
   arrayTransform,
@@ -29,6 +36,8 @@ import {
   set,
   writeResult,
 } from './util/helpers';
+import {compare} from '../src/order';
+import {RESERVED_BSON_BINARY_KEY, RESERVED_MIN_KEY} from '../src/map-type';
 
 function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
   it("can't be used inside arrays", () => {
@@ -278,4 +287,122 @@ describe('FieldValue.serverTimestamp()', () => {
     'FieldValue.serverTimestamp',
     FieldValue.serverTimestamp()
   );
+});
+
+describe('non-native types', () => {
+  it('BSON timestamp members', () => {
+    const value = FieldValue.bsonTimestamp(57, 4);
+    expect(value.seconds).to.equal(57);
+    expect(value.increment).to.equal(4);
+  });
+
+  it('BSON object id', () => {
+    const bsonObjectId = FieldValue.bsonObjectId('foobar');
+    expect(bsonObjectId.value).to.equal('foobar');
+  });
+
+  it('regular expression', () => {
+    const regex = FieldValue.regex('^foo', 'i');
+    expect(regex.pattern).to.equal('^foo');
+    expect(regex.options).to.equal('i');
+  });
+
+  it('32-bit int', () => {
+    const intValue = FieldValue.int32(255);
+    expect(intValue.value).to.equal(255);
+  });
+
+  it('min key', () => {
+    const value1 = FieldValue.minKey();
+    const value2 = FieldValue.minKey();
+    const other = FieldValue.maxKey();
+    // All MinKeys are equal.
+    expect(value1).to.equal(value2);
+
+    // MinKey and MaxKey are not equal.
+    expect(value1).to.not.equal(other);
+
+    // Null values and MinKey values are equal.
+    expect(
+      compare(
+        {
+          nullValue: null,
+        },
+        {
+          mapValue: {
+            fields: {
+              [RESERVED_MIN_KEY]: {
+                nullValue: 'NULL_VALUE',
+              },
+            },
+          },
+        }
+      )
+    ).to.equal(0);
+  });
+
+  it('max key', () => {
+    const value1 = FieldValue.maxKey();
+    const value2 = FieldValue.maxKey();
+    const other = FieldValue.minKey();
+    expect(value1).to.equal(value2);
+    expect(value1).to.not.equal(other);
+  });
+
+  it('BSON binary data', () => {
+    const value = FieldValue.bsonBinaryData(128, Uint8Array.from([7, 8, 9]));
+    expect(value.subtype).to.equal(128);
+    expect(value.data).to.deep.equal(Uint8Array.from([7, 8, 9]));
+  });
+
+  it('BSON binary data can have empty data', () => {
+    const value = BsonBinaryData._fromProto({
+      mapValue: {
+        fields: {
+          [RESERVED_BSON_BINARY_KEY]: {
+            bytesValue: new Uint8Array([128]),
+          },
+        },
+      },
+    });
+    expect(value.subtype).to.equal(128);
+    expect(value.data).to.deep.equal(Uint8Array.from([]));
+    expect(value.isEqual(FieldValue.bsonBinaryData(128, Uint8Array.from([]))))
+      .to.be.true;
+  });
+
+  it('can create BSON timestamp using new', () => {
+    const value1 = FieldValue.bsonTimestamp(57, 4);
+    const value2 = new BsonTimestampValue(57, 4);
+    expect(value1.isEqual(value2)).to.be.true;
+    expect(value2.isEqual(value1)).to.be.true;
+  });
+
+  it('can create BSON object id using new', () => {
+    const bsonObjectId1 = FieldValue.bsonObjectId('foobar');
+    const bsonObjectId2 = new BsonObjectId('foobar');
+    expect(bsonObjectId1.isEqual(bsonObjectId2)).to.be.true;
+    expect(bsonObjectId2.isEqual(bsonObjectId1)).to.be.true;
+  });
+
+  it('can create regular expression using new', () => {
+    const regex1 = FieldValue.regex('^foo', 'i');
+    const regex2 = new RegexValue('^foo', 'i');
+    expect(regex1.isEqual(regex2)).to.be.true;
+    expect(regex2.isEqual(regex1)).to.be.true;
+  });
+
+  it('can create 32-bit int using new', () => {
+    const intValue1 = FieldValue.int32(255);
+    const intValue2 = new Int32Value(255);
+    expect(intValue1.isEqual(intValue2)).to.be.true;
+    expect(intValue2.isEqual(intValue1)).to.be.true;
+  });
+
+  it('can create BSON binary data using new', () => {
+    const value1 = FieldValue.bsonBinaryData(128, Uint8Array.from([7, 8, 9]));
+    const value2 = new BsonBinaryData(128, Uint8Array.from([7, 8, 9]));
+    expect(value1.isEqual(value2)).to.be.true;
+    expect(value2.isEqual(value1)).to.be.true;
+  });
 });

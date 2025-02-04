@@ -25,6 +25,7 @@ import {
 } from '../src';
 import {GeoPoint} from '../src';
 import {DocumentReference} from '../src';
+import {FieldValue} from '../src';
 import * as order from '../src/order';
 import {QualifiedResourcePath} from '../src/path';
 import {createInstance, InvalidApiUsage, verifyInstance} from './util/helpers';
@@ -148,7 +149,12 @@ describe('Order', () => {
   it('is correct', () => {
     const groups = [
       // null first
-      [wrap(null)],
+      [
+        wrap(null),
+        wrap(null),
+        wrap(FieldValue.minKey()),
+        wrap(FieldValue.minKey()),
+      ],
 
       // booleans
       [wrap(false)],
@@ -160,17 +166,22 @@ describe('Order', () => {
       [double(-Number.MAX_VALUE)],
       [int(Number.MIN_SAFE_INTEGER - 1)],
       [int(Number.MIN_SAFE_INTEGER)],
+      // 64-bit and 32-bit integers order together numerically.
+      [int(-2147483648), wrap(FieldValue.int32(-2147483648))],
       [double(-1.1)],
-      // Integers and Doubles order the same.
-      [int(-1), double(-1.0)],
+      // Integers and Doubles and int32 order together numerically.
+      [int(-1), double(-1.0), wrap(FieldValue.int32(-1))],
       [double(-Number.MIN_VALUE)],
       // zeros all compare the same.
-      [int(0), double(0.0), double(-0)],
+      [int(0), double(0.0), double(-0), wrap(FieldValue.int32(0))],
       [double(Number.MIN_VALUE)],
-      [int(1), double(1.0)],
+      [int(1), double(1.0), wrap(FieldValue.int32(1))],
       [double(1.1)],
       [int(2)],
       [int(10)],
+      [wrap(FieldValue.int32(11))],
+      [wrap(FieldValue.int32(12))],
+      [wrap(FieldValue.int32(2147483647))],
       [int(Number.MAX_SAFE_INTEGER)],
       [int(Number.MAX_SAFE_INTEGER + 1)],
       [double(Infinity)],
@@ -178,6 +189,11 @@ describe('Order', () => {
       // timestamps
       [wrap(new Date(2016, 5, 20, 10, 20))],
       [wrap(new Date(2016, 10, 21, 15, 32))],
+
+      // request timestamp
+      [wrap(FieldValue.bsonTimestamp(123, 4))],
+      [wrap(FieldValue.bsonTimestamp(123, 5))],
+      [wrap(FieldValue.bsonTimestamp(124, 0))],
 
       // strings
       [wrap('')],
@@ -198,6 +214,13 @@ describe('Order', () => {
       [blob([0, 1, 2, 4, 3])],
       [blob([255])],
 
+      [
+        wrap(FieldValue.bsonBinaryData(5, Buffer.from([1, 2, 3]))),
+        wrap(FieldValue.bsonBinaryData(5, new Uint8Array([1, 2, 3]))),
+      ],
+      [wrap(FieldValue.bsonBinaryData(7, Buffer.from([1])))],
+      [wrap(FieldValue.bsonBinaryData(7, Buffer.from([2])))],
+
       // resource names
       [resource('projects/p1/databases/d1/documents/c1/doc1')],
       [resource('projects/p1/databases/d1/documents/c1/doc2')],
@@ -208,6 +231,15 @@ describe('Order', () => {
       [resource('projects/p2/databases/d2/documents/c1/doc1')],
       [resource('projects/p2/databases/d2/documents/c1-/doc1')],
       [resource('projects/p2/databases/d3/documents/c1-/doc1')],
+
+      // ObjectId
+      [
+        wrap(FieldValue.bsonObjectId('foo')),
+        wrap(FieldValue.bsonObjectId('foo')),
+      ],
+      [wrap(FieldValue.bsonObjectId('foo\u0301'))], // with combining acute accent
+      [wrap(FieldValue.bsonObjectId('xyz'))],
+      [wrap(FieldValue.bsonObjectId('Ḟoo'))], // with latin capital letter f with dot above
 
       // geo points
       [geopoint(-90, -180)],
@@ -223,6 +255,12 @@ describe('Order', () => {
       [geopoint(90, 0)],
       [geopoint(90, 180)],
 
+      // regular expressions
+      [wrap(FieldValue.regex('a', 'bar1'))],
+      [wrap(FieldValue.regex('foo', 'bar1'))],
+      [wrap(FieldValue.regex('foo', 'bar2'))],
+      [wrap(FieldValue.regex('go', 'bar1'))],
+
       // arrays
       [wrap([])],
       [wrap(['bar'])],
@@ -237,6 +275,9 @@ describe('Order', () => {
       [wrap({foo: 1})],
       [wrap({foo: 2})],
       [wrap({foo: '0'})],
+
+      // MaxKey
+      [wrap(FieldValue.maxKey()), wrap(FieldValue.maxKey())],
     ];
 
     for (let i = 0; i < groups.length; i++) {

@@ -2773,6 +2773,114 @@ declare namespace FirebaseFirestore {
     isEqual(other: VectorValue): boolean;
   }
 
+  /** Represent a "Min Key" type in Firestore documents. */
+  export class MinKey {
+    private constructor();
+  }
+
+  /** Represent a "Max Key" type in Firestore documents. */
+  export class MaxKey {
+    private constructor();
+  }
+
+  /** Represents a regular expression type in Firestore documents. */
+  export class RegexValue {
+    constructor(pattern: string, options: string);
+
+    /** The regular expression pattern */
+    readonly pattern: string;
+
+    /** The regular expression options */
+    readonly options: string;
+
+    /**
+     * Returns true if this `RegexValue` is equal to the provided one.
+     *
+     * @param other The `RegexValue` to compare against.
+     * @return 'true' if this `RegexValue` is equal to the provided one.
+     */
+    isEqual(other: RegexValue): boolean;
+  }
+
+  /** Represents an ObjectId type in Firestore documents. */
+  export class BsonObjectId {
+    constructor(value: string);
+
+    /** The 24-character hex string representation of the ObjectId. */
+    readonly value: string;
+
+    /**
+     * Returns true if this `BsonObjectId` is equal to the provided one.
+     *
+     * @param other The `BsonObjectId` to compare against.
+     * @return 'true' if this `BsonObjectId` is equal to the provided one.
+     */
+    isEqual(other: BsonObjectId): boolean;
+  }
+
+  /** Represents a 32-bit integer type in Firestore documents. */
+  export class Int32Value {
+    /**
+     * Note: values larger than the largest 32-bit signed integer,
+     * or smaller than the smallest 32-bit signed integer are invalid
+     * and will get rejected.
+     */
+    constructor(value: number);
+
+    /** The underlying 32-bit number */
+    readonly value: number;
+
+    /**
+     * Returns true if this `Int32Value` is equal to the provided one.
+     *
+     * @param other The `Int32Value` to compare against.
+     * @return 'true' if this `Int32Value` is equal to the provided one.
+     */
+    isEqual(other: Int32Value): boolean;
+  }
+
+  /** Represents a BSON Timestamp type in Firestore documents. */
+  export class BsonTimestampValue {
+    /**
+     *  Note: negative values and values larger than the largest 32-bit
+     *  unsigned integer are invalid and will get rejected.
+     */
+    constructor(seconds: number, increment: number);
+
+    /** The underlying unsigned 32-bit integer for seconds */
+    readonly seconds: number;
+
+    /** The underlying unsigned 32-bit integer for increment */
+    readonly increment: number;
+
+    /**
+     * Returns true if this `BsonTimestampValue` is equal to the provided one.
+     *
+     * @param other The `BsonTimestampValue` to compare against.
+     * @return 'true' if this `BsonTimestampValue` is equal to the provided one.
+     */
+    isEqual(other: BsonTimestampValue): boolean;
+  }
+
+  /** Represents a BSON Binary Data type in Firestore documents. */
+  export class BsonBinaryData {
+    constructor(subtype: number, data: Uint8Array);
+
+    /** The subtype for the data */
+    readonly subtype: number;
+
+    /** The binary data as a byte array */
+    readonly data: Uint8Array;
+
+    /**
+     * Returns true if this `BsonBinaryData` is equal to the provided one.
+     *
+     * @param other The `BsonBinaryData` to compare against.
+     * @return 'true' if this `BsonBinaryData` is equal to the provided one.
+     */
+    isEqual(other: BsonBinaryData): boolean;
+  }
+
   /**
    * Sentinel values that can be used when writing document fields with set(),
    * create() or update().
@@ -2847,6 +2955,73 @@ declare namespace FirebaseFirestore {
      * @return A new `VectorValue` constructed with a copy of the given array of number.
      */
     static vector(values?: number[]): VectorValue;
+
+    /**
+     * @return A new `MinKey` value instance.
+     */
+    static minKey(): MinKey;
+
+    /**
+     * @return A new `MaxKey` value instance.
+     */
+    static maxKey(): MaxKey;
+
+    /**
+     * Creates a new regular expression value with the given pattern and options.
+     *
+     * @param pattern The pattern to use for this regex value.
+     * @param options The options to use for this regex value.
+     * @return A new regular expression value.
+     */
+    static regex(pattern: string, options: string): RegexValue;
+
+    /**
+     * Creates a new BSON ObjectId value with the given value.
+     *
+     * @param hexValue The 24-character hex string representing the ObjectId.
+     *
+     * @returns The new BSON ObjectId instance.
+     */
+    static bsonObjectId(hexValue: string): BsonObjectId;
+
+    /**
+     * Returns a new 32-bit signed integer value.
+     *
+     * @param value The 32-bit number to be used for constructing the Int32Value.
+     *
+     * Note: values larger than the largest 32-bit signed integer,
+     * or smaller than the smallest 32-bit signed integer are invalid
+     * and will get rejected.
+     *
+     * @return A new 32-bit integer value.
+     */
+    static int32(value: number): Int32Value;
+
+    /**
+     * Creates a new BSON Timestamp from the given values.
+     *
+     * @param seconds The underlying unsigned 32-bit integer for seconds.
+     * @param increment The underlying unsigned 32-bit integer for increment.
+     *
+     *  Note: negative values and values larger than the largest 32-bit
+     *  unsigned integer are invalid and will get rejected.
+     *
+     * @return A new BSON Timestamp value.
+     */
+    static bsonTimestamp(
+      seconds: number,
+      increment: number
+    ): BsonTimestampValue;
+
+    /**
+     * Creates a new BSON Binary Data from the given values.
+     *
+     * @param subtype The subtype of the data.
+     * @param data The byte array that contains the data.
+     *
+     * @return A new BsonBinaryData value.
+     */
+    static bsonBinaryData(subtype: number, data: Uint8Array): BsonBinaryData;
 
     /**
      * Returns true if this `FieldValue` is equal to the provided one.
