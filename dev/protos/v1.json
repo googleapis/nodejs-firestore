@@ -2431,6 +2431,10 @@
                   "rule": "repeated",
                   "type": "string",
                   "id": 1
+                },
+                "generateOmittedAsInternal": {
+                  "type": "bool",
+                  "id": 2
                 }
               }
             },

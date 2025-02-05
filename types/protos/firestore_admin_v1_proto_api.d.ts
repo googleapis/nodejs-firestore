@@ -5681,6 +5681,9 @@ export namespace google {
 
             /** SelectiveGapicGeneration methods */
             methods?: (string[]|null);
+
+            /** SelectiveGapicGeneration generateOmittedAsInternal */
+            generateOmittedAsInternal?: (boolean|null);
         }
 
         /** Represents a SelectiveGapicGeneration. */
@@ -5694,6 +5697,9 @@ export namespace google {
 
             /** SelectiveGapicGeneration methods. */
             public methods: string[];
+
+            /** SelectiveGapicGeneration generateOmittedAsInternal. */
+            public generateOmittedAsInternal: boolean;
 
             /**
              * Creates a SelectiveGapicGeneration message from a plain object. Also converts values to their respective internal types.
