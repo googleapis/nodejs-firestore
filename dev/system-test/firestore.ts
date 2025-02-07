@@ -8853,7 +8853,7 @@ describe('non-native Firestore types', () => {
       .orderBy('key', 'desc'); // minKeys are equal, would sort by documentId as secondary order
 
     const snapshot = await getFirstSnapshot(orderedQuery);
-    expect(toDataArray(snapshot)).to.deep.equal([testDocs['c'], testDocs['b']]);
+    expect(toDataArray(snapshot)).to.deep.equal([testDocs['b'], testDocs['a']]);
   });
 
   it('can filter and order maxKey values', async () => {

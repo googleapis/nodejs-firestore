@@ -101,6 +101,7 @@ export class VectorValue implements firestore.VectorValue {
  */
 export class MinKey implements firestore.MinKey {
   private static MIN_KEY_VALUE_INSTANCE = new MinKey();
+  readonly type = 'MinKey';
 
   private constructor() {}
 
@@ -128,6 +129,7 @@ export class MinKey implements firestore.MinKey {
  */
 export class MaxKey implements firestore.MaxKey {
   private static MAX_KEY_VALUE_INSTANCE = new MaxKey();
+  readonly type = 'MaxKey';
 
   /**
    * @private

@@ -2775,11 +2775,15 @@ declare namespace FirebaseFirestore {
 
   /** Represent a "Min Key" type in Firestore documents. */
   export class MinKey {
+    /** A type string to uniquely identify instances of this class. */
+    readonly type = 'MinKey';
     private constructor();
   }
 
   /** Represent a "Max Key" type in Firestore documents. */
   export class MaxKey {
+    /** A type string to uniquely identify instances of this class. */
+    readonly type = 'MaxKey';
     private constructor();
   }
 
