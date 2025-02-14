@@ -450,6 +450,19 @@ export declare class FirestoreAdminClient {
    *   Use `{location} = '-'` to list backups from all locations for the given
    *   project. This allows listing backups from a single location or from all
    *   locations.
+   * @param {string} request.filter
+   *   An expression that filters the list of returned backups.
+   *
+   *   A filter expression consists of a field name, a comparison operator, and a
+   *   value for filtering.
+   *   The value must be a string, a number, or a boolean. The comparison operator
+   *   must be one of: `<`, `>`, `<=`, `>=`, `!=`, `=`, or `:`.
+   *   Colon `:` is the contains operator. Filter rules are not case sensitive.
+   *
+   *   The following fields in the {@link protos.google.firestore.admin.v1.Backup|Backup} are
+   *   eligible for filtering:
+   *
+   *     * `database_uid` (supports `=` only)
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1663,7 +1676,7 @@ export declare class FirestoreAdminClient {
     >
   ): void;
   /**
-   * Equivalent to `method.name.toCamelCase()`, but returns a NodeJS Stream object.
+   * Equivalent to `listIndexes`, but returns a NodeJS Stream object.
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
@@ -1795,7 +1808,7 @@ export declare class FirestoreAdminClient {
     >
   ): void;
   /**
-   * Equivalent to `method.name.toCamelCase()`, but returns a NodeJS Stream object.
+   * Equivalent to `listFields`, but returns a NodeJS Stream object.
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
@@ -1973,7 +1986,7 @@ export declare class FirestoreAdminClient {
    */
   getOperation(
     request: protos.google.longrunning.GetOperationRequest,
-    options?:
+    optionsOrCallback?:
       | gax.CallOptions
       | Callback<
           protos.google.longrunning.Operation,
@@ -2053,11 +2066,11 @@ export declare class FirestoreAdminClient {
    */
   cancelOperation(
     request: protos.google.longrunning.CancelOperationRequest,
-    options?:
+    optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protos.google.protobuf.Empty,
           protos.google.longrunning.CancelOperationRequest,
+          protos.google.protobuf.Empty,
           {} | undefined | null
         >,
     callback?: Callback<
@@ -2093,7 +2106,7 @@ export declare class FirestoreAdminClient {
    */
   deleteOperation(
     request: protos.google.longrunning.DeleteOperationRequest,
-    options?:
+    optionsOrCallback?:
       | gax.CallOptions
       | Callback<
           protos.google.protobuf.Empty,

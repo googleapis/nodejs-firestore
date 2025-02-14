@@ -17,6 +17,7 @@
 import * as firestore from '@google-cloud/firestore';
 
 import {google} from '../protos/firestore_v1_proto_api';
+import {compareUtf8Strings, primitiveComparator} from './order';
 
 import {isObject} from './util';
 import {
@@ -170,7 +171,7 @@ abstract class Path<T> {
         return comparison;
       }
     }
-    return Math.sign(this.segments.length - other.segments.length);
+    return primitiveComparator(this.segments.length, other.segments.length);
   }
 
   private compareSegments(lhs: string, rhs: string): number {
@@ -191,7 +192,7 @@ abstract class Path<T> {
       );
     } else {
       // both non-numeric
-      return this.compareStrings(lhs, rhs);
+      return compareUtf8Strings(lhs, rhs);
     }
   }
 
@@ -206,16 +207,6 @@ abstract class Path<T> {
   }
 
   private compareNumbers(lhs: bigint, rhs: bigint): number {
-    if (lhs < rhs) {
-      return -1;
-    } else if (lhs > rhs) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-
-  private compareStrings(lhs: string, rhs: string): number {
     if (lhs < rhs) {
       return -1;
     } else if (lhs > rhs) {

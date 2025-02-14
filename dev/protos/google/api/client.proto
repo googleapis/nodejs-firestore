@@ -124,6 +124,9 @@ message CommonLanguageSettings {
 
   // The destination where API teams want this client library to be published.
   repeated ClientLibraryDestination destinations = 2;
+
+  // Configuration for which RPCs should be generated in the GAPIC client.
+  SelectiveGapicGeneration selective_gapic_generation = 3;
 }
 
 // Details about how and where to publish client libraries.
@@ -272,6 +275,12 @@ message PythonSettings {
     // This feature will be enabled by default 1 month after launching the
     // feature in preview packages.
     bool rest_async_io_enabled = 1;
+
+    // Enables generation of protobuf code using new types that are more
+    // Pythonic which are included in `protobuf>=5.29.x`. This feature will be
+    // enabled by default 1 month after launching the feature in preview
+    // packages.
+    bool protobuf_pythonic_types_enabled = 2;
   }
 
   // Some settings.
@@ -333,6 +342,16 @@ message RubySettings {
 message GoSettings {
   // Some settings.
   CommonLanguageSettings common = 1;
+
+  // Map of service names to renamed services. Keys are the package relative
+  // service names and values are the name to be used for the service client
+  // and call options.
+  //
+  // publishing:
+  //   go_settings:
+  //     renamed_services:
+  //       Publisher: TopicAdmin
+  map<string, string> renamed_services = 2;
 }
 
 // Describes the generator configuration for a method.
@@ -442,4 +461,20 @@ enum ClientLibraryDestination {
 
   // Publish the library to package managers like nuget.org and npmjs.com.
   PACKAGE_MANAGER = 20;
+}
+
+// This message is used to configure the generation of a subset of the RPCs in
+// a service for client libraries.
+message SelectiveGapicGeneration {
+  // An allowlist of the fully qualified names of RPCs that should be included
+  // on public client surfaces.
+  repeated string methods = 1;
+
+  // Setting this to true indicates to the client generators that methods
+  // that would be excluded from the generation should instead be generated
+  // in a way that indicates these methods should not be consumed by
+  // end users. How this is expressed is up to individual language
+  // implementations to decide. Some examples may be: added annotations,
+  // obfuscated identifiers, or other language idiomatic patterns.
+  bool generate_omitted_as_internal = 2;
 }
