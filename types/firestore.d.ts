@@ -40,12 +40,12 @@ declare namespace FirebaseFirestore {
     | (T extends Primitive
         ? T
         : T extends {}
-        ? {
-            [K in keyof T]?: T[K] extends Function
-              ? T[K]
-              : PartialWithFieldValue<T[K]> | FieldValue;
-          }
-        : never);
+          ? {
+              [K in keyof T]?: T[K] extends Function
+                ? T[K]
+                : PartialWithFieldValue<T[K]> | FieldValue;
+            }
+          : never);
 
   /**
    * Allows FieldValues to be passed in as a property value while maintaining
@@ -56,12 +56,12 @@ declare namespace FirebaseFirestore {
     | (T extends Primitive
         ? T
         : T extends {}
-        ? {
-            [K in keyof T]: T[K] extends Function
-              ? T[K]
-              : WithFieldValue<T[K]> | FieldValue;
-          }
-        : never);
+          ? {
+              [K in keyof T]: T[K] extends Function
+                ? T[K]
+                : WithFieldValue<T[K]> | FieldValue;
+            }
+          : never);
 
   /**
    * Update data (for use with [update]{@link DocumentReference#update})
@@ -80,8 +80,8 @@ declare namespace FirebaseFirestore {
   export type UpdateData<T> = T extends Primitive
     ? T
     : T extends {}
-    ? {[K in keyof T]?: UpdateData<T[K]> | FieldValue} & NestedUpdateFields<T>
-    : Partial<T>;
+      ? {[K in keyof T]?: UpdateData<T[K]> | FieldValue} & NestedUpdateFields<T>
+      : Partial<T>;
 
   /** Primitive types. */
   export type Primitive = string | number | boolean | undefined | null;
