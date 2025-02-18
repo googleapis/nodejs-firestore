@@ -273,11 +273,10 @@ export class DocumentReference<
             pageSize: Math.pow(2, 16) - 1,
           };
           return this._firestore
-            .request<api.IListCollectionIdsRequest, string[]>(
-              'listCollectionIds',
-              request,
-              tag
-            )
+            .request<
+              api.IListCollectionIdsRequest,
+              string[]
+            >('listCollectionIds', request, tag)
             .then(collectionIds => {
               const collections: Array<CollectionReference> = [];
 
