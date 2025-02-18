@@ -84,8 +84,9 @@ export class EnabledTraceUtil implements TraceUtil {
     const host =
       settings.servicePath ?? settings.host ?? 'firestore.googleapis.com';
     const port = settings.port ?? FirestoreClient.port;
-    this.settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.host`] =
-      `${host}:${port}`;
+    this.settingsAttributes[
+      `${ATTRIBUTE_SETTINGS_PREFIX}.host`
+    ] = `${host}:${port}`;
 
     if (settings.preferRest !== undefined) {
       this.settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.prefer_REST`] =
