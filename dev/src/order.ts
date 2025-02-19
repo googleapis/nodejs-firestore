@@ -270,16 +270,7 @@ export function compareUtf8Strings(left: string, right: string): number {
         // UTF-8 encoded byte comparison, substring 2 indexes to cover surrogate pairs
         const leftBytes = encoder.encode(left.substring(i, i + 2));
         const rightBytes = encoder.encode(right.substring(i, i + 2));
-        for (
-          let j = 0;
-          j < Math.min(leftBytes.length, rightBytes.length);
-          j++
-        ) {
-          const comparison = primitiveComparator(leftBytes[j], rightBytes[j]);
-          if (comparison !== 0) {
-            return comparison;
-          }
-        }
+        return compareBlobs(Buffer.from(leftBytes), Buffer.from(rightBytes));
       }
     }
 
