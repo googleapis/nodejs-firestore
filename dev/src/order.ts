@@ -248,19 +248,51 @@ function compareVectors(left: ApiMapValue, right: ApiMapValue): number {
   return compareArrays(leftArray, rightArray);
 }
 
-function stringToUtf8Bytes(str: string): Uint8Array {
-  return new TextEncoder().encode(str);
-}
-
 /*!
  * Compare strings in UTF-8 encoded byte order
  * @private
  * @internal
  */
 export function compareUtf8Strings(left: string, right: string): number {
-  const leftBytes = stringToUtf8Bytes(left);
-  const rightBytes = stringToUtf8Bytes(right);
-  return compareBlobs(Buffer.from(leftBytes), Buffer.from(rightBytes));
+  for (let i = 0; i < left.length && i < right.length; i++) {
+    const leftCodePoint = left.codePointAt(i)!;
+    const rightCodePoint = right.codePointAt(i)!;
+
+    if (leftCodePoint !== rightCodePoint) {
+      if (leftCodePoint < 128 && rightCodePoint < 128) {
+        // ASCII comparison
+        return primitiveComparator(leftCodePoint, rightCodePoint);
+      } else {
+        // Lazy instantiate TextEncoder
+        const encoder = new TextEncoder();
+
+        // Substring and do UTF-8 encoded byte comparison
+        const leftBytes = encoder.encode(getUtf8SafeSubstring(left, i));
+        const rightBytes = encoder.encode(getUtf8SafeSubstring(right, i));
+        const comp = compareBlobs(
+          Buffer.from(leftBytes),
+          Buffer.from(rightBytes)
+        );
+        if (comp !== 0) {
+          return comp;
+        }
+      }
+    }
+  }
+
+  // Compare lengths if all characters are equal
+  return primitiveComparator(left.length, right.length);
+}
+
+function getUtf8SafeSubstring(str: string, index: number): string {
+  const firstCodePoint = str.codePointAt(index)!;
+  if (firstCodePoint > 0xffff) {
+    // It's a surrogate pair, return the whole pair
+    return str.substring(index, index + 2);
+  } else {
+    // It's a single code point, return it
+    return str.substring(index, index + 1);
+  }
 }
 
 /*!
