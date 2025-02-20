@@ -25,7 +25,7 @@ describe('Quickstart', () => {
     await closeInvalidLink({github: octokit, context});
   });
 
-  it.only('does not do anything if it is a bug with an appropriate link', async () => {
+  it('does not do anything if it is a bug with an appropriate link', async () => {
     const context = {repo: {owner: 'testOrg', repo: 'testRepo'}, issue: {number: 1}}
     const octokit = {rest: {issues: {get: () => {return {data: {body: fs.readFileSync('./fixtures/validIssueBody.txt', 'utf-8')}}}}}};
     await closeInvalidLink({github: octokit, context});
