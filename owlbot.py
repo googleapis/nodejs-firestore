@@ -223,7 +223,7 @@ templates = common_templates.node_library(
     source_location="build/src", test_project="node-gcloud-ci"
 )
 
-s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*", ".github/CODEOWNERS", ".github/"])
+s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*", ".github/*", ".github/CODEOWNERS"])
 
 # Remove generated samples from veneer library:
 shell.run(('rm', '-rf', 'dev/samples/generated'), hide_output = False)
