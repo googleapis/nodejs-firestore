@@ -286,7 +286,10 @@ describe('Order', () => {
 });
 
 class StringPair {
-  constructor(public s1: string, public s2: string) {}
+  constructor(
+    readonly s1: string,
+    readonly s2: string
+  ) {}
 }
 
 class StringPairGenerator {
@@ -327,43 +330,43 @@ class StringGenerator {
   constructor(seed: number);
   constructor(rnd: Random, surrogatePairProbability: number, maxLength: number);
   constructor(
-      seedOrRnd: number | Random,
-      surrogatePairProbability?: number,
-      maxLength?: number
+    seedOrRnd: number | Random,
+    surrogatePairProbability?: number,
+    maxLength?: number
   ) {
     if (typeof seedOrRnd === 'number') {
       this.rnd = new Random(seedOrRnd);
       this.surrogatePairProbability =
-          StringGenerator.DEFAULT_SURROGATE_PAIR_PROBABILITY;
+        StringGenerator.DEFAULT_SURROGATE_PAIR_PROBABILITY;
       this.maxLength = StringGenerator.DEFAULT_MAX_LENGTH;
     } else {
       this.rnd = seedOrRnd;
       this.surrogatePairProbability = StringGenerator.validateProbability(
-          'surrogate pair',
-          surrogatePairProbability!
+        'surrogate pair',
+        surrogatePairProbability!
       );
       this.maxLength = StringGenerator.validateLength(
-          'maximum string',
-          maxLength!
+        'maximum string',
+        maxLength!
       );
     }
   }
 
   private static validateProbability(
-      name: string,
-      probability: number
+    name: string,
+    probability: number
   ): number {
     if (!Number.isFinite(probability)) {
       throw new Error(
-          `invalid ${name} probability: ${probability} (must be between 0.0 and 1.0, inclusive)`
+        `invalid ${name} probability: ${probability} (must be between 0.0 and 1.0, inclusive)`
       );
     } else if (probability < 0.0) {
       throw new Error(
-          `invalid ${name} probability: ${probability} (must be greater than or equal to zero)`
+        `invalid ${name} probability: ${probability} (must be greater than or equal to zero)`
       );
     } else if (probability > 1.0) {
       throw new Error(
-          `invalid ${name} probability: ${probability} (must be less than or equal to 1)`
+        `invalid ${name} probability: ${probability} (must be less than or equal to 1)`
       );
     }
     return probability;
@@ -372,7 +375,7 @@ class StringGenerator {
   private static validateLength(name: string, length: number): number {
     if (length < 0) {
       throw new Error(
-          `invalid ${name} length: ${length} (must be greater than or equal to zero)`
+        `invalid ${name} length: ${length} (must be greater than or equal to zero)`
       );
     }
     return length;
@@ -417,12 +420,12 @@ class StringGenerator {
     const lowSurrogateMax = 0xdfff;
 
     const highSurrogate = this.nextCodePointRange(
-        highSurrogateMin,
-        highSurrogateMax
+      highSurrogateMin,
+      highSurrogateMax
     );
     const lowSurrogate = this.nextCodePointRange(
-        lowSurrogateMin,
-        lowSurrogateMax
+      lowSurrogateMin,
+      lowSurrogateMax
     );
 
     return (highSurrogate - 0xd800) * 0x400 + (lowSurrogate - 0xdc00) + 0x10000;
@@ -430,8 +433,8 @@ class StringGenerator {
 
   private nextNonSurrogateCodePoint(): number {
     return this.nextCodePointRange(
-        StringGenerator.MIN_BMP_CODE_POINT,
-        StringGenerator.MAX_BMP_CODE_POINT
+      StringGenerator.MIN_BMP_CODE_POINT,
+      StringGenerator.MAX_BMP_CODE_POINT
     );
   }
 
@@ -483,7 +486,7 @@ class StringBuilder {
   }
 }
 
-describe.only('CompareUtf8Strings', () => {
+describe('CompareUtf8Strings', () => {
   it('testCompareUtf8Strings', () => {
     const errors = [];
     const seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
@@ -492,7 +495,7 @@ describe.only('CompareUtf8Strings', () => {
     const stringPairGenerator = new StringPairGenerator(stringGenerator);
 
     for (let i = 0; i < 1000000 && errors.length < 10; i++) {
-      const { s1, s2 } = stringPairGenerator.next();
+      const {s1, s2} = stringPairGenerator.next();
 
       const actual = order.compareUtf8Strings(s1, s2);
       const expected = Buffer.from(s1, 'utf8').compare(Buffer.from(s2, 'utf8'));
@@ -501,7 +504,7 @@ describe.only('CompareUtf8Strings', () => {
         passCount++;
       } else {
         errors.push(
-            `compareUtf8Strings(s1="${s1}", s2="${s2}") returned ${actual}, ` +
+          `compareUtf8Strings(s1="${s1}", s2="${s2}") returned ${actual}, ` +
             `but expected ${expected} (i=${i}, s1.length=${s1.length}, s2.length=${s2.length})`
         );
       }
@@ -509,13 +512,12 @@ describe.only('CompareUtf8Strings', () => {
 
     if (errors.length > 0) {
       console.error(
-          `${errors.length} test cases failed, ${passCount} test cases passed, seed=${seed};`
+        `${errors.length} test cases failed, ${passCount} test cases passed, seed=${seed};`
       );
       errors.forEach((error, index) =>
-          console.error(`errors[${index}]: ${error}`)
+        console.error(`errors[${index}]: ${error}`)
       );
       throw new Error('Test failed');
     }
   }).timeout(20000);
 });
-
