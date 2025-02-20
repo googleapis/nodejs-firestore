@@ -13,5 +13,8 @@
     "devDependencies": {
         "@octokit/rest": "^21.0.2",
         "mocha": "^11.0.1"
+    },
+    "dependencies": {
+        "js-yaml": "^4.1.0"
     }
 }
