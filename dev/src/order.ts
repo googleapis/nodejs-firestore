@@ -273,7 +273,9 @@ export function compareUtf8Strings(left: string, right: string): number {
           Buffer.from(leftBytes),
           Buffer.from(rightBytes)
         );
-        if (comp !== 0) return comp;
+        if (comp !== 0) {
+          return comp;
+        }
       }
     }
   }
