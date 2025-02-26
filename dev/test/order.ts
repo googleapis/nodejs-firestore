@@ -307,22 +307,6 @@ class StringGenerator {
   private static readonly DEFAULT_SURROGATE_PAIR_PROBABILITY = 0.33;
   private static readonly DEFAULT_MAX_LENGTH = 20;
 
-  // The first Unicode code point that is in the basic multilingual plane ("BMP") and,
-  // therefore requires 1 UTF-16 code unit to be represented in UTF-16.
-  private static readonly MIN_BMP_CODE_POINT = 0x00000000;
-
-  // The last Unicode code point that is in the basic multilingual plane ("BMP") and,
-  // therefore requires 1 UTF-16 code unit to be represented in UTF-16.
-  private static readonly MAX_BMP_CODE_POINT = 0x0000ffff;
-
-  // The first Unicode code point that is outside of the basic multilingual plane ("BMP") and,
-  // therefore requires 2 UTF-16 code units, a surrogate pair, to be represented in UTF-16.
-  private static readonly MIN_SUPPLEMENTARY_CODE_POINT = 0x00010000;
-
-  // The last Unicode code point that is outside of the basic multilingual plane ("BMP") and,
-  // therefore requires 2 UTF-16 code units, a surrogate pair, to be represented in UTF-16.
-  private static readonly MAX_SUPPLEMENTARY_CODE_POINT = 0x0010ffff;
-
   private readonly rnd: Random;
   private readonly surrogatePairProbability: number;
   private readonly maxLength: number;
@@ -432,10 +416,12 @@ class StringGenerator {
   }
 
   private nextNonSurrogateCodePoint(): number {
-    return this.nextCodePointRange(
-      StringGenerator.MIN_BMP_CODE_POINT,
-      StringGenerator.MAX_BMP_CODE_POINT
-    );
+    let codePoint;
+    do {
+      codePoint = this.nextCodePointRange(0, 0xffff); // BMP range
+    } while (codePoint >= 0xd800 && codePoint <= 0xdfff); // Exclude surrogate range
+
+    return codePoint;
   }
 
   private nextCodePointRange(min: number, max: number): number {

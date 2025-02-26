@@ -254,7 +254,8 @@ function compareVectors(left: ApiMapValue, right: ApiMapValue): number {
  * @internal
  */
 export function compareUtf8Strings(left: string, right: string): number {
-  for (let i = 0; i < left.length && i < right.length; i++) {
+  let i = 0;
+  while (i < left.length && i < right.length) {
     const leftCodePoint = left.codePointAt(i)!;
     const rightCodePoint = right.codePointAt(i)!;
 
@@ -266,7 +267,7 @@ export function compareUtf8Strings(left: string, right: string): number {
         // Lazy instantiate TextEncoder
         const encoder = new TextEncoder();
 
-        // Substring and do UTF-8 encoded byte comparison
+        // UTF-8 encode the character at index i for byte comparison.
         const leftBytes = encoder.encode(getUtf8SafeSubstring(left, i));
         const rightBytes = encoder.encode(getUtf8SafeSubstring(right, i));
         const comp = compareBlobs(
@@ -275,9 +276,19 @@ export function compareUtf8Strings(left: string, right: string): number {
         );
         if (comp !== 0) {
           return comp;
+        } else {
+          // EXTREMELY RARE CASE: Code points differ, but their UTF-8 byte
+          // representations are identical. This can happen with malformed input
+          // (invalid surrogate pairs). The backend also actively prevents invalid
+          // surrogates as INVALID_ARGUMENT errors, so we almost never receive
+          // invalid strings from backend.
+          // Fallback to code point comparison for graceful handling.
+          return primitiveComparator(leftCodePoint, rightCodePoint);
         }
       }
     }
+    // Increment by 2 for surrogate pairs, 1 otherwise
+    i += leftCodePoint > 0xffff ? 2 : 1;
   }
 
   // Compare lengths if all characters are equal
