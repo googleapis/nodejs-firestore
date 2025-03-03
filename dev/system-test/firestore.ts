@@ -4086,6 +4086,20 @@ describe('Query class', () => {
     });
 
     describe('sort unicode strings', () => {
+      const expectedDocs = [
+        'b',
+        'a',
+        'h',
+        'i',
+        'c',
+        'f',
+        'e',
+        'd',
+        'g',
+        'k',
+        'j',
+      ];
+
       it('snapshot listener sorts unicode strings same as server', async () => {
         const collection = await testCollectionWithDocs({
           a: {value: 'Łukasiewicz'},
@@ -4095,10 +4109,13 @@ describe('Query class', () => {
           e: {value: 'Ｐ'},
           f: {value: '︒'},
           g: {value: '🐵'},
+          h: {value: '你好'},
+          i: {value: '你顥'},
+          j: {value: '😁'},
+          k: {value: '😀'},
         });
 
         const query = collection.orderBy('value');
-        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
 
         const getSnapshot = await query.get();
         expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
@@ -4123,10 +4140,13 @@ describe('Query class', () => {
           e: {value: ['Ｐ']},
           f: {value: ['︒']},
           g: {value: ['🐵']},
+          h: {value: ['你好']},
+          i: {value: ['你顥']},
+          j: {value: ['😁']},
+          k: {value: ['😀']},
         });
 
         const query = collection.orderBy('value');
-        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
 
         const getSnapshot = await query.get();
         expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
@@ -4151,10 +4171,13 @@ describe('Query class', () => {
           e: {value: {foo: 'Ｐ'}},
           f: {value: {foo: '︒'}},
           g: {value: {foo: '🐵'}},
+          h: {value: {foo: '你好'}},
+          i: {value: {foo: '你顥'}},
+          j: {value: {foo: '😁'}},
+          k: {value: {foo: '😀'}},
         });
 
         const query = collection.orderBy('value');
-        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
 
         const getSnapshot = await query.get();
         expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
@@ -4179,10 +4202,13 @@ describe('Query class', () => {
           e: {value: {Ｐ: true}},
           f: {value: {'︒': true}},
           g: {value: {'🐵': true}},
+          h: {value: {你好: true}},
+          i: {value: {你顥: true}},
+          j: {value: {'😁': true}},
+          k: {value: {'😀': true}},
         });
 
         const query = collection.orderBy('value');
-        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
 
         const getSnapshot = await query.get();
         expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
@@ -4207,17 +4233,25 @@ describe('Query class', () => {
           Ｐ: {value: true},
           '︒': {value: true},
           '🐵': {value: true},
+          你好: {value: true},
+          你顥: {value: true},
+          '😁': {value: true},
+          '😀': {value: true},
         });
 
         const query = collection.orderBy(FieldPath.documentId());
         const expectedDocs = [
           'Sierpiński',
           'Łukasiewicz',
+          '你好',
+          '你顥',
           '岩澤',
           '︒',
           'Ｐ',
           '🄟',
           '🐵',
+          '😀',
+          '😁',
         ];
 
         const getSnapshot = await query.get();

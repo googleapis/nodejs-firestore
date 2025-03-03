@@ -248,19 +248,62 @@ function compareVectors(left: ApiMapValue, right: ApiMapValue): number {
   return compareArrays(leftArray, rightArray);
 }
 
-function stringToUtf8Bytes(str: string): Uint8Array {
-  return new TextEncoder().encode(str);
-}
-
 /*!
  * Compare strings in UTF-8 encoded byte order
  * @private
  * @internal
  */
 export function compareUtf8Strings(left: string, right: string): number {
-  const leftBytes = stringToUtf8Bytes(left);
-  const rightBytes = stringToUtf8Bytes(right);
-  return compareBlobs(Buffer.from(leftBytes), Buffer.from(rightBytes));
+  let i = 0;
+  while (i < left.length && i < right.length) {
+    const leftCodePoint = left.codePointAt(i)!;
+    const rightCodePoint = right.codePointAt(i)!;
+
+    if (leftCodePoint !== rightCodePoint) {
+      if (leftCodePoint < 128 && rightCodePoint < 128) {
+        // ASCII comparison
+        return primitiveComparator(leftCodePoint, rightCodePoint);
+      } else {
+        // Lazy instantiate TextEncoder
+        const encoder = new TextEncoder();
+
+        // UTF-8 encode the character at index i for byte comparison.
+        const leftBytes = encoder.encode(getUtf8SafeSubstring(left, i));
+        const rightBytes = encoder.encode(getUtf8SafeSubstring(right, i));
+        const comp = compareBlobs(
+          Buffer.from(leftBytes),
+          Buffer.from(rightBytes)
+        );
+        if (comp !== 0) {
+          return comp;
+        } else {
+          // EXTREMELY RARE CASE: Code points differ, but their UTF-8 byte
+          // representations are identical. This can happen with malformed input
+          // (invalid surrogate pairs). The backend also actively prevents invalid
+          // surrogates as INVALID_ARGUMENT errors, so we almost never receive
+          // invalid strings from backend.
+          // Fallback to code point comparison for graceful handling.
+          return primitiveComparator(leftCodePoint, rightCodePoint);
+        }
+      }
+    }
+    // Increment by 2 for surrogate pairs, 1 otherwise
+    i += leftCodePoint > 0xffff ? 2 : 1;
+  }
+
+  // Compare lengths if all characters are equal
+  return primitiveComparator(left.length, right.length);
+}
+
+function getUtf8SafeSubstring(str: string, index: number): string {
+  const firstCodePoint = str.codePointAt(index)!;
+  if (firstCodePoint > 0xffff) {
+    // It's a surrogate pair, return the whole pair
+    return str.substring(index, index + 2);
+  } else {
+    // It's a single code point, return it
+    return str.substring(index, index + 1);
+  }
 }
 
 /*!
