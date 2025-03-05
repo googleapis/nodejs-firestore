@@ -8496,20 +8496,6 @@ describe('non-native Firestore types', () => {
     expect(resultValue === FieldValue.minKey()).to.be.true;
   });
 
-  it('min key values are equal to null values', async () => {
-    await randomCol.doc('doc1').set({key: FieldValue.minKey()});
-    await randomCol.doc('doc2').set({key: null});
-    await randomCol.doc('doc3').set({key: 4});
-    await randomCol.doc('doc4').set({key: 'foo'});
-    await randomCol.doc('doc5').set({key: false});
-    const getResult = await getFirstSnapshot(
-      randomCol.where('key', '==', FieldValue.minKey())
-    );
-    expect(getResult.docs.length).to.equal(2);
-    expect(getResult.docs[0].id).to.equal('doc1');
-    expect(getResult.docs[1].id).to.equal('doc2');
-  });
-
   it('can use max key in filter', async () => {
     await doc.set({key: FieldValue.maxKey()});
     const getResult = await getFirstSnapshot(
@@ -8845,6 +8831,7 @@ describe('non-native Firestore types', () => {
       a: {key: FieldValue.minKey()},
       b: {key: FieldValue.minKey()},
       c: {key: FieldValue.maxKey()},
+      d: {key: null},
     };
     await addDocs(testDocs);
 

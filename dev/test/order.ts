@@ -149,12 +149,10 @@ describe('Order', () => {
   it('is correct', () => {
     const groups = [
       // null first
-      [
-        wrap(null),
-        wrap(null),
-        wrap(FieldValue.minKey()),
-        wrap(FieldValue.minKey()),
-      ],
+      [wrap(null), wrap(null)],
+
+      // MinKey is after null
+      [wrap(FieldValue.minKey()), wrap(FieldValue.minKey())],
 
       // booleans
       [wrap(false)],

@@ -322,7 +322,31 @@ describe('non-native types', () => {
     // MinKey and MaxKey are not equal.
     expect(value1).to.not.equal(other);
 
-    // Null values and MinKey values are equal.
+    // Two MinKey values are equal.
+    expect(
+      compare(
+        {
+          mapValue: {
+            fields: {
+              [RESERVED_MIN_KEY]: {
+                nullValue: 'NULL_VALUE',
+              },
+            },
+          },
+        },
+        {
+          mapValue: {
+            fields: {
+              [RESERVED_MIN_KEY]: {
+                nullValue: 'NULL_VALUE',
+              },
+            },
+          },
+        }
+      )
+    ).to.equal(0);
+
+    // Null comes before MinKey.
     expect(
       compare(
         {
@@ -338,7 +362,7 @@ describe('non-native types', () => {
           },
         }
       )
-    ).to.equal(0);
+    ).to.equal(-1);
   });
 
   it('max key', () => {

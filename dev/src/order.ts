@@ -38,25 +38,25 @@ import {
 enum TypeOrder {
   // NULL and MIN_KEY sort the same.
   NULL = 0,
-  MIN_KEY = 0,
-  BOOLEAN = 1,
+  MIN_KEY = 1,
+  BOOLEAN = 2,
   // Note: all numbers (32-bit int, 64-bit int, 64-bit double, 128-bit decimal,
   // etc.) are sorted together numerically. The `compareNumberProtos` function
   // distinguishes between different number types and compares them accordingly.
-  NUMBER = 2,
-  TIMESTAMP = 3,
-  BSON_TIMESTAMP = 4,
-  STRING = 5,
-  BLOB = 6,
-  BSON_BINARY = 7,
-  REF = 8,
-  BSON_OBJECT_ID = 9,
-  GEO_POINT = 10,
-  REGEX = 11,
-  ARRAY = 12,
-  VECTOR = 13,
-  OBJECT = 14,
-  MAX_KEY = 15,
+  NUMBER = 3,
+  TIMESTAMP = 4,
+  BSON_TIMESTAMP = 5,
+  STRING = 6,
+  BLOB = 7,
+  BSON_BINARY = 8,
+  REF = 9,
+  BSON_OBJECT_ID = 10,
+  GEO_POINT = 11,
+  REGEX = 12,
+  ARRAY = 13,
+  VECTOR = 14,
+  OBJECT = 15,
+  MAX_KEY = 16,
 }
 
 /*!
