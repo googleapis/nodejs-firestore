@@ -552,7 +552,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('getIndex request %j', request);
     const wrappedCallback: Callback<
         protos.google.firestore.admin.v1.IIndex,
@@ -641,7 +641,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('deleteIndex request %j', request);
     const wrappedCallback: Callback<
         protos.google.protobuf.IEmpty,
@@ -730,7 +730,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('getField request %j', request);
     const wrappedCallback: Callback<
         protos.google.firestore.admin.v1.IField,
@@ -819,7 +819,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('getDatabase request %j', request);
     const wrappedCallback: Callback<
         protos.google.firestore.admin.v1.IDatabase,
@@ -910,7 +910,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('listDatabases request %j', request);
     const wrappedCallback: Callback<
         protos.google.firestore.admin.v1.IListDatabasesResponse,
@@ -1000,7 +1000,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('getBackup request %j', request);
     const wrappedCallback: Callback<
         protos.google.firestore.admin.v1.IBackup,
@@ -1106,7 +1106,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('listBackups request %j', request);
     const wrappedCallback: Callback<
         protos.google.firestore.admin.v1.IListBackupsResponse,
@@ -1196,7 +1196,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('deleteBackup request %j', request);
     const wrappedCallback: Callback<
         protos.google.protobuf.IEmpty,
@@ -1290,7 +1290,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('createBackupSchedule request %j', request);
     const wrappedCallback: Callback<
         protos.google.firestore.admin.v1.IBackupSchedule,
@@ -1381,7 +1381,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('getBackupSchedule request %j', request);
     const wrappedCallback: Callback<
         protos.google.firestore.admin.v1.IBackupSchedule,
@@ -1471,7 +1471,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('listBackupSchedules request %j', request);
     const wrappedCallback: Callback<
         protos.google.firestore.admin.v1.IListBackupSchedulesResponse,
@@ -1561,7 +1561,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'backup_schedule.name': request.backupSchedule!.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('updateBackupSchedule request %j', request);
     const wrappedCallback: Callback<
         protos.google.firestore.admin.v1.IBackupSchedule,
@@ -1652,7 +1652,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('deleteBackupSchedule request %j', request);
     const wrappedCallback: Callback<
         protos.google.protobuf.IEmpty,
@@ -1750,7 +1750,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: Callback<
           LROperation<protos.google.firestore.admin.v1.IIndex, protos.google.firestore.admin.v1.IIndexOperationMetadata>,
           protos.google.longrunning.IOperation|null|undefined,
@@ -1875,7 +1875,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'field.name': request.field!.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: Callback<
           LROperation<protos.google.firestore.admin.v1.IField, protos.google.firestore.admin.v1.IFieldOperationMetadata>,
           protos.google.longrunning.IOperation|null|undefined,
@@ -2020,7 +2020,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: Callback<
           LROperation<protos.google.firestore.admin.v1.IExportDocumentsResponse, protos.google.firestore.admin.v1.IExportDocumentsMetadata>,
           protos.google.longrunning.IOperation|null|undefined,
@@ -2148,7 +2148,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: Callback<
           LROperation<protos.google.protobuf.IEmpty, protos.google.firestore.admin.v1.IImportDocumentsMetadata>,
           protos.google.longrunning.IOperation|null|undefined,
@@ -2279,7 +2279,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: Callback<
           LROperation<protos.google.firestore.admin.v1.IBulkDeleteDocumentsResponse, protos.google.firestore.admin.v1.IBulkDeleteDocumentsMetadata>,
           protos.google.longrunning.IOperation|null|undefined,
@@ -2398,7 +2398,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: Callback<
           LROperation<protos.google.firestore.admin.v1.IDatabase, protos.google.firestore.admin.v1.ICreateDatabaseMetadata>,
           protos.google.longrunning.IOperation|null|undefined,
@@ -2507,7 +2507,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'database.name': request.database!.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: Callback<
           LROperation<protos.google.firestore.admin.v1.IDatabase, protos.google.firestore.admin.v1.IUpdateDatabaseMetadata>,
           protos.google.longrunning.IOperation|null|undefined,
@@ -2619,7 +2619,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'name': request.name ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: Callback<
           LROperation<protos.google.firestore.admin.v1.IDatabase, protos.google.firestore.admin.v1.IDeleteDatabaseMetadata>,
           protos.google.longrunning.IOperation|null|undefined,
@@ -2767,7 +2767,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: Callback<
           LROperation<protos.google.firestore.admin.v1.IDatabase, protos.google.firestore.admin.v1.IRestoreDatabaseMetadata>,
           protos.google.longrunning.IOperation|null|undefined,
@@ -2886,7 +2886,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: PaginationCallback<
       protos.google.firestore.admin.v1.IListIndexesRequest,
       protos.google.firestore.admin.v1.IListIndexesResponse|null|undefined,
@@ -2950,7 +2950,7 @@ export class FirestoreAdminClient {
     });
     const defaultCallSettings = this._defaults['listIndexes'];
     const callSettings = defaultCallSettings.merge(options);
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('listIndexes stream %j', request);
     return this.descriptors.page.listIndexes.createStream(
       this.innerApiCalls.listIndexes as GaxCall,
@@ -3003,7 +3003,7 @@ export class FirestoreAdminClient {
     });
     const defaultCallSettings = this._defaults['listIndexes'];
     const callSettings = defaultCallSettings.merge(options);
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('listIndexes iterate %j', request);
     return this.descriptors.page.listIndexes.asyncIterate(
       this.innerApiCalls['listIndexes'] as GaxCall,
@@ -3106,7 +3106,7 @@ export class FirestoreAdminClient {
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
     });
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     const wrappedCallback: PaginationCallback<
       protos.google.firestore.admin.v1.IListFieldsRequest,
       protos.google.firestore.admin.v1.IListFieldsResponse|null|undefined,
@@ -3176,7 +3176,7 @@ export class FirestoreAdminClient {
     });
     const defaultCallSettings = this._defaults['listFields'];
     const callSettings = defaultCallSettings.merge(options);
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('listFields stream %j', request);
     return this.descriptors.page.listFields.createStream(
       this.innerApiCalls.listFields as GaxCall,
@@ -3235,7 +3235,7 @@ export class FirestoreAdminClient {
     });
     const defaultCallSettings = this._defaults['listFields'];
     const callSettings = defaultCallSettings.merge(options);
-    this.initialize();
+    this.initialize().catch(err => {throw err});
     this._log.info('listFields iterate %j', request);
     return this.descriptors.page.listFields.asyncIterate(
       this.innerApiCalls['listFields'] as GaxCall,
@@ -3415,7 +3415,7 @@ export class FirestoreAdminClient {
   listOperationsAsync(
     request: protos.google.longrunning.ListOperationsRequest,
     options?: gax.CallOptions
-  ): AsyncIterable<protos.google.longrunning.ListOperationsResponse> {
+  ): AsyncIterable<protos.google.longrunning.IOperation> {
      options = options || {};
      options.otherArgs = options.otherArgs || {};
      options.otherArgs.headers = options.otherArgs.headers || {};
