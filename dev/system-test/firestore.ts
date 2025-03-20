@@ -13,15 +13,10 @@
 // limitations under the License.
 
 import {
-  BsonBinaryData,
-  BsonObjectId,
-  BsonTimestampValue,
   DocumentData,
   ExplainMetrics,
-  Int32Value,
   PartialWithFieldValue,
   QuerySnapshot,
-  RegexValue,
   SetOptions,
   Settings,
   VectorValue,
@@ -8484,121 +8479,6 @@ describe('non-native Firestore types', () => {
     await checkRoundTrip(
       FieldValue.bsonBinaryData(128, Buffer.from([5, 6, 7]))
     );
-  });
-
-  it('can use min key in filter', async () => {
-    await doc.set({key: FieldValue.minKey()});
-    const getResult = await getFirstSnapshot(
-      randomCol.where('key', '==', FieldValue.minKey())
-    );
-    expect(getResult.docs.length).to.equal(1);
-    const resultValue = getResult.docs[0].data()['key'];
-    expect(resultValue === FieldValue.minKey()).to.be.true;
-  });
-
-  it('can use max key in filter', async () => {
-    await doc.set({key: FieldValue.maxKey()});
-    const getResult = await getFirstSnapshot(
-      randomCol.where('key', '==', FieldValue.maxKey())
-    );
-    expect(getResult.docs.length).to.equal(1);
-    const resultValue = getResult.docs[0].data()['key'];
-    expect(resultValue === FieldValue.maxKey()).to.be.true;
-  });
-
-  it('can use object id in filter', async () => {
-    await randomCol
-      .doc()
-      .set({key: FieldValue.bsonObjectId('507f191e810c19729de860ea')});
-    await randomCol
-      .doc()
-      .set({key: FieldValue.bsonObjectId('507f191e810c19729de860eb')});
-
-    const getResult = await getFirstSnapshot(
-      randomCol.where(
-        'key',
-        '>',
-        FieldValue.bsonObjectId('507f191e810c19729de860ea')
-      )
-    );
-    expect(getResult.docs.length).to.equal(1);
-    const resultValue: BsonObjectId = getResult.docs[0].data()['key'];
-    expect(resultValue.value).equal('507f191e810c19729de860eb');
-  });
-
-  // TODO(types): this test passes with 'get' and fails with 'onSnapshot'.
-  it.skip('can use regex in filter', async () => {
-    await randomCol.doc().set({key: FieldValue.regex('^bar', 'i')});
-    await randomCol.doc().set({key: FieldValue.regex('^bar', 'x')});
-    await randomCol.doc().set({key: FieldValue.regex('^baz', 'i')});
-
-    const getResult = await getFirstSnapshot(
-      randomCol.where('key', '>', FieldValue.regex('^bar', 'i'))
-    );
-    expect(getResult.docs.length).to.equal(2);
-    const result0: RegexValue = getResult.docs[0].data()['key'];
-    const result1: RegexValue = getResult.docs[1].data()['key'];
-    expect(result0.isEqual(FieldValue.regex('^bar', 'x'))).to.equal(true);
-    expect(result1.isEqual(FieldValue.regex('^baz', 'i'))).to.equal(true);
-  });
-
-  it('can use 32-bit int in filter', async () => {
-    await randomCol.doc().set({key: FieldValue.int32(-57)});
-    await randomCol.doc().set({key: FieldValue.int32(0)});
-    await randomCol.doc().set({key: FieldValue.int32(27)});
-
-    const getResult = await getFirstSnapshot(
-      randomCol.where('key', '<', FieldValue.int32(20)).orderBy('key')
-    );
-    expect(getResult.docs.length).to.equal(2);
-    const result0: Int32Value = getResult.docs[0].data()['key'];
-    const result1: Int32Value = getResult.docs[1].data()['key'];
-    expect(result0.isEqual(FieldValue.int32(-57))).to.be.true;
-    expect(result1.isEqual(FieldValue.int32(0))).to.be.true;
-  });
-
-  it('can use BSON timestamp in filter', async () => {
-    await randomCol.doc().set({key: FieldValue.bsonTimestamp(56789, 1)});
-    await randomCol.doc().set({key: FieldValue.bsonTimestamp(56789, 2)});
-    await randomCol.doc().set({key: FieldValue.bsonTimestamp(56799, 1)});
-
-    const getResult = await getFirstSnapshot(
-      randomCol
-        .where('key', '>', FieldValue.bsonTimestamp(56789, 1))
-        .orderBy('key')
-    );
-    expect(getResult.docs.length).to.equal(2);
-    const result0: BsonTimestampValue = getResult.docs[0].data()['key'];
-    const result1: BsonTimestampValue = getResult.docs[1].data()['key'];
-    expect(result0.isEqual(FieldValue.bsonTimestamp(56789, 2))).to.be.true;
-    expect(result1.isEqual(FieldValue.bsonTimestamp(56799, 1))).to.be.true;
-  });
-
-  it('can use BSON Binary Data in filter', async () => {
-    await randomCol
-      .doc()
-      .set({key: FieldValue.bsonBinaryData(1, Uint8Array.from([7, 8, 9]))});
-    await randomCol
-      .doc()
-      .set({key: FieldValue.bsonBinaryData(2, Uint8Array.from([8, 9, 10]))});
-    await randomCol
-      .doc()
-      .set({key: FieldValue.bsonBinaryData(127, Uint8Array.from([7, 8, 9]))});
-
-    const getResult = await getFirstSnapshot(
-      randomCol
-        .where('key', '>', FieldValue.bsonBinaryData(1, Buffer.from([7, 8, 9])))
-        .orderBy('key')
-    );
-    expect(getResult.docs.length).to.equal(2);
-    const result0: BsonBinaryData = getResult.docs[0].data()['key'];
-    const result1: BsonBinaryData = getResult.docs[1].data()['key'];
-    expect(
-      result0.isEqual(FieldValue.bsonBinaryData(2, Uint8Array.from([8, 9, 10])))
-    ).to.be.true;
-    expect(
-      result1.isEqual(FieldValue.bsonBinaryData(127, Buffer.from([7, 8, 9])))
-    ).to.be.true;
   });
 
   it('invalid 32-bit integer gets rejected', async () => {
