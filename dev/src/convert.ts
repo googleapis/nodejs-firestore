@@ -115,6 +115,44 @@ function bytesFromJson(bytesValue: string | Uint8Array): Uint8Array {
 }
 
 /**
+ * Detects the 'valueType' for cases where a map value has been used to
+ * represent another type.
+ * @param mapValue The map value to probe.
+ */
+function detectMapRepresentation(
+  mapValue: api.IMapValue | null | undefined
+): string {
+  const fields = mapValue?.fields;
+  if (fields) {
+    const props = Object.keys(fields);
+    if (
+      props.indexOf(RESERVED_MAP_KEY) !== -1 &&
+      detectValueType(fields[RESERVED_MAP_KEY]) === 'stringValue' &&
+      fields[RESERVED_MAP_KEY].stringValue === RESERVED_MAP_KEY_VECTOR_VALUE
+    ) {
+      return 'vectorValue';
+    } else if (props.indexOf(RESERVED_MIN_KEY) !== -1) {
+      return 'minKeyValue';
+    } else if (props.indexOf(RESERVED_MAX_KEY) !== -1) {
+      return 'maxKeyValue';
+    } else if (props.indexOf(RESERVED_REGEX_KEY) !== -1) {
+      return 'regexValue';
+    } else if (props.indexOf(RESERVED_BSON_OBJECT_ID_KEY) !== -1) {
+      return 'bsonObjectIdValue';
+    } else if (props.indexOf(RESERVED_INT32_KEY) !== -1) {
+      return 'int32Value';
+    } else if (props.indexOf(RESERVED_BSON_TIMESTAMP_KEY) !== -1) {
+      return 'bsonTimestampValue';
+    } else if (props.indexOf(RESERVED_BSON_BINARY_KEY) !== -1) {
+      return 'bsonBinaryValue';
+    }
+  }
+
+  // If none of the above cases apply, it's a regular map.
+  return 'mapValue';
+}
+
+/**
  * Detects 'valueType' from a Proto3 JSON `firestore.v1.Value` proto.
  *
  * @private
@@ -173,33 +211,10 @@ export function detectValueType(proto: ProtobufJsValue): string {
     valueType = detectedValues[0];
   }
 
-  // Special handling of mapValues used to represent other data types
+  // Special handling of mapValues which may or may not have been
+  // used to represent other data types.
   if (valueType === 'mapValue') {
-    const fields = proto.mapValue?.fields;
-    if (fields) {
-      const props = Object.keys(fields);
-      if (
-        props.indexOf(RESERVED_MAP_KEY) !== -1 &&
-        detectValueType(fields[RESERVED_MAP_KEY]) === 'stringValue' &&
-        fields[RESERVED_MAP_KEY].stringValue === RESERVED_MAP_KEY_VECTOR_VALUE
-      ) {
-        valueType = 'vectorValue';
-      } else if (props.indexOf(RESERVED_MIN_KEY) !== -1) {
-        valueType = 'minKeyValue';
-      } else if (props.indexOf(RESERVED_MAX_KEY) !== -1) {
-        valueType = 'maxKeyValue';
-      } else if (props.indexOf(RESERVED_REGEX_KEY) !== -1) {
-        valueType = 'regexValue';
-      } else if (props.indexOf(RESERVED_BSON_OBJECT_ID_KEY) !== -1) {
-        valueType = 'bsonObjectIdValue';
-      } else if (props.indexOf(RESERVED_INT32_KEY) !== -1) {
-        valueType = 'int32Value';
-      } else if (props.indexOf(RESERVED_BSON_TIMESTAMP_KEY) !== -1) {
-        valueType = 'bsonTimestampValue';
-      } else if (props.indexOf(RESERVED_BSON_BINARY_KEY) !== -1) {
-        valueType = 'bsonBinaryValue';
-      }
-    }
+    valueType = detectMapRepresentation(proto.mapValue);
   }
 
   return valueType;
