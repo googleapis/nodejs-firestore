@@ -20,7 +20,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 
 import {
   BsonBinaryData,
-  BsonTimestampValue,
+  BsonTimestamp,
   DeleteTransform,
   FieldTransform,
   Int32Value,
@@ -199,7 +199,7 @@ export class Serializer {
       val instanceof VectorValue ||
       val instanceof RegexValue ||
       val instanceof Int32Value ||
-      val instanceof BsonTimestampValue ||
+      val instanceof BsonTimestamp ||
       val instanceof BsonBinaryData ||
       val instanceof BsonObjectId ||
       val instanceof MinKey ||
@@ -490,7 +490,7 @@ export class Serializer {
         return Int32Value._fromProto(proto);
       }
       case 'bsonTimestampValue': {
-        return BsonTimestampValue._fromProto(proto);
+        return BsonTimestamp._fromProto(proto);
       }
       case 'bsonBinaryValue': {
         return BsonBinaryData._fromProto(proto);
@@ -671,7 +671,7 @@ export function validateUserInput(
     value instanceof RegexValue ||
     value instanceof BsonObjectId ||
     value instanceof Int32Value ||
-    value instanceof BsonTimestampValue ||
+    value instanceof BsonTimestamp ||
     value instanceof BsonBinaryData ||
     value instanceof MinKey ||
     value instanceof MaxKey

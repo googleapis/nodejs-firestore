@@ -281,7 +281,7 @@ export class Int32Value implements firestore.Int32Value {
 }
 
 /** Represents a Request Timestamp type in Firestore documents. */
-export class BsonTimestampValue implements firestore.BsonTimestampValue {
+export class BsonTimestamp implements firestore.BsonTimestamp {
   /**
    * @private
    * @internal
@@ -289,7 +289,18 @@ export class BsonTimestampValue implements firestore.BsonTimestampValue {
   constructor(
     readonly seconds: number,
     readonly increment: number
-  ) {}
+  ) {
+    if (seconds < 0 || seconds > 4294967295) {
+      throw new Error(
+        "BsonTimestamp 'seconds' must be in the range of a 32-bit unsigned integer."
+      );
+    }
+    if (increment < 0 || increment > 4294967295) {
+      throw new Error(
+        "BsonTimestamp 'increment' must be in the range of a 32-bit unsigned integer."
+      );
+    }
+  }
 
   /**
    * @private
@@ -303,7 +314,7 @@ export class BsonTimestampValue implements firestore.BsonTimestampValue {
    * @private
    * @internal
    */
-  static _fromProto(proto: api.IValue): BsonTimestampValue {
+  static _fromProto(proto: api.IValue): BsonTimestamp {
     const fields = proto.mapValue!.fields?.[RESERVED_BSON_TIMESTAMP_KEY];
     const seconds = Number(
       fields?.mapValue?.fields?.[RESERVED_BSON_TIMESTAMP_SECONDS_KEY]
@@ -313,16 +324,16 @@ export class BsonTimestampValue implements firestore.BsonTimestampValue {
       fields?.mapValue?.fields?.[RESERVED_BSON_TIMESTAMP_INCREMENT_KEY]
         ?.integerValue
     );
-    return new BsonTimestampValue(seconds, increment);
+    return new BsonTimestamp(seconds, increment);
   }
 
   /**
-   * Returns true if this `BsonTimestampValue` is equal to the provided one.
+   * Returns true if this `BsonTimestamp` is equal to the provided one.
    *
-   * @param other The `BsonTimestampValue` to compare against.
-   * @return 'true' if this `BsonTimestampValue` is equal to the provided one.
+   * @param other The `BsonTimestamp` to compare against.
+   * @return 'true' if this `BsonTimestamp` is equal to the provided one.
    */
-  isEqual(other: BsonTimestampValue): boolean {
+  isEqual(other: BsonTimestamp): boolean {
     return this.seconds === other.seconds && this.increment === other.increment;
   }
 }
@@ -474,8 +485,8 @@ export class FieldValue implements firestore.FieldValue {
    *
    * @return A new BSON Timestamp value.
    */
-  static bsonTimestamp(seconds: number, increment: number): BsonTimestampValue {
-    return new BsonTimestampValue(seconds, increment);
+  static bsonTimestamp(seconds: number, increment: number): BsonTimestamp {
+    return new BsonTimestamp(seconds, increment);
   }
 
   /**

@@ -19,7 +19,7 @@ import {
   FieldValue,
   BsonBinaryData,
   BsonObjectId,
-  BsonTimestampValue,
+  BsonTimestamp,
   Int32Value,
   RegexValue,
 } from '../src';
@@ -397,9 +397,59 @@ describe('non-native types', () => {
 
   it('can create BSON timestamp using new', () => {
     const value1 = FieldValue.bsonTimestamp(57, 4);
-    const value2 = new BsonTimestampValue(57, 4);
+    const value2 = new BsonTimestamp(57, 4);
     expect(value1.isEqual(value2)).to.be.true;
     expect(value2.isEqual(value1)).to.be.true;
+  });
+
+  it('cannot create BSON timestamp with out-of-range values', () => {
+    // Negative seconds
+    let error1: Error | null = null;
+    try {
+      FieldValue.bsonTimestamp(-1, 1);
+    } catch (e) {
+      error1 = e;
+    }
+    expect(error1).to.not.be.null;
+    expect(error1!.message!).to.equal(
+      "BsonTimestamp 'seconds' must be in the range of a 32-bit unsigned integer."
+    );
+
+    // Larger than 2^32-1 seconds
+    let error2: Error | null = null;
+    try {
+      FieldValue.bsonTimestamp(4294967296, 1);
+    } catch (e) {
+      error2 = e;
+    }
+    expect(error2).to.not.be.null;
+    expect(error2!.message!).to.equal(
+      "BsonTimestamp 'seconds' must be in the range of a 32-bit unsigned integer."
+    );
+
+    // Negative increment
+    let error3: Error | null = null;
+    try {
+      new BsonTimestamp(1, -1);
+    } catch (e) {
+      error3 = e;
+    }
+    expect(error3).to.not.be.null;
+    expect(error3!.message!).to.equal(
+      "BsonTimestamp 'increment' must be in the range of a 32-bit unsigned integer."
+    );
+
+    // Larger than 2^32-1 increment
+    let error4: Error | null = null;
+    try {
+      new BsonTimestamp(1, 4294967296);
+    } catch (e) {
+      error4 = e;
+    }
+    expect(error4).to.not.be.null;
+    expect(error4!.message!).to.equal(
+      "BsonTimestamp 'increment' must be in the range of a 32-bit unsigned integer."
+    );
   });
 
   it('can create BSON object id using new', () => {

@@ -2844,7 +2844,7 @@ declare namespace FirebaseFirestore {
   }
 
   /** Represents a BSON Timestamp type in Firestore documents. */
-  export class BsonTimestampValue {
+  export class BsonTimestamp {
     /**
      *  Note: negative values and values larger than the largest 32-bit
      *  unsigned integer are invalid and will get rejected.
@@ -2858,12 +2858,12 @@ declare namespace FirebaseFirestore {
     readonly increment: number;
 
     /**
-     * Returns true if this `BsonTimestampValue` is equal to the provided one.
+     * Returns true if this `BsonTimestamp` is equal to the provided one.
      *
-     * @param other The `BsonTimestampValue` to compare against.
-     * @return 'true' if this `BsonTimestampValue` is equal to the provided one.
+     * @param other The `BsonTimestamp` to compare against.
+     * @return 'true' if this `BsonTimestamp` is equal to the provided one.
      */
-    isEqual(other: BsonTimestampValue): boolean;
+    isEqual(other: BsonTimestamp): boolean;
   }
 
   /** Represents a BSON Binary Data type in Firestore documents. */
@@ -3012,10 +3012,7 @@ declare namespace FirebaseFirestore {
      *
      * @return A new BSON Timestamp value.
      */
-    static bsonTimestamp(
-      seconds: number,
-      increment: number
-    ): BsonTimestampValue;
+    static bsonTimestamp(seconds: number, increment: number): BsonTimestamp;
 
     /**
      * Creates a new BSON Binary Data from the given values.

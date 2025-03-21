@@ -114,7 +114,7 @@ export {
   MinKey,
   MaxKey,
   BsonObjectId,
-  BsonTimestampValue,
+  BsonTimestamp,
   BsonBinaryData,
   RegexValue,
   Int32Value,
