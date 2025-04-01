@@ -700,6 +700,294 @@
       }
     },
     {
+      "regionTag": "firestore_v1_generated_FirestoreAdmin_CreateUserCreds_async",
+      "title": "FirestoreAdmin createUserCreds Sample",
+      "origin": "API_DEFINITION",
+      "description": " Create a user creds.",
+      "canonical": true,
+      "file": "firestore_admin.create_user_creds.js",
+      "language": "JAVASCRIPT",
+      "segments": [
+        {
+          "start": 25,
+          "end": 68,
+          "type": "FULL"
+        }
+      ],
+      "clientMethod": {
+        "shortName": "CreateUserCreds",
+        "fullName": "google.firestore.admin.v1.FirestoreAdmin.CreateUserCreds",
+        "async": true,
+        "parameters": [
+          {
+            "name": "parent",
+            "type": "TYPE_STRING"
+          },
+          {
+            "name": "user_creds",
+            "type": ".google.firestore.admin.v1.UserCreds"
+          },
+          {
+            "name": "user_creds_id",
+            "type": "TYPE_STRING"
+          }
+        ],
+        "resultType": ".google.firestore.admin.v1.UserCreds",
+        "client": {
+          "shortName": "FirestoreAdminClient",
+          "fullName": "google.firestore.admin.v1.FirestoreAdminClient"
+        },
+        "method": {
+          "shortName": "CreateUserCreds",
+          "fullName": "google.firestore.admin.v1.FirestoreAdmin.CreateUserCreds",
+          "service": {
+            "shortName": "FirestoreAdmin",
+            "fullName": "google.firestore.admin.v1.FirestoreAdmin"
+          }
+        }
+      }
+    },
+    {
+      "regionTag": "firestore_v1_generated_FirestoreAdmin_GetUserCreds_async",
+      "title": "FirestoreAdmin getUserCreds Sample",
+      "origin": "API_DEFINITION",
+      "description": " Gets a user creds resource. Note that the returned resource does not contain the secret value itself.",
+      "canonical": true,
+      "file": "firestore_admin.get_user_creds.js",
+      "language": "JAVASCRIPT",
+      "segments": [
+        {
+          "start": 25,
+          "end": 54,
+          "type": "FULL"
+        }
+      ],
+      "clientMethod": {
+        "shortName": "GetUserCreds",
+        "fullName": "google.firestore.admin.v1.FirestoreAdmin.GetUserCreds",
+        "async": true,
+        "parameters": [
+          {
+            "name": "name",
+            "type": "TYPE_STRING"
+          }
+        ],
+        "resultType": ".google.firestore.admin.v1.UserCreds",
+        "client": {
+          "shortName": "FirestoreAdminClient",
+          "fullName": "google.firestore.admin.v1.FirestoreAdminClient"
+        },
+        "method": {
+          "shortName": "GetUserCreds",
+          "fullName": "google.firestore.admin.v1.FirestoreAdmin.GetUserCreds",
+          "service": {
+            "shortName": "FirestoreAdmin",
+            "fullName": "google.firestore.admin.v1.FirestoreAdmin"
+          }
+        }
+      }
+    },
+    {
+      "regionTag": "firestore_v1_generated_FirestoreAdmin_ListUserCreds_async",
+      "title": "FirestoreAdmin listUserCreds Sample",
+      "origin": "API_DEFINITION",
+      "description": " List all user creds in the database. Note that the returned resource does not contain the secret value itself.",
+      "canonical": true,
+      "file": "firestore_admin.list_user_creds.js",
+      "language": "JAVASCRIPT",
+      "segments": [
+        {
+          "start": 25,
+          "end": 54,
+          "type": "FULL"
+        }
+      ],
+      "clientMethod": {
+        "shortName": "ListUserCreds",
+        "fullName": "google.firestore.admin.v1.FirestoreAdmin.ListUserCreds",
+        "async": true,
+        "parameters": [
+          {
+            "name": "parent",
+            "type": "TYPE_STRING"
+          }
+        ],
+        "resultType": ".google.firestore.admin.v1.ListUserCredsResponse",
+        "client": {
+          "shortName": "FirestoreAdminClient",
+          "fullName": "google.firestore.admin.v1.FirestoreAdminClient"
+        },
+        "method": {
+          "shortName": "ListUserCreds",
+          "fullName": "google.firestore.admin.v1.FirestoreAdmin.ListUserCreds",
+          "service": {
+            "shortName": "FirestoreAdmin",
+            "fullName": "google.firestore.admin.v1.FirestoreAdmin"
+          }
+        }
+      }
+    },
+    {
+      "regionTag": "firestore_v1_generated_FirestoreAdmin_EnableUserCreds_async",
+      "title": "FirestoreAdmin enableUserCreds Sample",
+      "origin": "API_DEFINITION",
+      "description": " Enables a user creds. No-op if the user creds are already enabled.",
+      "canonical": true,
+      "file": "firestore_admin.enable_user_creds.js",
+      "language": "JAVASCRIPT",
+      "segments": [
+        {
+          "start": 25,
+          "end": 54,
+          "type": "FULL"
+        }
+      ],
+      "clientMethod": {
+        "shortName": "EnableUserCreds",
+        "fullName": "google.firestore.admin.v1.FirestoreAdmin.EnableUserCreds",
+        "async": true,
+        "parameters": [
+          {
+            "name": "name",
+            "type": "TYPE_STRING"
+          }
+        ],
+        "resultType": ".google.firestore.admin.v1.UserCreds",
+        "client": {
+          "shortName": "FirestoreAdminClient",
+          "fullName": "google.firestore.admin.v1.FirestoreAdminClient"
+        },
+        "method": {
+          "shortName": "EnableUserCreds",
+          "fullName": "google.firestore.admin.v1.FirestoreAdmin.EnableUserCreds",
+          "service": {
+            "shortName": "FirestoreAdmin",
+            "fullName": "google.firestore.admin.v1.FirestoreAdmin"
+          }
+        }
+      }
+    },
+    {
+      "regionTag": "firestore_v1_generated_FirestoreAdmin_DisableUserCreds_async",
+      "title": "FirestoreAdmin disableUserCreds Sample",
+      "origin": "API_DEFINITION",
+      "description": " Disables a user creds. No-op if the user creds are already disabled.",
+      "canonical": true,
+      "file": "firestore_admin.disable_user_creds.js",
+      "language": "JAVASCRIPT",
+      "segments": [
+        {
+          "start": 25,
+          "end": 54,
+          "type": "FULL"
+        }
+      ],
+      "clientMethod": {
+        "shortName": "DisableUserCreds",
+        "fullName": "google.firestore.admin.v1.FirestoreAdmin.DisableUserCreds",
+        "async": true,
+        "parameters": [
+          {
+            "name": "name",
+            "type": "TYPE_STRING"
+          }
+        ],
+        "resultType": ".google.firestore.admin.v1.UserCreds",
+        "client": {
+          "shortName": "FirestoreAdminClient",
+          "fullName": "google.firestore.admin.v1.FirestoreAdminClient"
+        },
+        "method": {
+          "shortName": "DisableUserCreds",
+          "fullName": "google.firestore.admin.v1.FirestoreAdmin.DisableUserCreds",
+          "service": {
+            "shortName": "FirestoreAdmin",
+            "fullName": "google.firestore.admin.v1.FirestoreAdmin"
+          }
+        }
+      }
+    },
+    {
+      "regionTag": "firestore_v1_generated_FirestoreAdmin_ResetUserPassword_async",
+      "title": "FirestoreAdmin resetUserPassword Sample",
+      "origin": "API_DEFINITION",
+      "description": " Resets the password of a user creds.",
+      "canonical": true,
+      "file": "firestore_admin.reset_user_password.js",
+      "language": "JAVASCRIPT",
+      "segments": [
+        {
+          "start": 25,
+          "end": 54,
+          "type": "FULL"
+        }
+      ],
+      "clientMethod": {
+        "shortName": "ResetUserPassword",
+        "fullName": "google.firestore.admin.v1.FirestoreAdmin.ResetUserPassword",
+        "async": true,
+        "parameters": [
+          {
+            "name": "name",
+            "type": "TYPE_STRING"
+          }
+        ],
+        "resultType": ".google.firestore.admin.v1.UserCreds",
+        "client": {
+          "shortName": "FirestoreAdminClient",
+          "fullName": "google.firestore.admin.v1.FirestoreAdminClient"
+        },
+        "method": {
+          "shortName": "ResetUserPassword",
+          "fullName": "google.firestore.admin.v1.FirestoreAdmin.ResetUserPassword",
+          "service": {
+            "shortName": "FirestoreAdmin",
+            "fullName": "google.firestore.admin.v1.FirestoreAdmin"
+          }
+        }
+      }
+    },
+    {
+      "regionTag": "firestore_v1_generated_FirestoreAdmin_DeleteUserCreds_async",
+      "title": "FirestoreAdmin deleteUserCreds Sample",
+      "origin": "API_DEFINITION",
+      "description": " Deletes a user creds.",
+      "canonical": true,
+      "file": "firestore_admin.delete_user_creds.js",
+      "language": "JAVASCRIPT",
+      "segments": [
+        {
+          "start": 25,
+          "end": 54,
+          "type": "FULL"
+        }
+      ],
+      "clientMethod": {
+        "shortName": "DeleteUserCreds",
+        "fullName": "google.firestore.admin.v1.FirestoreAdmin.DeleteUserCreds",
+        "async": true,
+        "parameters": [
+          {
+            "name": "name",
+            "type": "TYPE_STRING"
+          }
+        ],
+        "resultType": ".google.protobuf.Empty",
+        "client": {
+          "shortName": "FirestoreAdminClient",
+          "fullName": "google.firestore.admin.v1.FirestoreAdminClient"
+        },
+        "method": {
+          "shortName": "DeleteUserCreds",
+          "fullName": "google.firestore.admin.v1.FirestoreAdmin.DeleteUserCreds",
+          "service": {
+            "shortName": "FirestoreAdmin",
+            "fullName": "google.firestore.admin.v1.FirestoreAdmin"
+          }
+        }
+      }
+    },
+    {
       "regionTag": "firestore_v1_generated_FirestoreAdmin_GetBackup_async",
       "title": "FirestoreAdmin getBackup Sample",
       "origin": "API_DEFINITION",

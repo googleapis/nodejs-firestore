@@ -908,6 +908,140 @@
                             }
                           ]
                         },
+                        "CreateUserCreds": {
+                          "requestType": "CreateUserCredsRequest",
+                          "responseType": "UserCreds",
+                          "options": {
+                            "(google.api.http).post": "/v1/{parent=projects/*/databases/*}/userCreds",
+                            "(google.api.http).body": "user_creds",
+                            "(google.api.method_signature)": "parent,user_creds,user_creds_id"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{parent=projects/*/databases/*}/userCreds",
+                                "body": "user_creds"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "parent,user_creds,user_creds_id"
+                            }
+                          ]
+                        },
+                        "GetUserCreds": {
+                          "requestType": "GetUserCredsRequest",
+                          "responseType": "UserCreds",
+                          "options": {
+                            "(google.api.http).get": "/v1/{name=projects/*/databases/*/userCreds/*}",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "get": "/v1/{name=projects/*/databases/*/userCreds/*}"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
+                        "ListUserCreds": {
+                          "requestType": "ListUserCredsRequest",
+                          "responseType": "ListUserCredsResponse",
+                          "options": {
+                            "(google.api.http).get": "/v1/{parent=projects/*/databases/*}/userCreds",
+                            "(google.api.method_signature)": "parent"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "get": "/v1/{parent=projects/*/databases/*}/userCreds"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "parent"
+                            }
+                          ]
+                        },
+                        "EnableUserCreds": {
+                          "requestType": "EnableUserCredsRequest",
+                          "responseType": "UserCreds",
+                          "options": {
+                            "(google.api.http).post": "/v1/{name=projects/*/databases/*/userCreds/*}:enable",
+                            "(google.api.http).body": "*",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{name=projects/*/databases/*/userCreds/*}:enable",
+                                "body": "*"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
+                        "DisableUserCreds": {
+                          "requestType": "DisableUserCredsRequest",
+                          "responseType": "UserCreds",
+                          "options": {
+                            "(google.api.http).post": "/v1/{name=projects/*/databases/*/userCreds/*}:disable",
+                            "(google.api.http).body": "*",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{name=projects/*/databases/*/userCreds/*}:disable",
+                                "body": "*"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
+                        "ResetUserPassword": {
+                          "requestType": "ResetUserPasswordRequest",
+                          "responseType": "UserCreds",
+                          "options": {
+                            "(google.api.http).post": "/v1/{name=projects/*/databases/*/userCreds/*}:resetPassword",
+                            "(google.api.http).body": "*",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{name=projects/*/databases/*/userCreds/*}:resetPassword",
+                                "body": "*"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
+                        "DeleteUserCreds": {
+                          "requestType": "DeleteUserCredsRequest",
+                          "responseType": "google.protobuf.Empty",
+                          "options": {
+                            "(google.api.http).delete": "/v1/{name=projects/*/databases/*/userCreds/*}",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "delete": "/v1/{name=projects/*/databases/*/userCreds/*}"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
                         "GetBackup": {
                           "requestType": "GetBackupRequest",
                           "responseType": "Backup",
@@ -1189,6 +1323,113 @@
                     },
                     "DeleteDatabaseMetadata": {
                       "fields": {}
+                    },
+                    "CreateUserCredsRequest": {
+                      "fields": {
+                        "parent": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).child_type": "firestore.googleapis.com/UserCreds"
+                          }
+                        },
+                        "userCreds": {
+                          "type": "UserCreds",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "userCredsId": {
+                          "type": "string",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        }
+                      }
+                    },
+                    "GetUserCredsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
+                    },
+                    "ListUserCredsRequest": {
+                      "fields": {
+                        "parent": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).child_type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
+                    },
+                    "ListUserCredsResponse": {
+                      "fields": {
+                        "userCreds": {
+                          "rule": "repeated",
+                          "type": "UserCreds",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "EnableUserCredsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
+                    },
+                    "DisableUserCredsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
+                    },
+                    "ResetUserPasswordRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
+                    },
+                    "DeleteUserCredsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
                     },
                     "CreateBackupScheduleRequest": {
                       "fields": {
@@ -1934,6 +2175,82 @@
                         "day": {
                           "type": "google.type.DayOfWeek",
                           "id": 2
+                        }
+                      }
+                    },
+                    "UserCreds": {
+                      "options": {
+                        "(google.api.resource).type": "firestore.googleapis.com/UserCreds",
+                        "(google.api.resource).pattern": "projects/{project}/databases/{database}/userCreds/{user_creds}",
+                        "(google.api.resource).plural": "userCreds",
+                        "(google.api.resource).singular": "userCreds"
+                      },
+                      "oneofs": {
+                        "UserCredsIdentity": {
+                          "oneof": [
+                            "resourceIdentity"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "IDENTIFIER"
+                          }
+                        },
+                        "createTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "updateTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "state": {
+                          "type": "State",
+                          "id": 4,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "securePassword": {
+                          "type": "string",
+                          "id": 5,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "resourceIdentity": {
+                          "type": "ResourceIdentity",
+                          "id": 6
+                        }
+                      },
+                      "nested": {
+                        "State": {
+                          "values": {
+                            "STATE_UNSPECIFIED": 0,
+                            "ENABLED": 1,
+                            "DISABLED": 2
+                          }
+                        },
+                        "ResourceIdentity": {
+                          "fields": {
+                            "principal": {
+                              "type": "string",
+                              "id": 1,
+                              "options": {
+                                "(google.api.field_behavior)": "OUTPUT_ONLY"
+                              }
+                            }
+                          }
                         }
                       }
                     },

@@ -35,6 +35,41 @@
                 "listDatabases"
               ]
             },
+            "CreateUserCreds": {
+              "methods": [
+                "createUserCreds"
+              ]
+            },
+            "GetUserCreds": {
+              "methods": [
+                "getUserCreds"
+              ]
+            },
+            "ListUserCreds": {
+              "methods": [
+                "listUserCreds"
+              ]
+            },
+            "EnableUserCreds": {
+              "methods": [
+                "enableUserCreds"
+              ]
+            },
+            "DisableUserCreds": {
+              "methods": [
+                "disableUserCreds"
+              ]
+            },
+            "ResetUserPassword": {
+              "methods": [
+                "resetUserPassword"
+              ]
+            },
+            "DeleteUserCreds": {
+              "methods": [
+                "deleteUserCreds"
+              ]
+            },
             "GetBackup": {
               "methods": [
                 "getBackup"
@@ -162,6 +197,41 @@
             "ListDatabases": {
               "methods": [
                 "listDatabases"
+              ]
+            },
+            "CreateUserCreds": {
+              "methods": [
+                "createUserCreds"
+              ]
+            },
+            "GetUserCreds": {
+              "methods": [
+                "getUserCreds"
+              ]
+            },
+            "ListUserCreds": {
+              "methods": [
+                "listUserCreds"
+              ]
+            },
+            "EnableUserCreds": {
+              "methods": [
+                "enableUserCreds"
+              ]
+            },
+            "DisableUserCreds": {
+              "methods": [
+                "disableUserCreds"
+              ]
+            },
+            "ResetUserPassword": {
+              "methods": [
+                "resetUserPassword"
+              ]
+            },
+            "DeleteUserCreds": {
+              "methods": [
+                "deleteUserCreds"
               ]
             },
             "GetBackup": {

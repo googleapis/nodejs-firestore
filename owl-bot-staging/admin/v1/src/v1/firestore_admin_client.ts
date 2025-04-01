@@ -235,6 +235,9 @@ export class FirestoreAdminClient {
       projectPathTemplate: new this._gaxModule.PathTemplate(
         'projects/{project}'
       ),
+      userCredsPathTemplate: new this._gaxModule.PathTemplate(
+        'projects/{project}/databases/{database}/userCreds/{user_creds}'
+      ),
     };
 
     // Some of the methods on this service return "paged" results,
@@ -379,7 +382,7 @@ export class FirestoreAdminClient {
     // Iterate over each of the methods that the service provides
     // and create an API call method for each.
     const firestoreAdminStubMethods =
-        ['createIndex', 'listIndexes', 'getIndex', 'deleteIndex', 'getField', 'updateField', 'listFields', 'exportDocuments', 'importDocuments', 'bulkDeleteDocuments', 'createDatabase', 'getDatabase', 'listDatabases', 'updateDatabase', 'deleteDatabase', 'getBackup', 'listBackups', 'deleteBackup', 'restoreDatabase', 'createBackupSchedule', 'getBackupSchedule', 'listBackupSchedules', 'updateBackupSchedule', 'deleteBackupSchedule'];
+        ['createIndex', 'listIndexes', 'getIndex', 'deleteIndex', 'getField', 'updateField', 'listFields', 'exportDocuments', 'importDocuments', 'bulkDeleteDocuments', 'createDatabase', 'getDatabase', 'listDatabases', 'updateDatabase', 'deleteDatabase', 'createUserCreds', 'getUserCreds', 'listUserCreds', 'enableUserCreds', 'disableUserCreds', 'resetUserPassword', 'deleteUserCreds', 'getBackup', 'listBackups', 'deleteBackup', 'restoreDatabase', 'createBackupSchedule', 'getBackupSchedule', 'listBackupSchedules', 'updateBackupSchedule', 'deleteBackupSchedule'];
     for (const methodName of firestoreAdminStubMethods) {
       const callPromise = this.firestoreAdminStub.then(
         stub => (...args: Array<{}>) => {
@@ -928,6 +931,640 @@ export class FirestoreAdminClient {
         {}|undefined
       ]) => {
         this._log.info('listDatabases response %j', response);
+        return [response, options, rawResponse];
+      });
+  }
+/**
+ * Create a user creds.
+ *
+ * @param {Object} request
+ *   The request object that will be sent.
+ * @param {string} request.parent
+ *   Required. A parent name of the form
+ *   `projects/{project_id}/databases/{database_id}`
+ * @param {google.firestore.admin.v1.UserCreds} request.userCreds
+ *   Required. The user creds to create.
+ * @param {string} request.userCredsId
+ *   Required. The ID to use for the user creds, which will become the final
+ *   component of the user creds's resource name.
+ *
+ *   This value should be 4-63 characters. Valid characters are /{@link protos.0-9|a-z}-/
+ *   with first character a letter and the last a letter or a number. Must not
+ *   be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+ * @param {object} [options]
+ *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+ * @returns {Promise} - The promise which resolves to an array.
+ *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.UserCreds|UserCreds}.
+ *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+ *   for more details and examples.
+ * @example <caption>include:samples/generated/v1/firestore_admin.create_user_creds.js</caption>
+ * region_tag:firestore_v1_generated_FirestoreAdmin_CreateUserCreds_async
+ */
+  createUserCreds(
+      request?: protos.google.firestore.admin.v1.ICreateUserCredsRequest,
+      options?: CallOptions):
+      Promise<[
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.ICreateUserCredsRequest|undefined, {}|undefined
+      ]>;
+  createUserCreds(
+      request: protos.google.firestore.admin.v1.ICreateUserCredsRequest,
+      options: CallOptions,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.ICreateUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  createUserCreds(
+      request: protos.google.firestore.admin.v1.ICreateUserCredsRequest,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.ICreateUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  createUserCreds(
+      request?: protos.google.firestore.admin.v1.ICreateUserCredsRequest,
+      optionsOrCallback?: CallOptions|Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.ICreateUserCredsRequest|null|undefined,
+          {}|null|undefined>,
+      callback?: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.ICreateUserCredsRequest|null|undefined,
+          {}|null|undefined>):
+      Promise<[
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.ICreateUserCredsRequest|undefined, {}|undefined
+      ]>|void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    }
+    else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = this._gaxModule.routingHeader.fromParams({
+      'parent': request.parent ?? '',
+    });
+    this.initialize().catch(err => {throw err});
+    this._log.info('createUserCreds request %j', request);
+    const wrappedCallback: Callback<
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.ICreateUserCredsRequest|null|undefined,
+        {}|null|undefined>|undefined = callback
+      ? (error, response, options, rawResponse) => {
+          this._log.info('createUserCreds response %j', response);
+          callback!(error, response, options, rawResponse); // We verified callback above.
+        }
+      : undefined;
+    return this.innerApiCalls.createUserCreds(request, options, wrappedCallback)
+      ?.then(([response, options, rawResponse]: [
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.ICreateUserCredsRequest|undefined,
+        {}|undefined
+      ]) => {
+        this._log.info('createUserCreds response %j', response);
+        return [response, options, rawResponse];
+      });
+  }
+/**
+ * Gets a user creds resource. Note that the returned resource does not
+ * contain the secret value itself.
+ *
+ * @param {Object} request
+ *   The request object that will be sent.
+ * @param {string} request.name
+ *   Required. A name of the form
+ *   `projects/{project_id}/databases/{database_id}/userCreds/{user_creds_id}`
+ * @param {object} [options]
+ *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+ * @returns {Promise} - The promise which resolves to an array.
+ *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.UserCreds|UserCreds}.
+ *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+ *   for more details and examples.
+ * @example <caption>include:samples/generated/v1/firestore_admin.get_user_creds.js</caption>
+ * region_tag:firestore_v1_generated_FirestoreAdmin_GetUserCreds_async
+ */
+  getUserCreds(
+      request?: protos.google.firestore.admin.v1.IGetUserCredsRequest,
+      options?: CallOptions):
+      Promise<[
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IGetUserCredsRequest|undefined, {}|undefined
+      ]>;
+  getUserCreds(
+      request: protos.google.firestore.admin.v1.IGetUserCredsRequest,
+      options: CallOptions,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IGetUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  getUserCreds(
+      request: protos.google.firestore.admin.v1.IGetUserCredsRequest,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IGetUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  getUserCreds(
+      request?: protos.google.firestore.admin.v1.IGetUserCredsRequest,
+      optionsOrCallback?: CallOptions|Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IGetUserCredsRequest|null|undefined,
+          {}|null|undefined>,
+      callback?: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IGetUserCredsRequest|null|undefined,
+          {}|null|undefined>):
+      Promise<[
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IGetUserCredsRequest|undefined, {}|undefined
+      ]>|void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    }
+    else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = this._gaxModule.routingHeader.fromParams({
+      'name': request.name ?? '',
+    });
+    this.initialize().catch(err => {throw err});
+    this._log.info('getUserCreds request %j', request);
+    const wrappedCallback: Callback<
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IGetUserCredsRequest|null|undefined,
+        {}|null|undefined>|undefined = callback
+      ? (error, response, options, rawResponse) => {
+          this._log.info('getUserCreds response %j', response);
+          callback!(error, response, options, rawResponse); // We verified callback above.
+        }
+      : undefined;
+    return this.innerApiCalls.getUserCreds(request, options, wrappedCallback)
+      ?.then(([response, options, rawResponse]: [
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IGetUserCredsRequest|undefined,
+        {}|undefined
+      ]) => {
+        this._log.info('getUserCreds response %j', response);
+        return [response, options, rawResponse];
+      });
+  }
+/**
+ * List all user creds in the database. Note that the returned resource
+ * does not contain the secret value itself.
+ *
+ * @param {Object} request
+ *   The request object that will be sent.
+ * @param {string} request.parent
+ *   Required. A parent database name of the form
+ *   `projects/{project_id}/databases/{database_id}`
+ * @param {object} [options]
+ *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+ * @returns {Promise} - The promise which resolves to an array.
+ *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.ListUserCredsResponse|ListUserCredsResponse}.
+ *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+ *   for more details and examples.
+ * @example <caption>include:samples/generated/v1/firestore_admin.list_user_creds.js</caption>
+ * region_tag:firestore_v1_generated_FirestoreAdmin_ListUserCreds_async
+ */
+  listUserCreds(
+      request?: protos.google.firestore.admin.v1.IListUserCredsRequest,
+      options?: CallOptions):
+      Promise<[
+        protos.google.firestore.admin.v1.IListUserCredsResponse,
+        protos.google.firestore.admin.v1.IListUserCredsRequest|undefined, {}|undefined
+      ]>;
+  listUserCreds(
+      request: protos.google.firestore.admin.v1.IListUserCredsRequest,
+      options: CallOptions,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IListUserCredsResponse,
+          protos.google.firestore.admin.v1.IListUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  listUserCreds(
+      request: protos.google.firestore.admin.v1.IListUserCredsRequest,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IListUserCredsResponse,
+          protos.google.firestore.admin.v1.IListUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  listUserCreds(
+      request?: protos.google.firestore.admin.v1.IListUserCredsRequest,
+      optionsOrCallback?: CallOptions|Callback<
+          protos.google.firestore.admin.v1.IListUserCredsResponse,
+          protos.google.firestore.admin.v1.IListUserCredsRequest|null|undefined,
+          {}|null|undefined>,
+      callback?: Callback<
+          protos.google.firestore.admin.v1.IListUserCredsResponse,
+          protos.google.firestore.admin.v1.IListUserCredsRequest|null|undefined,
+          {}|null|undefined>):
+      Promise<[
+        protos.google.firestore.admin.v1.IListUserCredsResponse,
+        protos.google.firestore.admin.v1.IListUserCredsRequest|undefined, {}|undefined
+      ]>|void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    }
+    else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = this._gaxModule.routingHeader.fromParams({
+      'parent': request.parent ?? '',
+    });
+    this.initialize().catch(err => {throw err});
+    this._log.info('listUserCreds request %j', request);
+    const wrappedCallback: Callback<
+        protos.google.firestore.admin.v1.IListUserCredsResponse,
+        protos.google.firestore.admin.v1.IListUserCredsRequest|null|undefined,
+        {}|null|undefined>|undefined = callback
+      ? (error, response, options, rawResponse) => {
+          this._log.info('listUserCreds response %j', response);
+          callback!(error, response, options, rawResponse); // We verified callback above.
+        }
+      : undefined;
+    return this.innerApiCalls.listUserCreds(request, options, wrappedCallback)
+      ?.then(([response, options, rawResponse]: [
+        protos.google.firestore.admin.v1.IListUserCredsResponse,
+        protos.google.firestore.admin.v1.IListUserCredsRequest|undefined,
+        {}|undefined
+      ]) => {
+        this._log.info('listUserCreds response %j', response);
+        return [response, options, rawResponse];
+      });
+  }
+/**
+ * Enables a user creds. No-op if the user creds are already enabled.
+ *
+ * @param {Object} request
+ *   The request object that will be sent.
+ * @param {string} request.name
+ *   Required. A name of the form
+ *   `projects/{project_id}/databases/{database_id}/userCreds/{user_creds_id}`
+ * @param {object} [options]
+ *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+ * @returns {Promise} - The promise which resolves to an array.
+ *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.UserCreds|UserCreds}.
+ *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+ *   for more details and examples.
+ * @example <caption>include:samples/generated/v1/firestore_admin.enable_user_creds.js</caption>
+ * region_tag:firestore_v1_generated_FirestoreAdmin_EnableUserCreds_async
+ */
+  enableUserCreds(
+      request?: protos.google.firestore.admin.v1.IEnableUserCredsRequest,
+      options?: CallOptions):
+      Promise<[
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IEnableUserCredsRequest|undefined, {}|undefined
+      ]>;
+  enableUserCreds(
+      request: protos.google.firestore.admin.v1.IEnableUserCredsRequest,
+      options: CallOptions,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IEnableUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  enableUserCreds(
+      request: protos.google.firestore.admin.v1.IEnableUserCredsRequest,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IEnableUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  enableUserCreds(
+      request?: protos.google.firestore.admin.v1.IEnableUserCredsRequest,
+      optionsOrCallback?: CallOptions|Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IEnableUserCredsRequest|null|undefined,
+          {}|null|undefined>,
+      callback?: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IEnableUserCredsRequest|null|undefined,
+          {}|null|undefined>):
+      Promise<[
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IEnableUserCredsRequest|undefined, {}|undefined
+      ]>|void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    }
+    else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = this._gaxModule.routingHeader.fromParams({
+      'name': request.name ?? '',
+    });
+    this.initialize().catch(err => {throw err});
+    this._log.info('enableUserCreds request %j', request);
+    const wrappedCallback: Callback<
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IEnableUserCredsRequest|null|undefined,
+        {}|null|undefined>|undefined = callback
+      ? (error, response, options, rawResponse) => {
+          this._log.info('enableUserCreds response %j', response);
+          callback!(error, response, options, rawResponse); // We verified callback above.
+        }
+      : undefined;
+    return this.innerApiCalls.enableUserCreds(request, options, wrappedCallback)
+      ?.then(([response, options, rawResponse]: [
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IEnableUserCredsRequest|undefined,
+        {}|undefined
+      ]) => {
+        this._log.info('enableUserCreds response %j', response);
+        return [response, options, rawResponse];
+      });
+  }
+/**
+ * Disables a user creds. No-op if the user creds are already disabled.
+ *
+ * @param {Object} request
+ *   The request object that will be sent.
+ * @param {string} request.name
+ *   Required. A name of the form
+ *   `projects/{project_id}/databases/{database_id}/userCreds/{user_creds_id}`
+ * @param {object} [options]
+ *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+ * @returns {Promise} - The promise which resolves to an array.
+ *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.UserCreds|UserCreds}.
+ *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+ *   for more details and examples.
+ * @example <caption>include:samples/generated/v1/firestore_admin.disable_user_creds.js</caption>
+ * region_tag:firestore_v1_generated_FirestoreAdmin_DisableUserCreds_async
+ */
+  disableUserCreds(
+      request?: protos.google.firestore.admin.v1.IDisableUserCredsRequest,
+      options?: CallOptions):
+      Promise<[
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IDisableUserCredsRequest|undefined, {}|undefined
+      ]>;
+  disableUserCreds(
+      request: protos.google.firestore.admin.v1.IDisableUserCredsRequest,
+      options: CallOptions,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IDisableUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  disableUserCreds(
+      request: protos.google.firestore.admin.v1.IDisableUserCredsRequest,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IDisableUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  disableUserCreds(
+      request?: protos.google.firestore.admin.v1.IDisableUserCredsRequest,
+      optionsOrCallback?: CallOptions|Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IDisableUserCredsRequest|null|undefined,
+          {}|null|undefined>,
+      callback?: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IDisableUserCredsRequest|null|undefined,
+          {}|null|undefined>):
+      Promise<[
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IDisableUserCredsRequest|undefined, {}|undefined
+      ]>|void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    }
+    else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = this._gaxModule.routingHeader.fromParams({
+      'name': request.name ?? '',
+    });
+    this.initialize().catch(err => {throw err});
+    this._log.info('disableUserCreds request %j', request);
+    const wrappedCallback: Callback<
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IDisableUserCredsRequest|null|undefined,
+        {}|null|undefined>|undefined = callback
+      ? (error, response, options, rawResponse) => {
+          this._log.info('disableUserCreds response %j', response);
+          callback!(error, response, options, rawResponse); // We verified callback above.
+        }
+      : undefined;
+    return this.innerApiCalls.disableUserCreds(request, options, wrappedCallback)
+      ?.then(([response, options, rawResponse]: [
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IDisableUserCredsRequest|undefined,
+        {}|undefined
+      ]) => {
+        this._log.info('disableUserCreds response %j', response);
+        return [response, options, rawResponse];
+      });
+  }
+/**
+ * Resets the password of a user creds.
+ *
+ * @param {Object} request
+ *   The request object that will be sent.
+ * @param {string} request.name
+ *   Required. A name of the form
+ *   `projects/{project_id}/databases/{database_id}/userCreds/{user_creds_id}`
+ * @param {object} [options]
+ *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+ * @returns {Promise} - The promise which resolves to an array.
+ *   The first element of the array is an object representing {@link protos.google.firestore.admin.v1.UserCreds|UserCreds}.
+ *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+ *   for more details and examples.
+ * @example <caption>include:samples/generated/v1/firestore_admin.reset_user_password.js</caption>
+ * region_tag:firestore_v1_generated_FirestoreAdmin_ResetUserPassword_async
+ */
+  resetUserPassword(
+      request?: protos.google.firestore.admin.v1.IResetUserPasswordRequest,
+      options?: CallOptions):
+      Promise<[
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IResetUserPasswordRequest|undefined, {}|undefined
+      ]>;
+  resetUserPassword(
+      request: protos.google.firestore.admin.v1.IResetUserPasswordRequest,
+      options: CallOptions,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IResetUserPasswordRequest|null|undefined,
+          {}|null|undefined>): void;
+  resetUserPassword(
+      request: protos.google.firestore.admin.v1.IResetUserPasswordRequest,
+      callback: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IResetUserPasswordRequest|null|undefined,
+          {}|null|undefined>): void;
+  resetUserPassword(
+      request?: protos.google.firestore.admin.v1.IResetUserPasswordRequest,
+      optionsOrCallback?: CallOptions|Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IResetUserPasswordRequest|null|undefined,
+          {}|null|undefined>,
+      callback?: Callback<
+          protos.google.firestore.admin.v1.IUserCreds,
+          protos.google.firestore.admin.v1.IResetUserPasswordRequest|null|undefined,
+          {}|null|undefined>):
+      Promise<[
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IResetUserPasswordRequest|undefined, {}|undefined
+      ]>|void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    }
+    else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = this._gaxModule.routingHeader.fromParams({
+      'name': request.name ?? '',
+    });
+    this.initialize().catch(err => {throw err});
+    this._log.info('resetUserPassword request %j', request);
+    const wrappedCallback: Callback<
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IResetUserPasswordRequest|null|undefined,
+        {}|null|undefined>|undefined = callback
+      ? (error, response, options, rawResponse) => {
+          this._log.info('resetUserPassword response %j', response);
+          callback!(error, response, options, rawResponse); // We verified callback above.
+        }
+      : undefined;
+    return this.innerApiCalls.resetUserPassword(request, options, wrappedCallback)
+      ?.then(([response, options, rawResponse]: [
+        protos.google.firestore.admin.v1.IUserCreds,
+        protos.google.firestore.admin.v1.IResetUserPasswordRequest|undefined,
+        {}|undefined
+      ]) => {
+        this._log.info('resetUserPassword response %j', response);
+        return [response, options, rawResponse];
+      });
+  }
+/**
+ * Deletes a user creds.
+ *
+ * @param {Object} request
+ *   The request object that will be sent.
+ * @param {string} request.name
+ *   Required. A name of the form
+ *   `projects/{project_id}/databases/{database_id}/userCreds/{user_creds_id}`
+ * @param {object} [options]
+ *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+ * @returns {Promise} - The promise which resolves to an array.
+ *   The first element of the array is an object representing {@link protos.google.protobuf.Empty|Empty}.
+ *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#regular-methods | documentation }
+ *   for more details and examples.
+ * @example <caption>include:samples/generated/v1/firestore_admin.delete_user_creds.js</caption>
+ * region_tag:firestore_v1_generated_FirestoreAdmin_DeleteUserCreds_async
+ */
+  deleteUserCreds(
+      request?: protos.google.firestore.admin.v1.IDeleteUserCredsRequest,
+      options?: CallOptions):
+      Promise<[
+        protos.google.protobuf.IEmpty,
+        protos.google.firestore.admin.v1.IDeleteUserCredsRequest|undefined, {}|undefined
+      ]>;
+  deleteUserCreds(
+      request: protos.google.firestore.admin.v1.IDeleteUserCredsRequest,
+      options: CallOptions,
+      callback: Callback<
+          protos.google.protobuf.IEmpty,
+          protos.google.firestore.admin.v1.IDeleteUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  deleteUserCreds(
+      request: protos.google.firestore.admin.v1.IDeleteUserCredsRequest,
+      callback: Callback<
+          protos.google.protobuf.IEmpty,
+          protos.google.firestore.admin.v1.IDeleteUserCredsRequest|null|undefined,
+          {}|null|undefined>): void;
+  deleteUserCreds(
+      request?: protos.google.firestore.admin.v1.IDeleteUserCredsRequest,
+      optionsOrCallback?: CallOptions|Callback<
+          protos.google.protobuf.IEmpty,
+          protos.google.firestore.admin.v1.IDeleteUserCredsRequest|null|undefined,
+          {}|null|undefined>,
+      callback?: Callback<
+          protos.google.protobuf.IEmpty,
+          protos.google.firestore.admin.v1.IDeleteUserCredsRequest|null|undefined,
+          {}|null|undefined>):
+      Promise<[
+        protos.google.protobuf.IEmpty,
+        protos.google.firestore.admin.v1.IDeleteUserCredsRequest|undefined, {}|undefined
+      ]>|void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    }
+    else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = this._gaxModule.routingHeader.fromParams({
+      'name': request.name ?? '',
+    });
+    this.initialize().catch(err => {throw err});
+    this._log.info('deleteUserCreds request %j', request);
+    const wrappedCallback: Callback<
+        protos.google.protobuf.IEmpty,
+        protos.google.firestore.admin.v1.IDeleteUserCredsRequest|null|undefined,
+        {}|null|undefined>|undefined = callback
+      ? (error, response, options, rawResponse) => {
+          this._log.info('deleteUserCreds response %j', response);
+          callback!(error, response, options, rawResponse); // We verified callback above.
+        }
+      : undefined;
+    return this.innerApiCalls.deleteUserCreds(request, options, wrappedCallback)
+      ?.then(([response, options, rawResponse]: [
+        protos.google.protobuf.IEmpty,
+        protos.google.firestore.admin.v1.IDeleteUserCredsRequest|undefined,
+        {}|undefined
+      ]) => {
+        this._log.info('deleteUserCreds response %j', response);
         return [response, options, rawResponse];
       });
   }
@@ -3913,6 +4550,55 @@ export class FirestoreAdminClient {
    */
   matchProjectFromProjectName(projectName: string) {
     return this.pathTemplates.projectPathTemplate.match(projectName).project;
+  }
+
+  /**
+   * Return a fully-qualified userCreds resource name string.
+   *
+   * @param {string} project
+   * @param {string} database
+   * @param {string} user_creds
+   * @returns {string} Resource name string.
+   */
+  userCredsPath(project:string,database:string,userCreds:string) {
+    return this.pathTemplates.userCredsPathTemplate.render({
+      project: project,
+      database: database,
+      user_creds: userCreds,
+    });
+  }
+
+  /**
+   * Parse the project from UserCreds resource.
+   *
+   * @param {string} userCredsName
+   *   A fully-qualified path representing UserCreds resource.
+   * @returns {string} A string representing the project.
+   */
+  matchProjectFromUserCredsName(userCredsName: string) {
+    return this.pathTemplates.userCredsPathTemplate.match(userCredsName).project;
+  }
+
+  /**
+   * Parse the database from UserCreds resource.
+   *
+   * @param {string} userCredsName
+   *   A fully-qualified path representing UserCreds resource.
+   * @returns {string} A string representing the database.
+   */
+  matchDatabaseFromUserCredsName(userCredsName: string) {
+    return this.pathTemplates.userCredsPathTemplate.match(userCredsName).database;
+  }
+
+  /**
+   * Parse the user_creds from UserCreds resource.
+   *
+   * @param {string} userCredsName
+   *   A fully-qualified path representing UserCreds resource.
+   * @returns {string} A string representing the user_creds.
+   */
+  matchUserCredsFromUserCredsName(userCredsName: string) {
+    return this.pathTemplates.userCredsPathTemplate.match(userCredsName).user_creds;
   }
 
   /**

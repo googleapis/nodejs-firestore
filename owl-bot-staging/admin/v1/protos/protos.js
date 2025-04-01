@@ -5732,6 +5732,237 @@
                          */
     
                         /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin|createUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef CreateUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.UserCreds} [response] UserCreds
+                         */
+    
+                        /**
+                         * Calls CreateUserCreds.
+                         * @function createUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICreateUserCredsRequest} request CreateUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.CreateUserCredsCallback} callback Node-style callback called with the error, if any, and UserCreds
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.createUserCreds = function createUserCreds(request, callback) {
+                            return this.rpcCall(createUserCreds, $root.google.firestore.admin.v1.CreateUserCredsRequest, $root.google.firestore.admin.v1.UserCreds, request, callback);
+                        }, "name", { value: "CreateUserCreds" });
+    
+                        /**
+                         * Calls CreateUserCreds.
+                         * @function createUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICreateUserCredsRequest} request CreateUserCredsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.UserCreds>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin|getUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef GetUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.UserCreds} [response] UserCreds
+                         */
+    
+                        /**
+                         * Calls GetUserCreds.
+                         * @function getUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetUserCredsRequest} request GetUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.GetUserCredsCallback} callback Node-style callback called with the error, if any, and UserCreds
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.getUserCreds = function getUserCreds(request, callback) {
+                            return this.rpcCall(getUserCreds, $root.google.firestore.admin.v1.GetUserCredsRequest, $root.google.firestore.admin.v1.UserCreds, request, callback);
+                        }, "name", { value: "GetUserCreds" });
+    
+                        /**
+                         * Calls GetUserCreds.
+                         * @function getUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetUserCredsRequest} request GetUserCredsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.UserCreds>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin|listUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef ListUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.ListUserCredsResponse} [response] ListUserCredsResponse
+                         */
+    
+                        /**
+                         * Calls ListUserCreds.
+                         * @function listUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListUserCredsRequest} request ListUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.ListUserCredsCallback} callback Node-style callback called with the error, if any, and ListUserCredsResponse
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.listUserCreds = function listUserCreds(request, callback) {
+                            return this.rpcCall(listUserCreds, $root.google.firestore.admin.v1.ListUserCredsRequest, $root.google.firestore.admin.v1.ListUserCredsResponse, request, callback);
+                        }, "name", { value: "ListUserCreds" });
+    
+                        /**
+                         * Calls ListUserCreds.
+                         * @function listUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListUserCredsRequest} request ListUserCredsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.ListUserCredsResponse>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin|enableUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef EnableUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.UserCreds} [response] UserCreds
+                         */
+    
+                        /**
+                         * Calls EnableUserCreds.
+                         * @function enableUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IEnableUserCredsRequest} request EnableUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.EnableUserCredsCallback} callback Node-style callback called with the error, if any, and UserCreds
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.enableUserCreds = function enableUserCreds(request, callback) {
+                            return this.rpcCall(enableUserCreds, $root.google.firestore.admin.v1.EnableUserCredsRequest, $root.google.firestore.admin.v1.UserCreds, request, callback);
+                        }, "name", { value: "EnableUserCreds" });
+    
+                        /**
+                         * Calls EnableUserCreds.
+                         * @function enableUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IEnableUserCredsRequest} request EnableUserCredsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.UserCreds>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin|disableUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef DisableUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.UserCreds} [response] UserCreds
+                         */
+    
+                        /**
+                         * Calls DisableUserCreds.
+                         * @function disableUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDisableUserCredsRequest} request DisableUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.DisableUserCredsCallback} callback Node-style callback called with the error, if any, and UserCreds
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.disableUserCreds = function disableUserCreds(request, callback) {
+                            return this.rpcCall(disableUserCreds, $root.google.firestore.admin.v1.DisableUserCredsRequest, $root.google.firestore.admin.v1.UserCreds, request, callback);
+                        }, "name", { value: "DisableUserCreds" });
+    
+                        /**
+                         * Calls DisableUserCreds.
+                         * @function disableUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDisableUserCredsRequest} request DisableUserCredsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.UserCreds>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin|resetUserPassword}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef ResetUserPasswordCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.UserCreds} [response] UserCreds
+                         */
+    
+                        /**
+                         * Calls ResetUserPassword.
+                         * @function resetUserPassword
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IResetUserPasswordRequest} request ResetUserPasswordRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.ResetUserPasswordCallback} callback Node-style callback called with the error, if any, and UserCreds
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.resetUserPassword = function resetUserPassword(request, callback) {
+                            return this.rpcCall(resetUserPassword, $root.google.firestore.admin.v1.ResetUserPasswordRequest, $root.google.firestore.admin.v1.UserCreds, request, callback);
+                        }, "name", { value: "ResetUserPassword" });
+    
+                        /**
+                         * Calls ResetUserPassword.
+                         * @function resetUserPassword
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IResetUserPasswordRequest} request ResetUserPasswordRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.UserCreds>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin|deleteUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef DeleteUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.protobuf.Empty} [response] Empty
+                         */
+    
+                        /**
+                         * Calls DeleteUserCreds.
+                         * @function deleteUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteUserCredsRequest} request DeleteUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.DeleteUserCredsCallback} callback Node-style callback called with the error, if any, and Empty
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.deleteUserCreds = function deleteUserCreds(request, callback) {
+                            return this.rpcCall(deleteUserCreds, $root.google.firestore.admin.v1.DeleteUserCredsRequest, $root.google.protobuf.Empty, request, callback);
+                        }, "name", { value: "DeleteUserCreds" });
+    
+                        /**
+                         * Calls DeleteUserCreds.
+                         * @function deleteUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteUserCredsRequest} request DeleteUserCredsRequest message or plain object
+                         * @returns {Promise<google.protobuf.Empty>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
                          * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin|getBackup}.
                          * @memberof google.firestore.admin.v1.FirestoreAdmin
                          * @typedef GetBackupCallback
@@ -7967,6 +8198,1703 @@
                         };
     
                         return DeleteDatabaseMetadata;
+                    })();
+    
+                    v1.CreateUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of a CreateUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface ICreateUserCredsRequest
+                         * @property {string|null} [parent] CreateUserCredsRequest parent
+                         * @property {google.firestore.admin.v1.IUserCreds|null} [userCreds] CreateUserCredsRequest userCreds
+                         * @property {string|null} [userCredsId] CreateUserCredsRequest userCredsId
+                         */
+    
+                        /**
+                         * Constructs a new CreateUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a CreateUserCredsRequest.
+                         * @implements ICreateUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.ICreateUserCredsRequest=} [properties] Properties to set
+                         */
+                        function CreateUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * CreateUserCredsRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @instance
+                         */
+                        CreateUserCredsRequest.prototype.parent = "";
+    
+                        /**
+                         * CreateUserCredsRequest userCreds.
+                         * @member {google.firestore.admin.v1.IUserCreds|null|undefined} userCreds
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @instance
+                         */
+                        CreateUserCredsRequest.prototype.userCreds = null;
+    
+                        /**
+                         * CreateUserCredsRequest userCredsId.
+                         * @member {string} userCredsId
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @instance
+                         */
+                        CreateUserCredsRequest.prototype.userCredsId = "";
+    
+                        /**
+                         * Creates a new CreateUserCredsRequest instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ICreateUserCredsRequest=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.CreateUserCredsRequest} CreateUserCredsRequest instance
+                         */
+                        CreateUserCredsRequest.create = function create(properties) {
+                            return new CreateUserCredsRequest(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified CreateUserCredsRequest message. Does not implicitly {@link google.firestore.admin.v1.CreateUserCredsRequest.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ICreateUserCredsRequest} message CreateUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        CreateUserCredsRequest.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.parent != null && Object.hasOwnProperty.call(message, "parent"))
+                                writer.uint32(/* id 1, wireType 2 =*/10).string(message.parent);
+                            if (message.userCreds != null && Object.hasOwnProperty.call(message, "userCreds"))
+                                $root.google.firestore.admin.v1.UserCreds.encode(message.userCreds, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                            if (message.userCredsId != null && Object.hasOwnProperty.call(message, "userCredsId"))
+                                writer.uint32(/* id 3, wireType 2 =*/26).string(message.userCredsId);
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified CreateUserCredsRequest message, length delimited. Does not implicitly {@link google.firestore.admin.v1.CreateUserCredsRequest.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ICreateUserCredsRequest} message CreateUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        CreateUserCredsRequest.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a CreateUserCredsRequest message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.CreateUserCredsRequest} CreateUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        CreateUserCredsRequest.decode = function decode(reader, length) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.CreateUserCredsRequest();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.parent = reader.string();
+                                        break;
+                                    }
+                                case 2: {
+                                        message.userCreds = $root.google.firestore.admin.v1.UserCreds.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 3: {
+                                        message.userCredsId = reader.string();
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a CreateUserCredsRequest message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.CreateUserCredsRequest} CreateUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        CreateUserCredsRequest.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a CreateUserCredsRequest message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        CreateUserCredsRequest.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                if (!$util.isString(message.parent))
+                                    return "parent: string expected";
+                            if (message.userCreds != null && message.hasOwnProperty("userCreds")) {
+                                var error = $root.google.firestore.admin.v1.UserCreds.verify(message.userCreds);
+                                if (error)
+                                    return "userCreds." + error;
+                            }
+                            if (message.userCredsId != null && message.hasOwnProperty("userCredsId"))
+                                if (!$util.isString(message.userCredsId))
+                                    return "userCredsId: string expected";
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a CreateUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.CreateUserCredsRequest} CreateUserCredsRequest
+                         */
+                        CreateUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.CreateUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.CreateUserCredsRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            if (object.userCreds != null) {
+                                if (typeof object.userCreds !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CreateUserCredsRequest.userCreds: object expected");
+                                message.userCreds = $root.google.firestore.admin.v1.UserCreds.fromObject(object.userCreds);
+                            }
+                            if (object.userCredsId != null)
+                                message.userCredsId = String(object.userCredsId);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a CreateUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.CreateUserCredsRequest} message CreateUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        CreateUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.parent = "";
+                                object.userCreds = null;
+                                object.userCredsId = "";
+                            }
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            if (message.userCreds != null && message.hasOwnProperty("userCreds"))
+                                object.userCreds = $root.google.firestore.admin.v1.UserCreds.toObject(message.userCreds, options);
+                            if (message.userCredsId != null && message.hasOwnProperty("userCredsId"))
+                                object.userCredsId = message.userCredsId;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this CreateUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        CreateUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for CreateUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        CreateUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.CreateUserCredsRequest";
+                        };
+    
+                        return CreateUserCredsRequest;
+                    })();
+    
+                    v1.GetUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of a GetUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IGetUserCredsRequest
+                         * @property {string|null} [name] GetUserCredsRequest name
+                         */
+    
+                        /**
+                         * Constructs a new GetUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a GetUserCredsRequest.
+                         * @implements IGetUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IGetUserCredsRequest=} [properties] Properties to set
+                         */
+                        function GetUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * GetUserCredsRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @instance
+                         */
+                        GetUserCredsRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a new GetUserCredsRequest instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IGetUserCredsRequest=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.GetUserCredsRequest} GetUserCredsRequest instance
+                         */
+                        GetUserCredsRequest.create = function create(properties) {
+                            return new GetUserCredsRequest(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified GetUserCredsRequest message. Does not implicitly {@link google.firestore.admin.v1.GetUserCredsRequest.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IGetUserCredsRequest} message GetUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        GetUserCredsRequest.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                                writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified GetUserCredsRequest message, length delimited. Does not implicitly {@link google.firestore.admin.v1.GetUserCredsRequest.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IGetUserCredsRequest} message GetUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        GetUserCredsRequest.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a GetUserCredsRequest message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.GetUserCredsRequest} GetUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        GetUserCredsRequest.decode = function decode(reader, length) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.GetUserCredsRequest();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.name = reader.string();
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a GetUserCredsRequest message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.GetUserCredsRequest} GetUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        GetUserCredsRequest.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a GetUserCredsRequest message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        GetUserCredsRequest.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                if (!$util.isString(message.name))
+                                    return "name: string expected";
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a GetUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.GetUserCredsRequest} GetUserCredsRequest
+                         */
+                        GetUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.GetUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.GetUserCredsRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a GetUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.GetUserCredsRequest} message GetUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        GetUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this GetUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        GetUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for GetUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        GetUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.GetUserCredsRequest";
+                        };
+    
+                        return GetUserCredsRequest;
+                    })();
+    
+                    v1.ListUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of a ListUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListUserCredsRequest
+                         * @property {string|null} [parent] ListUserCredsRequest parent
+                         */
+    
+                        /**
+                         * Constructs a new ListUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListUserCredsRequest.
+                         * @implements IListUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListUserCredsRequest=} [properties] Properties to set
+                         */
+                        function ListUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListUserCredsRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @instance
+                         */
+                        ListUserCredsRequest.prototype.parent = "";
+    
+                        /**
+                         * Creates a new ListUserCredsRequest instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IListUserCredsRequest=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.ListUserCredsRequest} ListUserCredsRequest instance
+                         */
+                        ListUserCredsRequest.create = function create(properties) {
+                            return new ListUserCredsRequest(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified ListUserCredsRequest message. Does not implicitly {@link google.firestore.admin.v1.ListUserCredsRequest.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IListUserCredsRequest} message ListUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        ListUserCredsRequest.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.parent != null && Object.hasOwnProperty.call(message, "parent"))
+                                writer.uint32(/* id 1, wireType 2 =*/10).string(message.parent);
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified ListUserCredsRequest message, length delimited. Does not implicitly {@link google.firestore.admin.v1.ListUserCredsRequest.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IListUserCredsRequest} message ListUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        ListUserCredsRequest.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a ListUserCredsRequest message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.ListUserCredsRequest} ListUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        ListUserCredsRequest.decode = function decode(reader, length) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.ListUserCredsRequest();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.parent = reader.string();
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a ListUserCredsRequest message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.ListUserCredsRequest} ListUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        ListUserCredsRequest.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a ListUserCredsRequest message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        ListUserCredsRequest.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                if (!$util.isString(message.parent))
+                                    return "parent: string expected";
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a ListUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListUserCredsRequest} ListUserCredsRequest
+                         */
+                        ListUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListUserCredsRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ListUserCredsRequest} message ListUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.parent = "";
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListUserCredsRequest";
+                        };
+    
+                        return ListUserCredsRequest;
+                    })();
+    
+                    v1.ListUserCredsResponse = (function() {
+    
+                        /**
+                         * Properties of a ListUserCredsResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListUserCredsResponse
+                         * @property {Array.<google.firestore.admin.v1.IUserCreds>|null} [userCreds] ListUserCredsResponse userCreds
+                         */
+    
+                        /**
+                         * Constructs a new ListUserCredsResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListUserCredsResponse.
+                         * @implements IListUserCredsResponse
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListUserCredsResponse=} [properties] Properties to set
+                         */
+                        function ListUserCredsResponse(properties) {
+                            this.userCreds = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListUserCredsResponse userCreds.
+                         * @member {Array.<google.firestore.admin.v1.IUserCreds>} userCreds
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @instance
+                         */
+                        ListUserCredsResponse.prototype.userCreds = $util.emptyArray;
+    
+                        /**
+                         * Creates a new ListUserCredsResponse instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {google.firestore.admin.v1.IListUserCredsResponse=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.ListUserCredsResponse} ListUserCredsResponse instance
+                         */
+                        ListUserCredsResponse.create = function create(properties) {
+                            return new ListUserCredsResponse(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified ListUserCredsResponse message. Does not implicitly {@link google.firestore.admin.v1.ListUserCredsResponse.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {google.firestore.admin.v1.IListUserCredsResponse} message ListUserCredsResponse message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        ListUserCredsResponse.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.userCreds != null && message.userCreds.length)
+                                for (var i = 0; i < message.userCreds.length; ++i)
+                                    $root.google.firestore.admin.v1.UserCreds.encode(message.userCreds[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified ListUserCredsResponse message, length delimited. Does not implicitly {@link google.firestore.admin.v1.ListUserCredsResponse.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {google.firestore.admin.v1.IListUserCredsResponse} message ListUserCredsResponse message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        ListUserCredsResponse.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a ListUserCredsResponse message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.ListUserCredsResponse} ListUserCredsResponse
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        ListUserCredsResponse.decode = function decode(reader, length) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.ListUserCredsResponse();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        if (!(message.userCreds && message.userCreds.length))
+                                            message.userCreds = [];
+                                        message.userCreds.push($root.google.firestore.admin.v1.UserCreds.decode(reader, reader.uint32()));
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a ListUserCredsResponse message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.ListUserCredsResponse} ListUserCredsResponse
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        ListUserCredsResponse.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a ListUserCredsResponse message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        ListUserCredsResponse.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.userCreds != null && message.hasOwnProperty("userCreds")) {
+                                if (!Array.isArray(message.userCreds))
+                                    return "userCreds: array expected";
+                                for (var i = 0; i < message.userCreds.length; ++i) {
+                                    var error = $root.google.firestore.admin.v1.UserCreds.verify(message.userCreds[i]);
+                                    if (error)
+                                        return "userCreds." + error;
+                                }
+                            }
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a ListUserCredsResponse message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListUserCredsResponse} ListUserCredsResponse
+                         */
+                        ListUserCredsResponse.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListUserCredsResponse)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListUserCredsResponse();
+                            if (object.userCreds) {
+                                if (!Array.isArray(object.userCreds))
+                                    throw TypeError(".google.firestore.admin.v1.ListUserCredsResponse.userCreds: array expected");
+                                message.userCreds = [];
+                                for (var i = 0; i < object.userCreds.length; ++i) {
+                                    if (typeof object.userCreds[i] !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.ListUserCredsResponse.userCreds: object expected");
+                                    message.userCreds[i] = $root.google.firestore.admin.v1.UserCreds.fromObject(object.userCreds[i]);
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListUserCredsResponse message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {google.firestore.admin.v1.ListUserCredsResponse} message ListUserCredsResponse
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListUserCredsResponse.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.userCreds = [];
+                            if (message.userCreds && message.userCreds.length) {
+                                object.userCreds = [];
+                                for (var j = 0; j < message.userCreds.length; ++j)
+                                    object.userCreds[j] = $root.google.firestore.admin.v1.UserCreds.toObject(message.userCreds[j], options);
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListUserCredsResponse to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListUserCredsResponse.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListUserCredsResponse
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListUserCredsResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListUserCredsResponse";
+                        };
+    
+                        return ListUserCredsResponse;
+                    })();
+    
+                    v1.EnableUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of an EnableUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IEnableUserCredsRequest
+                         * @property {string|null} [name] EnableUserCredsRequest name
+                         */
+    
+                        /**
+                         * Constructs a new EnableUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents an EnableUserCredsRequest.
+                         * @implements IEnableUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IEnableUserCredsRequest=} [properties] Properties to set
+                         */
+                        function EnableUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * EnableUserCredsRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @instance
+                         */
+                        EnableUserCredsRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a new EnableUserCredsRequest instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IEnableUserCredsRequest=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.EnableUserCredsRequest} EnableUserCredsRequest instance
+                         */
+                        EnableUserCredsRequest.create = function create(properties) {
+                            return new EnableUserCredsRequest(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified EnableUserCredsRequest message. Does not implicitly {@link google.firestore.admin.v1.EnableUserCredsRequest.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IEnableUserCredsRequest} message EnableUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        EnableUserCredsRequest.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                                writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified EnableUserCredsRequest message, length delimited. Does not implicitly {@link google.firestore.admin.v1.EnableUserCredsRequest.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IEnableUserCredsRequest} message EnableUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        EnableUserCredsRequest.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes an EnableUserCredsRequest message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.EnableUserCredsRequest} EnableUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        EnableUserCredsRequest.decode = function decode(reader, length) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.EnableUserCredsRequest();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.name = reader.string();
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes an EnableUserCredsRequest message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.EnableUserCredsRequest} EnableUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        EnableUserCredsRequest.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies an EnableUserCredsRequest message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        EnableUserCredsRequest.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                if (!$util.isString(message.name))
+                                    return "name: string expected";
+                            return null;
+                        };
+    
+                        /**
+                         * Creates an EnableUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.EnableUserCredsRequest} EnableUserCredsRequest
+                         */
+                        EnableUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.EnableUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.EnableUserCredsRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from an EnableUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.EnableUserCredsRequest} message EnableUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        EnableUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this EnableUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        EnableUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for EnableUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        EnableUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.EnableUserCredsRequest";
+                        };
+    
+                        return EnableUserCredsRequest;
+                    })();
+    
+                    v1.DisableUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of a DisableUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDisableUserCredsRequest
+                         * @property {string|null} [name] DisableUserCredsRequest name
+                         */
+    
+                        /**
+                         * Constructs a new DisableUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DisableUserCredsRequest.
+                         * @implements IDisableUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDisableUserCredsRequest=} [properties] Properties to set
+                         */
+                        function DisableUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * DisableUserCredsRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @instance
+                         */
+                        DisableUserCredsRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a new DisableUserCredsRequest instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IDisableUserCredsRequest=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.DisableUserCredsRequest} DisableUserCredsRequest instance
+                         */
+                        DisableUserCredsRequest.create = function create(properties) {
+                            return new DisableUserCredsRequest(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified DisableUserCredsRequest message. Does not implicitly {@link google.firestore.admin.v1.DisableUserCredsRequest.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IDisableUserCredsRequest} message DisableUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        DisableUserCredsRequest.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                                writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified DisableUserCredsRequest message, length delimited. Does not implicitly {@link google.firestore.admin.v1.DisableUserCredsRequest.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IDisableUserCredsRequest} message DisableUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        DisableUserCredsRequest.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a DisableUserCredsRequest message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.DisableUserCredsRequest} DisableUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        DisableUserCredsRequest.decode = function decode(reader, length) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.DisableUserCredsRequest();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.name = reader.string();
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a DisableUserCredsRequest message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.DisableUserCredsRequest} DisableUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        DisableUserCredsRequest.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a DisableUserCredsRequest message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        DisableUserCredsRequest.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                if (!$util.isString(message.name))
+                                    return "name: string expected";
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a DisableUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DisableUserCredsRequest} DisableUserCredsRequest
+                         */
+                        DisableUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DisableUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.DisableUserCredsRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a DisableUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.DisableUserCredsRequest} message DisableUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DisableUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this DisableUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DisableUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DisableUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DisableUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DisableUserCredsRequest";
+                        };
+    
+                        return DisableUserCredsRequest;
+                    })();
+    
+                    v1.ResetUserPasswordRequest = (function() {
+    
+                        /**
+                         * Properties of a ResetUserPasswordRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IResetUserPasswordRequest
+                         * @property {string|null} [name] ResetUserPasswordRequest name
+                         */
+    
+                        /**
+                         * Constructs a new ResetUserPasswordRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ResetUserPasswordRequest.
+                         * @implements IResetUserPasswordRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IResetUserPasswordRequest=} [properties] Properties to set
+                         */
+                        function ResetUserPasswordRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ResetUserPasswordRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @instance
+                         */
+                        ResetUserPasswordRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a new ResetUserPasswordRequest instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IResetUserPasswordRequest=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.ResetUserPasswordRequest} ResetUserPasswordRequest instance
+                         */
+                        ResetUserPasswordRequest.create = function create(properties) {
+                            return new ResetUserPasswordRequest(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified ResetUserPasswordRequest message. Does not implicitly {@link google.firestore.admin.v1.ResetUserPasswordRequest.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IResetUserPasswordRequest} message ResetUserPasswordRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        ResetUserPasswordRequest.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                                writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified ResetUserPasswordRequest message, length delimited. Does not implicitly {@link google.firestore.admin.v1.ResetUserPasswordRequest.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IResetUserPasswordRequest} message ResetUserPasswordRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        ResetUserPasswordRequest.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a ResetUserPasswordRequest message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.ResetUserPasswordRequest} ResetUserPasswordRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        ResetUserPasswordRequest.decode = function decode(reader, length) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.ResetUserPasswordRequest();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.name = reader.string();
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a ResetUserPasswordRequest message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.ResetUserPasswordRequest} ResetUserPasswordRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        ResetUserPasswordRequest.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a ResetUserPasswordRequest message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        ResetUserPasswordRequest.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                if (!$util.isString(message.name))
+                                    return "name: string expected";
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a ResetUserPasswordRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ResetUserPasswordRequest} ResetUserPasswordRequest
+                         */
+                        ResetUserPasswordRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ResetUserPasswordRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ResetUserPasswordRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ResetUserPasswordRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ResetUserPasswordRequest} message ResetUserPasswordRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ResetUserPasswordRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ResetUserPasswordRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ResetUserPasswordRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ResetUserPasswordRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ResetUserPasswordRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ResetUserPasswordRequest";
+                        };
+    
+                        return ResetUserPasswordRequest;
+                    })();
+    
+                    v1.DeleteUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of a DeleteUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDeleteUserCredsRequest
+                         * @property {string|null} [name] DeleteUserCredsRequest name
+                         */
+    
+                        /**
+                         * Constructs a new DeleteUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DeleteUserCredsRequest.
+                         * @implements IDeleteUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDeleteUserCredsRequest=} [properties] Properties to set
+                         */
+                        function DeleteUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * DeleteUserCredsRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @instance
+                         */
+                        DeleteUserCredsRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a new DeleteUserCredsRequest instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IDeleteUserCredsRequest=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.DeleteUserCredsRequest} DeleteUserCredsRequest instance
+                         */
+                        DeleteUserCredsRequest.create = function create(properties) {
+                            return new DeleteUserCredsRequest(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified DeleteUserCredsRequest message. Does not implicitly {@link google.firestore.admin.v1.DeleteUserCredsRequest.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IDeleteUserCredsRequest} message DeleteUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        DeleteUserCredsRequest.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                                writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified DeleteUserCredsRequest message, length delimited. Does not implicitly {@link google.firestore.admin.v1.DeleteUserCredsRequest.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.IDeleteUserCredsRequest} message DeleteUserCredsRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        DeleteUserCredsRequest.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a DeleteUserCredsRequest message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.DeleteUserCredsRequest} DeleteUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        DeleteUserCredsRequest.decode = function decode(reader, length) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.DeleteUserCredsRequest();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.name = reader.string();
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a DeleteUserCredsRequest message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.DeleteUserCredsRequest} DeleteUserCredsRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        DeleteUserCredsRequest.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a DeleteUserCredsRequest message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        DeleteUserCredsRequest.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                if (!$util.isString(message.name))
+                                    return "name: string expected";
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a DeleteUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DeleteUserCredsRequest} DeleteUserCredsRequest
+                         */
+                        DeleteUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DeleteUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.DeleteUserCredsRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a DeleteUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.DeleteUserCredsRequest} message DeleteUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DeleteUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this DeleteUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DeleteUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DeleteUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DeleteUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DeleteUserCredsRequest";
+                        };
+    
+                        return DeleteUserCredsRequest;
                     })();
     
                     v1.CreateBackupScheduleRequest = (function() {
@@ -18130,6 +20058,603 @@
                         };
     
                         return WeeklyRecurrence;
+                    })();
+    
+                    v1.UserCreds = (function() {
+    
+                        /**
+                         * Properties of a UserCreds.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IUserCreds
+                         * @property {string|null} [name] UserCreds name
+                         * @property {google.protobuf.ITimestamp|null} [createTime] UserCreds createTime
+                         * @property {google.protobuf.ITimestamp|null} [updateTime] UserCreds updateTime
+                         * @property {google.firestore.admin.v1.UserCreds.State|null} [state] UserCreds state
+                         * @property {string|null} [securePassword] UserCreds securePassword
+                         * @property {google.firestore.admin.v1.UserCreds.IResourceIdentity|null} [resourceIdentity] UserCreds resourceIdentity
+                         */
+    
+                        /**
+                         * Constructs a new UserCreds.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a UserCreds.
+                         * @implements IUserCreds
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IUserCreds=} [properties] Properties to set
+                         */
+                        function UserCreds(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * UserCreds name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.name = "";
+    
+                        /**
+                         * UserCreds createTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} createTime
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.createTime = null;
+    
+                        /**
+                         * UserCreds updateTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} updateTime
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.updateTime = null;
+    
+                        /**
+                         * UserCreds state.
+                         * @member {google.firestore.admin.v1.UserCreds.State} state
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.state = 0;
+    
+                        /**
+                         * UserCreds securePassword.
+                         * @member {string} securePassword
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.securePassword = "";
+    
+                        /**
+                         * UserCreds resourceIdentity.
+                         * @member {google.firestore.admin.v1.UserCreds.IResourceIdentity|null|undefined} resourceIdentity
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.resourceIdentity = null;
+    
+                        // OneOf field names bound to virtual getters and setters
+                        var $oneOfFields;
+    
+                        /**
+                         * UserCreds UserCredsIdentity.
+                         * @member {"resourceIdentity"|undefined} UserCredsIdentity
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        Object.defineProperty(UserCreds.prototype, "UserCredsIdentity", {
+                            get: $util.oneOfGetter($oneOfFields = ["resourceIdentity"]),
+                            set: $util.oneOfSetter($oneOfFields)
+                        });
+    
+                        /**
+                         * Creates a new UserCreds instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {google.firestore.admin.v1.IUserCreds=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.UserCreds} UserCreds instance
+                         */
+                        UserCreds.create = function create(properties) {
+                            return new UserCreds(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified UserCreds message. Does not implicitly {@link google.firestore.admin.v1.UserCreds.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {google.firestore.admin.v1.IUserCreds} message UserCreds message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        UserCreds.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                                writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
+                            if (message.createTime != null && Object.hasOwnProperty.call(message, "createTime"))
+                                $root.google.protobuf.Timestamp.encode(message.createTime, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                            if (message.updateTime != null && Object.hasOwnProperty.call(message, "updateTime"))
+                                $root.google.protobuf.Timestamp.encode(message.updateTime, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+                            if (message.state != null && Object.hasOwnProperty.call(message, "state"))
+                                writer.uint32(/* id 4, wireType 0 =*/32).int32(message.state);
+                            if (message.securePassword != null && Object.hasOwnProperty.call(message, "securePassword"))
+                                writer.uint32(/* id 5, wireType 2 =*/42).string(message.securePassword);
+                            if (message.resourceIdentity != null && Object.hasOwnProperty.call(message, "resourceIdentity"))
+                                $root.google.firestore.admin.v1.UserCreds.ResourceIdentity.encode(message.resourceIdentity, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified UserCreds message, length delimited. Does not implicitly {@link google.firestore.admin.v1.UserCreds.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {google.firestore.admin.v1.IUserCreds} message UserCreds message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        UserCreds.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a UserCreds message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.UserCreds} UserCreds
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        UserCreds.decode = function decode(reader, length) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.UserCreds();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.name = reader.string();
+                                        break;
+                                    }
+                                case 2: {
+                                        message.createTime = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 3: {
+                                        message.updateTime = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 4: {
+                                        message.state = reader.int32();
+                                        break;
+                                    }
+                                case 5: {
+                                        message.securePassword = reader.string();
+                                        break;
+                                    }
+                                case 6: {
+                                        message.resourceIdentity = $root.google.firestore.admin.v1.UserCreds.ResourceIdentity.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a UserCreds message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.UserCreds} UserCreds
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        UserCreds.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a UserCreds message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        UserCreds.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            var properties = {};
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                if (!$util.isString(message.name))
+                                    return "name: string expected";
+                            if (message.createTime != null && message.hasOwnProperty("createTime")) {
+                                var error = $root.google.protobuf.Timestamp.verify(message.createTime);
+                                if (error)
+                                    return "createTime." + error;
+                            }
+                            if (message.updateTime != null && message.hasOwnProperty("updateTime")) {
+                                var error = $root.google.protobuf.Timestamp.verify(message.updateTime);
+                                if (error)
+                                    return "updateTime." + error;
+                            }
+                            if (message.state != null && message.hasOwnProperty("state"))
+                                switch (message.state) {
+                                default:
+                                    return "state: enum value expected";
+                                case 0:
+                                case 1:
+                                case 2:
+                                    break;
+                                }
+                            if (message.securePassword != null && message.hasOwnProperty("securePassword"))
+                                if (!$util.isString(message.securePassword))
+                                    return "securePassword: string expected";
+                            if (message.resourceIdentity != null && message.hasOwnProperty("resourceIdentity")) {
+                                properties.UserCredsIdentity = 1;
+                                {
+                                    var error = $root.google.firestore.admin.v1.UserCreds.ResourceIdentity.verify(message.resourceIdentity);
+                                    if (error)
+                                        return "resourceIdentity." + error;
+                                }
+                            }
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a UserCreds message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.UserCreds} UserCreds
+                         */
+                        UserCreds.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.UserCreds)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.UserCreds();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            if (object.createTime != null) {
+                                if (typeof object.createTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UserCreds.createTime: object expected");
+                                message.createTime = $root.google.protobuf.Timestamp.fromObject(object.createTime);
+                            }
+                            if (object.updateTime != null) {
+                                if (typeof object.updateTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UserCreds.updateTime: object expected");
+                                message.updateTime = $root.google.protobuf.Timestamp.fromObject(object.updateTime);
+                            }
+                            switch (object.state) {
+                            default:
+                                if (typeof object.state === "number") {
+                                    message.state = object.state;
+                                    break;
+                                }
+                                break;
+                            case "STATE_UNSPECIFIED":
+                            case 0:
+                                message.state = 0;
+                                break;
+                            case "ENABLED":
+                            case 1:
+                                message.state = 1;
+                                break;
+                            case "DISABLED":
+                            case 2:
+                                message.state = 2;
+                                break;
+                            }
+                            if (object.securePassword != null)
+                                message.securePassword = String(object.securePassword);
+                            if (object.resourceIdentity != null) {
+                                if (typeof object.resourceIdentity !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UserCreds.resourceIdentity: object expected");
+                                message.resourceIdentity = $root.google.firestore.admin.v1.UserCreds.ResourceIdentity.fromObject(object.resourceIdentity);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a UserCreds message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {google.firestore.admin.v1.UserCreds} message UserCreds
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        UserCreds.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.name = "";
+                                object.createTime = null;
+                                object.updateTime = null;
+                                object.state = options.enums === String ? "STATE_UNSPECIFIED" : 0;
+                                object.securePassword = "";
+                            }
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.createTime != null && message.hasOwnProperty("createTime"))
+                                object.createTime = $root.google.protobuf.Timestamp.toObject(message.createTime, options);
+                            if (message.updateTime != null && message.hasOwnProperty("updateTime"))
+                                object.updateTime = $root.google.protobuf.Timestamp.toObject(message.updateTime, options);
+                            if (message.state != null && message.hasOwnProperty("state"))
+                                object.state = options.enums === String ? $root.google.firestore.admin.v1.UserCreds.State[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.UserCreds.State[message.state] : message.state;
+                            if (message.securePassword != null && message.hasOwnProperty("securePassword"))
+                                object.securePassword = message.securePassword;
+                            if (message.resourceIdentity != null && message.hasOwnProperty("resourceIdentity")) {
+                                object.resourceIdentity = $root.google.firestore.admin.v1.UserCreds.ResourceIdentity.toObject(message.resourceIdentity, options);
+                                if (options.oneofs)
+                                    object.UserCredsIdentity = "resourceIdentity";
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this UserCreds to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        UserCreds.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for UserCreds
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        UserCreds.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.UserCreds";
+                        };
+    
+                        /**
+                         * State enum.
+                         * @name google.firestore.admin.v1.UserCreds.State
+                         * @enum {number}
+                         * @property {number} STATE_UNSPECIFIED=0 STATE_UNSPECIFIED value
+                         * @property {number} ENABLED=1 ENABLED value
+                         * @property {number} DISABLED=2 DISABLED value
+                         */
+                        UserCreds.State = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "STATE_UNSPECIFIED"] = 0;
+                            values[valuesById[1] = "ENABLED"] = 1;
+                            values[valuesById[2] = "DISABLED"] = 2;
+                            return values;
+                        })();
+    
+                        UserCreds.ResourceIdentity = (function() {
+    
+                            /**
+                             * Properties of a ResourceIdentity.
+                             * @memberof google.firestore.admin.v1.UserCreds
+                             * @interface IResourceIdentity
+                             * @property {string|null} [principal] ResourceIdentity principal
+                             */
+    
+                            /**
+                             * Constructs a new ResourceIdentity.
+                             * @memberof google.firestore.admin.v1.UserCreds
+                             * @classdesc Represents a ResourceIdentity.
+                             * @implements IResourceIdentity
+                             * @constructor
+                             * @param {google.firestore.admin.v1.UserCreds.IResourceIdentity=} [properties] Properties to set
+                             */
+                            function ResourceIdentity(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * ResourceIdentity principal.
+                             * @member {string} principal
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @instance
+                             */
+                            ResourceIdentity.prototype.principal = "";
+    
+                            /**
+                             * Creates a new ResourceIdentity instance using the specified properties.
+                             * @function create
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {google.firestore.admin.v1.UserCreds.IResourceIdentity=} [properties] Properties to set
+                             * @returns {google.firestore.admin.v1.UserCreds.ResourceIdentity} ResourceIdentity instance
+                             */
+                            ResourceIdentity.create = function create(properties) {
+                                return new ResourceIdentity(properties);
+                            };
+    
+                            /**
+                             * Encodes the specified ResourceIdentity message. Does not implicitly {@link google.firestore.admin.v1.UserCreds.ResourceIdentity.verify|verify} messages.
+                             * @function encode
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {google.firestore.admin.v1.UserCreds.IResourceIdentity} message ResourceIdentity message or plain object to encode
+                             * @param {$protobuf.Writer} [writer] Writer to encode to
+                             * @returns {$protobuf.Writer} Writer
+                             */
+                            ResourceIdentity.encode = function encode(message, writer) {
+                                if (!writer)
+                                    writer = $Writer.create();
+                                if (message.principal != null && Object.hasOwnProperty.call(message, "principal"))
+                                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.principal);
+                                return writer;
+                            };
+    
+                            /**
+                             * Encodes the specified ResourceIdentity message, length delimited. Does not implicitly {@link google.firestore.admin.v1.UserCreds.ResourceIdentity.verify|verify} messages.
+                             * @function encodeDelimited
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {google.firestore.admin.v1.UserCreds.IResourceIdentity} message ResourceIdentity message or plain object to encode
+                             * @param {$protobuf.Writer} [writer] Writer to encode to
+                             * @returns {$protobuf.Writer} Writer
+                             */
+                            ResourceIdentity.encodeDelimited = function encodeDelimited(message, writer) {
+                                return this.encode(message, writer).ldelim();
+                            };
+    
+                            /**
+                             * Decodes a ResourceIdentity message from the specified reader or buffer.
+                             * @function decode
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                             * @param {number} [length] Message length if known beforehand
+                             * @returns {google.firestore.admin.v1.UserCreds.ResourceIdentity} ResourceIdentity
+                             * @throws {Error} If the payload is not a reader or valid buffer
+                             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                             */
+                            ResourceIdentity.decode = function decode(reader, length) {
+                                if (!(reader instanceof $Reader))
+                                    reader = $Reader.create(reader);
+                                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.UserCreds.ResourceIdentity();
+                                while (reader.pos < end) {
+                                    var tag = reader.uint32();
+                                    switch (tag >>> 3) {
+                                    case 1: {
+                                            message.principal = reader.string();
+                                            break;
+                                        }
+                                    default:
+                                        reader.skipType(tag & 7);
+                                        break;
+                                    }
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Decodes a ResourceIdentity message from the specified reader or buffer, length delimited.
+                             * @function decodeDelimited
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                             * @returns {google.firestore.admin.v1.UserCreds.ResourceIdentity} ResourceIdentity
+                             * @throws {Error} If the payload is not a reader or valid buffer
+                             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                             */
+                            ResourceIdentity.decodeDelimited = function decodeDelimited(reader) {
+                                if (!(reader instanceof $Reader))
+                                    reader = new $Reader(reader);
+                                return this.decode(reader, reader.uint32());
+                            };
+    
+                            /**
+                             * Verifies a ResourceIdentity message.
+                             * @function verify
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {Object.<string,*>} message Plain object to verify
+                             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                             */
+                            ResourceIdentity.verify = function verify(message) {
+                                if (typeof message !== "object" || message === null)
+                                    return "object expected";
+                                if (message.principal != null && message.hasOwnProperty("principal"))
+                                    if (!$util.isString(message.principal))
+                                        return "principal: string expected";
+                                return null;
+                            };
+    
+                            /**
+                             * Creates a ResourceIdentity message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.UserCreds.ResourceIdentity} ResourceIdentity
+                             */
+                            ResourceIdentity.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.UserCreds.ResourceIdentity)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.UserCreds.ResourceIdentity();
+                                if (object.principal != null)
+                                    message.principal = String(object.principal);
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a ResourceIdentity message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {google.firestore.admin.v1.UserCreds.ResourceIdentity} message ResourceIdentity
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            ResourceIdentity.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.principal = "";
+                                if (message.principal != null && message.hasOwnProperty("principal"))
+                                    object.principal = message.principal;
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this ResourceIdentity to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            ResourceIdentity.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for ResourceIdentity
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            ResourceIdentity.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.UserCreds.ResourceIdentity";
+                            };
+    
+                            return ResourceIdentity;
+                        })();
+    
+                        return UserCreds;
                     })();
     
                     v1.LocationMetadata = (function() {
