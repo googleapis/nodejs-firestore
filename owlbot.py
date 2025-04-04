@@ -211,6 +211,11 @@ if staging.is_dir():
         "../../protos",
         "../protos"
     )
+    s.replace(
+        "types/v1/firestore_client.d.ts",
+        "import Long = require(\"long\");",
+        ""
+    )
 
   finally:
     # The staging directory should never be merged into the main branch.
