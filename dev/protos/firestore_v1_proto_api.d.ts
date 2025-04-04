@@ -15,7 +15,6 @@
  */
 
 import * as $protobuf from "protobufjs";
-import Long = require("long");
 /** Namespace firestore. */
 export namespace firestore {
 
