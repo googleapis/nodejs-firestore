@@ -218,12 +218,12 @@ if staging.is_dir():
     )
     s.replace(
         "types/protos/firestore_v1_proto_api.d.ts",
-        'import Long = require(\"long");',
+        'import Long = require("long");',
         ""
     )
     s.replace(
         "types/protos/firestore_v1beta1_proto_api.d.ts",
-        'import Long = require(\"long");',
+        'import Long = require("long");',
         ""
     )
 
