@@ -28,6 +28,7 @@
     "firestore"
   ],
   "scripts": {
+    "Xpreinstall": "npx npm-force-resolutions",
     "precloud-rad": "npm run compile",
     "cloud-rad": "NO_UPLOAD=1 npx @google-cloud/cloud-rad",
     "preapi-report": "npm run compile",
@@ -70,6 +71,7 @@
     "protobufjs": "^7.2.6"
   },
   "devDependencies": {
+    "@google-cloud/promisify": "legacy-14",
     "@google-cloud/trace-agent": "^8.0.0",
     "@googleapis/cloudtrace": "^1.1.2",
     "@google-cloud/cloud-rad": "^0.4.0",
