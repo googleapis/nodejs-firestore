@@ -28,7 +28,6 @@
     "firestore"
   ],
   "scripts": {
-    "Xpreinstall": "npx npm-force-resolutions",
     "precloud-rad": "npm run compile",
     "cloud-rad": "NO_UPLOAD=1 npx @google-cloud/cloud-rad",
     "preapi-report": "npm run compile",
