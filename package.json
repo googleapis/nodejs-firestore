@@ -70,6 +70,7 @@
     "protobufjs": "^7.2.6"
   },
   "devDependencies": {
+    "@google-cloud/promisify": "legacy-14",
     "@google-cloud/trace-agent": "^8.0.0",
     "@googleapis/cloudtrace": "^1.1.2",
     "@google-cloud/cloud-rad": "^0.4.0",
