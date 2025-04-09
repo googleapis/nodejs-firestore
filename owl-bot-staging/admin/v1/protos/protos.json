@@ -122,6 +122,13 @@
                         "(google.api.resource).pattern": "projects/{project}/databases/{database}",
                         "(google.api.resource).style": "DECLARATIVE_FRIENDLY"
                       },
+                      "oneofs": {
+                        "_freeTier": {
+                          "oneof": [
+                            "freeTier"
+                          ]
+                        }
+                      },
                       "fields": {
                         "name": {
                           "type": "string",
@@ -221,9 +228,24 @@
                             "(google.api.field_behavior)": "OUTPUT_ONLY"
                           }
                         },
+                        "freeTier": {
+                          "type": "bool",
+                          "id": 30,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY",
+                            "proto3_optional": true
+                          }
+                        },
                         "etag": {
                           "type": "string",
                           "id": 99
+                        },
+                        "databaseEdition": {
+                          "type": "DatabaseEdition",
+                          "id": 28,
+                          "options": {
+                            "(google.api.field_behavior)": "IMMUTABLE"
+                          }
                         }
                       },
                       "nested": {
@@ -360,6 +382,13 @@
                               }
                             }
                           }
+                        },
+                        "DatabaseEdition": {
+                          "values": {
+                            "DATABASE_EDITION_UNSPECIFIED": 0,
+                            "STANDARD": 1,
+                            "ENTERPRISE": 2
+                          }
                         }
                       }
                     },
@@ -456,6 +485,27 @@
                         "state": {
                           "type": "State",
                           "id": 4
+                        },
+                        "density": {
+                          "type": "Density",
+                          "id": 6,
+                          "options": {
+                            "(google.api.field_behavior)": "IMMUTABLE"
+                          }
+                        },
+                        "multikey": {
+                          "type": "bool",
+                          "id": 7,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        },
+                        "shardCount": {
+                          "type": "int32",
+                          "id": 8,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
                         }
                       },
                       "nested": {
@@ -470,7 +520,8 @@
                         "ApiScope": {
                           "values": {
                             "ANY_API": 0,
-                            "DATASTORE_MODE_API": 1
+                            "DATASTORE_MODE_API": 1,
+                            "MONGODB_COMPATIBLE_API": 2
                           }
                         },
                         "IndexField": {
@@ -550,6 +601,14 @@
                             "CREATING": 1,
                             "READY": 2,
                             "NEEDS_REPAIR": 3
+                          }
+                        },
+                        "Density": {
+                          "values": {
+                            "DENSITY_UNSPECIFIED": 0,
+                            "SPARSE_ALL": 1,
+                            "SPARSE_ANY": 2,
+                            "DENSE": 3
                           }
                         }
                       }

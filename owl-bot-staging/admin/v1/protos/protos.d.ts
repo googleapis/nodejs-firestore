@@ -333,8 +333,14 @@ export namespace google {
                     /** Database sourceInfo */
                     sourceInfo?: (google.firestore.admin.v1.Database.ISourceInfo|null);
 
+                    /** Database freeTier */
+                    freeTier?: (boolean|null);
+
                     /** Database etag */
                     etag?: (string|null);
+
+                    /** Database databaseEdition */
+                    databaseEdition?: (google.firestore.admin.v1.Database.DatabaseEdition|keyof typeof google.firestore.admin.v1.Database.DatabaseEdition|null);
                 }
 
                 /** Represents a Database. */
@@ -397,8 +403,14 @@ export namespace google {
                     /** Database sourceInfo. */
                     public sourceInfo?: (google.firestore.admin.v1.Database.ISourceInfo|null);
 
+                    /** Database freeTier. */
+                    public freeTier?: (boolean|null);
+
                     /** Database etag. */
                     public etag: string;
+
+                    /** Database databaseEdition. */
+                    public databaseEdition: (google.firestore.admin.v1.Database.DatabaseEdition|keyof typeof google.firestore.admin.v1.Database.DatabaseEdition);
 
                     /**
                      * Creates a new Database instance using the specified properties.
@@ -1218,6 +1230,13 @@ export namespace google {
                             public static getTypeUrl(typeUrlPrefix?: string): string;
                         }
                     }
+
+                    /** DatabaseEdition enum. */
+                    enum DatabaseEdition {
+                        DATABASE_EDITION_UNSPECIFIED = 0,
+                        STANDARD = 1,
+                        ENTERPRISE = 2
+                    }
                 }
 
                 /** Properties of a Field. */
@@ -1572,6 +1591,15 @@ export namespace google {
 
                     /** Index state */
                     state?: (google.firestore.admin.v1.Index.State|keyof typeof google.firestore.admin.v1.Index.State|null);
+
+                    /** Index density */
+                    density?: (google.firestore.admin.v1.Index.Density|keyof typeof google.firestore.admin.v1.Index.Density|null);
+
+                    /** Index multikey */
+                    multikey?: (boolean|null);
+
+                    /** Index shardCount */
+                    shardCount?: (number|null);
                 }
 
                 /** Represents an Index. */
@@ -1597,6 +1625,15 @@ export namespace google {
 
                     /** Index state. */
                     public state: (google.firestore.admin.v1.Index.State|keyof typeof google.firestore.admin.v1.Index.State);
+
+                    /** Index density. */
+                    public density: (google.firestore.admin.v1.Index.Density|keyof typeof google.firestore.admin.v1.Index.Density);
+
+                    /** Index multikey. */
+                    public multikey: boolean;
+
+                    /** Index shardCount. */
+                    public shardCount: number;
 
                     /**
                      * Creates a new Index instance using the specified properties.
@@ -1689,7 +1726,8 @@ export namespace google {
                     /** ApiScope enum. */
                     enum ApiScope {
                         ANY_API = 0,
-                        DATASTORE_MODE_API = 1
+                        DATASTORE_MODE_API = 1,
+                        MONGODB_COMPATIBLE_API = 2
                     }
 
                     /** Properties of an IndexField. */
@@ -2032,6 +2070,14 @@ export namespace google {
                         CREATING = 1,
                         READY = 2,
                         NEEDS_REPAIR = 3
+                    }
+
+                    /** Density enum. */
+                    enum Density {
+                        DENSITY_UNSPECIFIED = 0,
+                        SPARSE_ALL = 1,
+                        SPARSE_ANY = 2,
+                        DENSE = 3
                     }
                 }
 

@@ -785,7 +785,9 @@
                          * @property {google.firestore.admin.v1.Database.ICmekConfig|null} [cmekConfig] Database cmekConfig
                          * @property {string|null} [previousId] Database previousId
                          * @property {google.firestore.admin.v1.Database.ISourceInfo|null} [sourceInfo] Database sourceInfo
+                         * @property {boolean|null} [freeTier] Database freeTier
                          * @property {string|null} [etag] Database etag
+                         * @property {google.firestore.admin.v1.Database.DatabaseEdition|null} [databaseEdition] Database databaseEdition
                          */
     
                         /**
@@ -940,12 +942,37 @@
                         Database.prototype.sourceInfo = null;
     
                         /**
+                         * Database freeTier.
+                         * @member {boolean|null|undefined} freeTier
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.freeTier = null;
+    
+                        /**
                          * Database etag.
                          * @member {string} etag
                          * @memberof google.firestore.admin.v1.Database
                          * @instance
                          */
                         Database.prototype.etag = "";
+    
+                        /**
+                         * Database databaseEdition.
+                         * @member {google.firestore.admin.v1.Database.DatabaseEdition} databaseEdition
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.databaseEdition = 0;
+    
+                        // OneOf field names bound to virtual getters and setters
+                        var $oneOfFields;
+    
+                        // Virtual OneOf for proto3 optional field
+                        Object.defineProperty(Database.prototype, "_freeTier", {
+                            get: $util.oneOfGetter($oneOfFields = ["freeTier"]),
+                            set: $util.oneOfSetter($oneOfFields)
+                        });
     
                         /**
                          * Creates a new Database instance using the specified properties.
@@ -1005,6 +1032,10 @@
                                 writer.uint32(/* id 25, wireType 2 =*/202).string(message.previousId);
                             if (message.sourceInfo != null && Object.hasOwnProperty.call(message, "sourceInfo"))
                                 $root.google.firestore.admin.v1.Database.SourceInfo.encode(message.sourceInfo, writer.uint32(/* id 26, wireType 2 =*/210).fork()).ldelim();
+                            if (message.databaseEdition != null && Object.hasOwnProperty.call(message, "databaseEdition"))
+                                writer.uint32(/* id 28, wireType 0 =*/224).int32(message.databaseEdition);
+                            if (message.freeTier != null && Object.hasOwnProperty.call(message, "freeTier"))
+                                writer.uint32(/* id 30, wireType 0 =*/240).bool(message.freeTier);
                             if (message.etag != null && Object.hasOwnProperty.call(message, "etag"))
                                 writer.uint32(/* id 99, wireType 2 =*/794).string(message.etag);
                             return writer;
@@ -1109,8 +1140,16 @@
                                         message.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.decode(reader, reader.uint32());
                                         break;
                                     }
+                                case 30: {
+                                        message.freeTier = reader.bool();
+                                        break;
+                                    }
                                 case 99: {
                                         message.etag = reader.string();
+                                        break;
+                                    }
+                                case 28: {
+                                        message.databaseEdition = reader.int32();
                                         break;
                                     }
                                 default:
@@ -1148,6 +1187,7 @@
                         Database.verify = function verify(message) {
                             if (typeof message !== "object" || message === null)
                                 return "object expected";
+                            var properties = {};
                             if (message.name != null && message.hasOwnProperty("name"))
                                 if (!$util.isString(message.name))
                                     return "name: string expected";
@@ -1244,9 +1284,23 @@
                                 if (error)
                                     return "sourceInfo." + error;
                             }
+                            if (message.freeTier != null && message.hasOwnProperty("freeTier")) {
+                                properties._freeTier = 1;
+                                if (typeof message.freeTier !== "boolean")
+                                    return "freeTier: boolean expected";
+                            }
                             if (message.etag != null && message.hasOwnProperty("etag"))
                                 if (!$util.isString(message.etag))
                                     return "etag: string expected";
+                            if (message.databaseEdition != null && message.hasOwnProperty("databaseEdition"))
+                                switch (message.databaseEdition) {
+                                default:
+                                    return "databaseEdition: enum value expected";
+                                case 0:
+                                case 1:
+                                case 2:
+                                    break;
+                                }
                             return null;
                         };
     
@@ -1411,8 +1465,30 @@
                                     throw TypeError(".google.firestore.admin.v1.Database.sourceInfo: object expected");
                                 message.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.fromObject(object.sourceInfo);
                             }
+                            if (object.freeTier != null)
+                                message.freeTier = Boolean(object.freeTier);
                             if (object.etag != null)
                                 message.etag = String(object.etag);
+                            switch (object.databaseEdition) {
+                            default:
+                                if (typeof object.databaseEdition === "number") {
+                                    message.databaseEdition = object.databaseEdition;
+                                    break;
+                                }
+                                break;
+                            case "DATABASE_EDITION_UNSPECIFIED":
+                            case 0:
+                                message.databaseEdition = 0;
+                                break;
+                            case "STANDARD":
+                            case 1:
+                                message.databaseEdition = 1;
+                                break;
+                            case "ENTERPRISE":
+                            case 2:
+                                message.databaseEdition = 2;
+                                break;
+                            }
                             return message;
                         };
     
@@ -1447,6 +1523,7 @@
                                 object.cmekConfig = null;
                                 object.previousId = "";
                                 object.sourceInfo = null;
+                                object.databaseEdition = options.enums === String ? "DATABASE_EDITION_UNSPECIFIED" : 0;
                                 object.etag = "";
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
@@ -1483,6 +1560,13 @@
                                 object.previousId = message.previousId;
                             if (message.sourceInfo != null && message.hasOwnProperty("sourceInfo"))
                                 object.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.toObject(message.sourceInfo, options);
+                            if (message.databaseEdition != null && message.hasOwnProperty("databaseEdition"))
+                                object.databaseEdition = options.enums === String ? $root.google.firestore.admin.v1.Database.DatabaseEdition[message.databaseEdition] === undefined ? message.databaseEdition : $root.google.firestore.admin.v1.Database.DatabaseEdition[message.databaseEdition] : message.databaseEdition;
+                            if (message.freeTier != null && message.hasOwnProperty("freeTier")) {
+                                object.freeTier = message.freeTier;
+                                if (options.oneofs)
+                                    object._freeTier = "freeTier";
+                            }
                             if (message.etag != null && message.hasOwnProperty("etag"))
                                 object.etag = message.etag;
                             return object;
@@ -3143,6 +3227,22 @@
                             return EncryptionConfig;
                         })();
     
+                        /**
+                         * DatabaseEdition enum.
+                         * @name google.firestore.admin.v1.Database.DatabaseEdition
+                         * @enum {number}
+                         * @property {number} DATABASE_EDITION_UNSPECIFIED=0 DATABASE_EDITION_UNSPECIFIED value
+                         * @property {number} STANDARD=1 STANDARD value
+                         * @property {number} ENTERPRISE=2 ENTERPRISE value
+                         */
+                        Database.DatabaseEdition = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "DATABASE_EDITION_UNSPECIFIED"] = 0;
+                            values[valuesById[1] = "STANDARD"] = 1;
+                            values[valuesById[2] = "ENTERPRISE"] = 2;
+                            return values;
+                        })();
+    
                         return Database;
                     })();
     
@@ -3962,6 +4062,9 @@
                          * @property {google.firestore.admin.v1.Index.ApiScope|null} [apiScope] Index apiScope
                          * @property {Array.<google.firestore.admin.v1.Index.IIndexField>|null} [fields] Index fields
                          * @property {google.firestore.admin.v1.Index.State|null} [state] Index state
+                         * @property {google.firestore.admin.v1.Index.Density|null} [density] Index density
+                         * @property {boolean|null} [multikey] Index multikey
+                         * @property {number|null} [shardCount] Index shardCount
                          */
     
                         /**
@@ -4021,6 +4124,30 @@
                         Index.prototype.state = 0;
     
                         /**
+                         * Index density.
+                         * @member {google.firestore.admin.v1.Index.Density} density
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.density = 0;
+    
+                        /**
+                         * Index multikey.
+                         * @member {boolean} multikey
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.multikey = false;
+    
+                        /**
+                         * Index shardCount.
+                         * @member {number} shardCount
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.shardCount = 0;
+    
+                        /**
                          * Creates a new Index instance using the specified properties.
                          * @function create
                          * @memberof google.firestore.admin.v1.Index
@@ -4055,6 +4182,12 @@
                                 writer.uint32(/* id 4, wireType 0 =*/32).int32(message.state);
                             if (message.apiScope != null && Object.hasOwnProperty.call(message, "apiScope"))
                                 writer.uint32(/* id 5, wireType 0 =*/40).int32(message.apiScope);
+                            if (message.density != null && Object.hasOwnProperty.call(message, "density"))
+                                writer.uint32(/* id 6, wireType 0 =*/48).int32(message.density);
+                            if (message.multikey != null && Object.hasOwnProperty.call(message, "multikey"))
+                                writer.uint32(/* id 7, wireType 0 =*/56).bool(message.multikey);
+                            if (message.shardCount != null && Object.hasOwnProperty.call(message, "shardCount"))
+                                writer.uint32(/* id 8, wireType 0 =*/64).int32(message.shardCount);
                             return writer;
                         };
     
@@ -4111,6 +4244,18 @@
                                         message.state = reader.int32();
                                         break;
                                     }
+                                case 6: {
+                                        message.density = reader.int32();
+                                        break;
+                                    }
+                                case 7: {
+                                        message.multikey = reader.bool();
+                                        break;
+                                    }
+                                case 8: {
+                                        message.shardCount = reader.int32();
+                                        break;
+                                    }
                                 default:
                                     reader.skipType(tag & 7);
                                     break;
@@ -4165,6 +4310,7 @@
                                     return "apiScope: enum value expected";
                                 case 0:
                                 case 1:
+                                case 2:
                                     break;
                                 }
                             if (message.fields != null && message.hasOwnProperty("fields")) {
@@ -4186,6 +4332,22 @@
                                 case 3:
                                     break;
                                 }
+                            if (message.density != null && message.hasOwnProperty("density"))
+                                switch (message.density) {
+                                default:
+                                    return "density: enum value expected";
+                                case 0:
+                                case 1:
+                                case 2:
+                                case 3:
+                                    break;
+                                }
+                            if (message.multikey != null && message.hasOwnProperty("multikey"))
+                                if (typeof message.multikey !== "boolean")
+                                    return "multikey: boolean expected";
+                            if (message.shardCount != null && message.hasOwnProperty("shardCount"))
+                                if (!$util.isInteger(message.shardCount))
+                                    return "shardCount: integer expected";
                             return null;
                         };
     
@@ -4242,6 +4404,10 @@
                             case 1:
                                 message.apiScope = 1;
                                 break;
+                            case "MONGODB_COMPATIBLE_API":
+                            case 2:
+                                message.apiScope = 2;
+                                break;
                             }
                             if (object.fields) {
                                 if (!Array.isArray(object.fields))
@@ -4277,6 +4443,34 @@
                                 message.state = 3;
                                 break;
                             }
+                            switch (object.density) {
+                            default:
+                                if (typeof object.density === "number") {
+                                    message.density = object.density;
+                                    break;
+                                }
+                                break;
+                            case "DENSITY_UNSPECIFIED":
+                            case 0:
+                                message.density = 0;
+                                break;
+                            case "SPARSE_ALL":
+                            case 1:
+                                message.density = 1;
+                                break;
+                            case "SPARSE_ANY":
+                            case 2:
+                                message.density = 2;
+                                break;
+                            case "DENSE":
+                            case 3:
+                                message.density = 3;
+                                break;
+                            }
+                            if (object.multikey != null)
+                                message.multikey = Boolean(object.multikey);
+                            if (object.shardCount != null)
+                                message.shardCount = object.shardCount | 0;
                             return message;
                         };
     
@@ -4300,6 +4494,9 @@
                                 object.queryScope = options.enums === String ? "QUERY_SCOPE_UNSPECIFIED" : 0;
                                 object.state = options.enums === String ? "STATE_UNSPECIFIED" : 0;
                                 object.apiScope = options.enums === String ? "ANY_API" : 0;
+                                object.density = options.enums === String ? "DENSITY_UNSPECIFIED" : 0;
+                                object.multikey = false;
+                                object.shardCount = 0;
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
@@ -4314,6 +4511,12 @@
                                 object.state = options.enums === String ? $root.google.firestore.admin.v1.Index.State[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.Index.State[message.state] : message.state;
                             if (message.apiScope != null && message.hasOwnProperty("apiScope"))
                                 object.apiScope = options.enums === String ? $root.google.firestore.admin.v1.Index.ApiScope[message.apiScope] === undefined ? message.apiScope : $root.google.firestore.admin.v1.Index.ApiScope[message.apiScope] : message.apiScope;
+                            if (message.density != null && message.hasOwnProperty("density"))
+                                object.density = options.enums === String ? $root.google.firestore.admin.v1.Index.Density[message.density] === undefined ? message.density : $root.google.firestore.admin.v1.Index.Density[message.density] : message.density;
+                            if (message.multikey != null && message.hasOwnProperty("multikey"))
+                                object.multikey = message.multikey;
+                            if (message.shardCount != null && message.hasOwnProperty("shardCount"))
+                                object.shardCount = message.shardCount;
                             return object;
                         };
     
@@ -4367,11 +4570,13 @@
                          * @enum {number}
                          * @property {number} ANY_API=0 ANY_API value
                          * @property {number} DATASTORE_MODE_API=1 DATASTORE_MODE_API value
+                         * @property {number} MONGODB_COMPATIBLE_API=2 MONGODB_COMPATIBLE_API value
                          */
                         Index.ApiScope = (function() {
                             var valuesById = {}, values = Object.create(valuesById);
                             values[valuesById[0] = "ANY_API"] = 0;
                             values[valuesById[1] = "DATASTORE_MODE_API"] = 1;
+                            values[valuesById[2] = "MONGODB_COMPATIBLE_API"] = 2;
                             return values;
                         })();
     
@@ -5198,6 +5403,24 @@
                             values[valuesById[1] = "CREATING"] = 1;
                             values[valuesById[2] = "READY"] = 2;
                             values[valuesById[3] = "NEEDS_REPAIR"] = 3;
+                            return values;
+                        })();
+    
+                        /**
+                         * Density enum.
+                         * @name google.firestore.admin.v1.Index.Density
+                         * @enum {number}
+                         * @property {number} DENSITY_UNSPECIFIED=0 DENSITY_UNSPECIFIED value
+                         * @property {number} SPARSE_ALL=1 SPARSE_ALL value
+                         * @property {number} SPARSE_ANY=2 SPARSE_ANY value
+                         * @property {number} DENSE=3 DENSE value
+                         */
+                        Index.Density = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "DENSITY_UNSPECIFIED"] = 0;
+                            values[valuesById[1] = "SPARSE_ALL"] = 1;
+                            values[valuesById[2] = "SPARSE_ANY"] = 2;
+                            values[valuesById[3] = "DENSE"] = 3;
                             return values;
                         })();
     
