@@ -530,7 +530,6 @@ function normalizeTimestamp(obj: Record<string, unknown>) {
     if (fieldNames.includes(key) && typeof obj[key] === 'string') {
       obj[key] = convertTimestamp(obj[key] as string);
     } else if (typeof obj[key] === 'object') {
-      // @ts-ignore
       normalizeTimestamp(obj[key] as Record<string, unknown>);
     }
   }
@@ -577,7 +576,6 @@ function normalizeInt32Value(obj: Record<string, unknown>, parent = '') {
         value: obj[key],
       };
     } else if (typeof obj[key] === 'object') {
-      // @ts-ignore
       normalizeInt32Value(obj[key] as Record<string, object>, key);
     }
   }

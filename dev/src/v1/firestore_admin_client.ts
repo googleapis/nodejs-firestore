@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -1127,6 +1127,19 @@ export class FirestoreAdminClient {
    *   Use `{location} = '-'` to list backups from all locations for the given
    *   project. This allows listing backups from a single location or from all
    *   locations.
+   * @param {string} request.filter
+   *   An expression that filters the list of returned backups.
+   *
+   *   A filter expression consists of a field name, a comparison operator, and a
+   *   value for filtering.
+   *   The value must be a string, a number, or a boolean. The comparison operator
+   *   must be one of: `<`, `>`, `<=`, `>=`, `!=`, `=`, or `:`.
+   *   Colon `:` is the contains operator. Filter rules are not case sensitive.
+   *
+   *   The following fields in the {@link protos.google.firestore.admin.v1.Backup|Backup} are
+   *   eligible for filtering:
+   *
+   *     * `database_uid` (supports `=` only)
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -2073,8 +2086,8 @@ export class FirestoreAdminClient {
    *   Required. Database to export. Should be of the form:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {string[]} request.collectionIds
-   *   Which collection ids to export. Unspecified means all collections. Each
-   *   collection id in this list must be unique.
+   *   Which collection IDs to export. Unspecified means all collections. Each
+   *   collection ID in this list must be unique.
    * @param {string} request.outputUriPrefix
    *   The output URI. Currently only supports Google Cloud Storage URIs of the
    *   form: `gs://BUCKET_NAME[/NAMESPACE_PATH]`, where `BUCKET_NAME` is the name
@@ -2241,8 +2254,8 @@ export class FirestoreAdminClient {
    *   Required. Database to import into. Should be of the form:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {string[]} request.collectionIds
-   *   Which collection ids to import. Unspecified means all collections included
-   *   in the import. Each collection id in this list must be unique.
+   *   Which collection IDs to import. Unspecified means all collections included
+   *   in the import. Each collection ID in this list must be unique.
    * @param {string} request.inputUriPrefix
    *   Location of the exported files.
    *   This must match the output_uri_prefix of an ExportDocumentsResponse from
@@ -2563,7 +2576,7 @@ export class FirestoreAdminClient {
    *   with first character a letter and the last a letter or a number. Must not
    *   be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
    *
-   *   "(default)" database id is also valid.
+   *   "(default)" database ID is also valid.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -2998,19 +3011,28 @@ export class FirestoreAdminClient {
    *   `projects/{project_id}`.
    * @param {string} request.databaseId
    *   Required. The ID to use for the database, which will become the final
-   *   component of the database's resource name. This database id must not be
+   *   component of the database's resource name. This database ID must not be
    *   associated with an existing database.
    *
    *   This value should be 4-63 characters. Valid characters are /{@link protos.0-9|a-z}-/
    *   with first character a letter and the last a letter or a number. Must not
    *   be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
    *
-   *   "(default)" database id is also valid.
+   *   "(default)" database ID is also valid.
    * @param {string} request.backup
    *   Required. Backup to restore from. Must be from the same project as the
    *   parent.
    *
+   *   The restored database will be created in the same location as the source
+   *   backup.
+   *
    *   Format is: `projects/{project_id}/locations/{location}/backups/{backup}`
+   * @param {google.firestore.admin.v1.Database.EncryptionConfig} [request.encryptionConfig]
+   *   Optional. Encryption configuration for the restored database.
+   *
+   *   If this field is not specified, the restored database will use
+   *   the same encryption configuration as the backup, namely
+   *   {@link protos.google.firestore.admin.v1.Database.EncryptionConfig.use_source_encryption|use_source_encryption}.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -3238,7 +3260,7 @@ export class FirestoreAdminClient {
   }
 
   /**
-   * Equivalent to `method.name.toCamelCase()`, but returns a NodeJS Stream object.
+   * Equivalent to `listIndexes`, but returns a NodeJS Stream object.
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
@@ -3447,7 +3469,7 @@ export class FirestoreAdminClient {
   }
 
   /**
-   * Equivalent to `method.name.toCamelCase()`, but returns a NodeJS Stream object.
+   * Equivalent to `listFields`, but returns a NodeJS Stream object.
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
@@ -3666,7 +3688,7 @@ export class FirestoreAdminClient {
    */
   getOperation(
     request: protos.google.longrunning.GetOperationRequest,
-    options?:
+    optionsOrCallback?:
       | gax.CallOptions
       | Callback<
           protos.google.longrunning.Operation,
@@ -3679,6 +3701,20 @@ export class FirestoreAdminClient {
       {} | null | undefined
     >
   ): Promise<[protos.google.longrunning.Operation]> {
+    let options: gax.CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as gax.CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
+      });
     return this.operationsClient.getOperation(request, options, callback);
   }
   /**
@@ -3715,6 +3751,13 @@ export class FirestoreAdminClient {
     request: protos.google.longrunning.ListOperationsRequest,
     options?: gax.CallOptions
   ): AsyncIterable<protos.google.longrunning.ListOperationsResponse> {
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
+      });
     return this.operationsClient.listOperationsAsync(request, options);
   }
   /**
@@ -3750,11 +3793,11 @@ export class FirestoreAdminClient {
    */
   cancelOperation(
     request: protos.google.longrunning.CancelOperationRequest,
-    options?:
+    optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protos.google.protobuf.Empty,
           protos.google.longrunning.CancelOperationRequest,
+          protos.google.protobuf.Empty,
           {} | undefined | null
         >,
     callback?: Callback<
@@ -3763,6 +3806,20 @@ export class FirestoreAdminClient {
       {} | undefined | null
     >
   ): Promise<protos.google.protobuf.Empty> {
+    let options: gax.CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as gax.CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
+      });
     return this.operationsClient.cancelOperation(request, options, callback);
   }
 
@@ -3793,7 +3850,7 @@ export class FirestoreAdminClient {
    */
   deleteOperation(
     request: protos.google.longrunning.DeleteOperationRequest,
-    options?:
+    optionsOrCallback?:
       | gax.CallOptions
       | Callback<
           protos.google.protobuf.Empty,
@@ -3806,6 +3863,20 @@ export class FirestoreAdminClient {
       {} | null | undefined
     >
   ): Promise<protos.google.protobuf.Empty> {
+    let options: gax.CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as gax.CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams({
+        name: request.name ?? '',
+      });
     return this.operationsClient.deleteOperation(request, options, callback);
   }
 

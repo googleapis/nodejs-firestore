@@ -677,6 +677,11 @@ export class Firestore implements firestore.Firestore {
       libraryHeader.libVersion += ' fire/' + settings.firebaseVersion;
     }
 
+    if (settings && settings.firebaseAdminVersion) {
+      libraryHeader.libVersion +=
+        ' fire-admin/' + settings.firebaseAdminVersion;
+    }
+
     this.validateAndApplySettings({...settings, ...libraryHeader});
     this._traceUtil = this.newTraceUtilInstance(this._settings);
 
@@ -881,8 +886,7 @@ export class Firestore implements firestore.Firestore {
   }
 
   private newTraceUtilInstance(settings: firestore.Settings): TraceUtil {
-    // Take the tracing option from the settings.
-    let createEnabledInstance = settings.openTelemetryOptions?.enableTracing;
+    let createEnabledInstance = true;
 
     // The environment variable can override options to enable/disable telemetry collection.
     if ('FIRESTORE_ENABLE_TRACING' in process.env) {
@@ -1576,7 +1580,11 @@ export class Firestore implements firestore.Firestore {
    *
    * @return A Promise that resolves when the client is terminated.
    */
-  terminate(): Promise<void> {
+  async terminate(): Promise<void> {
+    if (this._bulkWriter) {
+      await this._bulkWriter.close();
+      this._bulkWriter = undefined;
+    }
     if (this.registeredListenersCount > 0 || this.bulkWritersCount > 0) {
       return Promise.reject(
         'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +

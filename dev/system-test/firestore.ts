@@ -2401,7 +2401,7 @@ describe('Query class', () => {
     });
 
     describe('requesting computed distance', () => {
-      it('supports COSINE distance', async () => {
+      it('supports requesting computed COSINE distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2438,7 +2438,7 @@ describe('Query class', () => {
         expect(res.docs[3].get('distance')).to.equal(2);
       });
 
-      it('supports EUCLIDEAN distance', async () => {
+      it('supports requesting computed EUCLIDEAN distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2482,7 +2482,7 @@ describe('Query class', () => {
         expect(res.docs[3].get('distance')).to.equal(100);
       });
 
-      it('supports DOT_PRODUCT distance', async () => {
+      it('supports requesting computed DOT_PRODUCT distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2557,7 +2557,7 @@ describe('Query class', () => {
         expect(res.docs[0].get('distance')).to.equal(1);
       });
 
-      it('supports select queries', async () => {
+      it('supports requesting computed distance in select queries', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2598,7 +2598,7 @@ describe('Query class', () => {
     });
 
     describe('querying with distance threshold', () => {
-      it('supports COSINE distance', async () => {
+      it('supports querying with distance threshold using COSINE distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2632,7 +2632,7 @@ describe('Query class', () => {
         ).to.be.true;
       });
 
-      it('supports EUCLIDEAN distance', async () => {
+      it('supports querying with distance threshold using EUCLIDEAN distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2666,7 +2666,7 @@ describe('Query class', () => {
           .to.be.true;
       });
 
-      it('supports DOT_PRODUCT distance', async () => {
+      it('supports querying with distance threshold using DOT_PRODUCT distance', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -2699,7 +2699,7 @@ describe('Query class', () => {
         ).to.be.true;
       });
 
-      it('works with distance threshold', async () => {
+      it('works with distance result field', async () => {
         const indexTestHelper = new IndexTestHelper(firestore);
 
         const collectionReference = await indexTestHelper.setTestDocs({
@@ -3932,6 +3932,112 @@ describe('Query class', () => {
       unsubscribe();
     });
 
+    it('snapshot listener sorts query by DocumentId same way as server', async () => {
+      const batch = firestore.batch();
+      batch.set(randomCol.doc('A'), {a: 1});
+      batch.set(randomCol.doc('a'), {a: 1});
+      batch.set(randomCol.doc('Aa'), {a: 1});
+      batch.set(randomCol.doc('7'), {a: 1});
+      batch.set(randomCol.doc('12'), {a: 1});
+      batch.set(randomCol.doc('__id7__'), {a: 1});
+      batch.set(randomCol.doc('__id12__'), {a: 1});
+      batch.set(randomCol.doc('__id-2__'), {a: 1});
+      batch.set(randomCol.doc('__id1_'), {a: 1});
+      batch.set(randomCol.doc('_id1__'), {a: 1});
+      batch.set(randomCol.doc('__id'), {a: 1});
+      // largest long number
+      batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
+      batch.set(randomCol.doc('__id9223372036854775806__'), {a: 1});
+      // smallest long number
+      batch.set(randomCol.doc('__id-9223372036854775808__'), {a: 1});
+      batch.set(randomCol.doc('__id-9223372036854775807__'), {a: 1});
+      await batch.commit();
+
+      const query = randomCol.orderBy(FieldPath.documentId());
+      const expectedDocs = [
+        '__id-9223372036854775808__',
+        '__id-9223372036854775807__',
+        '__id-2__',
+        '__id7__',
+        '__id12__',
+        '__id9223372036854775806__',
+        '__id9223372036854775807__',
+        '12',
+        '7',
+        'A',
+        'Aa',
+        '__id',
+        '__id1_',
+        '_id1__',
+        'a',
+      ];
+
+      const getSnapshot = await query.get();
+      expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+      const unsubscribe = query.onSnapshot(snapshot =>
+        currentDeferred.resolve(snapshot)
+      );
+
+      const watchSnapshot = await waitForSnapshot();
+      // Compare the snapshot (including sort order) of a snapshot
+      snapshotsEqual(watchSnapshot, {
+        docs: getSnapshot.docs,
+        docChanges: getSnapshot.docChanges(),
+      });
+      unsubscribe();
+    });
+
+    it('snapshot listener sorts filtered query by DocumentId same way as server', async () => {
+      const batch = firestore.batch();
+      batch.set(randomCol.doc('A'), {a: 1});
+      batch.set(randomCol.doc('a'), {a: 1});
+      batch.set(randomCol.doc('Aa'), {a: 1});
+      batch.set(randomCol.doc('7'), {a: 1});
+      batch.set(randomCol.doc('12'), {a: 1});
+      batch.set(randomCol.doc('__id7__'), {a: 1});
+      batch.set(randomCol.doc('__id12__'), {a: 1});
+      batch.set(randomCol.doc('__id-2__'), {a: 1});
+      batch.set(randomCol.doc('__id1_'), {a: 1});
+      batch.set(randomCol.doc('_id1__'), {a: 1});
+      batch.set(randomCol.doc('__id'), {a: 1});
+      // largest long number
+      batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
+      batch.set(randomCol.doc('__id9223372036854775806__'), {a: 1});
+      // smallest long number
+      batch.set(randomCol.doc('__id-9223372036854775808__'), {a: 1});
+      batch.set(randomCol.doc('__id-9223372036854775807__'), {a: 1});
+      await batch.commit();
+
+      const query = randomCol
+        .where(FieldPath.documentId(), '>', '__id7__')
+        .where(FieldPath.documentId(), '<=', 'A')
+        .orderBy(FieldPath.documentId());
+      const expectedDocs = [
+        '__id12__',
+        '__id9223372036854775806__',
+        '__id9223372036854775807__',
+        '12',
+        '7',
+        'A',
+      ];
+
+      const getSnapshot = await query.get();
+      expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+      const unsubscribe = query.onSnapshot(snapshot =>
+        currentDeferred.resolve(snapshot)
+      );
+
+      const watchSnapshot = await waitForSnapshot();
+      // Compare the snapshot (including sort order) of a snapshot
+      snapshotsEqual(watchSnapshot, {
+        docs: getSnapshot.docs,
+        docChanges: getSnapshot.docChanges(),
+      });
+      unsubscribe();
+    });
+
     it('SDK orders vector field same way as backend', async () => {
       // We validate that the SDK orders the vector field the same way as the backend
       // by comparing the sort order of vector fields from a Query.get() and
@@ -3995,6 +4101,190 @@ describe('Query class', () => {
       snapshotsEqual(watchSnapshot, {
         docs: expectedSnapshots,
         docChanges: expectedChanges,
+      });
+    });
+
+    describe('sort unicode strings', () => {
+      const expectedDocs = [
+        'b',
+        'a',
+        'h',
+        'i',
+        'c',
+        'f',
+        'e',
+        'd',
+        'g',
+        'k',
+        'j',
+      ];
+
+      it('snapshot listener sorts unicode strings same as server', async () => {
+        const collection = await testCollectionWithDocs({
+          a: {value: 'Łukasiewicz'},
+          b: {value: 'Sierpiński'},
+          c: {value: '岩澤'},
+          d: {value: '🄟'},
+          e: {value: 'Ｐ'},
+          f: {value: '︒'},
+          g: {value: '🐵'},
+          h: {value: '你好'},
+          i: {value: '你顥'},
+          j: {value: '😁'},
+          k: {value: '😀'},
+        });
+
+        const query = collection.orderBy('value');
+
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot)
+        );
+        const watchSnapshot = await waitForSnapshot();
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      });
+
+      it('snapshot listener sorts unicode strings in array same as server', async () => {
+        const collection = await testCollectionWithDocs({
+          a: {value: ['Łukasiewicz']},
+          b: {value: ['Sierpiński']},
+          c: {value: ['岩澤']},
+          d: {value: ['🄟']},
+          e: {value: ['Ｐ']},
+          f: {value: ['︒']},
+          g: {value: ['🐵']},
+          h: {value: ['你好']},
+          i: {value: ['你顥']},
+          j: {value: ['😁']},
+          k: {value: ['😀']},
+        });
+
+        const query = collection.orderBy('value');
+
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot)
+        );
+        const watchSnapshot = await waitForSnapshot();
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      });
+
+      it('snapshot listener sorts unicode strings in map same as server', async () => {
+        const collection = await testCollectionWithDocs({
+          a: {value: {foo: 'Łukasiewicz'}},
+          b: {value: {foo: 'Sierpiński'}},
+          c: {value: {foo: '岩澤'}},
+          d: {value: {foo: '🄟'}},
+          e: {value: {foo: 'Ｐ'}},
+          f: {value: {foo: '︒'}},
+          g: {value: {foo: '🐵'}},
+          h: {value: {foo: '你好'}},
+          i: {value: {foo: '你顥'}},
+          j: {value: {foo: '😁'}},
+          k: {value: {foo: '😀'}},
+        });
+
+        const query = collection.orderBy('value');
+
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot)
+        );
+        const watchSnapshot = await waitForSnapshot();
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      });
+
+      it('snapshot listener sorts unicode strings in map key same as server', async () => {
+        const collection = await testCollectionWithDocs({
+          a: {value: {Łukasiewicz: true}},
+          b: {value: {Sierpiński: true}},
+          c: {value: {岩澤: true}},
+          d: {value: {'🄟': true}},
+          e: {value: {Ｐ: true}},
+          f: {value: {'︒': true}},
+          g: {value: {'🐵': true}},
+          h: {value: {你好: true}},
+          i: {value: {你顥: true}},
+          j: {value: {'😁': true}},
+          k: {value: {'😀': true}},
+        });
+
+        const query = collection.orderBy('value');
+
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot)
+        );
+        const watchSnapshot = await waitForSnapshot();
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      });
+
+      it('snapshot listener sorts unicode strings in document key same as server', async () => {
+        const collection = await testCollectionWithDocs({
+          Łukasiewicz: {value: true},
+          Sierpiński: {value: true},
+          岩澤: {value: true},
+          '🄟': {value: true},
+          Ｐ: {value: true},
+          '︒': {value: true},
+          '🐵': {value: true},
+          你好: {value: true},
+          你顥: {value: true},
+          '😁': {value: true},
+          '😀': {value: true},
+        });
+
+        const query = collection.orderBy(FieldPath.documentId());
+        const expectedDocs = [
+          'Sierpiński',
+          'Łukasiewicz',
+          '你好',
+          '你顥',
+          '岩澤',
+          '︒',
+          'Ｐ',
+          '🄟',
+          '🐵',
+          '😀',
+          '😁',
+        ];
+
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot)
+        );
+        const watchSnapshot = await waitForSnapshot();
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
       });
     });
   });
@@ -6880,7 +7170,11 @@ describe('BulkWriter class', () => {
     writer = firestore.bulkWriter();
   });
 
-  afterEach(() => verifyInstance(firestore));
+  afterEach(async () => {
+    await writer.close();
+    await verifyInstance(firestore);
+    await firestore.terminate();
+  });
 
   it('has create() method', async () => {
     const ref = randomCol.doc('doc1');
@@ -7044,6 +7338,7 @@ describe('BulkWriter class', () => {
       });
       await firestore.recursiveDelete(randomCol, bulkWriter);
       expect(callbackCount).to.equal(6);
+      await bulkWriter.close();
     });
   });
 

@@ -17,6 +17,7 @@
 import * as firestore from '@google-cloud/firestore';
 
 import {google} from '../protos/firestore_v1_proto_api';
+import {compareUtf8Strings, primitiveComparator} from './order';
 
 import {isObject} from './util';
 import {
@@ -150,6 +151,10 @@ abstract class Path<T> {
   /**
    * Compare the current path against another Path object.
    *
+   * Compare the current path against another Path object. Paths are compared segment by segment,
+   * prioritizing numeric IDs (e.g., "__id123__") in numeric ascending order, followed by string
+   * segments in lexicographical order.
+   *
    * @private
    * @internal
    * @param other The path to compare to.
@@ -158,20 +163,57 @@ abstract class Path<T> {
   compareTo(other: Path<T>): number {
     const len = Math.min(this.segments.length, other.segments.length);
     for (let i = 0; i < len; i++) {
-      if (this.segments[i] < other.segments[i]) {
-        return -1;
-      }
-      if (this.segments[i] > other.segments[i]) {
-        return 1;
+      const comparison = this.compareSegments(
+        this.segments[i],
+        other.segments[i]
+      );
+      if (comparison !== 0) {
+        return comparison;
       }
     }
-    if (this.segments.length < other.segments.length) {
+    return primitiveComparator(this.segments.length, other.segments.length);
+  }
+
+  private compareSegments(lhs: string, rhs: string): number {
+    const isLhsNumeric = this.isNumericId(lhs);
+    const isRhsNumeric = this.isNumericId(rhs);
+
+    if (isLhsNumeric && !isRhsNumeric) {
+      // Only lhs is numeric
       return -1;
-    }
-    if (this.segments.length > other.segments.length) {
+    } else if (!isLhsNumeric && isRhsNumeric) {
+      // Only rhs is numeric
       return 1;
+    } else if (isLhsNumeric && isRhsNumeric) {
+      // both numeric
+      return this.compareNumbers(
+        this.extractNumericId(lhs),
+        this.extractNumericId(rhs)
+      );
+    } else {
+      // both non-numeric
+      return compareUtf8Strings(lhs, rhs);
     }
-    return 0;
+  }
+
+  // Checks if a segment is a numeric ID (starts with "__id" and ends with "__").
+  private isNumericId(segment: string): boolean {
+    return segment.startsWith('__id') && segment.endsWith('__');
+  }
+
+  //  Extracts the long number from a numeric ID segment.
+  private extractNumericId(segment: string): bigint {
+    return BigInt(segment.substring(4, segment.length - 2));
+  }
+
+  private compareNumbers(lhs: bigint, rhs: bigint): number {
+    if (lhs < rhs) {
+      return -1;
+    } else if (lhs > rhs) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 
   /**
@@ -621,7 +663,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
       .map(str => {
         return UNESCAPED_FIELD_NAME_RE.test(str)
           ? str
-          : '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
+          : '`' + str.replace(/\\/g, '\\\\').replace(/`/g, '\\`') + '`';
       })
       .join('.');
   }

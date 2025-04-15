@@ -465,7 +465,30 @@ declare namespace FirebaseFirestore {
      */
     preferRest?: boolean;
 
+    /**
+     * Settings related to telemetry collection by this client.
+     * @beta
+     */
+    openTelemetry?: FirestoreOpenTelemetryOptions;
+
     [key: string]: any; // Accept other properties, such as GRPC settings.
+  }
+
+  /**
+   * Options to configure telemetry collection.
+   * This is a 'beta' interface and may change in backwards incompatible ways.
+   * @beta
+   */
+  export interface FirestoreOpenTelemetryOptions {
+    /**
+     * The OpenTelemetry TracerProvider instance that the SDK should use to
+     * create trace spans. If not provided, the SDK will use the Global TracerProvider.
+     *
+     * Even if a Global TracerProvider has been registered, users can still
+     * disable this client's span creation by passing in a "no-op" tracer provider
+     * here, or by setting the `FIRESTORE_ENABLE_TRACING` environment variable to `OFF` or `FALSE`.
+     */
+    tracerProvider?: any;
   }
 
   /** Options to configure a read-only transaction. */
@@ -2108,6 +2131,38 @@ declare namespace FirebaseFirestore {
         limit: number;
         distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
       }
+    ): VectorQuery<AppModelType, DbModelType>;
+
+    /**
+     * Returns a query that can perform vector distance (similarity) search with given parameters.
+     *
+     * The returned query, when executed, performs a distance (similarity) search on the specified
+     * `vectorField` against the given `queryVector` and returns the top documents that are closest
+     * to the `queryVector`.
+     *
+     * Only documents whose `vectorField` field is a {@link VectorValue} of the same dimension as `queryVector`
+     * participate in the query, all other documents are ignored.
+     *
+     * @example
+     * ```
+     * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
+     * const vectorQuery = col.findNearest({
+     *     vectorField: 'embedding',
+     *     queryVector: [41, 42],
+     *     limit: 10,
+     *     distanceMeasure: 'EUCLIDEAN',
+     *     distanceResultField: 'distance',
+     *     distanceThreshold: 0.125
+     * });
+     *
+     * const querySnapshot = await aggregateQuery.get();
+     * querySnapshot.forEach(...);
+     * ```
+     * @param options - An argument specifying the behavior of the {@link VectorQuery} returned by this function.
+     * See {@link VectorQueryOptions}.
+     */
+    findNearest(
+      options: VectorQueryOptions
     ): VectorQuery<AppModelType, DbModelType>;
 
     /**

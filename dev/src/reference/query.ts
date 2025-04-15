@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import * as protos from '../../protos/firestore_v1_proto_api';
+import api = protos.google.firestore.v1;
 import * as firestore from '@google-cloud/firestore';
 import {GoogleError} from 'google-gax';
 import {Transform} from 'stream';
-import * as protos from '../../protos/firestore_v1_proto_api';
 import {and, Field, Ordering} from '../expression';
 
 import {CompositeFilter, UnaryFilter} from '../filter';
@@ -71,7 +72,6 @@ import {
 } from './types';
 import {VectorQuery} from './vector-query';
 import {VectorQueryOptions} from './vector-query-options';
-import api = protos.google.firestore.v1;
 import {SPAN_NAME_QUERY_GET} from '../telemetry/trace-util';
 
 /**
@@ -624,7 +624,7 @@ export class Query<
    * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
    * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
    *
-   * const querySnapshot = await aggregateQuery.get();
+   * const querySnapshot = await vectorQuery.get();
    * querySnapshot.forEach(...);
    * ```
    *
