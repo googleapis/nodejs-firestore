@@ -16,19 +16,11 @@ import * as firestore from '@google-cloud/firestore';
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
-import {
-  Accumulator,
-  Expr,
-  Field,
-  FilterCondition,
-  Ordering,
-  Selectable,
-} from './expression';
+import {AggregateFunction, Expr, Field, Ordering, field} from './expression';
 import {VectorValue} from './field-value';
 import {DocumentReference} from './reference/document-reference';
 import {Serializer} from './serializer';
 import {Pipeline} from './pipeline';
-import {selectableToExpr} from './pipeline-util';
 
 /**
  * @beta
@@ -77,7 +69,7 @@ export class Aggregate implements Stage {
   name = 'aggregate';
 
   constructor(
-    private accumulators: Map<string, Accumulator>,
+    private accumulators: Map<string, AggregateFunction>,
     private groups: Map<string, Expr>
   ) {}
 
@@ -185,7 +177,7 @@ export class DocumentsSource implements Stage {
 export class Where implements Stage {
   name = 'where';
 
-  constructor(private condition: firestore.FilterCondition & firestore.Expr) {}
+  constructor(private condition: firestore.BooleanExpr & firestore.Expr) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
@@ -219,7 +211,7 @@ export class FindNearest implements Stage {
       limit: serializer.encodeValue(this._options.limit)!,
     };
     if (this._options.distanceField) {
-      options.distance_field = Field.of(this._options.distanceField)._toProto(
+      options.distance_field = field(this._options.distanceField)._toProto(
         serializer
       );
     }
@@ -228,7 +220,7 @@ export class FindNearest implements Stage {
       name: this.name,
       args: [
         (typeof this._options.field === 'string'
-          ? Field.of(this._options.field)
+          ? field(this._options.field)
           : (this._options.field as unknown as Field)
         )._toProto(serializer),
         this._options.vectorValue instanceof VectorValue
@@ -274,7 +266,7 @@ export class Sample implements Stage {
 export class Union implements Stage {
   name = 'union';
 
-  constructor(private _other: Pipeline<unknown>) {}
+  constructor(private _other: Pipeline) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
@@ -288,8 +280,8 @@ export class Union implements Stage {
  * @beta
  */
 export interface UnnestOptions {
-  field: firestore.Selectable | string;
-  alias: firestore.Field | string;
+  expr: Expr;
+  alias: Field;
   indexField?: string;
 }
 
@@ -303,8 +295,8 @@ export class Unnest implements Stage {
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     const args: api.IValue[] = [
-      selectableToExpr(this.options.field)._toProto(serializer),
-      selectableToExpr(this.options.alias)._toProto(serializer),
+      this.options.expr._toProto(serializer),
+      this.options.alias._toProto(serializer),
     ];
     const indexField = this.options?.indexField;
     if (indexField) {

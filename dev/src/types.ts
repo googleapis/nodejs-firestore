@@ -19,7 +19,6 @@ import {
   QueryDocumentSnapshot,
   DocumentData,
   WithFieldValue,
-  FirestorePipelineConverter,
 } from '@google-cloud/firestore';
 
 import {CallOptions} from 'google-gax';
@@ -27,7 +26,6 @@ import {Duplex} from 'stream';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath} from './path';
-import {PipelineResult} from './pipeline';
 
 import api = google.firestore.v1;
 
@@ -151,23 +149,6 @@ export function defaultConverter<
     AppModelType,
     DbModelType
   >;
-}
-
-const defaultPipelineConverterObj: FirestorePipelineConverter<DocumentData> = {
-  fromFirestore(snapshot: PipelineResult): DocumentData {
-    return snapshot.data()!;
-  },
-};
-
-/**
- * A default converter to use when none is provided.
- * @private
- * @internal
- */
-export function defaultPipelineConverter<
-  AppModelType,
->(): FirestorePipelineConverter<AppModelType> {
-  return defaultPipelineConverterObj as FirestorePipelineConverter<AppModelType>;
 }
 
 /**

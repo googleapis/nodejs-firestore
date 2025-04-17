@@ -101,7 +101,7 @@ if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
 }
 
-export function getTestRoot(settings: Settings = {}): CollectionReference {
+export function getTestDb(settings: Settings = {}): Firestore {
   const internalSettings: Settings = {};
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
@@ -126,11 +126,14 @@ export function getTestRoot(settings: Settings = {}): CollectionReference {
     }
   }
 
-  const firestore = new Firestore({
+  return new Firestore({
     ...internalSettings,
     ...settings, // caller settings take precedent over internal settings
   });
-  return firestore.collection(`node_${version}_${autoId()}`);
+}
+
+export function getTestRoot(settings: Settings = {}): CollectionReference {
+  return getTestDb(settings).collection(`node_${version}_${autoId()}`);
 }
 
 describe('Firestore class', () => {

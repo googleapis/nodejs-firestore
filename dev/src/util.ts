@@ -365,3 +365,16 @@ export function isPrimitiveArrayEqual<T extends number | string>(
 
   return true;
 }
+
+export function cast<T>(
+  val: unknown,
+  constructor?: {new (...args: any[]): T}
+): T {
+  if (!constructor) {
+    return val as T;
+  } else if (val instanceof constructor) {
+    return val;
+  }
+
+  throw new Error(`${val} not instance of ${constructor}`);
+}

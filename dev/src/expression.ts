@@ -22,66 +22,84 @@ import {FieldPath} from './path';
 import {Pipeline} from './pipeline';
 import {isFirestoreValue} from './pipeline-util';
 import {Serializer} from './serializer';
+import {cast} from './util';
 
-/**
- * @beta
- *
- * An interface that represents a selectable expression.
- */
-export interface Selectable {
-  selectable: true;
+function isPlainObject(...args: unknown[]): boolean {
+  throw 'TODO implement isPlainObject';
+}
+function isString(val: unknown): val is string {
+  throw 'TODO implement isString';
 }
 
 /**
- * @beta
+ * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * ArrayFunction, or the input itself (if it's already an expression).
  *
- * An interface that represents a filter condition.
+ * @private
+ * @internal
+ * @param value
  */
-export interface FilterCondition {
-  filterable: true;
+function valueToDefaultExpr(value: unknown): Expr {
+  let result: Expr | undefined;
+  if (value instanceof Expr) {
+    return value;
+  }
+  if (value instanceof firestore.Expr) {
+    throw new Error('Unsupported Expr type: ' + typeof value);
+  } else if (isPlainObject(value)) {
+    result = map(value as Record<string, unknown>);
+  } else if (value instanceof Array) {
+    result = array(value);
+  } else {
+    result = new Constant(value);
+  }
+
+  // TODO(pipeline) is this still used?
+  result._createdFromLiteral = true;
+  return result;
 }
 
 /**
- * @beta
+ * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * ArrayFunction, or the input itself (if it's already an expression).
  *
- * An interface that represents an accumulator.
+ * @private
+ * @internal
+ * @param value
  */
-export interface Accumulator {
-  accumulator: true;
+function vectorToExpr(
+  value: firestore.VectorValue | number[] | firestore.Expr
+): Expr {
+  if (value instanceof Expr) {
+    return value;
+  } else if (value instanceof VectorValue || Array.isArray(value)) {
+    const result = constantVector(value);
+    result._createdFromLiteral = true;
+    return result;
+  } else {
+    throw new Error('Unsupported value: ' + typeof value);
+  }
 }
 
 /**
- * @beta
+ * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * ArrayFunction, or the input itself (if it's already an expression).
+ * If the input is a string, it is assumed to be a field name, and a
+ * field(value) is returned.
  *
- * An accumulator target, which is an expression with an alias that also implements the Accumulator interface.
+ * @private
+ * @internal
+ * @param value
  */
-export type AccumulatorTarget = ExprWithAlias<Expr & Accumulator>;
-
-/**
- * @beta
- *
- * A filter expression, which is an expression that also implements the FilterCondition interface.
- */
-export type FilterExpr = Expr & FilterCondition;
-
-/**
- * @beta
- *
- * A selectable expression, which is an expression that also implements the Selectable interface.
- */
-export type SelectableExpr = Expr & Selectable;
-
-/**
- * @beta
- *
- * An enumeration of the different types of expressions.
- */
-export type ExprType =
-  | 'Field'
-  | 'Constant'
-  | 'Function'
-  | 'ListOfExprs'
-  | 'ExprWithAlias';
+export function fieldOrExpression(value: unknown): Expr {
+  if (isString(value)) {
+    const result = field(value);
+    result._createdFromLiteral = true;
+    return result;
+  } else {
+    return valueToDefaultExpr(value);
+  }
+}
 
 /**
  * @beta
@@ -95,42 +113,49 @@ export type ExprType =
  * - **Field references:** Access values from document fields.
  * - **Literals:** Represent constant values (strings, numbers, booleans).
  * - **Function calls:** Apply functions to one or more expressions.
- * - **Aggregations:** Calculate aggregate values (e.g., sum, average) over a set of documents.
  *
  * The `Expr` class provides a fluent API for building expressions. You can chain together
  * method calls to create complex expressions.
  */
-export abstract class Expr implements firestore.Expr {
+export abstract class Expr extends firestore.Expr {
+  abstract readonly exprType: firestore.ExprType;
+
+  /**
+   * @internal
+   * @private
+   * Indicates if this expression was created from a literal value passed
+   * by the caller.
+   */
+  _createdFromLiteral = false;
+
+  /**
+   * @private
+   * @internal
+   */
+  abstract _toProto(serializer: Serializer): api.IValue;
+  _protoValueType = 'ProtoValue' as const;
+
   /**
    * Creates an expression that adds this expression to another expression.
    *
    * ```typescript
    * // Add the value of the 'quantity' field and the 'reserve' field.
-   * Field.of("quantity").add(Field.of("reserve"));
+   * field("quantity").add(field("reserve"));
    * ```
    *
-   * @param other The expression to add to this expression.
+   * @param second The expression or literal to add to this expression.
+   * @param others Optional additional expressions or literals to add to this expression.
    * @return A new `Expr` representing the addition operation.
    */
-  add(other: firestore.Expr): Add;
-
-  /**
-   * Creates an expression that adds this expression to a constant value.
-   *
-   * ```typescript
-   * // Add 5 to the value of the 'age' field
-   * Field.of("age").add(5);
-   * ```
-   *
-   * @param other The constant value to add.
-   * @return A new `Expr` representing the addition operation.
-   */
-  add(other: any): Add;
-  add(other: any): Add {
-    if (other instanceof Expr) {
-      return new Add(this, other);
-    }
-    return new Add(this, Constant.of(other));
+  add(
+    second: firestore.Expr | unknown,
+    ...others: Array<firestore.Expr | unknown>
+  ): FunctionExpr {
+    const values = [second, ...others];
+    return new FunctionExpr('add', [
+      this,
+      ...values.map(value => valueToDefaultExpr(value)),
+    ]);
   }
 
   /**
@@ -138,31 +163,28 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Subtract the 'discount' field from the 'price' field
-   * Field.of("price").subtract(Field.of("discount"));
+   * field("price").subtract(field("discount"));
    * ```
    *
    * @param other The expression to subtract from this expression.
    * @return A new `Expr` representing the subtraction operation.
    */
-  subtract(other: firestore.Expr): Subtract;
+  subtract(other: firestore.Expr): FunctionExpr;
 
   /**
    * Creates an expression that subtracts a constant value from this expression.
    *
    * ```typescript
    * // Subtract 20 from the value of the 'total' field
-   * Field.of("total").subtract(20);
+   * field("total").subtract(20);
    * ```
    *
    * @param other The constant value to subtract.
    * @return A new `Expr` representing the subtraction operation.
    */
-  subtract(other: any): Subtract;
-  subtract(other: any): Subtract {
-    if (other instanceof Expr) {
-      return new Subtract(this, other);
-    }
-    return new Subtract(this, Constant.of(other));
+  subtract(other: number): FunctionExpr;
+  subtract(other: number | firestore.Expr): FunctionExpr {
+    return new FunctionExpr('subtract', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -170,31 +192,22 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Multiply the 'quantity' field by the 'price' field
-   * Field.of("quantity").multiply(Field.of("price"));
+   * field("quantity").multiply(field("price"));
    * ```
    *
-   * @param other The expression to multiply by.
+   * @param second The second expression or literal to multiply by.
+   * @param others Optional additional expressions or literals to multiply by.
    * @return A new `Expr` representing the multiplication operation.
    */
-  multiply(other: firestore.Expr): Multiply;
-
-  /**
-   * Creates an expression that multiplies this expression by a constant value.
-   *
-   * ```typescript
-   * // Multiply the 'value' field by 2
-   * Field.of("value").multiply(2);
-   * ```
-   *
-   * @param other The constant value to multiply by.
-   * @return A new `Expr` representing the multiplication operation.
-   */
-  multiply(other: any): Multiply;
-  multiply(other: any): Multiply {
-    if (other instanceof Expr) {
-      return new Multiply(this, other);
-    }
-    return new Multiply(this, Constant.of(other));
+  multiply(
+    second: firestore.Expr | number,
+    ...others: Array<firestore.Expr | number>
+  ): FunctionExpr {
+    return new FunctionExpr('multiply', [
+      this,
+      valueToDefaultExpr(second),
+      ...others.map(value => valueToDefaultExpr(value)),
+    ]);
   }
 
   /**
@@ -202,31 +215,28 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Divide the 'total' field by the 'count' field
-   * Field.of("total").divide(Field.of("count"));
+   * field("total").divide(field("count"));
    * ```
    *
    * @param other The expression to divide by.
    * @return A new `Expr` representing the division operation.
    */
-  divide(other: firestore.Expr): Divide;
+  divide(other: firestore.Expr): FunctionExpr;
 
   /**
    * Creates an expression that divides this expression by a constant value.
    *
    * ```typescript
    * // Divide the 'value' field by 10
-   * Field.of("value").divide(10);
+   * field("value").divide(10);
    * ```
    *
    * @param other The constant value to divide by.
    * @return A new `Expr` representing the division operation.
    */
-  divide(other: any): Divide;
-  divide(other: any): Divide {
-    if (other instanceof Expr) {
-      return new Divide(this, other);
-    }
-    return new Divide(this, Constant.of(other));
+  divide(other: number): FunctionExpr;
+  divide(other: number | firestore.Expr): FunctionExpr {
+    return new FunctionExpr('divide', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -234,237 +244,57 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Calculate the remainder of dividing the 'value' field by the 'divisor' field
-   * Field.of("value").mod(Field.of("divisor"));
+   * field("value").mod(field("divisor"));
    * ```
    *
-   * @param other The expression to divide by.
+   * @param expression The expression to divide by.
    * @return A new `Expr` representing the modulo operation.
    */
-  mod(other: firestore.Expr): Mod;
+  mod(expression: firestore.Expr): FunctionExpr;
 
   /**
    * Creates an expression that calculates the modulo (remainder) of dividing this expression by a constant value.
    *
    * ```typescript
    * // Calculate the remainder of dividing the 'value' field by 10
-   * Field.of("value").mod(10);
+   * field("value").mod(10);
    * ```
    *
-   * @param other The constant value to divide by.
+   * @param value The constant value to divide by.
    * @return A new `Expr` representing the modulo operation.
    */
-  mod(other: any): Mod;
-  mod(other: any): Mod {
-    if (other instanceof Expr) {
-      return new Mod(this, other);
-    }
-    return new Mod(this, Constant.of(other));
+  mod(value: number): FunctionExpr;
+  mod(other: number | firestore.Expr): FunctionExpr {
+    return new FunctionExpr('mod', [this, valueToDefaultExpr(other)]);
   }
-
-  // /**
-  //  * Creates an expression that applies a bitwise AND operation between this expression and another expression.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise AND of 'field1' and 'field2'.
-  //  * Field.of("field1").bitAnd(Field.of("field2"));
-  //  * ```
-  //  *
-  //  * @param other The right operand expression.
-  //  * @return A new {@code Expr} representing the bitwise AND operation.
-  //  */
-  // bitAnd(other: firestore.Expr): BitAnd;
-  //
-  // /**
-  //  * Creates an expression that applies a bitwise AND operation between this expression and a constant value.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise AND of 'field1' and 0xFF.
-  //  * Field.of("field1").bitAnd(0xFF);
-  //  * ```
-  //  *
-  //  * @param other The right operand constant.
-  //  * @return A new {@code Expr} representing the bitwise AND operation.
-  //  */
-  // bitAnd(other: any): BitAnd;
-  // bitAnd(other: any): BitAnd {
-  //   if (other instanceof Expr) {
-  //     return new BitAnd(this, other);
-  //   }
-  //   return new BitAnd(this, Constant.of(other));
-  // }
-  //
-  // /**
-  //  * Creates an expression that applies a bitwise OR operation between this expression and another expression.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise OR of 'field1' and 'field2'.
-  //  * Field.of("field1").bitOr(Field.of("field2"));
-  //  * ```
-  //  *
-  //  * @param other The right operand expression.
-  //  * @return A new {@code Expr} representing the bitwise OR operation.
-  //  */
-  // bitOr(other: firestore.Expr): BitOr;
-  //
-  // /**
-  //  * Creates an expression that applies a bitwise OR operation between this expression and a constant value.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise OR of 'field1' and 0xFF.
-  //  * Field.of("field1").bitOr(0xFF);
-  //  * ```
-  //  *
-  //  * @param other The right operand constant.
-  //  * @return A new {@code Expr} representing the bitwise OR operation.
-  //  */
-  // bitOr(other: any): BitOr;
-  // bitOr(other: any): BitOr {
-  //   if (other instanceof Expr) {
-  //     return new BitOr(this, other);
-  //   }
-  //   return new BitOr(this, Constant.of(other));
-  // }
-  //
-  // /**
-  //  * Creates an expression that applies a bitwise XOR operation between this expression and another expression.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise XOR of 'field1' and 'field2'.
-  //  * Field.of("field1").bitXor(Field.of("field2"));
-  //  * ```
-  //  *
-  //  * @param other The right operand expression.
-  //  * @return A new {@code Expr} representing the bitwise XOR operation.
-  //  */
-  // bitXor(other: firestore.Expr): BitXor;
-  //
-  // /**
-  //  * Creates an expression that applies a bitwise XOR operation between this expression and a constant value.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise XOR of 'field1' and 0xFF.
-  //  * Field.of("field1").bitXor(0xFF);
-  //  * ```
-  //  *
-  //  * @param other The right operand constant.
-  //  * @return A new {@code Expr} representing the bitwise XOR operation.
-  //  */
-  // bitXor(other: any): BitXor;
-  // bitXor(other: any): BitXor {
-  //   if (other instanceof Expr) {
-  //     return new BitXor(this, other);
-  //   }
-  //   return new BitXor(this, Constant.of(other));
-  // }
-  //
-  // /**
-  //  * Creates an expression that applies a bitwise NOT operation to this expression.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise NOT of 'field1'.
-  //  * Field.of("field1").bitNot();
-  //  * ```
-  //  *
-  //  * @return A new {@code Expr} representing the bitwise NOT operation.
-  //  */
-  // bitNot(): BitNot {
-  //   return new BitNot(this);
-  // }
-  //
-  // /**
-  //  * Creates an expression that applies a bitwise left shift operation between this expression and another expression.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
-  //  * Field.of("field1").bitLeftShift(Field.of("field2"));
-  //  * ```
-  //  *
-  //  * @param other The right operand expression representing the number of bits to shift.
-  //  * @return A new {@code Expr} representing the bitwise left shift operation.
-  //  */
-  // bitLeftShift(other: firestore.Expr): BitLeftShift;
-  //
-  // /**
-  //  * Creates an expression that applies a bitwise left shift operation between this expression and a constant value.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise left shift of 'field1' by 2 bits.
-  //  * Field.of("field1").bitLeftShift(2);
-  //  * ```
-  //  *
-  //  * @param other The right operand constant representing the number of bits to shift.
-  //  * @return A new {@code Expr} representing the bitwise left shift operation.
-  //  */
-  // bitLeftShift(other: number): BitLeftShift;
-  // bitLeftShift(other: firestore.Expr | number): BitLeftShift {
-  //   if (typeof other === 'number') {
-  //     return new BitLeftShift(this, Constant.of(other));
-  //   }
-  //   return new BitLeftShift(this, other as Expr);
-  // }
-  //
-  // /**
-  //  * Creates an expression that applies a bitwise right shift operation between this expression and another expression.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
-  //  * Field.of("field1").bitRightShift(Field.of("field2"));
-  //  * ```
-  //  *
-  //  * @param other The right operand expression representing the number of bits to shift.
-  //  * @return A new {@code Expr} representing the bitwise right shift operation.
-  //  */
-  // bitRightShift(other: firestore.Expr): BitRightShift;
-  //
-  // /**
-  //  * Creates an expression that applies a bitwise right shift operation between this expression and a constant value.
-  //  *
-  //  * ```typescript
-  //  * // Calculate the bitwise right shift of 'field1' by 2 bits.
-  //  * Field.of("field1").bitRightShift(2);
-  //  * ```
-  //  *
-  //  * @param other The right operand constant representing the number of bits to shift.
-  //  * @return A new {@code Expr} representing the bitwise right shift operation.
-  //  */
-  // bitRightShift(other: number): BitRightShift;
-  // bitRightShift(other: firestore.Expr | number): BitRightShift {
-  //   if (typeof other === 'number') {
-  //     return new BitRightShift(this, Constant.of(other));
-  //   }
-  //   return new BitRightShift(this, other as Expr);
-  // }
 
   /**
    * Creates an expression that checks if this expression is equal to another expression.
    *
    * ```typescript
    * // Check if the 'age' field is equal to 21
-   * Field.of("age").eq(21);
+   * field("age").eq(21);
    * ```
    *
-   * @param other The expression to compare for equality.
+   * @param expression The expression to compare for equality.
    * @return A new `Expr` representing the equality comparison.
    */
-  eq(other: firestore.Expr): Eq;
+  eq(expression: firestore.Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is equal to a constant value.
    *
    * ```typescript
    * // Check if the 'city' field is equal to "London"
-   * Field.of("city").eq("London");
+   * field("city").eq("London");
    * ```
    *
-   * @param other The constant value to compare for equality.
+   * @param value The constant value to compare for equality.
    * @return A new `Expr` representing the equality comparison.
    */
-  eq(other: any): Eq;
-  eq(other: any): Eq {
-    if (other instanceof Expr) {
-      return new Eq(this, other);
-    }
-    return new Eq(this, Constant.of(other));
+  eq(value: unknown): BooleanExpr;
+  eq(other: unknown): BooleanExpr {
+    return new BooleanExpr('eq', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -472,31 +302,28 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'status' field is not equal to "completed"
-   * Field.of("status").neq("completed");
+   * field("status").neq("completed");
    * ```
    *
-   * @param other The expression to compare for inequality.
+   * @param expression The expression to compare for inequality.
    * @return A new `Expr` representing the inequality comparison.
    */
-  neq(other: firestore.Expr): Neq;
+  neq(expression: firestore.Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is not equal to a constant value.
    *
    * ```typescript
    * // Check if the 'country' field is not equal to "USA"
-   * Field.of("country").neq("USA");
+   * field("country").neq("USA");
    * ```
    *
-   * @param other The constant value to compare for inequality.
+   * @param value The constant value to compare for inequality.
    * @return A new `Expr` representing the inequality comparison.
    */
-  neq(other: any): Neq;
-  neq(other: any): Neq {
-    if (other instanceof Expr) {
-      return new Neq(this, other);
-    }
-    return new Neq(this, Constant.of(other));
+  neq(value: unknown): BooleanExpr;
+  neq(other: unknown): BooleanExpr {
+    return new BooleanExpr('neq', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -504,31 +331,28 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'age' field is less than 'limit'
-   * Field.of("age").lt(Field.of('limit'));
+   * field("age").lt(field('limit'));
    * ```
    *
-   * @param other The expression to compare for less than.
+   * @param experession The expression to compare for less than.
    * @return A new `Expr` representing the less than comparison.
    */
-  lt(other: firestore.Expr): Lt;
+  lt(experession: firestore.Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is less than a constant value.
    *
    * ```typescript
    * // Check if the 'price' field is less than 50
-   * Field.of("price").lt(50);
+   * field("price").lt(50);
    * ```
    *
-   * @param other The constant value to compare for less than.
+   * @param value The constant value to compare for less than.
    * @return A new `Expr` representing the less than comparison.
    */
-  lt(other: any): Lt;
-  lt(other: any): Lt {
-    if (other instanceof Expr) {
-      return new Lt(this, other);
-    }
-    return new Lt(this, Constant.of(other));
+  lt(value: unknown): BooleanExpr;
+  lt(other: unknown): BooleanExpr {
+    return new BooleanExpr('lt', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -537,31 +361,28 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'quantity' field is less than or equal to 20
-   * Field.of("quantity").lte(Constant.of(20));
+   * field("quantity").lte(constant(20));
    * ```
    *
-   * @param other The expression to compare for less than or equal to.
+   * @param expression The expression to compare for less than or equal to.
    * @return A new `Expr` representing the less than or equal to comparison.
    */
-  lte(other: firestore.Expr): Lte;
+  lte(expression: firestore.Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is less than or equal to a constant value.
    *
    * ```typescript
    * // Check if the 'score' field is less than or equal to 70
-   * Field.of("score").lte(70);
+   * field("score").lte(70);
    * ```
    *
-   * @param other The constant value to compare for less than or equal to.
+   * @param value The constant value to compare for less than or equal to.
    * @return A new `Expr` representing the less than or equal to comparison.
    */
-  lte(other: any): Lte;
-  lte(other: any): Lte {
-    if (other instanceof Expr) {
-      return new Lte(this, other);
-    }
-    return new Lte(this, Constant.of(other));
+  lte(value: unknown): BooleanExpr;
+  lte(other: unknown): BooleanExpr {
+    return new BooleanExpr('lte', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -569,31 +390,28 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'age' field is greater than the 'limit' field
-   * Field.of("age").gt(Field.of("limit"));
+   * field("age").gt(field("limit"));
    * ```
    *
-   * @param other The expression to compare for greater than.
+   * @param expression The expression to compare for greater than.
    * @return A new `Expr` representing the greater than comparison.
    */
-  gt(other: firestore.Expr): Gt;
+  gt(expression: firestore.Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is greater than a constant value.
    *
    * ```typescript
    * // Check if the 'price' field is greater than 100
-   * Field.of("price").gt(100);
+   * field("price").gt(100);
    * ```
    *
-   * @param other The constant value to compare for greater than.
+   * @param value The constant value to compare for greater than.
    * @return A new `Expr` representing the greater than comparison.
    */
-  gt(other: any): Gt;
-  gt(other: any): Gt {
-    if (other instanceof Expr) {
-      return new Gt(this, other);
-    }
-    return new Gt(this, Constant.of(other));
+  gt(value: unknown): BooleanExpr;
+  gt(other: unknown): BooleanExpr {
+    return new BooleanExpr('gt', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -602,13 +420,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'quantity' field is greater than or equal to field 'requirement' plus 1
-   * Field.of("quantity").gte(Field.of('requirement').add(1));
+   * field("quantity").gte(field('requirement').add(1));
    * ```
    *
-   * @param other The expression to compare for greater than or equal to.
+   * @param expression The expression to compare for greater than or equal to.
    * @return A new `Expr` representing the greater than or equal to comparison.
    */
-  gte(other: firestore.Expr): Gte;
+  gte(expression: firestore.Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is greater than or equal to a constant
@@ -616,18 +434,15 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'score' field is greater than or equal to 80
-   * Field.of("score").gte(80);
+   * field("score").gte(80);
    * ```
    *
-   * @param other The constant value to compare for greater than or equal to.
+   * @param value The constant value to compare for greater than or equal to.
    * @return A new `Expr` representing the greater than or equal to comparison.
    */
-  gte(other: any): Gte;
-  gte(other: any): Gte {
-    if (other instanceof Expr) {
-      return new Gte(this, other);
-    }
-    return new Gte(this, Constant.of(other));
+  gte(value: unknown): BooleanExpr;
+  gte(other: unknown): BooleanExpr {
+    return new BooleanExpr('gte', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -635,31 +450,19 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Combine the 'items' array with another array field.
-   * Field.of("items").arrayConcat(Field.of("otherItems"));
+   * field("items").arrayConcat(field("otherItems"));
    * ```
-   *
-   * @param arrays The array expressions to concatenate.
+   * @param secondArray Second array expression or array literal to concatenate.
+   * @param otherArrays Optional additional array expressions or array literals to concatenate.
    * @return A new `Expr` representing the concatenated array.
    */
-  arrayConcat(arrays: firestore.Expr[]): ArrayConcat;
-
-  /**
-   * Creates an expression that concatenates an array expression with one or more other arrays.
-   *
-   * ```typescript
-   * // Combine the 'tags' array with a new array and an array field
-   * Field.of("tags").arrayConcat(Arrays.asList("newTag1", "newTag2"), Field.of("otherTag"));
-   * ```
-   *
-   * @param arrays The array expressions or values to concatenate.
-   * @return A new `Expr` representing the concatenated array.
-   */
-  arrayConcat(arrays: any[]): ArrayConcat;
-  arrayConcat(arrays: any[]): ArrayConcat {
-    const exprValues = arrays.map(value =>
-      value instanceof Expr ? value : Constant.of(value)
-    );
-    return new ArrayConcat(this, exprValues);
+  arrayConcat(
+    secondArray: firestore.Expr | unknown[],
+    ...otherArrays: Array<firestore.Expr | unknown[]>
+  ): FunctionExpr {
+    const elements = [secondArray, ...otherArrays];
+    const exprValues = elements.map(value => valueToDefaultExpr(value));
+    return new FunctionExpr('array_concat', [this, ...exprValues]);
   }
 
   /**
@@ -667,63 +470,63 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'sizes' array contains the value from the 'selectedSize' field
-   * Field.of("sizes").arrayContains(Field.of("selectedSize"));
+   * field("sizes").arrayContains(field("selectedSize"));
    * ```
    *
-   * @param element The element to search for in the array.
+   * @param expression The element to search for in the array.
    * @return A new `Expr` representing the 'array_contains' comparison.
    */
-  arrayContains(element: firestore.Expr): ArrayContains;
+  arrayContains(expression: firestore.Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if an array contains a specific value.
    *
    * ```typescript
    * // Check if the 'colors' array contains "red"
-   * Field.of("colors").arrayContains("red");
+   * field("colors").arrayContains("red");
    * ```
    *
-   * @param element The element to search for in the array.
+   * @param value The element to search for in the array.
    * @return A new `Expr` representing the 'array_contains' comparison.
    */
-  arrayContains(element: any): ArrayContains;
-  arrayContains(element: any): ArrayContains {
-    if (element instanceof Expr) {
-      return new ArrayContains(this, element);
-    }
-    return new ArrayContains(this, Constant.of(element));
+  arrayContains(value: unknown): BooleanExpr;
+  arrayContains(element: unknown): BooleanExpr {
+    return new BooleanExpr('array_contains', [
+      this,
+      valueToDefaultExpr(element),
+    ]);
   }
 
   /**
    * Creates an expression that checks if an array contains all the specified elements.
    *
    * ```typescript
-   * // Check if the 'tags' array contains both "news" and "sports"
-   * Field.of("tags").arrayContainsAll(Field.of("tag1"), Field.of("tag2"));
+   * // Check if the 'tags' array contains both the value in field "tag1" and the literal value "tag2"
+   * field("tags").arrayContainsAll([field("tag1"), "tag2"]);
    * ```
    *
    * @param values The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_all' comparison.
    */
-  arrayContainsAll(...values: firestore.Expr[]): ArrayContainsAll;
+  arrayContainsAll(values: Array<firestore.Expr | unknown>): BooleanExpr;
 
   /**
    * Creates an expression that checks if an array contains all the specified elements.
    *
    * ```typescript
-   * // Check if the 'tags' array contains both of the values from field 'tag1' and "tag2"
-   * Field.of("tags").arrayContainsAll(Field.of("tag1"), Field.of("tag2"));
+   * // Check if the 'tags' array contains both of the values from field "tag1" and the literal value "tag2"
+   * field("tags").arrayContainsAll(array([field("tag1"), "tag2"]));
    * ```
    *
-   * @param values The elements to check for in the array.
+   * @param arrayExpression The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_all' comparison.
    */
-  arrayContainsAll(...values: any[]): ArrayContainsAll;
-  arrayContainsAll(...values: any[]): ArrayContainsAll {
-    const exprValues = values.map(value =>
-      value instanceof Expr ? value : Constant.of(value)
-    );
-    return new ArrayContainsAll(this, exprValues);
+  arrayContainsAll(arrayExpression: firestore.Expr): BooleanExpr;
+  arrayContainsAll(values: unknown[] | firestore.Expr): BooleanExpr {
+    const normalizedExpr = Array.isArray(values)
+      ? new ListOfExprs(values.map(valueToDefaultExpr))
+      : values;
+    return new BooleanExpr('array_contains_all', [this, normalizedExpr]);
   }
 
   /**
@@ -731,13 +534,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'categories' array contains either values from field "cate1" or "cate2"
-   * Field.of("categories").arrayContainsAny(Field.of("cate1"), Field.of("cate2"));
+   * field("categories").arrayContainsAny([field("cate1"), field("cate2")]);
    * ```
    *
    * @param values The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_any' comparison.
    */
-  arrayContainsAny(...values: firestore.Expr[]): ArrayContainsAny;
+  arrayContainsAny(values: Array<firestore.Expr | unknown>): BooleanExpr;
 
   /**
    * Creates an expression that checks if an array contains any of the specified elements.
@@ -745,18 +548,20 @@ export abstract class Expr implements firestore.Expr {
    * ```typescript
    * // Check if the 'groups' array contains either the value from the 'userGroup' field
    * // or the value "guest"
-   * Field.of("groups").arrayContainsAny(Field.of("userGroup"), "guest");
+   * field("groups").arrayContainsAny(array([field("userGroup"), "guest"]));
    * ```
    *
-   * @param values The elements to check for in the array.
+   * @param arrayExpression The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_any' comparison.
    */
-  arrayContainsAny(...values: any[]): ArrayContainsAny;
-  arrayContainsAny(...values: any[]): ArrayContainsAny {
-    const exprValues = values.map(value =>
-      value instanceof Expr ? value : Constant.of(value)
-    );
-    return new ArrayContainsAny(this, exprValues);
+  arrayContainsAny(arrayExpression: firestore.Expr): BooleanExpr;
+  arrayContainsAny(
+    values: Array<unknown | firestore.Expr> | firestore.Expr
+  ): BooleanExpr {
+    const normalizedExpr = Array.isArray(values)
+      ? new ListOfExprs(values.map(valueToDefaultExpr))
+      : values;
+    return new BooleanExpr('array_contains_any', [this, normalizedExpr]);
   }
 
   /**
@@ -764,13 +569,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Get the number of items in the 'cart' array
-   * Field.of("cart").arrayLength();
+   * field("cart").arrayLength();
    * ```
    *
    * @return A new `Expr` representing the length of the array.
    */
-  arrayLength(): ArrayLength {
-    return new ArrayLength(this);
+  arrayLength(): FunctionExpr {
+    return new FunctionExpr('array_length', [this]);
   }
 
   /**
@@ -779,13 +584,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-   * Field.of("category").eqAny("Electronics", Field.of("primaryType"));
+   * field("category").eqAny("Electronics", field("primaryType"));
    * ```
    *
-   * @param others The values or expressions to check against.
-   * @return A new `Expr` representing the 'EqAny' comparison.
+   * @param values The values or expressions to check against.
+   * @return A new `Expr` representing the 'IN' comparison.
    */
-  eqAny(...others: firestore.Expr[]): EqAny;
+  eqAny(values: Array<firestore.Expr | unknown>): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is equal to any of the provided values or
@@ -793,18 +598,18 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-   * Field.of("category").eqAny("Electronics", Field.of("primaryType"));
+   * field("category").eqAny(array(["Electronics", field("primaryType")]));
    * ```
    *
-   * @param others The values or expressions to check against.
-   * @return A new `Expr` representing the 'EqAny' comparison.
+   * @param arrayExpression An expression that evaluates to an array of values to check against.
+   * @return A new `Expr` representing the 'IN' comparison.
    */
-  eqAny(...others: any[]): EqAny;
-  eqAny(...others: any[]): EqAny {
-    const exprOthers = others.map(other =>
-      other instanceof Expr ? other : Constant.of(other)
-    );
-    return new EqAny(this, exprOthers);
+  eqAny(arrayExpression: firestore.Expr): BooleanExpr;
+  eqAny(others: unknown[] | firestore.Expr): BooleanExpr {
+    const exprOthers = Array.isArray(others)
+      ? new ListOfExprs(others.map(valueToDefaultExpr))
+      : others;
+    return new BooleanExpr('eq_any', [this, exprOthers]);
   }
 
   /**
@@ -813,32 +618,31 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-   * Field.of("status").notEqAny("pending", Field.of("rejectedStatus"));
+   * field("status").notEqAny(["pending", field("rejectedStatus")]);
    * ```
    *
-   * @param others The values or expressions to check against.
+   * @param values The values or expressions to check against.
    * @return A new `Expr` representing the 'NotEqAny' comparison.
    */
-  notEqAny(...others: firestore.Expr[]): NotEqAny;
+  notEqAny(values: Array<firestore.Expr | unknown>): BooleanExpr;
 
   /**
-   * Creates an expression that checks if this expression is not equal to any of the provided values or
-   * expressions.
+   * Creates an expression that checks if this expression is not equal to any of the values in the evaluated expression.
    *
    * ```typescript
-   * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-   * Field.of("status").notEqAny("pending", Field.of("rejectedStatus"));
+   * // Check if the 'status' field is not equal to any value in the field 'rejectedStatuses'
+   * field("status").notEqAny(field('rejectedStatuses'));
    * ```
    *
-   * @param others The values or expressions to check against.
+   * @param arrayExpression The values or expressions to check against.
    * @return A new `Expr` representing the 'NotEqAny' comparison.
    */
-  notEqAny(...others: any[]): NotEqAny;
-  notEqAny(...others: any[]): NotEqAny {
-    const exprOthers = others.map(other =>
-      other instanceof Expr ? other : Constant.of(other)
-    );
-    return new NotEqAny(this, exprOthers);
+  notEqAny(arrayExpression: firestore.Expr): BooleanExpr;
+  notEqAny(others: unknown[] | firestore.Expr): BooleanExpr {
+    const exprOthers = Array.isArray(others)
+      ? new ListOfExprs(others.map(valueToDefaultExpr))
+      : others;
+    return new BooleanExpr('not_eq_any', [this, exprOthers]);
   }
 
   /**
@@ -846,13 +650,27 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the result of a calculation is NaN
-   * Field.of("value").divide(0).isNaN();
+   * field("value").divide(0).isNan();
    * ```
    *
-   * @return A new `Expr` representing the 'isNaN' check.
+   * @return A new `Expr` representing the 'isNan' check.
    */
-  isNaN(): IsNan {
-    return new IsNan(this);
+  isNan(): BooleanExpr {
+    return new BooleanExpr('is_nan', [this]);
+  }
+
+  /**
+   * Creates an expression that checks if this expression evaluates to 'Null'.
+   *
+   * ```typescript
+   * // Check if the result of a calculation is NaN
+   * field("value").isNull();
+   * ```
+   *
+   * @return A new `Expr` representing the 'isNull' check.
+   */
+  isNull(): BooleanExpr {
+    return new BooleanExpr('is_null', [this]);
   }
 
   /**
@@ -860,13 +678,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the document has a field named "phoneNumber"
-   * Field.of("phoneNumber").exists();
+   * field("phoneNumber").exists();
    * ```
    *
    * @return A new `Expr` representing the 'exists' check.
    */
-  exists(): Exists {
-    return new Exists(this);
+  exists(): BooleanExpr {
+    return new BooleanExpr('exists', [this]);
   }
 
   /**
@@ -874,13 +692,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Get the character length of the 'name' field in its UTF-8 form.
-   * Field.of("name").charLength();
+   * field("name").charLength();
    * ```
    *
    * @return A new `Expr` representing the length of the string.
    */
-  charLength(): CharLength {
-    return new CharLength(this);
+  charLength(): FunctionExpr {
+    return new FunctionExpr('char_length', [this]);
   }
 
   /**
@@ -888,31 +706,28 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'title' field contains the word "guide" (case-sensitive)
-   * Field.of("title").like("%guide%");
+   * field("title").like("%guide%");
    * ```
    *
    * @param pattern The pattern to search for. You can use "%" as a wildcard character.
    * @return A new `Expr` representing the 'like' comparison.
    */
-  like(pattern: string): Like;
+  like(pattern: string): FunctionExpr;
 
   /**
    * Creates an expression that performs a case-sensitive string comparison.
    *
    * ```typescript
    * // Check if the 'title' field contains the word "guide" (case-sensitive)
-   * Field.of("title").like("%guide%");
+   * field("title").like("%guide%");
    * ```
    *
    * @param pattern The pattern to search for. You can use "%" as a wildcard character.
    * @return A new `Expr` representing the 'like' comparison.
    */
-  like(pattern: firestore.Expr): Like;
-  like(stringOrExpr: string | firestore.Expr): Like {
-    if (typeof stringOrExpr === 'string') {
-      return new Like(this, Constant.of(stringOrExpr));
-    }
-    return new Like(this, stringOrExpr as Expr);
+  like(pattern: firestore.Expr): FunctionExpr;
+  like(stringOrExpr: string | firestore.Expr): FunctionExpr {
+    return new FunctionExpr('like', [this, valueToDefaultExpr(stringOrExpr)]);
   }
 
   /**
@@ -921,13 +736,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'description' field contains "example" (case-insensitive)
-   * Field.of("description").regexContains("(?i)example");
+   * field("description").regexContains("(?i)example");
    * ```
    *
    * @param pattern The regular expression to use for the search.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  regexContains(pattern: string): RegexContains;
+  regexContains(pattern: string): BooleanExpr;
 
   /**
    * Creates an expression that checks if a string contains a specified regular expression as a
@@ -935,18 +750,18 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'description' field contains the regular expression stored in field 'regex'
-   * Field.of("description").regexContains(Field.of("regex"));
+   * field("description").regexContains(field("regex"));
    * ```
    *
    * @param pattern The regular expression to use for the search.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  regexContains(pattern: firestore.Expr): RegexContains;
-  regexContains(stringOrExpr: string | firestore.Expr): RegexContains {
-    if (typeof stringOrExpr === 'string') {
-      return new RegexContains(this, Constant.of(stringOrExpr));
-    }
-    return new RegexContains(this, stringOrExpr as Expr);
+  regexContains(pattern: firestore.Expr): BooleanExpr;
+  regexContains(stringOrExpr: string | firestore.Expr): BooleanExpr {
+    return new BooleanExpr('regex_contains', [
+      this,
+      valueToDefaultExpr(stringOrExpr),
+    ]);
   }
 
   /**
@@ -954,31 +769,31 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'email' field matches a valid email pattern
-   * Field.of("email").regexMatch("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}");
+   * field("email").regexMatch("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}");
    * ```
    *
    * @param pattern The regular expression to use for the match.
    * @return A new `Expr` representing the regular expression match.
    */
-  regexMatch(pattern: string): RegexMatch;
+  regexMatch(pattern: string): BooleanExpr;
 
   /**
    * Creates an expression that checks if a string matches a specified regular expression.
    *
    * ```typescript
    * // Check if the 'email' field matches a regular expression stored in field 'regex'
-   * Field.of("email").regexMatch(Field.of("regex"));
+   * field("email").regexMatch(field("regex"));
    * ```
    *
    * @param pattern The regular expression to use for the match.
    * @return A new `Expr` representing the regular expression match.
    */
-  regexMatch(pattern: firestore.Expr): RegexMatch;
-  regexMatch(stringOrExpr: string | firestore.Expr): RegexMatch {
-    if (typeof stringOrExpr === 'string') {
-      return new RegexMatch(this, Constant.of(stringOrExpr));
-    }
-    return new RegexMatch(this, stringOrExpr as Expr);
+  regexMatch(pattern: firestore.Expr): BooleanExpr;
+  regexMatch(stringOrExpr: string | firestore.Expr): BooleanExpr {
+    return new BooleanExpr('regex_match', [
+      this,
+      valueToDefaultExpr(stringOrExpr),
+    ]);
   }
 
   /**
@@ -986,31 +801,31 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'description' field contains "example".
-   * Field.of("description").strContains("example");
+   * field("description").strContains("example");
    * ```
    *
    * @param substring The substring to search for.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  strContains(substring: string): StrContains;
+  strContains(substring: string): BooleanExpr;
 
   /**
    * Creates an expression that checks if a string contains the string represented by another expression.
    *
    * ```typescript
    * // Check if the 'description' field contains the value of the 'keyword' field.
-   * Field.of("description").strContains(Field.of("keyword"));
+   * field("description").strContains(field("keyword"));
    * ```
    *
    * @param expr The expression representing the substring to search for.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  strContains(expr: Expr): StrContains;
-  strContains(stringOrExpr: string | Expr): StrContains {
-    if (typeof stringOrExpr === 'string') {
-      return new StrContains(this, Constant.of(stringOrExpr));
-    }
-    return new StrContains(this, stringOrExpr as Expr);
+  strContains(expr: firestore.Expr): BooleanExpr;
+  strContains(stringOrExpr: string | firestore.Expr): BooleanExpr {
+    return new BooleanExpr('str_contains', [
+      this,
+      valueToDefaultExpr(stringOrExpr),
+    ]);
   }
 
   /**
@@ -1018,13 +833,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'name' field starts with "Mr."
-   * Field.of("name").startsWith("Mr.");
+   * field("name").startsWith("Mr.");
    * ```
    *
    * @param prefix The prefix to check for.
    * @return A new `Expr` representing the 'starts with' comparison.
    */
-  startsWith(prefix: string): StartsWith;
+  startsWith(prefix: string): BooleanExpr;
 
   /**
    * Creates an expression that checks if a string starts with a given prefix (represented as an
@@ -1032,18 +847,18 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'fullName' field starts with the value of the 'firstName' field
-   * Field.of("fullName").startsWith(Field.of("firstName"));
+   * field("fullName").startsWith(field("firstName"));
    * ```
    *
    * @param prefix The prefix expression to check for.
    * @return A new `Expr` representing the 'starts with' comparison.
    */
-  startsWith(prefix: firestore.Expr): StartsWith;
-  startsWith(stringOrExpr: string | firestore.Expr): StartsWith {
-    if (typeof stringOrExpr === 'string') {
-      return new StartsWith(this, Constant.of(stringOrExpr));
-    }
-    return new StartsWith(this, stringOrExpr as Expr);
+  startsWith(prefix: firestore.Expr): BooleanExpr;
+  startsWith(stringOrExpr: string | firestore.Expr): BooleanExpr {
+    return new BooleanExpr('starts_with', [
+      this,
+      valueToDefaultExpr(stringOrExpr),
+    ]);
   }
 
   /**
@@ -1051,13 +866,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'filename' field ends with ".txt"
-   * Field.of("filename").endsWith(".txt");
+   * field("filename").endsWith(".txt");
    * ```
    *
    * @param suffix The postfix to check for.
    * @return A new `Expr` representing the 'ends with' comparison.
    */
-  endsWith(suffix: string): EndsWith;
+  endsWith(suffix: string): BooleanExpr;
 
   /**
    * Creates an expression that checks if a string ends with a given postfix (represented as an
@@ -1065,18 +880,18 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Check if the 'url' field ends with the value of the 'extension' field
-   * Field.of("url").endsWith(Field.of("extension"));
+   * field("url").endsWith(field("extension"));
    * ```
    *
    * @param suffix The postfix expression to check for.
    * @return A new `Expr` representing the 'ends with' comparison.
    */
-  endsWith(suffix: firestore.Expr): EndsWith;
-  endsWith(stringOrExpr: string | firestore.Expr): EndsWith {
-    if (typeof stringOrExpr === 'string') {
-      return new EndsWith(this, Constant.of(stringOrExpr));
-    }
-    return new EndsWith(this, stringOrExpr as Expr);
+  endsWith(suffix: firestore.Expr): BooleanExpr;
+  endsWith(stringOrExpr: string | firestore.Expr): BooleanExpr {
+    return new BooleanExpr('ends_with', [
+      this,
+      valueToDefaultExpr(stringOrExpr),
+    ]);
   }
 
   /**
@@ -1084,13 +899,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Convert the 'name' field to lowercase
-   * Field.of("name").toLower();
+   * field("name").toLower();
    * ```
    *
    * @return A new `Expr` representing the lowercase string.
    */
-  toLower(): ToLower {
-    return new ToLower(this);
+  toLower(): FunctionExpr {
+    return new FunctionExpr('to_lower', [this]);
   }
 
   /**
@@ -1098,13 +913,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Convert the 'title' field to uppercase
-   * Field.of("title").toUpper();
+   * field("title").toUpper();
    * ```
    *
    * @return A new `Expr` representing the uppercase string.
    */
-  toUpper(): ToUpper {
-    return new ToUpper(this);
+  toUpper(): FunctionExpr {
+    return new FunctionExpr('to_upper', [this]);
   }
 
   /**
@@ -1112,13 +927,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Trim whitespace from the 'userInput' field
-   * Field.of("userInput").trim();
+   * field("userInput").trim();
    * ```
    *
    * @return A new `Expr` representing the trimmed string.
    */
-  trim(): Trim {
-    return new Trim(this);
+  trim(): FunctionExpr {
+    return new FunctionExpr('trim', [this]);
   }
 
   /**
@@ -1126,17 +941,20 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Combine the 'firstName', " ", and 'lastName' fields into a single string
-   * Field.of("firstName").strConcat(Constant.of(" "), Field.of("lastName"));
+   * field("firstName").strConcat(constant(" "), field("lastName"));
    * ```
    *
-   * @param elements The expressions (typically strings) to concatenate.
+   * @param secondString The additional expression or string literal to concatenate.
+   * @param otherStrings Optional additional expressions or string literals to concatenate.
    * @return A new `Expr` representing the concatenated string.
    */
-  strConcat(...elements: (string | firestore.Expr)[]): StrConcat {
-    const exprs = elements.map(e =>
-      typeof e === 'string' ? Constant.of(e) : (e as Expr)
-    );
-    return new StrConcat(this, exprs);
+  strConcat(
+    secondString: firestore.Expr | string,
+    ...otherStrings: Array<firestore.Expr | string>
+  ): FunctionExpr {
+    const elements = [secondString, ...otherStrings];
+    const exprs = elements.map(valueToDefaultExpr);
+    return new FunctionExpr('str_concat', [this, ...exprs]);
   }
 
   /**
@@ -1144,13 +962,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Reverse the value of the 'myString' field.
-   * Field.of("myString").reverse();
+   * field("myString").reverse();
    * ```
    *
    * @return A new {@code Expr} representing the reversed string.
    */
-  reverse(): Reverse {
-    return new Reverse(this);
+  reverse(): FunctionExpr {
+    return new FunctionExpr('reverse', [this]);
   }
 
   /**
@@ -1158,14 +976,14 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Replace the first occurrence of "hello" with "hi" in the 'message' field
-   * Field.of("message").replaceFirst("hello", "hi");
+   * field("message").replaceFirst("hello", "hi");
    * ```
    *
    * @param find The substring to search for.
    * @param replace The substring to replace the first occurrence of 'find' with.
    * @return A new {@code Expr} representing the string with the first occurrence replaced.
    */
-  replaceFirst(find: string, replace: string): firestore.ReplaceFirst;
+  replaceFirst(find: string, replace: string): FunctionExpr;
 
   /**
    * Creates an expression that replaces the first occurrence of a substring within this string expression with another substring,
@@ -1173,29 +991,23 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Replace the first occurrence of the value in 'findField' with the value in 'replaceField' in the 'message' field
-   * Field.of("message").replaceFirst(Field.of("findField"), Field.of("replaceField"));
+   * field("message").replaceFirst(field("findField"), field("replaceField"));
    * ```
    *
    * @param find The expression representing the substring to search for.
    * @param replace The expression representing the substring to replace the first occurrence of 'find' with.
    * @return A new {@code Expr} representing the string with the first occurrence replaced.
    */
-  replaceFirst(
-    find: firestore.Expr,
-    replace: firestore.Expr
-  ): firestore.ReplaceFirst;
+  replaceFirst(find: firestore.Expr, replace: firestore.Expr): FunctionExpr;
   replaceFirst(
     find: firestore.Expr | string,
     replace: firestore.Expr | string
-  ): firestore.ReplaceFirst {
-    const normalizedFind = typeof find === 'string' ? Constant.of(find) : find;
-    const normalizedReplace =
-      typeof replace === 'string' ? Constant.of(replace) : replace;
-    return new ReplaceFirst(
+  ): FunctionExpr {
+    return new FunctionExpr('replace_first', [
       this,
-      normalizedFind as Expr,
-      normalizedReplace as Expr
-    );
+      valueToDefaultExpr(find),
+      valueToDefaultExpr(replace),
+    ]);
   }
 
   /**
@@ -1203,14 +1015,14 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Replace all occurrences of "hello" with "hi" in the 'message' field
-   * Field.of("message").replaceAll("hello", "hi");
+   * field("message").replaceAll("hello", "hi");
    * ```
    *
    * @param find The substring to search for.
    * @param replace The substring to replace all occurrences of 'find' with.
    * @return A new {@code Expr} representing the string with all occurrences replaced.
    */
-  replaceAll(find: string, replace: string): firestore.ReplaceAll;
+  replaceAll(find: string, replace: string): FunctionExpr;
 
   /**
    * Creates an expression that replaces all occurrences of a substring within this string expression with another substring,
@@ -1218,29 +1030,23 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Replace all occurrences of the value in 'findField' with the value in 'replaceField' in the 'message' field
-   * Field.of("message").replaceAll(Field.of("findField"), Field.of("replaceField"));
+   * field("message").replaceAll(field("findField"), field("replaceField"));
    * ```
    *
    * @param find The expression representing the substring to search for.
    * @param replace The expression representing the substring to replace all occurrences of 'find' with.
    * @return A new {@code Expr} representing the string with all occurrences replaced.
    */
-  replaceAll(
-    find: firestore.Expr,
-    replace: firestore.Expr
-  ): firestore.ReplaceAll;
+  replaceAll(find: firestore.Expr, replace: firestore.Expr): FunctionExpr;
   replaceAll(
     find: firestore.Expr | string,
     replace: firestore.Expr | string
-  ): firestore.ReplaceAll {
-    const normalizedFind = typeof find === 'string' ? Constant.of(find) : find;
-    const normalizedReplace =
-      typeof replace === 'string' ? Constant.of(replace) : replace;
-    return new ReplaceAll(
+  ): FunctionExpr {
+    return new FunctionExpr('replace_all', [
       this,
-      normalizedFind as Expr,
-      normalizedReplace as Expr
-    );
+      valueToDefaultExpr(find),
+      valueToDefaultExpr(replace),
+    ]);
   }
 
   /**
@@ -1248,13 +1054,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Calculate the length of the 'myString' field in bytes.
-   * Field.of("myString").byteLength();
+   * field("myString").byteLength();
    * ```
    *
    * @return A new {@code Expr} representing the length of the string in bytes.
    */
-  byteLength(): firestore.ByteLength {
-    return new ByteLength(this);
+  byteLength(): FunctionExpr {
+    return new FunctionExpr('byte_length', [this]);
   }
 
   /**
@@ -1262,14 +1068,14 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Get the 'city' value from the 'address' map field
-   * Field.of("address").mapGet("city");
+   * field("address").mapGet("city");
    * ```
    *
    * @param subfield The key to access in the map.
    * @return A new `Expr` representing the value associated with the given key in the map.
    */
-  mapGet(subfield: string): MapGet {
-    return new MapGet(this, subfield);
+  mapGet(subfield: string): FunctionExpr {
+    return new FunctionExpr('map_get', [this, constant(subfield)]);
   }
 
   /**
@@ -1278,13 +1084,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Count the total number of products
-   * Field.of("productId").count().as("totalProducts");
+   * field("productId").count().as("totalProducts");
    * ```
    *
-   * @return A new `Accumulator` representing the 'count' aggregation.
+   * @return A new `AggregateFunction` representing the 'count' aggregation.
    */
-  count(): Count {
-    return new Count(this, false);
+  count(): AggregateFunction {
+    return new AggregateFunction('count', [this]);
   }
 
   /**
@@ -1292,13 +1098,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Calculate the total revenue from a set of orders
-   * Field.of("orderAmount").sum().as("totalRevenue");
+   * field("orderAmount").sum().as("totalRevenue");
    * ```
    *
-   * @return A new `Accumulator` representing the 'sum' aggregation.
+   * @return A new `AggregateFunction` representing the 'sum' aggregation.
    */
-  sum(): Sum {
-    return new Sum(this, false);
+  sum(): AggregateFunction {
+    return new AggregateFunction('sum', [this]);
   }
 
   /**
@@ -1307,13 +1113,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Calculate the average age of users
-   * Field.of("age").avg().as("averageAge");
+   * field("age").avg().as("averageAge");
    * ```
    *
-   * @return A new `Accumulator` representing the 'avg' aggregation.
+   * @return A new `AggregateFunction` representing the 'avg' aggregation.
    */
-  avg(): Avg {
-    return new Avg(this, false);
+  avg(): AggregateFunction {
+    return new AggregateFunction('avg', [this]);
   }
 
   /**
@@ -1321,13 +1127,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Find the lowest price of all products
-   * Field.of("price").minimum().as("lowestPrice");
+   * field("price").minimum().as("lowestPrice");
    * ```
    *
-   * @return A new `Accumulator` representing the 'minimum' aggregation.
+   * @return A new `AggregateFunction` representing the 'min' aggregation.
    */
-  minimum(): Minimum {
-    return new Minimum(this, false);
+  minimum(): AggregateFunction {
+    return new AggregateFunction('minimum', [this]);
   }
 
   /**
@@ -1335,13 +1141,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Find the highest score in a leaderboard
-   * Field.of("score").maximum().as("highestScore");
+   * field("score").maximum().as("highestScore");
    * ```
    *
-   * @return A new `Accumulator` representing the 'maximum' aggregation.
+   * @return A new `AggregateFunction` representing the 'max' aggregation.
    */
-  maximum(): Maximum {
-    return new Maximum(this, false);
+  maximum(): AggregateFunction {
+    return new AggregateFunction('maximum', [this]);
   }
 
   /**
@@ -1349,31 +1155,22 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Returns the larger value between the 'timestamp' field and the current timestamp.
-   * Field.of("timestamp").logicalMaximum(Function.currentTimestamp());
+   * field("timestamp").logicalMaximum(Function.currentTimestamp());
    * ```
    *
-   * @param other The expression to compare with.
-   * @return A new {@code Expr} representing the logical maximum operation.
+   * @param second The second expression or literal to compare with.
+   * @param others Optional additional expressions or literals to compare with.
+   * @return A new {@code Expr} representing the logical max operation.
    */
-  logicalMaximum(other: firestore.Expr): firestore.LogicalMaximum;
-
-  /**
-   * Creates an expression that returns the larger value between this expression and a constant value, based on Firestore's value type ordering.
-   *
-   * ```typescript
-   * // Returns the larger value between the 'value' field and 10.
-   * Field.of("value").logicalMaximum(10);
-   * ```
-   *
-   * @param other The constant value to compare with.
-   * @return A new {@code Expr} representing the logical maximum operation.
-   */
-  logicalMaximum(other: any): firestore.LogicalMaximum;
-  logicalMaximum(other: any): firestore.LogicalMaximum {
-    if (other instanceof Expr) {
-      return new LogicalMaximum(this, other as Expr);
-    }
-    return new LogicalMaximum(this, Constant.of(other));
+  logicalMaximum(
+    second: firestore.Expr | unknown,
+    ...others: Array<firestore.Expr | unknown>
+  ): FunctionExpr {
+    const values = [second, ...others];
+    return new FunctionExpr('logical_maximum', [
+      this,
+      ...values.map(valueToDefaultExpr),
+    ]);
   }
 
   /**
@@ -1381,31 +1178,22 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Returns the smaller value between the 'timestamp' field and the current timestamp.
-   * Field.of("timestamp").logicalMinimum(Function.currentTimestamp());
+   * field("timestamp").logicalMinimum(Function.currentTimestamp());
    * ```
    *
-   * @param other The expression to compare with.
-   * @return A new {@code Expr} representing the logical minimum operation.
+   * @param second The second expression or literal to compare with.
+   * @param others Optional additional expressions or literals to compare with.
+   * @return A new {@code Expr} representing the logical min operation.
    */
-  logicalMinimum(other: firestore.Expr): firestore.LogicalMinimum;
-
-  /**
-   * Creates an expression that returns the smaller value between this expression and a constant value, based on Firestore's value type ordering.
-   *
-   * ```typescript
-   * // Returns the smaller value between the 'value' field and 10.
-   * Field.of("value").logicalMinimum(10);
-   * ```
-   *
-   * @param other The constant value to compare with.
-   * @return A new {@code Expr} representing the logical minimum operation.
-   */
-  logicalMinimum(other: any): firestore.LogicalMinimum;
-  logicalMinimum(other: any): firestore.LogicalMinimum {
-    if (other instanceof Expr) {
-      return new LogicalMinimum(this, other as Expr);
-    }
-    return new LogicalMinimum(this, Constant.of(other));
+  logicalMinimum(
+    second: firestore.Expr | unknown,
+    ...others: Array<firestore.Expr | unknown>
+  ): FunctionExpr {
+    const values = [second, ...others];
+    return new FunctionExpr('logical_minimum', [
+      this,
+      ...values.map(valueToDefaultExpr),
+    ]);
   }
 
   /**
@@ -1413,13 +1201,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Get the vector length (dimension) of the field 'embedding'.
-   * Field.of("embedding").vectorLength();
+   * field("embedding").vectorLength();
    * ```
    *
    * @return A new {@code Expr} representing the length of the vector.
    */
-  vectorLength(): VectorLength {
-    return new VectorLength(this);
+  vectorLength(): FunctionExpr {
+    return new FunctionExpr('vector_length', [this]);
   }
 
   /**
@@ -1427,48 +1215,29 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Calculate the cosine distance between the 'userVector' field and the 'itemVector' field
-   * Field.of("userVector").cosineDistance(Field.of("itemVector"));
+   * field("userVector").cosineDistance(field("itemVector"));
    * ```
    *
-   * @param other The other vector (represented as an Expr) to compare against.
+   * @param vectorExpression The other vector (represented as an Expr) to compare against.
    * @return A new `Expr` representing the cosine distance between the two vectors.
    */
-  cosineDistance(other: firestore.Expr): CosineDistance;
+  cosineDistance(vectorExpression: firestore.Expr): FunctionExpr;
   /**
    * Calculates the Cosine distance between two vectors.
    *
    * ```typescript
    * // Calculate the Cosine distance between the 'location' field and a target location
-   * Field.of("location").cosineDistance(new VectorValue([37.7749, -122.4194]));
+   * field("location").cosineDistance(new VectorValue([37.7749, -122.4194]));
    * ```
    *
-   * @param other The other vector (as a VectorValue) to compare against.
+   * @param vector The other vector (as a VectorValue) to compare against.
    * @return A new `Expr` representing the Cosine* distance between the two vectors.
    */
-  cosineDistance(other: VectorValue): CosineDistance;
-  /**
-   * Calculates the Cosine distance between two vectors.
-   *
-   * ```typescript
-   * // Calculate the Cosine distance between the 'location' field and a target location
-   * Field.of("location").cosineDistance([37.7749, -122.4194]);
-   * ```
-   *
-   * @param other The other vector (as an array of numbers) to compare against.
-   * @return A new `Expr` representing the Cosine distance between the two vectors.
-   */
-  cosineDistance(other: number[]): CosineDistance;
+  cosineDistance(vector: firestore.VectorValue | number[]): FunctionExpr;
   cosineDistance(
     other: firestore.Expr | firestore.VectorValue | number[]
-  ): CosineDistance {
-    if (other instanceof Expr) {
-      return new CosineDistance(this, other as Expr);
-    } else {
-      return new CosineDistance(
-        this,
-        Constant.vector(other as VectorValue | number[])
-      );
-    }
+  ): FunctionExpr {
+    return new FunctionExpr('cosine_distance', [this, vectorToExpr(other)]);
   }
 
   /**
@@ -1476,50 +1245,30 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Calculate the dot product between a feature vector and a target vector
-   * Field.of("features").dotProduct([0.5, 0.8, 0.2]);
+   * field("features").dotProduct([0.5, 0.8, 0.2]);
    * ```
    *
-   * @param other The other vector (as an array of numbers) to calculate with.
+   * @param vectorExpression The other vector (as an array of numbers) to calculate with.
    * @return A new `Expr` representing the dot product between the two vectors.
    */
-  dotProduct(other: firestore.Expr): DotProduct;
+  dotProduct(vectorExpression: firestore.Expr): FunctionExpr;
 
   /**
    * Calculates the dot product between two vectors.
    *
    * ```typescript
    * // Calculate the dot product between a feature vector and a target vector
-   * Field.of("features").dotProduct(new VectorValue([0.5, 0.8, 0.2]));
+   * field("features").dotProduct(new VectorValue([0.5, 0.8, 0.2]));
    * ```
    *
-   * @param other The other vector (as an array of numbers) to calculate with.
+   * @param vector The other vector (as an array of numbers) to calculate with.
    * @return A new `Expr` representing the dot product between the two vectors.
    */
-  dotProduct(other: VectorValue): DotProduct;
-
-  /**
-   * Calculates the dot product between two vectors.
-   *
-   * ```typescript
-   * // Calculate the dot product between a feature vector and a target vector
-   * Field.of("features").dotProduct([0.5, 0.8, 0.2]);
-   * ```
-   *
-   * @param other The other vector (as an array of numbers) to calculate with.
-   * @return A new `Expr` representing the dot product between the two vectors.
-   */
-  dotProduct(other: number[]): DotProduct;
+  dotProduct(vector: firestore.VectorValue | number[]): FunctionExpr;
   dotProduct(
     other: firestore.Expr | firestore.VectorValue | number[]
-  ): DotProduct {
-    if (other instanceof Expr) {
-      return new DotProduct(this, other as Expr);
-    } else {
-      return new DotProduct(
-        this,
-        Constant.vector(other as VectorValue | number[])
-      );
-    }
+  ): FunctionExpr {
+    return new FunctionExpr('dot_product', [this, vectorToExpr(other)]);
   }
 
   /**
@@ -1527,50 +1276,30 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Calculate the Euclidean distance between the 'location' field and a target location
-   * Field.of("location").euclideanDistance([37.7749, -122.4194]);
+   * field("location").euclideanDistance([37.7749, -122.4194]);
    * ```
    *
-   * @param other The other vector (as an array of numbers) to calculate with.
+   * @param vectorExpression The other vector (as an array of numbers) to calculate with.
    * @return A new `Expr` representing the Euclidean distance between the two vectors.
    */
-  euclideanDistance(other: firestore.Expr): EuclideanDistance;
+  euclideanDistance(vectorExpression: firestore.Expr): FunctionExpr;
 
   /**
    * Calculates the Euclidean distance between two vectors.
    *
    * ```typescript
    * // Calculate the Euclidean distance between the 'location' field and a target location
-   * Field.of("location").euclideanDistance(new VectorValue([37.7749, -122.4194]));
+   * field("location").euclideanDistance(new VectorValue([37.7749, -122.4194]));
    * ```
    *
-   * @param other The other vector (as a VectorValue) to compare against.
+   * @param vector The other vector (as a VectorValue) to compare against.
    * @return A new `Expr` representing the Euclidean distance between the two vectors.
    */
-  euclideanDistance(other: VectorValue): EuclideanDistance;
-
-  /**
-   * Calculates the Euclidean distance between two vectors.
-   *
-   * ```typescript
-   * // Calculate the Euclidean distance between the 'location' field and a target location
-   * Field.of("location").euclideanDistance([37.7749, -122.4194]);
-   * ```
-   *
-   * @param other The other vector (as an array of numbers) to compare against.
-   * @return A new `Expr` representing the Euclidean distance between the two vectors.
-   */
-  euclideanDistance(other: number[]): EuclideanDistance;
+  euclideanDistance(vector: firestore.VectorValue | number[]): FunctionExpr;
   euclideanDistance(
     other: firestore.Expr | firestore.VectorValue | number[]
-  ): EuclideanDistance {
-    if (other instanceof Expr) {
-      return new EuclideanDistance(this, other as Expr);
-    } else {
-      return new EuclideanDistance(
-        this,
-        Constant.vector(other as VectorValue | number[])
-      );
-    }
+  ): FunctionExpr {
+    return new FunctionExpr('euclidean_distance', [this, vectorToExpr(other)]);
   }
 
   /**
@@ -1579,13 +1308,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Interpret the 'microseconds' field as microseconds since epoch.
-   * Field.of("microseconds").unixMicrosToTimestamp();
+   * field("microseconds").unixMicrosToTimestamp();
    * ```
    *
    * @return A new {@code Expr} representing the timestamp.
    */
-  unixMicrosToTimestamp(): firestore.UnixMicrosToTimestamp {
-    return new UnixMicrosToTimestamp(this);
+  unixMicrosToTimestamp(): FunctionExpr {
+    return new FunctionExpr('unix_micros_to_timestamp', [this]);
   }
 
   /**
@@ -1593,13 +1322,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Convert the 'timestamp' field to microseconds since epoch.
-   * Field.of("timestamp").timestampToUnixMicros();
+   * field("timestamp").timestampToUnixMicros();
    * ```
    *
    * @return A new {@code Expr} representing the number of microseconds since epoch.
    */
-  timestampToUnixMicros(): firestore.TimestampToUnixMicros {
-    return new TimestampToUnixMicros(this);
+  timestampToUnixMicros(): FunctionExpr {
+    return new FunctionExpr('timestamp_to_unix_micros', [this]);
   }
 
   /**
@@ -1608,13 +1337,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Interpret the 'milliseconds' field as milliseconds since epoch.
-   * Field.of("milliseconds").unixMillisToTimestamp();
+   * field("milliseconds").unixMillisToTimestamp();
    * ```
    *
    * @return A new {@code Expr} representing the timestamp.
    */
-  unixMillisToTimestamp(): firestore.UnixMillisToTimestamp {
-    return new UnixMillisToTimestamp(this);
+  unixMillisToTimestamp(): FunctionExpr {
+    return new FunctionExpr('unix_millis_to_timestamp', [this]);
   }
 
   /**
@@ -1622,13 +1351,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Convert the 'timestamp' field to milliseconds since epoch.
-   * Field.of("timestamp").timestampToUnixMillis();
+   * field("timestamp").timestampToUnixMillis();
    * ```
    *
    * @return A new {@code Expr} representing the number of milliseconds since epoch.
    */
-  timestampToUnixMillis(): firestore.TimestampToUnixMillis {
-    return new TimestampToUnixMillis(this);
+  timestampToUnixMillis(): FunctionExpr {
+    return new FunctionExpr('timestamp_to_unix_millis', [this]);
   }
 
   /**
@@ -1637,13 +1366,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Interpret the 'seconds' field as seconds since epoch.
-   * Field.of("seconds").unixSecondsToTimestamp();
+   * field("seconds").unixSecondsToTimestamp();
    * ```
    *
    * @return A new {@code Expr} representing the timestamp.
    */
-  unixSecondsToTimestamp(): firestore.UnixSecondsToTimestamp {
-    return new UnixSecondsToTimestamp(this);
+  unixSecondsToTimestamp(): FunctionExpr {
+    return new FunctionExpr('unix_seconds_to_timestamp', [this]);
   }
 
   /**
@@ -1651,13 +1380,13 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Convert the 'timestamp' field to seconds since epoch.
-   * Field.of("timestamp").timestampToUnixSeconds();
+   * field("timestamp").timestampToUnixSeconds();
    * ```
    *
    * @return A new {@code Expr} representing the number of seconds since epoch.
    */
-  timestampToUnixSeconds(): firestore.TimestampToUnixSeconds {
-    return new TimestampToUnixSeconds(this);
+  timestampToUnixSeconds(): FunctionExpr {
+    return new FunctionExpr('timestamp_to_unix_seconds', [this]);
   }
 
   /**
@@ -1665,24 +1394,21 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Add some duration determined by field 'unit' and 'amount' to the 'timestamp' field.
-   * Field.of("timestamp").timestampAdd(Field.of("unit"), Field.of("amount"));
+   * field("timestamp").timestampAdd(field("unit"), field("amount"));
    * ```
    *
    * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
    * @param amount The expression evaluates to amount of the unit.
    * @return A new {@code Expr} representing the resulting timestamp.
    */
-  timestampAdd(
-    unit: firestore.Expr,
-    amount: firestore.Expr
-  ): firestore.TimestampAdd;
+  timestampAdd(unit: firestore.Expr, amount: firestore.Expr): FunctionExpr;
 
   /**
    * Creates an expression that adds a specified amount of time to this timestamp expression.
    *
    * ```typescript
    * // Add 1 day to the 'timestamp' field.
-   * Field.of("timestamp").timestampAdd("day", 1);
+   * field("timestamp").timestampAdd("day", 1);
    * ```
    *
    * @param unit The unit of time to add (e.g., "day", "hour").
@@ -1692,7 +1418,7 @@ export abstract class Expr implements firestore.Expr {
   timestampAdd(
     unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
     amount: number
-  ): firestore.TimestampAdd;
+  ): FunctionExpr;
   timestampAdd(
     unit:
       | firestore.Expr
@@ -1703,15 +1429,12 @@ export abstract class Expr implements firestore.Expr {
       | 'hour'
       | 'day',
     amount: firestore.Expr | number
-  ): firestore.TimestampAdd {
-    const normalizedUnit = typeof unit === 'string' ? Constant.of(unit) : unit;
-    const normalizedAmount =
-      typeof amount === 'number' ? Constant.of(amount) : amount;
-    return new TimestampAdd(
+  ): FunctionExpr {
+    return new FunctionExpr('timestamp_add', [
       this,
-      normalizedUnit as Expr,
-      normalizedAmount as Expr
-    );
+      valueToDefaultExpr(unit),
+      valueToDefaultExpr(amount),
+    ]);
   }
 
   /**
@@ -1719,24 +1442,21 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Subtract some duration determined by field 'unit' and 'amount' from the 'timestamp' field.
-   * Field.of("timestamp").timestampSub(Field.of("unit"), Field.of("amount"));
+   * field("timestamp").timestampSub(field("unit"), field("amount"));
    * ```
    *
    * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
    * @param amount The expression evaluates to amount of the unit.
    * @return A new {@code Expr} representing the resulting timestamp.
    */
-  timestampSub(
-    unit: firestore.Expr,
-    amount: firestore.Expr
-  ): firestore.TimestampSub;
+  timestampSub(unit: firestore.Expr, amount: firestore.Expr): FunctionExpr;
 
   /**
    * Creates an expression that subtracts a specified amount of time from this timestamp expression.
    *
    * ```typescript
    * // Subtract 1 day from the 'timestamp' field.
-   * Field.of("timestamp").timestampSub("day", 1);
+   * field("timestamp").timestampSub("day", 1);
    * ```
    *
    * @param unit The unit of time to subtract (e.g., "day", "hour").
@@ -1746,7 +1466,7 @@ export abstract class Expr implements firestore.Expr {
   timestampSub(
     unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
     amount: number
-  ): firestore.TimestampSub;
+  ): FunctionExpr;
   timestampSub(
     unit:
       | firestore.Expr
@@ -1757,15 +1477,468 @@ export abstract class Expr implements firestore.Expr {
       | 'hour'
       | 'day',
     amount: firestore.Expr | number
-  ): firestore.TimestampSub {
-    const normalizedUnit = typeof unit === 'string' ? Constant.of(unit) : unit;
-    const normalizedAmount =
-      typeof amount === 'number' ? Constant.of(amount) : amount;
-    return new TimestampSub(
+  ): FunctionExpr {
+    return new FunctionExpr('timestamp_sub', [
       this,
-      normalizedUnit as Expr,
-      normalizedAmount as Expr
-    );
+      valueToDefaultExpr(unit),
+      valueToDefaultExpr(amount),
+    ]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise AND operation between this expression and a constant.
+   *
+   * ```typescript
+   * // Calculate the bitwise AND of 'field1' and 0xFF.
+   * field("field1").bitAnd(0xFF);
+   * ```
+   *
+   * @param otherBits A constant representing bits.
+   * @return A new {@code Expr} representing the bitwise AND operation.
+   */
+  bitAnd(otherBits: number | Buffer | Uint8Array): FunctionExpr;
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise AND operation between two expressions.
+   *
+   * ```typescript
+   * // Calculate the bitwise AND of 'field1' and 'field2'.
+   * field("field1").bitAnd(field("field2"));
+   * ```
+   *
+   * @param bitsExpression An expression that returns bits when evaluated.
+   * @return A new {@code Expr} representing the bitwise AND operation.
+   */
+  bitAnd(bitsExpression: firestore.Expr): FunctionExpr;
+  bitAnd(
+    bitsOrExpression: number | firestore.Expr | Buffer | Uint8Array
+  ): FunctionExpr {
+    return new FunctionExpr('bit_and', [
+      this,
+      valueToDefaultExpr(bitsOrExpression),
+    ]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise OR operation between this expression and a constant.
+   *
+   * ```typescript
+   * // Calculate the bitwise OR of 'field1' and 0xFF.
+   * field("field1").bitOr(0xFF);
+   * ```
+   *
+   * @param otherBits A constant representing bits.
+   * @return A new {@code Expr} representing the bitwise OR operation.
+   */
+  bitOr(otherBits: number | Buffer | Uint8Array): FunctionExpr;
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise OR operation between two expressions.
+   *
+   * ```typescript
+   * // Calculate the bitwise OR of 'field1' and 'field2'.
+   * field("field1").bitOr(field("field2"));
+   * ```
+   *
+   * @param bitsExpression An expression that returns bits when evaluated.
+   * @return A new {@code Expr} representing the bitwise OR operation.
+   */
+  bitOr(bitsExpression: firestore.Expr): FunctionExpr;
+  bitOr(
+    bitsOrExpression: number | firestore.Expr | Buffer | Uint8Array
+  ): FunctionExpr {
+    return new FunctionExpr('bit_or', [
+      this,
+      valueToDefaultExpr(bitsOrExpression),
+    ]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise XOR operation between this expression and a constant.
+   *
+   * ```typescript
+   * // Calculate the bitwise XOR of 'field1' and 0xFF.
+   * field("field1").bitXor(0xFF);
+   * ```
+   *
+   * @param otherBits A constant representing bits.
+   * @return A new {@code Expr} representing the bitwise XOR operation.
+   */
+  bitXor(otherBits: number | Buffer | Uint8Array): FunctionExpr;
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise XOR operation between two expressions.
+   *
+   * ```typescript
+   * // Calculate the bitwise XOR of 'field1' and 'field2'.
+   * field("field1").bitXor(field("field2"));
+   * ```
+   *
+   * @param bitsExpression An expression that returns bits when evaluated.
+   * @return A new {@code Expr} representing the bitwise XOR operation.
+   */
+  bitXor(bitsExpression: firestore.Expr): FunctionExpr;
+  bitXor(
+    bitsOrExpression: number | firestore.Expr | Buffer | Uint8Array
+  ): FunctionExpr {
+    return new FunctionExpr('bit_xor', [
+      this,
+      valueToDefaultExpr(bitsOrExpression),
+    ]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise NOT operation to this expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise NOT of 'field1'.
+   * field("field1").bitNot();
+   * ```
+   *
+   * @return A new {@code Expr} representing the bitwise NOT operation.
+   */
+  bitNot(): FunctionExpr {
+    return new FunctionExpr('bit_not', [this]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise left shift operation to this expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise left shift of 'field1' by 2 bits.
+   * field("field1").bitLeftShift(2);
+   * ```
+   *
+   * @param y The operand constant representing the number of bits to shift.
+   * @return A new {@code Expr} representing the bitwise left shift operation.
+   */
+  bitLeftShift(y: number): FunctionExpr;
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise left shift operation to this expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
+   * field("field1").bitLeftShift(field("field2"));
+   * ```
+   *
+   * @param numberExpr The operand expression representing the number of bits to shift.
+   * @return A new {@code Expr} representing the bitwise left shift operation.
+   */
+  bitLeftShift(numberExpr: firestore.Expr): FunctionExpr;
+  bitLeftShift(numberExpr: number | firestore.Expr): FunctionExpr {
+    return new FunctionExpr('bit_left_shift', [
+      this,
+      valueToDefaultExpr(numberExpr),
+    ]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise right shift operation to this expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise right shift of 'field1' by 2 bits.
+   * field("field1").bitRightShift(2);
+   * ```
+   *
+   * @param right The operand constant representing the number of bits to shift.
+   * @return A new {@code Expr} representing the bitwise right shift operation.
+   */
+  bitRightShift(y: number): FunctionExpr;
+  /**
+   * @beta
+   *
+   * Creates an expression that applies a bitwise right shift operation to this expression.
+   *
+   * ```typescript
+   * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
+   * field("field1").bitRightShift(field("field2"));
+   * ```
+   *
+   * @param numberExpr The operand expression representing the number of bits to shift.
+   * @return A new {@code Expr} representing the bitwise right shift operation.
+   */
+  bitRightShift(numberExpr: firestore.Expr): FunctionExpr;
+  bitRightShift(numberExpr: number | firestore.Expr): FunctionExpr {
+    return new FunctionExpr('bit_right_shift', [
+      this,
+      valueToDefaultExpr(numberExpr),
+    ]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that returns the document ID from a path.
+   *
+   * ```typescript
+   * // Get the document ID from a path.
+   * field("__path__").documentId();
+   * ```
+   *
+   * @return A new {@code Expr} representing the documentId operation.
+   */
+  documentId(): FunctionExpr {
+    return new FunctionExpr('document_id', [this]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that returns a substring of the results of this expression.
+   *
+   * @param position Index of the first character of the substring.
+   * @param length Length of the substring. If not provided, the substring will
+   * end at the end of the input.
+   */
+  substr(position: number, length?: number): FunctionExpr;
+
+  /**
+   * @beta
+   *
+   * Creates an expression that returns a substring of the results of this expression.
+   *
+   * @param position An expression returning the index of the first character of the substring.
+   * @param length An expression returning the length of the substring. If not provided the
+   * substring will end at the end of the input.
+   */
+  substr(position: firestore.Expr, length?: firestore.Expr): FunctionExpr;
+  substr(
+    position: firestore.Expr | number,
+    length?: firestore.Expr | number
+  ): FunctionExpr {
+    const positionExpr = valueToDefaultExpr(position);
+    if (length === undefined) {
+      return new FunctionExpr('substr', [this, positionExpr]);
+    } else {
+      return new FunctionExpr('substr', [
+        this,
+        positionExpr,
+        valueToDefaultExpr(length),
+      ]);
+    }
+  }
+
+  /**
+   * @beta
+   * Creates an expression that indexes into an array from the beginning or end
+   * and returns the element. If the offset exceeds the array length, an error is
+   * returned. A negative offset, starts from the end.
+   *
+   * ```typescript
+   * // Return the value in the 'tags' field array at index `1`.
+   * field('tags').arrayOffset(1);
+   * ```
+   *
+   * @param offset The index of the element to return.
+   * @return A new Expr representing the 'arrayOffset' operation.
+   */
+  arrayOffset(offset: number): FunctionExpr;
+
+  /**
+   * @beta
+   * Creates an expression that indexes into an array from the beginning or end
+   * and returns the element. If the offset exceeds the array length, an error is
+   * returned. A negative offset, starts from the end.
+   *
+   * ```typescript
+   * // Return the value in the tags field array at index specified by field
+   * // 'favoriteTag'.
+   * field('tags').arrayOffset(field('favoriteTag'));
+   * ```
+   *
+   * @param offsetExpr An Expr evaluating to the index of the element to return.
+   * @return A new Expr representing the 'arrayOffset' operation.
+   */
+  arrayOffset(offsetExpr: firestore.Expr): FunctionExpr;
+  arrayOffset(offset: firestore.Expr | number): FunctionExpr {
+    return new FunctionExpr('array_offset', [this, valueToDefaultExpr(offset)]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that checks if a given expression produces an error.
+   *
+   * ```typescript
+   * // Check if the result of a calculation is an error
+   * field("title").arrayContains(1).isError();
+   * ```
+   *
+   * @return A new {@code BooleanExpr} representing the 'isError' check.
+   */
+  isError(): BooleanExpr {
+    return new BooleanExpr('is_error', [this]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that returns the result of the `catchExpr` argument
+   * if there is an error, else return the result of this expression.
+   *
+   * ```typescript
+   * // Returns the first item in the title field arrays, or returns
+   * // the entire title field if the array is empty or the field is another type.
+   * field("title").arrayOffset(0).ifError(field("title"));
+   * ```
+   *
+   * @param catchExpr The catch expression that will be evaluated and
+   * returned if this expression produces an error.
+   * @return A new {@code Expr} representing the 'ifError' operation.
+   */
+  ifError(catchExpr: firestore.Expr): FunctionExpr;
+
+  /**
+   * @beta
+   *
+   * Creates an expression that returns the `catch` argument if there is an
+   * error, else return the result of this expression.
+   *
+   * ```typescript
+   * // Returns the first item in the title field arrays, or returns
+   * // "Default Title"
+   * field("title").arrayOffset(0).ifError("Default Title");
+   * ```
+   *
+   * @param catchValue The value that will be returned if this expression
+   * produces an error.
+   * @return A new {@code Expr} representing the 'ifError' operation.
+   */
+  ifError(catchValue: unknown): FunctionExpr;
+  ifError(catchValue: unknown): FunctionExpr {
+    return new FunctionExpr('if_error', [this, valueToDefaultExpr(catchValue)]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that returns `true` if the result of this expression
+   * is absent. Otherwise, returns `false` even if the value is `null`.
+   *
+   * ```typescript
+   * // Check if the field `value` is absent.
+   * field("value").isAbsent();
+   * ```
+   *
+   * @return A new {@code BooleanExpr} representing the 'isAbsent' check.
+   */
+  isAbsent(): BooleanExpr {
+    return new BooleanExpr('is_absent', [this]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that checks if tbe result of an expression is not null.
+   *
+   * ```typescript
+   * // Check if the value of the 'name' field is not null
+   * field("name").isNotNull();
+   * ```
+   *
+   * @return A new {@code BooleanExpr} representing the 'isNotNull' check.
+   */
+  isNotNull(): BooleanExpr {
+    return new BooleanExpr('is_not_null', [this]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
+   *
+   * ```typescript
+   * // Check if the result of a calculation is NOT NaN
+   * field("value").divide(0).isNotNan();
+   * ```
+   *
+   * @return A new {@code Expr} representing the 'isNan' check.
+   */
+  isNotNan(): BooleanExpr {
+    return new BooleanExpr('is_not_nan', [this]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that removes a key from the map produced by evaluating this expression.
+   *
+   * ```
+   * // Removes the key 'baz' from the input map.
+   * map({foo: 'bar', baz: true}).mapRemove('baz');
+   * ```
+   *
+   * @param key The name of the key to remove from the input map.
+   * @returns A new {@code FirestoreFunction} representing the 'mapRemove' operation.
+   */
+  mapRemove(key: string): FunctionExpr;
+  /**
+   * @beta
+   *
+   * Creates an expression that removes a key from the map produced by evaluating this expression.
+   *
+   * ```
+   * // Removes the key 'baz' from the input map.
+   * map({foo: 'bar', baz: true}).mapRemove(constant('baz'));
+   * ```
+   *
+   * @param keyExpr An expression that produces the name of the key to remove from the input map.
+   * @returns A new {@code FirestoreFunction} representing the 'mapRemove' operation.
+   */
+  mapRemove(keyExpr: firestore.Expr): FunctionExpr;
+  mapRemove(stringExpr: firestore.Expr | string): FunctionExpr {
+    return new FunctionExpr('map_remove', [
+      this,
+      valueToDefaultExpr(stringExpr),
+    ]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that merges multiple map values.
+   *
+   * ```
+   * // Merges the map in the settings field with, a map literal, and a map in
+   * // that is conditionally returned by another expression
+   * field('settings').mapMerge({ enabled: true }, cond(field('isAdmin'), { admin: true}, {})
+   * ```
+   *
+   * @param secondMap A required second map to merge. Represented as a literal or
+   * an expression that returns a map.
+   * @param otherMaps Optional additional maps to merge. Each map is represented
+   * as a literal or an expression that returns a map.
+   *
+   * @returns A new {@code FirestoreFunction} representing the 'mapMerge' operation.
+   */
+  mapMerge(
+    secondMap: Record<string, unknown> | firestore.Expr,
+    ...otherMaps: Array<Record<string, unknown> | firestore.Expr>
+  ): FunctionExpr {
+    const secondMapExpr = valueToDefaultExpr(secondMap);
+    const otherMapExprs = otherMaps.map(valueToDefaultExpr);
+    return new FunctionExpr('map_merge', [
+      this,
+      secondMapExpr,
+      ...otherMapExprs,
+    ]);
   }
 
   /**
@@ -1773,8 +1946,8 @@ export abstract class Expr implements firestore.Expr {
    *
    * ```typescript
    * // Sort documents by the 'name' field in ascending order
-   * firestore.pipeline().collection("users")
-   *   .sort(Field.of("name").ascending());
+   * pipeline().collection("users")
+   *   .sort(field("name").ascending());
    * ```
    *
    * @return A new `Ordering` for ascending sorting.
@@ -1789,7 +1962,7 @@ export abstract class Expr implements firestore.Expr {
    * ```typescript
    * // Sort documents by the 'createdAt' field in descending order
    * firestore.pipeline().collection("users")
-   *   .sort(Field.of("createdAt").descending());
+   *   .sort(field("createdAt").descending());
    * ```
    *
    * @return A new `Ordering` for descending sorting.
@@ -1807,52 +1980,136 @@ export abstract class Expr implements firestore.Expr {
    * ```typescript
    * // Calculate the total price and assign it the alias "totalPrice" and add it to the output.
    * firestore.pipeline().collection("items")
-   *   .addFields(Field.of("price").multiply(Field.of("quantity")).as("totalPrice"));
+   *   .addFields(field("price").multiply(field("quantity")).as("totalPrice"));
    * ```
    *
    * @param name The alias to assign to this expression.
    * @return A new {@link ExprWithAlias} that wraps this
    *     expression and associates it with the provided alias.
    */
-  as(name: string): ExprWithAlias<typeof this> {
+  as(name: string): firestore.ExprWithAlias {
     return new ExprWithAlias(this, name);
   }
+}
 
-  abstract _toProto(serializer: Serializer): api.IValue;
+/**
+ * @beta
+ *
+ * A class that represents an aggregate function.
+ */
+export class AggregateFunction extends firestore.AggregateFunction {
+  exprType: firestore.ExprType = 'AggregateFunction';
+
+  /**
+   * @internal
+   * @private
+   * Indicates if this expression was created from a literal value passed
+   * by the caller.
+   */
+  _createdFromLiteral = false;
+
+  constructor(
+    private name: string,
+    private params: Expr[]
+  ) {
+    super(name, params);
+  }
+
+  /**
+   * Assigns an alias to this AggregateFunction. The alias specifies the name that
+   * the aggregated value will have in the output document.
+   *
+   * ```typescript
+   * // Calculate the average price of all items and assign it the alias "averagePrice".
+   * firestore.pipeline().collection("items")
+   *   .aggregate(field("price").avg().as("averagePrice"));
+   * ```
+   *
+   * @param name The alias to assign to this AggregateFunction.
+   * @return A new {@link AggregateWithAlias} that wraps this
+   *     AggregateFunction and associates it with the provided alias.
+   */
+  as(name: string): AggregateWithAlias {
+    return new AggregateWithAlias(this, name);
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _toProto(serializer: Serializer): api.IValue {
+    return {
+      functionValue: {
+        name: this.name,
+        args: this.params.map(p => p._toProto(serializer)),
+      },
+    };
+  }
+
+  _protoValueType = 'ProtoValue' as const;
+}
+
+/**
+ * @beta
+ *
+ * An AggregateFunction with alias.
+ */
+export class AggregateWithAlias extends firestore.AggregateWithAlias {
+  constructor(
+    readonly aggregate: AggregateFunction,
+    readonly alias: string
+  ) {
+    super();
+  }
+
+  /**
+   * @internal
+   * @private
+   * Indicates if this expression was created from a literal value passed
+   * by the caller.
+   */
+  _createdFromLiteral = false;
 }
 
 /**
  * @beta
  */
-export class ExprWithAlias<T extends Expr> extends Expr implements Selectable {
-  exprType: ExprType = 'ExprWithAlias';
+export class ExprWithAlias implements firestore.Selectable {
+  exprType: firestore.ExprType = 'ExprWithAlias';
   selectable = true as const;
 
-  constructor(
-    public expr: T,
-    public alias: string
-  ) {
-    super();
-  }
+  /**
+   * @internal
+   * @private
+   * Indicates if this expression was created from a literal value passed
+   * by the caller.
+   */
+  _createdFromLiteral = false;
 
-  _toProto(serializer: Serializer): api.IValue {
-    throw new Error('ExprWithAlias should not be serialized directly.');
-  }
+  constructor(
+    readonly expr: Expr,
+    readonly alias: string
+  ) {}
 }
 
 /**
  * @internal
  */
 class ListOfExprs extends Expr {
-  exprType: ExprType = 'ListOfExprs';
+  exprType: firestore.ExprType = 'ListOfExprs';
+
   constructor(private exprs: Expr[]) {
     super();
   }
 
+  /**
+   * @private
+   * @internal
+   */
   _toProto(serializer: Serializer): api.IValue {
     return {
       arrayValue: {
-        values: this.exprs.map(p => serializer.encodeValue(p)!),
+        values: this.exprs.map(p => p._toProto(serializer)!),
       },
     };
   }
@@ -1870,75 +2127,74 @@ class ListOfExprs extends Expr {
  *
  * ```typescript
  * // Create a Field instance for the 'name' field
- * const nameField = Field.of("name");
+ * const nameField = field("name");
  *
  * // Create a Field instance for a nested field 'address.city'
- * const cityField = Field.of("address.city");
+ * const cityField = field("address.city");
  * ```
  */
-export class Field extends Expr implements Selectable {
-  exprType: ExprType = 'Field';
+export class Field extends Expr implements firestore.Selectable {
+  readonly exprType: firestore.ExprType = 'Field';
   selectable = true as const;
 
-  private constructor(
-    private fieldPath: firestore.FieldPath,
-    private pipeline: Pipeline | null = null
-  ) {
+  /**
+   * @internal
+   * @private
+   * @hideconstructor
+   * @param fieldPath
+   */
+  constructor(private fieldPath: FieldPath) {
     super();
   }
 
-  /**
-   * Creates a {@code Field} instance representing the field at the given path.
-   *
-   * The path can be a simple field name (e.g., "name") or a dot-separated path to a nested field
-   * (e.g., "address.city").
-   *
-   * ```typescript
-   * // Create a Field instance for the 'title' field
-   * const titleField = Field.of("title");
-   *
-   * // Create a Field instance for a nested field 'author.firstName'
-   * const authorFirstNameField = Field.of("author.firstName");
-   * ```
-   *
-   * @param name The path to the field.
-   * @return A new {@code Field} instance representing the specified field.
-   */
-  static of(name: string): Field;
-  static of(path: firestore.FieldPath): Field;
-  static of(nameOrPath: string | firestore.FieldPath): Field;
-  static of(pipeline: firestore.Pipeline, name: string): Field;
-  static of(
-    pipelineOrName: firestore.Pipeline | string | firestore.FieldPath,
-    name?: string
-  ): Field {
-    if (typeof pipelineOrName === 'string') {
-      if (FieldPath.documentId().formattedName === pipelineOrName) {
-        return new Field(FieldPath.documentId());
-      }
-
-      return new Field(FieldPath.fromArgument(pipelineOrName));
-    } else if (pipelineOrName instanceof FieldPath) {
-      if (FieldPath.documentId().isEqual(pipelineOrName)) {
-        return new Field(FieldPath.documentId());
-      }
-      return new Field(pipelineOrName);
-    } else {
-      return new Field(
-        FieldPath.fromArgument(name!),
-        pipelineOrName as Pipeline
-      );
-    }
-  }
-
   fieldName(): string {
-    return (this.fieldPath as FieldPath).formattedName;
+    return this.fieldPath.formattedName;
   }
 
+  get alias(): string {
+    return this.fieldName();
+  }
+
+  get expr(): Expr {
+    return this;
+  }
+
+  /**
+   * @private
+   * @internal
+   */
   _toProto(serializer: Serializer): api.IValue {
     return {
-      fieldReferenceValue: (this.fieldPath as FieldPath).formattedName,
+      fieldReferenceValue: this.fieldPath.formattedName,
     };
+  }
+}
+
+/**
+ * Creates a {@code Field} instance representing the field at the given path.
+ *
+ * The path can be a simple field name (e.g., "name") or a dot-separated path to a nested field
+ * (e.g., "address.city").
+ *
+ * ```typescript
+ * // Create a Field instance for the 'title' field
+ * const titleField = field("title");
+ *
+ * // Create a Field instance for a nested field 'author.firstName'
+ * const authorFirstNameField = field("author.firstName");
+ * ```
+ *
+ * @param field The path to the field.
+ * @return A new {@code Field} instance representing the specified field.
+ */
+export function field(field: string | firestore.FieldPath): Field {
+  if (typeof field === 'string') {
+    if ('__name__' === field) {
+      return new Field(FieldPath.documentId());
+    }
+    return new Field(FieldPath.fromArgument(field));
+  } else {
+    return new Field(field as unknown as FieldPath);
   }
 }
 
@@ -1951,161 +2207,41 @@ export class Field extends Expr implements Selectable {
  *
  * ```typescript
  * // Create a Constant instance for the number 10
- * const ten = Constant.of(10);
+ * const ten = constant(10);
  *
  * // Create a Constant instance for the string "hello"
- * const hello = Constant.of("hello");
+ * const hello = constant("hello");
  * ```
  */
 export class Constant extends Expr {
-  exprType: ExprType = 'Constant';
+  readonly exprType: firestore.ExprType = 'Constant';
 
-  private constructor(private value: any) {
+  private protoValue?: api.IValue;
+
+  /**
+   * @private
+   * @internal
+   * @hideconstructor
+   * @param value The value of the constant.
+   */
+  constructor(private value: unknown) {
     super();
   }
 
   /**
-   * Creates a `Constant` instance for a number value.
-   *
-   * @param value The number value.
-   * @return A new `Constant` instance.
+   * @private
+   * @internal
    */
-  static of(value: number): Constant;
-
-  /**
-   * Creates a `Constant` instance for a string value.
-   *
-   * @param value The string value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: string): Constant;
-
-  /**
-   * Creates a `Constant` instance for a boolean value.
-   *
-   * @param value The boolean value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: boolean): Constant;
-
-  /**
-   * Creates a `Constant` instance for a null value.
-   *
-   * @param value The null value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: null): Constant;
-
-  /**
-   * Creates a `Constant` instance for an undefined value.
-   *
-   * @param value The undefined value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: undefined): Constant;
-
-  /**
-   * Creates a `Constant` instance for a GeoPoint value.
-   *
-   * @param value The GeoPoint value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: firestore.GeoPoint): Constant;
-
-  /**
-   * Creates a `Constant` instance for a Timestamp value.
-   *
-   * @param value The Timestamp value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: firestore.Timestamp): Constant;
-
-  /**
-   * Creates a `Constant` instance for a Date value.
-   *
-   * @param value The Date value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: Date): Constant;
-
-  /**
-   * Creates a `Constant` instance for a Uint8Array value.
-   *
-   * @param value The Uint8Array value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: Uint8Array): Constant;
-
-  /**
-   * Creates a `Constant` instance for a DocumentReference value.
-   *
-   * @param value The DocumentReference value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: firestore.DocumentReference): Constant;
-
-  /**
-   * Creates a `Constant` instance for a Firestore proto value.
-   *
-   * @param value The Firestore proto value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: api.IValue): Constant;
-
-  /**
-   * Creates a `Constant` instance for an array value.
-   *
-   * @param value The array value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: Array<any>): Constant;
-
-  /**
-   * Creates a `Constant` instance for a map value.
-   *
-   * @param value The map value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: Map<string, any>): Constant;
-
-  /**
-   * Creates a `Constant` instance for a VectorValue value.
-   *
-   * @param value The VectorValue value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: firestore.VectorValue): Constant;
-
-  /**
-   * Creates a `Constant` instance for a Firestore proto value.
-   *
-   * @param value The Firestore proto value.
-   * @return A new `Constant` instance.
-   */
-  static of(value: api.IValue): Constant;
-  static of(value: any): Constant {
-    return new Constant(value);
+  static _fromProto(value: api.IValue): Constant {
+    const result = new Constant(value);
+    result.protoValue = value;
+    return result;
   }
 
   /**
-   * Creates a `Constant` instance for a VectorValue value.
-   *
-   * ```typescript
-   * // Create a Constant instance for a vector value
-   * const vectorConstant = Constant.ofVector([1, 2, 3]);
-   * ```
-   *
-   * @param value The VectorValue value.
-   * @return A new `Constant` instance.
+   * @private
+   * @internal
    */
-  static vector(value: Array<number> | firestore.VectorValue): Constant {
-    if (value instanceof VectorValue) {
-      return new Constant(value);
-    } else {
-      return new Constant(new VectorValue(value as Array<number>));
-    }
-  }
-
   _toProto(serializer: Serializer): api.IValue {
     if (isFirestoreValue(this.value)) {
       return this.value;
@@ -2116,28 +2252,165 @@ export class Constant extends Expr {
 }
 
 /**
+ * Creates a `Constant` instance for a number value.
+ *
+ * @param value The number value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: number): Constant;
+
+/**
+ * Creates a `Constant` instance for a string value.
+ *
+ * @param value The string value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: string): Constant;
+
+/**
+ * Creates a `Constant` instance for a boolean value.
+ *
+ * @param value The boolean value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: boolean): Constant;
+
+/**
+ * Creates a `Constant` instance for a null value.
+ *
+ * @param value The null value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: null): Constant;
+
+/**
+ * Creates a `Constant` instance for a GeoPoint value.
+ *
+ * @param value The GeoPoint value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: firestore.GeoPoint): Constant;
+
+/**
+ * Creates a `Constant` instance for a Timestamp value.
+ *
+ * @param value The Timestamp value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: firestore.Timestamp): Constant;
+
+/**
+ * Creates a `Constant` instance for a Date value.
+ *
+ * @param value The Date value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: Date): Constant;
+
+/**
+ * Creates a `Constant` instance for a Buffer | Uint8Array value.
+ *
+ * @param value The Buffer | Uint8Array value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: Buffer | Uint8Array): Constant;
+
+/**
+ * Creates a `Constant` instance for a DocumentReference value.
+ *
+ * @param value The DocumentReference value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: firestore.DocumentReference): Constant;
+
+/**
+ * Creates a `Constant` instance for a Firestore proto value.
+ * For internal use only.
+ * @private
+ * @internal
+ * @param value The Firestore proto value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: api.IValue): Constant;
+
+/**
+ * Creates a `Constant` instance for a VectorValue value.
+ *
+ * @param value The VectorValue value.
+ * @return A new `Constant` instance.
+ */
+export function constant(value: firestore.VectorValue): Constant;
+
+export function constant(value: unknown): Constant {
+  return new Constant(value);
+}
+
+/**
+ * Creates a `Constant` instance for a VectorValue value.
+ *
+ * ```typescript
+ * // Create a Constant instance for a vector value
+ * const vectorConstant = constantVector([1, 2, 3]);
+ * ```
+ *
+ * @param value The VectorValue value.
+ * @return A new `Constant` instance.
+ */
+export function constantVector(
+  value: number[] | firestore.VectorValue
+): Constant {
+  if (value instanceof VectorValue) {
+    return new Constant(value);
+  } else {
+    return new Constant(new VectorValue(value as number[]));
+  }
+}
+
+/**
+ * Internal only
+ * @internal
+ * @private
+ */
+export class MapValue extends Expr {
+  constructor(private plainObject: Map<string, Expr>) {
+    super();
+  }
+
+  exprType: firestore.ExprType = 'Constant';
+
+  _toProto(serializer: Serializer): api.IValue {
+    return serializer.encodeValue(this.plainObject);
+  }
+}
+
+/**
  * @beta
  *
  * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
  * execution.
  *
  * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link eq},
- * or the methods on {@link Expr} ({@link Expr#eq}, {@link Expr#lt}, etc) to construct new Function instances.
+ * or the methods on {@link Expr} ({@link Expr#eq}, {@link Expr#lt}, etc.) to construct new Function instances.
  */
-export class Function extends Expr {
-  exprType: ExprType = 'Function';
+export class FunctionExpr extends Expr {
+  readonly exprType: firestore.ExprType = 'Function';
+
   constructor(
     private name: string,
-    private params: Expr[]
+    private params: firestore.Expr[]
   ) {
     super();
   }
 
+  /**
+   * @private
+   * @internal
+   */
   _toProto(serializer: Serializer): api.IValue {
     return {
       functionValue: {
         name: this.name,
-        args: this.params.map(p => serializer.encodeValue(p)!),
+        args: this.params.map(p => cast<Expr>(p)._toProto(serializer)),
       },
     };
   }
@@ -2145,781 +2418,1008 @@ export class Function extends Expr {
 
 /**
  * @beta
+ *
+ * An interface that represents a filter condition.
  */
-export class Add extends Function {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('add', [left, right]);
+export class BooleanExpr extends FunctionExpr implements firestore.BooleanExpr {
+  filterable: true = true as const;
+
+  /**
+   * Creates an aggregation that finds the count of input documents satisfying
+   * this boolean expression.
+   *
+   * ```typescript
+   * // Find the count of documents with a score greater than 90
+   * field("score").gt(90).countIf().as("highestScore");
+   * ```
+   *
+   * @return A new `AggregateFunction` representing the 'countIf' aggregation.
+   */
+  countIf(): AggregateFunction {
+    return new AggregateFunction('count_if', [this]);
+  }
+
+  /**
+   * Creates an expression that negates this boolean expression.
+   *
+   * ```typescript
+   * // Find documents where the 'tags' field does not contain 'completed'
+   * field("tags").arrayContains("completed").not();
+   * ```
+   *
+   * @return A new {@code Expr} representing the negated filter condition.
+   */
+  not(): BooleanExpr {
+    return new BooleanExpr('not', [this]);
   }
 }
 
 /**
  * @beta
+ * Creates an aggregation that counts the number of stage inputs where the provided
+ * boolean expression evaluates to true.
+ *
+ * ```typescript
+ * // Count the number of documents where 'is_active' field equals true
+ * countIf(field("is_active").eq(true)).as("numActiveDocuments");
+ * ```
+ *
+ * @param booleanExpr - The boolean expression to evaluate on each input.
+ * @returns A new `AggregateFunction` representing the 'countIf' aggregation.
  */
-export class Subtract extends Function {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('subtract', [left, right]);
-  }
+export function countIf(booleanExpr: firestore.BooleanExpr): AggregateFunction {
+  return new AggregateFunction('count_if', [cast<Expr>(booleanExpr)]);
 }
 
 /**
  * @beta
+ * Creates an expression that return a pseudo-random value of type double in the
+ * range of [0, 1), inclusive of 0 and exclusive of 1.
+ *
+ * @returns A new `Expr` representing the 'rand' function.
  */
-export class Multiply extends Function {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('multiply', [left, right]);
-  }
+export function rand(): FunctionExpr {
+  return new FunctionExpr('rand', []);
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that applies a bitwise AND operation between a field and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise AND of 'field1' and 0xFF.
+ * bitAnd("field1", 0xFF);
+ * ```
+ *
+ * @param field The left operand field name.
+ * @param otherBits A constant representing bits.
+ * @return A new {@code Expr} representing the bitwise AND operation.
  */
-export class Divide extends Function {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('divide', [left, right]);
-  }
+export function bitAnd(
+  field: string,
+  otherBits: number | Buffer | Uint8Array
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise AND operation between a field and an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise AND of 'field1' and 'field2'.
+ * bitAnd("field1", field("field2"));
+ * ```
+ *
+ * @param field The left operand field name.
+ * @param bitsExpression An expression that returns bits when evaluated.
+ * @return A new {@code Expr} representing the bitwise AND operation.
+ */
+export function bitAnd(
+  field: string,
+  bitsExpression: firestore.Expr
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise AND operation between an expression and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise AND of 'field1' and 0xFF.
+ * bitAnd(field("field1"), 0xFF);
+ * ```
+ *
+ * @param bitsExpression An expression returning bits.
+ * @param otherBits A constant representing bits.
+ * @return A new {@code Expr} representing the bitwise AND operation.
+ */
+export function bitAnd(
+  bitsExpression: firestore.Expr,
+  otherBits: number | Buffer | Uint8Array
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise AND operation between two expressions.
+ *
+ * ```typescript
+ * // Calculate the bitwise AND of 'field1' and 'field2'.
+ * bitAnd(field("field1"), field("field2"));
+ * ```
+ *
+ * @param bitsExpression An expression that returns bits when evaluated.
+ * @param otherBitsExpression An expression that returns bits when evaluated.
+ * @return A new {@code Expr} representing the bitwise AND operation.
+ */
+export function bitAnd(
+  bitsExpression: firestore.Expr,
+  otherBitsExpression: firestore.Expr
+): FunctionExpr;
+export function bitAnd(
+  bits: string | firestore.Expr,
+  bitsOrExpression: number | firestore.Expr | Buffer | Uint8Array
+): FunctionExpr {
+  return fieldOrExpression(bits).bitAnd(valueToDefaultExpr(bitsOrExpression));
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that applies a bitwise OR operation between a field and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise OR of 'field1' and 0xFF.
+ * bitOr("field1", 0xFF);
+ * ```
+ *
+ * @param field The left operand field name.
+ * @param otherBits A constant representing bits.
+ * @return A new {@code Expr} representing the bitwise OR operation.
  */
-export class Mod extends Function {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('mod', [left, right]);
-  }
-}
-
-// /**
-//  * @beta
-//  */
-// export class BitAnd extends Function {
-//   constructor(
-//     private left: Expr,
-//     private right: Expr
-//   ) {
-//     super('bit_and', [left, right]);
-//   }
-// }
-//
-// /**
-//  * @beta
-//  */
-// export class BitOr extends Function {
-//   constructor(
-//     private left: Expr,
-//     private right: Expr
-//   ) {
-//     super('bit_or', [left, right]);
-//   }
-// }
-//
-// /**
-//  * @beta
-//  */
-// export class BitXor extends Function {
-//   constructor(
-//     private left: Expr,
-//     private right: Expr
-//   ) {
-//     super('bit_xor', [left, right]);
-//   }
-// }
-//
-// /**
-//  * @beta
-//  */
-// export class BitNot extends Function {
-//   constructor(private operand: Expr) {
-//     super('bit_not', [operand]);
-//   }
-// }
-//
-// /**
-//  * @beta
-//  */
-// export class BitLeftShift extends Function {
-//   constructor(
-//     private left: Expr,
-//     private right: Expr
-//   ) {
-//     super('bit_left_shift', [left, right]);
-//   }
-// }
-//
-// /**
-//  * @beta
-//  */
-// export class BitRightShift extends Function {
-//   constructor(
-//     private left: Expr,
-//     private right: Expr
-//   ) {
-//     super('bit_right_shift', [left, right]);
-//   }
-// }
-
+export function bitOr(
+  field: string,
+  otherBits: number | Buffer | Uint8Array
+): FunctionExpr;
 /**
  * @beta
+ *
+ * Creates an expression that applies a bitwise OR operation between a field and an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise OR of 'field1' and 'field2'.
+ * bitOr("field1", field("field2"));
+ * ```
+ *
+ * @param field The left operand field name.
+ * @param bitsExpression An expression that returns bits when evaluated.
+ * @return A new {@code Expr} representing the bitwise OR operation.
  */
-export class Eq extends Function implements FilterCondition {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('eq', [left, right]);
-  }
-  filterable = true as const;
+export function bitOr(
+  field: string,
+  bitsExpression: firestore.Expr
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise OR operation between an expression and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise OR of 'field1' and 0xFF.
+ * bitOr(field("field1"), 0xFF);
+ * ```
+ *
+ * @param bitsExpression An expression returning bits.
+ * @param otherBits A constant representing bits.
+ * @return A new {@code Expr} representing the bitwise OR operation.
+ */
+export function bitOr(
+  bitsExpression: firestore.Expr,
+  otherBits: number | Buffer | Uint8Array
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise OR operation between two expressions.
+ *
+ * ```typescript
+ * // Calculate the bitwise OR of 'field1' and 'field2'.
+ * bitOr(field("field1"), field("field2"));
+ * ```
+ *
+ * @param bitsExpression An expression that returns bits when evaluated.
+ * @param otherBitsExpression An expression that returns bits when evaluated.
+ * @return A new {@code Expr} representing the bitwise OR operation.
+ */
+export function bitOr(
+  bitsExpression: firestore.Expr,
+  otherBitsExpression: firestore.Expr
+): FunctionExpr;
+export function bitOr(
+  bits: string | firestore.Expr,
+  bitsOrExpression: number | firestore.Expr | Buffer | Uint8Array
+): FunctionExpr {
+  return fieldOrExpression(bits).bitOr(valueToDefaultExpr(bitsOrExpression));
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that applies a bitwise XOR operation between a field and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise XOR of 'field1' and 0xFF.
+ * bitXor("field1", 0xFF);
+ * ```
+ *
+ * @param field The left operand field name.
+ * @param otherBits A constant representing bits.
+ * @return A new {@code Expr} representing the bitwise XOR operation.
  */
-class Neq extends Function implements FilterCondition {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('neq', [left, right]);
-  }
-  filterable = true as const;
+export function bitXor(
+  field: string,
+  otherBits: number | Buffer | Uint8Array
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise XOR operation between a field and an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise XOR of 'field1' and 'field2'.
+ * bitXor("field1", field("field2"));
+ * ```
+ *
+ * @param field The left operand field name.
+ * @param bitsExpression An expression that returns bits when evaluated.
+ * @return A new {@code Expr} representing the bitwise XOR operation.
+ */
+export function bitXor(
+  field: string,
+  bitsExpression: firestore.Expr
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise XOR operation between an expression and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise XOR of 'field1' and 0xFF.
+ * bitXor(field("field1"), 0xFF);
+ * ```
+ *
+ * @param bitsExpression An expression returning bits.
+ * @param otherBits A constant representing bits.
+ * @return A new {@code Expr} representing the bitwise XOR operation.
+ */
+export function bitXor(
+  bitsExpression: firestore.Expr,
+  otherBits: number | Buffer | Uint8Array
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise XOR operation between two expressions.
+ *
+ * ```typescript
+ * // Calculate the bitwise XOR of 'field1' and 'field2'.
+ * bitXor(field("field1"), field("field2"));
+ * ```
+ *
+ * @param bitsExpression An expression that returns bits when evaluated.
+ * @param otherBitsExpression An expression that returns bits when evaluated.
+ * @return A new {@code Expr} representing the bitwise XOR operation.
+ */
+export function bitXor(
+  bitsExpression: firestore.Expr,
+  otherBitsExpression: firestore.Expr
+): FunctionExpr;
+export function bitXor(
+  bits: string | firestore.Expr,
+  bitsOrExpression: number | firestore.Expr | Buffer | Uint8Array
+): FunctionExpr {
+  return fieldOrExpression(bits).bitXor(valueToDefaultExpr(bitsOrExpression));
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that applies a bitwise NOT operation to a field.
+ *
+ * ```typescript
+ * // Calculate the bitwise NOT of 'field1'.
+ * bitNot("field1");
+ * ```
+ *
+ * @param field The operand field name.
+ * @return A new {@code Expr} representing the bitwise NOT operation.
  */
-class Lt extends Function implements FilterCondition {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('lt', [left, right]);
-  }
-  filterable = true as const;
+export function bitNot(field: string): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise NOT operation to an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise NOT of 'field1'.
+ * bitNot(field("field1"));
+ * ```
+ *
+ * @param bitsValueExpression An expression that returns bits when evaluated.
+ * @return A new {@code Expr} representing the bitwise NOT operation.
+ */
+export function bitNot(bitsValueExpression: firestore.Expr): FunctionExpr;
+export function bitNot(bits: string | firestore.Expr): FunctionExpr {
+  return fieldOrExpression(bits).bitNot();
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that applies a bitwise left shift operation between a field and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise left shift of 'field1' by 2 bits.
+ * bitLeftShift("field1", 2);
+ * ```
+ *
+ * @param field The left operand field name.
+ * @param y The right operand constant representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise left shift operation.
  */
-class Lte extends Function implements FilterCondition {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('lte', [left, right]);
-  }
-  filterable = true as const;
+export function bitLeftShift(field: string, y: number): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise left shift operation between a field and an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
+ * bitLeftShift("field1", field("field2"));
+ * ```
+ *
+ * @param field The left operand field name.
+ * @param numberExpr The right operand expression representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise left shift operation.
+ */
+export function bitLeftShift(
+  field: string,
+  numberExpr: firestore.Expr
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise left shift operation between an expression and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise left shift of 'field1' by 2 bits.
+ * bitLeftShift(field("field1"), 2);
+ * ```
+ *
+ * @param xValue An expression returning bits.
+ * @param y The right operand constant representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise left shift operation.
+ */
+export function bitLeftShift(xValue: firestore.Expr, y: number): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise left shift operation between two expressions.
+ *
+ * ```typescript
+ * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
+ * bitLeftShift(field("field1"), field("field2"));
+ * ```
+ *
+ * @param xValue An expression returning bits.
+ * @param numberExpr The right operand expression representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise left shift operation.
+ */
+export function bitLeftShift(
+  xValue: firestore.Expr,
+  numberExpr: firestore.Expr
+): FunctionExpr;
+export function bitLeftShift(
+  xValue: string | firestore.Expr,
+  numberExpr: number | firestore.Expr
+): FunctionExpr {
+  return fieldOrExpression(xValue).bitLeftShift(valueToDefaultExpr(numberExpr));
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that applies a bitwise right shift operation between a field and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise right shift of 'field1' by 2 bits.
+ * bitRightShift("field1", 2);
+ * ```
+ *
+ * @param field The left operand field name.
+ * @param y The right operand constant representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise right shift operation.
  */
-class Gt extends Function implements FilterCondition {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('gt', [left, right]);
-  }
-  filterable = true as const;
+export function bitRightShift(field: string, y: number): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise right shift operation between a field and an expression.
+ *
+ * ```typescript
+ * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
+ * bitRightShift("field1", field("field2"));
+ * ```
+ *
+ * @param field The left operand field name.
+ * @param numberExpr The right operand expression representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise right shift operation.
+ */
+export function bitRightShift(
+  field: string,
+  numberExpr: firestore.Expr
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise right shift operation between an expression and a constant.
+ *
+ * ```typescript
+ * // Calculate the bitwise right shift of 'field1' by 2 bits.
+ * bitRightShift(field("field1"), 2);
+ * ```
+ *
+ * @param xValue An expression returning bits.
+ * @param y The right operand constant representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise right shift operation.
+ */
+export function bitRightShift(xValue: firestore.Expr, y: number): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that applies a bitwise right shift operation between two expressions.
+ *
+ * ```typescript
+ * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
+ * bitRightShift(field("field1"), field("field2"));
+ * ```
+ *
+ * @param xValue An expression returning bits.
+ * @param numberExpr The right operand expression representing the number of bits to shift.
+ * @return A new {@code Expr} representing the bitwise right shift operation.
+ */
+export function bitRightShift(
+  xValue: firestore.Expr,
+  numberExpr: firestore.Expr
+): FunctionExpr;
+export function bitRightShift(
+  xValue: string | firestore.Expr,
+  numberExpr: number | firestore.Expr
+): FunctionExpr {
+  return fieldOrExpression(xValue).bitRightShift(
+    valueToDefaultExpr(numberExpr)
+  );
 }
 
 /**
  * @beta
+ * Creates an expression that indexes into an array from the beginning or end
+ * and return the element. If the offset exceeds the array length, an error is
+ * returned. A negative offset, starts from the end.
+ *
+ * ```typescript
+ * // Return the value in the tags field array at index 1.
+ * arrayOffset('tags', 1);
+ * ```
+ *
+ * @param arrayField The name of the array field.
+ * @param offset The index of the element to return.
+ * @return A new Expr representing the 'arrayOffset' operation.
  */
-class Gte extends Function implements FilterCondition {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('gte', [left, right]);
-  }
-  filterable = true as const;
+export function arrayOffset(arrayField: string, offset: number): FunctionExpr;
+
+/**
+ * @beta
+ * Creates an expression that indexes into an array from the beginning or end
+ * and return the element. If the offset exceeds the array length, an error is
+ * returned. A negative offset, starts from the end.
+ *
+ * ```typescript
+ * // Return the value in the tags field array at index specified by field
+ * // 'favoriteTag'.
+ * arrayOffset('tags', field('favoriteTag'));
+ * ```
+ *
+ * @param arrayField The name of the array field.
+ * @param offsetExpr An Expr evaluating to the index of the element to return.
+ * @return A new Expr representing the 'arrayOffset' operation.
+ */
+export function arrayOffset(
+  arrayField: string,
+  offsetExpr: firestore.Expr
+): FunctionExpr;
+
+/**
+ * @beta
+ * Creates an expression that indexes into an array from the beginning or end
+ * and return the element. If the offset exceeds the array length, an error is
+ * returned. A negative offset, starts from the end.
+ *
+ * ```typescript
+ * // Return the value in the tags field array at index 1.
+ * arrayOffset(field('tags'), 1);
+ * ```
+ *
+ * @param arrayExpression An Expr evaluating to an array.
+ * @param offset The index of the element to return.
+ * @return A new Expr representing the 'arrayOffset' operation.
+ */
+export function arrayOffset(
+  arrayExpression: firestore.Expr,
+  offset: number
+): FunctionExpr;
+
+/**
+ * @beta
+ * Creates an expression that indexes into an array from the beginning or end
+ * and return the element. If the offset exceeds the array length, an error is
+ * returned. A negative offset, starts from the end.
+ *
+ * ```typescript
+ * // Return the value in the tags field array at index specified by field
+ * // 'favoriteTag'.
+ * arrayOffset(field('tags'), field('favoriteTag'));
+ * ```
+ *
+ * @param arrayExpression An Expr evaluating to an array.
+ * @param offsetExpr An Expr evaluating to the index of the element to return.
+ * @return A new Expr representing the 'arrayOffset' operation.
+ */
+export function arrayOffset(
+  arrayExpression: firestore.Expr,
+  offsetExpr: firestore.Expr
+): FunctionExpr;
+export function arrayOffset(
+  array: firestore.Expr | string,
+  offset: firestore.Expr | number
+): FunctionExpr {
+  return fieldOrExpression(array).arrayOffset(valueToDefaultExpr(offset));
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that checks if a given expression produces an error.
+ *
+ * ```typescript
+ * // Check if the result of a calculation is an error
+ * isError(field("title").arrayContains(1));
+ * ```
+ *
+ * @param value The expression to check.
+ * @return A new {@code Expr} representing the 'isError' check.
  */
-class ArrayConcat extends Function {
-  constructor(
-    private array: Expr,
-    private elements: Expr[]
-  ) {
-    super('array_concat', [array, ...elements]);
-  }
+export function isError(value: firestore.Expr): BooleanExpr {
+  const expr: Expr = cast<Expr>(value);
+  return expr.isError();
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that returns the `catch` argument if there is an
+ * error, else return the result of the `try` argument evaluation.
+ *
+ * ```typescript
+ * // Returns the first item in the title field arrays, or returns
+ * // the entire title field if the array is empty or the field is another type.
+ * ifError(field("title").arrayOffset(0), field("title"));
+ * ```
+ *
+ * @param tryExpr The try expression.
+ * @param catchExpr The catch expression that will be evaluated and
+ * returned if the tryExpr produces an error.
+ * @return A new {@code Expr} representing the 'ifError' operation.
  */
-class ArrayReverse extends Function {
-  constructor(private array: Expr) {
-    super('array_reverse', [array]);
-  }
+export function ifError(
+  tryExpr: firestore.Expr,
+  catchExpr: firestore.Expr
+): FunctionExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the `catch` argument if there is an
+ * error, else return the result of the `try` argument evaluation.
+ *
+ * ```typescript
+ * // Returns the first item in the title field arrays, or returns
+ * // "Default Title"
+ * ifError(field("title").arrayOffset(0), "Default Title");
+ * ```
+ *
+ * @param tryExpr The try expression.
+ * @param catchValue The value that will be returned if the tryExpr produces an
+ * error.
+ * @return A new {@code Expr} representing the 'ifError' operation.
+ */
+export function ifError(
+  tryExpr: firestore.Expr,
+  catchValue: unknown
+): FunctionExpr;
+export function ifError(
+  tryExpr: firestore.Expr,
+  catchValue: unknown
+): FunctionExpr {
+  const expr: Expr = cast<Expr>(tryExpr);
+  return expr.ifError(valueToDefaultExpr(catchValue));
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that returns `true` if a value is absent. Otherwise,
+ * returns `false` even if the value is `null`.
+ *
+ * ```typescript
+ * // Check if the field `value` is absent.
+ * isAbsent(field("value"));
+ * ```
+ *
+ * @param value The expression to check.
+ * @return A new {@code Expr} representing the 'isAbsent' check.
  */
-class ArrayContains extends Function implements FilterCondition {
-  constructor(
-    private array: Expr,
-    private element: Expr
-  ) {
-    super('array_contains', [array, element]);
-  }
-  filterable = true as const;
+export function isAbsent(value: firestore.Expr): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns `true` if a field is absent. Otherwise,
+ * returns `false` even if the field value is `null`.
+ *
+ * ```typescript
+ * // Check if the field `value` is absent.
+ * isAbsent("value");
+ * ```
+ *
+ * @param field The field to check.
+ * @return A new {@code Expr} representing the 'isAbsent' check.
+ */
+export function isAbsent(field: string): BooleanExpr;
+export function isAbsent(value: firestore.Expr | string): BooleanExpr {
+  return fieldOrExpression(value).isAbsent();
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that checks if an expression evaluates to 'NaN' (Not a Number).
+ *
+ * ```typescript
+ * // Check if the result of a calculation is NaN
+ * isNull(field("value").divide(0));
+ * ```
+ *
+ * @param value The expression to check.
+ * @return A new {@code Expr} representing the 'isNull' check.
  */
-class ArrayContainsAll extends Function implements FilterCondition {
-  constructor(
-    private array: Expr,
-    private values: Expr[]
-  ) {
-    super('array_contains_all', [array, new ListOfExprs(values)]);
-  }
-  filterable = true as const;
+export function isNull(value: firestore.Expr): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a field's value evaluates to 'NaN' (Not a Number).
+ *
+ * ```typescript
+ * // Check if the result of a calculation is NaN
+ * isNull("value");
+ * ```
+ *
+ * @param value The name of the field to check.
+ * @return A new {@code Expr} representing the 'isNull' check.
+ */
+export function isNull(value: string): BooleanExpr;
+export function isNull(value: firestore.Expr | string): BooleanExpr {
+  return fieldOrExpression(value).isNull();
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that checks if tbe result of an expression is not null.
+ *
+ * ```typescript
+ * // Check if the value of the 'name' field is not null
+ * isNotNull(field("name"));
+ * ```
+ *
+ * @param value The expression to check.
+ * @return A new {@code Expr} representing the 'isNotNull' check.
  */
-class ArrayContainsAny extends Function implements FilterCondition {
-  constructor(
-    private array: Expr,
-    private values: Expr[]
-  ) {
-    super('array_contains_any', [array, new ListOfExprs(values)]);
-  }
-  filterable = true as const;
+export function isNotNull(value: firestore.Expr): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if tbe value of a field is not null.
+ *
+ * ```typescript
+ * // Check if the value of the 'name' field is not null
+ * isNotNull("name");
+ * ```
+ *
+ * @param value The name of the field to check.
+ * @return A new {@code Expr} representing the 'isNotNull' check.
+ */
+export function isNotNull(value: string): BooleanExpr;
+export function isNotNull(value: firestore.Expr | string): BooleanExpr {
+  return fieldOrExpression(value).isNotNull();
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
+ *
+ * ```typescript
+ * // Check if the result of a calculation is NOT NaN
+ * isNotNaN(field("value").divide(0));
+ * ```
+ *
+ * @param value The expression to check.
+ * @return A new {@code Expr} representing the 'isNotNaN' check.
  */
-class ArrayLength extends Function {
-  constructor(private array: Expr) {
-    super('array_length', [array]);
-  }
+export function isNotNan(value: firestore.Expr): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
+ *
+ * ```typescript
+ * // Check if the value of a field is NOT NaN
+ * isNotNaN("value");
+ * ```
+ *
+ * @param value The name of the field to check.
+ * @return A new {@code Expr} representing the 'isNotNaN' check.
+ */
+export function isNotNan(value: string): BooleanExpr;
+export function isNotNan(value: firestore.Expr | string): BooleanExpr {
+  return fieldOrExpression(value).isNotNan();
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that removes a key from the map at the specified field name.
+ *
+ * ```
+ * // Removes the key 'city' field from the map in the address field of the input document.
+ * mapRemove('address', 'city');
+ * ```
+ *
+ * @param mapField The name of a field containing a map value.
+ * @param key The name of the key to remove from the input map.
  */
-class ArrayElement extends Function {
-  constructor() {
-    super('array_element', []);
-  }
+export function mapRemove(mapField: string, key: string): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that removes a key from the map produced by evaluating an expression.
+ *
+ * ```
+ * // Removes the key 'baz' from the input map.
+ * mapRemove(map({foo: 'bar', baz: true}), 'baz');
+ * ```
+ *
+ * @param mapExpr An expression return a map value.
+ * @param key The name of the key to remove from the input map.
+ */
+export function mapRemove(mapExpr: firestore.Expr, key: string): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that removes a key from the map at the specified field name.
+ *
+ * ```
+ * // Removes the key 'city' field from the map in the address field of the input document.
+ * mapRemove('address', constant('city'));
+ * ```
+ *
+ * @param mapField The name of a field containing a map value.
+ * @param keyExpr An expression that produces the name of the key to remove from the input map.
+ */
+export function mapRemove(
+  mapField: string,
+  keyExpr: firestore.Expr
+): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that removes a key from the map produced by evaluating an expression.
+ *
+ * ```
+ * // Removes the key 'baz' from the input map.
+ * mapRemove(map({foo: 'bar', baz: true}), constant('baz'));
+ * ```
+ *
+ * @param mapExpr An expression return a map value.
+ * @param keyExpr An expression that produces the name of the key to remove from the input map.
+ */
+export function mapRemove(
+  mapExpr: firestore.Expr,
+  keyExpr: firestore.Expr
+): FunctionExpr;
+
+export function mapRemove(
+  mapExpr: firestore.Expr | string,
+  stringExpr: firestore.Expr | string
+): FunctionExpr {
+  return fieldOrExpression(mapExpr).mapRemove(valueToDefaultExpr(stringExpr));
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that merges multiple map values.
+ *
+ * ```
+ * // Merges the map in the settings field with, a map literal, and a map in
+ * // that is conditionally returned by another expression
+ * mapMerge('settings', { enabled: true }, cond(field('isAdmin'), { admin: true}, {})
+ * ```
+ *
+ * @param mapField Name of a field containing a map value that will be merged.
+ * @param secondMap A required second map to merge. Represented as a literal or
+ * an expression that returns a map.
+ * @param otherMaps Optional additional maps to merge. Each map is represented
+ * as a literal or an expression that returns a map.
  */
-class EqAny extends Function implements FilterCondition {
-  constructor(
-    private left: Expr,
-    private others: Expr[]
-  ) {
-    super('eq_any', [left, new ListOfExprs(others)]);
-  }
-  filterable = true as const;
+export function mapMerge(
+  mapField: string,
+  secondMap: Record<string, unknown> | firestore.Expr,
+  ...otherMaps: Array<Record<string, unknown> | firestore.Expr>
+): FunctionExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that merges multiple map values.
+ *
+ * ```
+ * // Merges the map in the settings field with, a map literal, and a map in
+ * // that is conditionally returned by another expression
+ * mapMerge(field('settings'), { enabled: true }, cond(field('isAdmin'), { admin: true}, {})
+ * ```
+ *
+ * @param firstMap An expression or literal map value that will be merged.
+ * @param secondMap A required second map to merge. Represented as a literal or
+ * an expression that returns a map.
+ * @param otherMaps Optional additional maps to merge. Each map is represented
+ * as a literal or an expression that returns a map.
+ */
+export function mapMerge(
+  firstMap: Record<string, unknown> | firestore.Expr,
+  secondMap: Record<string, unknown> | firestore.Expr,
+  ...otherMaps: Array<Record<string, unknown> | firestore.Expr>
+): FunctionExpr;
+
+export function mapMerge(
+  firstMap: string | Record<string, unknown> | firestore.Expr,
+  secondMap: Record<string, unknown> | firestore.Expr,
+  ...otherMaps: Array<Record<string, unknown> | firestore.Expr>
+): FunctionExpr {
+  const secondMapExpr = valueToDefaultExpr(secondMap);
+  const otherMapExprs = otherMaps.map(valueToDefaultExpr);
+  return fieldOrExpression(firstMap).mapMerge(secondMapExpr, ...otherMapExprs);
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that returns the document ID from a path.
+ *
+ * ```typescript
+ * // Get the document ID from a path.
+ * documentId(myDocumentReference);
+ * ```
+ *
+ * @return A new {@code Expr} representing the documentId operation.
  */
-class NotEqAny extends Function implements FilterCondition {
-  constructor(
-    private left: Expr,
-    private others: Expr[]
-  ) {
-    super('not_eq_any', [left, new ListOfExprs(others)]);
-  }
-  filterable = true as const;
+export function documentId(
+  documentPath: string | firestore.DocumentReference
+): FunctionExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the document ID from a path.
+ *
+ * ```typescript
+ * // Get the document ID from a path.
+ * documentId(field("__path__"));
+ * ```
+ *
+ * @return A new {@code Expr} representing the documentId operation.
+ */
+export function documentId(documentPathExpr: firestore.Expr): FunctionExpr;
+
+export function documentId(
+  documentPath: firestore.Expr | string | firestore.DocumentReference
+): FunctionExpr {
+  const documentPathExpr = valueToDefaultExpr(documentPath);
+  return documentPathExpr.documentId();
 }
 
 /**
  * @beta
+ *
+ * Creates an expression that returns a substring of a string or byte array.
+ *
+ * @param field The name of a field containing a string or byte array to compute the substring from.
+ * @param position Index of the first character of the substring.
+ * @param length Length of the substring.
  */
-class IsNan extends Function implements FilterCondition {
-  constructor(private expr: Expr) {
-    super('is_nan', [expr]);
-  }
-  filterable = true as const;
-}
+export function substr(
+  field: string,
+  position: number,
+  length?: number
+): FunctionExpr;
 
 /**
  * @beta
+ *
+ * Creates an expression that returns a substring of a string or byte array.
+ *
+ * @param input An expression returning a string or byte array to compute the substring from.
+ * @param position Index of the first character of the substring.
+ * @param length Length of the substring.
  */
-class Exists extends Function implements FilterCondition {
-  constructor(private expr: Expr) {
-    super('exists', [expr]);
-  }
-  filterable = true as const;
-}
+export function substr(
+  input: firestore.Expr,
+  position: number,
+  length?: number
+): FunctionExpr;
 
 /**
  * @beta
+ *
+ * Creates an expression that returns a substring of a string or byte array.
+ *
+ * @param field The name of a field containing a string or byte array to compute the substring from.
+ * @param position An expression that returns the index of the first character of the substring.
+ * @param length An expression that returns the length of the substring.
  */
-class Not extends Function implements FilterCondition {
-  constructor(private expr: Expr) {
-    super('not', [expr]);
-  }
-  filterable = true as const;
-}
+export function substr(
+  field: string,
+  position: firestore.Expr,
+  length?: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
+ *
+ * Creates an expression that returns a substring of a string or byte array.
+ *
+ * @param input An expression returning a string or byte array to compute the substring from.
+ * @param position An expression that returns the index of the first character of the substring.
+ * @param length An expression that returns the length of the substring.
  */
-class And extends Function implements FilterCondition {
-  constructor(private conditions: FilterExpr[]) {
-    super('and', conditions);
-  }
+export function substr(
+  input: firestore.Expr,
+  position: firestore.Expr,
+  length?: firestore.Expr
+): FunctionExpr;
 
-  filterable = true as const;
-}
-
-/**
- * @beta
- */
-class Or extends Function implements FilterCondition {
-  constructor(private conditions: FilterExpr[]) {
-    super('or', conditions);
-  }
-  filterable = true as const;
-}
-
-/**
- * @beta
- */
-class Xor extends Function implements FilterCondition {
-  constructor(private conditions: FilterExpr[]) {
-    super('xor', conditions);
-  }
-  filterable = true as const;
-}
-
-/**
- * @beta
- */
-class Cond extends Function implements FilterCondition {
-  constructor(
-    private condition: FilterExpr,
-    private thenExpr: Expr,
-    private elseExpr: Expr
-  ) {
-    super('cond', [condition, thenExpr, elseExpr]);
-  }
-  filterable = true as const;
-}
-
-/**
- * @beta
- */
-class LogicalMaximum extends Function {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('logical_maximum', [left, right]);
-  }
-}
-
-/**
- * @beta
- */
-class LogicalMinimum extends Function {
-  constructor(
-    private left: Expr,
-    private right: Expr
-  ) {
-    super('logical_minimum', [left, right]);
-  }
-}
-
-/**
- * @beta
- */
-export class Reverse extends Function {
-  constructor(private value: Expr) {
-    super('reverse', [value]);
-  }
-}
-
-/**
- * @beta
- */
-export class ReplaceFirst extends Function {
-  constructor(
-    private value: Expr,
-    private find: Expr,
-    private replace: Expr
-  ) {
-    super('replace_first', [value, find, replace]);
-  }
-}
-
-/**
- * @beta
- */
-export class ReplaceAll extends Function {
-  constructor(
-    private value: Expr,
-    private find: Expr,
-    private replace: Expr
-  ) {
-    super('replace_all', [value, find, replace]);
-  }
-}
-
-/**
- * @beta
- */
-export class CharLength extends Function {
-  constructor(private value: Expr) {
-    super('char_length', [value]);
-  }
-}
-
-/**
- * @beta
- */
-export class ByteLength extends Function {
-  constructor(private value: Expr) {
-    super('byte_length', [value]);
-  }
-}
-
-/**
- * @beta
- */
-class Like extends Function implements FilterCondition {
-  constructor(
-    private expr: Expr,
-    private pattern: Expr
-  ) {
-    super('like', [expr, pattern]);
-  }
-  filterable = true as const;
-}
-
-/**
- * @beta
- */
-class RegexContains extends Function implements FilterCondition {
-  constructor(
-    private expr: Expr,
-    private pattern: Expr
-  ) {
-    super('regex_contains', [expr, pattern]);
-  }
-  filterable = true as const;
-}
-
-/**
- * @beta
- */
-class RegexMatch extends Function implements FilterCondition {
-  constructor(
-    private expr: Expr,
-    private pattern: Expr
-  ) {
-    super('regex_match', [expr, pattern]);
-  }
-  filterable = true as const;
-}
-
-/**
- * @beta
- */
-class StrContains extends Function implements FilterCondition {
-  constructor(
-    private expr: Expr,
-    private substring: Expr
-  ) {
-    super('str_contains', [expr, substring]);
-  }
-  filterable = true as const;
-}
-
-/**
- * @beta
- */
-class StartsWith extends Function implements FilterCondition {
-  constructor(
-    private expr: Expr,
-    private prefix: Expr
-  ) {
-    super('starts_with', [expr, prefix]);
-  }
-  filterable = true as const;
-}
-
-/**
- * @beta
- */
-class EndsWith extends Function implements FilterCondition {
-  constructor(
-    private expr: Expr,
-    private suffix: Expr
-  ) {
-    super('ends_with', [expr, suffix]);
-  }
-  filterable = true as const;
-}
-
-/**
- * @beta
- */
-class ToLower extends Function {
-  constructor(private expr: Expr) {
-    super('to_lower', [expr]);
-  }
-}
-
-/**
- * @beta
- */
-class ToUpper extends Function {
-  constructor(private expr: Expr) {
-    super('to_upper', [expr]);
-  }
-}
-
-/**
- * @beta
- */
-class Trim extends Function {
-  constructor(private expr: Expr) {
-    super('trim', [expr]);
-  }
-}
-
-/**
- * @beta
- */
-class StrConcat extends Function {
-  constructor(
-    private first: Expr,
-    private rest: Expr[]
-  ) {
-    super('str_concat', [first, ...rest]);
-  }
-}
-
-/**
- * @beta
- */
-class MapGet extends Function {
-  constructor(map: Expr, name: string) {
-    super('map_get', [map, Constant.of(name)]);
-  }
-}
-
-/**
- * @beta
- */
-class Count extends Function implements Accumulator {
-  accumulator = true as const;
-  constructor(
-    private value: Expr | undefined,
-    private distinct: boolean
-  ) {
-    super('count', value === undefined ? [] : [value]);
-  }
-}
-
-/**
- * @beta
- */
-class Sum extends Function implements Accumulator {
-  accumulator = true as const;
-  constructor(
-    private value: Expr,
-    private distinct: boolean
-  ) {
-    super('sum', [value]);
-  }
-}
-
-/**
- * @beta
- */
-class Avg extends Function implements Accumulator {
-  accumulator = true as const;
-  constructor(
-    private value: Expr,
-    private distinct: boolean
-  ) {
-    super('avg', [value]);
-  }
-}
-
-/**
- * @beta
- */
-class Minimum extends Function implements Accumulator {
-  accumulator = true as const;
-  constructor(
-    private value: Expr,
-    private distinct: boolean
-  ) {
-    super('minimum', [value]);
-  }
-}
-
-/**
- * @beta
- */
-class Maximum extends Function implements Accumulator {
-  accumulator = true as const;
-  constructor(
-    private value: Expr,
-    private distinct: boolean
-  ) {
-    super('maximum', [value]);
-  }
-}
-
-/**
- * @beta
- */
-class CosineDistance extends Function {
-  constructor(
-    private vector1: Expr,
-    private vector2: Expr
-  ) {
-    super('cosine_distance', [vector1, vector2]);
-  }
-}
-
-/**
- * @beta
- */
-class DotProduct extends Function {
-  constructor(
-    private vector1: Expr,
-    private vector2: Expr
-  ) {
-    super('dot_product', [vector1, vector2]);
-  }
-}
-
-/**
- * @beta
- */
-class EuclideanDistance extends Function {
-  constructor(
-    private vector1: Expr,
-    private vector2: Expr
-  ) {
-    super('euclidean_distance', [vector1, vector2]);
-  }
-}
-
-/**
- * @beta
- */
-export class VectorLength extends Function {
-  constructor(private value: Expr) {
-    super('vector_length', [value]);
-  }
-}
-
-/**
- * @beta
- */
-export class UnixMicrosToTimestamp extends Function {
-  constructor(private input: Expr) {
-    super('unix_micros_to_timestamp', [input]);
-  }
-}
-
-/**
- * @beta
- */
-export class TimestampToUnixMicros extends Function {
-  constructor(private input: Expr) {
-    super('timestamp_to_unix_micros', [input]);
-  }
-}
-
-/**
- * @beta
- */
-export class UnixMillisToTimestamp extends Function {
-  constructor(private input: Expr) {
-    super('unix_millis_to_timestamp', [input]);
-  }
-}
-
-/**
- * @beta
- */
-export class TimestampToUnixMillis extends Function {
-  constructor(private input: Expr) {
-    super('timestamp_to_unix_millis', [input]);
-  }
-}
-
-/**
- * @beta
- */
-export class UnixSecondsToTimestamp extends Function {
-  constructor(private input: Expr) {
-    super('unix_seconds_to_timestamp', [input]);
-  }
-}
-
-/**
- * @beta
- */
-export class TimestampToUnixSeconds extends Function {
-  constructor(private input: Expr) {
-    super('timestamp_to_unix_seconds', [input]);
-  }
-}
-
-/**
- * @beta
- */
-export class TimestampAdd extends Function {
-  constructor(
-    private timestamp: Expr,
-    private unit: Expr,
-    private amount: Expr
-  ) {
-    super('timestamp_add', [timestamp, unit, amount]);
-  }
-}
-
-/**
- * @beta
- */
-export class TimestampSub extends Function {
-  constructor(
-    private timestamp: Expr,
-    private unit: Expr,
-    private amount: Expr
-  ) {
-    super('timestamp_sub', [timestamp, unit, amount]);
-  }
+export function substr(
+  field: firestore.Expr | string,
+  position: firestore.Expr | number,
+  length?: firestore.Expr | number
+): FunctionExpr {
+  const fieldExpr = fieldOrExpression(field);
+  const positionExpr = valueToDefaultExpr(position);
+  const lengthExpr =
+    length === undefined ? undefined : valueToDefaultExpr(length);
+  return fieldExpr.substr(positionExpr, lengthExpr);
 }
 
 /**
@@ -2929,30 +3429,19 @@ export class TimestampSub extends Function {
  *
  * ```typescript
  * // Add the value of the 'quantity' field and the 'reserve' field.
- * add(Field.of("quantity"), Field.of("reserve"));
+ * add(field("quantity"), field("reserve"));
  * ```
  *
- * @param left The first expression to add.
- * @param right The second expression to add.
+ * @param first The first expression to add.
+ * @param second The second expression or literal to add.
+ * @param others Optional other expressions or literals to add.
  * @return A new {@code Expr} representing the addition operation.
  */
-export function add(left: Expr, right: Expr): Add;
-
-/**
- * @beta
- *
- * Creates an expression that adds an expression to a constant value.
- *
- * ```typescript
- * // Add 5 to the value of the 'age' field
- * add(Field.of("age"), 5);
- * ```
- *
- * @param left The expression to add to.
- * @param right The constant value to add.
- * @return A new {@code Expr} representing the addition operation.
- */
-export function add(left: Expr, right: any): Add;
+export function add(
+  first: firestore.Expr,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr;
 
 /**
  * @beta
@@ -2961,34 +3450,29 @@ export function add(left: Expr, right: any): Add;
  *
  * ```typescript
  * // Add the value of the 'quantity' field and the 'reserve' field.
- * add("quantity", Field.of("reserve"));
+ * add("quantity", field("reserve"));
  * ```
  *
- * @param left The field name to add to.
- * @param right The expression to add.
+ * @param fieldName The name of the field containing the value to add.
+ * @param second The second expression or literal to add.
+ * @param others Optional other expressions or literals to add.
  * @return A new {@code Expr} representing the addition operation.
  */
-export function add(left: string, right: Expr): Add;
+export function add(
+  fieldName: string,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr;
 
-/**
- * @beta
- *
- * Creates an expression that adds a field's value to a constant value.
- *
- * ```typescript
- * // Add 5 to the value of the 'age' field
- * add("age", 5);
- * ```
- *
- * @param left The field name to add to.
- * @param right The constant value to add.
- * @return A new {@code Expr} representing the addition operation.
- */
-export function add(left: string, right: any): Add;
-export function add(left: Expr | string, right: Expr | any): Add {
-  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-  return new Add(normalizedLeft, normalizedRight);
+export function add(
+  first: firestore.Expr | string,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr {
+  return fieldOrExpression(first).add(
+    valueToDefaultExpr(second),
+    ...others.map(value => valueToDefaultExpr(value))
+  );
 }
 
 /**
@@ -2998,14 +3482,17 @@ export function add(left: Expr | string, right: Expr | any): Add {
  *
  * ```typescript
  * // Subtract the 'discount' field from the 'price' field
- * subtract(Field.of("price"), Field.of("discount"));
+ * subtract(field("price"), field("discount"));
  * ```
  *
  * @param left The expression to subtract from.
  * @param right The expression to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(left: Expr, right: Expr): Subtract;
+export function subtract(
+  left: firestore.Expr,
+  right: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -3014,14 +3501,17 @@ export function subtract(left: Expr, right: Expr): Subtract;
  *
  * ```typescript
  * // Subtract the constant value 2 from the 'value' field
- * subtract(Field.of("value"), 2);
+ * subtract(field("value"), 2);
  * ```
  *
- * @param left The expression to subtract from.
- * @param right The constant value to subtract.
+ * @param expression The expression to subtract from.
+ * @param value The constant value to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(left: Expr, right: any): Subtract;
+export function subtract(
+  expression: firestore.Expr,
+  value: unknown
+): FunctionExpr;
 
 /**
  * @beta
@@ -3030,14 +3520,17 @@ export function subtract(left: Expr, right: any): Subtract;
  *
  * ```typescript
  * // Subtract the 'discount' field from the 'price' field
- * subtract("price", Field.of("discount"));
+ * subtract("price", field("discount"));
  * ```
  *
- * @param left The field name to subtract from.
- * @param right The expression to subtract.
+ * @param fieldName The field name to subtract from.
+ * @param expression The expression to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(left: string, right: Expr): Subtract;
+export function subtract(
+  fieldName: string,
+  expression: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -3049,15 +3542,18 @@ export function subtract(left: string, right: Expr): Subtract;
  * subtract("total", 20);
  * ```
  *
- * @param left The field name to subtract from.
- * @param right The constant value to subtract.
+ * @param fieldName The field name to subtract from.
+ * @param value The constant value to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(left: string, right: any): Subtract;
-export function subtract(left: Expr | string, right: Expr | any): Subtract {
-  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-  return new Subtract(normalizedLeft, normalizedRight);
+export function subtract(fieldName: string, value: unknown): FunctionExpr;
+export function subtract(
+  left: firestore.Expr | string,
+  right: firestore.Expr | unknown
+): FunctionExpr {
+  const normalizedLeft = fieldOrExpression(left);
+  const normalizedRight = valueToDefaultExpr(right);
+  return normalizedLeft.subtract(normalizedRight);
 }
 
 /**
@@ -3067,30 +3563,19 @@ export function subtract(left: Expr | string, right: Expr | any): Subtract {
  *
  * ```typescript
  * // Multiply the 'quantity' field by the 'price' field
- * multiply(Field.of("quantity"), Field.of("price"));
+ * multiply(field("quantity"), field("price"));
  * ```
  *
- * @param left The first expression to multiply.
- * @param right The second expression to multiply.
+ * @param first The first expression to multiply.
+ * @param second The second expression or literal to multiply.
+ * @param others Optional additional expressions or literals to multiply.
  * @return A new {@code Expr} representing the multiplication operation.
  */
-export function multiply(left: Expr, right: Expr): Multiply;
-
-/**
- * @beta
- *
- * Creates an expression that multiplies an expression by a constant value.
- *
- * ```typescript
- * // Multiply the value of the 'price' field by 2
- * multiply(Field.of("price"), 2);
- * ```
- *
- * @param left The expression to multiply.
- * @param right The constant value to multiply by.
- * @return A new {@code Expr} representing the multiplication operation.
- */
-export function multiply(left: Expr, right: any): Multiply;
+export function multiply(
+  first: firestore.Expr,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr;
 
 /**
  * @beta
@@ -3099,34 +3584,29 @@ export function multiply(left: Expr, right: any): Multiply;
  *
  * ```typescript
  * // Multiply the 'quantity' field by the 'price' field
- * multiply("quantity", Field.of("price"));
+ * multiply("quantity", field("price"));
  * ```
  *
- * @param left The field name to multiply.
- * @param right The expression to multiply by.
+ * @param fieldName The name of the field containing the value to add.
+ * @param second The second expression or literal to add.
+ * @param others Optional other expressions or literals to add.
  * @return A new {@code Expr} representing the multiplication operation.
  */
-export function multiply(left: string, right: Expr): Multiply;
+export function multiply(
+  fieldName: string,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr;
 
-/**
- * @beta
- *
- * Creates an expression that multiplies a field's value by a constant value.
- *
- * ```typescript
- * // Multiply the 'value' field by 2
- * multiply("value", 2);
- * ```
- *
- * @param left The field name to multiply.
- * @param right The constant value to multiply by.
- * @return A new {@code Expr} representing the multiplication operation.
- */
-export function multiply(left: string, right: any): Multiply;
-export function multiply(left: Expr | string, right: Expr | any): Multiply {
-  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-  return new Multiply(normalizedLeft, normalizedRight);
+export function multiply(
+  first: firestore.Expr | string,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr {
+  return fieldOrExpression(first).multiply(
+    valueToDefaultExpr(second),
+    ...others.map(valueToDefaultExpr)
+  );
 }
 
 /**
@@ -3136,14 +3616,17 @@ export function multiply(left: Expr | string, right: Expr | any): Multiply {
  *
  * ```typescript
  * // Divide the 'total' field by the 'count' field
- * divide(Field.of("total"), Field.of("count"));
+ * divide(field("total"), field("count"));
  * ```
  *
  * @param left The expression to be divided.
  * @param right The expression to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(left: Expr, right: Expr): Divide;
+export function divide(
+  left: firestore.Expr,
+  right: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -3152,14 +3635,17 @@ export function divide(left: Expr, right: Expr): Divide;
  *
  * ```typescript
  * // Divide the 'value' field by 10
- * divide(Field.of("value"), 10);
+ * divide(field("value"), 10);
  * ```
  *
- * @param left The expression to be divided.
- * @param right The constant value to divide by.
+ * @param expression The expression to be divided.
+ * @param value The constant value to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(left: Expr, right: any): Divide;
+export function divide(
+  expression: firestore.Expr,
+  value: unknown
+): FunctionExpr;
 
 /**
  * @beta
@@ -3168,14 +3654,17 @@ export function divide(left: Expr, right: any): Divide;
  *
  * ```typescript
  * // Divide the 'total' field by the 'count' field
- * divide("total", Field.of("count"));
+ * divide("total", field("count"));
  * ```
  *
- * @param left The field name to be divided.
- * @param right The expression to divide by.
+ * @param fieldName The field name to be divided.
+ * @param expressions The expression to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(left: string, right: Expr): Divide;
+export function divide(
+  fieldName: string,
+  expressions: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -3187,15 +3676,18 @@ export function divide(left: string, right: Expr): Divide;
  * divide("value", 10);
  * ```
  *
- * @param left The field name to be divided.
- * @param right The constant value to divide by.
+ * @param fieldName The field name to be divided.
+ * @param value The constant value to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(left: string, right: any): Divide;
-export function divide(left: Expr | string, right: Expr | any): Divide {
-  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-  return new Divide(normalizedLeft, normalizedRight);
+export function divide(fieldName: string, value: unknown): FunctionExpr;
+export function divide(
+  left: firestore.Expr | string,
+  right: firestore.Expr | unknown
+): FunctionExpr {
+  const normalizedLeft = fieldOrExpression(left);
+  const normalizedRight = valueToDefaultExpr(right);
+  return normalizedLeft.divide(normalizedRight);
 }
 
 /**
@@ -3205,14 +3697,14 @@ export function divide(left: Expr | string, right: Expr | any): Divide {
  *
  * ```typescript
  * // Calculate the remainder of dividing 'field1' by 'field2'.
- * mod(Field.of("field1"), Field.of("field2"));
+ * mod(field("field1"), field("field2"));
  * ```
  *
  * @param left The dividend expression.
  * @param right The divisor expression.
  * @return A new {@code Expr} representing the modulo operation.
  */
-export function mod(left: Expr, right: Expr): Mod;
+export function mod(left: firestore.Expr, right: firestore.Expr): FunctionExpr;
 
 /**
  * @beta
@@ -3221,14 +3713,14 @@ export function mod(left: Expr, right: Expr): Mod;
  *
  * ```typescript
  * // Calculate the remainder of dividing 'field1' by 5.
- * mod(Field.of("field1"), 5);
+ * mod(field("field1"), 5);
  * ```
  *
- * @param left The dividend expression.
- * @param right The divisor constant.
+ * @param expression The dividend expression.
+ * @param value The divisor constant.
  * @return A new {@code Expr} representing the modulo operation.
  */
-export function mod(left: Expr, right: any): Mod;
+export function mod(expression: firestore.Expr, value: unknown): FunctionExpr;
 
 /**
  * @beta
@@ -3237,14 +3729,17 @@ export function mod(left: Expr, right: any): Mod;
  *
  * ```typescript
  * // Calculate the remainder of dividing 'field1' by 'field2'.
- * mod("field1", Field.of("field2"));
+ * mod("field1", field("field2"));
  * ```
  *
- * @param left The dividend field name.
- * @param right The divisor expression.
+ * @param fieldName The dividend field name.
+ * @param expression The divisor expression.
  * @return A new {@code Expr} representing the modulo operation.
  */
-export function mod(left: string, right: Expr): Mod;
+export function mod(
+  fieldName: string,
+  expression: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -3256,402 +3751,86 @@ export function mod(left: string, right: Expr): Mod;
  * mod("field1", 5);
  * ```
  *
- * @param left The dividend field name.
- * @param right The divisor constant.
+ * @param fieldName The dividend field name.
+ * @param value The divisor constant.
  * @return A new {@code Expr} representing the modulo operation.
  */
-export function mod(left: string, right: any): Mod;
-export function mod(left: Expr | string, right: Expr | any): Mod {
-  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-  return new Mod(normalizedLeft, normalizedRight);
+export function mod(fieldName: string, value: unknown): FunctionExpr;
+export function mod(
+  left: firestore.Expr | string,
+  right: firestore.Expr | unknown
+): FunctionExpr {
+  const normalizedLeft = fieldOrExpression(left);
+  const normalizedRight = valueToDefaultExpr(right);
+  return normalizedLeft.mod(normalizedRight);
 }
 
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise AND operation between two expressions.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise AND of 'field1' and 'field2'.
-//  * bitAnd(Field.of("field1"), Field.of("field2"));
-//  * ```
-//  *
-//  * @param left The left operand expression.
-//  * @param right The right operand expression.
-//  * @return A new {@code Expr} representing the bitwise AND operation.
-//  */
-// export function bitAnd(left: Expr, right: Expr): BitAnd;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise AND operation between an expression and a constant.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise AND of 'field1' and 0xFF.
-//  * bitAnd(Field.of("field1"), 0xFF);
-//  * ```
-//  *
-//  * @param left The left operand expression.
-//  * @param right The right operand constant.
-//  * @return A new {@code Expr} representing the bitwise AND operation.
-//  */
-// export function bitAnd(left: Expr, right: any): BitAnd;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise AND operation between a field and an expression.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise AND of 'field1' and 'field2'.
-//  * bitAnd("field1", Field.of("field2"));
-//  * ```
-//  *
-//  * @param left The left operand field name.
-//  * @param right The right operand expression.
-//  * @return A new {@code Expr} representing the bitwise AND operation.
-//  */
-// export function bitAnd(left: string, right: Expr): BitAnd;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise AND operation between a field and a constant.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise AND of 'field1' and 0xFF.
-//  * bitAnd("field1", 0xFF);
-//  * ```
-//  *
-//  * @param left The left operand field name.
-//  * @param right The right operand constant.
-//  * @return A new {@code Expr} representing the bitwise AND operation.
-//  */
-// export function bitAnd(left: string, right: any): BitAnd;
-// export function bitAnd(left: Expr | string, right: Expr | any): BitAnd {
-//   const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-//   const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-//   return new BitAnd(normalizedLeft, normalizedRight);
-// }
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise OR operation between two expressions.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise OR of 'field1' and 'field2'.
-//  * bitOr(Field.of("field1"), Field.of("field2"));
-//  * ```
-//  *
-//  * @param left The left operand expression.
-//  * @param right The right operand expression.
-//  * @return A new {@code Expr} representing the bitwise OR operation.
-//  */
-// export function bitOr(left: Expr, right: Expr): BitOr;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise OR operation between an expression and a constant.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise OR of 'field1' and 0xFF.
-//  * bitOr(Field.of("field1"), 0xFF);
-//  * ```
-//  *
-//  * @param left The left operand expression.
-//  * @param right The right operand constant.
-//  * @return A new {@code Expr} representing the bitwise OR operation.
-//  */
-// export function bitOr(left: Expr, right: any): BitOr;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise OR operation between a field and an expression.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise OR of 'field1' and 'field2'.
-//  * bitOr("field1", Field.of("field2"));
-//  * ```
-//  *
-//  * @param left The left operand field name.
-//  * @param right The right operand expression.
-//  * @return A new {@code Expr} representing the bitwise OR operation.
-//  */
-// export function bitOr(left: string, right: Expr): BitOr;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise OR operation between a field and a constant.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise OR of 'field1' and 0xFF.
-//  * bitOr("field1", 0xFF);
-//  * ```
-//  *
-//  * @param left The left operand field name.
-//  * @param right The right operand constant.
-//  * @return A new {@code Expr} representing the bitwise OR operation.
-//  */
-// export function bitOr(left: string, right: any): BitOr;
-// export function bitOr(left: Expr | string, right: Expr | any): BitOr {
-//   const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-//   const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-//   return new BitOr(normalizedLeft, normalizedRight);
-// }
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise XOR operation between two expressions.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise XOR of 'field1' and 'field2'.
-//  * bitXor(Field.of("field1"), Field.of("field2"));
-//  * ```
-//  *
-//  * @param left The left operand expression.
-//  * @param right The right operand expression.
-//  * @return A new {@code Expr} representing the bitwise XOR operation.
-//  */
-// export function bitXor(left: Expr, right: Expr): BitXor;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise XOR operation between an expression and a constant.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise XOR of 'field1' and 0xFF.
-//  * bitXor(Field.of("field1"), 0xFF);
-//  * ```
-//  *
-//  * @param left The left operand expression.
-//  * @param right The right operand constant.
-//  * @return A new {@code Expr} representing the bitwise XOR operation.
-//  */
-// export function bitXor(left: Expr, right: any): BitXor;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise XOR operation between a field and an expression.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise XOR of 'field1' and 'field2'.
-//  * bitXor("field1", Field.of("field2"));
-//  * ```
-//  *
-//  * @param left The left operand field name.
-//  * @param right The right operand expression.
-//  * @return A new {@code Expr} representing the bitwise XOR operation.
-//  */
-// export function bitXor(left: string, right: Expr): BitXor;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise XOR operation between a field and a constant.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise XOR of 'field1' and 0xFF.
-//  * bitXor("field1", 0xFF);
-//  * ```
-//  *
-//  * @param left The left operand field name.
-//  * @param right The right operand constant.
-//  * @return A new {@code Expr} representing the bitwise XOR operation.
-//  */
-// export function bitXor(left: string, right: any): BitXor;
-// export function bitXor(left: Expr | string, right: Expr | any): BitXor {
-//   const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-//   const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-//   return new BitXor(normalizedLeft, normalizedRight);
-// }
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise NOT operation to an expression.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise NOT of 'field1'.
-//  * bitNot(Field.of("field1"));
-//  * ```
-//  *
-//  * @param operand The operand expression.
-//  * @return A new {@code Expr} representing the bitwise NOT operation.
-//  */
-// export function bitNot(operand: Expr): BitNot;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise NOT operation to a field.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise NOT of 'field1'.
-//  * bitNot("field1");
-//  * ```
-//  *
-//  * @param operand The operand field name.
-//  * @return A new {@code Expr} representing the bitwise NOT operation.
-//  */
-// export function bitNot(operand: string): BitNot;
-// export function bitNot(operand: Expr | string): BitNot {
-//   const normalizedOperand =
-//     typeof operand === 'string' ? Field.of(operand) : operand;
-//   return new BitNot(normalizedOperand);
-// }
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise left shift operation between two expressions.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
-//  * bitLeftShift(Field.of("field1"), Field.of("field2"));
-//  * ```
-//  *
-//  * @param left The left operand expression.
-//  * @param right The right operand expression representing the number of bits to shift.
-//  * @return A new {@code Expr} representing the bitwise left shift operation.
-//  */
-// export function bitLeftShift(left: Expr, right: Expr): BitLeftShift;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise left shift operation between an expression and a constant.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise left shift of 'field1' by 2 bits.
-//  * bitLeftShift(Field.of("field1"), 2);
-//  * ```
-//  *
-//  * @param left The left operand expression.
-//  * @param right The right operand constant representing the number of bits to shift.
-//  * @return A new {@code Expr} representing the bitwise left shift operation.
-//  */
-// export function bitLeftShift(left: Expr, right: any): BitLeftShift;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise left shift operation between a field and an expression.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
-//  * bitLeftShift("field1", Field.of("field2"));
-//  * ```
-//  *
-//  * @param left The left operand field name.
-//  * @param right The right operand expression representing the number of bits to shift.
-//  * @return A new {@code Expr} representing the bitwise left shift operation.
-//  */
-// export function bitLeftShift(left: string, right: Expr): BitLeftShift;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise left shift operation between a field and a constant.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise left shift of 'field1' by 2 bits.
-//  * bitLeftShift("field1", 2);
-//  * ```
-//  *
-//  * @param left The left operand field name.
-//  * @param right The right operand constant representing the number of bits to shift.
-//  * @return A new {@code Expr} representing the bitwise left shift operation.
-//  */
-// export function bitLeftShift(left: string, right: any): BitLeftShift;
-// export function bitLeftShift(
-//   left: Expr | string,
-//   right: Expr | any
-// ): BitLeftShift {
-//   const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-//   const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-//   return new BitLeftShift(normalizedLeft, normalizedRight);
-// }
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise right shift operation between two expressions.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
-//  * bitRightShift(Field.of("field1"), Field.of("field2"));
-//  * ```
-//  *
-//  * @param left The left operand expression.
-//  * @param right The right operand expression representing the number of bits to shift.
-//  * @return A new {@code Expr} representing the bitwise right shift operation.
-//  */
-// export function bitRightShift(left: Expr, right: Expr): BitRightShift;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise right shift operation between an expression and a constant.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise right shift of 'field1' by 2 bits.
-//  * bitRightShift(Field.of("field1"), 2);
-//  * ```
-//  *
-//  * @param left The left operand expression.
-//  * @param right The right operand constant representing the number of bits to shift.
-//  * @return A new {@code Expr} representing the bitwise right shift operation.
-//  */
-// export function bitRightShift(left: Expr, right: any): BitRightShift;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise right shift operation between a field and an expression.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
-//  * bitRightShift("field1", Field.of("field2"));
-//  * ```
-//  *
-//  * @param left The left operand field name.
-//  * @param right The right operand expression representing the number of bits to shift.
-//  * @return A new {@code Expr} representing the bitwise right shift operation.
-//  */
-// export function bitRightShift(left: string, right: Expr): BitRightShift;
-//
-// /**
-//  * @beta
-//  *
-//  * Creates an expression that applies a bitwise right shift operation between a field and a constant.
-//  *
-//  * ```typescript
-//  * // Calculate the bitwise right shift of 'field1' by 2 bits.
-//  * bitRightShift("field1", 2);
-//  * ```
-//  *
-//  * @param left The left operand field name.
-//  * @param right The right operand constant representing the number of bits to shift.
-//  * @return A new {@code Expr} representing the bitwise right shift operation.
-//  */
-// export function bitRightShift(left: string, right: any): BitRightShift;
-// export function bitRightShift(
-//   left: Expr | string,
-//   right: Expr | any
-// ): BitRightShift {
-//   const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-//   const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-//   return new BitRightShift(normalizedLeft, normalizedRight);
-// }
+/**
+ * @beta
+ *
+ * Creates an expression that creates a Firestore map value from an input object.
+ *
+ * ```typescript
+ * // Create a map from the input object and reference the 'baz' field value from the input document.
+ * map({foo: 'bar', baz: field('baz')}).as('data');
+ * ```
+ *
+ * @param elements The input map to evaluate in the expression.
+ * @return A new {@code Expr} representing the map function.
+ */
+export function map(elements: Record<string, unknown>): FunctionExpr {
+  const result: firestore.Expr[] = [];
+  for (const key in elements) {
+    if (Object.prototype.hasOwnProperty.call(elements, key)) {
+      const value = elements[key];
+      result.push(constant(key));
+      result.push(valueToDefaultExpr(value));
+    }
+  }
+  return new FunctionExpr('map', result);
+}
+
+/**
+ * Internal use only
+ * Converts a plainObject to a mapValue in the proto representation,
+ * rather than a functionValue+map that is the result of the map(...) function.
+ * This behaves different from constant(plainObject) because it
+ * traverses the input object, converts values in the object to expressions,
+ * and calls _readUserData on each of these expressions.
+ * @private
+ * @internal
+ * @param plainObject
+ */
+export function _mapValue(plainObject: Record<string, unknown>): MapValue {
+  const result: Map<string, Expr> = new Map<string, Expr>();
+  for (const key in plainObject) {
+    if (Object.prototype.hasOwnProperty.call(plainObject, key)) {
+      const value = plainObject[key];
+      result.set(key, valueToDefaultExpr(value));
+    }
+  }
+  return new MapValue(result);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that creates a Firestore array value from an input array.
+ *
+ * ```typescript
+ * // Create an array value from the input array and reference the 'baz' field value from the input document.
+ * array(['bar', field('baz')]).as('foo');
+ * ```
+ *
+ * @param elements The input array to evaluate in the expression.
+ * @return A new {@code Expr} representing the array function.
+ */
+export function array(elements: unknown[]): FunctionExpr {
+  return new FunctionExpr(
+    'array',
+    elements.map(element => valueToDefaultExpr(element))
+  );
+}
 
 /**
  * @beta
@@ -3660,14 +3839,14 @@ export function mod(left: Expr | string, right: Expr | any): Mod {
  *
  * ```typescript
  * // Check if the 'age' field is equal to an expression
- * eq(Field.of("age"), Field.of("minAge").add(10));
+ * eq(field("age"), field("minAge").add(10));
  * ```
  *
  * @param left The first expression to compare.
  * @param right The second expression to compare.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(left: Expr, right: Expr): Eq;
+export function eq(left: firestore.Expr, right: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3676,14 +3855,14 @@ export function eq(left: Expr, right: Expr): Eq;
  *
  * ```typescript
  * // Check if the 'age' field is equal to 21
- * eq(Field.of("age"), 21);
+ * eq(field("age"), 21);
  * ```
  *
- * @param left The expression to compare.
- * @param right The constant value to compare to.
+ * @param expression The expression to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(left: Expr, right: any): Eq;
+export function eq(expression: firestore.Expr, value: unknown): BooleanExpr;
 
 /**
  * @beta
@@ -3692,14 +3871,14 @@ export function eq(left: Expr, right: any): Eq;
  *
  * ```typescript
  * // Check if the 'age' field is equal to the 'limit' field
- * eq("age", Field.of("limit"));
+ * eq("age", field("limit"));
  * ```
  *
- * @param left The field name to compare.
- * @param right The expression to compare to.
+ * @param fieldName The field name to compare.
+ * @param expression The expression to compare to.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(left: string, right: Expr): Eq;
+export function eq(fieldName: string, expression: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3711,15 +3890,15 @@ export function eq(left: string, right: Expr): Eq;
  * eq("city", "London");
  * ```
  *
- * @param left The field name to compare.
- * @param right The constant value to compare to.
+ * @param fieldName The field name to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(left: string, right: any): Eq;
-export function eq(left: Expr | string, right: any): Eq {
-  const leftExpr = left instanceof Expr ? left : Field.of(left);
-  const rightExpr = right instanceof Expr ? right : Constant.of(right);
-  return new Eq(leftExpr, rightExpr);
+export function eq(fieldName: string, value: unknown): BooleanExpr;
+export function eq(left: firestore.Expr | string, right: unknown): BooleanExpr {
+  const leftExpr = fieldOrExpression(left);
+  const rightExpr = valueToDefaultExpr(right);
+  return leftExpr.eq(rightExpr);
 }
 
 /**
@@ -3729,14 +3908,14 @@ export function eq(left: Expr | string, right: any): Eq {
  *
  * ```typescript
  * // Check if the 'status' field is not equal to field 'finalState'
- * neq(Field.of("status"), Field.of("finalState"));
+ * neq(field("status"), field("finalState"));
  * ```
  *
  * @param left The first expression to compare.
  * @param right The second expression to compare.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(left: Expr, right: Expr): Neq;
+export function neq(left: firestore.Expr, right: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3745,14 +3924,14 @@ export function neq(left: Expr, right: Expr): Neq;
  *
  * ```typescript
  * // Check if the 'status' field is not equal to "completed"
- * neq(Field.of("status"), "completed");
+ * neq(field("status"), "completed");
  * ```
  *
- * @param left The expression to compare.
- * @param right The constant value to compare to.
+ * @param expression The expression to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(left: Expr, right: any): Neq;
+export function neq(expression: firestore.Expr, value: unknown): BooleanExpr;
 
 /**
  * @beta
@@ -3761,14 +3940,14 @@ export function neq(left: Expr, right: any): Neq;
  *
  * ```typescript
  * // Check if the 'status' field is not equal to the value of 'expectedStatus'
- * neq("status", Field.of("expectedStatus"));
+ * neq("status", field("expectedStatus"));
  * ```
  *
- * @param left The field name to compare.
- * @param right The expression to compare to.
+ * @param fieldName The field name to compare.
+ * @param expression The expression to compare to.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(left: string, right: Expr): Neq;
+export function neq(fieldName: string, expression: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3780,15 +3959,18 @@ export function neq(left: string, right: Expr): Neq;
  * neq("country", "USA");
  * ```
  *
- * @param left The field name to compare.
- * @param right The constant value to compare to.
+ * @param fieldName The field name to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(left: string, right: any): Neq;
-export function neq(left: Expr | string, right: any): Neq {
-  const leftExpr = left instanceof Expr ? left : Field.of(left);
-  const rightExpr = right instanceof Expr ? right : Constant.of(right);
-  return new Neq(leftExpr, rightExpr);
+export function neq(fieldName: string, value: unknown): BooleanExpr;
+export function neq(
+  left: firestore.Expr | string,
+  right: unknown
+): BooleanExpr {
+  const leftExpr = fieldOrExpression(left);
+  const rightExpr = valueToDefaultExpr(right);
+  return leftExpr.neq(rightExpr);
 }
 
 /**
@@ -3798,14 +3980,14 @@ export function neq(left: Expr | string, right: any): Neq {
  *
  * ```typescript
  * // Check if the 'age' field is less than 30
- * lt(Field.of("age"), Field.of("limit"));
+ * lt(field("age"), field("limit"));
  * ```
  *
  * @param left The first expression to compare.
  * @param right The second expression to compare.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(left: Expr, right: Expr): Lt;
+export function lt(left: firestore.Expr, right: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3814,14 +3996,14 @@ export function lt(left: Expr, right: Expr): Lt;
  *
  * ```typescript
  * // Check if the 'age' field is less than 30
- * lt(Field.of("age"), 30);
+ * lt(field("age"), 30);
  * ```
  *
- * @param left The expression to compare.
- * @param right The constant value to compare to.
+ * @param expression The expression to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(left: Expr, right: any): Lt;
+export function lt(expression: firestore.Expr, value: unknown): BooleanExpr;
 
 /**
  * @beta
@@ -3830,14 +4012,14 @@ export function lt(left: Expr, right: any): Lt;
  *
  * ```typescript
  * // Check if the 'age' field is less than the 'limit' field
- * lt("age", Field.of("limit"));
+ * lt("age", field("limit"));
  * ```
  *
- * @param left The field name to compare.
- * @param right The expression to compare to.
+ * @param fieldName The field name to compare.
+ * @param expression The expression to compare to.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(left: string, right: Expr): Lt;
+export function lt(fieldName: string, expression: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3849,15 +4031,15 @@ export function lt(left: string, right: Expr): Lt;
  * lt("price", 50);
  * ```
  *
- * @param left The field name to compare.
- * @param right The constant value to compare to.
+ * @param fieldName The field name to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(left: string, right: any): Lt;
-export function lt(left: Expr | string, right: any): Lt {
-  const leftExpr = left instanceof Expr ? left : Field.of(left);
-  const rightExpr = right instanceof Expr ? right : Constant.of(right);
-  return new Lt(leftExpr, rightExpr);
+export function lt(fieldName: string, value: unknown): BooleanExpr;
+export function lt(left: firestore.Expr | string, right: unknown): BooleanExpr {
+  const leftExpr = fieldOrExpression(left);
+  const rightExpr = valueToDefaultExpr(right);
+  return leftExpr.lt(rightExpr);
 }
 
 /**
@@ -3868,14 +4050,14 @@ export function lt(left: Expr | string, right: any): Lt {
  *
  * ```typescript
  * // Check if the 'quantity' field is less than or equal to 20
- * lte(Field.of("quantity"), Field.of("limit"));
+ * lte(field("quantity"), field("limit"));
  * ```
  *
  * @param left The first expression to compare.
  * @param right The second expression to compare.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(left: Expr, right: Expr): Lte;
+export function lte(left: firestore.Expr, right: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3884,28 +4066,28 @@ export function lte(left: Expr, right: Expr): Lte;
  *
  * ```typescript
  * // Check if the 'quantity' field is less than or equal to 20
- * lte(Field.of("quantity"), 20);
+ * lte(field("quantity"), 20);
  * ```
  *
- * @param left The expression to compare.
- * @param right The constant value to compare to.
+ * @param expression The expression to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(left: Expr, right: any): Lte;
+export function lte(expression: firestore.Expr, value: unknown): BooleanExpr;
 
 /**
  * Creates an expression that checks if a field's value is less than or equal to an expression.
  *
  * ```typescript
  * // Check if the 'quantity' field is less than or equal to the 'limit' field
- * lte("quantity", Field.of("limit"));
+ * lte("quantity", field("limit"));
  * ```
  *
- * @param left The field name to compare.
- * @param right The expression to compare to.
+ * @param fieldName The field name to compare.
+ * @param expression The expression to compare to.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(left: string, right: Expr): Lte;
+export function lte(fieldName: string, expression: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3917,15 +4099,18 @@ export function lte(left: string, right: Expr): Lte;
  * lte("score", 70);
  * ```
  *
- * @param left The field name to compare.
- * @param right The constant value to compare to.
+ * @param fieldName The field name to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(left: string, right: any): Lte;
-export function lte(left: Expr | string, right: any): Lte {
-  const leftExpr = left instanceof Expr ? left : Field.of(left);
-  const rightExpr = right instanceof Expr ? right : Constant.of(right);
-  return new Lte(leftExpr, rightExpr);
+export function lte(fieldName: string, value: unknown): BooleanExpr;
+export function lte(
+  left: firestore.Expr | string,
+  right: unknown
+): BooleanExpr {
+  const leftExpr = fieldOrExpression(left);
+  const rightExpr = valueToDefaultExpr(right);
+  return leftExpr.lte(rightExpr);
 }
 
 /**
@@ -3936,14 +4121,14 @@ export function lte(left: Expr | string, right: any): Lte {
  *
  * ```typescript
  * // Check if the 'age' field is greater than 18
- * gt(Field.of("age"), Constant(9).add(9));
+ * gt(field("age"), Constant(9).add(9));
  * ```
  *
  * @param left The first expression to compare.
  * @param right The second expression to compare.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(left: Expr, right: Expr): Gt;
+export function gt(left: firestore.Expr, right: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3952,14 +4137,14 @@ export function gt(left: Expr, right: Expr): Gt;
  *
  * ```typescript
  * // Check if the 'age' field is greater than 18
- * gt(Field.of("age"), 18);
+ * gt(field("age"), 18);
  * ```
  *
- * @param left The expression to compare.
- * @param right The constant value to compare to.
+ * @param expression The expression to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(left: Expr, right: any): Gt;
+export function gt(expression: firestore.Expr, value: unknown): BooleanExpr;
 
 /**
  * @beta
@@ -3968,14 +4153,14 @@ export function gt(left: Expr, right: any): Gt;
  *
  * ```typescript
  * // Check if the value of field 'age' is greater than the value of field 'limit'
- * gt("age", Field.of("limit"));
+ * gt("age", field("limit"));
  * ```
  *
- * @param left The field name to compare.
- * @param right The expression to compare to.
+ * @param fieldName The field name to compare.
+ * @param expression The expression to compare to.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(left: string, right: Expr): Gt;
+export function gt(fieldName: string, expression: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3987,15 +4172,15 @@ export function gt(left: string, right: Expr): Gt;
  * gt("price", 100);
  * ```
  *
- * @param left The field name to compare.
- * @param right The constant value to compare to.
+ * @param fieldName The field name to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(left: string, right: any): Gt;
-export function gt(left: Expr | string, right: any): Gt {
-  const leftExpr = left instanceof Expr ? left : Field.of(left);
-  const rightExpr = right instanceof Expr ? right : Constant.of(right);
-  return new Gt(leftExpr, rightExpr);
+export function gt(fieldName: string, value: unknown): BooleanExpr;
+export function gt(left: firestore.Expr | string, right: unknown): BooleanExpr {
+  const leftExpr = fieldOrExpression(left);
+  const rightExpr = valueToDefaultExpr(right);
+  return leftExpr.gt(rightExpr);
 }
 
 /**
@@ -4006,14 +4191,14 @@ export function gt(left: Expr | string, right: any): Gt {
  *
  * ```typescript
  * // Check if the 'quantity' field is greater than or equal to the field "threshold"
- * gte(Field.of("quantity"), Field.of("threshold"));
+ * gte(field("quantity"), field("threshold"));
  * ```
  *
  * @param left The first expression to compare.
  * @param right The second expression to compare.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(left: Expr, right: Expr): Gte;
+export function gte(left: firestore.Expr, right: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4023,14 +4208,14 @@ export function gte(left: Expr, right: Expr): Gte;
  *
  * ```typescript
  * // Check if the 'quantity' field is greater than or equal to 10
- * gte(Field.of("quantity"), 10);
+ * gte(field("quantity"), 10);
  * ```
  *
- * @param left The expression to compare.
- * @param right The constant value to compare to.
+ * @param expression The expression to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(left: Expr, right: any): Gte;
+export function gte(expression: firestore.Expr, value: unknown): BooleanExpr;
 
 /**
  * @beta
@@ -4039,14 +4224,14 @@ export function gte(left: Expr, right: any): Gte;
  *
  * ```typescript
  * // Check if the value of field 'age' is greater than or equal to the value of field 'limit'
- * gte("age", Field.of("limit"));
+ * gte("age", field("limit"));
  * ```
  *
- * @param left The field name to compare.
- * @param right The expression to compare to.
+ * @param fieldName The field name to compare.
+ * @param value The expression to compare to.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(left: string, right: Expr): Gte;
+export function gte(fieldName: string, value: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4059,15 +4244,18 @@ export function gte(left: string, right: Expr): Gte;
  * gte("score", 80);
  * ```
  *
- * @param left The field name to compare.
- * @param right The constant value to compare to.
+ * @param fieldName The field name to compare.
+ * @param value The constant value to compare to.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(left: string, right: any): Gte;
-export function gte(left: Expr | string, right: any): Gte {
-  const leftExpr = left instanceof Expr ? left : Field.of(left);
-  const rightExpr = right instanceof Expr ? right : Constant.of(right);
-  return new Gte(leftExpr, rightExpr);
+export function gte(fieldName: string, value: unknown): BooleanExpr;
+export function gte(
+  left: firestore.Expr | string,
+  right: unknown
+): BooleanExpr {
+  const leftExpr = fieldOrExpression(left);
+  const rightExpr = valueToDefaultExpr(right);
+  return leftExpr.gte(rightExpr);
 }
 
 /**
@@ -4077,30 +4265,19 @@ export function gte(left: Expr | string, right: any): Gte {
  *
  * ```typescript
  * // Combine the 'items' array with two new item arrays
- * arrayConcat(Field.of("items"), [Field.of("newItems"), Field.of("otherItems")]);
+ * arrayConcat(field("items"), [field("newItems"), field("otherItems")]);
  * ```
  *
- * @param array The array expression to concatenate to.
- * @param elements The array expressions to concatenate.
+ * @param firstArray The first array expression to concatenate to.
+ * @param secondArray The second array expression or array literal to concatenate to.
+ * @param otherArrays Optional additional array expressions or array literals to concatenate.
  * @return A new {@code Expr} representing the concatenated array.
  */
-export function arrayConcat(array: Expr, elements: Expr[]): ArrayConcat;
-
-/**
- * @beta
- *
- * Creates an expression that concatenates an array expression with other arrays and/or values.
- *
- * ```typescript
- * // Combine the 'tags' array with a new array
- * arrayConcat(Field.of("tags"), ["newTag1", "newTag2"]);
- * ```
- *
- * @param array The array expression to concatenate to.
- * @param elements The array expressions or single values to concatenate.
- * @return A new {@code Expr} representing the concatenated array.
- */
-export function arrayConcat(array: Expr, elements: any[]): ArrayConcat;
+export function arrayConcat(
+  firstArray: firestore.Expr,
+  secondArray: firestore.Expr | unknown[],
+  ...otherArrays: Array<firestore.Expr | unknown[]>
+): FunctionExpr;
 
 /**
  * @beta
@@ -4109,39 +4286,30 @@ export function arrayConcat(array: Expr, elements: any[]): ArrayConcat;
  *
  * ```typescript
  * // Combine the 'items' array with two new item arrays
- * arrayConcat("items", [Field.of("newItems"), Field.of("otherItems")]);
+ * arrayConcat("items", [field("newItems"), field("otherItems")]);
  * ```
  *
- * @param array The field name containing array values.
- * @param elements The array expressions to concatenate.
+ * @param firstArrayField The first array to concatenate to.
+ * @param secondArray The second array expression or array literal to concatenate to.
+ * @param otherArrays Optional additional array expressions or array literals to concatenate.
  * @return A new {@code Expr} representing the concatenated array.
  */
-export function arrayConcat(array: string, elements: Expr[]): ArrayConcat;
-
-/**
- * @beta
- *
- * Creates an expression that concatenates a field's array value with other arrays and/or values.
- *
- * ```typescript
- * // Combine the 'tags' array with a new array
- * arrayConcat("tags", ["newTag1", "newTag2"]);
- * ```
- *
- * @param array The field name containing array values.
- * @param elements The array expressions or single values to concatenate.
- * @return A new {@code Expr} representing the concatenated array.
- */
-export function arrayConcat(array: string, elements: any[]): ArrayConcat;
 export function arrayConcat(
-  array: Expr | string,
-  elements: any[]
-): ArrayConcat {
-  const arrayExpr = array instanceof Expr ? array : Field.of(array);
-  const exprValues = elements.map(element =>
-    element instanceof Expr ? element : Constant.of(element)
+  firstArrayField: string,
+  secondArray: firestore.Expr | unknown[],
+  ...otherArrays: Array<firestore.Expr | unknown[]>
+): FunctionExpr;
+
+export function arrayConcat(
+  firstArray: firestore.Expr | string,
+  secondArray: firestore.Expr | unknown[],
+  ...otherArrays: Array<firestore.Expr | unknown[]>
+): FunctionExpr {
+  const exprValues = otherArrays.map(element => valueToDefaultExpr(element));
+  return fieldOrExpression(firstArray).arrayConcat(
+    fieldOrExpression(secondArray),
+    ...exprValues
   );
-  return new ArrayConcat(arrayExpr, exprValues);
 }
 
 /**
@@ -4151,14 +4319,17 @@ export function arrayConcat(
  *
  * ```typescript
  * // Check if the 'colors' array contains the value of field 'selectedColor'
- * arrayContains(Field.of("colors"), Field.of("selectedColor"));
+ * arrayContains(field("colors"), field("selectedColor"));
  * ```
  *
  * @param array The array expression to check.
  * @param element The element to search for in the array.
  * @return A new {@code Expr} representing the 'array_contains' comparison.
  */
-export function arrayContains(array: Expr, element: Expr): ArrayContains;
+export function arrayContains(
+  array: firestore.Expr,
+  element: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -4167,14 +4338,17 @@ export function arrayContains(array: Expr, element: Expr): ArrayContains;
  *
  * ```typescript
  * // Check if the 'colors' array contains "red"
- * arrayContains(Field.of("colors"), "red");
+ * arrayContains(field("colors"), "red");
  * ```
  *
  * @param array The array expression to check.
  * @param element The element to search for in the array.
  * @return A new {@code Expr} representing the 'array_contains' comparison.
  */
-export function arrayContains(array: Expr, element: any): ArrayContains;
+export function arrayContains(
+  array: firestore.Expr,
+  element: unknown
+): FunctionExpr;
 
 /**
  * @beta
@@ -4183,14 +4357,17 @@ export function arrayContains(array: Expr, element: any): ArrayContains;
  *
  * ```typescript
  * // Check if the 'colors' array contains the value of field 'selectedColor'
- * arrayContains("colors", Field.of("selectedColor"));
+ * arrayContains("colors", field("selectedColor"));
  * ```
  *
- * @param array The field name to check.
+ * @param fieldName The field name to check.
  * @param element The element to search for in the array.
  * @return A new {@code Expr} representing the 'array_contains' comparison.
  */
-export function arrayContains(array: string, element: Expr): ArrayContains;
+export function arrayContains(
+  fieldName: string,
+  element: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -4202,18 +4379,18 @@ export function arrayContains(array: string, element: Expr): ArrayContains;
  * arrayContains("colors", "red");
  * ```
  *
- * @param array The field name to check.
+ * @param fieldName The field name to check.
  * @param element The element to search for in the array.
  * @return A new {@code Expr} representing the 'array_contains' comparison.
  */
-export function arrayContains(array: string, element: any): ArrayContains;
+export function arrayContains(fieldName: string, element: unknown): BooleanExpr;
 export function arrayContains(
-  array: Expr | string,
-  element: any
-): ArrayContains {
-  const arrayExpr = array instanceof Expr ? array : Field.of(array);
-  const elementExpr = element instanceof Expr ? element : Constant.of(element);
-  return new ArrayContains(arrayExpr, elementExpr);
+  array: firestore.Expr | string,
+  element: unknown
+): BooleanExpr {
+  const arrayExpr = fieldOrExpression(array);
+  const elementExpr = valueToDefaultExpr(element);
+  return arrayExpr.arrayContains(elementExpr);
 }
 
 /**
@@ -4224,14 +4401,38 @@ export function arrayContains(
  *
  * ```typescript
  * // Check if the 'categories' array contains either values from field "cate1" or "Science"
- * arrayContainsAny(Field.of("categories"), [Field.of("cate1"), "Science"]);
+ * arrayContainsAny(field("categories"), [field("cate1"), "Science"]);
  * ```
  *
  * @param array The array expression to check.
  * @param values The elements to check for in the array.
  * @return A new {@code Expr} representing the 'array_contains_any' comparison.
  */
-export function arrayContainsAny(array: Expr, values: Expr[]): ArrayContainsAny;
+export function arrayContainsAny(
+  array: firestore.Expr,
+  values: Array<firestore.Expr | unknown>
+): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a field's array value contains any of the specified
+ * elements.
+ *
+ * ```typescript
+ * // Check if the 'groups' array contains either the value from the 'userGroup' field
+ * // or the value "guest"
+ * arrayContainsAny("categories", [field("cate1"), "Science"]);
+ * ```
+ *
+ * @param fieldName The field name to check.
+ * @param values The elements to check for in the array.
+ * @return A new {@code Expr} representing the 'array_contains_any' comparison.
+ */
+export function arrayContainsAny(
+  fieldName: string,
+  values: Array<firestore.Expr | unknown>
+): BooleanExpr;
 
 /**
  * @beta
@@ -4241,14 +4442,17 @@ export function arrayContainsAny(array: Expr, values: Expr[]): ArrayContainsAny;
  *
  * ```typescript
  * // Check if the 'categories' array contains either values from field "cate1" or "Science"
- * arrayContainsAny(Field.of("categories"), [Field.of("cate1"), "Science"]);
+ * arrayContainsAny(field("categories"), array([field("cate1"), "Science"]));
  * ```
  *
  * @param array The array expression to check.
- * @param values The elements to check for in the array.
+ * @param values An expression that evaluates to an array, whose elements to check for in the array.
  * @return A new {@code Expr} representing the 'array_contains_any' comparison.
  */
-export function arrayContainsAny(array: Expr, values: any[]): ArrayContainsAny;
+export function arrayContainsAny(
+  array: firestore.Expr,
+  values: firestore.Expr
+): BooleanExpr;
 
 /**
  * @beta
@@ -4259,47 +4463,23 @@ export function arrayContainsAny(array: Expr, values: any[]): ArrayContainsAny;
  * ```typescript
  * // Check if the 'groups' array contains either the value from the 'userGroup' field
  * // or the value "guest"
- * arrayContainsAny("categories", [Field.of("cate1"), "Science"]);
+ * arrayContainsAny("categories", array([field("cate1"), "Science"]));
  * ```
  *
- * @param array The field name to check.
- * @param values The elements to check for in the array.
+ * @param fieldName The field name to check.
+ * @param values An expression that evaluates to an array, whose elements to check for in the array field.
  * @return A new {@code Expr} representing the 'array_contains_any' comparison.
  */
 export function arrayContainsAny(
-  array: string,
-  values: Expr[]
-): ArrayContainsAny;
-
-/**
- * @beta
- *
- * Creates an expression that checks if a field's array value contains any of the specified
- * elements.
- *
- * ```typescript
- * // Check if the 'groups' array contains either the value from the 'userGroup' field
- * // or the value "guest"
- * arrayContainsAny("categories", [Field.of("cate1"), "Science"]);
- * ```
- *
- * @param array The field name to check.
- * @param values The elements to check for in the array.
- * @return A new {@code Expr} representing the 'array_contains_any' comparison.
- */
+  fieldName: string,
+  values: firestore.Expr
+): BooleanExpr;
 export function arrayContainsAny(
-  array: string,
-  values: any[]
-): ArrayContainsAny;
-export function arrayContainsAny(
-  array: Expr | string,
-  values: any[]
-): ArrayContainsAny {
-  const arrayExpr = array instanceof Expr ? array : Field.of(array);
-  const exprValues = values.map(value =>
-    value instanceof Expr ? value : Constant.of(value)
-  );
-  return new ArrayContainsAny(arrayExpr, exprValues);
+  array: firestore.Expr | string,
+  values: unknown[] | firestore.Expr
+): BooleanExpr {
+  // @ts-ignore implementation accepts both types
+  return fieldOrExpression(array).arrayContainsAny(values);
 }
 
 /**
@@ -4308,15 +4488,38 @@ export function arrayContainsAny(
  * Creates an expression that checks if an array expression contains all the specified elements.
  *
  * ```typescript
- * // Check if the 'tags' array contains both of the values from field 'tag1', 'tag2' and "tag3"
- * arrayContainsAll(Field.of("tags"), [Field.of("tag1"), "SciFi", "Adventure"]);
+ * // Check if the "tags" array contains all of the values: "SciFi", "Adventure", and the value from field "tag1"
+ * arrayContainsAll(field("tags"), [field("tag1"), constant("SciFi"), "Adventure"]);
  * ```
  *
  * @param array The array expression to check.
  * @param values The elements to check for in the array.
  * @return A new {@code Expr} representing the 'array_contains_all' comparison.
  */
-export function arrayContainsAll(array: Expr, values: Expr[]): ArrayContainsAll;
+export function arrayContainsAll(
+  array: firestore.Expr,
+  values: Array<firestore.Expr | unknown>
+): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a field's array value contains all the specified values or
+ * expressions.
+ *
+ * ```typescript
+ * // Check if the 'tags' array contains both of the values from field 'tag1', the value "SciFi", and "Adventure"
+ * arrayContainsAll("tags", [field("tag1"), "SciFi", "Adventure"]);
+ * ```
+ *
+ * @param fieldName The field name to check.
+ * @param values The elements to check for in the array.
+ * @return A new {@code Expr} representing the 'array_contains_all' comparison.
+ */
+export function arrayContainsAll(
+  fieldName: string,
+  values: Array<firestore.Expr | unknown>
+): BooleanExpr;
 
 /**
  * @beta
@@ -4324,15 +4527,18 @@ export function arrayContainsAll(array: Expr, values: Expr[]): ArrayContainsAll;
  * Creates an expression that checks if an array expression contains all the specified elements.
  *
  * ```typescript
- * // Check if the 'tags' array contains both of the values from field 'tag1', 'tag2' and "tag3"
- * arrayContainsAll(Field.of("tags"), [Field.of("tag1"), "SciFi", "Adventure"]);
+ * // Check if the "tags" array contains all of the values: "SciFi", "Adventure", and the value from field "tag1"
+ * arrayContainsAll(field("tags"), [field("tag1"), constant("SciFi"), "Adventure"]);
  * ```
  *
  * @param array The array expression to check.
- * @param values The elements to check for in the array.
+ * @param arrayExpression The elements to check for in the array.
  * @return A new {@code Expr} representing the 'array_contains_all' comparison.
  */
-export function arrayContainsAll(array: Expr, values: any[]): ArrayContainsAll;
+export function arrayContainsAll(
+  array: firestore.Expr,
+  arrayExpression: firestore.Expr
+): BooleanExpr;
 
 /**
  * @beta
@@ -4341,48 +4547,40 @@ export function arrayContainsAll(array: Expr, values: any[]): ArrayContainsAll;
  * expressions.
  *
  * ```typescript
- * // Check if the 'tags' array contains both of the values from field 'tag1' and "tag2"
- * arrayContainsAll("tags", [Field.of("tag1"), "SciFi", "Adventure"]);
+ * // Check if the 'tags' array contains both of the values from field 'tag1', the value "SciFi", and "Adventure"
+ * arrayContainsAll("tags", [field("tag1"), "SciFi", "Adventure"]);
  * ```
  *
- * @param array The field name to check.
- * @param values The elements to check for in the array.
+ * @param fieldName The field name to check.
+ * @param arrayExpression The elements to check for in the array.
  * @return A new {@code Expr} representing the 'array_contains_all' comparison.
  */
 export function arrayContainsAll(
-  array: string,
-  values: Expr[]
-): ArrayContainsAll;
-
-/**
- * @beta
- *
- * Creates an expression that checks if a field's array value contains all the specified values or
- * expressions.
- *
- * ```typescript
- * // Check if the 'tags' array contains both of the values from field 'tag1' and "tag2"
- * arrayContainsAll("tags", [Field.of("tag1"), "SciFi", "Adventure"]);
- * ```
- *
- * @param array The field name to check.
- * @param values The elements to check for in the array.
- * @return A new {@code Expr} representing the 'array_contains_all' comparison.
- */
+  fieldName: string,
+  arrayExpression: firestore.Expr
+): BooleanExpr;
 export function arrayContainsAll(
-  array: string,
-  values: any[]
-): ArrayContainsAll;
-export function arrayContainsAll(
-  array: Expr | string,
-  values: any[]
-): ArrayContainsAll {
-  const arrayExpr = array instanceof Expr ? array : Field.of(array);
-  const exprValues = values.map(value =>
-    value instanceof Expr ? value : Constant.of(value)
-  );
-  return new ArrayContainsAll(arrayExpr, exprValues);
+  array: firestore.Expr | string,
+  values: unknown[] | firestore.Expr
+): BooleanExpr {
+  // @ts-ignore implementation accepts both types
+  return fieldOrExpression(array).arrayContainsAll(values);
 }
+
+/**
+ * @beta
+ *
+ * Creates an expression that calculates the length of an array in a specified field.
+ *
+ * ```typescript
+ * // Get the number of items in field 'cart'
+ * arrayLength('cart');
+ * ```
+ *
+ * @param fieldName The name of the field containing an array to calculate the length of.
+ * @return A new {@code Expr} representing the length of the array.
+ */
+export function arrayLength(fieldName: string): FunctionExpr;
 
 /**
  * @beta
@@ -4391,66 +4589,55 @@ export function arrayContainsAll(
  *
  * ```typescript
  * // Get the number of items in the 'cart' array
- * arrayLength(Field.of("cart"));
+ * arrayLength(field("cart"));
  * ```
  *
  * @param array The array expression to calculate the length of.
  * @return A new {@code Expr} representing the length of the array.
  */
-export function arrayLength(array: Expr): ArrayLength {
-  return new ArrayLength(array);
+export function arrayLength(array: firestore.Expr): FunctionExpr;
+export function arrayLength(array: firestore.Expr | string): FunctionExpr {
+  return fieldOrExpression(array).arrayLength();
 }
 
 /**
  * @beta
  *
- * Creates an expression that checks if an expression is equal to any of the provided values or
+ * Creates an expression that checks if an expression, when evaluated, is equal to any of the provided values or
  * expressions.
  *
  * ```typescript
  * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
- * eqAny(Field.of("category"), [Constant.of("Electronics"), Field.of("primaryType")]);
+ * eqAny(field("category"), [constant("Electronics"), field("primaryType")]);
  * ```
  *
- * @param element The expression to compare.
- * @param others The values to check against.
- * @return A new {@code Expr} representing the 'eqAny' comparison.
+ * @param expression The expression whose results to compare.
+ * @param values The values to check against.
+ * @return A new {@code Expr} representing the 'IN' comparison.
  */
-export function eqAny(element: Expr, others: Expr[]): EqAny;
+export function eqAny(
+  expression: firestore.Expr,
+  values: Array<firestore.Expr | unknown>
+): BooleanExpr;
 
 /**
  * @beta
  *
- * Creates an expression that checks if an expression is equal to any of the provided values or
- * expressions.
+ * Creates an expression that checks if an expression is equal to any of the provided values.
  *
  * ```typescript
- * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
- * eqAny(Field.of("category"), ["Electronics", Field.of("primaryType")]);
+ * // Check if the 'category' field is set to a value in the disabledCategories field
+ * eqAny(field("category"), field('disabledCategories'));
  * ```
  *
- * @param element The expression to compare.
- * @param others The values to check against.
- * @return A new {@code Expr} representing the 'eqAny' comparison.
+ * @param expression The expression whose results to compare.
+ * @param arrayExpression An expression that evaluates to an array, whose elements to check for equality to the input.
+ * @return A new {@code Expr} representing the 'IN' comparison.
  */
-export function eqAny(element: Expr, others: any[]): EqAny;
-
-/**
- * @beta
- *
- * Creates an expression that checks if a field's value is equal to any of the provided values or
- * expressions.
- *
- * ```typescript
- * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
- * eqAny("category", [Constant.of("Electronics"), Field.of("primaryType")]);
- * ```
- *
- * @param element The field to compare.
- * @param others The values to check against.
- * @return A new {@code Expr} representing the 'eqAny' comparison.
- */
-export function eqAny(element: string, others: Expr[]): EqAny;
+export function eqAny(
+  expression: firestore.Expr,
+  arrayExpression: firestore.Expr
+): BooleanExpr;
 
 /**
  * @beta
@@ -4460,20 +4647,43 @@ export function eqAny(element: string, others: Expr[]): EqAny;
  *
  * ```typescript
  * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
- * eqAny("category", ["Electronics", Field.of("primaryType")]);
+ * eqAny("category", [constant("Electronics"), field("primaryType")]);
  * ```
  *
- * @param element The field to compare.
- * @param others The values to check against.
- * @return A new {@code Expr} representing the 'eqAny' comparison.
+ * @param fieldName The field to compare.
+ * @param values The values to check against.
+ * @return A new {@code Expr} representing the 'IN' comparison.
  */
-export function eqAny(element: string, others: any[]): EqAny;
-export function eqAny(element: Expr | string, others: any[]): EqAny {
-  const elementExpr = element instanceof Expr ? element : Field.of(element);
-  const exprOthers = others.map(other =>
-    other instanceof Expr ? other : Constant.of(other)
-  );
-  return new EqAny(elementExpr, exprOthers);
+export function eqAny(
+  fieldName: string,
+  values: Array<firestore.Expr | unknown>
+): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a field's value is equal to any of the provided values or
+ * expressions.
+ *
+ * ```typescript
+ * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
+ * eqAny("category", ["Electronics", field("primaryType")]);
+ * ```
+ *
+ * @param fieldName The field to compare.
+ * @param arrayExpression An expression that evaluates to an array, whose elements to check for equality to the input field.
+ * @return A new {@code Expr} representing the 'IN' comparison.
+ */
+export function eqAny(
+  fieldName: string,
+  arrayExpression: firestore.Expr
+): BooleanExpr;
+export function eqAny(
+  element: firestore.Expr | string,
+  values: unknown[] | firestore.Expr
+): BooleanExpr {
+  // @ts-ignore implementation accepts both types
+  return fieldOrExpression(element).eqAny(values);
 }
 
 /**
@@ -4484,14 +4694,37 @@ export function eqAny(element: Expr | string, others: any[]): EqAny {
  *
  * ```typescript
  * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
- * notEqAny(Field.of("status"), [Constant.of("pending"), Field.of("rejectedStatus")]);
+ * notEqAny(field("status"), ["pending", field("rejectedStatus")]);
  * ```
  *
  * @param element The expression to compare.
- * @param others The values to check against.
- * @return A new {@code Expr} representing the 'NotEqAny' comparison.
+ * @param values The values to check against.
+ * @return A new {@code Expr} representing the 'NOT IN' comparison.
  */
-export function notEqAny(element: Expr, others: Expr[]): NotEqAny;
+export function notEqAny(
+  element: firestore.Expr,
+  values: Array<firestore.Expr | unknown>
+): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a field's value is not equal to any of the provided values
+ * or expressions.
+ *
+ * ```typescript
+ * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
+ * notEqAny("status", [constant("pending"), field("rejectedStatus")]);
+ * ```
+ *
+ * @param fieldName The field name to compare.
+ * @param values The values to check against.
+ * @return A new {@code Expr} representing the 'NOT IN' comparison.
+ */
+export function notEqAny(
+  fieldName: string,
+  values: Array<firestore.Expr | unknown>
+): BooleanExpr;
 
 /**
  * @beta
@@ -4500,100 +4733,50 @@ export function notEqAny(element: Expr, others: Expr[]): NotEqAny;
  * or expressions.
  *
  * ```typescript
- * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
- * notEqAny(Field.of("status"), ["pending", Field.of("rejectedStatus")]);
+ * // Check if the 'status' field is neither "pending" nor the value of the field 'rejectedStatus'
+ * notEqAny(field("status"), ["pending", field("rejectedStatus")]);
  * ```
  *
  * @param element The expression to compare.
- * @param others The values to check against.
- * @return A new {@code Expr} representing the 'NotEqAny' comparison.
+ * @param arrayExpression The values to check against.
+ * @return A new {@code Expr} representing the 'NOT IN' comparison.
  */
-export function notEqAny(element: Expr, others: any[]): NotEqAny;
+export function notEqAny(
+  element: firestore.Expr,
+  arrayExpression: firestore.Expr
+): BooleanExpr;
 
 /**
  * @beta
  *
- * Creates an expression that checks if a field's value is not equal to any of the provided values
- * or expressions.
+ * Creates an expression that checks if a field's value is not equal to any of the values in the evaluated expression.
  *
  * ```typescript
- * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
- * notEqAny("status", ["pending", Field.of("rejectedStatus")]);
+ * // Check if the 'status' field is not equal to any value in the field 'rejectedStatuses'
+ * notEqAny("status", field("rejectedStatuses"));
  * ```
  *
- * @param element The field name to compare.
- * @param others The values to check against.
- * @return A new {@code Expr} representing the 'NotEqAny' comparison.
+ * @param fieldName The field name to compare.
+ * @param arrayExpression The values to check against.
+ * @return A new {@code Expr} representing the 'NOT IN' comparison.
  */
-export function notEqAny(element: string, others: Expr[]): NotEqAny;
+export function notEqAny(
+  fieldName: string,
+  arrayExpression: firestore.Expr
+): BooleanExpr;
 
-/**
- * @beta
- *
- * Creates an expression that checks if a field's value is not equal to any of the provided values
- * or expressions.
- *
- * ```typescript
- * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
- * notEqAny("status", ["pending", Field.of("rejectedStatus")]);
- * ```
- *
- * @param element The field name to compare.
- * @param others The values to check against.
- * @return A new {@code Expr} representing the 'NotEqAny' comparison.
- */
-export function notEqAny(element: string, others: any[]): NotEqAny;
-export function notEqAny(element: Expr | string, others: any[]): NotEqAny {
-  const elementExpr = element instanceof Expr ? element : Field.of(element);
-  const exprOthers = others.map(other =>
-    other instanceof Expr ? other : Constant.of(other)
-  );
-  return new NotEqAny(elementExpr, exprOthers);
+export function notEqAny(
+  element: firestore.Expr | string,
+  values: unknown[] | firestore.Expr
+): BooleanExpr {
+  // @ts-ignore implementation accepts both types
+  return fieldOrExpression(element).notEqAny(values);
 }
 
 /**
  * @beta
  *
- * Creates an expression that performs a logical 'AND' operation on multiple filter conditions.
- *
- * ```typescript
- * // Check if the 'age' field is greater than 18 AND the 'city' field is "London" AND
- * // the 'status' field is "active"
- * const condition = and(gt("age", 18), eq("city", "London"), eq("status", "active"));
- * ```
- *
- * @param left The first filter condition.
- * @param right Additional filter conditions to 'AND' together.
- * @return A new {@code Expr} representing the logical 'AND' operation.
- */
-export function and(left: FilterExpr, ...right: FilterExpr[]): And {
-  return new And([left, ...right]);
-}
-
-/**
- * @beta
- *
- * Creates an expression that performs a logical 'OR' operation on multiple filter conditions.
- *
- * ```typescript
- * // Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
- * // the 'status' field is "active"
- * const condition = or(gt("age", 18), eq("city", "London"), eq("status", "active"));
- * ```
- *
- * @param left The first filter condition.
- * @param right Additional filter conditions to 'OR' together.
- * @return A new {@code Expr} representing the logical 'OR' operation.
- */
-export function or(left: FilterExpr, ...right: FilterExpr[]): Or {
-  return new Or([left, ...right]);
-}
-
-/**
- * @beta
- *
- * Creates an expression that performs a logical 'XOR' (exclusive OR) operation on multiple filter
- * conditions.
+ * Creates an expression that performs a logical 'XOR' (exclusive OR) operation on multiple BooleanExprs.
  *
  * ```typescript
  * // Check if only one of the conditions is true: 'age' greater than 18, 'city' is "London",
@@ -4604,12 +4787,17 @@ export function or(left: FilterExpr, ...right: FilterExpr[]): Or {
  *     eq("status", "active"));
  * ```
  *
- * @param left The first filter condition.
- * @param right Additional filter conditions to 'XOR' together.
+ * @param first The first condition.
+ * @param second The second condition.
+ * @param additionalConditions Additional conditions to 'XOR' together.
  * @return A new {@code Expr} representing the logical 'XOR' operation.
  */
-export function xor(left: FilterExpr, ...right: FilterExpr[]): Xor {
-  return new Xor([left, ...right]);
+export function xor(
+  first: BooleanExpr,
+  second: BooleanExpr,
+  ...additionalConditions: BooleanExpr[]
+): BooleanExpr {
+  return new BooleanExpr('xor', [first, second, ...additionalConditions]);
 }
 
 /**
@@ -4621,7 +4809,7 @@ export function xor(left: FilterExpr, ...right: FilterExpr[]): Xor {
  * ```typescript
  * // If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
  * cond(
- *     gt("age", 18), Constant.of("Adult"), Constant.of("Minor"));
+ *     gt("age", 18), constant("Adult"), constant("Minor"));
  * ```
  *
  * @param condition The condition to evaluate.
@@ -4630,11 +4818,11 @@ export function xor(left: FilterExpr, ...right: FilterExpr[]): Xor {
  * @return A new {@code Expr} representing the conditional expression.
  */
 export function cond(
-  condition: FilterExpr,
-  thenExpr: Expr,
-  elseExpr: Expr
-): Cond {
-  return new Cond(condition, thenExpr, elseExpr);
+  condition: BooleanExpr,
+  thenExpr: firestore.Expr,
+  elseExpr: firestore.Expr
+): FunctionExpr {
+  return new FunctionExpr('cond', [condition, thenExpr, elseExpr]);
 }
 
 /**
@@ -4647,155 +4835,126 @@ export function cond(
  * not(eq("completed", true));
  * ```
  *
- * @param filter The filter condition to negate.
+ * @param booleanExpr The filter condition to negate.
  * @return A new {@code Expr} representing the negated filter condition.
  */
-export function not(filter: FilterExpr): Not {
-  return new Not(filter);
+export function not(booleanExpr: BooleanExpr): BooleanExpr {
+  return booleanExpr.not();
 }
 
 /**
  * @beta
  *
- * Creates an expression that returns the larger value between two expressions, based on Firestore's value type ordering.
+ * Creates an expression that returns the largest value between multiple input
+ * expressions or literal values. Based on Firestore's value type ordering.
  *
  * ```typescript
- * // Returns the larger value between the 'field1' field and the 'field2' field.
- * logicalMaximum(Field.of("field1"), Field.of("field2"));
+ * // Returns the largest value between the 'field1' field, the 'field2' field,
+ * // and 1000
+ * logicalMaximum(field("field1"), field("field2"), 1000);
  * ```
  *
- * @param left The left operand expression.
- * @param right The right operand expression.
- * @return A new {@code Expr} representing the logical maximum operation.
+ * @param first The first operand expression.
+ * @param second The second expression or literal.
+ * @param others Optional additional expressions or literals.
+ * @return A new {@code Expr} representing the logical max operation.
  */
-export function logicalMaximum(left: Expr, right: Expr): LogicalMaximum;
-
-/**
- * @beta
- *
- * Creates an expression that returns the larger value between an expression and a constant value, based on Firestore's value type ordering.
- *
- * ```typescript
- * // Returns the larger value between the 'value' field and 10.
- * logicalMaximum(Field.of("value"), 10);
- * ```
- *
- * @param left The left operand expression.
- * @param right The right operand constant.
- * @return A new {@code Expr} representing the logical maximum operation.
- */
-export function logicalMaximum(left: Expr, right: any): LogicalMaximum;
-
-/**
- * @beta
- *
- * Creates an expression that returns the larger value between a field and an expression, based on Firestore's value type ordering.
- *
- * ```typescript
- * // Returns the larger value between the 'field1' field and the 'field2' field.
- * logicalMaximum("field1", Field.of('field2'));
- * ```
- *
- * @param left The left operand field name.
- * @param right The right operand expression.
- * @return A new {@code Expr} representing the logical maximum operation.
- */
-export function logicalMaximum(left: string, right: Expr): LogicalMaximum;
-
-/**
- * @beta
- *
- * Creates an expression that returns the larger value between a field and a constant value, based on Firestore's value type ordering.
- *
- * ```typescript
- * // Returns the larger value between the 'value' field and 10.
- * logicalMaximum("value", 10);
- * ```
- *
- * @param left The left operand field name.
- * @param right The right operand constant.
- * @return A new {@code Expr} representing the logical maximum operation.
- */
-export function logicalMaximum(left: string, right: any): LogicalMaximum;
 export function logicalMaximum(
-  left: Expr | string,
-  right: Expr | any
-): LogicalMaximum {
-  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-  return new LogicalMaximum(normalizedLeft, normalizedRight);
+  first: firestore.Expr,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the largest value between multiple input
+ * expressions or literal values. Based on Firestore's value type ordering.
+ *
+ * ```typescript
+ * // Returns the largest value between the 'field1' field, the 'field2' field,
+ * // and 1000.
+ * logicalMaximum("field1", field("field2"), 1000);
+ * ```
+ *
+ * @param fieldName The first operand field name.
+ * @param second The second expression or literal.
+ * @param others Optional additional expressions or literals.
+ * @return A new {@code Expr} representing the logical max operation.
+ */
+export function logicalMaximum(
+  fieldName: string,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr;
+
+export function logicalMaximum(
+  first: firestore.Expr | string,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr {
+  return fieldOrExpression(first).logicalMaximum(
+    valueToDefaultExpr(second),
+    ...others.map(value => valueToDefaultExpr(value))
+  );
 }
 
 /**
  * @beta
  *
- * Creates an expression that returns the smaller value between two expressions, based on Firestore's value type ordering.
+ * Creates an expression that returns the smallest value between multiple input
+ * expressions and literal values. Based on Firestore's value type ordering.
  *
  * ```typescript
- * // Returns the smaller value between the 'field1' field and the 'field2' field.
- * logicalMinimum(Field.of("field1"), Field.of("field2"));
+ * // Returns the smallest value between the 'field1' field, the 'field2' field,
+ * // and 1000.
+ * logicalMinimum(field("field1"), field("field2"), 1000);
  * ```
  *
- * @param left The left operand expression.
- * @param right The right operand expression.
- * @return A new {@code Expr} representing the logical minimum operation.
+ * @param first The first operand expression.
+ * @param second The second expression or literal.
+ * @param others Optional additional expressions or literals.
+ * @return A new {@code Expr} representing the logical min operation.
  */
-export function logicalMinimum(left: Expr, right: Expr): LogicalMinimum;
-
-/**
- * @beta
- *
- * Creates an expression that returns the smaller value between an expression and a constant value, based on Firestore's value type ordering.
- *
- * ```typescript
- * // Returns the smaller value between the 'value' field and 10.
- * logicalMinimum(Field.of("value"), 10);
- * ```
- *
- * @param left The left operand expression.
- * @param right The right operand constant.
- * @return A new {@code Expr} representing the logical minimum operation.
- */
-export function logicalMinimum(left: Expr, right: any): LogicalMinimum;
-
-/**
- * @beta
- *
- * Creates an expression that returns the smaller value between a field and an expression, based on Firestore's value type ordering.
- *
- * ```typescript
- * // Returns the smaller value between the 'field1' field and the 'field2' field.
- * logicalMinimum("field1", Field.of("field2"));
- * ```
- *
- * @param left The left operand field name.
- * @param right The right operand expression.
- * @return A new {@code Expr} representing the logical minimum operation.
- */
-export function logicalMinimum(left: string, right: Expr): LogicalMinimum;
-
-/**
- * @beta
- *
- * Creates an expression that returns the smaller value between a field and a constant value, based on Firestore's value type ordering.
- *
- * ```typescript
- * // Returns the smaller value between the 'value' field and 10.
- * logicalMinimum("value", 10);
- * ```
- *
- * @param left The left operand field name.
- * @param right The right operand constant.
- * @return A new {@code Expr} representing the logical minimum operation.
- */
-export function logicalMinimum(left: string, right: any): LogicalMinimum;
 export function logicalMinimum(
-  left: Expr | string,
-  right: Expr | any
-): LogicalMinimum {
-  const normalizedLeft = typeof left === 'string' ? Field.of(left) : left;
-  const normalizedRight = right instanceof Expr ? right : Constant.of(right);
-  return new LogicalMinimum(normalizedLeft, normalizedRight);
+  first: firestore.Expr,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the smallest value between a field's value
+ * and other input expressions or literal values.
+ * Based on Firestore's value type ordering.
+ *
+ * ```typescript
+ * // Returns the smallest value between the 'field1' field, the 'field2' field,
+ * // and 1000.
+ * logicalMinimum("field1", field("field2"), 1000);
+ * ```
+ *
+ * @param fieldName The first operand field name.
+ * @param second The second expression or literal.
+ * @param others Optional additional expressions or literals.
+ * @return A new {@code Expr} representing the logical min operation.
+ */
+export function logicalMinimum(
+  fieldName: string,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr;
+
+export function logicalMinimum(
+  first: firestore.Expr | string,
+  second: firestore.Expr | unknown,
+  ...others: Array<firestore.Expr | unknown>
+): FunctionExpr {
+  return fieldOrExpression(first).logicalMinimum(
+    valueToDefaultExpr(second),
+    ...others.map(value => valueToDefaultExpr(value))
+  );
 }
 
 /**
@@ -4805,13 +4964,13 @@ export function logicalMinimum(
  *
  * ```typescript
  * // Check if the document has a field named "phoneNumber"
- * exists(Field.of("phoneNumber"));
+ * exists(field("phoneNumber"));
  * ```
  *
  * @param value An expression evaluates to the name of the field to check.
  * @return A new {@code Expr} representing the 'exists' check.
  */
-export function exists(value: Expr): Exists;
+export function exists(value: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4823,14 +4982,12 @@ export function exists(value: Expr): Exists;
  * exists("phoneNumber");
  * ```
  *
- * @param field The field name to check.
+ * @param fieldName The field name to check.
  * @return A new {@code Expr} representing the 'exists' check.
  */
-export function exists(field: string): Exists;
-export function exists(valueOrField: Expr | string): Exists {
-  const valueExpr =
-    valueOrField instanceof Expr ? valueOrField : Field.of(valueOrField);
-  return new Exists(valueExpr);
+export function exists(fieldName: string): BooleanExpr;
+export function exists(valueOrField: firestore.Expr | string): BooleanExpr {
+  return fieldOrExpression(valueOrField).exists();
 }
 
 /**
@@ -4840,13 +4997,13 @@ export function exists(valueOrField: Expr | string): Exists {
  *
  * ```typescript
  * // Check if the result of a calculation is NaN
- * isNaN(Field.of("value").divide(0));
+ * isNan(field("value").divide(0));
  * ```
  *
  * @param value The expression to check.
- * @return A new {@code Expr} representing the 'isNaN' check.
+ * @return A new {@code Expr} representing the 'isNan' check.
  */
-export function isNan(value: Expr): IsNan;
+export function isNan(value: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4855,16 +5012,15 @@ export function isNan(value: Expr): IsNan;
  *
  * ```typescript
  * // Check if the result of a calculation is NaN
- * isNaN("value");
+ * isNan("value");
  * ```
  *
- * @param value The name of the field to check.
- * @return A new {@code Expr} representing the 'isNaN' check.
+ * @param fieldName The name of the field to check.
+ * @return A new {@code Expr} representing the 'isNan' check.
  */
-export function isNan(value: string): IsNan;
-export function isNan(value: Expr | string): IsNan {
-  const valueExpr = value instanceof Expr ? value : Field.of(value);
-  return new IsNan(valueExpr);
+export function isNan(fieldName: string): BooleanExpr;
+export function isNan(value: firestore.Expr | string): BooleanExpr {
+  return fieldOrExpression(value).isNan();
 }
 
 /**
@@ -4874,18 +5030,18 @@ export function isNan(value: Expr | string): IsNan {
  *
  * ```typescript
  * // Reverse the value of the 'myString' field.
- * reverse(Field.of("myString"));
+ * reverse(field("myString"));
  * ```
  *
- * @param expr The expression representing the string to reverse.
+ * @param stringExpression An expression evaluating to a string value, which will be reversed.
  * @return A new {@code Expr} representing the reversed string.
  */
-export function reverse(expr: Expr): Reverse;
+export function reverse(stringExpression: firestore.Expr): FunctionExpr;
 
 /**
  * @beta
  *
- * Creates an expression that reverses a string represented by a field.
+ * Creates an expression that reverses a string value in the specified field.
  *
  * ```typescript
  * // Reverse the value of the 'myString' field.
@@ -4895,10 +5051,9 @@ export function reverse(expr: Expr): Reverse;
  * @param field The name of the field representing the string to reverse.
  * @return A new {@code Expr} representing the reversed string.
  */
-export function reverse(field: string): Reverse;
-export function reverse(expr: Expr | string): Reverse {
-  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
-  return new Reverse(normalizedExpr);
+export function reverse(field: string): FunctionExpr;
+export function reverse(expr: firestore.Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).reverse();
 }
 
 /**
@@ -4908,7 +5063,7 @@ export function reverse(expr: Expr | string): Reverse {
  *
  * ```typescript
  * // Replace the first occurrence of "hello" with "hi" in the 'message' field.
- * replaceFirst(Field.of("message"), "hello", "hi");
+ * replaceFirst(field("message"), "hello", "hi");
  * ```
  *
  * @param value The expression representing the string to perform the replacement on.
@@ -4917,10 +5072,10 @@ export function reverse(expr: Expr | string): Reverse {
  * @return A new {@code Expr} representing the string with the first occurrence replaced.
  */
 export function replaceFirst(
-  value: Expr,
+  value: firestore.Expr,
   find: string,
   replace: string
-): ReplaceFirst;
+): FunctionExpr;
 
 /**
  * @beta
@@ -4930,7 +5085,7 @@ export function replaceFirst(
  *
  * ```typescript
  * // Replace the first occurrence of the value in 'findField' with the value in 'replaceField' in the 'message' field.
- * replaceFirst(Field.of("message"), Field.of("findField"), Field.of("replaceField"));
+ * replaceFirst(field("message"), field("findField"), field("replaceField"));
  * ```
  *
  * @param value The expression representing the string to perform the replacement on.
@@ -4939,10 +5094,10 @@ export function replaceFirst(
  * @return A new {@code Expr} representing the string with the first occurrence replaced.
  */
 export function replaceFirst(
-  value: Expr,
-  find: Expr,
-  replace: Expr
-): ReplaceFirst;
+  value: firestore.Expr,
+  find: firestore.Expr,
+  replace: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -4954,26 +5109,25 @@ export function replaceFirst(
  * replaceFirst("message", "hello", "hi");
  * ```
  *
- * @param field The name of the field representing the string to perform the replacement on.
+ * @param fieldName The name of the field representing the string to perform the replacement on.
  * @param find The substring to search for.
  * @param replace The substring to replace the first occurrence of 'find' with.
  * @return A new {@code Expr} representing the string with the first occurrence replaced.
  */
 export function replaceFirst(
-  field: string,
+  fieldName: string,
   find: string,
   replace: string
-): ReplaceFirst;
+): FunctionExpr;
 export function replaceFirst(
-  value: Expr | string,
-  find: Expr | string,
-  replace: Expr | string
-): ReplaceFirst {
-  const normalizedValue = typeof value === 'string' ? Field.of(value) : value;
-  const normalizedFind = typeof find === 'string' ? Constant.of(find) : find;
-  const normalizedReplace =
-    typeof replace === 'string' ? Constant.of(replace) : replace;
-  return new ReplaceFirst(normalizedValue, normalizedFind, normalizedReplace);
+  value: firestore.Expr | string,
+  find: firestore.Expr | string,
+  replace: firestore.Expr | string
+): FunctionExpr {
+  const normalizedValue = fieldOrExpression(value);
+  const normalizedFind = valueToDefaultExpr(find);
+  const normalizedReplace = valueToDefaultExpr(replace);
+  return normalizedValue.replaceFirst(normalizedFind, normalizedReplace);
 }
 
 /**
@@ -4983,7 +5137,7 @@ export function replaceFirst(
  *
  * ```typescript
  * // Replace all occurrences of "hello" with "hi" in the 'message' field.
- * replaceAll(Field.of("message"), "hello", "hi");
+ * replaceAll(field("message"), "hello", "hi");
  * ```
  *
  * @param value The expression representing the string to perform the replacement on.
@@ -4992,10 +5146,10 @@ export function replaceFirst(
  * @return A new {@code Expr} representing the string with all occurrences replaced.
  */
 export function replaceAll(
-  value: Expr,
+  value: firestore.Expr,
   find: string,
   replace: string
-): ReplaceAll;
+): FunctionExpr;
 
 /**
  * @beta
@@ -5005,7 +5159,7 @@ export function replaceAll(
  *
  * ```typescript
  * // Replace all occurrences of the value in 'findField' with the value in 'replaceField' in the 'message' field.
- * replaceAll(Field.of("message"), Field.of("findField"), Field.of("replaceField"));
+ * replaceAll(field("message"), field("findField"), field("replaceField"));
  * ```
  *
  * @param value The expression representing the string to perform the replacement on.
@@ -5013,7 +5167,11 @@ export function replaceAll(
  * @param replace The expression representing the substring to replace all occurrences of 'find' with.
  * @return A new {@code Expr} representing the string with all occurrences replaced.
  */
-export function replaceAll(value: Expr, find: Expr, replace: Expr): ReplaceAll;
+export function replaceAll(
+  value: firestore.Expr,
+  find: firestore.Expr,
+  replace: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -5025,26 +5183,25 @@ export function replaceAll(value: Expr, find: Expr, replace: Expr): ReplaceAll;
  * replaceAll("message", "hello", "hi");
  * ```
  *
- * @param field The name of the field representing the string to perform the replacement on.
+ * @param fieldName The name of the field representing the string to perform the replacement on.
  * @param find The substring to search for.
  * @param replace The substring to replace all occurrences of 'find' with.
  * @return A new {@code Expr} representing the string with all occurrences replaced.
  */
 export function replaceAll(
-  field: string,
+  fieldName: string,
   find: string,
   replace: string
-): ReplaceAll;
+): FunctionExpr;
 export function replaceAll(
-  value: Expr | string,
-  find: Expr | string,
-  replace: Expr | string
-): ReplaceAll {
-  const normalizedValue = typeof value === 'string' ? Field.of(value) : value;
-  const normalizedFind = typeof find === 'string' ? Constant.of(find) : find;
-  const normalizedReplace =
-    typeof replace === 'string' ? Constant.of(replace) : replace;
-  return new ReplaceAll(normalizedValue, normalizedFind, normalizedReplace);
+  value: firestore.Expr | string,
+  find: firestore.Expr | string,
+  replace: firestore.Expr | string
+): FunctionExpr {
+  const normalizedValue = fieldOrExpression(value);
+  const normalizedFind = valueToDefaultExpr(find);
+  const normalizedReplace = valueToDefaultExpr(replace);
+  return normalizedValue.replaceAll(normalizedFind, normalizedReplace);
 }
 
 /**
@@ -5054,13 +5211,13 @@ export function replaceAll(
  *
  * ```typescript
  * // Calculate the length of the 'myString' field in bytes.
- * byteLength(Field.of("myString"));
+ * byteLength(field("myString"));
  * ```
  *
  * @param expr The expression representing the string.
  * @return A new {@code Expr} representing the length of the string in bytes.
  */
-export function byteLength(expr: Expr): ByteLength;
+export function byteLength(expr: firestore.Expr): FunctionExpr;
 
 /**
  * @beta
@@ -5072,13 +5229,13 @@ export function byteLength(expr: Expr): ByteLength;
  * byteLength("myString");
  * ```
  *
- * @param field The name of the field representing the string.
+ * @param fieldName The name of the field containing the string.
  * @return A new {@code Expr} representing the length of the string in bytes.
  */
-export function byteLength(field: string): ByteLength;
-export function byteLength(expr: Expr | string): ByteLength {
-  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
-  return new ByteLength(normalizedExpr);
+export function byteLength(fieldName: string): FunctionExpr;
+export function byteLength(expr: firestore.Expr | string): FunctionExpr {
+  const normalizedExpr = fieldOrExpression(expr);
+  return normalizedExpr.byteLength();
 }
 
 /**
@@ -5091,10 +5248,10 @@ export function byteLength(expr: Expr | string): ByteLength {
  * strLength("name");
  * ```
  *
- * @param field The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @return A new {@code Expr} representing the length of the string.
  */
-export function charLength(field: string): CharLength;
+export function charLength(fieldName: string): FunctionExpr;
 
 /**
  * @beta
@@ -5103,16 +5260,16 @@ export function charLength(field: string): CharLength;
  *
  * ```typescript
  * // Get the character length of the 'name' field in UTF-8.
- * strLength(Field.of("name"));
+ * strLength(field("name"));
  * ```
  *
- * @param expr The expression representing the string to calculate the length of.
+ * @param stringExpression The expression representing the string to calculate the length of.
  * @return A new {@code Expr} representing the length of the string.
  */
-export function charLength(expr: Expr): CharLength;
-export function charLength(value: Expr | string): CharLength {
-  const valueExpr = value instanceof Expr ? value : Field.of(value);
-  return new CharLength(valueExpr);
+export function charLength(stringExpression: firestore.Expr): FunctionExpr;
+export function charLength(value: firestore.Expr | string): FunctionExpr {
+  const valueExpr = fieldOrExpression(value);
+  return valueExpr.charLength();
 }
 
 /**
@@ -5126,11 +5283,11 @@ export function charLength(value: Expr | string): CharLength {
  * like("title", "%guide%");
  * ```
  *
- * @param left The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
-export function like(left: string, pattern: string): Like;
+export function like(fieldName: string, pattern: string): BooleanExpr;
 
 /**
  * @beta
@@ -5140,14 +5297,14 @@ export function like(left: string, pattern: string): Like;
  *
  * ```typescript
  * // Check if the 'title' field contains the string "guide"
- * like("title", Field.of("pattern"));
+ * like("title", field("pattern"));
  * ```
  *
- * @param left The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
-export function like(left: string, pattern: Expr): Like;
+export function like(fieldName: string, pattern: firestore.Expr): BooleanExpr;
 
 /**
  * @beta
@@ -5156,14 +5313,17 @@ export function like(left: string, pattern: Expr): Like;
  *
  * ```typescript
  * // Check if the 'title' field contains the string "guide"
- * like(Field.of("title"), "%guide%");
+ * like(field("title"), "%guide%");
  * ```
  *
- * @param left The expression representing the string to perform the comparison on.
+ * @param stringExpression The expression representing the string to perform the comparison on.
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
-export function like(left: Expr, pattern: string): Like;
+export function like(
+  stringExpression: firestore.Expr,
+  pattern: string
+): BooleanExpr;
 
 /**
  * @beta
@@ -5172,18 +5332,24 @@ export function like(left: Expr, pattern: string): Like;
  *
  * ```typescript
  * // Check if the 'title' field contains the string "guide"
- * like(Field.of("title"), Field.of("pattern"));
+ * like(field("title"), field("pattern"));
  * ```
  *
- * @param left The expression representing the string to perform the comparison on.
+ * @param stringExpression The expression representing the string to perform the comparison on.
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
-export function like(left: Expr, pattern: Expr): Like;
-export function like(left: Expr | string, pattern: Expr | string): Like {
-  const leftExpr = left instanceof Expr ? left : Field.of(left);
-  const patternExpr = pattern instanceof Expr ? pattern : Constant.of(pattern);
-  return new Like(leftExpr, patternExpr);
+export function like(
+  stringExpression: firestore.Expr,
+  pattern: firestore.Expr
+): BooleanExpr;
+export function like(
+  left: firestore.Expr | string,
+  pattern: firestore.Expr | string
+): FunctionExpr {
+  const leftExpr = fieldOrExpression(left);
+  const patternExpr = valueToDefaultExpr(pattern);
+  return leftExpr.like(patternExpr);
 }
 
 /**
@@ -5197,11 +5363,11 @@ export function like(left: Expr | string, pattern: Expr | string): Like {
  * regexContains("description", "(?i)example");
  * ```
  *
- * @param left The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @param pattern The regular expression to use for the search.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function regexContains(left: string, pattern: string): RegexContains;
+export function regexContains(fieldName: string, pattern: string): BooleanExpr;
 
 /**
  * @beta
@@ -5211,55 +5377,64 @@ export function regexContains(left: string, pattern: string): RegexContains;
  *
  * ```typescript
  * // Check if the 'description' field contains "example" (case-insensitive)
- * regexContains("description", Field.of("pattern"));
+ * regexContains("description", field("pattern"));
  * ```
  *
- * @param left The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @param pattern The regular expression to use for the search.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function regexContains(left: string, pattern: Expr): RegexContains;
-
-/**
- * @beta
- *
- * Creates an expression that checks if a string expression contains a specified regular
- * expression as a substring.
- *
- * ```typescript
- * // Check if the 'description' field contains "example" (case-insensitive)
- * regexContains(Field.of("description"), "(?i)example");
- * ```
- *
- * @param left The expression representing the string to perform the comparison on.
- * @param pattern The regular expression to use for the search.
- * @return A new {@code Expr} representing the 'contains' comparison.
- */
-export function regexContains(left: Expr, pattern: string): RegexContains;
-
-/**
- * @beta
- *
- * Creates an expression that checks if a string expression contains a specified regular
- * expression as a substring.
- *
- * ```typescript
- * // Check if the 'description' field contains "example" (case-insensitive)
- * regexContains(Field.of("description"), Field.of("pattern"));
- * ```
- *
- * @param left The expression representing the string to perform the comparison on.
- * @param pattern The regular expression to use for the search.
- * @return A new {@code Expr} representing the 'contains' comparison.
- */
-export function regexContains(left: Expr, pattern: Expr): RegexContains;
 export function regexContains(
-  left: Expr | string,
-  pattern: Expr | string
-): RegexContains {
-  const leftExpr = left instanceof Expr ? left : Field.of(left);
-  const patternExpr = pattern instanceof Expr ? pattern : Constant.of(pattern);
-  return new RegexContains(leftExpr, patternExpr);
+  fieldName: string,
+  pattern: firestore.Expr
+): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a string expression contains a specified regular
+ * expression as a substring.
+ *
+ * ```typescript
+ * // Check if the 'description' field contains "example" (case-insensitive)
+ * regexContains(field("description"), "(?i)example");
+ * ```
+ *
+ * @param stringExpression The expression representing the string to perform the comparison on.
+ * @param pattern The regular expression to use for the search.
+ * @return A new {@code Expr} representing the 'contains' comparison.
+ */
+export function regexContains(
+  stringExpression: firestore.Expr,
+  pattern: string
+): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a string expression contains a specified regular
+ * expression as a substring.
+ *
+ * ```typescript
+ * // Check if the 'description' field contains "example" (case-insensitive)
+ * regexContains(field("description"), field("pattern"));
+ * ```
+ *
+ * @param stringExpression The expression representing the string to perform the comparison on.
+ * @param pattern The regular expression to use for the search.
+ * @return A new {@code Expr} representing the 'contains' comparison.
+ */
+export function regexContains(
+  stringExpression: firestore.Expr,
+  pattern: firestore.Expr
+): BooleanExpr;
+export function regexContains(
+  left: firestore.Expr | string,
+  pattern: firestore.Expr | string
+): BooleanExpr {
+  const leftExpr = fieldOrExpression(left);
+  const patternExpr = valueToDefaultExpr(pattern);
+  return leftExpr.regexContains(patternExpr);
 }
 
 /**
@@ -5272,11 +5447,11 @@ export function regexContains(
  * regexMatch("email", "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}");
  * ```
  *
- * @param left The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @param pattern The regular expression to use for the match.
  * @return A new {@code Expr} representing the regular expression match.
  */
-export function regexMatch(left: string, pattern: string): RegexMatch;
+export function regexMatch(fieldName: string, pattern: string): BooleanExpr;
 
 /**
  * @beta
@@ -5285,55 +5460,64 @@ export function regexMatch(left: string, pattern: string): RegexMatch;
  *
  * ```typescript
  * // Check if the 'email' field matches a valid email pattern
- * regexMatch("email", Field.of("pattern"));
+ * regexMatch("email", field("pattern"));
  * ```
  *
- * @param left The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @param pattern The regular expression to use for the match.
  * @return A new {@code Expr} representing the regular expression match.
  */
-export function regexMatch(left: string, pattern: Expr): RegexMatch;
-
-/**
- * @beta
- *
- * Creates an expression that checks if a string expression matches a specified regular
- * expression.
- *
- * ```typescript
- * // Check if the 'email' field matches a valid email pattern
- * regexMatch(Field.of("email"), "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}");
- * ```
- *
- * @param left The expression representing the string to match against.
- * @param pattern The regular expression to use for the match.
- * @return A new {@code Expr} representing the regular expression match.
- */
-export function regexMatch(left: Expr, pattern: string): RegexMatch;
-
-/**
- * @beta
- *
- * Creates an expression that checks if a string expression matches a specified regular
- * expression.
- *
- * ```typescript
- * // Check if the 'email' field matches a valid email pattern
- * regexMatch(Field.of("email"), Field.of("pattern"));
- * ```
- *
- * @param left The expression representing the string to match against.
- * @param pattern The regular expression to use for the match.
- * @return A new {@code Expr} representing the regular expression match.
- */
-export function regexMatch(left: Expr, pattern: Expr): RegexMatch;
 export function regexMatch(
-  left: Expr | string,
-  pattern: Expr | string
-): RegexMatch {
-  const leftExpr = left instanceof Expr ? left : Field.of(left);
-  const patternExpr = pattern instanceof Expr ? pattern : Constant.of(pattern);
-  return new RegexMatch(leftExpr, patternExpr);
+  fieldName: string,
+  pattern: firestore.Expr
+): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a string expression matches a specified regular
+ * expression.
+ *
+ * ```typescript
+ * // Check if the 'email' field matches a valid email pattern
+ * regexMatch(field("email"), "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}");
+ * ```
+ *
+ * @param stringExpression The expression representing the string to match against.
+ * @param pattern The regular expression to use for the match.
+ * @return A new {@code Expr} representing the regular expression match.
+ */
+export function regexMatch(
+  stringExpression: firestore.Expr,
+  pattern: string
+): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a string expression matches a specified regular
+ * expression.
+ *
+ * ```typescript
+ * // Check if the 'email' field matches a valid email pattern
+ * regexMatch(field("email"), field("pattern"));
+ * ```
+ *
+ * @param stringExpression The expression representing the string to match against.
+ * @param pattern The regular expression to use for the match.
+ * @return A new {@code Expr} representing the regular expression match.
+ */
+export function regexMatch(
+  stringExpression: firestore.Expr,
+  pattern: firestore.Expr
+): BooleanExpr;
+export function regexMatch(
+  left: firestore.Expr | string,
+  pattern: firestore.Expr | string
+): BooleanExpr {
+  const leftExpr = fieldOrExpression(left);
+  const patternExpr = valueToDefaultExpr(pattern);
+  return leftExpr.regexMatch(patternExpr);
 }
 
 /**
@@ -5346,11 +5530,11 @@ export function regexMatch(
  * strContains("description", "example");
  * ```
  *
- * @param left The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @param substring The substring to search for.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function strContains(left: string, substring: string): StrContains;
+export function strContains(fieldName: string, substring: string): BooleanExpr;
 
 /**
  * @beta
@@ -5359,14 +5543,17 @@ export function strContains(left: string, substring: string): StrContains;
  *
  * ```typescript
  * // Check if the 'description' field contains the value of the 'keyword' field.
- * strContains("description", Field.of("keyword"));
+ * strContains("description", field("keyword"));
  * ```
  *
- * @param left The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @param substring The expression representing the substring to search for.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function strContains(left: string, substring: Expr): StrContains;
+export function strContains(
+  fieldName: string,
+  substring: firestore.Expr
+): BooleanExpr;
 
 /**
  * @beta
@@ -5375,14 +5562,17 @@ export function strContains(left: string, substring: Expr): StrContains;
  *
  * ```typescript
  * // Check if the 'description' field contains "example".
- * strContains(Field.of("description"), "example");
+ * strContains(field("description"), "example");
  * ```
  *
- * @param left The expression representing the string to perform the comparison on.
+ * @param stringExpression The expression representing the string to perform the comparison on.
  * @param substring The substring to search for.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function strContains(left: Expr, substring: string): StrContains;
+export function strContains(
+  stringExpression: firestore.Expr,
+  substring: string
+): BooleanExpr;
 
 /**
  * @beta
@@ -5391,22 +5581,24 @@ export function strContains(left: Expr, substring: string): StrContains;
  *
  * ```typescript
  * // Check if the 'description' field contains the value of the 'keyword' field.
- * strContains(Field.of("description"), Field.of("keyword"));
+ * strContains(field("description"), field("keyword"));
  * ```
  *
- * @param left The expression representing the string to perform the comparison on.
+ * @param stringExpression The expression representing the string to perform the comparison on.
  * @param substring The expression representing the substring to search for.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function strContains(left: Expr, substring: Expr): StrContains;
 export function strContains(
-  left: Expr | string,
-  substring: Expr | string
-): StrContains {
-  const leftExpr = left instanceof Expr ? left : Field.of(left);
-  const substringExpr =
-    substring instanceof Expr ? substring : Constant.of(substring);
-  return new StrContains(leftExpr, substringExpr);
+  stringExpression: firestore.Expr,
+  substring: firestore.Expr
+): BooleanExpr;
+export function strContains(
+  left: firestore.Expr | string,
+  substring: firestore.Expr | string
+): BooleanExpr {
+  const leftExpr = fieldOrExpression(left);
+  const substringExpr = valueToDefaultExpr(substring);
+  return leftExpr.strContains(substringExpr);
 }
 
 /**
@@ -5419,11 +5611,11 @@ export function strContains(
  * startsWith("name", "Mr.");
  * ```
  *
- * @param expr The field name to check.
+ * @param fieldName The field name to check.
  * @param prefix The prefix to check for.
  * @return A new {@code Expr} representing the 'starts with' comparison.
  */
-export function startsWith(expr: string, prefix: string): StartsWith;
+export function startsWith(fieldName: string, prefix: string): BooleanExpr;
 
 /**
  * @beta
@@ -5432,53 +5624,60 @@ export function startsWith(expr: string, prefix: string): StartsWith;
  *
  * ```typescript
  * // Check if the 'fullName' field starts with the value of the 'firstName' field
- * startsWith("fullName", Field.of("firstName"));
+ * startsWith("fullName", field("firstName"));
  * ```
  *
- * @param expr The field name to check.
+ * @param fieldName The field name to check.
  * @param prefix The expression representing the prefix.
  * @return A new {@code Expr} representing the 'starts with' comparison.
  */
-export function startsWith(expr: string, prefix: Expr): StartsWith;
-
-/**
- * @beta
- *
- * Creates an expression that checks if a string expression starts with a given prefix.
- *
- * ```typescript
- * // Check if the result of concatenating 'firstName' and 'lastName' fields starts with "Mr."
- * startsWith(Field.of("fullName"), "Mr.");
- * ```
- *
- * @param expr The expression to check.
- * @param prefix The prefix to check for.
- * @return A new {@code Expr} representing the 'starts with' comparison.
- */
-export function startsWith(expr: Expr, prefix: string): StartsWith;
-
-/**
- * @beta
- *
- * Creates an expression that checks if a string expression starts with a given prefix.
- *
- * ```typescript
- * // Check if the result of concatenating 'firstName' and 'lastName' fields starts with "Mr."
- * startsWith(Field.of("fullName"), Field.of("prefix"));
- * ```
- *
- * @param expr The expression to check.
- * @param prefix The prefix to check for.
- * @return A new {@code Expr} representing the 'starts with' comparison.
- */
-export function startsWith(expr: Expr, prefix: Expr): StartsWith;
 export function startsWith(
-  expr: Expr | string,
-  prefix: Expr | string
-): StartsWith {
-  const exprLeft = expr instanceof Expr ? expr : Field.of(expr);
-  const prefixExpr = prefix instanceof Expr ? prefix : Constant.of(prefix);
-  return new StartsWith(exprLeft, prefixExpr);
+  fieldName: string,
+  prefix: firestore.Expr
+): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a string expression starts with a given prefix.
+ *
+ * ```typescript
+ * // Check if the result of concatenating 'firstName' and 'lastName' fields starts with "Mr."
+ * startsWith(field("fullName"), "Mr.");
+ * ```
+ *
+ * @param stringExpression The expression to check.
+ * @param prefix The prefix to check for.
+ * @return A new {@code Expr} representing the 'starts with' comparison.
+ */
+export function startsWith(
+  stringExpression: firestore.Expr,
+  prefix: string
+): BooleanExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that checks if a string expression starts with a given prefix.
+ *
+ * ```typescript
+ * // Check if the result of concatenating 'firstName' and 'lastName' fields starts with "Mr."
+ * startsWith(field("fullName"), field("prefix"));
+ * ```
+ *
+ * @param stringExpression The expression to check.
+ * @param prefix The prefix to check for.
+ * @return A new {@code Expr} representing the 'starts with' comparison.
+ */
+export function startsWith(
+  stringExpression: firestore.Expr,
+  prefix: firestore.Expr
+): BooleanExpr;
+export function startsWith(
+  expr: firestore.Expr | string,
+  prefix: firestore.Expr | string
+): BooleanExpr {
+  return fieldOrExpression(expr).startsWith(valueToDefaultExpr(prefix));
 }
 
 /**
@@ -5491,11 +5690,11 @@ export function startsWith(
  * endsWith("filename", ".txt");
  * ```
  *
- * @param expr The field name to check.
+ * @param fieldName The field name to check.
  * @param suffix The postfix to check for.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
-export function endsWith(expr: string, suffix: string): EndsWith;
+export function endsWith(fieldName: string, suffix: string): BooleanExpr;
 
 /**
  * @beta
@@ -5504,14 +5703,17 @@ export function endsWith(expr: string, suffix: string): EndsWith;
  *
  * ```typescript
  * // Check if the 'url' field ends with the value of the 'extension' field
- * endsWith("url", Field.of("extension"));
+ * endsWith("url", field("extension"));
  * ```
  *
- * @param expr The field name to check.
+ * @param fieldName The field name to check.
  * @param suffix The expression representing the postfix.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
-export function endsWith(expr: string, suffix: Expr): EndsWith;
+export function endsWith(
+  fieldName: string,
+  suffix: firestore.Expr
+): BooleanExpr;
 
 /**
  * @beta
@@ -5520,14 +5722,17 @@ export function endsWith(expr: string, suffix: Expr): EndsWith;
  *
  * ```typescript
  * // Check if the result of concatenating 'firstName' and 'lastName' fields ends with "Jr."
- * endsWith(Field.of("fullName"), "Jr.");
+ * endsWith(field("fullName"), "Jr.");
  * ```
  *
- * @param expr The expression to check.
+ * @param stringExpression The expression to check.
  * @param suffix The postfix to check for.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
-export function endsWith(expr: Expr, suffix: string): EndsWith;
+export function endsWith(
+  stringExpression: firestore.Expr,
+  suffix: string
+): BooleanExpr;
 
 /**
  * @beta
@@ -5536,18 +5741,22 @@ export function endsWith(expr: Expr, suffix: string): EndsWith;
  *
  * ```typescript
  * // Check if the result of concatenating 'firstName' and 'lastName' fields ends with "Jr."
- * endsWith(Field.of("fullName"), Constant.of("Jr."));
+ * endsWith(field("fullName"), constant("Jr."));
  * ```
  *
- * @param expr The expression to check.
+ * @param stringExpression The expression to check.
  * @param suffix The postfix to check for.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
-export function endsWith(expr: Expr, suffix: Expr): EndsWith;
-export function endsWith(expr: Expr | string, suffix: Expr | string): EndsWith {
-  const exprLeft = expr instanceof Expr ? expr : Field.of(expr);
-  const suffixExpr = suffix instanceof Expr ? suffix : Constant.of(suffix);
-  return new EndsWith(exprLeft, suffixExpr);
+export function endsWith(
+  stringExpression: firestore.Expr,
+  suffix: firestore.Expr
+): BooleanExpr;
+export function endsWith(
+  expr: firestore.Expr | string,
+  suffix: firestore.Expr | string
+): BooleanExpr {
+  return fieldOrExpression(expr).endsWith(valueToDefaultExpr(suffix));
 }
 
 /**
@@ -5560,10 +5769,10 @@ export function endsWith(expr: Expr | string, suffix: Expr | string): EndsWith {
  * toLower("name");
  * ```
  *
- * @param expr The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @return A new {@code Expr} representing the lowercase string.
  */
-export function toLower(expr: string): ToLower;
+export function toLower(fieldName: string): FunctionExpr;
 
 /**
  * @beta
@@ -5572,15 +5781,15 @@ export function toLower(expr: string): ToLower;
  *
  * ```typescript
  * // Convert the 'name' field to lowercase
- * toLower(Field.of("name"));
+ * toLower(field("name"));
  * ```
  *
- * @param expr The expression representing the string to convert to lowercase.
+ * @param stringExpression The expression representing the string to convert to lowercase.
  * @return A new {@code Expr} representing the lowercase string.
  */
-export function toLower(expr: Expr): ToLower;
-export function toLower(expr: Expr | string): ToLower {
-  return new ToLower(expr instanceof Expr ? expr : Field.of(expr));
+export function toLower(stringExpression: firestore.Expr): FunctionExpr;
+export function toLower(expr: firestore.Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).toLower();
 }
 
 /**
@@ -5593,10 +5802,10 @@ export function toLower(expr: Expr | string): ToLower {
  * toUpper("title");
  * ```
  *
- * @param expr The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @return A new {@code Expr} representing the uppercase string.
  */
-export function toUpper(expr: string): ToUpper;
+export function toUpper(fieldName: string): FunctionExpr;
 
 /**
  * @beta
@@ -5605,15 +5814,15 @@ export function toUpper(expr: string): ToUpper;
  *
  * ```typescript
  * // Convert the 'title' field to uppercase
- * toUppercase(Field.of("title"));
+ * toUppercase(field("title"));
  * ```
  *
- * @param expr The expression representing the string to convert to uppercase.
+ * @param stringExpression The expression representing the string to convert to uppercase.
  * @return A new {@code Expr} representing the uppercase string.
  */
-export function toUpper(expr: Expr): ToUpper;
-export function toUpper(expr: Expr | string): ToUpper {
-  return new ToUpper(expr instanceof Expr ? expr : Field.of(expr));
+export function toUpper(stringExpression: firestore.Expr): FunctionExpr;
+export function toUpper(expr: firestore.Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).toUpper();
 }
 
 /**
@@ -5626,10 +5835,10 @@ export function toUpper(expr: Expr | string): ToUpper {
  * trim("userInput");
  * ```
  *
- * @param expr The name of the field containing the string.
+ * @param fieldName The name of the field containing the string.
  * @return A new {@code Expr} representing the trimmed string.
  */
-export function trim(expr: string): Trim;
+export function trim(fieldName: string): FunctionExpr;
 
 /**
  * @beta
@@ -5638,15 +5847,15 @@ export function trim(expr: string): Trim;
  *
  * ```typescript
  * // Trim whitespace from the 'userInput' field
- * trim(Field.of("userInput"));
+ * trim(field("userInput"));
  * ```
  *
- * @param expr The expression representing the string to trim.
+ * @param stringExpression The expression representing the string to trim.
  * @return A new {@code Expr} representing the trimmed string.
  */
-export function trim(expr: Expr): Trim;
-export function trim(expr: Expr | string): Trim {
-  return new Trim(expr instanceof Expr ? expr : Field.of(expr));
+export function trim(stringExpression: firestore.Expr): FunctionExpr;
+export function trim(expr: firestore.Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).trim();
 }
 
 /**
@@ -5656,17 +5865,19 @@ export function trim(expr: Expr | string): Trim {
  *
  * ```typescript
  * // Combine the 'firstName', " ", and 'lastName' fields into a single string
- * strConcat("firstName", " ", Field.of("lastName"));
+ * strConcat("firstName", " ", field("lastName"));
  * ```
  *
- * @param first The field name containing the initial string value.
- * @param elements The expressions (typically strings) to concatenate.
+ * @param fieldName The field name containing the initial string value.
+ * @param secondString An expression or string literal to concatenate.
+ * @param otherStrings Optional additional expressions or literals (typically strings) to concatenate.
  * @return A new {@code Expr} representing the concatenated string.
  */
 export function strConcat(
-  first: string,
-  ...elements: (Expr | string)[]
-): StrConcat;
+  fieldName: string,
+  secondString: firestore.Expr | string,
+  ...otherStrings: Array<firestore.Expr | string>
+): FunctionExpr;
 
 /**
  * @beta
@@ -5674,23 +5885,28 @@ export function strConcat(
  *
  * ```typescript
  * // Combine the 'firstName', " ", and 'lastName' fields into a single string
- * strConcat(Field.of("firstName"), " ", Field.of("lastName"));
+ * strConcat(field("firstName"), " ", field("lastName"));
  * ```
  *
- * @param first The initial string expression to concatenate to.
- * @param elements The expressions (typically strings) to concatenate.
+ * @param firstString The initial string expression to concatenate to.
+ * @param secondString An expression or string literal to concatenate.
+ * @param otherStrings Optional additional expressions or literals (typically strings) to concatenate.
  * @return A new {@code Expr} representing the concatenated string.
  */
 export function strConcat(
-  first: Expr,
-  ...elements: (Expr | string)[]
-): StrConcat;
+  firstString: firestore.Expr,
+  secondString: firestore.Expr | string,
+  ...otherStrings: Array<firestore.Expr | string>
+): FunctionExpr;
 export function strConcat(
-  first: string | Expr,
-  ...elements: (string | Expr)[]
-): StrConcat {
-  const exprs = elements.map(e => (e instanceof Expr ? e : Constant.of(e)));
-  return new StrConcat(first instanceof Expr ? first : Field.of(first), exprs);
+  first: string | firestore.Expr,
+  second: string | firestore.Expr,
+  ...elements: Array<string | firestore.Expr>
+): FunctionExpr {
+  return fieldOrExpression(first).strConcat(
+    valueToDefaultExpr(second),
+    ...elements.map(valueToDefaultExpr)
+  );
 }
 
 /**
@@ -5703,11 +5919,11 @@ export function strConcat(
  * mapGet("address", "city");
  * ```
  *
- * @param mapField The field name of the map field.
+ * @param fieldName The field name of the map field.
  * @param subField The key to access in the map.
  * @return A new {@code Expr} representing the value associated with the given key in the map.
  */
-export function mapGet(mapField: string, subField: string): MapGet;
+export function mapGet(fieldName: string, subField: string): FunctionExpr;
 
 /**
  * @beta
@@ -5716,19 +5932,22 @@ export function mapGet(mapField: string, subField: string): MapGet;
  *
  * ```typescript
  * // Get the 'city' value from the 'address' map field
- * mapGet(Field.of("address"), "city");
+ * mapGet(field("address"), "city");
  * ```
  *
- * @param mapExpr The expression representing the map.
+ * @param mapExpression The expression representing the map.
  * @param subField The key to access in the map.
  * @return A new {@code Expr} representing the value associated with the given key in the map.
  */
-export function mapGet(mapExpr: Expr, subField: string): MapGet;
-export function mapGet(fieldOrExpr: string | Expr, subField: string): MapGet {
-  return new MapGet(
-    typeof fieldOrExpr === 'string' ? Field.of(fieldOrExpr) : fieldOrExpr,
-    subField
-  );
+export function mapGet(
+  mapExpression: firestore.Expr,
+  subField: string
+): FunctionExpr;
+export function mapGet(
+  fieldOrExpr: string | firestore.Expr,
+  subField: string
+): FunctionExpr {
+  return fieldOrExpression(fieldOrExpr).mapGet(subField);
 }
 
 /**
@@ -5737,14 +5956,14 @@ export function mapGet(fieldOrExpr: string | Expr, subField: string): MapGet {
  * Creates an aggregation that counts the total number of stage inputs.
  *
  * ```typescript
- * // Count the total number of users
- * countAll().as("totalUsers");
+ * // Count the total number of input documents
+ * countAll().as("totalDocument");
  * ```
  *
- * @return A new {@code Accumulator} representing the 'countAll' aggregation.
+ * @return A new {@code AggregateFunction} representing the 'countAll' aggregation.
  */
-export function countAll(): Count {
-  return new Count(undefined, false);
+export function countAll(): AggregateFunction {
+  return new AggregateFunction('count', []);
 }
 
 /**
@@ -5755,30 +5974,28 @@ export function countAll(): Count {
  *
  * ```typescript
  * // Count the number of items where the price is greater than 10
- * count(Field.of("price").gt(10)).as("expensiveItemCount");
+ * count(field("price").gt(10)).as("expensiveItemCount");
  * ```
  *
- * @param value The expression to count.
- * @return A new {@code Accumulator} representing the 'count' aggregation.
+ * @param expression The expression to count.
+ * @return A new {@code AggregateFunction} representing the 'count' aggregation.
  */
-export function count(value: Expr): Count;
+export function count(expression: firestore.Expr): AggregateFunction;
 
 /**
- * Creates an aggregation that counts the number of stage inputs with valid evaluations of the
- * provided field.
+ * Creates an aggregation that counts the number of stage inputs where the input field exists.
  *
  * ```typescript
  * // Count the total number of products
  * count("productId").as("totalProducts");
  * ```
  *
- * @param value The name of the field to count.
- * @return A new {@code Accumulator} representing the 'count' aggregation.
+ * @param fieldName The name of the field to count.
+ * @return A new {@code AggregateFunction} representing the 'count' aggregation.
  */
-export function count(value: string): Count;
-export function count(value: Expr | string): Count {
-  const exprValue = value instanceof Expr ? value : Field.of(value);
-  return new Count(exprValue, false);
+export function count(fieldName: string): AggregateFunction;
+export function count(value: firestore.Expr | string): AggregateFunction {
+  return fieldOrExpression(value).count();
 }
 
 /**
@@ -5789,13 +6006,13 @@ export function count(value: Expr | string): Count {
  *
  * ```typescript
  * // Calculate the total revenue from a set of orders
- * sum(Field.of("orderAmount")).as("totalRevenue");
+ * sum(field("orderAmount")).as("totalRevenue");
  * ```
  *
- * @param value The expression to sum up.
- * @return A new {@code Accumulator} representing the 'sum' aggregation.
+ * @param expression The expression to sum up.
+ * @return A new {@code AggregateFunction} representing the 'sum' aggregation.
  */
-export function sum(value: Expr): Sum;
+export function sum(expression: firestore.Expr): AggregateFunction;
 
 /**
  * @beta
@@ -5808,13 +6025,12 @@ export function sum(value: Expr): Sum;
  * sum("orderAmount").as("totalRevenue");
  * ```
  *
- * @param value The name of the field containing numeric values to sum up.
- * @return A new {@code Accumulator} representing the 'sum' aggregation.
+ * @param fieldName The name of the field containing numeric values to sum up.
+ * @return A new {@code AggregateFunction} representing the 'sum' aggregation.
  */
-export function sum(value: string): Sum;
-export function sum(value: Expr | string): Sum {
-  const exprValue = value instanceof Expr ? value : Field.of(value);
-  return new Sum(exprValue, false);
+export function sum(fieldName: string): AggregateFunction;
+export function sum(value: firestore.Expr | string): AggregateFunction {
+  return fieldOrExpression(value).sum();
 }
 
 /**
@@ -5825,13 +6041,13 @@ export function sum(value: Expr | string): Sum {
  *
  * ```typescript
  * // Calculate the average age of users
- * avg(Field.of("age")).as("averageAge");
+ * avg(field("age")).as("averageAge");
  * ```
  *
- * @param value The expression representing the values to average.
- * @return A new {@code Accumulator} representing the 'avg' aggregation.
+ * @param expression The expression representing the values to average.
+ * @return A new {@code AggregateFunction} representing the 'avg' aggregation.
  */
-export function avg(value: Expr): Avg;
+export function avg(expression: firestore.Expr): AggregateFunction;
 
 /**
  * @beta
@@ -5844,13 +6060,12 @@ export function avg(value: Expr): Avg;
  * avg("age").as("averageAge");
  * ```
  *
- * @param value The name of the field containing numeric values to average.
- * @return A new {@code Accumulator} representing the 'avg' aggregation.
+ * @param fieldName The name of the field containing numeric values to average.
+ * @return A new {@code AggregateFunction} representing the 'avg' aggregation.
  */
-export function avg(value: string): Avg;
-export function avg(value: Expr | string): Avg {
-  const exprValue = value instanceof Expr ? value : Field.of(value);
-  return new Avg(exprValue, false);
+export function avg(fieldName: string): AggregateFunction;
+export function avg(value: firestore.Expr | string): AggregateFunction {
+  return fieldOrExpression(value).avg();
 }
 
 /**
@@ -5861,13 +6076,13 @@ export function avg(value: Expr | string): Avg {
  *
  * ```typescript
  * // Find the lowest price of all products
- * minimum(Field.of("price")).as("lowestPrice");
+ * minimum(field("price")).as("lowestPrice");
  * ```
  *
- * @param value The expression to find the minimum value of.
- * @return A new {@code Accumulator} representing the 'minimum' aggregation.
+ * @param expression The expression to find the minimum value of.
+ * @return A new {@code AggregateFunction} representing the 'min' aggregation.
  */
-export function minimum(value: Expr): Minimum;
+export function minimum(expression: firestore.Expr): AggregateFunction;
 
 /**
  * @beta
@@ -5879,13 +6094,12 @@ export function minimum(value: Expr): Minimum;
  * minimum("price").as("lowestPrice");
  * ```
  *
- * @param value The name of the field to find the minimum value of.
- * @return A new {@code Accumulator} representing the 'minimum' aggregation.
+ * @param fieldName The name of the field to find the minimum value of.
+ * @return A new {@code AggregateFunction} representing the 'min' aggregation.
  */
-export function minimum(value: string): Minimum;
-export function minimum(value: Expr | string): Minimum {
-  const exprValue = value instanceof Expr ? value : Field.of(value);
-  return new Minimum(exprValue, false);
+export function minimum(fieldName: string): AggregateFunction;
+export function minimum(value: firestore.Expr | string): AggregateFunction {
+  return fieldOrExpression(value).minimum();
 }
 
 /**
@@ -5896,13 +6110,13 @@ export function minimum(value: Expr | string): Minimum {
  *
  * ```typescript
  * // Find the highest score in a leaderboard
- * maximum(Field.of("score")).as("highestScore");
+ * maximum(field("score")).as("highestScore");
  * ```
  *
- * @param value The expression to find the maximum value of.
- * @return A new {@code Accumulator} representing the 'maximum' aggregation.
+ * @param expression The expression to find the maximum value of.
+ * @return A new {@code AggregateFunction} representing the 'max' aggregation.
  */
-export function maximum(value: Expr): Maximum;
+export function maximum(expression: firestore.Expr): AggregateFunction;
 
 /**
  * @beta
@@ -5914,49 +6128,32 @@ export function maximum(value: Expr): Maximum;
  * maximum("score").as("highestScore");
  * ```
  *
- * @param value The name of the field to find the maximum value of.
- * @return A new {@code Accumulator} representing the 'maximum' aggregation.
+ * @param fieldName The name of the field to find the maximum value of.
+ * @return A new {@code AggregateFunction} representing the 'max' aggregation.
  */
-export function maximum(value: string): Maximum;
-export function maximum(value: Expr | string): Maximum {
-  const exprValue = value instanceof Expr ? value : Field.of(value);
-  return new Maximum(exprValue, false);
+export function maximum(fieldName: string): AggregateFunction;
+export function maximum(value: firestore.Expr | string): AggregateFunction {
+  return fieldOrExpression(value).maximum();
 }
 
 /**
  * @beta
  *
- * Calculates the Cosine distance between a field's vector value and a double array.
+ * Calculates the Cosine distance between a field's vector value and a literal vector value.
  *
  * ```typescript
  * // Calculate the Cosine distance between the 'location' field and a target location
  * cosineDistance("location", [37.7749, -122.4194]);
  * ```
  *
- * @param expr The name of the field containing the first vector.
- * @param other The other vector (as an array of doubles) to compare against.
- * @return A new {@code Expr} representing the Cosine distance between the two vectors.
- */
-export function cosineDistance(expr: string, other: number[]): CosineDistance;
-
-/**
- * @beta
- *
- * Calculates the Cosine distance between a field's vector value and a VectorValue.
- *
- * ```typescript
- * // Calculate the Cosine distance between the 'location' field and a target location
- * cosineDistance("location", new VectorValue([37.7749, -122.4194]));
- * ```
- *
- * @param expr The name of the field containing the first vector.
- * @param other The other vector (as a VectorValue) to compare against.
+ * @param fieldName The name of the field containing the first vector.
+ * @param vector The other vector (as an array of doubles) or {@link VectorValue} to compare against.
  * @return A new {@code Expr} representing the Cosine distance between the two vectors.
  */
 export function cosineDistance(
-  expr: string,
-  other: VectorValue
-): CosineDistance;
+  fieldName: string,
+  vector: number[] | VectorValue
+): FunctionExpr;
 
 /**
  * @beta
@@ -5965,46 +6162,36 @@ export function cosineDistance(
  *
  * ```typescript
  * // Calculate the cosine distance between the 'userVector' field and the 'itemVector' field
- * cosineDistance("userVector", Field.of("itemVector"));
+ * cosineDistance("userVector", field("itemVector"));
  * ```
  *
- * @param expr The name of the field containing the first vector.
- * @param other The other vector (represented as an Expr) to compare against.
+ * @param fieldName The name of the field containing the first vector.
+ * @param vectorExpression The other vector (represented as an Expr) to compare against.
  * @return A new {@code Expr} representing the cosine distance between the two vectors.
  */
-export function cosineDistance(expr: string, other: Expr): CosineDistance;
+export function cosineDistance(
+  fieldName: string,
+  vectorExpression: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
  *
- * Calculates the Cosine distance between a vector expression and a double array.
+ * Calculates the Cosine distance between a vector expression and a vector literal.
  *
  * ```typescript
  * // Calculate the cosine distance between the 'location' field and a target location
- * cosineDistance(Field.of("location"), [37.7749, -122.4194]);
+ * cosineDistance(field("location"), [37.7749, -122.4194]);
  * ```
  *
- * @param expr The first vector (represented as an Expr) to compare against.
- * @param other The other vector (as an array of doubles) to compare against.
+ * @param vectorExpression The first vector (represented as an Expr) to compare against.
+ * @param vector The other vector (as an array of doubles or VectorValue) to compare against.
  * @return A new {@code Expr} representing the cosine distance between the two vectors.
  */
-export function cosineDistance(expr: Expr, other: number[]): CosineDistance;
-
-/**
- * @beta
- *
- * Calculates the Cosine distance between a vector expression and a VectorValue.
- *
- * ```typescript
- * // Calculate the cosine distance between the 'location' field and a target location
- * cosineDistance(Field.of("location"), new VectorValue([37.7749, -122.4194]));
- * ```
- *
- * @param expr The first vector (represented as an Expr) to compare against.
- * @param other The other vector (as a VectorValue) to compare against.
- * @return A new {@code Expr} representing the cosine distance between the two vectors.
- */
-export function cosineDistance(expr: Expr, other: VectorValue): CosineDistance;
+export function cosineDistance(
+  vectorExpression: firestore.Expr,
+  vector: number[] | firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -6013,21 +6200,24 @@ export function cosineDistance(expr: Expr, other: VectorValue): CosineDistance;
  *
  * ```typescript
  * // Calculate the cosine distance between the 'userVector' field and the 'itemVector' field
- * cosineDistance(Field.of("userVector"), Field.of("itemVector"));
+ * cosineDistance(field("userVector"), field("itemVector"));
  * ```
  *
- * @param expr The first vector (represented as an Expr) to compare against.
- * @param other The other vector (represented as an Expr) to compare against.
+ * @param vectorExpression The first vector (represented as an Expr) to compare against.
+ * @param otherVectorExpression The other vector (represented as an Expr) to compare against.
  * @return A new {@code Expr} representing the cosine distance between the two vectors.
  */
-export function cosineDistance(expr: Expr, other: Expr): CosineDistance;
 export function cosineDistance(
-  expr: Expr | string,
-  other: Expr | number[] | VectorValue
-): CosineDistance {
-  const expr1 = expr instanceof Expr ? expr : Field.of(expr);
-  const expr2 = other instanceof Expr ? other : Constant.vector(other);
-  return new CosineDistance(expr1, expr2);
+  vectorExpression: firestore.Expr,
+  otherVectorExpression: firestore.Expr
+): FunctionExpr;
+export function cosineDistance(
+  expr: firestore.Expr | string,
+  other: firestore.Expr | number[] | VectorValue
+): FunctionExpr {
+  const expr1 = fieldOrExpression(expr);
+  const expr2 = vectorToExpr(other);
+  return expr1.cosineDistance(expr2);
 }
 
 /**
@@ -6040,27 +6230,14 @@ export function cosineDistance(
  * dotProduct("features", [0.5, 0.8, 0.2]);
  * ```
  *
- * @param expr The name of the field containing the first vector.
- * @param other The other vector (as an array of doubles) to calculate with.
+ * @param fieldName The name of the field containing the first vector.
+ * @param vector The other vector (as an array of doubles or VectorValue) to calculate with.
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProduct(expr: string, other: number[]): DotProduct;
-
-/**
- * @beta
- *
- * Calculates the dot product between a field's vector value and a VectorValue.
- *
- * ```typescript
- * // Calculate the dot product distance between a feature vector and a target vector
- * dotProduct("features", new VectorValue([0.5, 0.8, 0.2]));
- * ```
- *
- * @param expr The name of the field containing the first vector.
- * @param other The other vector (as a VectorValue) to calculate with.
- * @return A new {@code Expr} representing the dot product between the two vectors.
- */
-export function dotProduct(expr: string, other: VectorValue): DotProduct;
+export function dotProduct(
+  fieldName: string,
+  vector: number[] | VectorValue
+): FunctionExpr;
 
 /**
  * @beta
@@ -6069,14 +6246,17 @@ export function dotProduct(expr: string, other: VectorValue): DotProduct;
  *
  * ```typescript
  * // Calculate the dot product distance between two document vectors: 'docVector1' and 'docVector2'
- * dotProduct("docVector1", Field.of("docVector2"));
+ * dotProduct("docVector1", field("docVector2"));
  * ```
  *
- * @param expr The name of the field containing the first vector.
- * @param other The other vector (represented as an Expr) to calculate with.
+ * @param fieldName The name of the field containing the first vector.
+ * @param vectorExpression The other vector (represented as an Expr) to calculate with.
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProduct(expr: string, other: Expr): DotProduct;
+export function dotProduct(
+  fieldName: string,
+  vectorExpression: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -6085,30 +6265,17 @@ export function dotProduct(expr: string, other: Expr): DotProduct;
  *
  * ```typescript
  * // Calculate the dot product between a feature vector and a target vector
- * dotProduct(Field.of("features"), [0.5, 0.8, 0.2]);
+ * dotProduct(field("features"), [0.5, 0.8, 0.2]);
  * ```
  *
- * @param expr The first vector (represented as an Expr) to calculate with.
- * @param other The other vector (as an array of doubles) to calculate with.
+ * @param vectorExpression The first vector (represented as an Expr) to calculate with.
+ * @param vector The other vector (as an array of doubles or VectorValue) to calculate with.
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProduct(expr: Expr, other: number[]): DotProduct;
-
-/**
- * @beta
- *
- * Calculates the dot product between a vector expression and a VectorValue.
- *
- * ```typescript
- * // Calculate the dot product between a feature vector and a target vector
- * dotProduct(Field.of("features"), new VectorValue([0.5, 0.8, 0.2]));
- * ```
- *
- * @param expr The first vector (represented as an Expr) to calculate with.
- * @param other The other vector (as a VectorValue) to calculate with.
- * @return A new {@code Expr} representing the dot product between the two vectors.
- */
-export function dotProduct(expr: Expr, other: VectorValue): DotProduct;
+export function dotProduct(
+  vectorExpression: firestore.Expr,
+  vector: number[] | VectorValue
+): FunctionExpr;
 
 /**
  * @beta
@@ -6117,21 +6284,24 @@ export function dotProduct(expr: Expr, other: VectorValue): DotProduct;
  *
  * ```typescript
  * // Calculate the dot product between two document vectors: 'docVector1' and 'docVector2'
- * dotProduct(Field.of("docVector1"), Field.of("docVector2"));
+ * dotProduct(field("docVector1"), field("docVector2"));
  * ```
  *
- * @param expr The first vector (represented as an Expr) to calculate with.
- * @param other The other vector (represented as an Expr) to calculate with.
+ * @param vectorExpression The first vector (represented as an Expr) to calculate with.
+ * @param otherVectorExpression The other vector (represented as an Expr) to calculate with.
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
-export function dotProduct(expr: Expr, other: Expr): DotProduct;
 export function dotProduct(
-  expr: Expr | string,
-  other: Expr | number[] | VectorValue
-): DotProduct {
-  const expr1 = expr instanceof Expr ? expr : Field.of(expr);
-  const expr2 = other instanceof Expr ? other : Constant.vector(other);
-  return new DotProduct(expr1, expr2);
+  vectorExpression: firestore.Expr,
+  otherVectorExpression: firestore.Expr
+): FunctionExpr;
+export function dotProduct(
+  expr: firestore.Expr | string,
+  other: firestore.Expr | number[] | VectorValue
+): FunctionExpr {
+  const expr1 = fieldOrExpression(expr);
+  const expr2 = vectorToExpr(other);
+  return expr1.dotProduct(expr2);
 }
 
 /**
@@ -6144,33 +6314,14 @@ export function dotProduct(
  * euclideanDistance("location", [37.7749, -122.4194]);
  * ```
  *
- * @param expr The name of the field containing the first vector.
- * @param other The other vector (as an array of doubles) to compare against.
+ * @param fieldName The name of the field containing the first vector.
+ * @param vector The other vector (as an array of doubles or VectorValue) to compare against.
  * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
  */
 export function euclideanDistance(
-  expr: string,
-  other: number[]
-): EuclideanDistance;
-
-/**
- * @beta
- *
- * Calculates the Euclidean distance between a field's vector value and a VectorValue.
- *
- * ```typescript
- * // Calculate the Euclidean distance between the 'location' field and a target location
- * euclideanDistance("location", new VectorValue([37.7749, -122.4194]));
- * ```
- *
- * @param expr The name of the field containing the first vector.
- * @param other The other vector (as a VectorValue) to compare against.
- * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
- */
-export function euclideanDistance(
-  expr: string,
-  other: VectorValue
-): EuclideanDistance;
+  fieldName: string,
+  vector: number[] | VectorValue
+): FunctionExpr;
 
 /**
  * @beta
@@ -6179,14 +6330,17 @@ export function euclideanDistance(
  *
  * ```typescript
  * // Calculate the Euclidean distance between two vector fields: 'pointA' and 'pointB'
- * euclideanDistance("pointA", Field.of("pointB"));
+ * euclideanDistance("pointA", field("pointB"));
  * ```
  *
- * @param expr The name of the field containing the first vector.
- * @param other The other vector (represented as an Expr) to compare against.
+ * @param fieldName The name of the field containing the first vector.
+ * @param vectorExpression The other vector (represented as an Expr) to compare against.
  * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
  */
-export function euclideanDistance(expr: string, other: Expr): EuclideanDistance;
+export function euclideanDistance(
+  fieldName: string,
+  vectorExpression: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -6196,36 +6350,17 @@ export function euclideanDistance(expr: string, other: Expr): EuclideanDistance;
  * ```typescript
  * // Calculate the Euclidean distance between the 'location' field and a target location
  *
- * euclideanDistance(Field.of("location"), [37.7749, -122.4194]);
+ * euclideanDistance(field("location"), [37.7749, -122.4194]);
  * ```
  *
- * @param expr The first vector (represented as an Expr) to compare against.
- * @param other The other vector (as an array of doubles) to compare against.
+ * @param vectorExpression The first vector (represented as an Expr) to compare against.
+ * @param vector The other vector (as an array of doubles or VectorValue) to compare against.
  * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
  */
 export function euclideanDistance(
-  expr: Expr,
-  other: number[]
-): EuclideanDistance;
-
-/**
- * @beta
- *
- * Calculates the Euclidean distance between a vector expression and a VectorValue.
- *
- * ```typescript
- * // Calculate the Euclidean distance between the 'location' field and a target location
- * euclideanDistance(Field.of("location"), new VectorValue([37.7749, -122.4194]));
- * ```
- *
- * @param expr The first vector (represented as an Expr) to compare against.
- * @param other The other vector (as a VectorValue) to compare against.
- * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
- */
-export function euclideanDistance(
-  expr: Expr,
-  other: VectorValue
-): EuclideanDistance;
+  vectorExpression: firestore.Expr,
+  vector: number[] | VectorValue
+): FunctionExpr;
 
 /**
  * @beta
@@ -6234,21 +6369,24 @@ export function euclideanDistance(
  *
  * ```typescript
  * // Calculate the Euclidean distance between two vector fields: 'pointA' and 'pointB'
- * euclideanDistance(Field.of("pointA"), Field.of("pointB"));
+ * euclideanDistance(field("pointA"), field("pointB"));
  * ```
  *
- * @param expr The first vector (represented as an Expr) to compare against.
- * @param other The other vector (represented as an Expr) to compare against.
+ * @param vectorExpression The first vector (represented as an Expr) to compare against.
+ * @param otherVectorExpression The other vector (represented as an Expr) to compare against.
  * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
  */
-export function euclideanDistance(expr: Expr, other: Expr): EuclideanDistance;
 export function euclideanDistance(
-  expr: Expr | string,
-  other: Expr | number[] | VectorValue
-): EuclideanDistance {
-  const expr1 = expr instanceof Expr ? expr : Field.of(expr);
-  const expr2 = other instanceof Expr ? other : Constant.vector(other);
-  return new EuclideanDistance(expr1, expr2);
+  vectorExpression: firestore.Expr,
+  otherVectorExpression: firestore.Expr
+): FunctionExpr;
+export function euclideanDistance(
+  expr: firestore.Expr | string,
+  other: firestore.Expr | number[] | VectorValue
+): FunctionExpr {
+  const expr1 = fieldOrExpression(expr);
+  const expr2 = vectorToExpr(other);
+  return expr1.euclideanDistance(expr2);
 }
 
 /**
@@ -6258,13 +6396,13 @@ export function euclideanDistance(
  *
  * ```typescript
  * // Get the vector length (dimension) of the field 'embedding'.
- * vectorLength(Field.of("embedding"));
+ * vectorLength(field("embedding"));
  * ```
  *
- * @param expr The expression representing the Firestore Vector.
+ * @param vectorExpression The expression representing the Firestore Vector.
  * @return A new {@code Expr} representing the length of the array.
  */
-export function vectorLength(expr: Expr): VectorLength;
+export function vectorLength(vectorExpression: firestore.Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6276,13 +6414,12 @@ export function vectorLength(expr: Expr): VectorLength;
  * vectorLength("embedding");
  * ```
  *
- * @param field The name of the field representing the Firestore Vector.
+ * @param fieldName The name of the field representing the Firestore Vector.
  * @return A new {@code Expr} representing the length of the array.
  */
-export function vectorLength(field: string): VectorLength;
-export function vectorLength(expr: Expr | string): VectorLength {
-  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
-  return new VectorLength(normalizedExpr);
+export function vectorLength(fieldName: string): FunctionExpr;
+export function vectorLength(expr: firestore.Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).vectorLength();
 }
 
 /**
@@ -6293,13 +6430,13 @@ export function vectorLength(expr: Expr | string): VectorLength {
  *
  * ```typescript
  * // Interpret the 'microseconds' field as microseconds since epoch.
- * unixMicrosToTimestamp(Field.of("microseconds"));
+ * unixMicrosToTimestamp(field("microseconds"));
  * ```
  *
  * @param expr The expression representing the number of microseconds since epoch.
  * @return A new {@code Expr} representing the timestamp.
  */
-export function unixMicrosToTimestamp(expr: Expr): UnixMicrosToTimestamp;
+export function unixMicrosToTimestamp(expr: firestore.Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6312,15 +6449,14 @@ export function unixMicrosToTimestamp(expr: Expr): UnixMicrosToTimestamp;
  * unixMicrosToTimestamp("microseconds");
  * ```
  *
- * @param field The name of the field representing the number of microseconds since epoch.
+ * @param fieldName The name of the field representing the number of microseconds since epoch.
  * @return A new {@code Expr} representing the timestamp.
  */
-export function unixMicrosToTimestamp(field: string): UnixMicrosToTimestamp;
+export function unixMicrosToTimestamp(fieldName: string): FunctionExpr;
 export function unixMicrosToTimestamp(
-  expr: Expr | string
-): UnixMicrosToTimestamp {
-  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
-  return new UnixMicrosToTimestamp(normalizedExpr);
+  expr: firestore.Expr | string
+): FunctionExpr {
+  return fieldOrExpression(expr).unixMicrosToTimestamp();
 }
 
 /**
@@ -6330,13 +6466,13 @@ export function unixMicrosToTimestamp(
  *
  * ```typescript
  * // Convert the 'timestamp' field to microseconds since epoch.
- * timestampToUnixMicros(Field.of("timestamp"));
+ * timestampToUnixMicros(field("timestamp"));
  * ```
  *
  * @param expr The expression representing the timestamp.
  * @return A new {@code Expr} representing the number of microseconds since epoch.
  */
-export function timestampToUnixMicros(expr: Expr): TimestampToUnixMicros;
+export function timestampToUnixMicros(expr: firestore.Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6348,15 +6484,14 @@ export function timestampToUnixMicros(expr: Expr): TimestampToUnixMicros;
  * timestampToUnixMicros("timestamp");
  * ```
  *
- * @param field The name of the field representing the timestamp.
+ * @param fieldName The name of the field representing the timestamp.
  * @return A new {@code Expr} representing the number of microseconds since epoch.
  */
-export function timestampToUnixMicros(field: string): TimestampToUnixMicros;
+export function timestampToUnixMicros(fieldName: string): FunctionExpr;
 export function timestampToUnixMicros(
-  expr: Expr | string
-): TimestampToUnixMicros {
-  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
-  return new TimestampToUnixMicros(normalizedExpr);
+  expr: firestore.Expr | string
+): FunctionExpr {
+  return fieldOrExpression(expr).timestampToUnixMicros();
 }
 
 /**
@@ -6367,13 +6502,13 @@ export function timestampToUnixMicros(
  *
  * ```typescript
  * // Interpret the 'milliseconds' field as milliseconds since epoch.
- * unixMillisToTimestamp(Field.of("milliseconds"));
+ * unixMillisToTimestamp(field("milliseconds"));
  * ```
  *
  * @param expr The expression representing the number of milliseconds since epoch.
  * @return A new {@code Expr} representing the timestamp.
  */
-export function unixMillisToTimestamp(expr: Expr): UnixMillisToTimestamp;
+export function unixMillisToTimestamp(expr: firestore.Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6386,15 +6521,15 @@ export function unixMillisToTimestamp(expr: Expr): UnixMillisToTimestamp;
  * unixMillisToTimestamp("milliseconds");
  * ```
  *
- * @param field The name of the field representing the number of milliseconds since epoch.
+ * @param fieldName The name of the field representing the number of milliseconds since epoch.
  * @return A new {@code Expr} representing the timestamp.
  */
-export function unixMillisToTimestamp(field: string): UnixMillisToTimestamp;
+export function unixMillisToTimestamp(fieldName: string): FunctionExpr;
 export function unixMillisToTimestamp(
-  expr: Expr | string
-): UnixMillisToTimestamp {
-  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
-  return new UnixMillisToTimestamp(normalizedExpr);
+  expr: firestore.Expr | string
+): FunctionExpr {
+  const normalizedExpr = fieldOrExpression(expr);
+  return normalizedExpr.unixMillisToTimestamp();
 }
 
 /**
@@ -6404,13 +6539,13 @@ export function unixMillisToTimestamp(
  *
  * ```typescript
  * // Convert the 'timestamp' field to milliseconds since epoch.
- * timestampToUnixMillis(Field.of("timestamp"));
+ * timestampToUnixMillis(field("timestamp"));
  * ```
  *
  * @param expr The expression representing the timestamp.
  * @return A new {@code Expr} representing the number of milliseconds since epoch.
  */
-export function timestampToUnixMillis(expr: Expr): TimestampToUnixMillis;
+export function timestampToUnixMillis(expr: firestore.Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6422,15 +6557,15 @@ export function timestampToUnixMillis(expr: Expr): TimestampToUnixMillis;
  * timestampToUnixMillis("timestamp");
  * ```
  *
- * @param field The name of the field representing the timestamp.
+ * @param fieldName The name of the field representing the timestamp.
  * @return A new {@code Expr} representing the number of milliseconds since epoch.
  */
-export function timestampToUnixMillis(field: string): TimestampToUnixMillis;
+export function timestampToUnixMillis(fieldName: string): FunctionExpr;
 export function timestampToUnixMillis(
-  expr: Expr | string
-): TimestampToUnixMillis {
-  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
-  return new TimestampToUnixMillis(normalizedExpr);
+  expr: firestore.Expr | string
+): FunctionExpr {
+  const normalizedExpr = fieldOrExpression(expr);
+  return normalizedExpr.timestampToUnixMillis();
 }
 
 /**
@@ -6441,13 +6576,13 @@ export function timestampToUnixMillis(
  *
  * ```typescript
  * // Interpret the 'seconds' field as seconds since epoch.
- * unixSecondsToTimestamp(Field.of("seconds"));
+ * unixSecondsToTimestamp(field("seconds"));
  * ```
  *
  * @param expr The expression representing the number of seconds since epoch.
  * @return A new {@code Expr} representing the timestamp.
  */
-export function unixSecondsToTimestamp(expr: Expr): UnixSecondsToTimestamp;
+export function unixSecondsToTimestamp(expr: firestore.Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6460,15 +6595,15 @@ export function unixSecondsToTimestamp(expr: Expr): UnixSecondsToTimestamp;
  * unixSecondsToTimestamp("seconds");
  * ```
  *
- * @param field The name of the field representing the number of seconds since epoch.
+ * @param fieldName The name of the field representing the number of seconds since epoch.
  * @return A new {@code Expr} representing the timestamp.
  */
-export function unixSecondsToTimestamp(field: string): UnixSecondsToTimestamp;
+export function unixSecondsToTimestamp(fieldName: string): FunctionExpr;
 export function unixSecondsToTimestamp(
-  expr: Expr | string
-): UnixSecondsToTimestamp {
-  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
-  return new UnixSecondsToTimestamp(normalizedExpr);
+  expr: firestore.Expr | string
+): FunctionExpr {
+  const normalizedExpr = fieldOrExpression(expr);
+  return normalizedExpr.unixSecondsToTimestamp();
 }
 
 /**
@@ -6478,13 +6613,13 @@ export function unixSecondsToTimestamp(
  *
  * ```typescript
  * // Convert the 'timestamp' field to seconds since epoch.
- * timestampToUnixSeconds(Field.of("timestamp"));
+ * timestampToUnixSeconds(field("timestamp"));
  * ```
  *
  * @param expr The expression representing the timestamp.
  * @return A new {@code Expr} representing the number of seconds since epoch.
  */
-export function timestampToUnixSeconds(expr: Expr): TimestampToUnixSeconds;
+export function timestampToUnixSeconds(expr: firestore.Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6496,15 +6631,15 @@ export function timestampToUnixSeconds(expr: Expr): TimestampToUnixSeconds;
  * timestampToUnixSeconds("timestamp");
  * ```
  *
- * @param field The name of the field representing the timestamp.
+ * @param fieldName The name of the field representing the timestamp.
  * @return A new {@code Expr} representing the number of seconds since epoch.
  */
-export function timestampToUnixSeconds(field: string): TimestampToUnixSeconds;
+export function timestampToUnixSeconds(fieldName: string): FunctionExpr;
 export function timestampToUnixSeconds(
-  expr: Expr | string
-): TimestampToUnixSeconds {
-  const normalizedExpr = typeof expr === 'string' ? Field.of(expr) : expr;
-  return new TimestampToUnixSeconds(normalizedExpr);
+  expr: firestore.Expr | string
+): FunctionExpr {
+  const normalizedExpr = fieldOrExpression(expr);
+  return normalizedExpr.timestampToUnixSeconds();
 }
 
 /**
@@ -6514,7 +6649,7 @@ export function timestampToUnixSeconds(
  *
  * ```typescript
  * // Add some duration determined by field 'unit' and 'amount' to the 'timestamp' field.
- * timestampAdd(Field.of("timestamp"), Field.of("unit"), Field.of("amount"));
+ * timestampAdd(field("timestamp"), field("unit"), field("amount"));
  * ```
  *
  * @param timestamp The expression representing the timestamp.
@@ -6523,10 +6658,10 @@ export function timestampToUnixSeconds(
  * @return A new {@code Expr} representing the resulting timestamp.
  */
 export function timestampAdd(
-  timestamp: Expr,
-  unit: Expr,
-  amount: Expr
-): TimestampAdd;
+  timestamp: firestore.Expr,
+  unit: firestore.Expr,
+  amount: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -6535,7 +6670,7 @@ export function timestampAdd(
  *
  * ```typescript
  * // Add 1 day to the 'timestamp' field.
- * timestampAdd(Field.of("timestamp"), "day", 1);
+ * timestampAdd(field("timestamp"), "day", 1);
  * ```
  *
  * @param timestamp The expression representing the timestamp.
@@ -6544,10 +6679,10 @@ export function timestampAdd(
  * @return A new {@code Expr} representing the resulting timestamp.
  */
 export function timestampAdd(
-  timestamp: Expr,
+  timestamp: firestore.Expr,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
-): TimestampAdd;
+): FunctionExpr;
 
 /**
  * @beta
@@ -6559,38 +6694,32 @@ export function timestampAdd(
  * timestampAdd("timestamp", "day", 1);
  * ```
  *
- * @param field The name of the field representing the timestamp.
+ * @param fieldName The name of the field representing the timestamp.
  * @param unit The unit of time to add (e.g., "day", "hour").
  * @param amount The amount of time to add.
  * @return A new {@code Expr} representing the resulting timestamp.
  */
 export function timestampAdd(
-  field: string,
+  fieldName: string,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
-): TimestampAdd;
+): FunctionExpr;
 export function timestampAdd(
-  timestamp: Expr | string,
+  timestamp: firestore.Expr | string,
   unit:
-    | Expr
+    | firestore.Expr
     | 'microsecond'
     | 'millisecond'
     | 'second'
     | 'minute'
     | 'hour'
     | 'day',
-  amount: Expr | number
-): TimestampAdd {
-  const normalizedTimestamp =
-    typeof timestamp === 'string' ? Field.of(timestamp) : timestamp;
-  const normalizedUnit = unit instanceof Expr ? unit : Constant.of(unit);
-  const normalizedAmount =
-    typeof amount === 'number' ? Constant.of(amount) : amount;
-  return new TimestampAdd(
-    normalizedTimestamp,
-    normalizedUnit,
-    normalizedAmount
-  );
+  amount: firestore.Expr | number
+): FunctionExpr {
+  const normalizedTimestamp = fieldOrExpression(timestamp);
+  const normalizedUnit = valueToDefaultExpr(unit);
+  const normalizedAmount = valueToDefaultExpr(amount);
+  return normalizedTimestamp.timestampAdd(normalizedUnit, normalizedAmount);
 }
 
 /**
@@ -6600,7 +6729,7 @@ export function timestampAdd(
  *
  * ```typescript
  * // Subtract some duration determined by field 'unit' and 'amount' from the 'timestamp' field.
- * timestampSub(Field.of("timestamp"), Field.of("unit"), Field.of("amount"));
+ * timestampSub(field("timestamp"), field("unit"), field("amount"));
  * ```
  *
  * @param timestamp The expression representing the timestamp.
@@ -6609,10 +6738,10 @@ export function timestampAdd(
  * @return A new {@code Expr} representing the resulting timestamp.
  */
 export function timestampSub(
-  timestamp: Expr,
-  unit: Expr,
-  amount: Expr
-): TimestampSub;
+  timestamp: firestore.Expr,
+  unit: firestore.Expr,
+  amount: firestore.Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -6621,7 +6750,7 @@ export function timestampSub(
  *
  * ```typescript
  * // Subtract 1 day from the 'timestamp' field.
- * timestampSub(Field.of("timestamp"), "day", 1);
+ * timestampSub(field("timestamp"), "day", 1);
  * ```
  *
  * @param timestamp The expression representing the timestamp.
@@ -6630,10 +6759,10 @@ export function timestampSub(
  * @return A new {@code Expr} representing the resulting timestamp.
  */
 export function timestampSub(
-  timestamp: Expr,
+  timestamp: firestore.Expr,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
-): TimestampSub;
+): FunctionExpr;
 
 /**
  * @beta
@@ -6645,93 +6774,150 @@ export function timestampSub(
  * timestampSub("timestamp", "day", 1);
  * ```
  *
- * @param field The name of the field representing the timestamp.
+ * @param fieldName The name of the field representing the timestamp.
  * @param unit The unit of time to subtract (e.g., "day", "hour").
  * @param amount The amount of time to subtract.
  * @return A new {@code Expr} representing the resulting timestamp.
  */
 export function timestampSub(
-  field: string,
+  fieldName: string,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
-): TimestampSub;
+): FunctionExpr;
 export function timestampSub(
-  timestamp: Expr | string,
+  timestamp: firestore.Expr | string,
   unit:
-    | Expr
+    | firestore.Expr
     | 'microsecond'
     | 'millisecond'
     | 'second'
     | 'minute'
     | 'hour'
     | 'day',
-  amount: Expr | number
-): TimestampSub {
-  const normalizedTimestamp =
-    typeof timestamp === 'string' ? Field.of(timestamp) : timestamp;
-  const normalizedUnit = unit instanceof Expr ? unit : Constant.of(unit);
-  const normalizedAmount =
-    typeof amount === 'number' ? Constant.of(amount) : amount;
-  return new TimestampSub(
-    normalizedTimestamp,
-    normalizedUnit,
-    normalizedAmount
-  );
+  amount: firestore.Expr | number
+): FunctionExpr {
+  const normalizedTimestamp = fieldOrExpression(timestamp);
+  const normalizedUnit = valueToDefaultExpr(unit);
+  const normalizedAmount = valueToDefaultExpr(amount);
+  return normalizedTimestamp.timestampSub(normalizedUnit, normalizedAmount);
 }
 
 /**
  * @beta
  *
- * Creates functions that work on the backend but do not exist in the SDK yet.
+ * Creates an expression that performs a logical 'AND' operation on multiple filter conditions.
  *
  * ```typescript
- * // Call a user defined function named "myFunc" with the arguments 10 and 20
- * // This is the same of the 'sum(Field.of("price"))', if it did not exist
- * genericFunction("sum", [Field.of("price")]);
+ * // Check if the 'age' field is greater than 18 AND the 'city' field is "London" AND
+ * // the 'status' field is "active"
+ * const condition = and(gt("age", 18), eq("city", "London"), eq("status", "active"));
  * ```
  *
- * @param name The name of the user defined function.
- * @param params The arguments to pass to the function.
- * @return A new {@code Function} representing the function call.
+ * @param first The first filter condition.
+ * @param second The second filter condition.
+ * @param more Additional filter conditions to 'AND' together.
+ * @return A new {@code Expr} representing the logical 'AND' operation.
  */
-export function genericFunction(name: string, params: Expr[]): Function {
-  return new Function(name, params);
+export function and(
+  first: BooleanExpr,
+  second: BooleanExpr,
+  ...more: BooleanExpr[]
+): BooleanExpr {
+  return new BooleanExpr('and', [first, second, ...more]);
 }
 
 /**
  * @beta
  *
- * Creates an {@link Ordering} that sorts documents in ascending order based on this expression.
+ * Creates an expression that performs a logical 'OR' operation on multiple filter conditions.
  *
  * ```typescript
- * // Sort documents by the 'name' field in ascending order
+ * // Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
+ * // the 'status' field is "active"
+ * const condition = or(gt("age", 18), eq("city", "London"), eq("status", "active"));
+ * ```
+ *
+ * @param first The first filter condition.
+ * @param second The second filter condition.
+ * @param more Additional filter conditions to 'OR' together.
+ * @return A new {@code Expr} representing the logical 'OR' operation.
+ */
+export function or(
+  first: BooleanExpr,
+  second: BooleanExpr,
+  ...more: BooleanExpr[]
+): BooleanExpr {
+  return new BooleanExpr('or', [first, second, ...more]);
+}
+
+/**
+ * @beta
+ *
+ * Creates an {@link Ordering} that sorts documents in ascending order based on an expression.
+ *
+ * ```typescript
+ * // Sort documents by the 'name' field in lowercase in ascending order
  * firestore.pipeline().collection("users")
- *   .sort(ascending(Field.of("name")));
+ *   .sort(ascending(field("name").toLower()));
  * ```
  *
  * @param expr The expression to create an ascending ordering for.
  * @return A new `Ordering` for ascending sorting.
  */
-export function ascending(expr: Expr): Ordering {
-  return new Ordering(expr, 'ascending');
+export function ascending(expr: firestore.Expr): Ordering;
+
+/**
+ * @beta
+ *
+ * Creates an {@link Ordering} that sorts documents in ascending order based on a field.
+ *
+ * ```typescript
+ * // Sort documents by the 'name' field in ascending order
+ * firestore.pipeline().collection("users")
+ *   .sort(ascending("name"));
+ * ```
+ *
+ * @param fieldName The field to create an ascending ordering for.
+ * @return A new `Ordering` for ascending sorting.
+ */
+export function ascending(fieldName: string): Ordering;
+export function ascending(field: firestore.Expr | string): Ordering {
+  return new Ordering(fieldOrExpression(field), 'ascending');
 }
 
 /**
  * @beta
  *
- * Creates an {@link Ordering} that sorts documents in descending order based on this expression.
+ * Creates an {@link Ordering} that sorts documents in descending order based on an expression.
  *
  * ```typescript
- * // Sort documents by the 'createdAt' field in descending order
+ * // Sort documents by the 'name' field in lowercase in descending order
  * firestore.pipeline().collection("users")
- *   .sort(descending(Field.of("createdAt")));
+ *   .sort(descending(field("name").toLower()));
  * ```
  *
  * @param expr The expression to create a descending ordering for.
  * @return A new `Ordering` for descending sorting.
  */
-export function descending(expr: Expr): Ordering {
-  return new Ordering(expr, 'descending');
+export function descending(expr: firestore.Expr): Ordering;
+
+/**
+ * @beta
+ *
+ * Creates an {@link Ordering} that sorts documents in descending order based on a field.
+ *
+ * ```typescript
+ * // Sort documents by the 'name' field in descending order
+ * firestore.pipeline().collection("users")
+ *   .sort(descending("name"));
+ * ```
+ *
+ * @param fieldName The field to create a descending ordering for.
+ * @return A new `Ordering` for descending sorting.
+ */
+export function descending(fieldName: string): Ordering;
+export function descending(field: firestore.Expr | string): Ordering {
+  return new Ordering(fieldOrExpression(field), 'descending');
 }
 
 /**
@@ -6743,18 +6929,33 @@ export function descending(expr: Expr): Ordering {
  */
 export class Ordering {
   constructor(
-    private expr: Expr,
-    private direction: 'ascending' | 'descending'
+    readonly expr: firestore.Expr,
+    readonly direction: 'ascending' | 'descending'
   ) {}
 
+  /**
+   * @internal
+   * @private
+   * Indicates if this expression was created from a literal value passed
+   * by the caller.
+   */
+  _createdFromLiteral = false;
+
+  /**
+   * @private
+   * @internal
+   */
   _toProto(serializer: Serializer): api.IValue {
+    const expr = this.expr as Expr;
     return {
       mapValue: {
         fields: {
-          direction: serializer.encodeValue(this.direction)!,
-          expression: serializer.encodeValue(this.expr)!,
+          direction: serializer.encodeValue(this.direction),
+          expression: expr._toProto(serializer),
         },
       },
     };
   }
+
+  _protoValueType: 'ProtoValue' = 'ProtoValue' as const;
 }

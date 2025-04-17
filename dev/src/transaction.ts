@@ -22,7 +22,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshot} from './document';
 import {DEFAULT_MAX_TRANSACTION_ATTEMPTS, Firestore, WriteBatch} from './index';
-import {Pipeline, PipelineResult} from './pipeline';
+import {Pipeline, PipelineResult, PipelineSnapshot} from './pipeline';
 import {Timestamp} from './timestamp';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
@@ -315,21 +315,30 @@ export class Transaction implements firestore.Transaction {
    * const futureResults = await transaction
    *   .execute(
    *     firestore.pipeline().collection("books")
-   *       .where(gt(Field.of("rating"), 4.5))
+   *       .where(gt(field("rating"), 4.5))
    *       .select("title", "author", "rating"));
    * ```
    *
    * @return A Promise representing the asynchronous pipeline execution.
    */
-  execute<AppModelType>(
-    pipeline: firestore.Pipeline<AppModelType>
-  ): Promise<Array<PipelineResult<AppModelType>>> {
+  execute(pipeline: firestore.Pipeline): Promise<PipelineSnapshot> {
     if (this._writeBatch && !this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
     if (pipeline instanceof Pipeline) {
-      return this.withLazyStartedTransaction(pipeline, this.executePipelineFn);
+      return this.withLazyStartedTransaction(
+        pipeline,
+        this.executePipelineFn
+      ).then(results => {
+        const executionTime = results.reduce((maxTime, result) => {
+          return result.executionTime.valueOf() > maxTime.valueOf()
+            ? result.executionTime
+            : maxTime;
+        }, Timestamp.fromMillis(0));
+
+        return new PipelineSnapshot(pipeline, results, executionTime);
+      });
     }
 
     throw new Error('Value for argument "pipeline" must be a Pipeline');
@@ -847,15 +856,14 @@ export class Transaction implements firestore.Transaction {
     return query._get(opts);
   }
 
-  private async executePipelineFn<AppModelType>(
-    pipeline: Pipeline<AppModelType>,
+  private async executePipelineFn(
+    pipeline: Pipeline,
     opts: Uint8Array | api.ITransactionOptions | Timestamp
   ): Promise<{
     transaction?: Uint8Array;
-    result: Array<PipelineResult<AppModelType>>;
+    result: Array<PipelineResult>;
   }> {
-    const {transaction, result, explainMetrics, executionTime} =
-      await pipeline._execute(opts);
+    const {transaction, result} = await pipeline._execute(opts);
     return {transaction, result: result || []};
   }
 }

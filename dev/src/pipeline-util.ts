@@ -13,24 +13,21 @@
 // limitations under the License.
 
 import * as firestore from '@google-cloud/firestore';
-import {GoogleError, serializer} from 'google-gax';
-import {converter} from 'protobufjs';
+import {GoogleError} from 'google-gax';
 import {Duplex, Transform} from 'stream';
 import {google} from '../protos/firestore_v1_proto_api';
 
 import * as protos from '../protos/firestore_v1_proto_api';
 import {
   Expr,
-  FilterCondition,
+  BooleanExpr,
   and,
   or,
-  isNan,
   Field,
   not,
-  Constant,
-  AccumulatorTarget,
   ExprWithAlias,
-  Accumulator,
+  field as createField,
+  constant,
 } from './expression';
 import Firestore, {DocumentReference, Timestamp} from './index';
 import {logger} from './logger';
@@ -40,11 +37,7 @@ import {CompositeFilterInternal} from './reference/composite-filter-internal';
 import {NOOP_MESSAGE} from './reference/constants';
 import {FieldFilterInternal} from './reference/field-filter-internal';
 import {FilterInternal} from './reference/filter-internal';
-import {
-  PipelineResponse,
-  PipelineStreamElement,
-  QueryResponse,
-} from './reference/types';
+import {PipelineResponse, PipelineStreamElement} from './reference/types';
 import {Serializer} from './serializer';
 import {
   Deferred,
@@ -63,32 +56,31 @@ import api = protos.google.firestore.v1;
  * @private
  * @internal
  */
-export class ExecutionUtil<AppModelType> {
+export class ExecutionUtil {
   constructor(
     /** @private */
     readonly _firestore: Firestore,
     /** @private */
-    readonly _serializer: Serializer,
-    readonly _converter: firestore.FirestorePipelineConverter<AppModelType>
+    readonly _serializer: Serializer
   ) {}
 
   _getResponse(
-    pipeline: Pipeline<AppModelType>,
+    pipeline: Pipeline,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
-  ): Promise<PipelineResponse<AppModelType>> {
+  ): Promise<PipelineResponse> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
     return new Promise((resolve, reject) => {
-      const result: Array<PipelineResult<AppModelType>> = [];
-      const output: PipelineResponse<AppModelType> = {};
+      const result: Array<PipelineResult> = [];
+      const output: PipelineResponse = {};
 
       this._stream(pipeline, transactionOrReadTime, explainOptions)
         .on('error', err => {
           reject(wrapError(err, stack));
         })
-        .on('data', (data: PipelineStreamElement<AppModelType>[]) => {
+        .on('data', (data: PipelineStreamElement[]) => {
           for (const element of data) {
             if (element.transaction) {
               output.transaction = element.transaction;
@@ -125,7 +117,7 @@ export class ExecutionUtil<AppModelType> {
     return Date.now() - startTime >= totalTimeout;
   }
 
-  stream(pipeline: Pipeline<AppModelType>): NodeJS.ReadableStream {
+  stream(pipeline: Pipeline): NodeJS.ReadableStream {
     const responseStream = this._stream(pipeline);
     const transform = new Transform({
       objectMode: true,
@@ -140,13 +132,11 @@ export class ExecutionUtil<AppModelType> {
   }
 
   _stream(
-    pipeline: Pipeline<AppModelType>,
+    pipeline: Pipeline,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
     const tag = requestTag();
-    const startTime = Date.now();
-    const isExplain = explainOptions !== undefined;
 
     let backendStream: Duplex;
     const stream = new Transform({
@@ -162,7 +152,7 @@ export class ExecutionUtil<AppModelType> {
         }
 
         if (proto.results && proto.results.length === 0) {
-          const output: PipelineStreamElement<AppModelType> = {};
+          const output: PipelineStreamElement = {};
           if (proto.transaction?.length) {
             output.transaction = proto.transaction;
           }
@@ -174,7 +164,7 @@ export class ExecutionUtil<AppModelType> {
           callback(
             undefined,
             proto.results.map(result => {
-              const output: PipelineStreamElement<AppModelType> = {};
+              const output: PipelineStreamElement = {};
               if (proto.transaction?.length) {
                 output.transaction = proto.transaction;
               }
@@ -188,7 +178,7 @@ export class ExecutionUtil<AppModelType> {
                     QualifiedResourcePath.fromSlashSeparatedString(result.name)
                   )
                 : undefined;
-              output.result = new PipelineResult<AppModelType>(
+              output.result = new PipelineResult(
                 this._serializer,
                 ref,
                 result.fields || undefined,
@@ -198,8 +188,7 @@ export class ExecutionUtil<AppModelType> {
                   : undefined,
                 result.updateTime
                   ? Timestamp.fromProto(result.updateTime!)
-                  : undefined,
-                this._converter
+                  : undefined
               );
               return output;
             })
@@ -401,7 +390,7 @@ export function selectableToExpr(
   selectable: firestore.Selectable | string
 ): Expr {
   if (typeof selectable === 'string') {
-    return Field.of(selectable);
+    return createField(selectable);
   } else if (selectable instanceof Field) {
     return selectable;
   } else if (selectable instanceof ExprWithAlias) {
@@ -411,17 +400,17 @@ export function selectableToExpr(
   }
 }
 
-export function toPipelineFilterCondition(
+export function toPipelineBooleanExpr(
   f: FilterInternal,
   serializer: Serializer
-): FilterCondition & Expr {
+): BooleanExpr {
   if (f instanceof FieldFilterInternal) {
-    const field = Field.of(f.field);
+    const field = createField(f.field);
     if (f.isNanChecking()) {
       if (f.nanOp() === 'IS_NAN') {
-        return and(field.exists(), field.isNaN());
+        return and(field.exists(), field.isNan());
       } else {
-        return and(field.exists(), not(field.isNaN()));
+        return and(field.exists(), not(field.isNan()));
       }
     } else if (f.isNullChecking()) {
       if (f.nullOp() === 'IS_NULL') {
@@ -450,22 +439,16 @@ export function toPipelineFilterCondition(
         case 'ARRAY_CONTAINS':
           return and(field.exists(), field.arrayContains(value));
         case 'IN': {
-          const values = value?.arrayValue?.values?.map(val =>
-            Constant.of(val)
-          );
-          return and(field.exists(), field.eqAny(...values!));
+          const values = value?.arrayValue?.values?.map(val => constant(val));
+          return and(field.exists(), field.eqAny(values!));
         }
         case 'ARRAY_CONTAINS_ANY': {
-          const values = value?.arrayValue?.values?.map(val =>
-            Constant.of(val)
-          );
+          const values = value?.arrayValue?.values?.map(val => constant(val));
           return and(field.exists(), field.arrayContainsAny(values!));
         }
         case 'NOT_IN': {
-          const values = value?.arrayValue?.values?.map(val =>
-            Constant.of(val)
-          );
-          return and(field.exists(), field.notEqAny(...values!));
+          const values = value?.arrayValue?.values?.map(val => constant(val));
+          return and(field.exists(), field.notEqAny(values!));
         }
       }
     }
@@ -474,14 +457,14 @@ export function toPipelineFilterCondition(
       case 'AND': {
         const conditions = f
           .getFilters()
-          .map(f => toPipelineFilterCondition(f, serializer));
-        return and(conditions[0], ...conditions.slice(1));
+          .map(f => toPipelineBooleanExpr(f, serializer));
+        return and(conditions[0], conditions[1], ...conditions.slice(2));
       }
       case 'OR': {
         const conditions = f
           .getFilters()
-          .map(f => toPipelineFilterCondition(f, serializer));
-        return or(conditions[0], ...conditions.slice(1));
+          .map(f => toPipelineBooleanExpr(f, serializer));
+        return or(conditions[0], conditions[1], ...conditions.slice(2));
       }
     }
   }

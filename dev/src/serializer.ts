@@ -119,7 +119,7 @@ export class Serializer {
       | Uint8Array
       | VectorValue
       | Map<string, unknown>
-      | Pipeline<unknown>
+      | Pipeline
   ): api.IValue;
   encodeValue(val: unknown): api.IValue | null;
   encodeValue(val: unknown): api.IValue | null {

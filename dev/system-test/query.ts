@@ -118,7 +118,7 @@ describe('Query class', () => {
     const pipeline = query.pipeline();
     const pipelineResults = await pipeline.execute();
 
-    expect(pipelineResults.map(r => r._fieldsProto)).to.deep.equal(
+    expect(pipelineResults.results.map(r => r._fieldsProto)).to.deep.equal(
       queryResults.docs.map(s => s._fieldsProto)
     );
     return queryResults;
@@ -131,7 +131,7 @@ describe('Query class', () => {
     const pipeline = query.toPipeline();
     const pipelineResults = await pipeline.execute();
 
-    expect(pipelineResults.map(r => r._fieldsProto)).to.deep.equal(
+    expect(pipelineResults.results.map(r => r._fieldsProto)).to.deep.equal(
       queryResults.docs.map(s => s._fieldsProto)
     );
     return queryResults;

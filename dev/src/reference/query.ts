@@ -19,7 +19,7 @@ import api = protos.google.firestore.v1;
 import * as firestore from '@google-cloud/firestore';
 import {GoogleError} from 'google-gax';
 import {Transform} from 'stream';
-import {and, Field, Ordering} from '../expression';
+import {and, field, Ordering} from '../expression';
 
 import {CompositeFilter, UnaryFilter} from '../filter';
 import {
@@ -35,10 +35,9 @@ import {
 import {compare} from '../order';
 import {validateFieldPath} from '../path';
 import {Pipeline} from '../pipeline';
-import {toPipelineFilterCondition} from '../pipeline-util';
+import {toPipelineBooleanExpr} from '../pipeline-util';
 import {ExplainResults} from '../query-profile';
 import {Serializer} from '../serializer';
-import {Limit} from '../stage';
 import {defaultConverter} from '../types';
 import {
   invalidArgumentMessage,
@@ -742,24 +741,26 @@ export class Query<
 
     // filters
     for (const f of this._queryOptions.filters) {
-      pipeline = pipeline.where(toPipelineFilterCondition(f, this._serializer));
+      pipeline = pipeline.where(toPipelineBooleanExpr(f, this._serializer));
     }
 
     // projections
     const projections = this._queryOptions.projection?.fields || [];
     if (projections.length > 0) {
+      const projectionFields = projections.map(p => field(p.fieldPath!));
       pipeline = pipeline.select(
-        ...projections.map(p => Field.of(p.fieldPath!))
+        projectionFields[0],
+        ...projectionFields.slice(1)
       );
     }
 
     // orderbys
     const exists = this.createImplicitOrderBy().map(fieldOrder => {
-      return Field.of(fieldOrder.field).exists();
+      return field(fieldOrder.field).exists();
     });
     if (exists.length > 1) {
-      const [first, ...rest] = exists;
-      pipeline = pipeline.where(and(first, ...rest));
+      const [first, second, ...rest] = exists;
+      pipeline = pipeline.where(and(first, second, ...rest));
     } else if (exists.length === 1) {
       pipeline = pipeline.where(exists[0]);
     }
@@ -776,10 +777,10 @@ export class Query<
           break;
         }
       }
-      return new Ordering(Field.of(fieldOrder.field), dir || 'ascending');
+      return new Ordering(field(fieldOrder.field), dir || 'ascending');
     });
     if (orderings.length > 0) {
-      pipeline = pipeline.sort({orderings: orderings});
+      pipeline = pipeline.sort(orderings[0], ...orderings.slice(1));
     }
 
     // Cursors, Limit and Offset
@@ -1670,12 +1671,14 @@ export class Query<
     };
   }
 
-  withConverter(converter: null): Query;
   withConverter<
     NewAppModelType,
     NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
-    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+    converter: firestore.FirestoreDataConverter<
+      NewAppModelType,
+      NewDbModelType
+    > | null
   ): Query<NewAppModelType, NewDbModelType>;
   /**
    * Applies a custom data converter to this Query, allowing you to use your

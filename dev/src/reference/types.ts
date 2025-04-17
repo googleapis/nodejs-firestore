@@ -60,21 +60,18 @@ export enum LimitType {
   Last,
 }
 
-export interface PipelineStreamElement<
-  AppModelType = firestore.DocumentData,
-  DbModelType extends firestore.DocumentData = firestore.DocumentData,
-> {
+export interface PipelineStreamElement {
   transaction?: Uint8Array;
   executionTime?: Timestamp;
   explainMetrics?: ExplainMetrics;
-  result?: PipelineResult<AppModelType>;
+  result?: PipelineResult;
 }
 
-export interface PipelineResponse<AppModelType = firestore.DocumentData> {
+export interface PipelineResponse {
   transaction?: Uint8Array;
   executionTime?: Timestamp;
   explainMetrics?: ExplainMetrics;
-  result?: Array<PipelineResult<AppModelType>>;
+  result?: Array<PipelineResult>;
 }
 
 /**

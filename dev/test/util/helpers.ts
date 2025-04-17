@@ -467,3 +467,10 @@ export function isPreferRest(): boolean {
     process.env.FIRESTORE_PREFER_REST === 'true'
   );
 }
+
+export function itIf(
+  condition: boolean | 'only'
+): Mocha.TestFunction | Mocha.PendingTestFunction {
+  // eslint-disable-next-line no-restricted-properties
+  return condition === 'only' ? it.only : condition ? it : it.skip;
+}

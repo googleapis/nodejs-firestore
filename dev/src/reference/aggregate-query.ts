@@ -22,14 +22,7 @@ import * as deepEqual from 'fast-deep-equal';
 
 import * as firestore from '@google-cloud/firestore';
 import {Aggregate, AggregateSpec} from '../aggregate';
-import {
-  AccumulatorTarget,
-  avg,
-  count,
-  countAll,
-  Field,
-  sum,
-} from '../expression';
+import {avg, count, countAll, field, sum} from '../expression';
 import {Pipeline} from '../pipeline';
 import {Timestamp} from '../timestamp';
 import {mapToArray, requestTag, wrapError} from '../util';
@@ -364,17 +357,26 @@ export class AggregateQuery<
           if (aggregate._field === undefined) {
             return countAll().as(clientAlias);
           }
-          return count(Field.of(aggregate._field)).as(clientAlias);
+          return count(field(aggregate._field)).as(clientAlias);
         } else if (aggregate.aggregateType === 'avg') {
-          return avg(Field.of(aggregate._field!)).as(clientAlias);
+          return avg(field(aggregate._field!)).as(clientAlias);
         } else if (aggregate.aggregateType === 'sum') {
-          return sum(Field.of(aggregate._field!)).as(clientAlias);
+          return sum(field(aggregate._field!)).as(clientAlias);
         } else {
           throw new Error(`Unknown aggregate type ${aggregate.aggregateType}`);
         }
       }
     );
-    return this._query.pipeline().aggregate(...aggregates);
+
+    if (aggregates.length === 0) {
+      throw new Error(
+        'Cannot convert an AggregateQuery with 0 aggregates to a Pipeline'
+      );
+    }
+
+    return this._query
+      .pipeline()
+      .aggregate(aggregates[0], ...aggregates.slice(1));
   }
 
   /**

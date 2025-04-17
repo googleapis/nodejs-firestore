@@ -307,13 +307,15 @@ export class CollectionReference<
     );
   }
 
-  withConverter(converter: null): CollectionReference;
   withConverter<
     NewAppModelType,
     NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
   ): CollectionReference<NewAppModelType, NewDbModelType>;
+  withConverter(
+    converter: null
+  ): CollectionReference<firestore.DocumentData, firestore.DocumentData>;
   /**
    * Applies a custom data converter to this CollectionReference, allowing you
    * to use your own custom model objects with Firestore. When you call add() on
