@@ -5010,6 +5010,16 @@ describe('Aggregation queries', () => {
     return Promise.all(sets);
   }
 
+  it('can run count within a transaction with readtime', async () => {
+    const doc = col.doc();
+    const writeResult: WriteResult = await doc.create({some: 'data'});
+    const count = await firestore.runTransaction(t => t.get(col.count()), {
+      readOnly: true,
+      readTime: writeResult.writeTime,
+    });
+    expect(count.data().count).to.equal(1);
+  });
+
   it('can run count query using aggregate api', async () => {
     const testDocs = {
       a: {author: 'authorA', title: 'titleA'},
