@@ -23,15 +23,16 @@ import {
   Field,
   BooleanExpr,
   Ordering,
+  constant,
+  _mapValue,
   field,
-  fieldOrExpression,
 } from './expression';
 import Firestore, {CollectionReference, FieldPath, Timestamp} from './index';
 import {validateFieldPath} from './path';
-import {ExecutionUtil} from './pipeline-util';
+import {ExecutionUtil, fieldOrExpression} from './pipeline-util';
 import {DocumentReference} from './reference/document-reference';
 import {PipelineResponse} from './reference/types';
-import {Serializer} from './serializer';
+import {HasUserData, hasUserData, Serializer} from './serializer';
 import {
   AddFields,
   Aggregate,
@@ -49,17 +50,17 @@ import {
   Stage,
   Distinct,
   RemoveFields,
-  Replace,
+  ReplaceWith,
   Sample,
   Union,
   Unnest,
-  UnnestOptions,
 } from './stage';
 import {ApiMapValue} from './types';
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 import IStage = google.firestore.v1.Pipeline.IStage;
-import {cast, isOptionalEqual} from './util';
+import {cast, isOptionalEqual, isPlainObject} from './util';
+import {validateDocumentReference} from './reference/helpers';
 
 /**
  * Represents the source of a Firestore {@link Pipeline}.
@@ -70,7 +71,7 @@ export class PipelineSource implements firestore.PipelineSource {
 
   collection(collection: string | firestore.CollectionReference): Pipeline {
     if (collection instanceof CollectionReference) {
-      // this._validateReference(collection);
+      this._validateReference(collection);
       return new Pipeline(this.db, [new CollectionSource(collection.path)]);
     } else if (typeof collection === 'string') {
       return new Pipeline(this.db, [new CollectionSource(collection)]);
@@ -96,6 +97,9 @@ export class PipelineSource implements firestore.PipelineSource {
    * @throws {@FirestoreError} Thrown if any of the provided DocumentReferences target a different project or database than the pipeline.
    */
   documents(docs: Array<string | DocumentReference>): Pipeline {
+    docs
+      .filter(v => v instanceof DocumentReference)
+      .forEach(dr => this._validateReference(dr));
     return new Pipeline(this.db, [
       DocumentsSource.of(cast<DocumentReference[]>(docs)),
     ]);
@@ -111,6 +115,21 @@ export class PipelineSource implements firestore.PipelineSource {
   createFrom(query: firestore.Query): Pipeline {
     throw 'Not implemented';
     // return query.toPipeline(query._query, query.firestore);
+  }
+
+  _validateReference(reference: CollectionReference | DocumentReference): void {
+    const refDbId = reference.firestore.formattedName;
+    if (refDbId !== this.db.formattedName) {
+      throw new Error(
+        `Invalid ${
+          reference instanceof CollectionReference
+            ? 'CollectionReference'
+            : 'DocumentReference'
+        }. ` +
+          `The database name ("${refDbId}") of this reference does not match ` +
+          `the database name ("${this.db.formattedName}") of the target database of this Pipeline.`
+      );
+    }
   }
 }
 
@@ -200,7 +219,12 @@ export class Pipeline implements firestore.Pipeline {
     ...additionalFields: firestore.Selectable[]
   ): Pipeline {
     return this._addStage(
-      new AddFields(this.selectablesToMap([field, ...additionalFields]))
+      new AddFields(
+        this.validateUserData(
+          'addFields',
+          this.selectablesToMap([field, ...additionalFields])
+        )
+      )
     );
   }
 
@@ -226,13 +250,11 @@ export class Pipeline implements firestore.Pipeline {
     fieldValue: firestore.Field | string,
     ...additionalFields: Array<firestore.Field | string>
   ): Pipeline {
-    return this._addStage(
-      new RemoveFields(
-        [fieldValue, ...additionalFields].map(f =>
-          typeof f === 'string' ? field(f) : (f as Field)
-        )
-      )
+    const fieldExpressions = [fieldValue, ...additionalFields].map(f =>
+      typeof f === 'string' ? field(f) : (f as Field)
     );
+    this.validateUserData('removeFields', fieldExpressions);
+    return this._addStage(new RemoveFields(fieldExpressions));
   }
 
   /**
@@ -272,9 +294,12 @@ export class Pipeline implements firestore.Pipeline {
     selection: firestore.Selectable | string,
     ...additionalSelections: Array<firestore.Selectable | string>
   ): Pipeline {
-    return this._addStage(
-      new Select(this.selectablesToMap([selection, ...additionalSelections]))
-    );
+    let projections: Map<string, Expr> = this.selectablesToMap([
+      selection,
+      ...additionalSelections,
+    ]);
+    projections = this.validateUserData('select', projections);
+    return this._addStage(new Select(projections));
   }
 
   private selectablesToMap(
@@ -283,7 +308,10 @@ export class Pipeline implements firestore.Pipeline {
     const result = new Map<string, Expr>();
     for (const selectable of selectables) {
       if (typeof selectable === 'string') {
-        result.set(selectable as string, field(selectable));
+        result.set(
+          selectable as string,
+          new Field(FieldPath.fromArgument(selectable))
+        );
       } else if (selectable instanceof Field) {
         result.set((selectable as Field).fieldName(), selectable);
       } else if (selectable instanceof ExprWithAlias) {
@@ -294,6 +322,32 @@ export class Pipeline implements firestore.Pipeline {
       }
     }
     return result;
+  }
+
+  /**
+   * Validates user data for each expression in the expressionMap.
+   * @param name Name of the calling function. Used for error messages when invalid user data is encountered.
+   * @param expressionMap
+   * @return the expressionMap argument.
+   * @private
+   */
+  private validateUserData<
+    T extends Map<string, HasUserData> | HasUserData[] | HasUserData,
+  >(name: string, expressionMap: T): T {
+    const ignoreUndefinedProperties =
+      !!this.db._settings.ignoreUndefinedProperties;
+    if (hasUserData(expressionMap)) {
+      expressionMap._validateUserData(ignoreUndefinedProperties);
+    } else if (Array.isArray(expressionMap)) {
+      expressionMap.forEach(readableData =>
+        readableData._validateUserData(ignoreUndefinedProperties)
+      );
+    } else {
+      expressionMap.forEach(expr =>
+        expr._validateUserData(ignoreUndefinedProperties)
+      );
+    }
+    return expressionMap;
   }
 
   /**
@@ -328,7 +382,9 @@ export class Pipeline implements firestore.Pipeline {
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   where(condition: firestore.BooleanExpr): Pipeline {
-    return this._addStage(new Where(condition));
+    const booleanExpr = condition as BooleanExpr;
+    this.validateUserData('where', booleanExpr);
+    return this._addStage(new Where(booleanExpr));
   }
 
   /**
@@ -417,7 +473,12 @@ export class Pipeline implements firestore.Pipeline {
     ...additionalGroups: Array<string | firestore.Selectable>
   ): Pipeline {
     return this._addStage(
-      new Distinct(this.selectablesToMap([group, ...additionalGroups]))
+      new Distinct(
+        this.validateUserData(
+          'distinct',
+          this.selectablesToMap([group, ...additionalGroups])
+        )
+      )
     );
   }
 
@@ -500,13 +561,22 @@ export class Pipeline implements firestore.Pipeline {
         new Aggregate(
           new Map<string, AggregateFunction>(
             optionsOrTarget.accumulators.map(
-              (target: firestore.AggregateWithAlias) => [
-                (target as unknown as AggregateWithAlias).alias,
-                (target as unknown as AggregateWithAlias).aggregate,
-              ]
+              (target: firestore.AggregateWithAlias) => {
+                this.validateUserData(
+                  'aggregate',
+                  target as unknown as AggregateWithAlias
+                );
+                return [
+                  (target as unknown as AggregateWithAlias).alias,
+                  (target as unknown as AggregateWithAlias).aggregate,
+                ];
+              }
             )
           ),
-          this.selectablesToMap(optionsOrTarget.groups || [])
+          this.validateUserData(
+            'aggregate',
+            this.selectablesToMap(optionsOrTarget.groups || [])
+          )
         )
       );
     } else {
@@ -515,7 +585,10 @@ export class Pipeline implements firestore.Pipeline {
           new Map<string, AggregateFunction>(
             [optionsOrTarget, ...rest].map(target => [
               (target as unknown as AggregateWithAlias).alias,
-              (target as unknown as AggregateWithAlias).aggregate,
+              this.validateUserData(
+                'aggregate',
+                (target as unknown as AggregateWithAlias).aggregate
+              ),
             ])
           ),
           new Map<string, Expr>()
@@ -599,9 +672,9 @@ export class Pipeline implements firestore.Pipeline {
    */
   replaceWith(expr: firestore.Expr): Pipeline;
   replaceWith(value: firestore.Expr | string): Pipeline {
-    return this._addStage(
-      new Replace(fieldOrExpression(value), 'full_replace')
-    );
+    const expr = fieldOrExpression(value);
+    this.validateUserData('replaceWith', expr);
+    return this._addStage(new ReplaceWith(expr, 'full_replace'));
   }
 
   /**
@@ -719,7 +792,7 @@ export class Pipeline implements firestore.Pipeline {
     return this._addStage(
       new Unnest({
         expr: cast<Expr>(selectable.expr),
-        alias: field(selectable.alias),
+        alias: new Field(FieldPath.fromArgument(selectable.alias)),
         indexField: indexField,
       })
     );
@@ -755,9 +828,9 @@ export class Pipeline implements firestore.Pipeline {
     ...additionalOrderings: firestore.Ordering[]
   ): Pipeline {
     // Ordering object
-    return this._addStage(
-      new Sort([ordering, ...additionalOrderings] as unknown as Ordering[])
-    );
+    const orderings = [ordering, ...additionalOrderings] as Ordering[];
+    this.validateUserData('sort', orderings);
+    return this._addStage(new Sort(orderings));
   }
 
   /**
@@ -781,7 +854,28 @@ export class Pipeline implements firestore.Pipeline {
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   genericStage(name: string, params: any[]): Pipeline {
-    return this._addStage(new GenericStage(name, params));
+    // Convert input values to Expressions.
+    // We treat objects as mapValues and arrays as arrayValues,
+    // this is unlike the default conversion for objects and arrays
+    // passed to an expression.
+    const expressionParams = params.map((value: unknown) => {
+      if (value instanceof Expr) {
+        return value;
+      } else if (value instanceof AggregateFunction) {
+        return value;
+      } else if (isPlainObject(value)) {
+        return _mapValue(value as Record<string, unknown>);
+      } else {
+        return constant(value);
+      }
+    });
+
+    expressionParams.forEach(param => {
+      if (hasUserData(param)) {
+        param._validateUserData(!!this.db._settings.ignoreUndefinedProperties);
+      }
+    });
+    return this._addStage(new GenericStage(name, expressionParams));
   }
 
   /**

@@ -133,10 +133,14 @@ export type {
   ExplainMetrics,
   ExplainResults,
 } from './query-profile';
-export {Pipeline, PipelineResult, PipelineSource, PipelineSnapshot} from './pipeline';
+export {
+  Pipeline,
+  PipelineResult,
+  PipelineSource,
+  PipelineSnapshot,
+} from './pipeline';
 export type {FindNearestOptions} from './stage';
 export {
-  Selectable,
   BooleanExpr,
   AggregateWithAlias,
   AggregateFunction,

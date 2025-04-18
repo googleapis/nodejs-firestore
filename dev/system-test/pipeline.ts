@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DocumentData } from '@google-cloud/firestore';
+import {DocumentData} from '@google-cloud/firestore';
 
 import {
   BooleanExpr,
@@ -128,16 +128,18 @@ const timestampDeltaMS = 1000;
 describe.only('Pipeline class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
-  const beginDocCreation = 0;
-  const endDocCreation = 0;
+  let beginDocCreation = 0;
+  let endDocCreation = 0;
 
   async function testCollectionWithDocs(docs: {
     [id: string]: DocumentData;
   }): Promise<CollectionReference<DocumentData>> {
+    beginDocCreation = new Date().valueOf();
     for (const id in docs) {
       const ref = randomCol.doc(id);
       await ref.set(docs[id]);
     }
+    endDocCreation = new Date().valueOf();
     return randomCol;
   }
 
@@ -166,17 +168,22 @@ describe.only('Pipeline class', () => {
 
   async function setupBookDocs(): Promise<CollectionReference<DocumentData>> {
     const bookDocs: {[id: string]: DocumentData} = {
-      book01: {
+      book1: {
         title: "The Hitchhiker's Guide to the Galaxy",
         author: 'Douglas Adams',
         genre: 'Science Fiction',
         published: 1979,
         rating: 4.2,
         tags: ['comedy', 'space', 'adventure'],
-        awards: {hugo: true, nebula: false, others: {unknown: {year: 1980}}},
+        awards: {
+          hugo: true,
+          nebula: false,
+          others: {unknown: {year: 1980}},
+        },
         nestedField: {'level.1': {'level.2': true}},
+        embedding: FieldValue.vector([10, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
       },
-      book02: {
+      book2: {
         title: 'Pride and Prejudice',
         author: 'Jane Austen',
         genre: 'Romance',
@@ -184,8 +191,9 @@ describe.only('Pipeline class', () => {
         rating: 4.5,
         tags: ['classic', 'social commentary', 'love'],
         awards: {none: true},
+        embedding: FieldValue.vector([1, 10, 1, 1, 1, 1, 1, 1, 1, 1]),
       },
-      book03: {
+      book3: {
         title: 'One Hundred Years of Solitude',
         author: 'Gabriel García Márquez',
         genre: 'Magical Realism',
@@ -193,8 +201,9 @@ describe.only('Pipeline class', () => {
         rating: 4.3,
         tags: ['family', 'history', 'fantasy'],
         awards: {nobel: true, nebula: false},
+        embedding: FieldValue.vector([1, 1, 10, 1, 1, 1, 1, 1, 1, 1]),
       },
-      book04: {
+      book4: {
         title: 'The Lord of the Rings',
         author: 'J.R.R. Tolkien',
         genre: 'Fantasy',
@@ -202,8 +211,11 @@ describe.only('Pipeline class', () => {
         rating: 4.7,
         tags: ['adventure', 'magic', 'epic'],
         awards: {hugo: false, nebula: false},
+        remarks: null,
+        cost: NaN,
+        embedding: FieldValue.vector([1, 1, 1, 10, 1, 1, 1, 1, 1, 1]),
       },
-      book05: {
+      book5: {
         title: "The Handmaid's Tale",
         author: 'Margaret Atwood',
         genre: 'Dystopian',
@@ -211,8 +223,9 @@ describe.only('Pipeline class', () => {
         rating: 4.1,
         tags: ['feminism', 'totalitarianism', 'resistance'],
         awards: {'arthur c. clarke': true, 'booker prize': false},
+        embedding: FieldValue.vector([1, 1, 1, 1, 10, 1, 1, 1, 1, 1]),
       },
-      book06: {
+      book6: {
         title: 'Crime and Punishment',
         author: 'Fyodor Dostoevsky',
         genre: 'Psychological Thriller',
@@ -220,8 +233,9 @@ describe.only('Pipeline class', () => {
         rating: 4.3,
         tags: ['philosophy', 'crime', 'redemption'],
         awards: {none: true},
+        embedding: FieldValue.vector([1, 1, 1, 1, 1, 10, 1, 1, 1, 1]),
       },
-      book07: {
+      book7: {
         title: 'To Kill a Mockingbird',
         author: 'Harper Lee',
         genre: 'Southern Gothic',
@@ -229,8 +243,9 @@ describe.only('Pipeline class', () => {
         rating: 4.2,
         tags: ['racism', 'injustice', 'coming-of-age'],
         awards: {pulitzer: true},
+        embedding: FieldValue.vector([1, 1, 1, 1, 1, 1, 10, 1, 1, 1]),
       },
-      book08: {
+      book8: {
         title: '1984',
         author: 'George Orwell',
         genre: 'Dystopian',
@@ -238,8 +253,9 @@ describe.only('Pipeline class', () => {
         rating: 4.2,
         tags: ['surveillance', 'totalitarianism', 'propaganda'],
         awards: {prometheus: true},
+        embedding: FieldValue.vector([1, 1, 1, 1, 1, 1, 1, 10, 1, 1]),
       },
-      book09: {
+      book9: {
         title: 'The Great Gatsby',
         author: 'F. Scott Fitzgerald',
         genre: 'Modernist',
@@ -247,6 +263,7 @@ describe.only('Pipeline class', () => {
         rating: 4.0,
         tags: ['wealth', 'american dream', 'love'],
         awards: {none: true},
+        embedding: FieldValue.vector([1, 1, 1, 1, 1, 1, 1, 1, 10, 1]),
       },
       book10: {
         title: 'Dune',
@@ -256,6 +273,7 @@ describe.only('Pipeline class', () => {
         rating: 4.6,
         tags: ['politics', 'desert', 'ecology'],
         awards: {hugo: true, nebula: true},
+        embedding: FieldValue.vector([1, 1, 1, 1, 1, 1, 1, 1, 1, 10]),
       },
     };
     return testCollectionWithDocs(bookDocs);
@@ -442,7 +460,7 @@ describe.only('Pipeline class', () => {
     });
 
     it('reject CollectionReference for another DB', async () => {
-      const db2 = getTestDb({databaseId: 'notDefault'});
+      const db2 = getTestDb({databaseId: 'notDefault', projectId: 'random'});
 
       expect(() => {
         firestore.pipeline().collection(db2.collection('foo'));
@@ -452,7 +470,7 @@ describe.only('Pipeline class', () => {
     });
 
     it('reject DocumentReference for another DB', async () => {
-      const db2 = getTestDb({databaseId: 'notDefault'});
+      const db2 = getTestDb({databaseId: 'notDefault', projectId: 'random'});
 
       expect(() => {
         firestore.pipeline().documents([db2.doc('foo/bar')]);
@@ -611,32 +629,81 @@ describe.only('Pipeline class', () => {
     });
 
     it('throws on undefined in a map', async () => {
-      expect(() => {
-        firestore
+      try {
+        await firestore
           .pipeline()
           .collection(randomCol.path)
           .limit(1)
           .select(
             map({
               number: 1,
-              undefined,
+              bad: undefined,
             }).as('foo')
-          );
-      }).to.throw(
-        'Function map() called with invalid data. Unsupported field value: undefined'
-      );
+          )
+          .execute();
+        expect.fail('The statement above was expected to throw.');
+      } catch (e: any) {
+        console.log(e.message);
+        expect(e.message).to.contain(
+          'Value for argument "value" is not a valid map value. Cannot use "undefined" as a Firestore value (found in field "bad").'
+        );
+      }
     });
 
     it('throws on undefined in an array', async () => {
-      expect(() => {
-        firestore
+      try {
+        await firestore
           .pipeline()
           .collection(randomCol.path)
           .limit(1)
-          .select(array([1, undefined]).as('foo'));
-      }).to.throw(
-        'Function array() called with invalid data. Unsupported field value: undefined'
-      );
+          .select(array([1, undefined]).as('foo'))
+          .execute();
+        expect.fail('The statement above was expected to throw.');
+      } catch (e: any) {
+        console.log(e.message);
+        expect(e.message).to.contain(
+          'Value for argument "value" is not a valid array value. Cannot use "undefined" as a Firestore value'
+        );
+      }
+    });
+
+    it('ignores undefined in a map if ignoreUndefinedProperties is true', async () => {
+      const customFirestore = getTestDb({
+        ignoreUndefinedProperties: true,
+      });
+
+      const snapshot = await customFirestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(
+          map({
+            number: 1,
+            bad: undefined,
+          }).as('foo')
+        )
+        .execute();
+
+      const data = snapshot.results[0].data();
+      expect(data).to.deep.equal({foo: {number: 1}});
+      await customFirestore.terminate();
+    });
+
+    it('ignores undefined in an array if ignoreUndefinedProperties is true', async () => {
+      const customFirestore = getTestDb({
+        ignoreUndefinedProperties: true,
+      });
+
+      const snapshot = await customFirestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(array([1, undefined, 3]).as('foo'))
+        .execute();
+
+      const data = snapshot.results[0].data();
+      expect(data).to.deep.equal({foo: [1, 3]});
+      await customFirestore.terminate();
     });
 
     it('converts arrays and plain objects to functionValues if the customer intent is unspecified', async () => {
@@ -761,7 +828,7 @@ describe.only('Pipeline class', () => {
 
       it('rejects groups without accumulators', async () => {
         expect(
-          await firestore
+          firestore
             .pipeline()
             .collection(randomCol.path)
             .where(lt('published', 1900))
@@ -1256,7 +1323,7 @@ describe.only('Pipeline class', () => {
 
       it('run pipeline with sample limit of {percentage: 0.6}', async () => {
         let avgSize = 0;
-        const numIterations = 20;
+        const numIterations = 30;
         for (let i = 0; i < numIterations; i++) {
           const snapshot = await firestore
             .pipeline()

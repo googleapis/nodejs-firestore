@@ -21,7 +21,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 import {DeleteTransform, FieldTransform, VectorValue} from './field-value';
 import {detectGoogleProtobufValueType, detectValueType} from './convert';
 import {GeoPoint} from './geo-point';
-import {DocumentReference, Firestore} from './index';
+import {DocumentReference, Field, Firestore} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, ValidationOptions} from './types';
@@ -591,6 +591,8 @@ export function validateUserInput(
     // Ok.
   } else if (value === null) {
     // Ok.
+  } else if (isProtoValueSerializable(value)) {
+    // Ok.
   } else if (typeof value === 'object') {
     throw new Error(customObjectMessage(arg, value, path));
   }
@@ -609,4 +611,31 @@ function isMomentJsType(value: unknown): value is {toDate(): Date} {
     value.constructor.name === 'Moment' &&
     typeof (value as {toDate: unknown}).toDate === 'function'
   );
+}
+
+export function isProtoValueSerializable(
+  value: unknown
+): value is ProtoValueSerializable {
+  return (
+    !!value &&
+    typeof (value as ProtoValueSerializable)._toProto === 'function' &&
+    (value as ProtoValueSerializable)._protoValueType === 'ProtoValue'
+  );
+}
+
+export interface ProtoSerializable<ProtoType> {
+  _toProto(serializer: Serializer): ProtoType;
+}
+
+export interface ProtoValueSerializable extends ProtoSerializable<api.IValue> {
+  // Supports runtime identification of the ProtoSerializable<ProtoValue> type.
+  _protoValueType: 'ProtoValue';
+}
+
+export interface HasUserData {
+  _validateUserData(ignoreUndefinedProperties: boolean): void;
+}
+
+export function hasUserData(value: unknown): value is HasUserData {
+  return typeof (value as HasUserData)._validateUserData === 'function';
 }

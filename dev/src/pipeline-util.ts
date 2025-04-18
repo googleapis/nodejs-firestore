@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as firestore from '@google-cloud/firestore';
+import type * as firestore from '@google-cloud/firestore';
 import {GoogleError} from 'google-gax';
 import {Duplex, Transform} from 'stream';
 import {google} from '../protos/firestore_v1_proto_api';
@@ -28,8 +28,13 @@ import {
   ExprWithAlias,
   field as createField,
   constant,
+  map,
+  array,
+  Constant,
+  constantVector,
+  field,
 } from './expression';
-import Firestore, {DocumentReference, Timestamp} from './index';
+import Firestore, {DocumentReference, Timestamp, VectorValue} from './index';
 import {logger} from './logger';
 import {QualifiedResourcePath} from './path';
 import {Pipeline, PipelineResult} from './pipeline';
@@ -44,6 +49,7 @@ import {
   getTotalTimeout,
   isObject,
   isPermanentRpcError,
+  isPlainObject,
   requestTag,
   wrapError,
 } from './util';
@@ -72,34 +78,38 @@ export class ExecutionUtil {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
       const result: Array<PipelineResult> = [];
       const output: PipelineResponse = {};
 
-      this._stream(pipeline, transactionOrReadTime, explainOptions)
-        .on('error', err => {
-          reject(wrapError(err, stack));
-        })
-        .on('data', (data: PipelineStreamElement[]) => {
-          for (const element of data) {
-            if (element.transaction) {
-              output.transaction = element.transaction;
-            }
-            if (element.executionTime) {
-              output.executionTime = element.executionTime;
-            }
-            if (element.explainMetrics) {
-              output.explainMetrics = element.explainMetrics;
-            }
-            if (element.result) {
-              result.push(element.result);
-            }
+      const stream: NodeJS.EventEmitter = this._stream(
+        pipeline,
+        transactionOrReadTime,
+        explainOptions
+      );
+      stream.on('error', err => {
+        reject(wrapError(err, stack));
+      });
+      stream.on('data', (data: PipelineStreamElement[]) => {
+        for (const element of data) {
+          if (element.transaction) {
+            output.transaction = element.transaction;
           }
-        })
-        .on('end', () => {
-          output.result = result;
-          resolve(output);
-        });
+          if (element.executionTime) {
+            output.executionTime = element.executionTime;
+          }
+          if (element.explainMetrics) {
+            output.explainMetrics = element.explainMetrics;
+          }
+          if (element.result) {
+            result.push(element.result);
+          }
+        }
+      });
+      stream.on('end', () => {
+        output.result = result;
+        resolve(output);
+      });
     });
   }
 
@@ -472,4 +482,75 @@ export function toPipelineBooleanExpr(
   throw new Error(
     `Failed to convert filter to pipeline conditions: ${f.toProto()}`
   );
+}
+
+export function isString(val: unknown): val is string {
+  return typeof val === 'string';
+}
+
+/**
+ * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * ArrayFunction, or the input itself (if it's already an expression).
+ *
+ * @private
+ * @internal
+ * @param value
+ */
+export function valueToDefaultExpr(value: unknown): Expr {
+  let result: Expr | undefined;
+  if (value instanceof Expr) {
+    return value;
+  } else if (isPlainObject(value)) {
+    result = map(value as Record<string, unknown>);
+  } else if (value instanceof Array) {
+    result = array(value);
+  } else {
+    result = constant(value);
+  }
+
+  // TODO(pipeline) is this still used?
+  result._createdFromLiteral = true;
+  return result;
+}
+
+/**
+ * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * ArrayFunction, or the input itself (if it's already an expression).
+ *
+ * @private
+ * @internal
+ * @param value
+ */
+export function vectorToExpr(
+  value: firestore.VectorValue | number[] | firestore.Expr
+): Expr {
+  if (value instanceof Expr) {
+    return value;
+  } else if (value instanceof VectorValue || Array.isArray(value)) {
+    const result = constantVector(value);
+    result._createdFromLiteral = true;
+    return result;
+  } else {
+    throw new Error('Unsupported value: ' + typeof value);
+  }
+}
+
+/**
+ * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * ArrayFunction, or the input itself (if it's already an expression).
+ * If the input is a string, it is assumed to be a field name, and a
+ * field(value) is returned.
+ *
+ * @private
+ * @internal
+ * @param value
+ */
+export function fieldOrExpression(value: unknown): Expr {
+  if (isString(value)) {
+    const result = field(value);
+    result._createdFromLiteral = true;
+    return result;
+  } else {
+    return valueToDefaultExpr(value);
+  }
 }

@@ -16,16 +16,23 @@ import * as firestore from '@google-cloud/firestore';
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
-import {AggregateFunction, Expr, Field, Ordering, field} from './expression';
+import {
+  AggregateFunction,
+  Expr,
+  Field,
+  Ordering,
+  field,
+  BooleanExpr,
+} from './expression';
 import {VectorValue} from './field-value';
 import {DocumentReference} from './reference/document-reference';
-import {Serializer} from './serializer';
+import {ProtoSerializable, Serializer} from './serializer';
 import {Pipeline} from './pipeline';
 
 /**
  * @beta
  */
-export interface Stage {
+export interface Stage extends ProtoSerializable<api.Pipeline.IStage> {
   name: string;
   _toProto(serializer: Serializer): api.Pipeline.IStage;
 }
@@ -157,8 +164,16 @@ export class DocumentsSource implements Stage {
 
   constructor(private docPaths: string[]) {}
 
-  static of(refs: DocumentReference[]): DocumentsSource {
-    return new DocumentsSource(refs.map(ref => '/' + ref.path));
+  static of(refs: Array<string | DocumentReference>): DocumentsSource {
+    return new DocumentsSource(
+      refs.map(ref =>
+        ref instanceof DocumentReference
+          ? '/' + ref.path
+          : ref.startsWith('/')
+            ? ref
+            : '/' + ref
+      )
+    );
   }
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
@@ -177,7 +192,7 @@ export class DocumentsSource implements Stage {
 export class Where implements Stage {
   name = 'where';
 
-  constructor(private condition: firestore.BooleanExpr & firestore.Expr) {}
+  constructor(private condition: BooleanExpr) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
@@ -351,8 +366,8 @@ export class Offset implements Stage {
 /**
  * @beta
  */
-export class Replace implements Stage {
-  name = 'replace';
+export class ReplaceWith implements Stage {
+  name = 'replace_with';
 
   constructor(
     private field: Expr,
@@ -409,12 +424,23 @@ export class Sort implements Stage {
  * @beta
  */
 export class GenericStage implements Stage {
+  /**
+   * @private
+   * @internal
+   */
   constructor(
     public name: string,
-    params: any[]
+    private params: Array<AggregateFunction | Expr>
   ) {}
 
-  _toProto(serializer: Serializer): api.Pipeline.Stage {
-    return new api.Pipeline.Stage();
+  /**
+   * @internal
+   * @private
+   */
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: this.params.map(o => o._toProto(serializer)),
+    };
   }
 }

@@ -15,91 +15,19 @@
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
-import * as firestore from '@google-cloud/firestore';
+import type * as firestore from '@google-cloud/firestore';
 
 import {VectorValue} from './field-value';
 import {FieldPath} from './path';
 import {Pipeline} from './pipeline';
-import {isFirestoreValue} from './pipeline-util';
-import {Serializer} from './serializer';
+import {
+  fieldOrExpression,
+  isFirestoreValue,
+  valueToDefaultExpr,
+  vectorToExpr,
+} from './pipeline-util';
+import {HasUserData, Serializer, validateUserInput} from './serializer';
 import {cast} from './util';
-
-function isPlainObject(...args: unknown[]): boolean {
-  throw 'TODO implement isPlainObject';
-}
-function isString(val: unknown): val is string {
-  throw 'TODO implement isString';
-}
-
-/**
- * Converts a value to an Expr, Returning either a Constant, MapFunction,
- * ArrayFunction, or the input itself (if it's already an expression).
- *
- * @private
- * @internal
- * @param value
- */
-function valueToDefaultExpr(value: unknown): Expr {
-  let result: Expr | undefined;
-  if (value instanceof Expr) {
-    return value;
-  }
-  if (value instanceof firestore.Expr) {
-    throw new Error('Unsupported Expr type: ' + typeof value);
-  } else if (isPlainObject(value)) {
-    result = map(value as Record<string, unknown>);
-  } else if (value instanceof Array) {
-    result = array(value);
-  } else {
-    result = new Constant(value);
-  }
-
-  // TODO(pipeline) is this still used?
-  result._createdFromLiteral = true;
-  return result;
-}
-
-/**
- * Converts a value to an Expr, Returning either a Constant, MapFunction,
- * ArrayFunction, or the input itself (if it's already an expression).
- *
- * @private
- * @internal
- * @param value
- */
-function vectorToExpr(
-  value: firestore.VectorValue | number[] | firestore.Expr
-): Expr {
-  if (value instanceof Expr) {
-    return value;
-  } else if (value instanceof VectorValue || Array.isArray(value)) {
-    const result = constantVector(value);
-    result._createdFromLiteral = true;
-    return result;
-  } else {
-    throw new Error('Unsupported value: ' + typeof value);
-  }
-}
-
-/**
- * Converts a value to an Expr, Returning either a Constant, MapFunction,
- * ArrayFunction, or the input itself (if it's already an expression).
- * If the input is a string, it is assumed to be a field name, and a
- * field(value) is returned.
- *
- * @private
- * @internal
- * @param value
- */
-export function fieldOrExpression(value: unknown): Expr {
-  if (isString(value)) {
-    const result = field(value);
-    result._createdFromLiteral = true;
-    return result;
-  } else {
-    return valueToDefaultExpr(value);
-  }
-}
 
 /**
  * @beta
@@ -117,7 +45,7 @@ export function fieldOrExpression(value: unknown): Expr {
  * The `Expr` class provides a fluent API for building expressions. You can chain together
  * method calls to create complex expressions.
  */
-export abstract class Expr extends firestore.Expr {
+export abstract class Expr implements firestore.Expr, HasUserData {
   abstract readonly exprType: firestore.ExprType;
 
   /**
@@ -134,6 +62,12 @@ export abstract class Expr extends firestore.Expr {
    */
   abstract _toProto(serializer: Serializer): api.IValue;
   _protoValueType = 'ProtoValue' as const;
+
+  /**
+   * @private
+   * @internal
+   */
+  abstract _validateUserData(ignoreUndefinedProperties: boolean): void;
 
   /**
    * Creates an expression that adds this expression to another expression.
@@ -525,7 +459,7 @@ export abstract class Expr extends firestore.Expr {
   arrayContainsAll(values: unknown[] | firestore.Expr): BooleanExpr {
     const normalizedExpr = Array.isArray(values)
       ? new ListOfExprs(values.map(valueToDefaultExpr))
-      : values;
+      : cast<Expr>(values);
     return new BooleanExpr('array_contains_all', [this, normalizedExpr]);
   }
 
@@ -560,7 +494,7 @@ export abstract class Expr extends firestore.Expr {
   ): BooleanExpr {
     const normalizedExpr = Array.isArray(values)
       ? new ListOfExprs(values.map(valueToDefaultExpr))
-      : values;
+      : cast<Expr>(values);
     return new BooleanExpr('array_contains_any', [this, normalizedExpr]);
   }
 
@@ -608,7 +542,7 @@ export abstract class Expr extends firestore.Expr {
   eqAny(others: unknown[] | firestore.Expr): BooleanExpr {
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
-      : others;
+      : cast<Expr>(others);
     return new BooleanExpr('eq_any', [this, exprOthers]);
   }
 
@@ -641,7 +575,7 @@ export abstract class Expr extends firestore.Expr {
   notEqAny(others: unknown[] | firestore.Expr): BooleanExpr {
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
-      : others;
+      : cast<Expr>(others);
     return new BooleanExpr('not_eq_any', [this, exprOthers]);
   }
 
@@ -1997,7 +1931,9 @@ export abstract class Expr extends firestore.Expr {
  *
  * A class that represents an aggregate function.
  */
-export class AggregateFunction extends firestore.AggregateFunction {
+export class AggregateFunction
+  implements firestore.AggregateFunction, HasUserData
+{
   exprType: firestore.ExprType = 'AggregateFunction';
 
   /**
@@ -2008,12 +1944,20 @@ export class AggregateFunction extends firestore.AggregateFunction {
    */
   _createdFromLiteral = false;
 
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    this.params.forEach(expr => {
+      return expr._validateUserData(ignoreUndefinedProperties);
+    });
+  }
+
   constructor(
     private name: string,
     private params: Expr[]
-  ) {
-    super(name, params);
-  }
+  ) {}
 
   /**
    * Assigns an alias to this AggregateFunction. The alias specifies the name that
@@ -2054,13 +1998,13 @@ export class AggregateFunction extends firestore.AggregateFunction {
  *
  * An AggregateFunction with alias.
  */
-export class AggregateWithAlias extends firestore.AggregateWithAlias {
+export class AggregateWithAlias
+  implements firestore.AggregateWithAlias, HasUserData
+{
   constructor(
     readonly aggregate: AggregateFunction,
     readonly alias: string
-  ) {
-    super();
-  }
+  ) {}
 
   /**
    * @internal
@@ -2069,12 +2013,20 @@ export class AggregateWithAlias extends firestore.AggregateWithAlias {
    * by the caller.
    */
   _createdFromLiteral = false;
+
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    this.aggregate._validateUserData(ignoreUndefinedProperties);
+  }
 }
 
 /**
  * @beta
  */
-export class ExprWithAlias implements firestore.Selectable {
+export class ExprWithAlias implements firestore.Selectable, HasUserData {
   exprType: firestore.ExprType = 'ExprWithAlias';
   selectable = true as const;
 
@@ -2090,6 +2042,14 @@ export class ExprWithAlias implements firestore.Selectable {
     readonly expr: Expr,
     readonly alias: string
   ) {}
+
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    this.expr._validateUserData(ignoreUndefinedProperties);
+  }
 }
 
 /**
@@ -2112,6 +2072,16 @@ class ListOfExprs extends Expr {
         values: this.exprs.map(p => p._toProto(serializer)!),
       },
     };
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    this.exprs.forEach(expr => {
+      return expr._validateUserData(ignoreUndefinedProperties);
+    });
   }
 }
 
@@ -2168,6 +2138,12 @@ export class Field extends Expr implements firestore.Selectable {
       fieldReferenceValue: this.fieldPath.formattedName,
     };
   }
+
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {}
 }
 
 /**
@@ -2248,6 +2224,18 @@ export class Constant extends Expr {
     }
 
     return serializer.encodeValue(this.value)!;
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    validateUserInput('value', this.value, 'constant value', {
+      allowUndefined: ignoreUndefinedProperties,
+      allowDeletes: 'none',
+      allowTransforms: false,
+    });
   }
 }
 
@@ -2341,6 +2329,13 @@ export function constant(value: api.IValue): Constant;
  */
 export function constant(value: firestore.VectorValue): Constant;
 
+/**
+ * @internal
+ * @private
+ * @param value
+ */
+export function constant(value: unknown): Constant;
+
 export function constant(value: unknown): Constant {
   return new Constant(value);
 }
@@ -2360,9 +2355,9 @@ export function constantVector(
   value: number[] | firestore.VectorValue
 ): Constant {
   if (value instanceof VectorValue) {
-    return new Constant(value);
+    return constant(value);
   } else {
-    return new Constant(new VectorValue(value as number[]));
+    return constant(new VectorValue(value as number[]));
   }
 }
 
@@ -2381,6 +2376,16 @@ export class MapValue extends Expr {
   _toProto(serializer: Serializer): api.IValue {
     return serializer.encodeValue(this.plainObject);
   }
+
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    this.plainObject.forEach(expr => {
+      return expr._validateUserData(ignoreUndefinedProperties);
+    });
+  }
 }
 
 /**
@@ -2396,8 +2401,8 @@ export class FunctionExpr extends Expr {
   readonly exprType: firestore.ExprType = 'Function';
 
   constructor(
-    private name: string,
-    private params: firestore.Expr[]
+    protected name: string,
+    private params: Expr[]
   ) {
     super();
   }
@@ -2413,6 +2418,111 @@ export class FunctionExpr extends Expr {
         args: this.params.map(p => cast<Expr>(p)._toProto(serializer)),
       },
     };
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    this.params.forEach(expr => {
+      return expr._validateUserData(ignoreUndefinedProperties);
+    });
+  }
+}
+
+/**
+ * @beta
+ *
+ * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
+ * execution.
+ *
+ * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link eq},
+ * or the methods on {@link Expr} ({@link Expr#eq}, {@link Expr#lt}, etc.) to construct new Function instances.
+ */
+class MapFunctionExpr extends FunctionExpr {
+  readonly exprType: firestore.ExprType = 'Function';
+
+  constructor(private map: Record<string, Expr | undefined>) {
+    super('map', []);
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _toProto(serializer: Serializer): api.IValue {
+    const args: api.IValue[] = [];
+    for (const key in this.map) {
+      if (Object.prototype.hasOwnProperty.call(this.map, key)) {
+        if (this.map[key]) {
+          args.push(constant(key)._toProto(serializer));
+          args.push(this.map[key]._toProto(serializer));
+        }
+      }
+    }
+    return {
+      functionValue: {
+        name: this.name,
+        args: args,
+      },
+    };
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    validateUserInput('value', this.map, 'map value', {
+      allowUndefined: ignoreUndefinedProperties,
+      allowTransforms: false,
+      allowDeletes: 'none',
+    });
+  }
+}
+
+/**
+ * @beta
+ *
+ * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
+ * execution.
+ *
+ * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link eq},
+ * or the methods on {@link Expr} ({@link Expr#eq}, {@link Expr#lt}, etc.) to construct new Function instances.
+ */
+class ArrayFunctionExpr extends FunctionExpr {
+  readonly exprType: firestore.ExprType = 'Function';
+
+  constructor(private values: Array<Expr | undefined>) {
+    super('array', []);
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _toProto(serializer: Serializer): api.IValue {
+    return {
+      functionValue: {
+        name: this.name,
+        args: this.values
+          .filter(v => !!v)
+          .map(value => value._toProto(serializer)),
+      },
+    };
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    validateUserInput('value', this.values, 'array value', {
+      allowUndefined: ignoreUndefinedProperties,
+      allowTransforms: false,
+      allowDeletes: 'none',
+    });
   }
 }
 
@@ -3779,15 +3889,17 @@ export function mod(
  * @return A new {@code Expr} representing the map function.
  */
 export function map(elements: Record<string, unknown>): FunctionExpr {
-  const result: firestore.Expr[] = [];
+  const result: Record<string, Expr | undefined> = {};
+
   for (const key in elements) {
     if (Object.prototype.hasOwnProperty.call(elements, key)) {
-      const value = elements[key];
-      result.push(constant(key));
-      result.push(valueToDefaultExpr(value));
+      result[key] =
+        elements[key] !== undefined
+          ? valueToDefaultExpr(elements[key])
+          : undefined;
     }
   }
-  return new FunctionExpr('map', result);
+  return new MapFunctionExpr(result);
 }
 
 /**
@@ -3826,9 +3938,10 @@ export function _mapValue(plainObject: Record<string, unknown>): MapValue {
  * @return A new {@code Expr} representing the array function.
  */
 export function array(elements: unknown[]): FunctionExpr {
-  return new FunctionExpr(
-    'array',
-    elements.map(element => valueToDefaultExpr(element))
+  return new ArrayFunctionExpr(
+    elements.map(element => {
+      return element !== undefined ? valueToDefaultExpr(element) : undefined;
+    })
   );
 }
 
@@ -4822,7 +4935,11 @@ export function cond(
   thenExpr: firestore.Expr,
   elseExpr: firestore.Expr
 ): FunctionExpr {
-  return new FunctionExpr('cond', [condition, thenExpr, elseExpr]);
+  return new FunctionExpr('cond', [
+    condition,
+    cast<Expr>(thenExpr),
+    cast<Expr>(elseExpr),
+  ]);
 }
 
 /**
@@ -6927,7 +7044,7 @@ export function descending(field: firestore.Expr | string): Ordering {
  *
  * You create `Ordering` instances using the `ascending` and `descending` helper functions.
  */
-export class Ordering {
+export class Ordering implements HasUserData {
   constructor(
     readonly expr: firestore.Expr,
     readonly direction: 'ascending' | 'descending'
@@ -6958,4 +7075,12 @@ export class Ordering {
   }
 
   _protoValueType: 'ProtoValue' = 'ProtoValue' as const;
+
+  /**
+   * @private
+   * @internal
+   */
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    (this.expr as Expr)._validateUserData(ignoreUndefinedProperties);
+  }
 }
