@@ -14,7 +14,13 @@
             "allowTypedFunctionExpressions": true
           }
         ],
-        "no-console": ["error", {"allow": ["error"]}]
+        "no-console": ["error", {"allow": ["error"]}],
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            "argsIgnorePattern": "^_$" // Ignore args that are underscore only
+          }
+        ]
       }
     },
     {
