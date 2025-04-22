@@ -119,7 +119,7 @@ export class CollectionSource implements Stage {
     }
   }
 
-  _toProto(serializer: Serializer): api.Pipeline.IStage {
+  _toProto(_: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
       args: [{referenceValue: this.collectionPath}],
@@ -149,7 +149,7 @@ export class CollectionGroupSource implements Stage {
 export class DatabaseSource implements Stage {
   name = 'database';
 
-  _toProto(serializer: Serializer): api.Pipeline.IStage {
+  _toProto(_: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
     };
@@ -176,7 +176,7 @@ export class DocumentsSource implements Stage {
     );
   }
 
-  _toProto(serializer: Serializer): api.Pipeline.IStage {
+  _toProto(_: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
       args: this.docPaths.map(p => {

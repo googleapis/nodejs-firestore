@@ -27,7 +27,12 @@ import {
   _mapValue,
   field,
 } from './expression';
-import Firestore, {CollectionReference, FieldPath, Timestamp} from './index';
+import Firestore, {
+  CollectionReference,
+  FieldPath,
+  Query,
+  Timestamp,
+} from './index';
 import {validateFieldPath} from './path';
 import {ExecutionUtil, fieldOrExpression} from './pipeline-util';
 import {DocumentReference} from './reference/document-reference';
@@ -60,7 +65,6 @@ import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 import IStage = google.firestore.v1.Pipeline.IStage;
 import {cast, isOptionalEqual, isPlainObject} from './util';
-import {validateDocumentReference} from './reference/helpers';
 
 /**
  * Represents the source of a Firestore {@link Pipeline}.
@@ -113,8 +117,7 @@ export class PipelineSource implements firestore.PipelineSource {
    * @throws {@FirestoreError} Thrown if any of the provided DocumentReferences target a different project or database than the pipeline.
    */
   createFrom(query: firestore.Query): Pipeline {
-    throw 'Not implemented';
-    // return query.toPipeline(query._query, query.firestore);
+    return (query as unknown as Query)._pipeline();
   }
 
   _validateReference(reference: CollectionReference | DocumentReference): void {
@@ -853,7 +856,7 @@ export class Pipeline implements firestore.Pipeline {
    * @param params A list of parameters to configure the generic stage's behavior.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  genericStage(name: string, params: any[]): Pipeline {
+  genericStage(name: string, params: unknown[]): Pipeline {
     // Convert input values to Expressions.
     // We treat objects as mapValues and arrays as arrayValues,
     // this is unlike the default conversion for objects and arrays

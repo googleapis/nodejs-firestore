@@ -368,7 +368,7 @@ export function isPrimitiveArrayEqual<T extends number | string>(
 
 export function cast<T>(
   val: unknown,
-  constructor?: {new (...args: any[]): T}
+  constructor?: {new (...args: unknown[]): T}
 ): T {
   if (!constructor) {
     return val as T;

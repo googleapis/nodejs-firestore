@@ -115,7 +115,7 @@ describe('Query class', () => {
 
   async function compareQueryAndPipeline(query: Query): Promise<QuerySnapshot> {
     const queryResults = await query.get();
-    const pipeline = query.pipeline();
+    const pipeline = query.firestore.pipeline().createFrom(query);
     const pipelineResults = await pipeline.execute();
 
     expect(pipelineResults.results.map(r => r._fieldsProto)).to.deep.equal(

@@ -35,7 +35,11 @@ import {
 import {compare} from '../order';
 import {validateFieldPath} from '../path';
 import {Pipeline} from '../pipeline';
-import {toPipelineBooleanExpr} from '../pipeline-util';
+import {
+  reverseOrderings,
+  toPipelineBooleanExpr,
+  whereConditionsFromCursor,
+} from '../pipeline-util';
 import {ExplainResults} from '../query-profile';
 import {Serializer} from '../serializer';
 import {defaultConverter} from '../types';
@@ -724,14 +728,22 @@ export class Query<
     return new VectorQuery<AppModelType, DbModelType>(this, options);
   }
 
-  pipeline(): Pipeline {
-    let pipeline;
-    if (this._queryOptions.allDescendants) {
-      pipeline = this.firestore
+  /**
+   * Returns a value indicating if this query is a collection group query
+   */
+  _isCollectionGroupQuery(): boolean {
+    return this._queryOptions.allDescendants;
+  }
+
+  _pipeline(): Pipeline {
+    let pipeline: Pipeline;
+    const db = this.firestore;
+    if (this._isCollectionGroupQuery()) {
+      pipeline = db
         .pipeline()
-        .collectionGroup(this._queryOptions.collectionId);
+        .collectionGroup(this._queryOptions.collectionId!);
     } else {
-      pipeline = this.firestore
+      pipeline = db
         .pipeline()
         .collection(
           this._queryOptions.parentPath.append(this._queryOptions.collectionId)
@@ -740,8 +752,10 @@ export class Query<
     }
 
     // filters
-    for (const f of this._queryOptions.filters) {
-      pipeline = pipeline.where(toPipelineBooleanExpr(f, this._serializer));
+    for (const filter of this._queryOptions.filters) {
+      pipeline = pipeline.where(
+        toPipelineBooleanExpr(filter, this._serializer)
+      );
     }
 
     // projections
@@ -754,15 +768,15 @@ export class Query<
       );
     }
 
-    // orderbys
-    const exists = this.createImplicitOrderBy().map(fieldOrder => {
+    // orders
+    const existsConditions = this.createImplicitOrderBy().map(fieldOrder => {
       return field(fieldOrder.field).exists();
     });
-    if (exists.length > 1) {
-      const [first, second, ...rest] = exists;
+    if (existsConditions.length > 1) {
+      const [first, second, ...rest] = existsConditions;
       pipeline = pipeline.where(and(first, second, ...rest));
-    } else if (exists.length === 1) {
-      pipeline = pipeline.where(exists[0]);
+    } else {
+      pipeline = pipeline.where(existsConditions[0]);
     }
 
     const orderings = this.createImplicitOrderBy().map(fieldOrder => {
@@ -779,27 +793,67 @@ export class Query<
       }
       return new Ordering(field(fieldOrder.field), dir || 'ascending');
     });
+
     if (orderings.length > 0) {
-      pipeline = pipeline.sort(orderings[0], ...orderings.slice(1));
+      if (this._queryOptions.limitType === LimitType.Last) {
+        const actualOrderings = reverseOrderings(orderings);
+        pipeline = pipeline.sort(
+          actualOrderings[0],
+          ...actualOrderings.slice(1)
+        );
+        // cursors
+        if (this._queryOptions.startAt !== undefined) {
+          pipeline = pipeline.where(
+            whereConditionsFromCursor(
+              this._queryOptions.startAt,
+              orderings,
+              'after'
+            )
+          );
+        }
+
+        if (this._queryOptions.endAt !== undefined) {
+          pipeline = pipeline.where(
+            whereConditionsFromCursor(
+              this._queryOptions.endAt,
+              orderings,
+              'before'
+            )
+          );
+        }
+
+        if (this._queryOptions.limit !== undefined) {
+          pipeline = pipeline.limit(this._queryOptions.limit!);
+        }
+
+        pipeline = pipeline.sort(orderings[0], ...orderings.slice(1));
+      } else {
+        pipeline = pipeline.sort(orderings[0], ...orderings.slice(1));
+        if (this._queryOptions.startAt !== undefined) {
+          pipeline = pipeline.where(
+            whereConditionsFromCursor(
+              this._queryOptions.startAt,
+              orderings,
+              'after'
+            )
+          );
+        }
+        if (this._queryOptions.endAt !== undefined) {
+          pipeline = pipeline.where(
+            whereConditionsFromCursor(
+              this._queryOptions.endAt,
+              orderings,
+              'before'
+            )
+          );
+        }
+
+        if (this._queryOptions.limit !== undefined) {
+          pipeline = pipeline.limit(this._queryOptions.limit);
+        }
+      }
     }
 
-    // Cursors, Limit and Offset
-    if (
-      !!this._queryOptions.startAt ||
-      !!this._queryOptions.endAt ||
-      this._queryOptions.limitType === LimitType.Last
-    ) {
-      throw new Error(
-        'Query to Pipeline conversion: cursors and limitToLast is not supported yet.'
-      );
-    } else {
-      if (this._queryOptions.offset) {
-        pipeline = pipeline.offset(this._queryOptions.offset);
-      }
-      if (this._queryOptions.limit) {
-        pipeline = pipeline.limit(this._queryOptions.limit);
-      }
-    }
     return pipeline;
   }
 

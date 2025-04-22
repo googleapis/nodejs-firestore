@@ -349,7 +349,7 @@ export class AggregateQuery<
     return runQueryRequest;
   }
 
-  pipeline(): Pipeline {
+  _pipeline(): Pipeline {
     const aggregates = mapToArray(
       this._aggregates,
       (aggregate, clientAlias) => {
@@ -375,7 +375,7 @@ export class AggregateQuery<
     }
 
     return this._query
-      .pipeline()
+      ._pipeline()
       .aggregate(aggregates[0], ...aggregates.slice(1));
   }
 

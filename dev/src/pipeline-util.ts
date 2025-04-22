@@ -23,9 +23,6 @@ import {
   BooleanExpr,
   and,
   or,
-  Field,
-  not,
-  ExprWithAlias,
   field as createField,
   constant,
   map,
@@ -33,6 +30,9 @@ import {
   Constant,
   constantVector,
   field,
+  Ordering,
+  gt,
+  lt,
 } from './expression';
 import Firestore, {DocumentReference, Timestamp, VectorValue} from './index';
 import {logger} from './logger';
@@ -42,7 +42,11 @@ import {CompositeFilterInternal} from './reference/composite-filter-internal';
 import {NOOP_MESSAGE} from './reference/constants';
 import {FieldFilterInternal} from './reference/field-filter-internal';
 import {FilterInternal} from './reference/filter-internal';
-import {PipelineResponse, PipelineStreamElement} from './reference/types';
+import {
+  PipelineResponse,
+  PipelineStreamElement,
+  QueryCursor,
+} from './reference/types';
 import {Serializer} from './serializer';
 import {
   Deferred,
@@ -144,7 +148,7 @@ export class ExecutionUtil {
   _stream(
     pipeline: Pipeline,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: firestore.ExplainOptions
+    _?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
     const tag = requestTag();
 
@@ -271,7 +275,7 @@ export class ExecutionUtil {
   }
 }
 
-function isITimestamp(obj: any): obj is google.protobuf.ITimestamp {
+function isITimestamp(obj: unknown): obj is google.protobuf.ITimestamp {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
@@ -288,7 +292,7 @@ function isITimestamp(obj: any): obj is google.protobuf.ITimestamp {
 
   return false;
 }
-function isILatLng(obj: any): obj is google.type.ILatLng {
+function isILatLng(obj: unknown): obj is google.type.ILatLng {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
@@ -303,7 +307,7 @@ function isILatLng(obj: any): obj is google.type.ILatLng {
 
   return false;
 }
-function isIArrayValue(obj: any): obj is api.IArrayValue {
+function isIArrayValue(obj: unknown): obj is api.IArrayValue {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
@@ -313,7 +317,7 @@ function isIArrayValue(obj: any): obj is api.IArrayValue {
 
   return false;
 }
-function isIMapValue(obj: any): obj is api.IMapValue {
+function isIMapValue(obj: unknown): obj is api.IMapValue {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
@@ -323,7 +327,7 @@ function isIMapValue(obj: any): obj is api.IMapValue {
 
   return false;
 }
-function isIFunction(obj: any): obj is api.IFunction {
+function isIFunction(obj: unknown): obj is api.IFunction {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
@@ -339,7 +343,7 @@ function isIFunction(obj: any): obj is api.IFunction {
   return false;
 }
 
-function isIPipeline(obj: any): obj is api.IPipeline {
+function isIPipeline(obj: unknown): obj is api.IPipeline {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
@@ -350,7 +354,7 @@ function isIPipeline(obj: any): obj is api.IPipeline {
   return false;
 }
 
-export function isFirestoreValue(obj: any): obj is api.IValue {
+export function isFirestoreValue(obj: unknown): obj is api.IValue {
   if (typeof obj !== 'object' || obj === null) {
     return false; // Must be a non-null object
   }
@@ -396,18 +400,56 @@ export function isFirestoreValue(obj: any): obj is api.IValue {
   return false;
 }
 
-export function selectableToExpr(
-  selectable: firestore.Selectable | string
-): Expr {
-  if (typeof selectable === 'string') {
-    return createField(selectable);
-  } else if (selectable instanceof Field) {
-    return selectable;
-  } else if (selectable instanceof ExprWithAlias) {
-    return selectable.expr;
-  } else {
-    throw new Error('unexpected selectable: ' + selectable);
+export function whereConditionsFromCursor(
+  cursor: QueryCursor,
+  orderings: Ordering[],
+  position: 'before' | 'after'
+): BooleanExpr {
+  // The filterFunc is either greater than or less than
+  const filterFunc = position === 'before' ? lt : gt;
+  const cursors = cursor.values.map(value => Constant._fromProto(value));
+  const size = cursors.length;
+
+  let field = orderings[size - 1].expr;
+  let value = cursors[size - 1];
+
+  // Add condition for last bound
+  let condition: BooleanExpr = filterFunc(field, value);
+  if (
+    (position === 'after' && cursor.before) ||
+    (position === 'before' && !cursor.before)
+  ) {
+    // When the cursor bound is inclusive, then the last bound
+    // can be equal to the value, otherwise it's not equal
+    condition = or(condition, field.eq(value) as unknown as BooleanExpr);
   }
+
+  // Iterate backwards over the remaining bounds, adding
+  // a condition for each one
+  for (let i = size - 2; i >= 0; i--) {
+    field = orderings[i].expr;
+    value = cursors[i];
+
+    // For each field in the orderings, the condition is either
+    // a) lt|gt the cursor value,
+    // b) or equal the cursor value and lt|gt the cursor values for other fields
+    condition = or(
+      filterFunc(field, value),
+      and(field.eq(value) as unknown as BooleanExpr, condition)
+    );
+  }
+
+  return condition;
+}
+
+export function reverseOrderings(orderings: Ordering[]): Ordering[] {
+  return orderings.map(
+    o =>
+      new Ordering(
+        o.expr,
+        o.direction === 'ascending' ? 'descending' : 'ascending'
+      )
+  );
 }
 
 export function toPipelineBooleanExpr(
@@ -420,13 +462,13 @@ export function toPipelineBooleanExpr(
       if (f.nanOp() === 'IS_NAN') {
         return and(field.exists(), field.isNan());
       } else {
-        return and(field.exists(), not(field.isNan()));
+        return and(field.exists(), field.isNotNan());
       }
     } else if (f.isNullChecking()) {
       if (f.nullOp() === 'IS_NULL') {
-        return and(field.exists(), field.eq(null));
+        return and(field.exists(), field.isNull());
       } else {
-        return and(field.exists(), not(field.eq(null)));
+        return and(field.exists(), field.isNotNull());
       }
     } else {
       // Comparison filters
@@ -498,6 +540,9 @@ export function isString(val: unknown): val is string {
  */
 export function valueToDefaultExpr(value: unknown): Expr {
   let result: Expr | undefined;
+  if (isFirestoreValue(value)) {
+    return constant(value);
+  }
   if (value instanceof Expr) {
     return value;
   } else if (isPlainObject(value)) {

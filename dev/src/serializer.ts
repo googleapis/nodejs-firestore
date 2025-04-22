@@ -21,7 +21,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 import {DeleteTransform, FieldTransform, VectorValue} from './field-value';
 import {detectGoogleProtobufValueType, detectValueType} from './convert';
 import {GeoPoint} from './geo-point';
-import {DocumentReference, Field, Firestore} from './index';
+import {DocumentReference, Firestore} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, ValidationOptions} from './types';

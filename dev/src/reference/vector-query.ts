@@ -152,7 +152,7 @@ export class VectorQuery<
         | 'dot_product',
     };
     return this.query
-      .pipeline()
+      ._pipeline()
       .where(field(this._options.vectorField).exists())
       .findNearest(options);
   }

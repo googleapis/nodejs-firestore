@@ -19,7 +19,6 @@ import type * as firestore from '@google-cloud/firestore';
 
 import {VectorValue} from './field-value';
 import {FieldPath} from './path';
-import {Pipeline} from './pipeline';
 import {
   fieldOrExpression,
   isFirestoreValue,
@@ -2133,7 +2132,7 @@ export class Field extends Expr implements firestore.Selectable {
    * @private
    * @internal
    */
-  _toProto(serializer: Serializer): api.IValue {
+  _toProto(_: Serializer): api.IValue {
     return {
       fieldReferenceValue: this.fieldPath.formattedName,
     };
@@ -2143,7 +2142,7 @@ export class Field extends Expr implements firestore.Selectable {
    * @private
    * @internal
    */
-  _validateUserData(ignoreUndefinedProperties: boolean): void {}
+  _validateUserData(_: boolean): void {}
 }
 
 /**
@@ -4591,8 +4590,11 @@ export function arrayContainsAny(
   array: firestore.Expr | string,
   values: unknown[] | firestore.Expr
 ): BooleanExpr {
-  // @ts-ignore implementation accepts both types
-  return fieldOrExpression(array).arrayContainsAny(values);
+  if (Array.isArray(values)) {
+    return fieldOrExpression(array).arrayContainsAny(values);
+  } else {
+    return fieldOrExpression(array).arrayContainsAny(values);
+  }
 }
 
 /**
@@ -4676,8 +4678,11 @@ export function arrayContainsAll(
   array: firestore.Expr | string,
   values: unknown[] | firestore.Expr
 ): BooleanExpr {
-  // @ts-ignore implementation accepts both types
-  return fieldOrExpression(array).arrayContainsAll(values);
+  if (Array.isArray(values)) {
+    return fieldOrExpression(array).arrayContainsAll(values);
+  } else {
+    return fieldOrExpression(array).arrayContainsAll(values);
+  }
 }
 
 /**
@@ -4795,8 +4800,11 @@ export function eqAny(
   element: firestore.Expr | string,
   values: unknown[] | firestore.Expr
 ): BooleanExpr {
-  // @ts-ignore implementation accepts both types
-  return fieldOrExpression(element).eqAny(values);
+  if (Array.isArray(values)) {
+    return fieldOrExpression(element).eqAny(values);
+  } else {
+    return fieldOrExpression(element).eqAny(values);
+  }
 }
 
 /**
@@ -4882,8 +4890,11 @@ export function notEqAny(
   element: firestore.Expr | string,
   values: unknown[] | firestore.Expr
 ): BooleanExpr {
-  // @ts-ignore implementation accepts both types
-  return fieldOrExpression(element).notEqAny(values);
+  if (Array.isArray(values)) {
+    return fieldOrExpression(element).notEqAny(values);
+  } else {
+    return fieldOrExpression(element).notEqAny(values);
+  }
 }
 
 /**
