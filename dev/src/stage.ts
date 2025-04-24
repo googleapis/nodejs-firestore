@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import * as firestore from '@google-cloud/firestore';
+import * as pipelines from '@google-cloud/firestore/pipelines';
 import * as protos from '../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
@@ -27,7 +28,7 @@ import {
 import {VectorValue} from './field-value';
 import {DocumentReference} from './reference/document-reference';
 import {ProtoSerializable, Serializer} from './serializer';
-import {Pipeline} from './pipeline';
+import {Pipeline} from './pipelines';
 
 /**
  * @beta
@@ -206,7 +207,7 @@ export class Where implements Stage {
  * @beta
  */
 export interface FindNearestOptions {
-  field: firestore.Field | string;
+  field: pipelines.Field | string;
   vectorValue: firestore.VectorValue | number[];
   distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
   limit?: number;

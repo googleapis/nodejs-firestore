@@ -15,16 +15,12 @@
 import {DocumentData} from '@google-cloud/firestore';
 
 import {
-  Filter,
   Pipeline,
   BooleanExpr,
   constant,
   constantVector,
   map,
-  GeoPoint,
-  FieldValue,
   array,
-  Timestamp,
   bitNot,
   field,
   xor,
@@ -112,6 +108,13 @@ import {
   logicalMinimum,
   logicalMaximum,
   cond,
+} from '../src/pipelines';
+
+import {
+  Timestamp,
+  GeoPoint,
+  Filter,
+  FieldValue,
   CollectionReference,
   FieldPath,
   Firestore,

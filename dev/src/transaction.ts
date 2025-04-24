@@ -15,6 +15,7 @@
  */
 
 import * as firestore from '@google-cloud/firestore';
+import * as pipelines from '@google-cloud/firestore/pipelines';
 
 import {GoogleError} from 'google-gax';
 import * as proto from '../protos/firestore_v1_proto_api';
@@ -22,7 +23,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshot} from './document';
 import {DEFAULT_MAX_TRANSACTION_ATTEMPTS, Firestore, WriteBatch} from './index';
-import {Pipeline, PipelineResult, PipelineSnapshot} from './pipeline';
+import {Pipeline, PipelineResult, PipelineSnapshot} from './pipelines';
 import {Timestamp} from './timestamp';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
@@ -321,7 +322,7 @@ export class Transaction implements firestore.Transaction {
    *
    * @return A Promise representing the asynchronous pipeline execution.
    */
-  execute(pipeline: firestore.Pipeline): Promise<PipelineSnapshot> {
+  execute(pipeline: pipelines.Pipeline): Promise<PipelineSnapshot> {
     if (this._writeBatch && !this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
