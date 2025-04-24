@@ -27,7 +27,7 @@ import {Timestamp} from './timestamp';
 import {ApiMapValue, ValidationOptions} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
-import {Pipeline} from './pipeline';
+import {Pipeline} from './pipelines';
 
 import api = proto.google.firestore.v1;
 import {

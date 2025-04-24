@@ -34,7 +34,7 @@ import {
 } from '../index';
 import {compare} from '../order';
 import {validateFieldPath} from '../path';
-import {Pipeline} from '../pipeline';
+import {Pipeline} from '../pipelines';
 import {
   reverseOrderings,
   toPipelineBooleanExpr,

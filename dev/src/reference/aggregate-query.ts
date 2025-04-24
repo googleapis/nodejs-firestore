@@ -23,7 +23,7 @@ import * as deepEqual from 'fast-deep-equal';
 import * as firestore from '@google-cloud/firestore';
 import {Aggregate, AggregateSpec} from '../aggregate';
 import {avg, count, countAll, field, sum} from '../expression';
-import {Pipeline} from '../pipeline';
+import {Pipeline} from '../pipelines';
 import {Timestamp} from '../timestamp';
 import {mapToArray, requestTag, wrapError} from '../util';
 import {ExplainMetrics, ExplainResults} from '../query-profile';

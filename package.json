@@ -14,7 +14,8 @@
     "build/protos",
     "build/src",
     "!build/src/**/*.map",
-    "types"
+    "types",
+    "pipelines"
   ],
   "keywords": [
     "google apis client",
@@ -111,5 +112,16 @@
     "through2": "^4.0.0",
     "ts-node": "^10.0.0",
     "typescript": "^5.2.2"
+  },
+  "exports": {
+    ".": {
+      "types": "./types/firestore.d.ts",
+      "default": "./build/src/index.js"
+    },
+    "./pipelines": {
+      "types": "./types/pipelines.d.ts",
+      "default": "./build/src/index.js"
+    },
+    "./package.json": "./package.json"
   }
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import type * as firestore from '@google-cloud/firestore';
+import type * as pipelines from '@google-cloud/firestore/pipelines';
 import {GoogleError} from 'google-gax';
 import {Duplex, Transform} from 'stream';
 import {google} from '../protos/firestore_v1_proto_api';
@@ -37,7 +38,7 @@ import {
 import Firestore, {DocumentReference, Timestamp, VectorValue} from './index';
 import {logger} from './logger';
 import {QualifiedResourcePath} from './path';
-import {Pipeline, PipelineResult} from './pipeline';
+import {Pipeline, PipelineResult} from './pipelines';
 import {CompositeFilterInternal} from './reference/composite-filter-internal';
 import {NOOP_MESSAGE} from './reference/constants';
 import {FieldFilterInternal} from './reference/field-filter-internal';
@@ -567,7 +568,7 @@ export function valueToDefaultExpr(value: unknown): Expr {
  * @param value
  */
 export function vectorToExpr(
-  value: firestore.VectorValue | number[] | firestore.Expr
+  value: firestore.VectorValue | number[] | pipelines.Expr
 ): Expr {
   if (value instanceof Expr) {
     return value;
