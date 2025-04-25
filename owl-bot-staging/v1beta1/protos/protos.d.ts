@@ -3488,7 +3488,7 @@ export namespace google {
             doubleValue?: (number|null);
 
             /** UninterpretedOption stringValue */
-            stringValue?: (Uint8Array|string|null);
+            stringValue?: (Uint8Array|Buffer|string|null);
 
             /** UninterpretedOption aggregateValue */
             aggregateValue?: (string|null);
@@ -3519,7 +3519,7 @@ export namespace google {
             public doubleValue: number;
 
             /** UninterpretedOption stringValue. */
-            public stringValue: (Uint8Array|string);
+            public stringValue: (Uint8Array|Buffer|string);
 
             /** UninterpretedOption aggregateValue. */
             public aggregateValue: string;
@@ -5431,7 +5431,7 @@ export namespace google {
         interface IBytesValue {
 
             /** BytesValue value */
-            value?: (Uint8Array|string|null);
+            value?: (Uint8Array|Buffer|string|null);
         }
 
         /** Represents a BytesValue. */
@@ -5444,7 +5444,7 @@ export namespace google {
             constructor(properties?: google.protobuf.IBytesValue);
 
             /** BytesValue value. */
-            public value: (Uint8Array|string);
+            public value: (Uint8Array|Buffer|string);
 
             /**
              * Creates a new BytesValue instance using the specified properties.
@@ -5622,7 +5622,7 @@ export namespace google {
             type_url?: (string|null);
 
             /** Any value */
-            value?: (Uint8Array|string|null);
+            value?: (Uint8Array|Buffer|string|null);
         }
 
         /** Represents an Any. */
@@ -5638,7 +5638,7 @@ export namespace google {
             public type_url: string;
 
             /** Any value. */
-            public value: (Uint8Array|string);
+            public value: (Uint8Array|Buffer|string);
 
             /**
              * Creates a new Any instance using the specified properties.
@@ -6040,7 +6040,7 @@ export namespace google {
                 interface IReadWrite {
 
                     /** ReadWrite retryTransaction */
-                    retryTransaction?: (Uint8Array|string|null);
+                    retryTransaction?: (Uint8Array|Buffer|string|null);
                 }
 
                 /** Represents a ReadWrite. */
@@ -6053,7 +6053,7 @@ export namespace google {
                     constructor(properties?: google.firestore.v1beta1.TransactionOptions.IReadWrite);
 
                     /** ReadWrite retryTransaction. */
-                    public retryTransaction: (Uint8Array|string);
+                    public retryTransaction: (Uint8Array|Buffer|string);
 
                     /**
                      * Creates a new ReadWrite instance using the specified properties.
@@ -6371,7 +6371,7 @@ export namespace google {
                 stringValue?: (string|null);
 
                 /** Value bytesValue */
-                bytesValue?: (Uint8Array|string|null);
+                bytesValue?: (Uint8Array|Buffer|string|null);
 
                 /** Value referenceValue */
                 referenceValue?: (string|null);
@@ -6414,7 +6414,7 @@ export namespace google {
                 public stringValue?: (string|null);
 
                 /** Value bytesValue. */
-                public bytesValue?: (Uint8Array|string|null);
+                public bytesValue?: (Uint8Array|Buffer|string|null);
 
                 /** Value referenceValue. */
                 public referenceValue?: (string|null);
@@ -7052,7 +7052,7 @@ export namespace google {
                 mask?: (google.firestore.v1beta1.IDocumentMask|null);
 
                 /** GetDocumentRequest transaction */
-                transaction?: (Uint8Array|string|null);
+                transaction?: (Uint8Array|Buffer|string|null);
 
                 /** GetDocumentRequest readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
@@ -7074,7 +7074,7 @@ export namespace google {
                 public mask?: (google.firestore.v1beta1.IDocumentMask|null);
 
                 /** GetDocumentRequest transaction. */
-                public transaction?: (Uint8Array|string|null);
+                public transaction?: (Uint8Array|Buffer|string|null);
 
                 /** GetDocumentRequest readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
@@ -7182,7 +7182,7 @@ export namespace google {
                 mask?: (google.firestore.v1beta1.IDocumentMask|null);
 
                 /** ListDocumentsRequest transaction */
-                transaction?: (Uint8Array|string|null);
+                transaction?: (Uint8Array|Buffer|string|null);
 
                 /** ListDocumentsRequest readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
@@ -7219,7 +7219,7 @@ export namespace google {
                 public mask?: (google.firestore.v1beta1.IDocumentMask|null);
 
                 /** ListDocumentsRequest transaction. */
-                public transaction?: (Uint8Array|string|null);
+                public transaction?: (Uint8Array|Buffer|string|null);
 
                 /** ListDocumentsRequest readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
@@ -7763,7 +7763,7 @@ export namespace google {
                 mask?: (google.firestore.v1beta1.IDocumentMask|null);
 
                 /** BatchGetDocumentsRequest transaction */
-                transaction?: (Uint8Array|string|null);
+                transaction?: (Uint8Array|Buffer|string|null);
 
                 /** BatchGetDocumentsRequest newTransaction */
                 newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
@@ -7791,7 +7791,7 @@ export namespace google {
                 public mask?: (google.firestore.v1beta1.IDocumentMask|null);
 
                 /** BatchGetDocumentsRequest transaction. */
-                public transaction?: (Uint8Array|string|null);
+                public transaction?: (Uint8Array|Buffer|string|null);
 
                 /** BatchGetDocumentsRequest newTransaction. */
                 public newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
@@ -7890,7 +7890,7 @@ export namespace google {
                 missing?: (string|null);
 
                 /** BatchGetDocumentsResponse transaction */
-                transaction?: (Uint8Array|string|null);
+                transaction?: (Uint8Array|Buffer|string|null);
 
                 /** BatchGetDocumentsResponse readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
@@ -7912,7 +7912,7 @@ export namespace google {
                 public missing?: (string|null);
 
                 /** BatchGetDocumentsResponse transaction. */
-                public transaction: (Uint8Array|string);
+                public transaction: (Uint8Array|Buffer|string);
 
                 /** BatchGetDocumentsResponse readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
@@ -8105,7 +8105,7 @@ export namespace google {
             interface IBeginTransactionResponse {
 
                 /** BeginTransactionResponse transaction */
-                transaction?: (Uint8Array|string|null);
+                transaction?: (Uint8Array|Buffer|string|null);
             }
 
             /** Represents a BeginTransactionResponse. */
@@ -8118,7 +8118,7 @@ export namespace google {
                 constructor(properties?: google.firestore.v1beta1.IBeginTransactionResponse);
 
                 /** BeginTransactionResponse transaction. */
-                public transaction: (Uint8Array|string);
+                public transaction: (Uint8Array|Buffer|string);
 
                 /**
                  * Creates a new BeginTransactionResponse instance using the specified properties.
@@ -8208,7 +8208,7 @@ export namespace google {
                 writes?: (google.firestore.v1beta1.IWrite[]|null);
 
                 /** CommitRequest transaction */
-                transaction?: (Uint8Array|string|null);
+                transaction?: (Uint8Array|Buffer|string|null);
             }
 
             /** Represents a CommitRequest. */
@@ -8227,7 +8227,7 @@ export namespace google {
                 public writes: google.firestore.v1beta1.IWrite[];
 
                 /** CommitRequest transaction. */
-                public transaction: (Uint8Array|string);
+                public transaction: (Uint8Array|Buffer|string);
 
                 /**
                  * Creates a new CommitRequest instance using the specified properties.
@@ -8417,7 +8417,7 @@ export namespace google {
                 database?: (string|null);
 
                 /** RollbackRequest transaction */
-                transaction?: (Uint8Array|string|null);
+                transaction?: (Uint8Array|Buffer|string|null);
             }
 
             /** Represents a RollbackRequest. */
@@ -8433,7 +8433,7 @@ export namespace google {
                 public database: string;
 
                 /** RollbackRequest transaction. */
-                public transaction: (Uint8Array|string);
+                public transaction: (Uint8Array|Buffer|string);
 
                 /**
                  * Creates a new RollbackRequest instance using the specified properties.
@@ -8523,7 +8523,7 @@ export namespace google {
                 structuredQuery?: (google.firestore.v1beta1.IStructuredQuery|null);
 
                 /** RunQueryRequest transaction */
-                transaction?: (Uint8Array|string|null);
+                transaction?: (Uint8Array|Buffer|string|null);
 
                 /** RunQueryRequest newTransaction */
                 newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
@@ -8548,7 +8548,7 @@ export namespace google {
                 public structuredQuery?: (google.firestore.v1beta1.IStructuredQuery|null);
 
                 /** RunQueryRequest transaction. */
-                public transaction?: (Uint8Array|string|null);
+                public transaction?: (Uint8Array|Buffer|string|null);
 
                 /** RunQueryRequest newTransaction. */
                 public newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
@@ -8644,7 +8644,7 @@ export namespace google {
             interface IRunQueryResponse {
 
                 /** RunQueryResponse transaction */
-                transaction?: (Uint8Array|string|null);
+                transaction?: (Uint8Array|Buffer|string|null);
 
                 /** RunQueryResponse document */
                 document?: (google.firestore.v1beta1.IDocument|null);
@@ -8666,7 +8666,7 @@ export namespace google {
                 constructor(properties?: google.firestore.v1beta1.IRunQueryResponse);
 
                 /** RunQueryResponse transaction. */
-                public transaction: (Uint8Array|string);
+                public transaction: (Uint8Array|Buffer|string);
 
                 /** RunQueryResponse document. */
                 public document?: (google.firestore.v1beta1.IDocument|null);
@@ -8995,7 +8995,7 @@ export namespace google {
                 writes?: (google.firestore.v1beta1.IWrite[]|null);
 
                 /** WriteRequest streamToken */
-                streamToken?: (Uint8Array|string|null);
+                streamToken?: (Uint8Array|Buffer|string|null);
 
                 /** WriteRequest labels */
                 labels?: ({ [k: string]: string }|null);
@@ -9020,7 +9020,7 @@ export namespace google {
                 public writes: google.firestore.v1beta1.IWrite[];
 
                 /** WriteRequest streamToken. */
-                public streamToken: (Uint8Array|string);
+                public streamToken: (Uint8Array|Buffer|string);
 
                 /** WriteRequest labels. */
                 public labels: { [k: string]: string };
@@ -9110,7 +9110,7 @@ export namespace google {
                 streamId?: (string|null);
 
                 /** WriteResponse streamToken */
-                streamToken?: (Uint8Array|string|null);
+                streamToken?: (Uint8Array|Buffer|string|null);
 
                 /** WriteResponse writeResults */
                 writeResults?: (google.firestore.v1beta1.IWriteResult[]|null);
@@ -9132,7 +9132,7 @@ export namespace google {
                 public streamId: string;
 
                 /** WriteResponse streamToken. */
-                public streamToken: (Uint8Array|string);
+                public streamToken: (Uint8Array|Buffer|string);
 
                 /** WriteResponse writeResults. */
                 public writeResults: google.firestore.v1beta1.IWriteResult[];
@@ -9470,7 +9470,7 @@ export namespace google {
                 documents?: (google.firestore.v1beta1.Target.IDocumentsTarget|null);
 
                 /** Target resumeToken */
-                resumeToken?: (Uint8Array|string|null);
+                resumeToken?: (Uint8Array|Buffer|string|null);
 
                 /** Target readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
@@ -9498,7 +9498,7 @@ export namespace google {
                 public documents?: (google.firestore.v1beta1.Target.IDocumentsTarget|null);
 
                 /** Target resumeToken. */
-                public resumeToken?: (Uint8Array|string|null);
+                public resumeToken?: (Uint8Array|Buffer|string|null);
 
                 /** Target readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
@@ -9812,7 +9812,7 @@ export namespace google {
                 cause?: (google.rpc.IStatus|null);
 
                 /** TargetChange resumeToken */
-                resumeToken?: (Uint8Array|string|null);
+                resumeToken?: (Uint8Array|Buffer|string|null);
 
                 /** TargetChange readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
@@ -9837,7 +9837,7 @@ export namespace google {
                 public cause?: (google.rpc.IStatus|null);
 
                 /** TargetChange resumeToken. */
-                public resumeToken: (Uint8Array|string);
+                public resumeToken: (Uint8Array|Buffer|string);
 
                 /** TargetChange readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);

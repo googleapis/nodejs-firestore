@@ -233,7 +233,7 @@ describe('v1.FirestoreClient', () => {
             assert(client.firestoreStub);
             client.close().then(() => {
                 done();
-            });
+            }).catch(err => {throw err});
         });
 
         it('has close method for the non-initialized client', done => {
@@ -244,7 +244,7 @@ describe('v1.FirestoreClient', () => {
             assert.strictEqual(client.firestoreStub, undefined);
             client.close().then(() => {
                 done();
-            });
+            }).catch(err => {throw err});
         });
 
         it('has getProjectId method', async () => {
@@ -383,7 +383,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.GetDocumentRequest', ['name']);
             request.name = defaultValue1;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             await assert.rejects(client.getDocument(request), expectedError);
         });
     });
@@ -495,7 +495,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.UpdateDocumentRequest', ['document', 'name']);
             request.document.name = defaultValue1;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             await assert.rejects(client.updateDocument(request), expectedError);
         });
     });
@@ -603,7 +603,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.DeleteDocumentRequest', ['name']);
             request.name = defaultValue1;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             await assert.rejects(client.deleteDocument(request), expectedError);
         });
     });
@@ -711,7 +711,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.BeginTransactionRequest', ['database']);
             request.database = defaultValue1;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             await assert.rejects(client.beginTransaction(request), expectedError);
         });
     });
@@ -819,7 +819,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.CommitRequest', ['database']);
             request.database = defaultValue1;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             await assert.rejects(client.commit(request), expectedError);
         });
     });
@@ -927,7 +927,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.RollbackRequest', ['database']);
             request.database = defaultValue1;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             await assert.rejects(client.rollback(request), expectedError);
         });
     });
@@ -1035,7 +1035,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.BatchWriteRequest', ['database']);
             request.database = defaultValue1;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             await assert.rejects(client.batchWrite(request), expectedError);
         });
     });
@@ -1155,7 +1155,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.CreateDocumentRequest', ['collectionId']);
             request.collectionId = defaultValue2;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             await assert.rejects(client.createDocument(request), expectedError);
         });
     });
@@ -1280,7 +1280,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.BatchGetDocumentsRequest', ['database']);
             request.database = defaultValue1;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             const stream = client.batchGetDocuments(request, {retryRequestOptions: {noResponseRetries: 0}});
             const promise = new Promise((resolve, reject) => {
                 stream.on('data', (response: protos.google.firestore.v1.BatchGetDocumentsResponse) => {
@@ -1420,7 +1420,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.RunQueryRequest', ['parent']);
             request.parent = defaultValue1;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             const stream = client.runQuery(request, {retryRequestOptions: {noResponseRetries: 0}});
             const promise = new Promise((resolve, reject) => {
                 stream.on('data', (response: protos.google.firestore.v1.RunQueryResponse) => {
@@ -1560,7 +1560,7 @@ describe('v1.FirestoreClient', () => {
               getTypeDefaultValue('.google.firestore.v1.RunAggregationQueryRequest', ['parent']);
             request.parent = defaultValue1;
             const expectedError = new Error('The client has already been closed.');
-            client.close();
+            client.close().catch(err => {throw err});
             const stream = client.runAggregationQuery(request, {retryRequestOptions: {noResponseRetries: 0}});
             const promise = new Promise((resolve, reject) => {
                 stream.on('data', (response: protos.google.firestore.v1.RunAggregationQueryResponse) => {

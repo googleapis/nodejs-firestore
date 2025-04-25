@@ -412,6 +412,9 @@ export namespace google {
                     /** Database databaseEdition. */
                     public databaseEdition: (google.firestore.admin.v1.Database.DatabaseEdition|keyof typeof google.firestore.admin.v1.Database.DatabaseEdition);
 
+                    /** Database _freeTier. */
+                    public _freeTier?: "freeTier";
+
                     /**
                      * Creates a new Database instance using the specified properties.
                      * @param [properties] Properties to set
@@ -13986,7 +13989,7 @@ export namespace google {
             doubleValue?: (number|null);
 
             /** UninterpretedOption stringValue */
-            stringValue?: (Uint8Array|string|null);
+            stringValue?: (Uint8Array|Buffer|string|null);
 
             /** UninterpretedOption aggregateValue */
             aggregateValue?: (string|null);
@@ -14017,7 +14020,7 @@ export namespace google {
             public doubleValue: number;
 
             /** UninterpretedOption stringValue. */
-            public stringValue: (Uint8Array|string);
+            public stringValue: (Uint8Array|Buffer|string);
 
             /** UninterpretedOption aggregateValue. */
             public aggregateValue: string;
@@ -15259,7 +15262,7 @@ export namespace google {
             type_url?: (string|null);
 
             /** Any value */
-            value?: (Uint8Array|string|null);
+            value?: (Uint8Array|Buffer|string|null);
         }
 
         /** Represents an Any. */
@@ -15275,7 +15278,7 @@ export namespace google {
             public type_url: string;
 
             /** Any value. */
-            public value: (Uint8Array|string);
+            public value: (Uint8Array|Buffer|string);
 
             /**
              * Creates a new Any instance using the specified properties.
