@@ -8388,11 +8388,7 @@ describe('non-native Firestore types', () => {
   let doc: DocumentReference;
 
   beforeEach(async () => {
-    randomCol = getTestRoot({
-      // TODO(types/ehsan): switch to using prod.
-      host: 'test-firestore.sandbox.googleapis.com',
-      projectId: 'firestore-sdk-nightly',
-    });
+    randomCol = getTestRoot();
     firestore = randomCol.firestore;
     doc = randomCol.doc();
   });
