@@ -796,8 +796,8 @@ describe('CollectionReference class', () => {
     const documentRefs = await randomCol.listDocuments();
 
     const actualDocIds = documentRefs
-        .map(dr => dr.id)
-        .sort((a, b) => a.localeCompare(b));
+      .map(dr => dr.id)
+      .sort((a, b) => a.localeCompare(b));
 
     expect(actualDocIds).to.deep.equal(expectedResults);
   });
@@ -1195,11 +1195,13 @@ describe('DocumentReference class', () => {
   });
 
   it('has listCollections() method', () => {
-    const collections = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+    const collections: string[] = [];
     const promises: Array<Promise<{}>> = [];
 
-    for (const collection of collections) {
-      promises.push(randomCol.doc(`doc/${collection}/doc`).create({}));
+    for (let i = 0; i < 400; i++) {
+      const collectionId = i.toString().padStart(3, '0');
+      promises.push(randomCol.doc(`doc/${collectionId}/doc`).create({}));
+      collections.push(collectionId);
     }
 
     return Promise.all(promises)

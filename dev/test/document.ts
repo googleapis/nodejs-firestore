@@ -2223,7 +2223,6 @@ describe('listCollections() method', () => {
       listCollectionIds: request => {
         expect(request).to.deep.eq({
           parent: `projects/${PROJECT_ID}/databases/(default)/documents/coll/doc`,
-          pageSize: 65535,
         });
 
         return response(['second', 'first']);
