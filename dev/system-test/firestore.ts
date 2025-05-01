@@ -38,6 +38,13 @@ import {
   FieldValue,
   Firestore,
   GeoPoint,
+  MinKey,
+  MaxKey,
+  Int32Value,
+  BsonTimestamp,
+  BsonBinaryData,
+  BsonObjectId,
+  RegexValue,
   Query,
   QueryDocumentSnapshot,
   setLogFunction,
@@ -8440,51 +8447,49 @@ describe('non-native Firestore types', () => {
   }
 
   it('round trip a min key value', async () => {
-    await doc.set({key: FieldValue.minKey()});
+    await doc.set({key: MinKey.instance()});
     const getResult = await doc.get();
     expect(getResult.data()).to.not.be.undefined;
     const roundTripValue = getResult.data()!['key'];
-    expect(roundTripValue === FieldValue.minKey()).to.be.true;
-    expect(roundTripValue === FieldValue.maxKey()).to.be.false;
+    expect(roundTripValue === MinKey.instance()).to.be.true;
+    expect(roundTripValue === MaxKey.instance()).to.be.false;
   });
 
   it('round trip a max key value', async () => {
-    await doc.set({key: FieldValue.maxKey()});
+    await doc.set({key: MaxKey.instance()});
     const getResult = await doc.get();
     expect(getResult.data()).to.not.be.undefined;
     const roundTripValue = getResult.data()!['key'];
-    expect(roundTripValue === FieldValue.minKey()).to.be.false;
-    expect(roundTripValue === FieldValue.maxKey()).to.be.true;
+    expect(roundTripValue === MinKey.instance()).to.be.false;
+    expect(roundTripValue === MaxKey.instance()).to.be.true;
   });
 
   it('round trip an object id value', async () => {
-    await checkRoundTrip(FieldValue.bsonObjectId('507f191e810c19729de860ea'));
+    await checkRoundTrip(new BsonObjectId('507f191e810c19729de860ea'));
   });
 
   it('round trip a regex value', async () => {
-    await checkRoundTrip(FieldValue.regex('^foo', 'i'));
+    await checkRoundTrip(new RegexValue('^foo', 'i'));
   });
 
   it('round trip a 32-bit integer', async () => {
-    await checkRoundTrip(FieldValue.int32(-57));
-    await checkRoundTrip(FieldValue.int32(0));
-    await checkRoundTrip(FieldValue.int32(57));
+    await checkRoundTrip(new Int32Value(-57));
+    await checkRoundTrip(new Int32Value(0));
+    await checkRoundTrip(new Int32Value(57));
   });
 
   it('round trip a BSON timestamp', async () => {
-    await checkRoundTrip(FieldValue.bsonTimestamp(57, 1));
+    await checkRoundTrip(new BsonTimestamp(57, 1));
   });
 
   it('round trip BSON binary data', async () => {
-    await checkRoundTrip(
-      FieldValue.bsonBinaryData(128, Buffer.from([5, 6, 7]))
-    );
+    await checkRoundTrip(new BsonBinaryData(128, Buffer.from([5, 6, 7])));
   });
 
   it('invalid 32-bit integer gets rejected', async () => {
     let error1: Error | null = null;
     try {
-      await doc.set({key: FieldValue.int32(2147483648)});
+      await doc.set({key: new Int32Value(2147483648)});
     } catch (e) {
       error1 = e;
     }
@@ -8496,7 +8501,7 @@ describe('non-native Firestore types', () => {
 
     let error2: Error | null = null;
     try {
-      await doc.set({key: FieldValue.int32(-2147483650)});
+      await doc.set({key: new Int32Value(-2147483650)});
     } catch (e) {
       error2 = e;
     }
@@ -8509,35 +8514,59 @@ describe('non-native Firestore types', () => {
   it('BSON timestamp larger than 32-bit integer gets rejected', async () => {
     let error: Error | null = null;
     try {
-      await doc.set({key: FieldValue.bsonTimestamp(4294967296, 2)});
+      await doc.set({key: new BsonTimestamp(4294967296, 2)});
     } catch (e) {
       error = e;
     }
 
     expect(error).to.not.be.null;
     expect(error!.message).to.contain(
-      "The field 'seconds' value (4,294,967,296) does not represent an unsigned 32-bit integer."
+      "BsonTimestamp 'seconds' must be in the range of a 32-bit unsigned integer."
+    );
+
+    error = null;
+    try {
+      await doc.set({key: new BsonTimestamp(2, 4294967296)});
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).to.not.be.null;
+    expect(error!.message).to.contain(
+      "BsonTimestamp 'increment' must be in the range of a 32-bit unsigned integer."
     );
   });
 
   it('negative BSON timestamp gets rejected', async () => {
     let error: Error | null = null;
     try {
-      await doc.set({key: FieldValue.bsonTimestamp(-1, 2)});
+      await doc.set({key: new BsonTimestamp(-1, 2)});
     } catch (e) {
       error = e;
     }
 
     expect(error).to.not.be.null;
     expect(error!.message).to.contain(
-      "The field 'seconds' value (-1) does not represent an unsigned 32-bit integer."
+      "BsonTimestamp 'seconds' must be in the range of a 32-bit unsigned integer."
+    );
+
+    error = null;
+    try {
+      await doc.set({key: new BsonTimestamp(1, -2)});
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).to.not.be.null;
+    expect(error!.message).to.contain(
+      "BsonTimestamp 'increment' must be in the range of a 32-bit unsigned integer."
     );
   });
 
   it('invalid regex value gets rejected', async () => {
     let error: Error | null = null;
     try {
-      await doc.set({key: FieldValue.regex('foo', 'a')});
+      await doc.set({key: new RegexValue('foo', 'a')});
     } catch (e) {
       error = e;
     }
@@ -8551,7 +8580,7 @@ describe('non-native Firestore types', () => {
   it('invalid bsonObjectId value gets rejected', async () => {
     let error: Error | null = null;
     try {
-      await doc.set({key: FieldValue.bsonObjectId('foo')});
+      await doc.set({key: new BsonObjectId('foo')});
     } catch (e) {
       error = e;
     }
@@ -8566,7 +8595,7 @@ describe('non-native Firestore types', () => {
     let error: Error | null = null;
     try {
       await doc.set({
-        key: FieldValue.bsonBinaryData(1234, new Uint8Array([1, 2, 3])),
+        key: new BsonBinaryData(1234, new Uint8Array([1, 2, 3])),
       });
     } catch (e) {
       error = e;
@@ -8580,14 +8609,14 @@ describe('non-native Firestore types', () => {
 
   it('can filter and order objectIds', async () => {
     const testDocs = {
-      a: {key: FieldValue.bsonObjectId('507f191e810c19729de860ea')},
-      b: {key: FieldValue.bsonObjectId('507f191e810c19729de860eb')},
-      c: {key: FieldValue.bsonObjectId('507f191e810c19729de860ec')},
+      a: {key: new BsonObjectId('507f191e810c19729de860ea')},
+      b: {key: new BsonObjectId('507f191e810c19729de860eb')},
+      c: {key: new BsonObjectId('507f191e810c19729de860ec')},
     };
 
     await addDocs(testDocs);
     let orderedQuery = randomCol
-      .where('key', '>', FieldValue.bsonObjectId('507f191e810c19729de860ea'))
+      .where('key', '>', new BsonObjectId('507f191e810c19729de860ea'))
       .orderBy('key', 'desc');
 
     let snapshot = await getFirstSnapshot(orderedQuery);
@@ -8595,8 +8624,8 @@ describe('non-native Firestore types', () => {
 
     orderedQuery = randomCol
       .where('key', 'in', [
-        FieldValue.bsonObjectId('507f191e810c19729de860ea'),
-        FieldValue.bsonObjectId('507f191e810c19729de860eb'),
+        new BsonObjectId('507f191e810c19729de860ea'),
+        new BsonObjectId('507f191e810c19729de860eb'),
       ])
       .orderBy('key', 'desc');
 
@@ -8606,20 +8635,20 @@ describe('non-native Firestore types', () => {
 
   it('can filter and order Int32 values', async () => {
     const testDocs = {
-      a: {key: FieldValue.int32(-1)},
-      b: {key: FieldValue.int32(1)},
-      c: {key: FieldValue.int32(2)},
+      a: {key: new Int32Value(-1)},
+      b: {key: new Int32Value(1)},
+      c: {key: new Int32Value(2)},
     };
     await addDocs(testDocs);
     let orderedQuery = randomCol
-      .where('key', '>=', FieldValue.int32(1))
+      .where('key', '>=', new Int32Value(1))
       .orderBy('key', 'desc');
 
     let snapshot = await getFirstSnapshot(orderedQuery);
     expect(toDataArray(snapshot)).to.deep.equal([testDocs['c'], testDocs['b']]);
 
     orderedQuery = randomCol
-      .where('key', 'not-in', [FieldValue.int32(1)])
+      .where('key', 'not-in', [new Int32Value(1)])
       .orderBy('key', 'desc');
 
     snapshot = await getFirstSnapshot(orderedQuery);
@@ -8628,21 +8657,21 @@ describe('non-native Firestore types', () => {
 
   it('can filter and order Timestamp values', async () => {
     const testDocs = {
-      a: {key: FieldValue.bsonTimestamp(1, 1)},
-      b: {key: FieldValue.bsonTimestamp(1, 2)},
-      c: {key: FieldValue.bsonTimestamp(2, 1)},
+      a: {key: new BsonTimestamp(1, 1)},
+      b: {key: new BsonTimestamp(1, 2)},
+      c: {key: new BsonTimestamp(2, 1)},
     };
     await addDocs(testDocs);
 
     let orderedQuery = randomCol
-      .where('key', '>', FieldValue.bsonTimestamp(1, 1))
+      .where('key', '>', new BsonTimestamp(1, 1))
       .orderBy('key', 'desc');
 
     let snapshot = await getFirstSnapshot(orderedQuery);
     expect(toDataArray(snapshot)).to.deep.equal([testDocs['c'], testDocs['b']]);
 
     orderedQuery = randomCol
-      .where('key', '!=', FieldValue.bsonTimestamp(1, 1))
+      .where('key', '!=', new BsonTimestamp(1, 1))
       .orderBy('key', 'desc');
 
     snapshot = await getFirstSnapshot(orderedQuery);
@@ -8651,34 +8680,22 @@ describe('non-native Firestore types', () => {
 
   it('can filter and order Binary values', async () => {
     const testDocs = {
-      a: {key: FieldValue.bsonBinaryData(1, new Uint8Array([1, 2, 3]))},
-      b: {key: FieldValue.bsonBinaryData(1, new Uint8Array([1, 2, 4]))},
-      c: {key: FieldValue.bsonBinaryData(2, new Uint8Array([1, 2, 3]))},
+      a: {key: new BsonBinaryData(1, new Uint8Array([1, 2, 3]))},
+      b: {key: new BsonBinaryData(1, new Uint8Array([1, 2, 4]))},
+      c: {key: new BsonBinaryData(2, new Uint8Array([1, 2, 3]))},
     };
     await addDocs(testDocs);
 
     let orderedQuery = randomCol
-      .where(
-        'key',
-        '>',
-        FieldValue.bsonBinaryData(1, new Uint8Array([1, 2, 3]))
-      )
+      .where('key', '>', new BsonBinaryData(1, new Uint8Array([1, 2, 3])))
       .orderBy('key', 'desc');
 
     let snapshot = await getFirstSnapshot(orderedQuery);
     expect(toDataArray(snapshot)).to.deep.equal([testDocs['c'], testDocs['b']]);
 
     orderedQuery = randomCol
-      .where(
-        'key',
-        '>=',
-        FieldValue.bsonBinaryData(1, new Uint8Array([1, 2, 3]))
-      )
-      .where(
-        'key',
-        '<',
-        FieldValue.bsonBinaryData(2, new Uint8Array([1, 2, 3]))
-      )
+      .where('key', '>=', new BsonBinaryData(1, new Uint8Array([1, 2, 3])))
+      .where('key', '<', new BsonBinaryData(2, new Uint8Array([1, 2, 3])))
       .orderBy('key', 'desc');
 
     snapshot = await getFirstSnapshot(orderedQuery);
@@ -8687,17 +8704,17 @@ describe('non-native Firestore types', () => {
 
   it('can filter and order Regex values', async () => {
     const testDocs = {
-      a: {key: FieldValue.regex('^bar', 'i')},
-      b: {key: FieldValue.regex('^bar', 'x')},
-      c: {key: FieldValue.regex('^baz', 'i')},
+      a: {key: new RegexValue('^bar', 'i')},
+      b: {key: new RegexValue('^bar', 'x')},
+      c: {key: new RegexValue('^baz', 'i')},
     };
     await addDocs(testDocs);
 
     const orderedQuery = randomCol
       .where(
         Filter.or(
-          Filter.where('key', '>', FieldValue.regex('^bar', 'x')),
-          Filter.where('key', '!=', FieldValue.regex('^bar', 'x'))
+          Filter.where('key', '>', new RegexValue('^bar', 'x')),
+          Filter.where('key', '!=', new RegexValue('^bar', 'x'))
         )
       )
       .orderBy('key', 'desc');
@@ -8708,15 +8725,15 @@ describe('non-native Firestore types', () => {
 
   it('can filter and order minKey values', async () => {
     const testDocs = {
-      a: {key: FieldValue.minKey()},
-      b: {key: FieldValue.minKey()},
-      c: {key: FieldValue.maxKey()},
+      a: {key: MinKey.instance()},
+      b: {key: MinKey.instance()},
+      c: {key: MaxKey.instance()},
       d: {key: null},
     };
     await addDocs(testDocs);
 
     const orderedQuery = randomCol
-      .where('key', '==', FieldValue.minKey())
+      .where('key', '==', MinKey.instance())
       .orderBy('key', 'desc'); // minKeys are equal, would sort by documentId as secondary order
 
     const snapshot = await getFirstSnapshot(orderedQuery);
@@ -8725,13 +8742,13 @@ describe('non-native Firestore types', () => {
 
   it('can filter and order maxKey values', async () => {
     const testDocs = {
-      a: {key: FieldValue.minKey()},
-      b: {key: FieldValue.maxKey()},
-      c: {key: FieldValue.maxKey()},
+      a: {key: MinKey.instance()},
+      b: {key: MaxKey.instance()},
+      c: {key: MaxKey.instance()},
     };
     await addDocs(testDocs);
     const orderedQuery = randomCol
-      .where('key', '==', FieldValue.maxKey())
+      .where('key', '==', MaxKey.instance())
       .orderBy('key', 'desc'); // maxKeys are equal, would sort by documentId as secondary order
     const snapshot = await getFirstSnapshot(orderedQuery);
     expect(toDataArray(snapshot)).to.deep.equal([testDocs['c'], testDocs['b']]);
@@ -8740,25 +8757,25 @@ describe('non-native Firestore types', () => {
   it('cross-type order', async () => {
     await addDocs({
       s: {key: null},
-      t: {key: FieldValue.minKey()},
+      t: {key: MinKey.instance()},
       c: {key: true},
       d: {key: NaN},
-      e: {key: FieldValue.int32(1)},
+      e: {key: new Int32Value(1)},
       f: {key: 2.0},
       g: {key: 3},
       h: {key: new Timestamp(100, 123456000)},
-      i: {key: FieldValue.bsonTimestamp(1, 2)},
+      i: {key: new BsonTimestamp(1, 2)},
       j: {key: 'string'},
       k: {key: new Uint8Array([0, 1, 255])},
-      l: {key: FieldValue.bsonBinaryData(1, new Uint8Array([1, 2, 3]))},
+      l: {key: new BsonBinaryData(1, new Uint8Array([1, 2, 3]))},
       m: {key: randomCol.firestore.collection('c1').doc('doc')},
-      n: {key: FieldValue.bsonObjectId('507f191e810c19729de860ea')},
+      n: {key: new BsonObjectId('507f191e810c19729de860ea')},
       o: {key: new GeoPoint(0, 0)},
-      p: {key: FieldValue.regex('^foo', 'i')},
+      p: {key: new RegexValue('^foo', 'i')},
       q: {key: [1, 2]},
       r: {key: FieldValue.vector([1, 2])},
       a: {key: {a: 1}},
-      b: {key: FieldValue.maxKey()},
+      b: {key: MaxKey.instance()},
     });
 
     const expectedResult = [

@@ -156,12 +156,16 @@ export class MaxKey implements firestore.MaxKey {
 
 /**
  * Represents a regular expression type in Firestore documents.
- * Create an instance with {@link FieldValue.regex}.
  *
  * @class RegexValue
  */
 export class RegexValue implements firestore.RegexValue {
   /**
+   * Creates a new regular expression value with the given pattern and options.
+   *
+   * @param pattern - The pattern to use for this regex value.
+   * @param options - The options to use for this regex value.
+   *
    * @private
    * @internal
    */
@@ -205,12 +209,15 @@ export class RegexValue implements firestore.RegexValue {
 
 /**
  * Represents a BSON ObjectId type in Firestore documents.
- * Create an instance with {@link FieldValue.bsonObjectId}.
  *
  * @class BsonObjectId
  */
 export class BsonObjectId implements firestore.BsonObjectId {
   /**
+   * Creates a new BSON ObjectId value with the given value.
+   *
+   * @param value - The 24-character hex string representing the ObjectId.
+   *
    * @private
    * @internal
    */
@@ -235,7 +242,7 @@ export class BsonObjectId implements firestore.BsonObjectId {
   }
 
   /**
-   * Returns `true` if the two regex values have the same pattern and options, returns `false` otherwise.
+   * Returns `true` if the two BsonObjectId values have the same pattern and options, returns `false` otherwise.
    */
   isEqual(other: BsonObjectId): boolean {
     return this.value === other.value;
@@ -245,6 +252,14 @@ export class BsonObjectId implements firestore.BsonObjectId {
 /** Represents a 32-bit integer type in Firestore documents. */
 export class Int32Value implements firestore.Int32Value {
   /**
+   * Creates a new 32-bit signed integer value.
+   *
+   * @param value - The number whose 32-bit representation will be used.
+   *
+   * Note: values larger than the largest 32-bit signed integer,
+   * or smaller than the smallest 32-bit signed integer are invalid
+   * and will get rejected.
+   *
    * @private
    * @internal
    */
@@ -283,6 +298,14 @@ export class Int32Value implements firestore.Int32Value {
 /** Represents a Request Timestamp type in Firestore documents. */
 export class BsonTimestamp implements firestore.BsonTimestamp {
   /**
+   * Creates a new BSON Timestamp from the given values.
+   *
+   * @param seconds - The seconds value to be used for this BSON timestamp.
+   * @param increment - The increment value to be used for this BSON timestamp.
+   *
+   * Note: negative values and values larger than the largest 32-bit
+   * unsigned integer are invalid and will get rejected.
+   *
    * @private
    * @internal
    */
@@ -341,6 +364,11 @@ export class BsonTimestamp implements firestore.BsonTimestamp {
 /** Represents a BSON Binary Data type in Firestore documents. */
 export class BsonBinaryData implements firestore.BsonBinaryData {
   /**
+   * Creates a new BSON Binary Data from the given values.
+   *
+   * @param subtype - The subtype of the data.
+   * @param data - The byte array that contains the data.
+   *
    * @private
    * @internal
    */
@@ -416,89 +444,6 @@ export class FieldValue implements firestore.FieldValue {
    */
   static vector(values?: number[]): VectorValue {
     return new VectorValue(values);
-  }
-
-  /**
-   * Returns a `MinKey` instance.
-   *
-   * @returns The `MinKey` instance.
-   */
-  static minKey(): MinKey {
-    return MinKey.instance();
-  }
-
-  /**
-   * Returns a `MaxKey` instance.
-   *
-   * @returns The `MaxKey` instance.
-   */
-  static maxKey(): MaxKey {
-    return MaxKey.instance();
-  }
-
-  /**
-   * Creates a new regular expression value with the given pattern and options.
-   *
-   * @param pattern - The pattern to use for this regex value.
-   * @param options - The options to use for this regex value.
-   *
-   * @returns The regular expression value.
-   */
-  static regex(pattern: string, options: string): RegexValue {
-    return new RegexValue(pattern, options);
-  }
-
-  /**
-   * Creates a new BSON ObjectId value with the given value.
-   *
-   * @param value - The 24-character hex string representing the ObjectId.
-   *
-   * @returns The new BSON ObjectId instance.
-   */
-  static bsonObjectId(value: string): BsonObjectId {
-    return new BsonObjectId(value);
-  }
-
-  /**
-   * Returns a new 32-bit signed integer value.
-   *
-   * @param value - The number whose 32-bit representation will be used.
-   *
-   * Note: values larger than the largest 32-bit signed integer,
-   * or smaller than the smallest 32-bit signed integer are invalid
-   * and will get rejected.
-   *
-   * @return A new 32-bit integer value.
-   */
-  static int32(value: number): Int32Value {
-    return new Int32Value(value);
-  }
-
-  /**
-   * Creates a new BSON Timestamp from the given values.
-   *
-   * @param seconds - The seconds value to be used for this BSON timestamp.
-   * @param increment - The increment value to be used for this BSON timestamp.
-   *
-   *  Note: negative values and values larger than the largest 32-bit
-   *  unsigned integer are invalid and will get rejected.
-   *
-   * @return A new BSON Timestamp value.
-   */
-  static bsonTimestamp(seconds: number, increment: number): BsonTimestamp {
-    return new BsonTimestamp(seconds, increment);
-  }
-
-  /**
-   * Creates a new BSON Binary Data from the given values.
-   *
-   * @param subtype - The subtype of the data.
-   * @param data - The byte array that contains the data.
-   *
-   * @return A new BsonBinaryData value.
-   */
-  static bsonBinaryData(subtype: number, data: Uint8Array): BsonBinaryData {
-    return new BsonBinaryData(subtype, data);
   }
 
   /**

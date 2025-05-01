@@ -21,7 +21,18 @@ import {GoogleError, GrpcClient, Status} from 'google-gax';
 import {google} from '../protos/firestore_v1_proto_api';
 
 import * as Firestore from '../src';
-import {DocumentSnapshot, FieldPath, FieldValue} from '../src';
+import {
+  DocumentSnapshot,
+  FieldPath,
+  FieldValue,
+  BsonBinaryData,
+  BsonObjectId,
+  BsonTimestamp,
+  Int32Value,
+  MaxKey,
+  MinKey,
+  RegexValue,
+} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {QualifiedResourcePath} from '../src/path';
 import {
@@ -458,18 +469,18 @@ const allSupportedTypesInput = {
   falseValue: false,
   integerValue: 0,
   doubleValue: 0.1,
-  int32Value: FieldValue.int32(789),
+  int32Value: new Int32Value(789),
   infinityValue: Infinity,
   negativeInfinityValue: -Infinity,
   objectValue: {foo: 'bar'},
   emptyObject: {},
   vectorValue: FieldValue.vector([0.1, 0.2, 0.3]),
-  minKeyValue: FieldValue.minKey(),
-  maxKeyValue: FieldValue.maxKey(),
-  regexValue: FieldValue.regex('myRegexPattern', 'myRegexOptions'),
-  bsonTimestampValue: FieldValue.bsonTimestamp(123, 456),
-  bsonBinaryValue: FieldValue.bsonBinaryData(155, Buffer.from([7, 90, 250])),
-  bsonObjectIdValue: FieldValue.bsonObjectId('my24CharacterHexString'),
+  minKeyValue: MinKey.instance(),
+  maxKeyValue: MaxKey.instance(),
+  regexValue: new RegexValue('myRegexPattern', 'myRegexOptions'),
+  bsonTimestampValue: new BsonTimestamp(123, 456),
+  bsonBinaryValue: new BsonBinaryData(155, Buffer.from([7, 90, 250])),
+  bsonObjectIdValue: new BsonObjectId('my24CharacterHexString'),
   dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
   timestampValue: Firestore.Timestamp.fromDate(
     new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
@@ -494,18 +505,18 @@ const allSupportedTypesOutput: {[field: string]: unknown} = {
   falseValue: false,
   integerValue: 0,
   doubleValue: 0.1,
-  int32Value: FieldValue.int32(789),
+  int32Value: new Int32Value(789),
   infinityValue: Infinity,
   negativeInfinityValue: -Infinity,
   objectValue: {foo: 'bar'},
   emptyObject: {},
   vectorValue: FieldValue.vector([0.1, 0.2, 0.3]),
-  minKeyValue: FieldValue.minKey(),
-  maxKeyValue: FieldValue.maxKey(),
-  regexValue: FieldValue.regex('myRegexPattern', 'myRegexOptions'),
-  bsonTimestampValue: FieldValue.bsonTimestamp(123, 456),
-  bsonBinaryValue: FieldValue.bsonBinaryData(155, Buffer.from([7, 90, 250])),
-  bsonObjectIdValue: FieldValue.bsonObjectId('my24CharacterHexString'),
+  minKeyValue: MinKey.instance(),
+  maxKeyValue: MaxKey.instance(),
+  regexValue: new RegexValue('myRegexPattern', 'myRegexOptions'),
+  bsonTimestampValue: new BsonTimestamp(123, 456),
+  bsonBinaryValue: new BsonBinaryData(155, Buffer.from([7, 90, 250])),
+  bsonObjectIdValue: new BsonObjectId('my24CharacterHexString'),
   dateValue: Firestore.Timestamp.fromDate(
     new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
   ),

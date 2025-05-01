@@ -25,6 +25,13 @@ import {
   GeoPoint,
   setLogFunction,
   Timestamp,
+  BsonBinaryData,
+  BsonObjectId,
+  BsonTimestamp,
+  Int32Value,
+  MaxKey,
+  MinKey,
+  RegexValue,
 } from '../src';
 import {
   ApiOverride,
@@ -532,7 +539,7 @@ describe('serialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
-        myMinKey: FieldValue.minKey(),
+        myMinKey: MinKey.instance(),
       });
     });
   });
@@ -560,7 +567,7 @@ describe('serialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
-        myMaxKey: FieldValue.maxKey(),
+        myMaxKey: MaxKey.instance(),
       });
     });
   });
@@ -597,7 +604,7 @@ describe('serialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
-        myRegexValue: FieldValue.regex('foo', 'bar'),
+        myRegexValue: new RegexValue('foo', 'bar'),
       });
     });
   });
@@ -625,7 +632,7 @@ describe('serialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
-        myObjectIdValue: FieldValue.bsonObjectId('foo'),
+        myObjectIdValue: new BsonObjectId('foo'),
       });
     });
   });
@@ -653,7 +660,7 @@ describe('serialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
-        myInt32: FieldValue.int32(12345),
+        myInt32: new Int32Value(12345),
       });
     });
   });
@@ -690,7 +697,7 @@ describe('serialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
-        myBsonTimestamp: FieldValue.bsonTimestamp(12345, 67),
+        myBsonTimestamp: new BsonTimestamp(12345, 67),
       });
     });
   });
@@ -718,10 +725,7 @@ describe('serialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
-        myBsonBinaryData: FieldValue.bsonBinaryData(
-          250,
-          Buffer.from([1, 2, 3])
-        ),
+        myBsonBinaryData: new BsonBinaryData(250, Buffer.from([1, 2, 3])),
       });
     });
   });
