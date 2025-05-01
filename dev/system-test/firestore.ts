@@ -783,6 +783,25 @@ describe('CollectionReference class', () => {
     expect(missingDocs.map(doc => doc.id)).to.have.members(['b']);
   });
 
+  it('lists documents (more than the max page size)', async () => {
+    const batch = firestore.batch();
+    const expectedResults = [];
+    for (let i = 0; i < 400; i++) {
+      const docRef = randomCol.doc(`${i}`.padStart(3, '0'));
+      batch.set(docRef, {id: i});
+      expectedResults.push(docRef.id);
+    }
+    await batch.commit();
+
+    const documentRefs = await randomCol.listDocuments();
+
+    const actualDocIds = documentRefs
+        .map(dr => dr.id)
+        .sort((a, b) => a.localeCompare(b));
+
+    expect(actualDocIds).to.deep.equal(expectedResults);
+  });
+
   it('supports withConverter()', async () => {
     const ref = await firestore
       .collection('col')
