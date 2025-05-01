@@ -4093,6 +4093,20 @@ describe('Query class', () => {
     });
 
     describe('sort unicode strings', () => {
+      const expectedDocs = [
+        'b',
+        'a',
+        'h',
+        'i',
+        'c',
+        'f',
+        'e',
+        'd',
+        'g',
+        'k',
+        'j',
+      ];
+
       it('snapshot listener sorts unicode strings same as server', async () => {
         const collection = await testCollectionWithDocs({
           a: {value: 'Łukasiewicz'},
@@ -4102,10 +4116,13 @@ describe('Query class', () => {
           e: {value: 'Ｐ'},
           f: {value: '︒'},
           g: {value: '🐵'},
+          h: {value: '你好'},
+          i: {value: '你顥'},
+          j: {value: '😁'},
+          k: {value: '😀'},
         });
 
         const query = collection.orderBy('value');
-        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
 
         const getSnapshot = await query.get();
         expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
@@ -4130,10 +4147,13 @@ describe('Query class', () => {
           e: {value: ['Ｐ']},
           f: {value: ['︒']},
           g: {value: ['🐵']},
+          h: {value: ['你好']},
+          i: {value: ['你顥']},
+          j: {value: ['😁']},
+          k: {value: ['😀']},
         });
 
         const query = collection.orderBy('value');
-        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
 
         const getSnapshot = await query.get();
         expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
@@ -4158,10 +4178,13 @@ describe('Query class', () => {
           e: {value: {foo: 'Ｐ'}},
           f: {value: {foo: '︒'}},
           g: {value: {foo: '🐵'}},
+          h: {value: {foo: '你好'}},
+          i: {value: {foo: '你顥'}},
+          j: {value: {foo: '😁'}},
+          k: {value: {foo: '😀'}},
         });
 
         const query = collection.orderBy('value');
-        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
 
         const getSnapshot = await query.get();
         expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
@@ -4186,10 +4209,13 @@ describe('Query class', () => {
           e: {value: {Ｐ: true}},
           f: {value: {'︒': true}},
           g: {value: {'🐵': true}},
+          h: {value: {你好: true}},
+          i: {value: {你顥: true}},
+          j: {value: {'😁': true}},
+          k: {value: {'😀': true}},
         });
 
         const query = collection.orderBy('value');
-        const expectedDocs = ['b', 'a', 'c', 'f', 'e', 'd', 'g'];
 
         const getSnapshot = await query.get();
         expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
@@ -4214,17 +4240,25 @@ describe('Query class', () => {
           Ｐ: {value: true},
           '︒': {value: true},
           '🐵': {value: true},
+          你好: {value: true},
+          你顥: {value: true},
+          '😁': {value: true},
+          '😀': {value: true},
         });
 
         const query = collection.orderBy(FieldPath.documentId());
         const expectedDocs = [
           'Sierpiński',
           'Łukasiewicz',
+          '你好',
+          '你顥',
           '岩澤',
           '︒',
           'Ｐ',
           '🄟',
           '🐵',
+          '😀',
+          '😁',
         ];
 
         const getSnapshot = await query.get();
@@ -4982,6 +5016,26 @@ describe('Aggregation queries', () => {
     });
     return Promise.all(sets);
   }
+
+  it('can run count within a transaction with readtime', async () => {
+    const doc = col.doc();
+    const writeResult: WriteResult = await doc.create({some: 'data'});
+
+    const count = await firestore.runTransaction(t => t.get(col.count()), {
+      readOnly: true,
+      readTime: writeResult.writeTime,
+    });
+    expect(count.data().count).to.equal(1);
+
+    const countBefore = await firestore.runTransaction(
+      t => t.get(col.count()),
+      {
+        readOnly: true,
+        readTime: Timestamp.fromMillis(writeResult.writeTime.toMillis() - 1),
+      }
+    );
+    expect(countBefore.data().count).to.equal(0);
+  });
 
   it('can run count query using aggregate api', async () => {
     const testDocs = {

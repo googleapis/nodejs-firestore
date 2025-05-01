@@ -15104,6 +15104,7 @@
                  * @memberof google.api
                  * @interface ISelectiveGapicGeneration
                  * @property {Array.<string>|null} [methods] SelectiveGapicGeneration methods
+                 * @property {boolean|null} [generateOmittedAsInternal] SelectiveGapicGeneration generateOmittedAsInternal
                  */
     
                 /**
@@ -15131,6 +15132,14 @@
                 SelectiveGapicGeneration.prototype.methods = $util.emptyArray;
     
                 /**
+                 * SelectiveGapicGeneration generateOmittedAsInternal.
+                 * @member {boolean} generateOmittedAsInternal
+                 * @memberof google.api.SelectiveGapicGeneration
+                 * @instance
+                 */
+                SelectiveGapicGeneration.prototype.generateOmittedAsInternal = false;
+    
+                /**
                  * Creates a SelectiveGapicGeneration message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.SelectiveGapicGeneration
@@ -15149,6 +15158,8 @@
                         for (var i = 0; i < object.methods.length; ++i)
                             message.methods[i] = String(object.methods[i]);
                     }
+                    if (object.generateOmittedAsInternal != null)
+                        message.generateOmittedAsInternal = Boolean(object.generateOmittedAsInternal);
                     return message;
                 };
     
@@ -15167,11 +15178,15 @@
                     var object = {};
                     if (options.arrays || options.defaults)
                         object.methods = [];
+                    if (options.defaults)
+                        object.generateOmittedAsInternal = false;
                     if (message.methods && message.methods.length) {
                         object.methods = [];
                         for (var j = 0; j < message.methods.length; ++j)
                             object.methods[j] = message.methods[j];
                     }
+                    if (message.generateOmittedAsInternal != null && message.hasOwnProperty("generateOmittedAsInternal"))
+                        object.generateOmittedAsInternal = message.generateOmittedAsInternal;
                     return object;
                 };
     
