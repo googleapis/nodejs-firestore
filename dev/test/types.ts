@@ -226,6 +226,44 @@ describe('FirestoreTypeConverter', () => {
     }));
 });
 
+describe('WithFieldValue<T>', () => {
+  it('does not affect functions on types', () => {
+    type SampleType = {
+      bar: string;
+      foo: () => void;
+    };
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    function test(x: WithFieldValue<SampleType>) {
+      // @ts-expect-error This should fail because x.bar is type `string | FieldValue`
+      const b: string = x.bar;
+
+      // ASSERT: if WithFieldValue applies FieldValue | K[T]
+      // to methods on the type, then this line will not compile
+      const f: () => void = x.foo;
+    }
+    /* eslint-enable @typescript-eslint/no-unused-vars */
+  });
+});
+
+describe('PartialWithFieldValue<T>', () => {
+  it('does not affect functions on types', () => {
+    type SampleType = {
+      bar: string;
+      foo: () => void;
+    };
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    function test(x: PartialWithFieldValue<SampleType>) {
+      // @ts-expect-error This should fail because x.bar is type `string | FieldValue`
+      const b: string = x.bar;
+
+      // ASSERT: if WithFieldValue applies FieldValue | K[T]
+      // to methods on the type, then this line will not compile
+      const f: undefined | (() => void) = x.foo;
+    }
+    /* eslint-enable @typescript-eslint/no-unused-vars */
+  });
+});
+
 /**
  * Does nothing; however, this function can be useful in tests that only check
  * the compile-time behavior of the TypeScript compiler. For example, a test
