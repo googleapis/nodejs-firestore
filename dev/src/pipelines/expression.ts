@@ -3336,7 +3336,7 @@ export function substr(
 /**
  * @beta
  *
- * Creates an expression that adds two expressions together.
+ * Creates an expression that adds the result of two expressions together.
  *
  * ```typescript
  * // Add the value of the 'quantity' field and the 'reserve' field.
@@ -3345,19 +3345,14 @@ export function substr(
  *
  * @param first The first expression to add.
  * @param second The second expression or literal to add.
- * @param others Optional other expressions or literals to add.
  * @return A new {@code Expr} representing the addition operation.
  */
-export function add(
-  first: Expr,
-  second: Expr | unknown,
-  ...others: Array<Expr | unknown>
-): FunctionExpr;
+export function add(first: Expr, second: Expr | unknown): FunctionExpr;
 
 /**
  * @beta
  *
- * Creates an expression that adds a field's value to an expression.
+ * Creates an expression that adds a field's value to the result of an expression.
  *
  * ```typescript
  * // Add the value of the 'quantity' field and the 'reserve' field.
@@ -3366,24 +3361,15 @@ export function add(
  *
  * @param fieldName The name of the field containing the value to add.
  * @param second The second expression or literal to add.
- * @param others Optional other expressions or literals to add.
  * @return A new {@code Expr} representing the addition operation.
  */
-export function add(
-  fieldName: string,
-  second: Expr | unknown,
-  ...others: Array<Expr | unknown>
-): FunctionExpr;
+export function add(fieldName: string, second: Expr | unknown): FunctionExpr;
 
 export function add(
   first: Expr | string,
-  second: Expr | unknown,
-  ...others: Array<Expr | unknown>
+  second: Expr | unknown
 ): FunctionExpr {
-  return fieldOrExpression(first).add(
-    valueToDefaultExpr(second),
-    ...others.map(value => valueToDefaultExpr(value))
-  );
+  return fieldOrExpression(first).add(valueToDefaultExpr(second));
 }
 
 /**
@@ -3461,7 +3447,7 @@ export function subtract(
 /**
  * @beta
  *
- * Creates an expression that multiplies two expressions together.
+ * Creates an expression that multiplies the result of two expressions together.
  *
  * ```typescript
  * // Multiply the 'quantity' field by the 'price' field
@@ -3470,45 +3456,34 @@ export function subtract(
  *
  * @param first The first expression to multiply.
  * @param second The second expression or literal to multiply.
- * @param others Optional additional expressions or literals to multiply.
  * @return A new {@code Expr} representing the multiplication operation.
  */
-export function multiply(
-  first: Expr,
-  second: Expr | unknown,
-  ...others: Array<Expr | unknown>
-): FunctionExpr;
+export function multiply(first: Expr, second: Expr | unknown): FunctionExpr;
 
 /**
  * @beta
  *
- * Creates an expression that multiplies a field's value by an expression.
+ * Creates an expression that multiplies a field's value by the result of an expression.
  *
  * ```typescript
  * // Multiply the 'quantity' field by the 'price' field
  * multiply("quantity", field("price"));
  * ```
  *
- * @param fieldName The name of the field containing the value to add.
- * @param second The second expression or literal to add.
- * @param others Optional other expressions or literals to add.
+ * @param fieldName The name of the field containing the value to multiply.
+ * @param second The second expression or literal to multiply.
  * @return A new {@code Expr} representing the multiplication operation.
  */
 export function multiply(
   fieldName: string,
-  second: Expr | unknown,
-  ...others: Array<Expr | unknown>
+  second: Expr | unknown
 ): FunctionExpr;
 
 export function multiply(
   first: Expr | string,
-  second: Expr | unknown,
-  ...others: Array<Expr | unknown>
+  second: Expr | unknown
 ): FunctionExpr {
-  return fieldOrExpression(first).multiply(
-    valueToDefaultExpr(second),
-    ...others.map(valueToDefaultExpr)
-  );
+  return fieldOrExpression(first).multiply(valueToDefaultExpr(second));
 }
 
 /**
