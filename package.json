@@ -120,7 +120,7 @@
     },
     "./pipelines": {
       "types": "./types/pipelines.d.ts",
-      "default": "./build/src/index.js"
+      "default": "./build/src/pipelines/index.js"
     },
     "./package.json": "./package.json"
   }

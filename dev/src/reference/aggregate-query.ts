@@ -22,7 +22,7 @@ import * as deepEqual from 'fast-deep-equal';
 
 import * as firestore from '@google-cloud/firestore';
 import {Aggregate, AggregateSpec} from '../aggregate';
-import {avg, count, countAll, field, sum} from '../expression';
+import {avg, count, countAll, field, sum} from '../pipelines';
 import {Pipeline} from '../pipelines';
 import {Timestamp} from '../timestamp';
 import {mapToArray, requestTag, wrapError} from '../util';
@@ -349,6 +349,10 @@ export class AggregateQuery<
     return runQueryRequest;
   }
 
+  /**
+   * @private
+   * @internal
+   */
   _pipeline(): Pipeline {
     const aggregates = mapToArray(
       this._aggregates,

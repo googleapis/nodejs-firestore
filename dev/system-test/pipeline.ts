@@ -15,9 +15,7 @@
 import {DocumentData} from '@google-cloud/firestore';
 
 import {
-  Pipeline,
   BooleanExpr,
-  constant,
   constantVector,
   map,
   array,
@@ -36,7 +34,6 @@ import {
   byteLength,
   bitAnd,
   multiply,
-  PipelineSnapshot,
   sum,
   maximum,
   descending,
@@ -66,7 +63,6 @@ import {
   documentId,
   isNull,
   arrayContainsAll,
-  FindNearestOptions,
   replaceFirst,
   replaceAll,
   mapRemove,
@@ -103,11 +99,15 @@ import {
   mapGet,
   lte,
   eqAny,
-  PipelineResult,
   notEqAny,
   logicalMinimum,
   logicalMaximum,
   cond,
+  constant,
+  PipelineResult,
+  PipelineSnapshot,
+  Pipeline,
+  FindNearestOptions,
 } from '../src/pipelines';
 
 import {

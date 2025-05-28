@@ -41,7 +41,6 @@ import {
   ResourcePath,
   validateResourcePath,
 } from './path';
-import {PipelineSource} from './pipelines';
 import {ClientPool} from './pool';
 import {CollectionReference} from './reference/collection-reference';
 import {DocumentReference} from './reference/document-reference';
@@ -95,6 +94,10 @@ import {
 } from './telemetry/trace-util';
 import {DisabledTraceUtil} from './telemetry/disabled-trace-util';
 import {EnabledTraceUtil} from './telemetry/enabled-trace-util';
+import {PipelineSource} from './pipelines';
+
+import * as Pipelines from './pipelines';
+export {Pipelines};
 
 export {CollectionReference} from './reference/collection-reference';
 export {DocumentReference} from './reference/document-reference';
@@ -945,6 +948,9 @@ export class Firestore implements firestore.Firestore {
     return new CollectionGroup(this, collectionId, /* converter= */ undefined);
   }
 
+  /**
+   * TODO
+   */
   pipeline(): PipelineSource {
     return new PipelineSource(this);
   }

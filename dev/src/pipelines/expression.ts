@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as protos from '../protos/firestore_v1_proto_api';
+import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
 import type * as firestore from '@google-cloud/firestore';
-import type * as pipelines from '@google-cloud/firestore/pipelines';
 
-import {VectorValue} from './field-value';
-import {FieldPath} from './path';
+import {VectorValue} from '../field-value';
+import {FieldPath} from '../path';
 import {
   fieldOrExpression,
   isFirestoreValue,
   valueToDefaultExpr,
   vectorToExpr,
 } from './pipeline-util';
-import {HasUserData, Serializer, validateUserInput} from './serializer';
-import {cast} from './util';
+import {HasUserData, Serializer, validateUserInput} from '../serializer';
+import {cast} from '../util';
 
 /**
- * @beta
- *
  * Represents an expression that can be evaluated to a value within the execution of a {@link
  * Pipeline}.
  *
@@ -45,8 +42,8 @@ import {cast} from './util';
  * The `Expr` class provides a fluent API for building expressions. You can chain together
  * method calls to create complex expressions.
  */
-export abstract class Expr implements pipelines.Expr, HasUserData {
-  abstract readonly exprType: pipelines.ExprType;
+export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
+  abstract exprType: firestore.Pipelines.ExprType;
 
   /**
    * @internal
@@ -82,8 +79,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new `Expr` representing the addition operation.
    */
   add(
-    second: pipelines.Expr | unknown,
-    ...others: Array<pipelines.Expr | unknown>
+    second: firestore.Pipelines.Expr | unknown,
+    ...others: Array<firestore.Pipelines.Expr | unknown>
   ): FunctionExpr {
     const values = [second, ...others];
     return new FunctionExpr('add', [
@@ -103,7 +100,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param other The expression to subtract from this expression.
    * @return A new `Expr` representing the subtraction operation.
    */
-  subtract(other: pipelines.Expr): FunctionExpr;
+  subtract(other: firestore.Pipelines.Expr): FunctionExpr;
 
   /**
    * Creates an expression that subtracts a constant value from this expression.
@@ -117,7 +114,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new `Expr` representing the subtraction operation.
    */
   subtract(other: number): FunctionExpr;
-  subtract(other: number | pipelines.Expr): FunctionExpr {
+  subtract(other: number | firestore.Pipelines.Expr): FunctionExpr {
     return new FunctionExpr('subtract', [this, valueToDefaultExpr(other)]);
   }
 
@@ -134,8 +131,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new `Expr` representing the multiplication operation.
    */
   multiply(
-    second: pipelines.Expr | number,
-    ...others: Array<pipelines.Expr | number>
+    second: Expr | number,
+    ...others: Array<Expr | number>
   ): FunctionExpr {
     return new FunctionExpr('multiply', [
       this,
@@ -155,7 +152,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param other The expression to divide by.
    * @return A new `Expr` representing the division operation.
    */
-  divide(other: pipelines.Expr): FunctionExpr;
+  divide(other: Expr): FunctionExpr;
 
   /**
    * Creates an expression that divides this expression by a constant value.
@@ -169,7 +166,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new `Expr` representing the division operation.
    */
   divide(other: number): FunctionExpr;
-  divide(other: number | pipelines.Expr): FunctionExpr {
+  divide(other: number | Expr): FunctionExpr {
     return new FunctionExpr('divide', [this, valueToDefaultExpr(other)]);
   }
 
@@ -184,7 +181,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param expression The expression to divide by.
    * @return A new `Expr` representing the modulo operation.
    */
-  mod(expression: pipelines.Expr): FunctionExpr;
+  mod(expression: Expr): FunctionExpr;
 
   /**
    * Creates an expression that calculates the modulo (remainder) of dividing this expression by a constant value.
@@ -198,7 +195,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new `Expr` representing the modulo operation.
    */
   mod(value: number): FunctionExpr;
-  mod(other: number | pipelines.Expr): FunctionExpr {
+  mod(other: number | Expr): FunctionExpr {
     return new FunctionExpr('mod', [this, valueToDefaultExpr(other)]);
   }
 
@@ -213,7 +210,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param expression The expression to compare for equality.
    * @return A new `Expr` representing the equality comparison.
    */
-  eq(expression: pipelines.Expr): BooleanExpr;
+  eq(expression: Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is equal to a constant value.
@@ -242,7 +239,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param expression The expression to compare for inequality.
    * @return A new `Expr` representing the inequality comparison.
    */
-  neq(expression: pipelines.Expr): BooleanExpr;
+  neq(expression: Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is not equal to a constant value.
@@ -271,7 +268,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param experession The expression to compare for less than.
    * @return A new `Expr` representing the less than comparison.
    */
-  lt(experession: pipelines.Expr): BooleanExpr;
+  lt(experession: Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is less than a constant value.
@@ -301,7 +298,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param expression The expression to compare for less than or equal to.
    * @return A new `Expr` representing the less than or equal to comparison.
    */
-  lte(expression: pipelines.Expr): BooleanExpr;
+  lte(expression: Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is less than or equal to a constant value.
@@ -330,7 +327,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param expression The expression to compare for greater than.
    * @return A new `Expr` representing the greater than comparison.
    */
-  gt(expression: pipelines.Expr): BooleanExpr;
+  gt(expression: Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is greater than a constant value.
@@ -360,7 +357,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param expression The expression to compare for greater than or equal to.
    * @return A new `Expr` representing the greater than or equal to comparison.
    */
-  gte(expression: pipelines.Expr): BooleanExpr;
+  gte(expression: Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is greater than or equal to a constant
@@ -391,8 +388,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new `Expr` representing the concatenated array.
    */
   arrayConcat(
-    secondArray: pipelines.Expr | unknown[],
-    ...otherArrays: Array<pipelines.Expr | unknown[]>
+    secondArray: Expr | unknown[],
+    ...otherArrays: Array<Expr | unknown[]>
   ): FunctionExpr {
     const elements = [secondArray, ...otherArrays];
     const exprValues = elements.map(value => valueToDefaultExpr(value));
@@ -410,7 +407,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param expression The element to search for in the array.
    * @return A new `Expr` representing the 'array_contains' comparison.
    */
-  arrayContains(expression: pipelines.Expr): BooleanExpr;
+  arrayContains(expression: Expr): BooleanExpr;
 
   /**
    * Creates an expression that checks if an array contains a specific value.
@@ -442,7 +439,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param values The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_all' comparison.
    */
-  arrayContainsAll(values: Array<pipelines.Expr | unknown>): BooleanExpr;
+  arrayContainsAll(values: Array<Expr | unknown>): BooleanExpr;
 
   /**
    * Creates an expression that checks if an array contains all the specified elements.
@@ -455,8 +452,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param arrayExpression The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_all' comparison.
    */
-  arrayContainsAll(arrayExpression: pipelines.Expr): BooleanExpr;
-  arrayContainsAll(values: unknown[] | pipelines.Expr): BooleanExpr {
+  arrayContainsAll(arrayExpression: Expr): BooleanExpr;
+  arrayContainsAll(values: unknown[] | Expr): BooleanExpr {
     const normalizedExpr = Array.isArray(values)
       ? new ListOfExprs(values.map(valueToDefaultExpr))
       : cast<Expr>(values);
@@ -474,7 +471,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param values The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_any' comparison.
    */
-  arrayContainsAny(values: Array<pipelines.Expr | unknown>): BooleanExpr;
+  arrayContainsAny(values: Array<Expr | unknown>): BooleanExpr;
 
   /**
    * Creates an expression that checks if an array contains any of the specified elements.
@@ -488,10 +485,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param arrayExpression The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_any' comparison.
    */
-  arrayContainsAny(arrayExpression: pipelines.Expr): BooleanExpr;
-  arrayContainsAny(
-    values: Array<unknown | pipelines.Expr> | pipelines.Expr
-  ): BooleanExpr {
+  arrayContainsAny(arrayExpression: Expr): BooleanExpr;
+  arrayContainsAny(values: Array<unknown | Expr> | Expr): BooleanExpr {
     const normalizedExpr = Array.isArray(values)
       ? new ListOfExprs(values.map(valueToDefaultExpr))
       : cast<Expr>(values);
@@ -524,7 +519,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param values The values or expressions to check against.
    * @return A new `Expr` representing the 'IN' comparison.
    */
-  eqAny(values: Array<pipelines.Expr | unknown>): BooleanExpr;
+  eqAny(values: Array<Expr | unknown>): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is equal to any of the provided values or
@@ -538,8 +533,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param arrayExpression An expression that evaluates to an array of values to check against.
    * @return A new `Expr` representing the 'IN' comparison.
    */
-  eqAny(arrayExpression: pipelines.Expr): BooleanExpr;
-  eqAny(others: unknown[] | pipelines.Expr): BooleanExpr {
+  eqAny(arrayExpression: Expr): BooleanExpr;
+  eqAny(others: unknown[] | Expr): BooleanExpr {
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
       : cast<Expr>(others);
@@ -558,7 +553,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param values The values or expressions to check against.
    * @return A new `Expr` representing the 'NotEqAny' comparison.
    */
-  notEqAny(values: Array<pipelines.Expr | unknown>): BooleanExpr;
+  notEqAny(values: Array<Expr | unknown>): BooleanExpr;
 
   /**
    * Creates an expression that checks if this expression is not equal to any of the values in the evaluated expression.
@@ -571,8 +566,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param arrayExpression The values or expressions to check against.
    * @return A new `Expr` representing the 'NotEqAny' comparison.
    */
-  notEqAny(arrayExpression: pipelines.Expr): BooleanExpr;
-  notEqAny(others: unknown[] | pipelines.Expr): BooleanExpr {
+  notEqAny(arrayExpression: Expr): BooleanExpr;
+  notEqAny(others: unknown[] | Expr): BooleanExpr {
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
       : cast<Expr>(others);
@@ -659,8 +654,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param pattern The pattern to search for. You can use "%" as a wildcard character.
    * @return A new `Expr` representing the 'like' comparison.
    */
-  like(pattern: pipelines.Expr): FunctionExpr;
-  like(stringOrExpr: string | pipelines.Expr): FunctionExpr {
+  like(pattern: Expr): FunctionExpr;
+  like(stringOrExpr: string | Expr): FunctionExpr {
     return new FunctionExpr('like', [this, valueToDefaultExpr(stringOrExpr)]);
   }
 
@@ -690,8 +685,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param pattern The regular expression to use for the search.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  regexContains(pattern: pipelines.Expr): BooleanExpr;
-  regexContains(stringOrExpr: string | pipelines.Expr): BooleanExpr {
+  regexContains(pattern: Expr): BooleanExpr;
+  regexContains(stringOrExpr: string | Expr): BooleanExpr {
     return new BooleanExpr('regex_contains', [
       this,
       valueToDefaultExpr(stringOrExpr),
@@ -722,8 +717,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param pattern The regular expression to use for the match.
    * @return A new `Expr` representing the regular expression match.
    */
-  regexMatch(pattern: pipelines.Expr): BooleanExpr;
-  regexMatch(stringOrExpr: string | pipelines.Expr): BooleanExpr {
+  regexMatch(pattern: Expr): BooleanExpr;
+  regexMatch(stringOrExpr: string | Expr): BooleanExpr {
     return new BooleanExpr('regex_match', [
       this,
       valueToDefaultExpr(stringOrExpr),
@@ -754,8 +749,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param expr The expression representing the substring to search for.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  strContains(expr: pipelines.Expr): BooleanExpr;
-  strContains(stringOrExpr: string | pipelines.Expr): BooleanExpr {
+  strContains(expr: Expr): BooleanExpr;
+  strContains(stringOrExpr: string | Expr): BooleanExpr {
     return new BooleanExpr('str_contains', [
       this,
       valueToDefaultExpr(stringOrExpr),
@@ -787,8 +782,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param prefix The prefix expression to check for.
    * @return A new `Expr` representing the 'starts with' comparison.
    */
-  startsWith(prefix: pipelines.Expr): BooleanExpr;
-  startsWith(stringOrExpr: string | pipelines.Expr): BooleanExpr {
+  startsWith(prefix: Expr): BooleanExpr;
+  startsWith(stringOrExpr: string | Expr): BooleanExpr {
     return new BooleanExpr('starts_with', [
       this,
       valueToDefaultExpr(stringOrExpr),
@@ -820,8 +815,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param suffix The postfix expression to check for.
    * @return A new `Expr` representing the 'ends with' comparison.
    */
-  endsWith(suffix: pipelines.Expr): BooleanExpr;
-  endsWith(stringOrExpr: string | pipelines.Expr): BooleanExpr {
+  endsWith(suffix: Expr): BooleanExpr;
+  endsWith(stringOrExpr: string | Expr): BooleanExpr {
     return new BooleanExpr('ends_with', [
       this,
       valueToDefaultExpr(stringOrExpr),
@@ -883,8 +878,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new `Expr` representing the concatenated string.
    */
   strConcat(
-    secondString: pipelines.Expr | string,
-    ...otherStrings: Array<pipelines.Expr | string>
+    secondString: Expr | string,
+    ...otherStrings: Array<Expr | string>
   ): FunctionExpr {
     const elements = [secondString, ...otherStrings];
     const exprs = elements.map(valueToDefaultExpr);
@@ -932,11 +927,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param replace The expression representing the substring to replace the first occurrence of 'find' with.
    * @return A new {@code Expr} representing the string with the first occurrence replaced.
    */
-  replaceFirst(find: pipelines.Expr, replace: pipelines.Expr): FunctionExpr;
-  replaceFirst(
-    find: pipelines.Expr | string,
-    replace: pipelines.Expr | string
-  ): FunctionExpr {
+  replaceFirst(find: Expr, replace: Expr): FunctionExpr;
+  replaceFirst(find: Expr | string, replace: Expr | string): FunctionExpr {
     return new FunctionExpr('replace_first', [
       this,
       valueToDefaultExpr(find),
@@ -971,11 +963,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param replace The expression representing the substring to replace all occurrences of 'find' with.
    * @return A new {@code Expr} representing the string with all occurrences replaced.
    */
-  replaceAll(find: pipelines.Expr, replace: pipelines.Expr): FunctionExpr;
-  replaceAll(
-    find: pipelines.Expr | string,
-    replace: pipelines.Expr | string
-  ): FunctionExpr {
+  replaceAll(find: Expr, replace: Expr): FunctionExpr;
+  replaceAll(find: Expr | string, replace: Expr | string): FunctionExpr {
     return new FunctionExpr('replace_all', [
       this,
       valueToDefaultExpr(find),
@@ -1097,8 +1086,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new {@code Expr} representing the logical max operation.
    */
   logicalMaximum(
-    second: pipelines.Expr | unknown,
-    ...others: Array<pipelines.Expr | unknown>
+    second: Expr | unknown,
+    ...others: Array<Expr | unknown>
   ): FunctionExpr {
     const values = [second, ...others];
     return new FunctionExpr('logical_maximum', [
@@ -1120,8 +1109,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new {@code Expr} representing the logical min operation.
    */
   logicalMinimum(
-    second: pipelines.Expr | unknown,
-    ...others: Array<pipelines.Expr | unknown>
+    second: Expr | unknown,
+    ...others: Array<Expr | unknown>
   ): FunctionExpr {
     const values = [second, ...others];
     return new FunctionExpr('logical_minimum', [
@@ -1155,7 +1144,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param vectorExpression The other vector (represented as an Expr) to compare against.
    * @return A new `Expr` representing the cosine distance between the two vectors.
    */
-  cosineDistance(vectorExpression: pipelines.Expr): FunctionExpr;
+  cosineDistance(vectorExpression: Expr): FunctionExpr;
   /**
    * Calculates the Cosine distance between two vectors.
    *
@@ -1168,9 +1157,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new `Expr` representing the Cosine* distance between the two vectors.
    */
   cosineDistance(vector: firestore.VectorValue | number[]): FunctionExpr;
-  cosineDistance(
-    other: pipelines.Expr | firestore.VectorValue | number[]
-  ): FunctionExpr {
+  cosineDistance(other: Expr | firestore.VectorValue | number[]): FunctionExpr {
     return new FunctionExpr('cosine_distance', [this, vectorToExpr(other)]);
   }
 
@@ -1185,7 +1172,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param vectorExpression The other vector (as an array of numbers) to calculate with.
    * @return A new `Expr` representing the dot product between the two vectors.
    */
-  dotProduct(vectorExpression: pipelines.Expr): FunctionExpr;
+  dotProduct(vectorExpression: Expr): FunctionExpr;
 
   /**
    * Calculates the dot product between two vectors.
@@ -1199,9 +1186,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new `Expr` representing the dot product between the two vectors.
    */
   dotProduct(vector: firestore.VectorValue | number[]): FunctionExpr;
-  dotProduct(
-    other: pipelines.Expr | firestore.VectorValue | number[]
-  ): FunctionExpr {
+  dotProduct(other: Expr | firestore.VectorValue | number[]): FunctionExpr {
     return new FunctionExpr('dot_product', [this, vectorToExpr(other)]);
   }
 
@@ -1216,7 +1201,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param vectorExpression The other vector (as an array of numbers) to calculate with.
    * @return A new `Expr` representing the Euclidean distance between the two vectors.
    */
-  euclideanDistance(vectorExpression: pipelines.Expr): FunctionExpr;
+  euclideanDistance(vectorExpression: Expr): FunctionExpr;
 
   /**
    * Calculates the Euclidean distance between two vectors.
@@ -1231,7 +1216,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    */
   euclideanDistance(vector: firestore.VectorValue | number[]): FunctionExpr;
   euclideanDistance(
-    other: pipelines.Expr | firestore.VectorValue | number[]
+    other: Expr | firestore.VectorValue | number[]
   ): FunctionExpr {
     return new FunctionExpr('euclidean_distance', [this, vectorToExpr(other)]);
   }
@@ -1335,7 +1320,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param amount The expression evaluates to amount of the unit.
    * @return A new {@code Expr} representing the resulting timestamp.
    */
-  timestampAdd(unit: pipelines.Expr, amount: pipelines.Expr): FunctionExpr;
+  timestampAdd(unit: Expr, amount: Expr): FunctionExpr;
 
   /**
    * Creates an expression that adds a specified amount of time to this timestamp expression.
@@ -1355,14 +1340,14 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   ): FunctionExpr;
   timestampAdd(
     unit:
-      | pipelines.Expr
+      | Expr
       | 'microsecond'
       | 'millisecond'
       | 'second'
       | 'minute'
       | 'hour'
       | 'day',
-    amount: pipelines.Expr | number
+    amount: Expr | number
   ): FunctionExpr {
     return new FunctionExpr('timestamp_add', [
       this,
@@ -1383,7 +1368,7 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param amount The expression evaluates to amount of the unit.
    * @return A new {@code Expr} representing the resulting timestamp.
    */
-  timestampSub(unit: pipelines.Expr, amount: pipelines.Expr): FunctionExpr;
+  timestampSub(unit: Expr, amount: Expr): FunctionExpr;
 
   /**
    * Creates an expression that subtracts a specified amount of time from this timestamp expression.
@@ -1403,14 +1388,14 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   ): FunctionExpr;
   timestampSub(
     unit:
-      | pipelines.Expr
+      | Expr
       | 'microsecond'
       | 'millisecond'
       | 'second'
       | 'minute'
       | 'hour'
       | 'day',
-    amount: pipelines.Expr | number
+    amount: Expr | number
   ): FunctionExpr {
     return new FunctionExpr('timestamp_sub', [
       this,
@@ -1420,8 +1405,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise AND operation between this expression and a constant.
    *
    * ```typescript
@@ -1434,8 +1417,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    */
   bitAnd(otherBits: number | Buffer | Uint8Array): FunctionExpr;
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise AND operation between two expressions.
    *
    * ```typescript
@@ -1446,10 +1427,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param bitsExpression An expression that returns bits when evaluated.
    * @return A new {@code Expr} representing the bitwise AND operation.
    */
-  bitAnd(bitsExpression: pipelines.Expr): FunctionExpr;
-  bitAnd(
-    bitsOrExpression: number | pipelines.Expr | Buffer | Uint8Array
-  ): FunctionExpr {
+  bitAnd(bitsExpression: Expr): FunctionExpr;
+  bitAnd(bitsOrExpression: number | Expr | Buffer | Uint8Array): FunctionExpr {
     return new FunctionExpr('bit_and', [
       this,
       valueToDefaultExpr(bitsOrExpression),
@@ -1457,8 +1436,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise OR operation between this expression and a constant.
    *
    * ```typescript
@@ -1471,8 +1448,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    */
   bitOr(otherBits: number | Buffer | Uint8Array): FunctionExpr;
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise OR operation between two expressions.
    *
    * ```typescript
@@ -1483,10 +1458,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param bitsExpression An expression that returns bits when evaluated.
    * @return A new {@code Expr} representing the bitwise OR operation.
    */
-  bitOr(bitsExpression: pipelines.Expr): FunctionExpr;
-  bitOr(
-    bitsOrExpression: number | pipelines.Expr | Buffer | Uint8Array
-  ): FunctionExpr {
+  bitOr(bitsExpression: Expr): FunctionExpr;
+  bitOr(bitsOrExpression: number | Expr | Buffer | Uint8Array): FunctionExpr {
     return new FunctionExpr('bit_or', [
       this,
       valueToDefaultExpr(bitsOrExpression),
@@ -1494,8 +1467,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise XOR operation between this expression and a constant.
    *
    * ```typescript
@@ -1508,8 +1479,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    */
   bitXor(otherBits: number | Buffer | Uint8Array): FunctionExpr;
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise XOR operation between two expressions.
    *
    * ```typescript
@@ -1520,10 +1489,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param bitsExpression An expression that returns bits when evaluated.
    * @return A new {@code Expr} representing the bitwise XOR operation.
    */
-  bitXor(bitsExpression: pipelines.Expr): FunctionExpr;
-  bitXor(
-    bitsOrExpression: number | pipelines.Expr | Buffer | Uint8Array
-  ): FunctionExpr {
+  bitXor(bitsExpression: Expr): FunctionExpr;
+  bitXor(bitsOrExpression: number | Expr | Buffer | Uint8Array): FunctionExpr {
     return new FunctionExpr('bit_xor', [
       this,
       valueToDefaultExpr(bitsOrExpression),
@@ -1531,8 +1498,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise NOT operation to this expression.
    *
    * ```typescript
@@ -1547,8 +1512,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise left shift operation to this expression.
    *
    * ```typescript
@@ -1561,8 +1524,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    */
   bitLeftShift(y: number): FunctionExpr;
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise left shift operation to this expression.
    *
    * ```typescript
@@ -1573,8 +1534,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param numberExpr The operand expression representing the number of bits to shift.
    * @return A new {@code Expr} representing the bitwise left shift operation.
    */
-  bitLeftShift(numberExpr: pipelines.Expr): FunctionExpr;
-  bitLeftShift(numberExpr: number | pipelines.Expr): FunctionExpr {
+  bitLeftShift(numberExpr: Expr): FunctionExpr;
+  bitLeftShift(numberExpr: number | Expr): FunctionExpr {
     return new FunctionExpr('bit_left_shift', [
       this,
       valueToDefaultExpr(numberExpr),
@@ -1582,8 +1543,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise right shift operation to this expression.
    *
    * ```typescript
@@ -1596,8 +1555,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    */
   bitRightShift(y: number): FunctionExpr;
   /**
-   * @beta
-   *
    * Creates an expression that applies a bitwise right shift operation to this expression.
    *
    * ```typescript
@@ -1608,8 +1565,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param numberExpr The operand expression representing the number of bits to shift.
    * @return A new {@code Expr} representing the bitwise right shift operation.
    */
-  bitRightShift(numberExpr: pipelines.Expr): FunctionExpr;
-  bitRightShift(numberExpr: number | pipelines.Expr): FunctionExpr {
+  bitRightShift(numberExpr: Expr): FunctionExpr;
+  bitRightShift(numberExpr: number | Expr): FunctionExpr {
     return new FunctionExpr('bit_right_shift', [
       this,
       valueToDefaultExpr(numberExpr),
@@ -1617,8 +1574,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that returns the document ID from a path.
    *
    * ```typescript
@@ -1633,8 +1588,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that returns a substring of the results of this expression.
    *
    * @param position Index of the first character of the substring.
@@ -1644,19 +1597,14 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   substr(position: number, length?: number): FunctionExpr;
 
   /**
-   * @beta
-   *
    * Creates an expression that returns a substring of the results of this expression.
    *
    * @param position An expression returning the index of the first character of the substring.
    * @param length An expression returning the length of the substring. If not provided the
    * substring will end at the end of the input.
    */
-  substr(position: pipelines.Expr, length?: pipelines.Expr): FunctionExpr;
-  substr(
-    position: pipelines.Expr | number,
-    length?: pipelines.Expr | number
-  ): FunctionExpr {
+  substr(position: Expr, length?: Expr): FunctionExpr;
+  substr(position: Expr | number, length?: Expr | number): FunctionExpr {
     const positionExpr = valueToDefaultExpr(position);
     if (length === undefined) {
       return new FunctionExpr('substr', [this, positionExpr]);
@@ -1670,7 +1618,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
    * Creates an expression that indexes into an array from the beginning or end
    * and returns the element. If the offset exceeds the array length, an error is
    * returned. A negative offset, starts from the end.
@@ -1686,7 +1633,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   arrayOffset(offset: number): FunctionExpr;
 
   /**
-   * @beta
    * Creates an expression that indexes into an array from the beginning or end
    * and returns the element. If the offset exceeds the array length, an error is
    * returned. A negative offset, starts from the end.
@@ -1700,14 +1646,12 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param offsetExpr An Expr evaluating to the index of the element to return.
    * @return A new Expr representing the 'arrayOffset' operation.
    */
-  arrayOffset(offsetExpr: pipelines.Expr): FunctionExpr;
-  arrayOffset(offset: pipelines.Expr | number): FunctionExpr {
+  arrayOffset(offsetExpr: Expr): FunctionExpr;
+  arrayOffset(offset: Expr | number): FunctionExpr {
     return new FunctionExpr('array_offset', [this, valueToDefaultExpr(offset)]);
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that checks if a given expression produces an error.
    *
    * ```typescript
@@ -1722,8 +1666,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that returns the result of the `catchExpr` argument
    * if there is an error, else return the result of this expression.
    *
@@ -1737,11 +1679,9 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * returned if this expression produces an error.
    * @return A new {@code Expr} representing the 'ifError' operation.
    */
-  ifError(catchExpr: pipelines.Expr): FunctionExpr;
+  ifError(catchExpr: Expr): FunctionExpr;
 
   /**
-   * @beta
-   *
    * Creates an expression that returns the `catch` argument if there is an
    * error, else return the result of this expression.
    *
@@ -1761,8 +1701,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that returns `true` if the result of this expression
    * is absent. Otherwise, returns `false` even if the value is `null`.
    *
@@ -1778,8 +1716,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that checks if tbe result of an expression is not null.
    *
    * ```typescript
@@ -1794,8 +1730,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
    *
    * ```typescript
@@ -1810,8 +1744,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that removes a key from the map produced by evaluating this expression.
    *
    * ```
@@ -1824,8 +1756,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    */
   mapRemove(key: string): FunctionExpr;
   /**
-   * @beta
-   *
    * Creates an expression that removes a key from the map produced by evaluating this expression.
    *
    * ```
@@ -1836,8 +1766,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @param keyExpr An expression that produces the name of the key to remove from the input map.
    * @returns A new {@code FirestoreFunction} representing the 'mapRemove' operation.
    */
-  mapRemove(keyExpr: pipelines.Expr): FunctionExpr;
-  mapRemove(stringExpr: pipelines.Expr | string): FunctionExpr {
+  mapRemove(keyExpr: Expr): FunctionExpr;
+  mapRemove(stringExpr: Expr | string): FunctionExpr {
     return new FunctionExpr('map_remove', [
       this,
       valueToDefaultExpr(stringExpr),
@@ -1845,8 +1775,6 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
   }
 
   /**
-   * @beta
-   *
    * Creates an expression that merges multiple map values.
    *
    * ```
@@ -1863,8 +1791,8 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @returns A new {@code FirestoreFunction} representing the 'mapMerge' operation.
    */
   mapMerge(
-    secondMap: Record<string, unknown> | pipelines.Expr,
-    ...otherMaps: Array<Record<string, unknown> | pipelines.Expr>
+    secondMap: Record<string, unknown> | Expr,
+    ...otherMaps: Array<Record<string, unknown> | Expr>
   ): FunctionExpr {
     const secondMapExpr = valueToDefaultExpr(secondMap);
     const otherMapExprs = otherMaps.map(valueToDefaultExpr);
@@ -1921,20 +1849,16 @@ export abstract class Expr implements pipelines.Expr, HasUserData {
    * @return A new {@link ExprWithAlias} that wraps this
    *     expression and associates it with the provided alias.
    */
-  as(name: string): pipelines.ExprWithAlias {
+  as(name: string): ExprWithAlias {
     return new ExprWithAlias(this, name);
   }
 }
 
 /**
- * @beta
- *
  * A class that represents an aggregate function.
  */
-export class AggregateFunction
-  implements pipelines.AggregateFunction, HasUserData
-{
-  exprType: pipelines.ExprType = 'AggregateFunction';
+export class AggregateFunction implements AggregateFunction, HasUserData {
+  exprType: firestore.Pipelines.ExprType = 'AggregateFunction';
 
   /**
    * @internal
@@ -1994,13 +1918,9 @@ export class AggregateFunction
 }
 
 /**
- * @beta
- *
  * An AggregateFunction with alias.
  */
-export class AggregateWithAlias
-  implements pipelines.AggregateWithAlias, HasUserData
-{
+export class AggregateWithAlias implements AggregateWithAlias, HasUserData {
   constructor(
     readonly aggregate: AggregateFunction,
     readonly alias: string
@@ -2024,10 +1944,12 @@ export class AggregateWithAlias
 }
 
 /**
- * @beta
+ * TODO
  */
-export class ExprWithAlias implements pipelines.Selectable, HasUserData {
-  exprType: pipelines.ExprType = 'ExprWithAlias';
+export class ExprWithAlias
+  implements firestore.Pipelines.Selectable, HasUserData
+{
+  exprType: firestore.Pipelines.ExprType = 'ExprWithAlias';
   selectable = true as const;
 
   /**
@@ -2056,7 +1978,7 @@ export class ExprWithAlias implements pipelines.Selectable, HasUserData {
  * @internal
  */
 class ListOfExprs extends Expr {
-  exprType: pipelines.ExprType = 'ListOfExprs';
+  exprType: firestore.Pipelines.ExprType = 'ListOfExprs';
 
   constructor(private exprs: Expr[]) {
     super();
@@ -2086,8 +2008,6 @@ class ListOfExprs extends Expr {
 }
 
 /**
- * @beta
- *
  * Represents a reference to a field in a Firestore document, or outputs of a {@link Pipeline} stage.
  *
  * <p>Field references are used to access document field values in expressions and to specify fields
@@ -2103,8 +2023,8 @@ class ListOfExprs extends Expr {
  * const cityField = field("address.city");
  * ```
  */
-export class Field extends Expr implements pipelines.Selectable {
-  readonly exprType: pipelines.ExprType = 'Field';
+export class Field extends Expr implements firestore.Pipelines.Selectable {
+  readonly exprType: firestore.Pipelines.ExprType = 'Field';
   selectable = true as const;
 
   /**
@@ -2175,8 +2095,6 @@ export function field(field: string | firestore.FieldPath): Field {
 }
 
 /**
- * @beta
- *
  * Represents a constant value that can be used in a Firestore pipeline expression.
  *
  * You can create a `Constant` instance using the static {@link #of} method:
@@ -2190,7 +2108,7 @@ export function field(field: string | firestore.FieldPath): Field {
  * ```
  */
 export class Constant extends Expr {
-  readonly exprType: pipelines.ExprType = 'Constant';
+  readonly exprType: firestore.Pipelines.ExprType = 'Constant';
 
   private protoValue?: api.IValue;
 
@@ -2354,10 +2272,10 @@ export function constant(value: unknown): Constant {
 export function constantVector(
   value: number[] | firestore.VectorValue
 ): Constant {
-  if (value instanceof VectorValue) {
-    return constant(value);
-  } else {
+  if (Array.isArray(value)) {
     return constant(new VectorValue(value as number[]));
+  } else {
+    return constant(value);
   }
 }
 
@@ -2371,7 +2289,7 @@ export class MapValue extends Expr {
     super();
   }
 
-  exprType: pipelines.ExprType = 'Constant';
+  exprType: firestore.Pipelines.ExprType = 'Constant';
 
   _toProto(serializer: Serializer): api.IValue {
     return serializer.encodeValue(this.plainObject);
@@ -2389,8 +2307,6 @@ export class MapValue extends Expr {
 }
 
 /**
- * @beta
- *
  * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
  * execution.
  *
@@ -2398,7 +2314,7 @@ export class MapValue extends Expr {
  * or the methods on {@link Expr} ({@link Expr#eq}, {@link Expr#lt}, etc.) to construct new Function instances.
  */
 export class FunctionExpr extends Expr {
-  readonly exprType: pipelines.ExprType = 'Function';
+  readonly exprType: firestore.Pipelines.ExprType = 'Function';
 
   constructor(
     protected name: string,
@@ -2432,8 +2348,6 @@ export class FunctionExpr extends Expr {
 }
 
 /**
- * @beta
- *
  * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
  * execution.
  *
@@ -2441,7 +2355,7 @@ export class FunctionExpr extends Expr {
  * or the methods on {@link Expr} ({@link Expr#eq}, {@link Expr#lt}, etc.) to construct new Function instances.
  */
 class MapFunctionExpr extends FunctionExpr {
-  readonly exprType: pipelines.ExprType = 'Function';
+  readonly exprType: firestore.Pipelines.ExprType = 'Function';
 
   constructor(private map: Record<string, Expr | undefined>) {
     super('map', []);
@@ -2483,8 +2397,6 @@ class MapFunctionExpr extends FunctionExpr {
 }
 
 /**
- * @beta
- *
  * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
  * execution.
  *
@@ -2492,7 +2404,7 @@ class MapFunctionExpr extends FunctionExpr {
  * or the methods on {@link Expr} ({@link Expr#eq}, {@link Expr#lt}, etc.) to construct new Function instances.
  */
 class ArrayFunctionExpr extends FunctionExpr {
-  readonly exprType: pipelines.ExprType = 'Function';
+  readonly exprType: firestore.Pipelines.ExprType = 'Function';
 
   constructor(private values: Array<Expr | undefined>) {
     super('array', []);
@@ -2527,11 +2439,9 @@ class ArrayFunctionExpr extends FunctionExpr {
 }
 
 /**
- * @beta
- *
  * An interface that represents a filter condition.
  */
-export class BooleanExpr extends FunctionExpr implements pipelines.BooleanExpr {
+export class BooleanExpr extends FunctionExpr implements BooleanExpr {
   filterable: true = true as const;
 
   /**
@@ -2565,7 +2475,6 @@ export class BooleanExpr extends FunctionExpr implements pipelines.BooleanExpr {
 }
 
 /**
- * @beta
  * Creates an aggregation that counts the number of stage inputs where the provided
  * boolean expression evaluates to true.
  *
@@ -2577,12 +2486,11 @@ export class BooleanExpr extends FunctionExpr implements pipelines.BooleanExpr {
  * @param booleanExpr - The boolean expression to evaluate on each input.
  * @returns A new `AggregateFunction` representing the 'countIf' aggregation.
  */
-export function countIf(booleanExpr: pipelines.BooleanExpr): AggregateFunction {
+export function countIf(booleanExpr: BooleanExpr): AggregateFunction {
   return new AggregateFunction('count_if', [cast<Expr>(booleanExpr)]);
 }
 
 /**
- * @beta
  * Creates an expression that return a pseudo-random value of type double in the
  * range of [0, 1), inclusive of 0 and exclusive of 1.
  *
@@ -2593,8 +2501,6 @@ export function rand(): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise AND operation between a field and a constant.
  *
  * ```typescript
@@ -2611,8 +2517,6 @@ export function bitAnd(
   otherBits: number | Buffer | Uint8Array
 ): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise AND operation between a field and an expression.
  *
  * ```typescript
@@ -2624,13 +2528,8 @@ export function bitAnd(
  * @param bitsExpression An expression that returns bits when evaluated.
  * @return A new {@code Expr} representing the bitwise AND operation.
  */
-export function bitAnd(
-  field: string,
-  bitsExpression: pipelines.Expr
-): FunctionExpr;
+export function bitAnd(field: string, bitsExpression: Expr): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise AND operation between an expression and a constant.
  *
  * ```typescript
@@ -2643,12 +2542,10 @@ export function bitAnd(
  * @return A new {@code Expr} representing the bitwise AND operation.
  */
 export function bitAnd(
-  bitsExpression: pipelines.Expr,
+  bitsExpression: Expr,
   otherBits: number | Buffer | Uint8Array
 ): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise AND operation between two expressions.
  *
  * ```typescript
@@ -2661,19 +2558,17 @@ export function bitAnd(
  * @return A new {@code Expr} representing the bitwise AND operation.
  */
 export function bitAnd(
-  bitsExpression: pipelines.Expr,
-  otherBitsExpression: pipelines.Expr
+  bitsExpression: Expr,
+  otherBitsExpression: Expr
 ): FunctionExpr;
 export function bitAnd(
-  bits: string | pipelines.Expr,
-  bitsOrExpression: number | pipelines.Expr | Buffer | Uint8Array
+  bits: string | Expr,
+  bitsOrExpression: number | Expr | Buffer | Uint8Array
 ): FunctionExpr {
   return fieldOrExpression(bits).bitAnd(valueToDefaultExpr(bitsOrExpression));
 }
 
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise OR operation between a field and a constant.
  *
  * ```typescript
@@ -2690,8 +2585,6 @@ export function bitOr(
   otherBits: number | Buffer | Uint8Array
 ): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise OR operation between a field and an expression.
  *
  * ```typescript
@@ -2703,13 +2596,8 @@ export function bitOr(
  * @param bitsExpression An expression that returns bits when evaluated.
  * @return A new {@code Expr} representing the bitwise OR operation.
  */
-export function bitOr(
-  field: string,
-  bitsExpression: pipelines.Expr
-): FunctionExpr;
+export function bitOr(field: string, bitsExpression: Expr): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise OR operation between an expression and a constant.
  *
  * ```typescript
@@ -2722,12 +2610,10 @@ export function bitOr(
  * @return A new {@code Expr} representing the bitwise OR operation.
  */
 export function bitOr(
-  bitsExpression: pipelines.Expr,
+  bitsExpression: Expr,
   otherBits: number | Buffer | Uint8Array
 ): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise OR operation between two expressions.
  *
  * ```typescript
@@ -2740,19 +2626,17 @@ export function bitOr(
  * @return A new {@code Expr} representing the bitwise OR operation.
  */
 export function bitOr(
-  bitsExpression: pipelines.Expr,
-  otherBitsExpression: pipelines.Expr
+  bitsExpression: Expr,
+  otherBitsExpression: Expr
 ): FunctionExpr;
 export function bitOr(
-  bits: string | pipelines.Expr,
-  bitsOrExpression: number | pipelines.Expr | Buffer | Uint8Array
+  bits: string | Expr,
+  bitsOrExpression: number | Expr | Buffer | Uint8Array
 ): FunctionExpr {
   return fieldOrExpression(bits).bitOr(valueToDefaultExpr(bitsOrExpression));
 }
 
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise XOR operation between a field and a constant.
  *
  * ```typescript
@@ -2769,8 +2653,6 @@ export function bitXor(
   otherBits: number | Buffer | Uint8Array
 ): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise XOR operation between a field and an expression.
  *
  * ```typescript
@@ -2782,13 +2664,8 @@ export function bitXor(
  * @param bitsExpression An expression that returns bits when evaluated.
  * @return A new {@code Expr} representing the bitwise XOR operation.
  */
-export function bitXor(
-  field: string,
-  bitsExpression: pipelines.Expr
-): FunctionExpr;
+export function bitXor(field: string, bitsExpression: Expr): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise XOR operation between an expression and a constant.
  *
  * ```typescript
@@ -2801,12 +2678,10 @@ export function bitXor(
  * @return A new {@code Expr} representing the bitwise XOR operation.
  */
 export function bitXor(
-  bitsExpression: pipelines.Expr,
+  bitsExpression: Expr,
   otherBits: number | Buffer | Uint8Array
 ): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise XOR operation between two expressions.
  *
  * ```typescript
@@ -2819,19 +2694,17 @@ export function bitXor(
  * @return A new {@code Expr} representing the bitwise XOR operation.
  */
 export function bitXor(
-  bitsExpression: pipelines.Expr,
-  otherBitsExpression: pipelines.Expr
+  bitsExpression: Expr,
+  otherBitsExpression: Expr
 ): FunctionExpr;
 export function bitXor(
-  bits: string | pipelines.Expr,
-  bitsOrExpression: number | pipelines.Expr | Buffer | Uint8Array
+  bits: string | Expr,
+  bitsOrExpression: number | Expr | Buffer | Uint8Array
 ): FunctionExpr {
   return fieldOrExpression(bits).bitXor(valueToDefaultExpr(bitsOrExpression));
 }
 
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise NOT operation to a field.
  *
  * ```typescript
@@ -2844,8 +2717,6 @@ export function bitXor(
  */
 export function bitNot(field: string): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise NOT operation to an expression.
  *
  * ```typescript
@@ -2856,14 +2727,12 @@ export function bitNot(field: string): FunctionExpr;
  * @param bitsValueExpression An expression that returns bits when evaluated.
  * @return A new {@code Expr} representing the bitwise NOT operation.
  */
-export function bitNot(bitsValueExpression: pipelines.Expr): FunctionExpr;
-export function bitNot(bits: string | pipelines.Expr): FunctionExpr {
+export function bitNot(bitsValueExpression: Expr): FunctionExpr;
+export function bitNot(bits: string | Expr): FunctionExpr {
   return fieldOrExpression(bits).bitNot();
 }
 
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise left shift operation between a field and a constant.
  *
  * ```typescript
@@ -2877,8 +2746,6 @@ export function bitNot(bits: string | pipelines.Expr): FunctionExpr {
  */
 export function bitLeftShift(field: string, y: number): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise left shift operation between a field and an expression.
  *
  * ```typescript
@@ -2890,13 +2757,8 @@ export function bitLeftShift(field: string, y: number): FunctionExpr;
  * @param numberExpr The right operand expression representing the number of bits to shift.
  * @return A new {@code Expr} representing the bitwise left shift operation.
  */
-export function bitLeftShift(
-  field: string,
-  numberExpr: pipelines.Expr
-): FunctionExpr;
+export function bitLeftShift(field: string, numberExpr: Expr): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise left shift operation between an expression and a constant.
  *
  * ```typescript
@@ -2908,10 +2770,8 @@ export function bitLeftShift(
  * @param y The right operand constant representing the number of bits to shift.
  * @return A new {@code Expr} representing the bitwise left shift operation.
  */
-export function bitLeftShift(xValue: pipelines.Expr, y: number): FunctionExpr;
+export function bitLeftShift(xValue: Expr, y: number): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise left shift operation between two expressions.
  *
  * ```typescript
@@ -2923,20 +2783,15 @@ export function bitLeftShift(xValue: pipelines.Expr, y: number): FunctionExpr;
  * @param numberExpr The right operand expression representing the number of bits to shift.
  * @return A new {@code Expr} representing the bitwise left shift operation.
  */
+export function bitLeftShift(xValue: Expr, numberExpr: Expr): FunctionExpr;
 export function bitLeftShift(
-  xValue: pipelines.Expr,
-  numberExpr: pipelines.Expr
-): FunctionExpr;
-export function bitLeftShift(
-  xValue: string | pipelines.Expr,
-  numberExpr: number | pipelines.Expr
+  xValue: string | Expr,
+  numberExpr: number | Expr
 ): FunctionExpr {
   return fieldOrExpression(xValue).bitLeftShift(valueToDefaultExpr(numberExpr));
 }
 
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise right shift operation between a field and a constant.
  *
  * ```typescript
@@ -2950,8 +2805,6 @@ export function bitLeftShift(
  */
 export function bitRightShift(field: string, y: number): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise right shift operation between a field and an expression.
  *
  * ```typescript
@@ -2963,13 +2816,8 @@ export function bitRightShift(field: string, y: number): FunctionExpr;
  * @param numberExpr The right operand expression representing the number of bits to shift.
  * @return A new {@code Expr} representing the bitwise right shift operation.
  */
-export function bitRightShift(
-  field: string,
-  numberExpr: pipelines.Expr
-): FunctionExpr;
+export function bitRightShift(field: string, numberExpr: Expr): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise right shift operation between an expression and a constant.
  *
  * ```typescript
@@ -2981,10 +2829,8 @@ export function bitRightShift(
  * @param y The right operand constant representing the number of bits to shift.
  * @return A new {@code Expr} representing the bitwise right shift operation.
  */
-export function bitRightShift(xValue: pipelines.Expr, y: number): FunctionExpr;
+export function bitRightShift(xValue: Expr, y: number): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that applies a bitwise right shift operation between two expressions.
  *
  * ```typescript
@@ -2996,13 +2842,10 @@ export function bitRightShift(xValue: pipelines.Expr, y: number): FunctionExpr;
  * @param numberExpr The right operand expression representing the number of bits to shift.
  * @return A new {@code Expr} representing the bitwise right shift operation.
  */
+export function bitRightShift(xValue: Expr, numberExpr: Expr): FunctionExpr;
 export function bitRightShift(
-  xValue: pipelines.Expr,
-  numberExpr: pipelines.Expr
-): FunctionExpr;
-export function bitRightShift(
-  xValue: string | pipelines.Expr,
-  numberExpr: number | pipelines.Expr
+  xValue: string | Expr,
+  numberExpr: number | Expr
 ): FunctionExpr {
   return fieldOrExpression(xValue).bitRightShift(
     valueToDefaultExpr(numberExpr)
@@ -3010,7 +2853,6 @@ export function bitRightShift(
 }
 
 /**
- * @beta
  * Creates an expression that indexes into an array from the beginning or end
  * and return the element. If the offset exceeds the array length, an error is
  * returned. A negative offset, starts from the end.
@@ -3027,7 +2869,6 @@ export function bitRightShift(
 export function arrayOffset(arrayField: string, offset: number): FunctionExpr;
 
 /**
- * @beta
  * Creates an expression that indexes into an array from the beginning or end
  * and return the element. If the offset exceeds the array length, an error is
  * returned. A negative offset, starts from the end.
@@ -3042,13 +2883,9 @@ export function arrayOffset(arrayField: string, offset: number): FunctionExpr;
  * @param offsetExpr An Expr evaluating to the index of the element to return.
  * @return A new Expr representing the 'arrayOffset' operation.
  */
-export function arrayOffset(
-  arrayField: string,
-  offsetExpr: pipelines.Expr
-): FunctionExpr;
+export function arrayOffset(arrayField: string, offsetExpr: Expr): FunctionExpr;
 
 /**
- * @beta
  * Creates an expression that indexes into an array from the beginning or end
  * and return the element. If the offset exceeds the array length, an error is
  * returned. A negative offset, starts from the end.
@@ -3063,12 +2900,11 @@ export function arrayOffset(
  * @return A new Expr representing the 'arrayOffset' operation.
  */
 export function arrayOffset(
-  arrayExpression: pipelines.Expr,
+  arrayExpression: Expr,
   offset: number
 ): FunctionExpr;
 
 /**
- * @beta
  * Creates an expression that indexes into an array from the beginning or end
  * and return the element. If the offset exceeds the array length, an error is
  * returned. A negative offset, starts from the end.
@@ -3084,19 +2920,17 @@ export function arrayOffset(
  * @return A new Expr representing the 'arrayOffset' operation.
  */
 export function arrayOffset(
-  arrayExpression: pipelines.Expr,
-  offsetExpr: pipelines.Expr
+  arrayExpression: Expr,
+  offsetExpr: Expr
 ): FunctionExpr;
 export function arrayOffset(
-  array: pipelines.Expr | string,
-  offset: pipelines.Expr | number
+  array: Expr | string,
+  offset: Expr | number
 ): FunctionExpr {
   return fieldOrExpression(array).arrayOffset(valueToDefaultExpr(offset));
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if a given expression produces an error.
  *
  * ```typescript
@@ -3107,14 +2941,12 @@ export function arrayOffset(
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isError' check.
  */
-export function isError(value: pipelines.Expr): BooleanExpr {
+export function isError(value: Expr): BooleanExpr {
   const expr: Expr = cast<Expr>(value);
   return expr.isError();
 }
 
 /**
- * @beta
- *
  * Creates an expression that returns the `catch` argument if there is an
  * error, else return the result of the `try` argument evaluation.
  *
@@ -3129,14 +2961,9 @@ export function isError(value: pipelines.Expr): BooleanExpr {
  * returned if the tryExpr produces an error.
  * @return A new {@code Expr} representing the 'ifError' operation.
  */
-export function ifError(
-  tryExpr: pipelines.Expr,
-  catchExpr: pipelines.Expr
-): FunctionExpr;
+export function ifError(tryExpr: Expr, catchExpr: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that returns the `catch` argument if there is an
  * error, else return the result of the `try` argument evaluation.
  *
@@ -3151,21 +2978,13 @@ export function ifError(
  * error.
  * @return A new {@code Expr} representing the 'ifError' operation.
  */
-export function ifError(
-  tryExpr: pipelines.Expr,
-  catchValue: unknown
-): FunctionExpr;
-export function ifError(
-  tryExpr: pipelines.Expr,
-  catchValue: unknown
-): FunctionExpr {
+export function ifError(tryExpr: Expr, catchValue: unknown): FunctionExpr;
+export function ifError(tryExpr: Expr, catchValue: unknown): FunctionExpr {
   const expr: Expr = cast<Expr>(tryExpr);
   return expr.ifError(valueToDefaultExpr(catchValue));
 }
 
 /**
- * @beta
- *
  * Creates an expression that returns `true` if a value is absent. Otherwise,
  * returns `false` even if the value is `null`.
  *
@@ -3177,11 +2996,9 @@ export function ifError(
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isAbsent' check.
  */
-export function isAbsent(value: pipelines.Expr): BooleanExpr;
+export function isAbsent(value: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that returns `true` if a field is absent. Otherwise,
  * returns `false` even if the field value is `null`.
  *
@@ -3194,13 +3011,11 @@ export function isAbsent(value: pipelines.Expr): BooleanExpr;
  * @return A new {@code Expr} representing the 'isAbsent' check.
  */
 export function isAbsent(field: string): BooleanExpr;
-export function isAbsent(value: pipelines.Expr | string): BooleanExpr {
+export function isAbsent(value: Expr | string): BooleanExpr {
   return fieldOrExpression(value).isAbsent();
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression evaluates to 'NaN' (Not a Number).
  *
  * ```typescript
@@ -3211,11 +3026,9 @@ export function isAbsent(value: pipelines.Expr | string): BooleanExpr {
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isNull' check.
  */
-export function isNull(value: pipelines.Expr): BooleanExpr;
+export function isNull(value: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value evaluates to 'NaN' (Not a Number).
  *
  * ```typescript
@@ -3227,13 +3040,11 @@ export function isNull(value: pipelines.Expr): BooleanExpr;
  * @return A new {@code Expr} representing the 'isNull' check.
  */
 export function isNull(value: string): BooleanExpr;
-export function isNull(value: pipelines.Expr | string): BooleanExpr {
+export function isNull(value: Expr | string): BooleanExpr {
   return fieldOrExpression(value).isNull();
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if tbe result of an expression is not null.
  *
  * ```typescript
@@ -3244,11 +3055,9 @@ export function isNull(value: pipelines.Expr | string): BooleanExpr {
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isNotNull' check.
  */
-export function isNotNull(value: pipelines.Expr): BooleanExpr;
+export function isNotNull(value: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if tbe value of a field is not null.
  *
  * ```typescript
@@ -3260,13 +3069,11 @@ export function isNotNull(value: pipelines.Expr): BooleanExpr;
  * @return A new {@code Expr} representing the 'isNotNull' check.
  */
 export function isNotNull(value: string): BooleanExpr;
-export function isNotNull(value: pipelines.Expr | string): BooleanExpr {
+export function isNotNull(value: Expr | string): BooleanExpr {
   return fieldOrExpression(value).isNotNull();
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
  *
  * ```typescript
@@ -3277,7 +3084,7 @@ export function isNotNull(value: pipelines.Expr | string): BooleanExpr {
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isNotNaN' check.
  */
-export function isNotNan(value: pipelines.Expr): BooleanExpr;
+export function isNotNan(value: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3293,7 +3100,7 @@ export function isNotNan(value: pipelines.Expr): BooleanExpr;
  * @return A new {@code Expr} representing the 'isNotNaN' check.
  */
 export function isNotNan(value: string): BooleanExpr;
-export function isNotNan(value: pipelines.Expr | string): BooleanExpr {
+export function isNotNan(value: Expr | string): BooleanExpr {
   return fieldOrExpression(value).isNotNan();
 }
 
@@ -3324,7 +3131,7 @@ export function mapRemove(mapField: string, key: string): FunctionExpr;
  * @param mapExpr An expression return a map value.
  * @param key The name of the key to remove from the input map.
  */
-export function mapRemove(mapExpr: pipelines.Expr, key: string): FunctionExpr;
+export function mapRemove(mapExpr: Expr, key: string): FunctionExpr;
 /**
  * @beta
  *
@@ -3338,10 +3145,7 @@ export function mapRemove(mapExpr: pipelines.Expr, key: string): FunctionExpr;
  * @param mapField The name of a field containing a map value.
  * @param keyExpr An expression that produces the name of the key to remove from the input map.
  */
-export function mapRemove(
-  mapField: string,
-  keyExpr: pipelines.Expr
-): FunctionExpr;
+export function mapRemove(mapField: string, keyExpr: Expr): FunctionExpr;
 /**
  * @beta
  *
@@ -3355,14 +3159,11 @@ export function mapRemove(
  * @param mapExpr An expression return a map value.
  * @param keyExpr An expression that produces the name of the key to remove from the input map.
  */
-export function mapRemove(
-  mapExpr: pipelines.Expr,
-  keyExpr: pipelines.Expr
-): FunctionExpr;
+export function mapRemove(mapExpr: Expr, keyExpr: Expr): FunctionExpr;
 
 export function mapRemove(
-  mapExpr: pipelines.Expr | string,
-  stringExpr: pipelines.Expr | string
+  mapExpr: Expr | string,
+  stringExpr: Expr | string
 ): FunctionExpr {
   return fieldOrExpression(mapExpr).mapRemove(valueToDefaultExpr(stringExpr));
 }
@@ -3386,8 +3187,8 @@ export function mapRemove(
  */
 export function mapMerge(
   mapField: string,
-  secondMap: Record<string, unknown> | pipelines.Expr,
-  ...otherMaps: Array<Record<string, unknown> | pipelines.Expr>
+  secondMap: Record<string, unknown> | Expr,
+  ...otherMaps: Array<Record<string, unknown> | Expr>
 ): FunctionExpr;
 
 /**
@@ -3408,15 +3209,15 @@ export function mapMerge(
  * as a literal or an expression that returns a map.
  */
 export function mapMerge(
-  firstMap: Record<string, unknown> | pipelines.Expr,
-  secondMap: Record<string, unknown> | pipelines.Expr,
-  ...otherMaps: Array<Record<string, unknown> | pipelines.Expr>
+  firstMap: Record<string, unknown> | Expr,
+  secondMap: Record<string, unknown> | Expr,
+  ...otherMaps: Array<Record<string, unknown> | Expr>
 ): FunctionExpr;
 
 export function mapMerge(
-  firstMap: string | Record<string, unknown> | pipelines.Expr,
-  secondMap: Record<string, unknown> | pipelines.Expr,
-  ...otherMaps: Array<Record<string, unknown> | pipelines.Expr>
+  firstMap: string | Record<string, unknown> | Expr,
+  secondMap: Record<string, unknown> | Expr,
+  ...otherMaps: Array<Record<string, unknown> | Expr>
 ): FunctionExpr {
   const secondMapExpr = valueToDefaultExpr(secondMap);
   const otherMapExprs = otherMaps.map(valueToDefaultExpr);
@@ -3451,10 +3252,10 @@ export function documentId(
  *
  * @return A new {@code Expr} representing the documentId operation.
  */
-export function documentId(documentPathExpr: pipelines.Expr): FunctionExpr;
+export function documentId(documentPathExpr: Expr): FunctionExpr;
 
 export function documentId(
-  documentPath: pipelines.Expr | string | firestore.DocumentReference
+  documentPath: Expr | string | firestore.DocumentReference
 ): FunctionExpr {
   const documentPathExpr = valueToDefaultExpr(documentPath);
   return documentPathExpr.documentId();
@@ -3485,7 +3286,7 @@ export function substr(
  * @param length Length of the substring.
  */
 export function substr(
-  input: pipelines.Expr,
+  input: Expr,
   position: number,
   length?: number
 ): FunctionExpr;
@@ -3501,8 +3302,8 @@ export function substr(
  */
 export function substr(
   field: string,
-  position: pipelines.Expr,
-  length?: pipelines.Expr
+  position: Expr,
+  length?: Expr
 ): FunctionExpr;
 
 /**
@@ -3515,15 +3316,15 @@ export function substr(
  * @param length An expression that returns the length of the substring.
  */
 export function substr(
-  input: pipelines.Expr,
-  position: pipelines.Expr,
-  length?: pipelines.Expr
+  input: Expr,
+  position: Expr,
+  length?: Expr
 ): FunctionExpr;
 
 export function substr(
-  field: pipelines.Expr | string,
-  position: pipelines.Expr | number,
-  length?: pipelines.Expr | number
+  field: Expr | string,
+  position: Expr | number,
+  length?: Expr | number
 ): FunctionExpr {
   const fieldExpr = fieldOrExpression(field);
   const positionExpr = valueToDefaultExpr(position);
@@ -3548,9 +3349,9 @@ export function substr(
  * @return A new {@code Expr} representing the addition operation.
  */
 export function add(
-  first: pipelines.Expr,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  first: Expr,
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr;
 
 /**
@@ -3570,14 +3371,14 @@ export function add(
  */
 export function add(
   fieldName: string,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr;
 
 export function add(
-  first: pipelines.Expr | string,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  first: Expr | string,
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr {
   return fieldOrExpression(first).add(
     valueToDefaultExpr(second),
@@ -3599,10 +3400,7 @@ export function add(
  * @param right The expression to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(
-  left: pipelines.Expr,
-  right: pipelines.Expr
-): FunctionExpr;
+export function subtract(left: Expr, right: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -3618,10 +3416,7 @@ export function subtract(
  * @param value The constant value to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(
-  expression: pipelines.Expr,
-  value: unknown
-): FunctionExpr;
+export function subtract(expression: Expr, value: unknown): FunctionExpr;
 
 /**
  * @beta
@@ -3637,10 +3432,7 @@ export function subtract(
  * @param expression The expression to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(
-  fieldName: string,
-  expression: pipelines.Expr
-): FunctionExpr;
+export function subtract(fieldName: string, expression: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -3658,8 +3450,8 @@ export function subtract(
  */
 export function subtract(fieldName: string, value: unknown): FunctionExpr;
 export function subtract(
-  left: pipelines.Expr | string,
-  right: pipelines.Expr | unknown
+  left: Expr | string,
+  right: Expr | unknown
 ): FunctionExpr {
   const normalizedLeft = fieldOrExpression(left);
   const normalizedRight = valueToDefaultExpr(right);
@@ -3682,9 +3474,9 @@ export function subtract(
  * @return A new {@code Expr} representing the multiplication operation.
  */
 export function multiply(
-  first: pipelines.Expr,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  first: Expr,
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr;
 
 /**
@@ -3704,14 +3496,14 @@ export function multiply(
  */
 export function multiply(
   fieldName: string,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr;
 
 export function multiply(
-  first: pipelines.Expr | string,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  first: Expr | string,
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr {
   return fieldOrExpression(first).multiply(
     valueToDefaultExpr(second),
@@ -3733,10 +3525,7 @@ export function multiply(
  * @param right The expression to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(
-  left: pipelines.Expr,
-  right: pipelines.Expr
-): FunctionExpr;
+export function divide(left: Expr, right: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -3752,10 +3541,7 @@ export function divide(
  * @param value The constant value to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(
-  expression: pipelines.Expr,
-  value: unknown
-): FunctionExpr;
+export function divide(expression: Expr, value: unknown): FunctionExpr;
 
 /**
  * @beta
@@ -3771,10 +3557,7 @@ export function divide(
  * @param expressions The expression to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(
-  fieldName: string,
-  expressions: pipelines.Expr
-): FunctionExpr;
+export function divide(fieldName: string, expressions: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -3792,8 +3575,8 @@ export function divide(
  */
 export function divide(fieldName: string, value: unknown): FunctionExpr;
 export function divide(
-  left: pipelines.Expr | string,
-  right: pipelines.Expr | unknown
+  left: Expr | string,
+  right: Expr | unknown
 ): FunctionExpr {
   const normalizedLeft = fieldOrExpression(left);
   const normalizedRight = valueToDefaultExpr(right);
@@ -3814,7 +3597,7 @@ export function divide(
  * @param right The divisor expression.
  * @return A new {@code Expr} representing the modulo operation.
  */
-export function mod(left: pipelines.Expr, right: pipelines.Expr): FunctionExpr;
+export function mod(left: Expr, right: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -3830,7 +3613,7 @@ export function mod(left: pipelines.Expr, right: pipelines.Expr): FunctionExpr;
  * @param value The divisor constant.
  * @return A new {@code Expr} representing the modulo operation.
  */
-export function mod(expression: pipelines.Expr, value: unknown): FunctionExpr;
+export function mod(expression: Expr, value: unknown): FunctionExpr;
 
 /**
  * @beta
@@ -3846,10 +3629,7 @@ export function mod(expression: pipelines.Expr, value: unknown): FunctionExpr;
  * @param expression The divisor expression.
  * @return A new {@code Expr} representing the modulo operation.
  */
-export function mod(
-  fieldName: string,
-  expression: pipelines.Expr
-): FunctionExpr;
+export function mod(fieldName: string, expression: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -3866,10 +3646,7 @@ export function mod(
  * @return A new {@code Expr} representing the modulo operation.
  */
 export function mod(fieldName: string, value: unknown): FunctionExpr;
-export function mod(
-  left: pipelines.Expr | string,
-  right: pipelines.Expr | unknown
-): FunctionExpr {
+export function mod(left: Expr | string, right: Expr | unknown): FunctionExpr {
   const normalizedLeft = fieldOrExpression(left);
   const normalizedRight = valueToDefaultExpr(right);
   return normalizedLeft.mod(normalizedRight);
@@ -3959,7 +3736,7 @@ export function array(elements: unknown[]): FunctionExpr {
  * @param right The second expression to compare.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
+export function eq(left: Expr, right: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -3975,7 +3752,7 @@ export function eq(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(expression: pipelines.Expr, value: unknown): BooleanExpr;
+export function eq(expression: Expr, value: unknown): BooleanExpr;
 
 /**
  * @beta
@@ -3991,7 +3768,7 @@ export function eq(expression: pipelines.Expr, value: unknown): BooleanExpr;
  * @param expression The expression to compare to.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(fieldName: string, expression: pipelines.Expr): BooleanExpr;
+export function eq(fieldName: string, expression: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4008,7 +3785,7 @@ export function eq(fieldName: string, expression: pipelines.Expr): BooleanExpr;
  * @return A new `Expr` representing the equality comparison.
  */
 export function eq(fieldName: string, value: unknown): BooleanExpr;
-export function eq(left: pipelines.Expr | string, right: unknown): BooleanExpr {
+export function eq(left: Expr | string, right: unknown): BooleanExpr {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.eq(rightExpr);
@@ -4028,7 +3805,7 @@ export function eq(left: pipelines.Expr | string, right: unknown): BooleanExpr {
  * @param right The second expression to compare.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
+export function neq(left: Expr, right: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4044,7 +3821,7 @@ export function neq(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(expression: pipelines.Expr, value: unknown): BooleanExpr;
+export function neq(expression: Expr, value: unknown): BooleanExpr;
 
 /**
  * @beta
@@ -4060,7 +3837,7 @@ export function neq(expression: pipelines.Expr, value: unknown): BooleanExpr;
  * @param expression The expression to compare to.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(fieldName: string, expression: pipelines.Expr): BooleanExpr;
+export function neq(fieldName: string, expression: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4077,10 +3854,7 @@ export function neq(fieldName: string, expression: pipelines.Expr): BooleanExpr;
  * @return A new `Expr` representing the inequality comparison.
  */
 export function neq(fieldName: string, value: unknown): BooleanExpr;
-export function neq(
-  left: pipelines.Expr | string,
-  right: unknown
-): BooleanExpr {
+export function neq(left: Expr | string, right: unknown): BooleanExpr {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.neq(rightExpr);
@@ -4100,7 +3874,7 @@ export function neq(
  * @param right The second expression to compare.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
+export function lt(left: Expr, right: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4116,7 +3890,7 @@ export function lt(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(expression: pipelines.Expr, value: unknown): BooleanExpr;
+export function lt(expression: Expr, value: unknown): BooleanExpr;
 
 /**
  * @beta
@@ -4132,7 +3906,7 @@ export function lt(expression: pipelines.Expr, value: unknown): BooleanExpr;
  * @param expression The expression to compare to.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(fieldName: string, expression: pipelines.Expr): BooleanExpr;
+export function lt(fieldName: string, expression: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4149,7 +3923,7 @@ export function lt(fieldName: string, expression: pipelines.Expr): BooleanExpr;
  * @return A new `Expr` representing the less than comparison.
  */
 export function lt(fieldName: string, value: unknown): BooleanExpr;
-export function lt(left: pipelines.Expr | string, right: unknown): BooleanExpr {
+export function lt(left: Expr | string, right: unknown): BooleanExpr {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.lt(rightExpr);
@@ -4170,7 +3944,7 @@ export function lt(left: pipelines.Expr | string, right: unknown): BooleanExpr {
  * @param right The second expression to compare.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
+export function lte(left: Expr, right: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4186,7 +3960,7 @@ export function lte(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(expression: pipelines.Expr, value: unknown): BooleanExpr;
+export function lte(expression: Expr, value: unknown): BooleanExpr;
 
 /**
  * Creates an expression that checks if a field's value is less than or equal to an expression.
@@ -4200,7 +3974,7 @@ export function lte(expression: pipelines.Expr, value: unknown): BooleanExpr;
  * @param expression The expression to compare to.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(fieldName: string, expression: pipelines.Expr): BooleanExpr;
+export function lte(fieldName: string, expression: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4217,10 +3991,7 @@ export function lte(fieldName: string, expression: pipelines.Expr): BooleanExpr;
  * @return A new `Expr` representing the less than or equal to comparison.
  */
 export function lte(fieldName: string, value: unknown): BooleanExpr;
-export function lte(
-  left: pipelines.Expr | string,
-  right: unknown
-): BooleanExpr {
+export function lte(left: Expr | string, right: unknown): BooleanExpr {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.lte(rightExpr);
@@ -4241,7 +4012,7 @@ export function lte(
  * @param right The second expression to compare.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
+export function gt(left: Expr, right: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4257,7 +4028,7 @@ export function gt(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(expression: pipelines.Expr, value: unknown): BooleanExpr;
+export function gt(expression: Expr, value: unknown): BooleanExpr;
 
 /**
  * @beta
@@ -4273,7 +4044,7 @@ export function gt(expression: pipelines.Expr, value: unknown): BooleanExpr;
  * @param expression The expression to compare to.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(fieldName: string, expression: pipelines.Expr): BooleanExpr;
+export function gt(fieldName: string, expression: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4290,7 +4061,7 @@ export function gt(fieldName: string, expression: pipelines.Expr): BooleanExpr;
  * @return A new `Expr` representing the greater than comparison.
  */
 export function gt(fieldName: string, value: unknown): BooleanExpr;
-export function gt(left: pipelines.Expr | string, right: unknown): BooleanExpr {
+export function gt(left: Expr | string, right: unknown): BooleanExpr {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.gt(rightExpr);
@@ -4311,7 +4082,7 @@ export function gt(left: pipelines.Expr | string, right: unknown): BooleanExpr {
  * @param right The second expression to compare.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
+export function gte(left: Expr, right: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4328,7 +4099,7 @@ export function gte(left: pipelines.Expr, right: pipelines.Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(expression: pipelines.Expr, value: unknown): BooleanExpr;
+export function gte(expression: Expr, value: unknown): BooleanExpr;
 
 /**
  * @beta
@@ -4344,7 +4115,7 @@ export function gte(expression: pipelines.Expr, value: unknown): BooleanExpr;
  * @param value The expression to compare to.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(fieldName: string, value: pipelines.Expr): BooleanExpr;
+export function gte(fieldName: string, value: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4362,10 +4133,7 @@ export function gte(fieldName: string, value: pipelines.Expr): BooleanExpr;
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
 export function gte(fieldName: string, value: unknown): BooleanExpr;
-export function gte(
-  left: pipelines.Expr | string,
-  right: unknown
-): BooleanExpr {
+export function gte(left: Expr | string, right: unknown): BooleanExpr {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.gte(rightExpr);
@@ -4387,9 +4155,9 @@ export function gte(
  * @return A new {@code Expr} representing the concatenated array.
  */
 export function arrayConcat(
-  firstArray: pipelines.Expr,
-  secondArray: pipelines.Expr | unknown[],
-  ...otherArrays: Array<pipelines.Expr | unknown[]>
+  firstArray: Expr,
+  secondArray: Expr | unknown[],
+  ...otherArrays: Array<Expr | unknown[]>
 ): FunctionExpr;
 
 /**
@@ -4409,14 +4177,14 @@ export function arrayConcat(
  */
 export function arrayConcat(
   firstArrayField: string,
-  secondArray: pipelines.Expr | unknown[],
-  ...otherArrays: Array<pipelines.Expr | unknown[]>
+  secondArray: Expr | unknown[],
+  ...otherArrays: Array<Expr | unknown[]>
 ): FunctionExpr;
 
 export function arrayConcat(
-  firstArray: pipelines.Expr | string,
-  secondArray: pipelines.Expr | unknown[],
-  ...otherArrays: Array<pipelines.Expr | unknown[]>
+  firstArray: Expr | string,
+  secondArray: Expr | unknown[],
+  ...otherArrays: Array<Expr | unknown[]>
 ): FunctionExpr {
   const exprValues = otherArrays.map(element => valueToDefaultExpr(element));
   return fieldOrExpression(firstArray).arrayConcat(
@@ -4439,10 +4207,7 @@ export function arrayConcat(
  * @param element The element to search for in the array.
  * @return A new {@code Expr} representing the 'array_contains' comparison.
  */
-export function arrayContains(
-  array: pipelines.Expr,
-  element: pipelines.Expr
-): FunctionExpr;
+export function arrayContains(array: Expr, element: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -4458,10 +4223,7 @@ export function arrayContains(
  * @param element The element to search for in the array.
  * @return A new {@code Expr} representing the 'array_contains' comparison.
  */
-export function arrayContains(
-  array: pipelines.Expr,
-  element: unknown
-): FunctionExpr;
+export function arrayContains(array: Expr, element: unknown): FunctionExpr;
 
 /**
  * @beta
@@ -4477,10 +4239,7 @@ export function arrayContains(
  * @param element The element to search for in the array.
  * @return A new {@code Expr} representing the 'array_contains' comparison.
  */
-export function arrayContains(
-  fieldName: string,
-  element: pipelines.Expr
-): FunctionExpr;
+export function arrayContains(fieldName: string, element: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -4498,7 +4257,7 @@ export function arrayContains(
  */
 export function arrayContains(fieldName: string, element: unknown): BooleanExpr;
 export function arrayContains(
-  array: pipelines.Expr | string,
+  array: Expr | string,
   element: unknown
 ): BooleanExpr {
   const arrayExpr = fieldOrExpression(array);
@@ -4522,8 +4281,8 @@ export function arrayContains(
  * @return A new {@code Expr} representing the 'array_contains_any' comparison.
  */
 export function arrayContainsAny(
-  array: pipelines.Expr,
-  values: Array<pipelines.Expr | unknown>
+  array: Expr,
+  values: Array<Expr | unknown>
 ): BooleanExpr;
 
 /**
@@ -4544,7 +4303,7 @@ export function arrayContainsAny(
  */
 export function arrayContainsAny(
   fieldName: string,
-  values: Array<pipelines.Expr | unknown>
+  values: Array<Expr | unknown>
 ): BooleanExpr;
 
 /**
@@ -4562,10 +4321,7 @@ export function arrayContainsAny(
  * @param values An expression that evaluates to an array, whose elements to check for in the array.
  * @return A new {@code Expr} representing the 'array_contains_any' comparison.
  */
-export function arrayContainsAny(
-  array: pipelines.Expr,
-  values: pipelines.Expr
-): BooleanExpr;
+export function arrayContainsAny(array: Expr, values: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4583,13 +4339,10 @@ export function arrayContainsAny(
  * @param values An expression that evaluates to an array, whose elements to check for in the array field.
  * @return A new {@code Expr} representing the 'array_contains_any' comparison.
  */
+export function arrayContainsAny(fieldName: string, values: Expr): BooleanExpr;
 export function arrayContainsAny(
-  fieldName: string,
-  values: pipelines.Expr
-): BooleanExpr;
-export function arrayContainsAny(
-  array: pipelines.Expr | string,
-  values: unknown[] | pipelines.Expr
+  array: Expr | string,
+  values: unknown[] | Expr
 ): BooleanExpr {
   if (Array.isArray(values)) {
     return fieldOrExpression(array).arrayContainsAny(values);
@@ -4613,8 +4366,8 @@ export function arrayContainsAny(
  * @return A new {@code Expr} representing the 'array_contains_all' comparison.
  */
 export function arrayContainsAll(
-  array: pipelines.Expr,
-  values: Array<pipelines.Expr | unknown>
+  array: Expr,
+  values: Array<Expr | unknown>
 ): BooleanExpr;
 
 /**
@@ -4634,7 +4387,7 @@ export function arrayContainsAll(
  */
 export function arrayContainsAll(
   fieldName: string,
-  values: Array<pipelines.Expr | unknown>
+  values: Array<Expr | unknown>
 ): BooleanExpr;
 
 /**
@@ -4652,8 +4405,8 @@ export function arrayContainsAll(
  * @return A new {@code Expr} representing the 'array_contains_all' comparison.
  */
 export function arrayContainsAll(
-  array: pipelines.Expr,
-  arrayExpression: pipelines.Expr
+  array: Expr,
+  arrayExpression: Expr
 ): BooleanExpr;
 
 /**
@@ -4673,11 +4426,11 @@ export function arrayContainsAll(
  */
 export function arrayContainsAll(
   fieldName: string,
-  arrayExpression: pipelines.Expr
+  arrayExpression: Expr
 ): BooleanExpr;
 export function arrayContainsAll(
-  array: pipelines.Expr | string,
-  values: unknown[] | pipelines.Expr
+  array: Expr | string,
+  values: unknown[] | Expr
 ): BooleanExpr {
   if (Array.isArray(values)) {
     return fieldOrExpression(array).arrayContainsAll(values);
@@ -4714,8 +4467,8 @@ export function arrayLength(fieldName: string): FunctionExpr;
  * @param array The array expression to calculate the length of.
  * @return A new {@code Expr} representing the length of the array.
  */
-export function arrayLength(array: pipelines.Expr): FunctionExpr;
-export function arrayLength(array: pipelines.Expr | string): FunctionExpr {
+export function arrayLength(array: Expr): FunctionExpr;
+export function arrayLength(array: Expr | string): FunctionExpr {
   return fieldOrExpression(array).arrayLength();
 }
 
@@ -4735,8 +4488,8 @@ export function arrayLength(array: pipelines.Expr | string): FunctionExpr {
  * @return A new {@code Expr} representing the 'IN' comparison.
  */
 export function eqAny(
-  expression: pipelines.Expr,
-  values: Array<pipelines.Expr | unknown>
+  expression: Expr,
+  values: Array<Expr | unknown>
 ): BooleanExpr;
 
 /**
@@ -4753,10 +4506,7 @@ export function eqAny(
  * @param arrayExpression An expression that evaluates to an array, whose elements to check for equality to the input.
  * @return A new {@code Expr} representing the 'IN' comparison.
  */
-export function eqAny(
-  expression: pipelines.Expr,
-  arrayExpression: pipelines.Expr
-): BooleanExpr;
+export function eqAny(expression: Expr, arrayExpression: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4775,7 +4525,7 @@ export function eqAny(
  */
 export function eqAny(
   fieldName: string,
-  values: Array<pipelines.Expr | unknown>
+  values: Array<Expr | unknown>
 ): BooleanExpr;
 
 /**
@@ -4793,13 +4543,10 @@ export function eqAny(
  * @param arrayExpression An expression that evaluates to an array, whose elements to check for equality to the input field.
  * @return A new {@code Expr} representing the 'IN' comparison.
  */
+export function eqAny(fieldName: string, arrayExpression: Expr): BooleanExpr;
 export function eqAny(
-  fieldName: string,
-  arrayExpression: pipelines.Expr
-): BooleanExpr;
-export function eqAny(
-  element: pipelines.Expr | string,
-  values: unknown[] | pipelines.Expr
+  element: Expr | string,
+  values: unknown[] | Expr
 ): BooleanExpr {
   if (Array.isArray(values)) {
     return fieldOrExpression(element).eqAny(values);
@@ -4824,8 +4571,8 @@ export function eqAny(
  * @return A new {@code Expr} representing the 'NOT IN' comparison.
  */
 export function notEqAny(
-  element: pipelines.Expr,
-  values: Array<pipelines.Expr | unknown>
+  element: Expr,
+  values: Array<Expr | unknown>
 ): BooleanExpr;
 
 /**
@@ -4845,7 +4592,7 @@ export function notEqAny(
  */
 export function notEqAny(
   fieldName: string,
-  values: Array<pipelines.Expr | unknown>
+  values: Array<Expr | unknown>
 ): BooleanExpr;
 
 /**
@@ -4863,10 +4610,7 @@ export function notEqAny(
  * @param arrayExpression The values to check against.
  * @return A new {@code Expr} representing the 'NOT IN' comparison.
  */
-export function notEqAny(
-  element: pipelines.Expr,
-  arrayExpression: pipelines.Expr
-): BooleanExpr;
+export function notEqAny(element: Expr, arrayExpression: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -4882,14 +4626,11 @@ export function notEqAny(
  * @param arrayExpression The values to check against.
  * @return A new {@code Expr} representing the 'NOT IN' comparison.
  */
-export function notEqAny(
-  fieldName: string,
-  arrayExpression: pipelines.Expr
-): BooleanExpr;
+export function notEqAny(fieldName: string, arrayExpression: Expr): BooleanExpr;
 
 export function notEqAny(
-  element: pipelines.Expr | string,
-  values: unknown[] | pipelines.Expr
+  element: Expr | string,
+  values: unknown[] | Expr
 ): BooleanExpr {
   if (Array.isArray(values)) {
     return fieldOrExpression(element).notEqAny(values);
@@ -4944,8 +4685,8 @@ export function xor(
  */
 export function cond(
   condition: BooleanExpr,
-  thenExpr: pipelines.Expr,
-  elseExpr: pipelines.Expr
+  thenExpr: Expr,
+  elseExpr: Expr
 ): FunctionExpr {
   return new FunctionExpr('cond', [
     condition,
@@ -4989,9 +4730,9 @@ export function not(booleanExpr: BooleanExpr): BooleanExpr {
  * @return A new {@code Expr} representing the logical max operation.
  */
 export function logicalMaximum(
-  first: pipelines.Expr,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  first: Expr,
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr;
 
 /**
@@ -5013,14 +4754,14 @@ export function logicalMaximum(
  */
 export function logicalMaximum(
   fieldName: string,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr;
 
 export function logicalMaximum(
-  first: pipelines.Expr | string,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  first: Expr | string,
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr {
   return fieldOrExpression(first).logicalMaximum(
     valueToDefaultExpr(second),
@@ -5046,9 +4787,9 @@ export function logicalMaximum(
  * @return A new {@code Expr} representing the logical min operation.
  */
 export function logicalMinimum(
-  first: pipelines.Expr,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  first: Expr,
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr;
 
 /**
@@ -5071,14 +4812,14 @@ export function logicalMinimum(
  */
 export function logicalMinimum(
   fieldName: string,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr;
 
 export function logicalMinimum(
-  first: pipelines.Expr | string,
-  second: pipelines.Expr | unknown,
-  ...others: Array<pipelines.Expr | unknown>
+  first: Expr | string,
+  second: Expr | unknown,
+  ...others: Array<Expr | unknown>
 ): FunctionExpr {
   return fieldOrExpression(first).logicalMinimum(
     valueToDefaultExpr(second),
@@ -5099,7 +4840,7 @@ export function logicalMinimum(
  * @param value An expression evaluates to the name of the field to check.
  * @return A new {@code Expr} representing the 'exists' check.
  */
-export function exists(value: pipelines.Expr): BooleanExpr;
+export function exists(value: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -5115,7 +4856,7 @@ export function exists(value: pipelines.Expr): BooleanExpr;
  * @return A new {@code Expr} representing the 'exists' check.
  */
 export function exists(fieldName: string): BooleanExpr;
-export function exists(valueOrField: pipelines.Expr | string): BooleanExpr {
+export function exists(valueOrField: Expr | string): BooleanExpr {
   return fieldOrExpression(valueOrField).exists();
 }
 
@@ -5132,7 +4873,7 @@ export function exists(valueOrField: pipelines.Expr | string): BooleanExpr {
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isNan' check.
  */
-export function isNan(value: pipelines.Expr): BooleanExpr;
+export function isNan(value: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -5148,7 +4889,7 @@ export function isNan(value: pipelines.Expr): BooleanExpr;
  * @return A new {@code Expr} representing the 'isNan' check.
  */
 export function isNan(fieldName: string): BooleanExpr;
-export function isNan(value: pipelines.Expr | string): BooleanExpr {
+export function isNan(value: Expr | string): BooleanExpr {
   return fieldOrExpression(value).isNan();
 }
 
@@ -5165,7 +4906,7 @@ export function isNan(value: pipelines.Expr | string): BooleanExpr {
  * @param stringExpression An expression evaluating to a string value, which will be reversed.
  * @return A new {@code Expr} representing the reversed string.
  */
-export function reverse(stringExpression: pipelines.Expr): FunctionExpr;
+export function reverse(stringExpression: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -5181,7 +4922,7 @@ export function reverse(stringExpression: pipelines.Expr): FunctionExpr;
  * @return A new {@code Expr} representing the reversed string.
  */
 export function reverse(field: string): FunctionExpr;
-export function reverse(expr: pipelines.Expr | string): FunctionExpr {
+export function reverse(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).reverse();
 }
 
@@ -5201,7 +4942,7 @@ export function reverse(expr: pipelines.Expr | string): FunctionExpr {
  * @return A new {@code Expr} representing the string with the first occurrence replaced.
  */
 export function replaceFirst(
-  value: pipelines.Expr,
+  value: Expr,
   find: string,
   replace: string
 ): FunctionExpr;
@@ -5223,9 +4964,9 @@ export function replaceFirst(
  * @return A new {@code Expr} representing the string with the first occurrence replaced.
  */
 export function replaceFirst(
-  value: pipelines.Expr,
-  find: pipelines.Expr,
-  replace: pipelines.Expr
+  value: Expr,
+  find: Expr,
+  replace: Expr
 ): FunctionExpr;
 
 /**
@@ -5249,9 +4990,9 @@ export function replaceFirst(
   replace: string
 ): FunctionExpr;
 export function replaceFirst(
-  value: pipelines.Expr | string,
-  find: pipelines.Expr | string,
-  replace: pipelines.Expr | string
+  value: Expr | string,
+  find: Expr | string,
+  replace: Expr | string
 ): FunctionExpr {
   const normalizedValue = fieldOrExpression(value);
   const normalizedFind = valueToDefaultExpr(find);
@@ -5275,7 +5016,7 @@ export function replaceFirst(
  * @return A new {@code Expr} representing the string with all occurrences replaced.
  */
 export function replaceAll(
-  value: pipelines.Expr,
+  value: Expr,
   find: string,
   replace: string
 ): FunctionExpr;
@@ -5297,9 +5038,9 @@ export function replaceAll(
  * @return A new {@code Expr} representing the string with all occurrences replaced.
  */
 export function replaceAll(
-  value: pipelines.Expr,
-  find: pipelines.Expr,
-  replace: pipelines.Expr
+  value: Expr,
+  find: Expr,
+  replace: Expr
 ): FunctionExpr;
 
 /**
@@ -5323,9 +5064,9 @@ export function replaceAll(
   replace: string
 ): FunctionExpr;
 export function replaceAll(
-  value: pipelines.Expr | string,
-  find: pipelines.Expr | string,
-  replace: pipelines.Expr | string
+  value: Expr | string,
+  find: Expr | string,
+  replace: Expr | string
 ): FunctionExpr {
   const normalizedValue = fieldOrExpression(value);
   const normalizedFind = valueToDefaultExpr(find);
@@ -5346,7 +5087,7 @@ export function replaceAll(
  * @param expr The expression representing the string.
  * @return A new {@code Expr} representing the length of the string in bytes.
  */
-export function byteLength(expr: pipelines.Expr): FunctionExpr;
+export function byteLength(expr: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -5362,7 +5103,7 @@ export function byteLength(expr: pipelines.Expr): FunctionExpr;
  * @return A new {@code Expr} representing the length of the string in bytes.
  */
 export function byteLength(fieldName: string): FunctionExpr;
-export function byteLength(expr: pipelines.Expr | string): FunctionExpr {
+export function byteLength(expr: Expr | string): FunctionExpr {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.byteLength();
 }
@@ -5395,8 +5136,8 @@ export function charLength(fieldName: string): FunctionExpr;
  * @param stringExpression The expression representing the string to calculate the length of.
  * @return A new {@code Expr} representing the length of the string.
  */
-export function charLength(stringExpression: pipelines.Expr): FunctionExpr;
-export function charLength(value: pipelines.Expr | string): FunctionExpr {
+export function charLength(stringExpression: Expr): FunctionExpr;
+export function charLength(value: Expr | string): FunctionExpr {
   const valueExpr = fieldOrExpression(value);
   return valueExpr.charLength();
 }
@@ -5433,7 +5174,7 @@ export function like(fieldName: string, pattern: string): BooleanExpr;
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
-export function like(fieldName: string, pattern: pipelines.Expr): BooleanExpr;
+export function like(fieldName: string, pattern: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -5449,10 +5190,7 @@ export function like(fieldName: string, pattern: pipelines.Expr): BooleanExpr;
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
-export function like(
-  stringExpression: pipelines.Expr,
-  pattern: string
-): BooleanExpr;
+export function like(stringExpression: Expr, pattern: string): BooleanExpr;
 
 /**
  * @beta
@@ -5468,13 +5206,10 @@ export function like(
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
+export function like(stringExpression: Expr, pattern: Expr): BooleanExpr;
 export function like(
-  stringExpression: pipelines.Expr,
-  pattern: pipelines.Expr
-): BooleanExpr;
-export function like(
-  left: pipelines.Expr | string,
-  pattern: pipelines.Expr | string
+  left: Expr | string,
+  pattern: Expr | string
 ): FunctionExpr {
   const leftExpr = fieldOrExpression(left);
   const patternExpr = valueToDefaultExpr(pattern);
@@ -5513,10 +5248,7 @@ export function regexContains(fieldName: string, pattern: string): BooleanExpr;
  * @param pattern The regular expression to use for the search.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function regexContains(
-  fieldName: string,
-  pattern: pipelines.Expr
-): BooleanExpr;
+export function regexContains(fieldName: string, pattern: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -5534,7 +5266,7 @@ export function regexContains(
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
 export function regexContains(
-  stringExpression: pipelines.Expr,
+  stringExpression: Expr,
   pattern: string
 ): BooleanExpr;
 
@@ -5554,12 +5286,12 @@ export function regexContains(
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
 export function regexContains(
-  stringExpression: pipelines.Expr,
-  pattern: pipelines.Expr
+  stringExpression: Expr,
+  pattern: Expr
 ): BooleanExpr;
 export function regexContains(
-  left: pipelines.Expr | string,
-  pattern: pipelines.Expr | string
+  left: Expr | string,
+  pattern: Expr | string
 ): BooleanExpr {
   const leftExpr = fieldOrExpression(left);
   const patternExpr = valueToDefaultExpr(pattern);
@@ -5596,10 +5328,7 @@ export function regexMatch(fieldName: string, pattern: string): BooleanExpr;
  * @param pattern The regular expression to use for the match.
  * @return A new {@code Expr} representing the regular expression match.
  */
-export function regexMatch(
-  fieldName: string,
-  pattern: pipelines.Expr
-): BooleanExpr;
+export function regexMatch(fieldName: string, pattern: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -5617,7 +5346,7 @@ export function regexMatch(
  * @return A new {@code Expr} representing the regular expression match.
  */
 export function regexMatch(
-  stringExpression: pipelines.Expr,
+  stringExpression: Expr,
   pattern: string
 ): BooleanExpr;
 
@@ -5636,13 +5365,10 @@ export function regexMatch(
  * @param pattern The regular expression to use for the match.
  * @return A new {@code Expr} representing the regular expression match.
  */
+export function regexMatch(stringExpression: Expr, pattern: Expr): BooleanExpr;
 export function regexMatch(
-  stringExpression: pipelines.Expr,
-  pattern: pipelines.Expr
-): BooleanExpr;
-export function regexMatch(
-  left: pipelines.Expr | string,
-  pattern: pipelines.Expr | string
+  left: Expr | string,
+  pattern: Expr | string
 ): BooleanExpr {
   const leftExpr = fieldOrExpression(left);
   const patternExpr = valueToDefaultExpr(pattern);
@@ -5679,10 +5405,7 @@ export function strContains(fieldName: string, substring: string): BooleanExpr;
  * @param substring The expression representing the substring to search for.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function strContains(
-  fieldName: string,
-  substring: pipelines.Expr
-): BooleanExpr;
+export function strContains(fieldName: string, substring: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -5699,7 +5422,7 @@ export function strContains(
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
 export function strContains(
-  stringExpression: pipelines.Expr,
+  stringExpression: Expr,
   substring: string
 ): BooleanExpr;
 
@@ -5718,12 +5441,12 @@ export function strContains(
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
 export function strContains(
-  stringExpression: pipelines.Expr,
-  substring: pipelines.Expr
+  stringExpression: Expr,
+  substring: Expr
 ): BooleanExpr;
 export function strContains(
-  left: pipelines.Expr | string,
-  substring: pipelines.Expr | string
+  left: Expr | string,
+  substring: Expr | string
 ): BooleanExpr {
   const leftExpr = fieldOrExpression(left);
   const substringExpr = valueToDefaultExpr(substring);
@@ -5760,10 +5483,7 @@ export function startsWith(fieldName: string, prefix: string): BooleanExpr;
  * @param prefix The expression representing the prefix.
  * @return A new {@code Expr} representing the 'starts with' comparison.
  */
-export function startsWith(
-  fieldName: string,
-  prefix: pipelines.Expr
-): BooleanExpr;
+export function startsWith(fieldName: string, prefix: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -5779,10 +5499,7 @@ export function startsWith(
  * @param prefix The prefix to check for.
  * @return A new {@code Expr} representing the 'starts with' comparison.
  */
-export function startsWith(
-  stringExpression: pipelines.Expr,
-  prefix: string
-): BooleanExpr;
+export function startsWith(stringExpression: Expr, prefix: string): BooleanExpr;
 
 /**
  * @beta
@@ -5798,13 +5515,10 @@ export function startsWith(
  * @param prefix The prefix to check for.
  * @return A new {@code Expr} representing the 'starts with' comparison.
  */
+export function startsWith(stringExpression: Expr, prefix: Expr): BooleanExpr;
 export function startsWith(
-  stringExpression: pipelines.Expr,
-  prefix: pipelines.Expr
-): BooleanExpr;
-export function startsWith(
-  expr: pipelines.Expr | string,
-  prefix: pipelines.Expr | string
+  expr: Expr | string,
+  prefix: Expr | string
 ): BooleanExpr {
   return fieldOrExpression(expr).startsWith(valueToDefaultExpr(prefix));
 }
@@ -5839,10 +5553,7 @@ export function endsWith(fieldName: string, suffix: string): BooleanExpr;
  * @param suffix The expression representing the postfix.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
-export function endsWith(
-  fieldName: string,
-  suffix: pipelines.Expr
-): BooleanExpr;
+export function endsWith(fieldName: string, suffix: Expr): BooleanExpr;
 
 /**
  * @beta
@@ -5858,10 +5569,7 @@ export function endsWith(
  * @param suffix The postfix to check for.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
-export function endsWith(
-  stringExpression: pipelines.Expr,
-  suffix: string
-): BooleanExpr;
+export function endsWith(stringExpression: Expr, suffix: string): BooleanExpr;
 
 /**
  * @beta
@@ -5877,13 +5585,10 @@ export function endsWith(
  * @param suffix The postfix to check for.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
+export function endsWith(stringExpression: Expr, suffix: Expr): BooleanExpr;
 export function endsWith(
-  stringExpression: pipelines.Expr,
-  suffix: pipelines.Expr
-): BooleanExpr;
-export function endsWith(
-  expr: pipelines.Expr | string,
-  suffix: pipelines.Expr | string
+  expr: Expr | string,
+  suffix: Expr | string
 ): BooleanExpr {
   return fieldOrExpression(expr).endsWith(valueToDefaultExpr(suffix));
 }
@@ -5916,8 +5621,8 @@ export function toLower(fieldName: string): FunctionExpr;
  * @param stringExpression The expression representing the string to convert to lowercase.
  * @return A new {@code Expr} representing the lowercase string.
  */
-export function toLower(stringExpression: pipelines.Expr): FunctionExpr;
-export function toLower(expr: pipelines.Expr | string): FunctionExpr {
+export function toLower(stringExpression: Expr): FunctionExpr;
+export function toLower(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).toLower();
 }
 
@@ -5949,8 +5654,8 @@ export function toUpper(fieldName: string): FunctionExpr;
  * @param stringExpression The expression representing the string to convert to uppercase.
  * @return A new {@code Expr} representing the uppercase string.
  */
-export function toUpper(stringExpression: pipelines.Expr): FunctionExpr;
-export function toUpper(expr: pipelines.Expr | string): FunctionExpr {
+export function toUpper(stringExpression: Expr): FunctionExpr;
+export function toUpper(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).toUpper();
 }
 
@@ -5982,8 +5687,8 @@ export function trim(fieldName: string): FunctionExpr;
  * @param stringExpression The expression representing the string to trim.
  * @return A new {@code Expr} representing the trimmed string.
  */
-export function trim(stringExpression: pipelines.Expr): FunctionExpr;
-export function trim(expr: pipelines.Expr | string): FunctionExpr {
+export function trim(stringExpression: Expr): FunctionExpr;
+export function trim(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).trim();
 }
 
@@ -6004,8 +5709,8 @@ export function trim(expr: pipelines.Expr | string): FunctionExpr {
  */
 export function strConcat(
   fieldName: string,
-  secondString: pipelines.Expr | string,
-  ...otherStrings: Array<pipelines.Expr | string>
+  secondString: Expr | string,
+  ...otherStrings: Array<Expr | string>
 ): FunctionExpr;
 
 /**
@@ -6023,14 +5728,14 @@ export function strConcat(
  * @return A new {@code Expr} representing the concatenated string.
  */
 export function strConcat(
-  firstString: pipelines.Expr,
-  secondString: pipelines.Expr | string,
-  ...otherStrings: Array<pipelines.Expr | string>
+  firstString: Expr,
+  secondString: Expr | string,
+  ...otherStrings: Array<Expr | string>
 ): FunctionExpr;
 export function strConcat(
-  first: string | pipelines.Expr,
-  second: string | pipelines.Expr,
-  ...elements: Array<string | pipelines.Expr>
+  first: string | Expr,
+  second: string | Expr,
+  ...elements: Array<string | Expr>
 ): FunctionExpr {
   return fieldOrExpression(first).strConcat(
     valueToDefaultExpr(second),
@@ -6068,12 +5773,9 @@ export function mapGet(fieldName: string, subField: string): FunctionExpr;
  * @param subField The key to access in the map.
  * @return A new {@code Expr} representing the value associated with the given key in the map.
  */
+export function mapGet(mapExpression: Expr, subField: string): FunctionExpr;
 export function mapGet(
-  mapExpression: pipelines.Expr,
-  subField: string
-): FunctionExpr;
-export function mapGet(
-  fieldOrExpr: string | pipelines.Expr,
+  fieldOrExpr: string | Expr,
   subField: string
 ): FunctionExpr {
   return fieldOrExpression(fieldOrExpr).mapGet(subField);
@@ -6109,7 +5811,7 @@ export function countAll(): AggregateFunction {
  * @param expression The expression to count.
  * @return A new {@code AggregateFunction} representing the 'count' aggregation.
  */
-export function count(expression: pipelines.Expr): AggregateFunction;
+export function count(expression: Expr): AggregateFunction;
 
 /**
  * Creates an aggregation that counts the number of stage inputs where the input field exists.
@@ -6123,7 +5825,7 @@ export function count(expression: pipelines.Expr): AggregateFunction;
  * @return A new {@code AggregateFunction} representing the 'count' aggregation.
  */
 export function count(fieldName: string): AggregateFunction;
-export function count(value: pipelines.Expr | string): AggregateFunction {
+export function count(value: Expr | string): AggregateFunction {
   return fieldOrExpression(value).count();
 }
 
@@ -6141,7 +5843,7 @@ export function count(value: pipelines.Expr | string): AggregateFunction {
  * @param expression The expression to sum up.
  * @return A new {@code AggregateFunction} representing the 'sum' aggregation.
  */
-export function sum(expression: pipelines.Expr): AggregateFunction;
+export function sum(expression: Expr): AggregateFunction;
 
 /**
  * @beta
@@ -6158,7 +5860,7 @@ export function sum(expression: pipelines.Expr): AggregateFunction;
  * @return A new {@code AggregateFunction} representing the 'sum' aggregation.
  */
 export function sum(fieldName: string): AggregateFunction;
-export function sum(value: pipelines.Expr | string): AggregateFunction {
+export function sum(value: Expr | string): AggregateFunction {
   return fieldOrExpression(value).sum();
 }
 
@@ -6176,7 +5878,7 @@ export function sum(value: pipelines.Expr | string): AggregateFunction {
  * @param expression The expression representing the values to average.
  * @return A new {@code AggregateFunction} representing the 'avg' aggregation.
  */
-export function avg(expression: pipelines.Expr): AggregateFunction;
+export function avg(expression: Expr): AggregateFunction;
 
 /**
  * @beta
@@ -6193,7 +5895,7 @@ export function avg(expression: pipelines.Expr): AggregateFunction;
  * @return A new {@code AggregateFunction} representing the 'avg' aggregation.
  */
 export function avg(fieldName: string): AggregateFunction;
-export function avg(value: pipelines.Expr | string): AggregateFunction {
+export function avg(value: Expr | string): AggregateFunction {
   return fieldOrExpression(value).avg();
 }
 
@@ -6211,7 +5913,7 @@ export function avg(value: pipelines.Expr | string): AggregateFunction {
  * @param expression The expression to find the minimum value of.
  * @return A new {@code AggregateFunction} representing the 'min' aggregation.
  */
-export function minimum(expression: pipelines.Expr): AggregateFunction;
+export function minimum(expression: Expr): AggregateFunction;
 
 /**
  * @beta
@@ -6227,7 +5929,7 @@ export function minimum(expression: pipelines.Expr): AggregateFunction;
  * @return A new {@code AggregateFunction} representing the 'min' aggregation.
  */
 export function minimum(fieldName: string): AggregateFunction;
-export function minimum(value: pipelines.Expr | string): AggregateFunction {
+export function minimum(value: Expr | string): AggregateFunction {
   return fieldOrExpression(value).minimum();
 }
 
@@ -6245,7 +5947,7 @@ export function minimum(value: pipelines.Expr | string): AggregateFunction {
  * @param expression The expression to find the maximum value of.
  * @return A new {@code AggregateFunction} representing the 'max' aggregation.
  */
-export function maximum(expression: pipelines.Expr): AggregateFunction;
+export function maximum(expression: Expr): AggregateFunction;
 
 /**
  * @beta
@@ -6261,7 +5963,7 @@ export function maximum(expression: pipelines.Expr): AggregateFunction;
  * @return A new {@code AggregateFunction} representing the 'max' aggregation.
  */
 export function maximum(fieldName: string): AggregateFunction;
-export function maximum(value: pipelines.Expr | string): AggregateFunction {
+export function maximum(value: Expr | string): AggregateFunction {
   return fieldOrExpression(value).maximum();
 }
 
@@ -6300,7 +6002,7 @@ export function cosineDistance(
  */
 export function cosineDistance(
   fieldName: string,
-  vectorExpression: pipelines.Expr
+  vectorExpression: Expr
 ): FunctionExpr;
 
 /**
@@ -6318,8 +6020,8 @@ export function cosineDistance(
  * @return A new {@code Expr} representing the cosine distance between the two vectors.
  */
 export function cosineDistance(
-  vectorExpression: pipelines.Expr,
-  vector: number[] | pipelines.Expr
+  vectorExpression: Expr,
+  vector: number[] | Expr
 ): FunctionExpr;
 
 /**
@@ -6337,12 +6039,12 @@ export function cosineDistance(
  * @return A new {@code Expr} representing the cosine distance between the two vectors.
  */
 export function cosineDistance(
-  vectorExpression: pipelines.Expr,
-  otherVectorExpression: pipelines.Expr
+  vectorExpression: Expr,
+  otherVectorExpression: Expr
 ): FunctionExpr;
 export function cosineDistance(
-  expr: pipelines.Expr | string,
-  other: pipelines.Expr | number[] | VectorValue
+  expr: Expr | string,
+  other: Expr | number[] | VectorValue
 ): FunctionExpr {
   const expr1 = fieldOrExpression(expr);
   const expr2 = vectorToExpr(other);
@@ -6384,7 +6086,7 @@ export function dotProduct(
  */
 export function dotProduct(
   fieldName: string,
-  vectorExpression: pipelines.Expr
+  vectorExpression: Expr
 ): FunctionExpr;
 
 /**
@@ -6402,7 +6104,7 @@ export function dotProduct(
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
 export function dotProduct(
-  vectorExpression: pipelines.Expr,
+  vectorExpression: Expr,
   vector: number[] | VectorValue
 ): FunctionExpr;
 
@@ -6421,12 +6123,12 @@ export function dotProduct(
  * @return A new {@code Expr} representing the dot product between the two vectors.
  */
 export function dotProduct(
-  vectorExpression: pipelines.Expr,
-  otherVectorExpression: pipelines.Expr
+  vectorExpression: Expr,
+  otherVectorExpression: Expr
 ): FunctionExpr;
 export function dotProduct(
-  expr: pipelines.Expr | string,
-  other: pipelines.Expr | number[] | VectorValue
+  expr: Expr | string,
+  other: Expr | number[] | VectorValue
 ): FunctionExpr {
   const expr1 = fieldOrExpression(expr);
   const expr2 = vectorToExpr(other);
@@ -6468,7 +6170,7 @@ export function euclideanDistance(
  */
 export function euclideanDistance(
   fieldName: string,
-  vectorExpression: pipelines.Expr
+  vectorExpression: Expr
 ): FunctionExpr;
 
 /**
@@ -6487,7 +6189,7 @@ export function euclideanDistance(
  * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
  */
 export function euclideanDistance(
-  vectorExpression: pipelines.Expr,
+  vectorExpression: Expr,
   vector: number[] | VectorValue
 ): FunctionExpr;
 
@@ -6506,12 +6208,12 @@ export function euclideanDistance(
  * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
  */
 export function euclideanDistance(
-  vectorExpression: pipelines.Expr,
-  otherVectorExpression: pipelines.Expr
+  vectorExpression: Expr,
+  otherVectorExpression: Expr
 ): FunctionExpr;
 export function euclideanDistance(
-  expr: pipelines.Expr | string,
-  other: pipelines.Expr | number[] | VectorValue
+  expr: Expr | string,
+  other: Expr | number[] | VectorValue
 ): FunctionExpr {
   const expr1 = fieldOrExpression(expr);
   const expr2 = vectorToExpr(other);
@@ -6531,7 +6233,7 @@ export function euclideanDistance(
  * @param vectorExpression The expression representing the Firestore Vector.
  * @return A new {@code Expr} representing the length of the array.
  */
-export function vectorLength(vectorExpression: pipelines.Expr): FunctionExpr;
+export function vectorLength(vectorExpression: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6547,7 +6249,7 @@ export function vectorLength(vectorExpression: pipelines.Expr): FunctionExpr;
  * @return A new {@code Expr} representing the length of the array.
  */
 export function vectorLength(fieldName: string): FunctionExpr;
-export function vectorLength(expr: pipelines.Expr | string): FunctionExpr {
+export function vectorLength(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).vectorLength();
 }
 
@@ -6565,7 +6267,7 @@ export function vectorLength(expr: pipelines.Expr | string): FunctionExpr {
  * @param expr The expression representing the number of microseconds since epoch.
  * @return A new {@code Expr} representing the timestamp.
  */
-export function unixMicrosToTimestamp(expr: pipelines.Expr): FunctionExpr;
+export function unixMicrosToTimestamp(expr: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6582,9 +6284,7 @@ export function unixMicrosToTimestamp(expr: pipelines.Expr): FunctionExpr;
  * @return A new {@code Expr} representing the timestamp.
  */
 export function unixMicrosToTimestamp(fieldName: string): FunctionExpr;
-export function unixMicrosToTimestamp(
-  expr: pipelines.Expr | string
-): FunctionExpr {
+export function unixMicrosToTimestamp(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).unixMicrosToTimestamp();
 }
 
@@ -6601,7 +6301,7 @@ export function unixMicrosToTimestamp(
  * @param expr The expression representing the timestamp.
  * @return A new {@code Expr} representing the number of microseconds since epoch.
  */
-export function timestampToUnixMicros(expr: pipelines.Expr): FunctionExpr;
+export function timestampToUnixMicros(expr: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6617,9 +6317,7 @@ export function timestampToUnixMicros(expr: pipelines.Expr): FunctionExpr;
  * @return A new {@code Expr} representing the number of microseconds since epoch.
  */
 export function timestampToUnixMicros(fieldName: string): FunctionExpr;
-export function timestampToUnixMicros(
-  expr: pipelines.Expr | string
-): FunctionExpr {
+export function timestampToUnixMicros(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).timestampToUnixMicros();
 }
 
@@ -6637,7 +6335,7 @@ export function timestampToUnixMicros(
  * @param expr The expression representing the number of milliseconds since epoch.
  * @return A new {@code Expr} representing the timestamp.
  */
-export function unixMillisToTimestamp(expr: pipelines.Expr): FunctionExpr;
+export function unixMillisToTimestamp(expr: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6654,9 +6352,7 @@ export function unixMillisToTimestamp(expr: pipelines.Expr): FunctionExpr;
  * @return A new {@code Expr} representing the timestamp.
  */
 export function unixMillisToTimestamp(fieldName: string): FunctionExpr;
-export function unixMillisToTimestamp(
-  expr: pipelines.Expr | string
-): FunctionExpr {
+export function unixMillisToTimestamp(expr: Expr | string): FunctionExpr {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.unixMillisToTimestamp();
 }
@@ -6674,7 +6370,7 @@ export function unixMillisToTimestamp(
  * @param expr The expression representing the timestamp.
  * @return A new {@code Expr} representing the number of milliseconds since epoch.
  */
-export function timestampToUnixMillis(expr: pipelines.Expr): FunctionExpr;
+export function timestampToUnixMillis(expr: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6690,9 +6386,7 @@ export function timestampToUnixMillis(expr: pipelines.Expr): FunctionExpr;
  * @return A new {@code Expr} representing the number of milliseconds since epoch.
  */
 export function timestampToUnixMillis(fieldName: string): FunctionExpr;
-export function timestampToUnixMillis(
-  expr: pipelines.Expr | string
-): FunctionExpr {
+export function timestampToUnixMillis(expr: Expr | string): FunctionExpr {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.timestampToUnixMillis();
 }
@@ -6711,7 +6405,7 @@ export function timestampToUnixMillis(
  * @param expr The expression representing the number of seconds since epoch.
  * @return A new {@code Expr} representing the timestamp.
  */
-export function unixSecondsToTimestamp(expr: pipelines.Expr): FunctionExpr;
+export function unixSecondsToTimestamp(expr: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6728,9 +6422,7 @@ export function unixSecondsToTimestamp(expr: pipelines.Expr): FunctionExpr;
  * @return A new {@code Expr} representing the timestamp.
  */
 export function unixSecondsToTimestamp(fieldName: string): FunctionExpr;
-export function unixSecondsToTimestamp(
-  expr: pipelines.Expr | string
-): FunctionExpr {
+export function unixSecondsToTimestamp(expr: Expr | string): FunctionExpr {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.unixSecondsToTimestamp();
 }
@@ -6748,7 +6440,7 @@ export function unixSecondsToTimestamp(
  * @param expr The expression representing the timestamp.
  * @return A new {@code Expr} representing the number of seconds since epoch.
  */
-export function timestampToUnixSeconds(expr: pipelines.Expr): FunctionExpr;
+export function timestampToUnixSeconds(expr: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -6764,9 +6456,7 @@ export function timestampToUnixSeconds(expr: pipelines.Expr): FunctionExpr;
  * @return A new {@code Expr} representing the number of seconds since epoch.
  */
 export function timestampToUnixSeconds(fieldName: string): FunctionExpr;
-export function timestampToUnixSeconds(
-  expr: pipelines.Expr | string
-): FunctionExpr {
+export function timestampToUnixSeconds(expr: Expr | string): FunctionExpr {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.timestampToUnixSeconds();
 }
@@ -6787,9 +6477,9 @@ export function timestampToUnixSeconds(
  * @return A new {@code Expr} representing the resulting timestamp.
  */
 export function timestampAdd(
-  timestamp: pipelines.Expr,
-  unit: pipelines.Expr,
-  amount: pipelines.Expr
+  timestamp: Expr,
+  unit: Expr,
+  amount: Expr
 ): FunctionExpr;
 
 /**
@@ -6808,7 +6498,7 @@ export function timestampAdd(
  * @return A new {@code Expr} representing the resulting timestamp.
  */
 export function timestampAdd(
-  timestamp: pipelines.Expr,
+  timestamp: Expr,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
 ): FunctionExpr;
@@ -6834,16 +6524,16 @@ export function timestampAdd(
   amount: number
 ): FunctionExpr;
 export function timestampAdd(
-  timestamp: pipelines.Expr | string,
+  timestamp: Expr | string,
   unit:
-    | pipelines.Expr
+    | Expr
     | 'microsecond'
     | 'millisecond'
     | 'second'
     | 'minute'
     | 'hour'
     | 'day',
-  amount: pipelines.Expr | number
+  amount: Expr | number
 ): FunctionExpr {
   const normalizedTimestamp = fieldOrExpression(timestamp);
   const normalizedUnit = valueToDefaultExpr(unit);
@@ -6867,9 +6557,9 @@ export function timestampAdd(
  * @return A new {@code Expr} representing the resulting timestamp.
  */
 export function timestampSub(
-  timestamp: pipelines.Expr,
-  unit: pipelines.Expr,
-  amount: pipelines.Expr
+  timestamp: Expr,
+  unit: Expr,
+  amount: Expr
 ): FunctionExpr;
 
 /**
@@ -6888,7 +6578,7 @@ export function timestampSub(
  * @return A new {@code Expr} representing the resulting timestamp.
  */
 export function timestampSub(
-  timestamp: pipelines.Expr,
+  timestamp: Expr,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
 ): FunctionExpr;
@@ -6914,16 +6604,16 @@ export function timestampSub(
   amount: number
 ): FunctionExpr;
 export function timestampSub(
-  timestamp: pipelines.Expr | string,
+  timestamp: Expr | string,
   unit:
-    | pipelines.Expr
+    | Expr
     | 'microsecond'
     | 'millisecond'
     | 'second'
     | 'minute'
     | 'hour'
     | 'day',
-  amount: pipelines.Expr | number
+  amount: Expr | number
 ): FunctionExpr {
   const normalizedTimestamp = fieldOrExpression(timestamp);
   const normalizedUnit = valueToDefaultExpr(unit);
@@ -6986,14 +6676,14 @@ export function or(
  *
  * ```typescript
  * // Sort documents by the 'name' field in lowercase in ascending order
- * pipelines.pipeline().collection("users")
+ * db.pipeline().collection("users")
  *   .sort(ascending(field("name").toLower()));
  * ```
  *
  * @param expr The expression to create an ascending ordering for.
  * @return A new `Ordering` for ascending sorting.
  */
-export function ascending(expr: pipelines.Expr): Ordering;
+export function ascending(expr: Expr): Ordering;
 
 /**
  * @beta
@@ -7002,7 +6692,7 @@ export function ascending(expr: pipelines.Expr): Ordering;
  *
  * ```typescript
  * // Sort documents by the 'name' field in ascending order
- * pipelines.pipeline().collection("users")
+ * db.pipeline().collection("users")
  *   .sort(ascending("name"));
  * ```
  *
@@ -7010,7 +6700,7 @@ export function ascending(expr: pipelines.Expr): Ordering;
  * @return A new `Ordering` for ascending sorting.
  */
 export function ascending(fieldName: string): Ordering;
-export function ascending(field: pipelines.Expr | string): Ordering {
+export function ascending(field: Expr | string): Ordering {
   return new Ordering(fieldOrExpression(field), 'ascending');
 }
 
@@ -7021,14 +6711,14 @@ export function ascending(field: pipelines.Expr | string): Ordering {
  *
  * ```typescript
  * // Sort documents by the 'name' field in lowercase in descending order
- * pipelines.pipeline().collection("users")
+ * db.pipeline().collection("users")
  *   .sort(descending(field("name").toLower()));
  * ```
  *
  * @param expr The expression to create a descending ordering for.
  * @return A new `Ordering` for descending sorting.
  */
-export function descending(expr: pipelines.Expr): Ordering;
+export function descending(expr: Expr): Ordering;
 
 /**
  * @beta
@@ -7037,7 +6727,7 @@ export function descending(expr: pipelines.Expr): Ordering;
  *
  * ```typescript
  * // Sort documents by the 'name' field in descending order
- * pipelines.pipeline().collection("users")
+ * db.pipeline().collection("users")
  *   .sort(descending("name"));
  * ```
  *
@@ -7045,7 +6735,7 @@ export function descending(expr: pipelines.Expr): Ordering;
  * @return A new `Ordering` for descending sorting.
  */
 export function descending(fieldName: string): Ordering;
-export function descending(field: pipelines.Expr | string): Ordering {
+export function descending(field: Expr | string): Ordering {
   return new Ordering(fieldOrExpression(field), 'descending');
 }
 
@@ -7058,7 +6748,7 @@ export function descending(field: pipelines.Expr | string): Ordering {
  */
 export class Ordering implements HasUserData {
   constructor(
-    readonly expr: pipelines.Expr,
+    readonly expr: Expr,
     readonly direction: 'ascending' | 'descending'
   ) {}
 

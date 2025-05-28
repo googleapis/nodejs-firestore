@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,9 +13,12 @@
 // limitations under the License.
 
 import * as firestore from '@google-cloud/firestore';
-import * as pipelines from '@google-cloud/firestore/pipelines';
-import * as protos from '../protos/firestore_v1_proto_api';
+import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
+
+import {VectorValue} from '../field-value';
+import {DocumentReference} from '../reference/document-reference';
+import {ProtoSerializable, Serializer} from '../serializer';
 
 import {
   AggregateFunction,
@@ -25,21 +28,19 @@ import {
   field,
   BooleanExpr,
 } from './expression';
-import {VectorValue} from './field-value';
-import {DocumentReference} from './reference/document-reference';
-import {ProtoSerializable, Serializer} from './serializer';
 import {Pipeline} from './pipelines';
 
 /**
- * @beta
+ *
  */
 export interface Stage extends ProtoSerializable<api.Pipeline.IStage> {
   name: string;
+
   _toProto(serializer: Serializer): api.Pipeline.IStage;
 }
 
 /**
- * @beta
+ *
  */
 export class AddFields implements Stage {
   name = 'add_fields';
@@ -55,7 +56,7 @@ export class AddFields implements Stage {
 }
 
 /**
- * @beta
+ *
  */
 export class RemoveFields implements Stage {
   name = 'remove_fields';
@@ -71,7 +72,6 @@ export class RemoveFields implements Stage {
 }
 
 /**
- * @beta
  */
 export class Aggregate implements Stage {
   name = 'aggregate';
@@ -207,7 +207,7 @@ export class Where implements Stage {
  * @beta
  */
 export interface FindNearestOptions {
-  field: pipelines.Field | string;
+  field: firestore.Pipelines.Field | string;
   vectorValue: firestore.VectorValue | number[];
   distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
   limit?: number;

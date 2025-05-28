@@ -19,7 +19,7 @@ import api = protos.google.firestore.v1;
 import * as firestore from '@google-cloud/firestore';
 import {GoogleError} from 'google-gax';
 import {Transform} from 'stream';
-import {and, field, Ordering} from '../expression';
+import {and, field, Ordering} from '../pipelines';
 
 import {CompositeFilter, UnaryFilter} from '../filter';
 import {
@@ -39,7 +39,7 @@ import {
   reverseOrderings,
   toPipelineBooleanExpr,
   whereConditionsFromCursor,
-} from '../pipeline-util';
+} from '../pipelines/pipeline-util';
 import {ExplainResults} from '../query-profile';
 import {Serializer} from '../serializer';
 import {defaultConverter} from '../types';
@@ -735,6 +735,10 @@ export class Query<
     return this._queryOptions.allDescendants;
   }
 
+  /**
+   * @private
+   * @internal
+   */
   _pipeline(): Pipeline {
     let pipeline: Pipeline;
     const db = this.firestore;
