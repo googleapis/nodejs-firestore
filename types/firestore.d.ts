@@ -9759,9 +9759,10 @@ declare namespace FirebaseFirestore {
        *     .execute();
        * ```
        *
+       * @param pipelineOptions - Optionally specify pipeline execution behavior.
        * @return A Promise representing the asynchronous pipeline execution.
        */
-      execute(): Promise<PipelineSnapshot>;
+      execute(pipelineOptions?: PipelineOptions): Promise<PipelineSnapshot>;
 
       /**
        * Executes this pipeline and streams the results as {@link PipelineResult}s.
@@ -9781,6 +9782,67 @@ declare namespace FirebaseFirestore {
        */
       stream(): NodeJS.ReadableStream;
     }
+    
+    /**
+     * Options defining how a Pipeline is evaluated.
+     */
+    export interface PipelineOptions {
+      /**
+       * Pipeline to be evaluated.
+       */
+      pipeline: Pipeline;
+
+      /**
+       * Specify the index mode.
+       */
+      indexMode?: 'recommended';
+
+      /**
+       * An escape hatch to set options not known at SDK build time. These values
+       * will be passed directly to the Firestore backend and not used by the SDK.
+       *
+       * The option name will be used as provided. And must match the name
+       * format used by the backend (hint: use a snake_case_name).
+       *
+       * Custom option values can be any type supported
+       * by Firestore (for example: string, boolean, number, map, …). Value types
+       * not known to the SDK will be rejected.
+       *
+       * Values specified in customOptions will take precedence over any options
+       * with the same name set by the SDK.
+       *
+       * Override the `example_option`:
+       * ```
+       *   execute({
+       *     pipeline: myPipeline,
+       *     customOptions: {
+       *       // Override `example_option`. This will not
+       *       // merge with the existing `example_option` object.
+       *       "example_option": {
+       *         foo: "bar"
+       *       }
+       *     }
+       *   }
+       * ```
+       *
+       * `customOptions` supports dot notation, if you want to override
+       * a nested option.
+       * ```
+       *   execute({
+       *     pipeline: myPipeline,
+       *     customOptions: {
+       *       // Override `example_option.foo` and do not override
+       *       // any other properties of `example_option`.
+       *       "example_option.foo": "bar"
+       *     }
+       *   }
+       * ```
+       */
+      customOptions?: {
+        [name: string]: unknown;
+      };
+    }
+
     /**
      * TODO(docs)
      */

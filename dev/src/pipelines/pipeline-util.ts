@@ -60,6 +60,8 @@ import {
   lt,
 } from './expression';
 import {Pipeline, PipelineResult} from './pipelines';
+import {PipelineOptions} from './pipeline-options';
+import {StructuredPipeline} from './structured-pipeline';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -79,7 +81,7 @@ export class ExecutionUtil {
   _getResponse(
     pipeline: Pipeline,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: firestore.ExplainOptions
+    pipelineOptions?: PipelineOptions
   ): Promise<PipelineResponse> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -88,10 +90,17 @@ export class ExecutionUtil {
       const result: Array<PipelineResult> = [];
       const output: PipelineResponse = {};
 
-      const stream: NodeJS.EventEmitter = this._stream(
+      const structuredPipelineOptions = pipelineOptions ?? {};
+      const optionsOverride = pipelineOptions?.customOptions ?? {};
+      const structuredPipeline = new StructuredPipeline(
         pipeline,
-        transactionOrReadTime,
-        explainOptions
+        structuredPipelineOptions,
+        this._serializer.encodeFields(optionsOverride)
+      );
+
+      const stream: NodeJS.EventEmitter = this._stream(
+        structuredPipeline,
+        transactionOrReadTime
       );
       stream.on('error', err => {
         reject(wrapError(err, stack));
@@ -134,7 +143,9 @@ export class ExecutionUtil {
   }
 
   stream(pipeline: Pipeline): NodeJS.ReadableStream {
-    const responseStream = this._stream(pipeline);
+    // TODO(pipeline) implement options for stream
+    const structuredPipeline = new StructuredPipeline(pipeline, {}, {});
+    const responseStream = this._stream(structuredPipeline);
     const transform = new Transform({
       objectMode: true,
       transform(chunk, encoding, callback) {
@@ -148,9 +159,8 @@ export class ExecutionUtil {
   }
 
   _stream(
-    pipeline: Pipeline,
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    _?: firestore.ExplainOptions
+    structuredPipeline: StructuredPipeline,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): NodeJS.ReadableStream {
     const tag = requestTag();
 
@@ -221,9 +231,7 @@ export class ExecutionUtil {
         // catch below.
         const request: api.IExecutePipelineRequest = {
           database: this._firestore.formattedName,
-          structuredPipeline: {
-            pipeline: pipeline._toProto(),
-          },
+          structuredPipeline: structuredPipeline._toProto(this._serializer),
         };
 
         if (transactionOrReadTime instanceof Uint8Array) {

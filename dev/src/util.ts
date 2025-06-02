@@ -378,3 +378,14 @@ export function cast<T>(
 
   throw new Error(`${val} not instance of ${constructor}`);
 }
+
+export function forEach<V>(
+  obj: Record<string, V> | undefined,
+  fn: (key: string, val: V) => void
+): void {
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      fn(key, obj[key]);
+    }
+  }
+}

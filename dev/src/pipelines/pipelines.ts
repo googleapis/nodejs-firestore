@@ -23,6 +23,7 @@ import Firestore, {
 } from '../index';
 import {validateFieldPath} from '../path';
 import {ExecutionUtil, fieldOrExpression} from './pipeline-util';
+import {PipelineOptions} from './pipeline-options';
 import {DocumentReference} from '../reference/document-reference';
 import {PipelineResponse} from '../reference/types';
 import {HasUserData, hasUserData, Serializer} from '../serializer';
@@ -911,10 +912,11 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *     .execute();
    * ```
    *
+   * @param pipelineOptions - Optionally specify pipeline execution behavior.
    * @return A Promise representing the asynchronous pipeline execution.
    */
-  execute(): Promise<PipelineSnapshot> {
-    return this._execute().then(response => {
+  execute(pipelineOptions?: PipelineOptions): Promise<PipelineSnapshot> {
+    return this._execute(undefined, pipelineOptions).then(response => {
       const results = response.result || [];
       const executionTime = response.executionTime;
 
@@ -924,11 +926,11 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
 
   _execute(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: firestore.ExplainOptions
+    pipelineOptions?: PipelineOptions
   ): Promise<PipelineResponse> {
     const util = new ExecutionUtil(this.db, this.db._serializer!);
     return util
-      ._getResponse(this, transactionOrReadTime, explainOptions)
+      ._getResponse(this, transactionOrReadTime, pipelineOptions)
       .then(result => result!);
   }
 
