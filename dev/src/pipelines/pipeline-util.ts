@@ -58,10 +58,12 @@ import {
   Ordering,
   gt,
   lt,
+  Field,
+  AggregateFunction,
 } from './expression';
 import {Pipeline, PipelineResult} from './pipelines';
-import {PipelineOptions} from './pipeline-options';
 import {StructuredPipeline} from './structured-pipeline';
+import Selectable = FirebaseFirestore.Pipelines.Selectable;
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -79,9 +81,8 @@ export class ExecutionUtil {
   ) {}
 
   _getResponse(
-    pipeline: Pipeline,
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    pipelineOptions?: PipelineOptions
+    structuredPipeline: StructuredPipeline,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): Promise<PipelineResponse> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -89,14 +90,6 @@ export class ExecutionUtil {
     return new Promise((resolve, reject): void => {
       const result: Array<PipelineResult> = [];
       const output: PipelineResponse = {};
-
-      const structuredPipelineOptions = pipelineOptions ?? {};
-      const optionsOverride = pipelineOptions?.customOptions ?? {};
-      const structuredPipeline = new StructuredPipeline(
-        pipeline,
-        structuredPipelineOptions,
-        this._serializer.encodeFields(optionsOverride)
-      );
 
       const stream: NodeJS.EventEmitter = this._stream(
         structuredPipeline,
@@ -540,6 +533,56 @@ export function isString(val: unknown): val is string {
   return typeof val === 'string';
 }
 
+export function isNumber(val: unknown): val is number {
+  return typeof val === 'number';
+}
+
+export function isSelectable(
+  val: unknown
+): val is firestore.Pipelines.Selectable {
+  const candidate = val as firestore.Pipelines.Selectable;
+  return (
+    candidate.selectable && isString(candidate.alias) && isExpr(candidate.expr)
+  );
+}
+
+export function isOrdering(val: unknown): val is firestore.Pipelines.Ordering {
+  const candidate = val as firestore.Pipelines.Ordering;
+  return (
+    isExpr(candidate.expr) &&
+    (candidate.direction === 'ascending' ||
+      candidate.direction === 'descending')
+  );
+}
+
+export function isAggregateWithAlias(
+  val: unknown
+): val is firestore.Pipelines.AggregateWithAlias {
+  const candidate = val as firestore.Pipelines.AggregateWithAlias;
+  return (
+    isString(candidate.alias) &&
+    candidate.aggregate instanceof AggregateFunction
+  );
+}
+
+export function isExpr(val: unknown): val is firestore.Pipelines.Expr {
+  return val instanceof Expr;
+}
+
+export function isBooleanExpr(
+  val: unknown
+): val is firestore.Pipelines.BooleanExpr {
+  return val instanceof BooleanExpr;
+}
+
+export function isField(val: unknown): val is firestore.Pipelines.Field {
+  return val instanceof Field;
+}
+
+export function isPipeline(val: unknown): val is firestore.Pipelines.Pipeline {
+  return val instanceof Pipeline;
+}
+
 /**
  * Converts a value to an Expr, Returning either a Constant, MapFunction,
  * ArrayFunction, or the input itself (if it's already an expression).
@@ -607,5 +650,35 @@ export function fieldOrExpression(value: unknown): Expr {
     return result;
   } else {
     return valueToDefaultExpr(value);
+  }
+}
+
+export function toField(value: string | firestore.Pipelines.Field): Field {
+  if (isString(value)) {
+    const result = field(value);
+    result._createdFromLiteral = true;
+    return result;
+  } else {
+    return value as Field;
+  }
+}
+
+/**
+ * Converts a value to a Selectable, returning either a
+ * Field, or the input itself (if it's already a Selectable).
+ * If the input is a string, it is assumed to be a field name, and a
+ * field(value) is returned.
+ *
+ * @private
+ * @internal
+ * @param value
+ */
+export function fieldOrSelectable(value: string | Selectable): Selectable {
+  if (isString(value)) {
+    const result = field(value);
+    result._createdFromLiteral = true;
+    return result;
+  } else {
+    return value;
   }
 }

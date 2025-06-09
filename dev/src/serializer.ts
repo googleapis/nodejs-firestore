@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@google-cloud/firestore';
+import * as firestore from '@google-cloud/firestore';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
@@ -39,6 +39,7 @@ import {google} from '../protos/firestore_v1_proto_api';
 import IMapValue = google.firestore.v1.IMapValue;
 import IValue = google.firestore.v1.IValue;
 import Value = google.firestore.v1.Value;
+import {isString} from './pipelines/pipeline-util';
 
 /**
  * The maximum depth of a Firestore object.
@@ -88,7 +89,7 @@ export class Serializer {
    * @param obj The object to encode.
    * @returns The Firestore 'Fields' representation
    */
-  encodeFields(obj: DocumentData): ApiMapValue {
+  encodeFields(obj: firestore.DocumentData): ApiMapValue {
     const fields: ApiMapValue = {};
 
     for (const prop of Object.keys(obj)) {
@@ -275,6 +276,14 @@ export class Serializer {
     throw new Error(`Cannot encode value: ${val}`);
   }
 
+  encodeReference(
+    path: string | firestore.DocumentReference | firestore.CollectionReference
+  ): api.IValue {
+    return {
+      referenceValue: isString(path) ? path : path.path,
+    };
+  }
+
   /**
    * @private
    */
@@ -348,7 +357,7 @@ export class Serializer {
       case 'mapValue': {
         const fields = proto.mapValue!.fields;
         if (fields) {
-          const obj: DocumentData = {};
+          const obj: firestore.DocumentData = {};
           for (const prop of Object.keys(fields)) {
             obj[prop] = this.decodeValue(fields[prop]);
           }

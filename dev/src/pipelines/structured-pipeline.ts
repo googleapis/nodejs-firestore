@@ -15,63 +15,42 @@
  * limitations under the License.
  */
 
-import {ApiMapValue} from '../types';
-import {ObjectValue, ProtoSerializable, Serializer} from '../serializer';
+import {ProtoSerializable, Serializer} from '../serializer';
 import {google} from '../../protos/firestore_v1_proto_api';
 import IStructuredPipeline = google.firestore.v1.IStructuredPipeline;
-import {ObjectValueFieldPath} from '../path';
-import {mapToArray} from '../util';
 import IPipeline = google.firestore.v1.IPipeline;
+import {OptionsUtil} from './options-util';
 
-export interface StructuredPipelineOptions {
+export type StructuredPipelineOptions = {
   indexMode?: 'recommended';
-}
+};
 
 export class StructuredPipeline
   implements ProtoSerializable<IStructuredPipeline>
 {
+  readonly optionsUtil = new OptionsUtil({
+    indexMode: {
+      serverName: 'index_mode',
+      supportedTypes: {
+        string: true,
+      },
+    },
+  });
+
   constructor(
     private pipeline: ProtoSerializable<IPipeline>,
     private options: StructuredPipelineOptions,
-    private optionsOverride: ApiMapValue
+    private optionsOverride: Record<string, unknown>
   ) {}
-
-  /**
-   * @private
-   * @internal for testing
-   */
-  _getKnownOptions(): ObjectValue {
-    const options: ObjectValue = ObjectValue.empty();
-
-    // SERIALIZE KNOWN OPTIONS
-    if (typeof this.options.indexMode === 'string') {
-      options.set(new ObjectValueFieldPath('index_mode'), {
-        stringValue: this.options.indexMode,
-      });
-    }
-
-    return options;
-  }
-
-  private getOptionsProto(): ApiMapValue {
-    const options: ObjectValue = this._getKnownOptions();
-
-    // APPLY OPTIONS OVERRIDES
-    const optionsMap = new Map(
-      mapToArray(this.optionsOverride, (value, key) => [
-        ObjectValueFieldPath.fromDotNotation(key),
-        value,
-      ])
-    );
-    options.setAll(optionsMap);
-
-    return options.value.mapValue.fields ?? {};
-  }
 
   _toProto(serializer: Serializer): IStructuredPipeline {
     return {
       pipeline: this.pipeline._toProto(serializer),
-      options: this.getOptionsProto(),
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.optionsOverride
+      ),
     };
   }
 }

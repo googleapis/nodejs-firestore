@@ -107,7 +107,6 @@ import {
   PipelineResult,
   PipelineSnapshot,
   Pipeline,
-  FindNearestOptions,
 } from '../src/pipelines';
 
 import {
@@ -128,6 +127,7 @@ import {itIf, verifyInstance} from '../test/util/helpers';
 import {getTestDb, getTestRoot} from './firestore';
 
 import {Firestore as InternalFirestore} from '../src';
+import {FindNearestStageOptions} from '../src/pipelines/stage-options';
 
 use(chaiAsPromised);
 
@@ -1522,7 +1522,7 @@ describe.only('Pipeline class', () => {
 
     describe('findNearest stage', () => {
       it('run pipeline with findNearest', async () => {
-        const measures: Array<FindNearestOptions['distanceMeasure']> = [
+        const measures: Array<FindNearestStageOptions['distanceMeasure']> = [
           'euclidean',
           'dot_product',
           'cosine',

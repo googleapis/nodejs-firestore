@@ -17,7 +17,7 @@
 
 import {expect} from 'chai';
 import * as sinon from 'sinon';
-import {ObjectValue, ProtoSerializable, Serializer} from '../src/serializer';
+import {ProtoSerializable, Serializer} from '../src/serializer';
 import {google} from '../protos/firestore_v1_proto_api';
 import IPipeline = google.firestore.v1.IPipeline;
 import {StructuredPipeline} from '../src/pipelines/structured-pipeline';
@@ -87,7 +87,7 @@ describe('StructuredPipeline', () => {
       pipeline,
       {},
       {
-        foo_bar: {stringValue: 'baz'},
+        foo_bar: 'baz',
       }
     );
 
@@ -98,9 +98,7 @@ describe('StructuredPipeline', () => {
     expect(proto).to.deep.equal({
       pipeline: {},
       options: {
-        foo_bar: {
-          stringValue: 'baz',
-        },
+        foo_bar: {stringValue: 'baz'},
       },
     });
 
@@ -115,7 +113,7 @@ describe('StructuredPipeline', () => {
       pipeline,
       {},
       {
-        'foo.bar': {stringValue: 'baz'},
+        'foo.bar': 'baz',
       }
     );
 
@@ -147,7 +145,7 @@ describe('StructuredPipeline', () => {
         indexMode: 'recommended',
       },
       {
-        index_mode: {stringValue: 'baz'},
+        index_mode: 'baz',
       }
     );
 
@@ -158,165 +156,6 @@ describe('StructuredPipeline', () => {
       options: {
         index_mode: {
           stringValue: 'baz',
-        },
-      },
-    });
-
-    expect((pipeline._toProto as sinon.SinonSpy).calledOnce).to.be.true;
-  });
-
-  it('should support options override of nested field', () => {
-    const pipeline: ProtoSerializable<IPipeline> = {
-      _toProto: sinon.fake.returns({} as IPipeline),
-    };
-
-    const structuredPipeline = new StructuredPipeline(
-      pipeline,
-      {},
-      {
-        'foo.bar': {integerValue: 123},
-      }
-    );
-
-    // Fake known options with a nested {foo: {bar: "baz"}}
-    structuredPipeline._getKnownOptions = sinon.fake.returns(
-      new ObjectValue({
-        mapValue: {
-          fields: {
-            foo: {
-              mapValue: {
-                fields: {
-                  bar: {stringValue: 'baz'},
-                  waldo: {booleanValue: true},
-                },
-              },
-            },
-          },
-        },
-      })
-    );
-
-    const proto = structuredPipeline._toProto(new Serializer(db!));
-
-    expect(proto).to.deep.equal({
-      pipeline: {},
-      options: {
-        foo: {
-          mapValue: {
-            fields: {
-              bar: {
-                integerValue: '123',
-              },
-              waldo: {
-                booleanValue: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    expect((pipeline._toProto as sinon.SinonSpy).calledOnce).to.be.true;
-  });
-
-  it('will replace a nested object if given a new object', () => {
-    const pipeline: ProtoSerializable<IPipeline> = {
-      _toProto: sinon.fake.returns({} as IPipeline),
-    };
-
-    const structuredPipeline = new StructuredPipeline(
-      pipeline,
-      {},
-      {
-        foo: {mapValue: {fields: {bar: {integerValue: 123}}}},
-      }
-    );
-
-    // Fake known options with a nested {foo: {bar: "baz"}}
-    structuredPipeline._getKnownOptions = sinon.fake.returns(
-      new ObjectValue({
-        mapValue: {
-          fields: {
-            foo: {
-              mapValue: {
-                fields: {
-                  bar: {stringValue: 'baz'},
-                  waldo: {booleanValue: true},
-                },
-              },
-            },
-          },
-        },
-      })
-    );
-
-    const proto = structuredPipeline._toProto(new Serializer(db!));
-
-    expect(proto).to.deep.equal({
-      pipeline: {},
-      options: {
-        foo: {
-          mapValue: {
-            fields: {
-              bar: {
-                integerValue: '123',
-              },
-            },
-          },
-        },
-      },
-    });
-
-    expect((pipeline._toProto as sinon.SinonSpy).calledOnce).to.be.true;
-  });
-
-  it('will replace a top level property that is not an object if given a nested field with dot notation', () => {
-    const pipeline: ProtoSerializable<IPipeline> = {
-      _toProto: sinon.fake.returns({} as IPipeline),
-    };
-
-    const structuredPipeline = new StructuredPipeline(
-      pipeline,
-      {},
-      {
-        foo: {
-          mapValue: {
-            fields: {
-              bar: {stringValue: '123'},
-              waldo: {booleanValue: true},
-            },
-          },
-        },
-      }
-    );
-
-    // Fake known options with a nested {foo: {bar: "baz"}}
-    structuredPipeline._getKnownOptions = sinon.fake.returns(
-      new ObjectValue({
-        mapValue: {
-          fields: {
-            foo: {integerValue: 123},
-          },
-        },
-      })
-    );
-
-    const proto = structuredPipeline._toProto(new Serializer(db!));
-
-    expect(proto).to.deep.equal({
-      pipeline: {},
-      options: {
-        foo: {
-          mapValue: {
-            fields: {
-              bar: {
-                stringValue: '123',
-              },
-              waldo: {
-                booleanValue: true,
-              },
-            },
-          },
         },
       },
     });

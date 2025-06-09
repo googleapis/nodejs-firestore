@@ -137,6 +137,19 @@ declare namespace FirebaseFirestore {
     : never;
 
   /**
+   * Utility type to create an type that only allows one
+   * property of the Type param T to be set.
+   *
+   * type XorY = OneOf<{ x: unknown, y: unknown}>
+   * let a = { x: "foo" }           // OK
+   * let b = { y: "foo" }           // OK
+   * let c = { a: "foo", y: "foo" } // Not OK
+   */
+  export type OneOf<T> = {
+    [K in keyof T]: Pick<T, K> & {[P in Exclude<keyof T, K>]?: undefined};
+  }[keyof T];
+
+  /**
    * Sets or disables the log function for all active Firestore instances.
    *
    * @param logger A log function that takes a message (such as `console.log`) or
@@ -9124,17 +9137,6 @@ declare namespace FirebaseFirestore {
     /**
      * @beta
      */
-    export type FindNearestOptions = {
-      field: Field | string;
-      vectorValue: VectorValue | number[];
-      distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
-      limit?: number;
-      distanceField?: string;
-    };
-
-    /**
-     * @beta
-     */
     export class FindNearest implements Stage {
       name: string;
     }
@@ -9515,7 +9517,7 @@ declare namespace FirebaseFirestore {
         groups?: Array<string | Selectable>;
       }): Pipeline;
 
-      findNearest(options: FindNearestOptions): Pipeline;
+      //findNearest(options: FindNearestOptions): Pipeline;
 
       /**
        * Fully overwrites all fields in a document with those coming from a nested map.
@@ -9782,7 +9784,7 @@ declare namespace FirebaseFirestore {
        */
       stream(): NodeJS.ReadableStream;
     }
-    
+
     /**
      * Options defining how a Pipeline is evaluated.
      */

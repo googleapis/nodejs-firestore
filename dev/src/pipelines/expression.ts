@@ -656,7 +656,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    */
   like(pattern: Expr): FunctionExpr;
   like(stringOrExpr: string | Expr): FunctionExpr {
-    return new FunctionExpr('like', [this, valueToDefaultExpr(stringOrExpr)]);
+    return new BooleanExpr('like', [this, valueToDefaultExpr(stringOrExpr)]);
   }
 
   /**
