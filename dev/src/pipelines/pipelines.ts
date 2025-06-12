@@ -27,6 +27,7 @@ import {
   fieldOrExpression,
   isAggregateWithAlias,
   isBooleanExpr,
+  isCollectionReference,
   isExpr,
   isField,
   isNumber,
@@ -92,28 +93,9 @@ import {
   InternalUnnestStageOptions,
   InternalSortStageOptions,
   InternalDocumentsStageOptions,
+  InternalCollectionGroupStageOptions,
+  InternalCollectionStageOptions,
 } from './stage';
-import {
-  AddFieldsStageOptions,
-  AggregateStageOptions,
-  CollectionGroupStageOptions,
-  CollectionStageOptions,
-  DatabaseStageOptions,
-  DistinctStageOptions,
-  DocumentsStageOptions,
-  FindNearestStageOptions,
-  isCollectionStageOptions,
-  LimitStageOptions,
-  OffsetStageOptions,
-  RemoveFieldsStageOptions,
-  ReplaceWithStageOptions,
-  SampleStageOptions,
-  SelectStageOptions,
-  SortStageOptions,
-  UnionStageOptions,
-  UnnestStageOptions,
-  WhereStageOptions,
-} from './stage-options';
 import {StructuredPipeline} from './structured-pipeline';
 import Selectable = FirebaseFirestore.Pipelines.Selectable;
 
@@ -132,26 +114,40 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
    * Returns all documents from the entire collection. The collection can be nested.
    * @param options - Options defining how this CollectionStage is evaluated.
    */
-  collection(options: CollectionStageOptions): Pipeline;
+  collection(options: firestore.Pipelines.CollectionStageOptions): Pipeline;
   collection(
     collectionOrOptions:
       | string
       | firestore.CollectionReference
-      | CollectionStageOptions
+      | firestore.Pipelines.CollectionStageOptions
   ): Pipeline {
-    const options: CollectionStageOptions = isCollectionStageOptions(
-      collectionOrOptions
-    )
-      ? {...collectionOrOptions}
-      : {
-          collection: collectionOrOptions,
-        };
+    const options =
+      isString(collectionOrOptions) ||
+      isCollectionReference(collectionOrOptions)
+        ? {}
+        : collectionOrOptions;
 
-    if (options.collection instanceof CollectionReference) {
-      this._validateReference(options.collection);
+    const collection =
+      isString(collectionOrOptions) ||
+      isCollectionReference(collectionOrOptions)
+        ? collectionOrOptions
+        : collectionOrOptions.collection;
+
+    // Validate that a user provided reference is for the same Firestore DB
+    if (isCollectionReference(collection)) {
+      this._validateReference(collection);
     }
 
-    return new Pipeline(this.db, [new CollectionSource(options)]);
+    const normalizedCollection = isString(collection)
+      ? this.db.collection(collection)
+      : (collection as CollectionReference);
+
+    const internalOptions: InternalCollectionStageOptions = {
+      ...options,
+      collection: normalizedCollection,
+    };
+
+    return new Pipeline(this.db, [new CollectionSource(internalOptions)]);
   }
 
   /**
@@ -164,11 +160,17 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
    * Returns all documents from a collection ID regardless of the parent.
    * @param options - Options defining how this CollectionGroupStage is evaluated.
    */
-  collectionGroup(options: CollectionGroupStageOptions): Pipeline;
   collectionGroup(
-    collectionIdOrOptions: string | CollectionGroupStageOptions
+    options: firestore.Pipelines.CollectionGroupStageOptions
+  ): Pipeline;
+  collectionGroup(
+    collectionIdOrOptions:
+      | string
+      | firestore.Pipelines.CollectionGroupStageOptions
   ): Pipeline {
-    const options: CollectionGroupStageOptions = isString(collectionIdOrOptions)
+    const options: InternalCollectionGroupStageOptions = isString(
+      collectionIdOrOptions
+    )
       ? {collectionId: collectionIdOrOptions}
       : {...collectionIdOrOptions};
     return new Pipeline(this.db, [new CollectionGroupSource(options)]);
@@ -182,8 +184,8 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
    * Returns all documents from the entire database.
    * @param options - Options defining how a DatabaseStage is evaluated.
    */
-  database(options: DatabaseStageOptions): Pipeline;
-  database(options?: DatabaseStageOptions): Pipeline {
+  database(options: firestore.Pipelines.DatabaseStageOptions): Pipeline;
+  database(options?: firestore.Pipelines.DatabaseStageOptions): Pipeline {
     return new Pipeline(this.db, [new DatabaseSource(options ?? {})]);
   }
 
@@ -204,26 +206,32 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
    *
    * @throws {@FirestoreError} Thrown if any of the provided DocumentReferences target a different project or database than the pipeline.
    */
-  documents(options: DocumentsStageOptions): Pipeline;
+  documents(options: firestore.Pipelines.DocumentsStageOptions): Pipeline;
   documents(
-    docsOrOptions: Array<string | DocumentReference> | DocumentsStageOptions
+    docsOrOptions:
+      | Array<string | DocumentReference>
+      | firestore.Pipelines.DocumentsStageOptions
   ): Pipeline {
     const options = Array.isArray(docsOrOptions) ? {} : docsOrOptions;
     const docs = Array.isArray(docsOrOptions)
       ? docsOrOptions
       : docsOrOptions.docs;
+
+    // Validate that all user provided references are for the same Firestore DB
+    docs
+      .filter(v => v instanceof DocumentReference)
+      .forEach(dr =>
+        this._validateReference(dr as firestore.DocumentReference)
+      );
+
     const normalizedDocs: Array<DocumentReference> = docs.map(doc =>
-      isString(doc) ? this.db.doc(doc) : doc
+      isString(doc) ? this.db.doc(doc) : (doc as DocumentReference)
     );
 
     const internalOptions: InternalDocumentsStageOptions = {
       ...options,
       docs: normalizedDocs,
     };
-
-    docs
-      .filter(v => v instanceof DocumentReference)
-      .forEach(dr => this._validateReference(dr));
     return new Pipeline(this.db, [new DocumentsSource(internalOptions)]);
   }
 
@@ -238,7 +246,20 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
     return (query as unknown as Query)._pipeline();
   }
 
-  _validateReference(reference: CollectionReference | DocumentReference): void {
+  _validateReference(
+    reference: firestore.CollectionReference | firestore.DocumentReference
+  ): reference is CollectionReference | DocumentReference {
+    if (
+      !(
+        reference instanceof CollectionReference ||
+        reference instanceof DocumentReference
+      )
+    ) {
+      throw new Error(
+        'Invalid reference. The value may not be a CollectionReference or DocumentReference. Or, it may be an object from a different SDK build.'
+      );
+    }
+
     const refDbId = reference.firestore.formattedName;
     if (refDbId !== this.db.formattedName) {
       throw new Error(
@@ -251,6 +272,8 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
           `the database name ("${this.db.formattedName}") of the target database of this Pipeline.`
       );
     }
+
+    return true;
   }
 }
 
@@ -337,9 +360,37 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     field: firestore.Pipelines.Selectable,
     ...additionalFields: firestore.Pipelines.Selectable[]
   ): Pipeline;
-  addFields(options: AddFieldsStageOptions): Pipeline;
+  /**
+   * Adds new fields to outputs from previous stages.
+   *
+   * This stage allows you to compute values on-the-fly based on existing data from previous
+   * stages or constants. You can use this to create new fields or overwrite existing ones (if there
+   * is name overlaps).
+   *
+   * The added fields are defined using {@link Selectable}s, which can be:
+   *
+   * - {@link Field}: References an existing document field.
+   * - {@link Expr}: Either a literal value (see {@link Constant}) or a computed value
+   *   (see {@FunctionExpr}) with an assigned alias using {@link Expr#as}.
+   *
+   * Example:
+   *
+   * ```typescript
+   * firestore.pipeline().collection("books")
+   *   .addFields(
+   *     field("rating").as("bookRating"), // Rename 'rating' to 'bookRating'
+   *     add(5, field("quantity")).as("totalCost")  // Calculate 'totalCost'
+   *   );
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
+  addFields(options: firestore.Pipelines.AddFieldsStageOptions): Pipeline;
   addFields(
-    fieldOrOptions: firestore.Pipelines.Selectable | AddFieldsStageOptions,
+    fieldOrOptions:
+      | firestore.Pipelines.Selectable
+      | firestore.Pipelines.AddFieldsStageOptions,
     ...additionalFields: firestore.Pipelines.Selectable[]
   ): Pipeline {
     const options = isSelectable(fieldOrOptions) ? {} : fieldOrOptions;
@@ -381,12 +432,29 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     fieldValue: firestore.Pipelines.Field | string,
     ...additionalFields: Array<firestore.Pipelines.Field | string>
   ): Pipeline;
-  removeFields(options: RemoveFieldsStageOptions): Pipeline;
+  /**
+   * Remove fields from outputs of previous stages.
+   *
+   * Example:
+   *
+   * ```typescript
+   * firestore.pipeline().collection('books')
+   *   // removes field 'rating' and 'cost' from the previous stage outputs.
+   *   .removeFields(
+   *     field('rating'),
+   *     'cost'
+   *   );
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
+  removeFields(options: firestore.Pipelines.RemoveFieldsStageOptions): Pipeline;
   removeFields(
     fieldValueOrOptions:
       | firestore.Pipelines.Field
       | string
-      | RemoveFieldsStageOptions,
+      | firestore.Pipelines.RemoveFieldsStageOptions,
     ...additionalFields: Array<firestore.Pipelines.Field | string>
   ): Pipeline {
     const options =
@@ -448,12 +516,42 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     selection: firestore.Pipelines.Selectable | string,
     ...additionalSelections: Array<firestore.Pipelines.Selectable | string>
   ): Pipeline;
-  select(options: SelectStageOptions): Pipeline;
+  /**
+   * Selects or creates a set of fields from the outputs of previous stages.
+   *
+   * <p>The selected fields are defined using {@link Selectable} expressions, which can be:
+   *
+   * <ul>
+   *   <li>{@code string}: Name of an existing field</li>
+   *   <li>{@link Field}: References an existing field.</li>
+   *   <li>{@link Function}: Represents the result of a function with an assigned alias name using
+   *       {@link Expr#as}</li>
+   * </ul>
+   *
+   * <p>If no selections are provided, the output of this stage is empty. Use {@link
+   * Pipeline#addFields} instead if only additions are
+   * desired.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * db.pipeline().collection("books")
+   *   .select(
+   *     "firstName",
+   *     field("lastName"),
+   *     field("address").toUppercase().as("upperAddress"),
+   *   );
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
+  select(options: firestore.Pipelines.SelectStageOptions): Pipeline;
   select(
     selectionOrOptions:
       | firestore.Pipelines.Selectable
       | string
-      | SelectStageOptions,
+      | firestore.Pipelines.SelectStageOptions,
     ...additionalSelections: Array<firestore.Pipelines.Selectable | string>
   ): Pipeline {
     const options =
@@ -509,9 +607,42 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   where(condition: firestore.Pipelines.BooleanExpr): Pipeline;
-  where(options: WhereStageOptions): Pipeline;
+  /**
+   * Filters the documents from previous stages to only include those matching the specified {@link
+   * BooleanExpr}.
+   *
+   * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
+   * You can filter documents based on their field values, using implementations of {@link
+   * BooleanExpr}, typically including but not limited to:
+   *
+   * <ul>
+   *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
+   *       Function#gt} (greater than), etc.</li>
+   *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
+   *   <li>advanced functions: {@link Function#regexMatch}, {@link
+   *       Function#arrayContains}, etc.</li>
+   * </ul>
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * firestore.pipeline().collection("books")
+   *   .where(
+   *     and(
+   *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
+   *         field("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+   *     )
+   *   );
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
+  where(options: firestore.Pipelines.WhereStageOptions): Pipeline;
   where(
-    conditionOrOptions: firestore.Pipelines.BooleanExpr | WhereStageOptions
+    conditionOrOptions:
+      | firestore.Pipelines.BooleanExpr
+      | firestore.Pipelines.WhereStageOptions
   ): Pipeline {
     const options = isBooleanExpr(conditionOrOptions) ? {} : conditionOrOptions;
 
@@ -552,8 +683,30 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   offset(offset: number): Pipeline;
-  offset(options: OffsetStageOptions): Pipeline;
-  offset(offsetOrOptions: number | OffsetStageOptions): Pipeline {
+  /**
+   * Skips the first `offset` number of documents from the results of previous stages.
+   *
+   * <p>This stage is useful for implementing pagination in your pipelines, allowing you to retrieve
+   * results in chunks. It is typically used in conjunction with {@link #limit} to control the
+   * size of each page.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Retrieve the second page of 20 results
+   * firestore.pipeline().collection('books')
+   *     .sort(field('published').descending())
+   *     .offset(20)  // Skip the first 20 results
+   *     .limit(20);   // Take the next 20 results
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
+  offset(options: firestore.Pipelines.OffsetStageOptions): Pipeline;
+  offset(
+    offsetOrOptions: number | firestore.Pipelines.OffsetStageOptions
+  ): Pipeline {
     const options = isNumber(offsetOrOptions) ? {} : offsetOrOptions;
 
     const offset: number = isNumber(offsetOrOptions)
@@ -593,8 +746,35 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   limit(limit: number): Pipeline;
-  limit(options: LimitStageOptions): Pipeline;
-  limit(limitOrOptions: number | LimitStageOptions): Pipeline {
+  /**
+   * Limits the maximum number of documents returned by previous stages to `limit`.
+   *
+   * <p>This stage is particularly useful when you want to retrieve a controlled subset of data from
+   * a potentially large result set. It's often used for:
+   *
+   * <ul>
+   *   <li>**Pagination:** In combination with {@link #offset} to retrieve specific pages of
+   *       results.</li>
+   *   <li>**Limiting Data Retrieval:** To prevent excessive data transfer and improve performance,
+   *       especially when dealing with large collections.</li>
+   * </ul>
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Limit the results to the top 10 highest-rated books
+   * firestore.pipeline().collection('books')
+   *     .sort(field('rating').descending())
+   *     .limit(10);
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new Pipeline object with this stage appended to the stage list.
+   */
+  limit(options: firestore.Pipelines.LimitStageOptions): Pipeline;
+  limit(
+    limitOrOptions: number | firestore.Pipelines.LimitStageOptions
+  ): Pipeline {
     const options = isNumber(limitOrOptions) ? {} : limitOrOptions;
 
     const limit: number = isNumber(limitOrOptions)
@@ -640,12 +820,37 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     group: string | firestore.Pipelines.Selectable,
     ...additionalGroups: Array<string | firestore.Pipelines.Selectable>
   ): Pipeline;
-  distinct(options: DistinctStageOptions): Pipeline;
+  /**
+   * Returns a set of distinct values from the inputs to this stage.
+   *
+   * This stage runs through the results from previous stages to include only results with
+   * unique combinations of {@link Expr} values ({@link Field}, {@link Function}, etc).
+   *
+   * The parameters to this stage are defined using {@link Selectable} expressions or strings:
+   *
+   * - {@code string}: Name of an existing field
+   * - {@link Field}: References an existing document field.
+   * - {@link ExprWithAlias}: Represents the result of a function with an assigned alias name
+   *   using {@link Expr#as}.
+   *
+   * Example:
+   *
+   * ```typescript
+   * // Get a list of unique author names in uppercase and genre combinations.
+   * firestore.pipeline().collection("books")
+   *     .distinct(toUppercase(field("author")).as("authorName"), field("genre"), "publishedAt")
+   *     .select("authorName");
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  distinct(options: firestore.Pipelines.DistinctStageOptions): Pipeline;
   distinct(
     groupOrOptions:
       | string
       | firestore.Pipelines.Selectable
-      | DistinctStageOptions,
+      | firestore.Pipelines.DistinctStageOptions,
     ...additionalGroups: Array<string | firestore.Pipelines.Selectable>
   ): Pipeline {
     const options =
@@ -724,16 +929,15 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *       });
    * ```
    *
-   * @param options An object that specifies the accumulators
-   * and optional grouping fields to perform.
+   * @param options - An object that specifies required and optional parameters for the stage.
    * @return A new {@code Pipeline} object with this stage appended to the stage
    * list.
    */
-  aggregate(options: AggregateStageOptions): Pipeline;
+  aggregate(options: firestore.Pipelines.AggregateStageOptions): Pipeline;
   aggregate(
     targetOrOptions:
       | firestore.Pipelines.AggregateWithAlias
-      | AggregateStageOptions,
+      | firestore.Pipelines.AggregateStageOptions,
     ...rest: firestore.Pipelines.AggregateWithAlias[]
   ): Pipeline {
     const options = isAggregateWithAlias(targetOrOptions)
@@ -760,7 +964,32 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     return this._addStage(new Aggregate(internalOptions));
   }
 
-  findNearest(options: FindNearestStageOptions): Pipeline {
+  /**
+   * Performs a vector proximity search on the documents from the previous stage, returning the
+   * K-nearest documents based on the specified query `vectorValue` and `distanceMeasure`. The
+   * returned documents will be sorted in order from nearest to furthest from the query `vectorValue`.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Find the 10 most similar books based on the book description.
+   * const bookDescription = "Lorem ipsum...";
+   * const queryVector: number[] = ...; // compute embedding of `bookDescription`
+   *
+   * firestore.pipeline().collection("books")
+   *     .findNearest({
+   *       field: 'embedding',
+   *       vectorValue: queryVector,
+   *       distanceMeasure: 'euclidean',
+   *       limit: 10,                        // optional
+   *       distanceField: 'computedDistance' // optional
+   *     });
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  findNearest(options: firestore.Pipelines.FindNearestStageOptions): Pipeline {
     const field = toField(options.field);
     const vectorValue = vectorToExpr(options.vectorValue);
     const distanceField = options.distanceField
@@ -813,7 +1042,6 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   replaceWith(fieldName: string): Pipeline;
-
   /**
    * Fully overwrites all fields in a document with those coming from a map.
    *
@@ -851,9 +1079,48 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   replaceWith(expr: firestore.Pipelines.Expr): Pipeline;
-  replaceWith(options: ReplaceWithStageOptions): Pipeline;
+  /**
+   * Fully overwrites all fields in a document with those coming from a map.
+   *
+   * <p>This stage allows you to emit a map value as a document. Each key of the map becomes a field
+   * on the document that contains the corresponding value.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Input.
+   * // {
+   * //  'name': 'John Doe Jr.',
+   * //  'parents': {
+   * //    'father': 'John Doe Sr.',
+   * //    'mother': 'Jane Doe'
+   * //   }
+   * // }
+   *
+   * // Emit parents as document.
+   * firestore.pipeline().collection('people').replaceWith(map({
+   *   foo: 'bar',
+   *   info: {
+   *     name: field('name')
+   *   }
+   * }));
+   *
+   * // Output
+   * // {
+   * //  'father': 'John Doe Sr.',
+   * //  'mother': 'Jane Doe'
+   * // }
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  replaceWith(options: firestore.Pipelines.ReplaceWithStageOptions): Pipeline;
   replaceWith(
-    valueOrOptions: firestore.Pipelines.Expr | string | ReplaceWithStageOptions
+    valueOrOptions:
+      | firestore.Pipelines.Expr
+      | string
+      | firestore.Pipelines.ReplaceWithStageOptions
   ): Pipeline {
     const options =
       isString(valueOrOptions) || isExpr(valueOrOptions) ? {} : valueOrOptions;
@@ -907,11 +1174,13 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * firestore.pipeline().collection("books")
    *     .sample({ percentage: 0.5 });
    *
-   * @param options The {@code SampleOptions} specifies how sampling is performed.
+   * @param options - An object that specifies required and optional parameters for the stage.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  sample(options: SampleStageOptions): Pipeline;
-  sample(documentsOrOptions: number | SampleStageOptions): Pipeline {
+  sample(options: firestore.Pipelines.SampleStageOptions): Pipeline;
+  sample(
+    documentsOrOptions: number | firestore.Pipelines.SampleStageOptions
+  ): Pipeline {
     const options = isNumber(documentsOrOptions) ? {} : documentsOrOptions;
 
     let rate: number;
@@ -955,8 +1224,28 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   union(other: Pipeline): Pipeline;
-  union(options: UnionStageOptions): Pipeline;
-  union(otherOrOptions: Pipeline | UnionStageOptions): Pipeline {
+  /**
+   * Performs union of all documents from two pipelines, including duplicates.
+   *
+   * <p>This stage will pass through documents from previous stage, and also pass through documents
+   * from previous stage of the `other` {@code Pipeline} given in parameter. The order of documents
+   * emitted from this stage is undefined.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Emit documents from books collection and magazines collection.
+   * firestore.pipeline().collection('books')
+   *     .union(firestore.pipeline().collection('magazines'));
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  union(options: firestore.Pipelines.UnionStageOptions): Pipeline;
+  union(
+    otherOrOptions: Pipeline | firestore.Pipelines.UnionStageOptions
+  ): Pipeline {
     const options = isPipeline(otherOrOptions) ? {} : otherOrOptions;
 
     const otherPipeline: firestore.Pipelines.Pipeline = isPipeline(
@@ -1009,9 +1298,42 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     selectable: firestore.Pipelines.Selectable,
     indexField?: string
   ): Pipeline;
-  unnest(options: UnnestStageOptions): Pipeline;
+  /**
+   * Produces a document for each element in an input array.
+   *
+   * For each previous stage document, this stage will emit zero or more augmented documents. The
+   * input array specified by the `selectable` parameter, will emit an augmented document for each input array element. The input array element will
+   * augment the previous stage document by setting the `alias` field  with the array element value.
+   *
+   * When `selectable` evaluates to a non-array value (ex: number, null, absent), then the stage becomes a no-op for
+   * the current input document, returning it as is with the `alias` field absent.
+   *
+   * No documents are emitted when `selectable` evaluates to an empty array.
+   *
+   * Example:
+   *
+   * ```typescript
+   * // Input:
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": [ "comedy", "space", "adventure" ], ... }
+   *
+   * // Emit a book document for each tag of the book.
+   * firestore.pipeline().collection("books")
+   *     .unnest(field("tags").as('tag'), 'tagIndex');
+   *
+   * // Output:
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "comedy", "tagIndex": 0, ... }
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "space", "tagIndex": 1, ... }
+   * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "adventure", "tagIndex": 2, ... }
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  unnest(options: firestore.Pipelines.UnnestStageOptions): Pipeline;
   unnest(
-    selectableOrOptions: firestore.Pipelines.Selectable | UnnestStageOptions,
+    selectableOrOptions:
+      | firestore.Pipelines.Selectable
+      | firestore.Pipelines.UnnestStageOptions,
     indexField?: string
   ): Pipeline {
     const options = isSelectable(selectableOrOptions)
@@ -1026,11 +1348,18 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     const alias = selectable.alias;
     const expr = selectable.expr as Expr;
 
+    const indexFieldName = isSelectable(selectableOrOptions)
+      ? indexField
+      : selectableOrOptions.indexField;
+    const normalizedIndexField = indexFieldName
+      ? field(indexFieldName)
+      : undefined;
+
     const internalOptions: InternalUnnestStageOptions = {
       ...options,
       alias,
       expr,
-      indexField,
+      indexField: normalizedIndexField,
     };
     return this._addStage(new Unnest(internalOptions));
   }
@@ -1064,9 +1393,35 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     ordering: firestore.Pipelines.Ordering,
     ...additionalOrderings: firestore.Pipelines.Ordering[]
   ): Pipeline;
-  sort(options: SortStageOptions): Pipeline;
+  /**
+   * Sorts the documents from previous stages based on one or more {@link Ordering} criteria.
+   *
+   * <p>This stage allows you to order the results of your pipeline. You can specify multiple {@link
+   * Ordering} instances to sort by multiple fields in ascending or descending order. If documents
+   * have the same value for a field used for sorting, the next specified ordering will be used. If
+   * all orderings result in equal comparison, the documents are considered equal and the order is
+   * unspecified.
+   *
+   * <p>Example:
+   *
+   * ```typescript
+   * // Sort books by rating in descending order, and then by title in ascending order for books
+   * // with the same rating
+   * firestore.pipeline().collection("books")
+   *     .sort(
+   *         Ordering.of(field("rating")).descending(),
+   *         Ordering.of(field("title"))  // Ascending order is the default
+   *     );
+   * ```
+   *
+   * @param options - An object that specifies required and optional parameters for the stage.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  sort(options: firestore.Pipelines.SortStageOptions): Pipeline;
   sort(
-    orderingOrOptions: firestore.Pipelines.Ordering | SortStageOptions,
+    orderingOrOptions:
+      | firestore.Pipelines.Ordering
+      | firestore.Pipelines.SortStageOptions,
     ...additionalOrderings: firestore.Pipelines.Ordering[]
   ): Pipeline {
     const options = isOrdering(orderingOrOptions) ? {} : orderingOrOptions;
@@ -1103,8 +1458,9 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *     .select('title', 'author');
    * ```
    *
-   * @param name The unique name of the generic stage to add.
-   * @param params A list of parameters to configure the generic stage's behavior.
+   * @param name - The unique name of the generic stage to add.
+   * @param params - A list of parameters to configure the generic stage's behavior.
+   * @param options - An object of key value pairs that specifies optional parameters for the stage.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   genericStage(

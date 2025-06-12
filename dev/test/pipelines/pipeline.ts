@@ -19,9 +19,14 @@ import {expect} from 'chai';
 import * as sinon from 'sinon';
 import {createInstance, stream} from '../util/helpers';
 import {google} from '../../protos/firestore_v1_proto_api';
-import {Timestamp} from '../../src';
+import {Timestamp, Pipelines, Firestore} from '../../src';
 import IExecutePipelineRequest = google.firestore.v1.IExecutePipelineRequest;
 import IExecutePipelineResponse = google.firestore.v1.IExecutePipelineResponse;
+import Pipeline = Pipelines.Pipeline;
+import field = Pipelines.field;
+import sum = Pipelines.sum;
+import descending = Pipelines.descending;
+import IValue = google.firestore.v1.IValue;
 
 const FIRST_CALL = 0;
 const EXECUTE_PIPELINE_REQUEST = 0;
@@ -73,6 +78,7 @@ describe('execute(Pipeline|PipelineOptions)', () => {
                 },
               ],
               name: 'collection',
+              options: {},
             },
           ],
         },
@@ -110,6 +116,7 @@ describe('execute(Pipeline|PipelineOptions)', () => {
                 },
               ],
               name: 'collection',
+              options: {},
             },
           ],
         },
@@ -152,6 +159,7 @@ describe('execute(Pipeline|PipelineOptions)', () => {
                 },
               ],
               name: 'collection',
+              options: {},
             },
           ],
         },
@@ -160,5 +168,247 @@ describe('execute(Pipeline|PipelineOptions)', () => {
     expect(spy.args[FIRST_CALL][EXECUTE_PIPELINE_REQUEST]).to.deep.equal(
       executePipelineRequest
     );
+  });
+});
+
+describe('stage option serialization', () => {
+  // Default custom options
+  const customOptions: Record<string, unknown> = {
+    foo: 'bar1',
+  };
+  // Default expected serialized options
+  const expectedSerializedOptions: Record<string, IValue> = {
+    foo: {
+      stringValue: 'bar1',
+    },
+  };
+
+  const testDefinitions: Array<{
+    name: string;
+    pipeline: (firestore: Firestore) => Pipeline;
+    stageIndex?: number;
+    expectedOptions?: Record<string, IValue>;
+  }> = [
+    {
+      name: 'collection stage',
+      pipeline: firestore =>
+        firestore.pipeline().collection({
+          collection: 'foo',
+          customOptions,
+          forceIndex: 'foo-index',
+        }),
+      expectedOptions: {
+        ...expectedSerializedOptions,
+        force_index: {
+          stringValue: 'foo-index',
+        },
+      },
+    },
+    {
+      name: 'collection group stage',
+      pipeline: firestore =>
+        firestore.pipeline().collectionGroup({
+          collectionId: 'foo',
+          customOptions,
+          forceIndex: 'bar-index',
+        }),
+      expectedOptions: {
+        ...expectedSerializedOptions,
+        force_index: {
+          stringValue: 'bar-index',
+        },
+      },
+    },
+    {
+      name: 'documents stage',
+      pipeline: firestore =>
+        firestore.pipeline().documents({
+          docs: ['foo/bar'],
+          customOptions,
+        }),
+    },
+    {
+      name: 'database stage',
+      pipeline: firestore =>
+        firestore.pipeline().database({
+          customOptions,
+        }),
+    },
+    {
+      name: 'distinct stage',
+      pipeline: firestore =>
+        firestore
+          .pipeline()
+          .database()
+          .distinct({
+            groups: ['foo'],
+            customOptions,
+          }),
+      stageIndex: 1,
+    },
+    {
+      name: 'findNearest stage',
+      pipeline: firestore =>
+        firestore
+          .pipeline()
+          .database()
+          .findNearest({
+            field: 'foo',
+            vectorValue: [0],
+            distanceMeasure: 'euclidean',
+            customOptions,
+          }),
+      stageIndex: 1,
+    },
+    {
+      name: 'select stage',
+      pipeline: firestore =>
+        firestore
+          .pipeline()
+          .database()
+          .select({
+            selections: ['foo'],
+            customOptions,
+          }),
+      stageIndex: 1,
+    },
+    {
+      name: 'unnest stage',
+      pipeline: firestore =>
+        firestore
+          .pipeline()
+          .database()
+          .unnest({
+            selectable: field('foo'),
+            customOptions,
+          }),
+      stageIndex: 1,
+    },
+    {
+      name: 'addFields stage',
+      pipeline: firestore =>
+        firestore
+          .pipeline()
+          .database()
+          .addFields({
+            fields: [field('foo')],
+            customOptions,
+          }),
+      stageIndex: 1,
+    },
+    {
+      name: 'aggregate stage',
+      pipeline: firestore =>
+        firestore
+          .pipeline()
+          .database()
+          .aggregate({
+            accumulators: [sum('foo').as('fooSum')],
+            customOptions,
+          }),
+      stageIndex: 1,
+    },
+    {
+      name: 'limit stage',
+      pipeline: firestore =>
+        firestore.pipeline().database().limit({
+          limit: 1,
+          customOptions,
+        }),
+      stageIndex: 1,
+    },
+    {
+      name: 'offset stage',
+      pipeline: firestore =>
+        firestore.pipeline().database().offset({
+          offset: 1,
+          customOptions,
+        }),
+      stageIndex: 1,
+    },
+    {
+      name: 'removeFields stage',
+      pipeline: firestore =>
+        firestore
+          .pipeline()
+          .database()
+          .removeFields({
+            fields: ['foo'],
+            customOptions,
+          }),
+      stageIndex: 1,
+    },
+    {
+      name: 'replaceWith stage',
+      pipeline: firestore =>
+        firestore.pipeline().database().replaceWith({
+          map: 'foo',
+          customOptions,
+        }),
+      stageIndex: 1,
+    },
+    {
+      name: 'sample stage',
+      pipeline: firestore =>
+        firestore.pipeline().database().sample({
+          documents: 100,
+          customOptions,
+        }),
+      stageIndex: 1,
+    },
+    {
+      name: 'sample stage',
+      pipeline: firestore =>
+        firestore
+          .pipeline()
+          .database()
+          .sort({
+            orderings: [descending('foo')],
+            customOptions,
+          }),
+      stageIndex: 1,
+    },
+    {
+      name: 'union stage',
+      pipeline: firestore =>
+        firestore.pipeline().database().union({
+          other: firestore.pipeline().database(),
+          customOptions,
+        }),
+      stageIndex: 1,
+    },
+    {
+      name: 'where stage',
+      pipeline: firestore =>
+        firestore
+          .pipeline()
+          .database()
+          .where({
+            condition: field('foo').eq(1),
+            customOptions,
+          }),
+      stageIndex: 1,
+    },
+  ];
+
+  testDefinitions.forEach(testDefinition => {
+    it(testDefinition.name, async () => {
+      const spy = sinon.fake.returns(stream());
+      const firestore = await createInstance({
+        executePipeline: spy,
+      });
+
+      await testDefinition.pipeline(firestore).execute();
+
+      const expectedOptions = testDefinition.expectedOptions
+        ? testDefinition.expectedOptions
+        : expectedSerializedOptions;
+
+      expect(
+        spy.args[FIRST_CALL][EXECUTE_PIPELINE_REQUEST]['structuredPipeline'][
+          'pipeline'
+        ]['stages'][testDefinition.stageIndex ?? 0]['options']
+      ).to.deep.equal(expectedOptions);
+    });
   });
 });

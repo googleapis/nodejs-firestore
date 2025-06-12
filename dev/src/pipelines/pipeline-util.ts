@@ -19,7 +19,12 @@ import {google} from '../../protos/firestore_v1_proto_api';
 
 import * as protos from '../../protos/firestore_v1_proto_api';
 import './expression';
-import Firestore, {DocumentReference, Timestamp, VectorValue} from '../index';
+import Firestore, {
+  CollectionReference,
+  DocumentReference,
+  Timestamp,
+  VectorValue,
+} from '../index';
 import {logger} from '../logger';
 import {QualifiedResourcePath} from '../path';
 import {CompositeFilterInternal} from '../reference/composite-filter-internal';
@@ -581,6 +586,12 @@ export function isField(val: unknown): val is firestore.Pipelines.Field {
 
 export function isPipeline(val: unknown): val is firestore.Pipelines.Pipeline {
   return val instanceof Pipeline;
+}
+
+export function isCollectionReference(
+  val: unknown
+): val is firestore.CollectionReference {
+  return val instanceof CollectionReference;
 }
 
 /**

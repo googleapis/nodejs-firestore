@@ -32,7 +32,6 @@ import {VectorQueryOptions} from './vector-query-options';
 import {VectorQuerySnapshot} from './vector-query-snapshot';
 import {ExplainResults} from '../query-profile';
 import {QueryResponse} from './types';
-import {FindNearestStageOptions} from '../pipelines/stage-options';
 
 /**
  * A query that finds the documents whose vector fields are closest to a certain query vector.
@@ -142,7 +141,7 @@ export class VectorQuery<
   }
 
   toPipeline(): Pipeline {
-    const options: FindNearestStageOptions = {
+    const options: firestore.Pipelines.FindNearestStageOptions = {
       field: field(this._options.vectorField),
       vectorValue: this._options.queryVector,
       limit: this._options.limit,

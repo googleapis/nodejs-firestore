@@ -9114,50 +9114,6 @@ declare namespace FirebaseFirestore {
     }
 
     /**
-     * @beta
-     */
-    export interface Stage {
-      name: string;
-    }
-
-    /**
-     * @beta
-     */
-    export class Aggregate implements Stage {
-      name: string;
-    }
-
-    /**
-     * @beta
-     */
-    export class Where implements Stage {
-      name: string;
-    }
-
-    /**
-     * @beta
-     */
-    export class FindNearest implements Stage {
-      name: string;
-    }
-
-    /**
-     * @beta
-     */
-    export class Replace implements Stage {
-      name: string;
-    }
-
-    /**
-     * @beta
-     */
-    export interface UnnestOptions {
-      field: Selectable | string;
-      alias: Field | string;
-      indexField?: string;
-    }
-
-    /**
      * Represents the source of a Firestore {@link Pipeline}.
      * @beta
      */
@@ -9171,12 +9127,24 @@ declare namespace FirebaseFirestore {
       collection(collectionPath: string | CollectionReference): Pipeline;
 
       /**
+       * Returns all documents from the entire collection. The collection can be nested.
+       * @param options - Options defining how this CollectionStage is evaluated.
+       */
+      collection(options: CollectionStageOptions): Pipeline;
+
+      /**
        * Specifies the source as a collection group.
        *
        * @param collectionId The ID of the collection group.
        * @return A new Pipeline object with the collection group as the source.
        */
       collectionGroup(collectionId: string): Pipeline;
+      /**
+       * Returns all documents from a collection ID regardless of the parent.
+       * @param options - Options defining how this CollectionGroupStage is evaluated.
+       */
+
+      collectionGroup(options: CollectionGroupStageOptions): Pipeline;
 
       /**
        * Specifies the source as a database.
@@ -9186,12 +9154,27 @@ declare namespace FirebaseFirestore {
       database(): Pipeline;
 
       /**
+       * Returns all documents from the entire database.
+       * @param options - Options defining how a DatabaseStage is evaluated.
+       */
+      database(options: DatabaseStageOptions): Pipeline;
+
+      /**
        * Specifies the source as a set of documents.
        *
        * @param docs The document references.
        * @return A new Pipeline object with the documents as the source.
        */
       documents(docs: Array<string | DocumentReference>): Pipeline;
+
+      /**
+       * Set the pipeline's source to the documents specified by the given paths and DocumentReferences.
+       *
+       * @param options - Options defining how this DocumentsStage is evaluated.
+       *
+       * @throws {@FirestoreError} Thrown if any of the provided DocumentReferences target a different project or database than the pipeline.
+       */
+      documents(options: DocumentsStageOptions): Pipeline;
 
       /**
        * Convert the given Query into an equivalent Pipeline.
@@ -9274,6 +9257,33 @@ declare namespace FirebaseFirestore {
        * @return A new Pipeline object with this stage appended to the stage list.
        */
       addFields(field: Selectable, ...additionalFields: Selectable[]): Pipeline;
+      /**
+       * Adds new fields to outputs from previous stages.
+       *
+       * This stage allows you to compute values on-the-fly based on existing data from previous
+       * stages or constants. You can use this to create new fields or overwrite existing ones (if there
+       * is name overlaps).
+       *
+       * The added fields are defined using {@link Selectable}s, which can be:
+       *
+       * - {@link Field}: References an existing document field.
+       * - {@link Expr}: Either a literal value (see {@link Constant}) or a computed value
+       *   (see {@FunctionExpr}) with an assigned alias using {@link Expr#as}.
+       *
+       * Example:
+       *
+       * ```typescript
+       * firestore.pipeline().collection("books")
+       *   .addFields(
+       *     field("rating").as("bookRating"), // Rename 'rating' to 'bookRating'
+       *     add(5, field("quantity")).as("totalCost")  // Calculate 'totalCost'
+       *   );
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new Pipeline object with this stage appended to the stage list.
+       */
+      addFields(options: AddFieldsStageOptions): Pipeline;
 
       /**
        * Remove fields from outputs of previous stages.
@@ -9297,6 +9307,24 @@ declare namespace FirebaseFirestore {
         fieldValue: Field | string,
         ...additionalFields: Array<Field | string>
       ): Pipeline;
+      /**
+       * Remove fields from outputs of previous stages.
+       *
+       * Example:
+       *
+       * ```typescript
+       * firestore.pipeline().collection('books')
+       *   // removes field 'rating' and 'cost' from the previous stage outputs.
+       *   .removeFields(
+       *     field('rating'),
+       *     'cost'
+       *   );
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new Pipeline object with this stage appended to the stage list.
+       */
+      removeFields(options: RemoveFieldsStageOptions): Pipeline;
 
       /**
        * Selects or creates a set of fields from the outputs of previous stages.
@@ -9335,6 +9363,37 @@ declare namespace FirebaseFirestore {
         selection: Selectable | string,
         ...additionalSelections: Array<Selectable | string>
       ): Pipeline;
+      /**
+       * Selects or creates a set of fields from the outputs of previous stages.
+       *
+       * <p>The selected fields are defined using {@link Selectable} expressions, which can be:
+       *
+       * <ul>
+       *   <li>{@code string}: Name of an existing field</li>
+       *   <li>{@link Field}: References an existing field.</li>
+       *   <li>{@link Function}: Represents the result of a function with an assigned alias name using
+       *       {@link Expr#as}</li>
+       * </ul>
+       *
+       * <p>If no selections are provided, the output of this stage is empty. Use {@link
+       * Pipeline#addFields} instead if only additions are
+       * desired.
+       *
+       * <p>Example:
+       *
+       * ```typescript
+       * db.pipeline().collection("books")
+       *   .select(
+       *     "firstName",
+       *     field("lastName"),
+       *     field("address").toUppercase().as("upperAddress"),
+       *   );
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new Pipeline object with this stage appended to the stage list.
+       */
+      select(options: SelectStageOptions): Pipeline;
 
       /**
        * Filters the documents from previous stages to only include those matching the specified {@link
@@ -9368,6 +9427,38 @@ declare namespace FirebaseFirestore {
        * @return A new Pipeline object with this stage appended to the stage list.
        */
       where(condition: BooleanExpr): Pipeline;
+      /**
+       * Filters the documents from previous stages to only include those matching the specified {@link
+       * BooleanExpr}.
+       *
+       * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
+       * You can filter documents based on their field values, using implementations of {@link
+       * BooleanExpr}, typically including but not limited to:
+       *
+       * <ul>
+       *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
+       *       Function#gt} (greater than), etc.</li>
+       *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
+       *   <li>advanced functions: {@link Function#regexMatch}, {@link
+       *       Function#arrayContains}, etc.</li>
+       * </ul>
+       *
+       * <p>Example:
+       *
+       * ```typescript
+       * firestore.pipeline().collection("books")
+       *   .where(
+       *     and(
+       *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
+       *         field("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+       *     )
+       *   );
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new Pipeline object with this stage appended to the stage list.
+       */
+      where(options: WhereStageOptions): Pipeline;
 
       /**
        * Skips the first `offset` number of documents from the results of previous stages.
@@ -9390,6 +9481,27 @@ declare namespace FirebaseFirestore {
        * @return A new Pipeline object with this stage appended to the stage list.
        */
       offset(offset: number): Pipeline;
+      /**
+       * Skips the first `offset` number of documents from the results of previous stages.
+       *
+       * <p>This stage is useful for implementing pagination in your pipelines, allowing you to retrieve
+       * results in chunks. It is typically used in conjunction with {@link #limit} to control the
+       * size of each page.
+       *
+       * <p>Example:
+       *
+       * ```typescript
+       * // Retrieve the second page of 20 results
+       * firestore.pipeline().collection('books')
+       *     .sort(field('published').descending())
+       *     .offset(20)  // Skip the first 20 results
+       *     .limit(20);   // Take the next 20 results
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new Pipeline object with this stage appended to the stage list.
+       */
+      offset(options: OffsetStageOptions): Pipeline;
 
       /**
        * Limits the maximum number of documents returned by previous stages to `limit`.
@@ -9417,6 +9529,32 @@ declare namespace FirebaseFirestore {
        * @return A new Pipeline object with this stage appended to the stage list.
        */
       limit(limit: number): Pipeline;
+      /**
+       * Limits the maximum number of documents returned by previous stages to `limit`.
+       *
+       * <p>This stage is particularly useful when you want to retrieve a controlled subset of data from
+       * a potentially large result set. It's often used for:
+       *
+       * <ul>
+       *   <li>**Pagination:** In combination with {@link #offset} to retrieve specific pages of
+       *       results.</li>
+       *   <li>**Limiting Data Retrieval:** To prevent excessive data transfer and improve performance,
+       *       especially when dealing with large collections.</li>
+       * </ul>
+       *
+       * <p>Example:
+       *
+       * ```typescript
+       * // Limit the results to the top 10 highest-rated books
+       * firestore.pipeline().collection('books')
+       *     .sort(field('rating').descending())
+       *     .limit(10);
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new Pipeline object with this stage appended to the stage list.
+       */
+      limit(options: LimitStageOptions): Pipeline;
 
       /**
        * Returns a set of distinct values from the inputs to this stage.
@@ -9450,6 +9588,32 @@ declare namespace FirebaseFirestore {
         group: string | Selectable,
         ...additionalGroups: Array<string | Selectable>
       ): Pipeline;
+      /**
+       * Returns a set of distinct values from the inputs to this stage.
+       *
+       * This stage runs through the results from previous stages to include only results with
+       * unique combinations of {@link Expr} values ({@link Field}, {@link Function}, etc).
+       *
+       * The parameters to this stage are defined using {@link Selectable} expressions or strings:
+       *
+       * - {@code string}: Name of an existing field
+       * - {@link Field}: References an existing document field.
+       * - {@link ExprWithAlias}: Represents the result of a function with an assigned alias name
+       *   using {@link Expr#as}.
+       *
+       * Example:
+       *
+       * ```typescript
+       * // Get a list of unique author names in uppercase and genre combinations.
+       * firestore.pipeline().collection("books")
+       *     .distinct(toUppercase(field("author")).as("authorName"), field("genre"), "publishedAt")
+       *     .select("authorName");
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new {@code Pipeline} object with this stage appended to the stage list.
+       */
+      distinct(options: DistinctStageOptions): Pipeline;
 
       /**
        * Performs aggregation operations on the documents from previous stages.
@@ -9507,17 +9671,38 @@ declare namespace FirebaseFirestore {
        *       });
        * ```
        *
-       * @param options An object that specifies the accumulators
-       * and optional grouping fields to perform.
+       * @param options - An object that specifies required and optional parameters for the stage.
        * @return A new {@code Pipeline} object with this stage appended to the stage
        * list.
        */
-      aggregate(options: {
-        accumulators: AggregateWithAlias[];
-        groups?: Array<string | Selectable>;
-      }): Pipeline;
+      aggregate(options: AggregateStageOptions): Pipeline;
 
-      //findNearest(options: FindNearestOptions): Pipeline;
+      /**
+       * Performs a vector proximity search on the documents from the previous stage, returning the
+       * K-nearest documents based on the specified query `vectorValue` and `distanceMeasure`. The
+       * returned documents will be sorted in order from nearest to furthest from the query `vectorValue`.
+       *
+       * <p>Example:
+       *
+       * ```typescript
+       * // Find the 10 most similar books based on the book description.
+       * const bookDescription = "Lorem ipsum...";
+       * const queryVector: number[] = ...; // compute embedding of `bookDescription`
+       *
+       * firestore.pipeline().collection("books")
+       *     .findNearest({
+       *       field: 'embedding',
+       *       vectorValue: queryVector,
+       *       distanceMeasure: 'euclidean',
+       *       limit: 10,                        // optional
+       *       distanceField: 'computedDistance' // optional
+       *     });
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new {@code Pipeline} object with this stage appended to the stage list.
+       */
+      findNearest(options: FindNearestStageOptions): Pipeline;
 
       /**
        * Fully overwrites all fields in a document with those coming from a nested map.
@@ -9591,6 +9776,44 @@ declare namespace FirebaseFirestore {
       replaceWith(expr: Expr): Pipeline;
 
       /**
+       * Fully overwrites all fields in a document with those coming from a map.
+       *
+       * <p>This stage allows you to emit a map value as a document. Each key of the map becomes a field
+       * on the document that contains the corresponding value.
+       *
+       * <p>Example:
+       *
+       * ```typescript
+       * // Input.
+       * // {
+       * //  'name': 'John Doe Jr.',
+       * //  'parents': {
+       * //    'father': 'John Doe Sr.',
+       * //    'mother': 'Jane Doe'
+       * //   }
+       * // }
+       *
+       * // Emit parents as document.
+       * firestore.pipeline().collection('people').replaceWith(map({
+       *   foo: 'bar',
+       *   info: {
+       *     name: field('name')
+       *   }
+       * }));
+       *
+       * // Output
+       * // {
+       * //  'father': 'John Doe Sr.',
+       * //  'mother': 'Jane Doe'
+       * // }
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new {@code Pipeline} object with this stage appended to the stage list.
+       */
+      replaceWith(options: ReplaceWithStageOptions): Pipeline;
+
+      /**
        * Performs a pseudo-random sampling of the documents from the previous stage.
        *
        * <p>This stage will filter documents pseudo-randomly. The parameter specifies how number of
@@ -9631,31 +9854,25 @@ declare namespace FirebaseFirestore {
       sample(options: {percentage: number} | {documents: number}): Pipeline;
 
       /**
-       * Sorts the documents from previous stages based on one or more {@link Ordering} criteria.
+       * Performs a pseudo-random sampling of the documents from the previous stage.
        *
-       * <p>This stage allows you to order the results of your pipeline. You can specify multiple {@link
-       * Ordering} instances to sort by multiple fields in ascending or descending order. If documents
-       * have the same value for a field used for sorting, the next specified ordering will be used. If
-       * all orderings result in equal comparison, the documents are considered equal and the order is
-       * unspecified.
+       * <p>This stage will filter documents pseudo-randomly. The 'options' parameter specifies how
+       * sampling will be performed. See {@code SampleOptions} for more information.
        *
-       * <p>Example:
+       * <p>Examples:
        *
-       * ```typescript
-       * // Sort books by rating in descending order, and then by title in ascending order for books
-       * // with the same rating
+       * // Sample 10 books, if available.
        * firestore.pipeline().collection("books")
-       *     .sort(
-       *         Ordering.of(field("rating")).descending(),
-       *         Ordering.of(field("title"))  // Ascending order is the default
-       *     );
-       * ```
+       *     .sample({ documents: 10 });
        *
-       * @param ordering The first {@link Ordering} instance specifying the sorting criteria.
-       * @param additionalOrderings Optional additional {@link Ordering} instances specifying the additional sorting criteria.
+       * // Sample 50% of books.
+       * firestore.pipeline().collection("books")
+       *     .sample({ percentage: 0.5 });
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
        * @return A new {@code Pipeline} object with this stage appended to the stage list.
        */
-      sort(ordering: Ordering, ...additionalOrderings: Ordering[]): Pipeline;
+      sample(options: SampleStageOptions): Pipeline;
 
       /**
        * Performs union of all documents from two pipelines, including duplicates.
@@ -9676,6 +9893,25 @@ declare namespace FirebaseFirestore {
        * @return A new {@code Pipeline} object with this stage appended to the stage list.
        */
       union(other: Pipeline): Pipeline;
+      /**
+       * Performs union of all documents from two pipelines, including duplicates.
+       *
+       * <p>This stage will pass through documents from previous stage, and also pass through documents
+       * from previous stage of the `other` {@code Pipeline} given in parameter. The order of documents
+       * emitted from this stage is undefined.
+       *
+       * <p>Example:
+       *
+       * ```typescript
+       * // Emit documents from books collection and magazines collection.
+       * firestore.pipeline().collection('books')
+       *     .union(firestore.pipeline().collection('magazines'));
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new {@code Pipeline} object with this stage appended to the stage list.
+       */
+      union(options: UnionStageOptions): Pipeline;
 
       /**
        * Produces a document for each element in an input array.
@@ -9710,6 +9946,90 @@ declare namespace FirebaseFirestore {
        * @return A new {@code Pipeline} object with this stage appended to the stage list.
        */
       unnest(selectable: Selectable, indexField?: string): Pipeline;
+      /**
+       * Produces a document for each element in an input array.
+       *
+       * For each previous stage document, this stage will emit zero or more augmented documents. The
+       * input array specified by the `selectable` parameter, will emit an augmented document for each input array element. The input array element will
+       * augment the previous stage document by setting the `alias` field  with the array element value.
+       *
+       * When `selectable` evaluates to a non-array value (ex: number, null, absent), then the stage becomes a no-op for
+       * the current input document, returning it as is with the `alias` field absent.
+       *
+       * No documents are emitted when `selectable` evaluates to an empty array.
+       *
+       * Example:
+       *
+       * ```typescript
+       * // Input:
+       * // { "title": "The Hitchhiker's Guide to the Galaxy", "tags": [ "comedy", "space", "adventure" ], ... }
+       *
+       * // Emit a book document for each tag of the book.
+       * firestore.pipeline().collection("books")
+       *     .unnest(field("tags").as('tag'), 'tagIndex');
+       *
+       * // Output:
+       * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "comedy", "tagIndex": 0, ... }
+       * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "space", "tagIndex": 1, ... }
+       * // { "title": "The Hitchhiker's Guide to the Galaxy", "tag": "adventure", "tagIndex": 2, ... }
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new {@code Pipeline} object with this stage appended to the stage list.
+       */
+      unnest(options: UnnestStageOptions): Pipeline;
+
+      /**
+       * Sorts the documents from previous stages based on one or more {@link Ordering} criteria.
+       *
+       * <p>This stage allows you to order the results of your pipeline. You can specify multiple {@link
+       * Ordering} instances to sort by multiple fields in ascending or descending order. If documents
+       * have the same value for a field used for sorting, the next specified ordering will be used. If
+       * all orderings result in equal comparison, the documents are considered equal and the order is
+       * unspecified.
+       *
+       * <p>Example:
+       *
+       * ```typescript
+       * // Sort books by rating in descending order, and then by title in ascending order for books
+       * // with the same rating
+       * firestore.pipeline().collection("books")
+       *     .sort(
+       *         Ordering.of(field("rating")).descending(),
+       *         Ordering.of(field("title"))  // Ascending order is the default
+       *     );
+       * ```
+       *
+       * @param ordering The first {@link Ordering} instance specifying the sorting criteria.
+       * @param additionalOrderings Optional additional {@link Ordering} instances specifying the additional sorting criteria.
+       * @return A new {@code Pipeline} object with this stage appended to the stage list.
+       */
+      sort(ordering: Ordering, ...additionalOrderings: Ordering[]): Pipeline;
+      /**
+       * Sorts the documents from previous stages based on one or more {@link Ordering} criteria.
+       *
+       * <p>This stage allows you to order the results of your pipeline. You can specify multiple {@link
+       * Ordering} instances to sort by multiple fields in ascending or descending order. If documents
+       * have the same value for a field used for sorting, the next specified ordering will be used. If
+       * all orderings result in equal comparison, the documents are considered equal and the order is
+       * unspecified.
+       *
+       * <p>Example:
+       *
+       * ```typescript
+       * // Sort books by rating in descending order, and then by title in ascending order for books
+       * // with the same rating
+       * firestore.pipeline().collection("books")
+       *     .sort(
+       *         Ordering.of(field("rating")).descending(),
+       *         Ordering.of(field("title"))  // Ascending order is the default
+       *     );
+       * ```
+       *
+       * @param options - An object that specifies required and optional parameters for the stage.
+       * @return A new {@code Pipeline} object with this stage appended to the stage list.
+       */
+      sort(options: SortStageOptions): Pipeline;
 
       /**
        * Adds a generic stage to the pipeline.
@@ -9732,6 +10052,7 @@ declare namespace FirebaseFirestore {
        * @return A new {@code Pipeline} object with this stage appended to the stage list.
        */
       genericStage(name: string, params: any[]): Pipeline;
+
       /**
        * Executes this pipeline and returns a Promise to represent the asynchronous operation.
        *
@@ -9788,7 +10109,7 @@ declare namespace FirebaseFirestore {
     /**
      * Options defining how a Pipeline is evaluated.
      */
-    export interface PipelineOptions {
+    export type PipelineOptions = {
       /**
        * Pipeline to be evaluated.
        */
@@ -9843,7 +10164,267 @@ declare namespace FirebaseFirestore {
       customOptions?: {
         [name: string]: unknown;
       };
-    }
+    };
+
+    /**
+     * Options defining how a Stage is evaluated.
+     */
+    export type StageOptions = {
+      /**
+       * An escape hatch to set options not known at SDK build time. These values
+       * will be passed directly to the Firestore backend and not used by the SDK.
+       *
+       * The option name will be used as provided. And must match the name
+       * format used by the backend (hint: use a snake_case_name).
+       *
+       * Custom option values can be any type supported
+       * by Firestore (for example: string, boolean, number, map, …). Value types
+       * not known to the SDK will be rejected.
+       *
+       * Values specified in customOptions will take precedence over any options
+       * with the same name set by the SDK.
+       *
+       * `customOptions` supports dot notation, if you want to override
+       * a nested option.
+       */
+      customOptions?: {
+        [name: string]: unknown;
+      };
+    };
+
+    /**
+     * Options defining how a CollectionStage is evaluated. See {@link PipelineSource.collection}.
+     */
+    export type CollectionStageOptions = StageOptions & {
+      /**
+       * Name or reference to the collection that will be used as the Pipeline source.
+       */
+      collection: string | CollectionReference;
+
+      /**
+       * Force index
+       */
+      forceIndex?: string;
+    };
+
+    /**
+     * Options defining how a CollectionGroupStage is evaluated. See {@link PipelineSource.collectionGroup}.
+     */
+    export type CollectionGroupStageOptions = StageOptions & {
+      /**
+       * ID of the collection group to use as the Pipeline source.
+       */
+      collectionId: string;
+
+      /**
+       * Force index
+       */
+      forceIndex?: string;
+    };
+
+    /**
+     * Options defining how a DatabaseStage is evaluated. See {@link PipelineSource.database}.
+     */
+    export type DatabaseStageOptions = StageOptions & {};
+
+    /**
+     * Options defining how a DocumentsStage is evaluated. See {@link PipelineSource.documents}.
+     */
+    export type DocumentsStageOptions = StageOptions & {
+      /**
+       * An array of paths and DocumentReferences specifying the individual documents that will be the source of this pipeline.
+       * The converters for these DocumentReferences will be ignored and not have an effect on this pipeline.
+       * There must be at least one document specified in the array.
+       */
+      docs: Array<string | DocumentReference>;
+    };
+
+    /**
+     * Options defining how an AddFieldsStage is evaluated. See {@link Pipeline.addFields}.
+     */
+    export type AddFieldsStageOptions = StageOptions & {
+      /**
+       *  The fields to add to each document, specified as a {@link Selectable}.
+       *  At least one field is required.
+       */
+      fields: Selectable[];
+    };
+
+    /**
+     * Options defining how a RemoveFieldsStage is evaluated. See {@link Pipeline.removeFields}.
+     */
+    export type RemoveFieldsStageOptions = StageOptions & {
+      /**
+       * The fields to remove from each document.
+       */
+      fields: Array<Field | string>;
+    };
+
+    /**
+     * Options defining how a SelectStage is evaluated. See {@link Pipeline.select}.
+     */
+    export type SelectStageOptions = StageOptions & {
+      /**
+       * The fields to include in the output documents, specified as {@link Selectable} expression
+       * or as a string value indicating the field name.
+       */
+      selections: Array<Selectable | string>;
+    };
+
+    /**
+     * Options defining how a WhereStage is evaluated. See {@link Pipeline.where}.
+     */
+    export type WhereStageOptions = StageOptions & {
+      /**
+       * The {@link BooleanExpr} to apply as a filter for each input document to this stage.
+       */
+      condition: BooleanExpr;
+    };
+
+    /**
+     * Options defining how an OffsetStage is evaluated. See {@link Pipeline.offset}.
+     */
+    export type OffsetStageOptions = StageOptions & {
+      /**
+       * The number of documents to skip.
+       */
+      offset: number;
+    };
+
+    /**
+     * Options defining how a LimitStage is evaluated. See {@link Pipeline.limit}.
+     */
+    export type LimitStageOptions = StageOptions & {
+      /**
+       * The maximum number of documents to return.
+       */
+      limit: number;
+    };
+
+    /**
+     * Options defining how a DistinctStage is evaluated. See {@link Pipeline.distinct}.
+     */
+    export type DistinctStageOptions = StageOptions & {
+      /**
+       * The {@link Selectable} expressions or field names to consider when determining
+       * distinct value combinations (groups).
+       */
+      groups: Array<string | Selectable>;
+    };
+
+    /**
+     * Options defining how an AggregateStage is evaluated. See {@link Pipeline.aggregate}.
+     */
+    export type AggregateStageOptions = StageOptions & {
+      /**
+       * The {@link AggregateWithAlias} values specifying aggregate operations to
+       * perform on the input documents.
+       */
+      accumulators: AggregateWithAlias[];
+
+      /**
+       * The {@link Selectable} expressions or field names to consider when determining
+       * distinct value combinations (groups), which will be aggregated over.
+       */
+      groups?: Array<string | Selectable>;
+    };
+
+    /**
+     * Options defining how a FindNearestStage is evaluated. See {@link Pipeline.findNearest}.
+     */
+    export type FindNearestStageOptions = StageOptions & {
+      /**
+       * Specifies the field on the source documents to which the vector distance will be computed against the query vector.
+       */
+      field: Field | string;
+      /**
+       * Specifies the query vector value, to which the vector distance will be computed.
+       */
+      vectorValue: VectorValue | number[];
+      /**
+       * Specifies how the distance is computed.
+       */
+      distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
+      /**
+       * The maximum number of documents to return from the FindNearest stage.
+       */
+      limit?: number;
+      /**
+       * If set, specifies the field on the output documents that will contain
+       * the computed vector distance for the document. If not set, the computed
+       * vector distance will not be returned.
+       */
+      distanceField?: string;
+    };
+
+    /**
+     * Options defining how a ReplaceWithStage is evaluated. See {@link Pipeline.replaceWith}.
+     */
+    export type ReplaceWithStageOptions = StageOptions & {
+      /**
+       * The name of a field that contains a map or an {@link Expr} that
+       * evaluates to a map.
+       */
+      map: Expr | string;
+    };
+
+    /**
+     * Options defining how a SampleStage is evaluated. See {@link Pipeline.findNearest}.
+     */
+    export type SampleStageOptions = StageOptions &
+      OneOf<{
+        /**
+         * If set, specifies the sample rate as a percentage of the
+         * input documents.
+         *
+         * Cannot be set when `documents: number` is set.
+         */
+        percentage: number;
+        /**
+         * If set, specifies the sample rate as a total number of
+         * documents to sample from the input documents.
+         *
+         * Cannot be set when `percentage: number` is set.
+         */
+        documents: number;
+      }>;
+
+    /**
+     * Options defining how a UnionStage is evaluated. See {@link Pipeline.union}.
+     */
+    export type UnionStageOptions = StageOptions & {
+      /**
+       * Specifies the other Pipeline to union with.
+       */
+      other: Pipeline;
+    };
+
+    /**
+     * Options defining how an UnnestStage is evaluated. See {@link Pipeline.findNearest}.
+     */
+    export type UnnestStageOptions = StageOptions & {
+      /**
+       * Specifies the expression evaluating to an array of elements, which will be un-nested
+       * into the field specified by `selectable.alias`.
+       */
+      selectable: Selectable;
+      /**
+       * If set, specifies the field on the output documents that will contain the
+       * offset (starting at zero) that the element is from the original array.
+       */
+      indexField?: string;
+    };
+
+    /**
+     * Options defining how a SortStage is evaluated. See {@link Pipeline.sort}.
+     */
+    export type SortStageOptions = StageOptions & {
+      /**
+       * Orderings specify how the input documents are sorted.
+       * One or more ordering are required.
+       */
+      orderings: Ordering[];
+    };
 
     /**
      * TODO(docs)
