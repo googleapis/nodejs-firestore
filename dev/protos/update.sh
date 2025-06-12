@@ -41,7 +41,14 @@ PBTS="$(npm root)/.bin/pbts"
 pushd "$WORK_DIR"
 
 # Clone necessary git repos.
-git clone --depth 1 https://github.com/googleapis/googleapis.git
+# If the USE_PREVIEW_BRANCH environment variable is set, clone the 'preview' branch.
+if [[ -n "${USE_PREVIEW_BRANCH-}" ]]; then
+  echo "Cloning 'preview' branch of googleapis.git..."
+  git clone --depth 1 --branch preview https://github.com/googleapis/googleapis.git
+else
+  echo "Cloning default branch of googleapis.git..."
+  git clone --depth 1 https://github.com/googleapis/googleapis.git
+fi
 # Protobuf may have breaking changes, so it will be pinned to a specific release.
 # TODO(version) nodejs-firestore should maintain the version number of protobuf manually
 git clone --single-branch --branch v26.1 --depth 1 https://github.com/google/protobuf.git

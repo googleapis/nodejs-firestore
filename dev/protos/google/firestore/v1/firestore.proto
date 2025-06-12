@@ -19,9 +19,11 @@ package google.firestore.v1;
 import "google/api/annotations.proto";
 import "google/api/client.proto";
 import "google/api/field_behavior.proto";
+import "google/api/routing.proto";
 import "google/firestore/v1/aggregation_result.proto";
 import "google/firestore/v1/common.proto";
 import "google/firestore/v1/document.proto";
+import "google/firestore/v1/explain_stats.proto";
 import "google/firestore/v1/pipeline.proto";
 import "google/firestore/v1/query.proto";
 import "google/firestore/v1/query_profile.proto";
@@ -147,6 +149,16 @@ service Firestore {
     option (google.api.http) = {
       post: "/v1/{database=projects/*/databases/*}/documents:executePipeline"
       body: "*"
+    };
+    option (google.api.routing) = {
+      routing_parameters {
+        field: "database"
+        path_template: "projects/{project_id=*}/**"
+      }
+      routing_parameters {
+        field: "database"
+        path_template: "projects/*/databases/{database_id=*}/**"
+      }
     };
   }
 
@@ -634,12 +646,12 @@ message RunQueryResponse {
   ExplainMetrics explain_metrics = 11;
 }
 
-// The request for [Firestore.ExecutePipeline][].
+// The request for
+// [Firestore.ExecutePipeline][google.firestore.v1.Firestore.ExecutePipeline].
 message ExecutePipelineRequest {
-  // Database identifier, in the form `projects/{project}/databases/{database}`.
-  string database = 1 [
-    (google.api.field_behavior) = REQUIRED
-  ];
+  // Required. Database identifier, in the form
+  // `projects/{project}/databases/{database}`.
+  string database = 1 [(google.api.field_behavior) = REQUIRED];
 
   oneof pipeline_type {
     // A pipelined operation.
@@ -666,17 +678,15 @@ message ExecutePipelineRequest {
     // minute timestamp within the past 7 days.
     google.protobuf.Timestamp read_time = 7;
   }
-
-  // Explain / analyze options for the pipeline.
-  // ExplainOptions explain_options = 8 [(google.api.field_behavior) = OPTIONAL];
 }
 
 // The response for [Firestore.Execute][].
 message ExecutePipelineResponse {
   // Newly created transaction identifier.
   //
-  // This field is only specified on the first response from the server when
-  // the request specified [ExecuteRequest.new_transaction][].
+  // This field is only specified as part of the first response from the server,
+  // alongside the `results` field when the original request specified
+  // [ExecuteRequest.new_transaction][].
   bytes transaction = 1;
 
   // An ordered batch of results returned executing a pipeline.
@@ -686,10 +696,11 @@ message ExecutePipelineResponse {
   //
   // The fields present in the returned documents are only those that were
   // explicitly requested in the pipeline, this include those like
-  // [`__name__`][Document.name] & [`__update_time__`][Document.update_time].
-  // This is explicitly a divergence from `Firestore.RunQuery` /
-  // `Firestore.GetDocument` RPCs which always return such fields even when they
-  // are not specified in the [`mask`][DocumentMask].
+  // [`__name__`][google.firestore.v1.Document.name] &
+  // [`__update_time__`][google.firestore.v1.Document.update_time]. This is
+  // explicitly a divergence from `Firestore.RunQuery` / `Firestore.GetDocument`
+  // RPCs which always return such fields even when they are not specified in
+  // the [`mask`][google.firestore.v1.DocumentMask].
   repeated Document results = 2;
 
   // The time at which the document(s) were read.
@@ -703,11 +714,11 @@ message ExecutePipelineResponse {
   // was run.
   google.protobuf.Timestamp execution_time = 3;
 
-  // Query explain metrics.
+  // Query explain stats.
   //
-  // Set on the last response when [ExecutePipelineRequest.explain_options][]
-  // was specified on the request.
-  // ExplainMetrics explain_metrics = 4;
+  // Contains all metadata related to pipeline planning and execution, specific
+  // contents depend on the supplied pipeline options.
+  ExplainStats explain_stats = 4;
 }
 
 // The request for
