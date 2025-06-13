@@ -15,6 +15,7 @@
  */
 
 import * as $protobuf from "protobufjs";
+import Long = require("long");
 /** Namespace firestore. */
 export namespace firestore {
 
@@ -1245,6 +1246,54 @@ export namespace google {
                      */
                     public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
+            }
+
+            /** Properties of an ExplainStats. */
+            interface IExplainStats {
+
+                /** ExplainStats data */
+                data?: (google.protobuf.IAny|null);
+            }
+
+            /** Represents an ExplainStats. */
+            class ExplainStats implements IExplainStats {
+
+                /**
+                 * Constructs a new ExplainStats.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IExplainStats);
+
+                /** ExplainStats data. */
+                public data?: (google.protobuf.IAny|null);
+
+                /**
+                 * Creates an ExplainStats message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExplainStats
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ExplainStats;
+
+                /**
+                 * Creates a plain object from an ExplainStats message. Also converts values to other types if specified.
+                 * @param message ExplainStats
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ExplainStats, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExplainStats to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExplainStats
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Represents a Firestore */
@@ -2707,6 +2756,9 @@ export namespace google {
 
                 /** ExecutePipelineResponse executionTime */
                 executionTime?: (google.protobuf.ITimestamp|null);
+
+                /** ExecutePipelineResponse explainStats */
+                explainStats?: (google.firestore.v1.IExplainStats|null);
             }
 
             /** Represents an ExecutePipelineResponse. */
@@ -2726,6 +2778,9 @@ export namespace google {
 
                 /** ExecutePipelineResponse executionTime. */
                 public executionTime?: (google.protobuf.ITimestamp|null);
+
+                /** ExecutePipelineResponse explainStats. */
+                public explainStats?: (google.firestore.v1.IExplainStats|null);
 
                 /**
                  * Creates an ExecutePipelineResponse message from a plain object. Also converts values to their respective internal types.
@@ -5843,9 +5898,6 @@ export namespace google {
 
             /** CommonLanguageSettings destinations */
             destinations?: (google.api.ClientLibraryDestination[]|null);
-
-            /** CommonLanguageSettings selectiveGapicGeneration */
-            selectiveGapicGeneration?: (google.api.ISelectiveGapicGeneration|null);
         }
 
         /** Represents a CommonLanguageSettings. */
@@ -5862,9 +5914,6 @@ export namespace google {
 
             /** CommonLanguageSettings destinations. */
             public destinations: google.api.ClientLibraryDestination[];
-
-            /** CommonLanguageSettings selectiveGapicGeneration. */
-            public selectiveGapicGeneration?: (google.api.ISelectiveGapicGeneration|null);
 
             /**
              * Creates a CommonLanguageSettings message from a plain object. Also converts values to their respective internal types.
@@ -6272,9 +6321,6 @@ export namespace google {
 
             /** PythonSettings common */
             common?: (google.api.ICommonLanguageSettings|null);
-
-            /** PythonSettings experimentalFeatures */
-            experimentalFeatures?: (google.api.PythonSettings.IExperimentalFeatures|null);
         }
 
         /** Represents a PythonSettings. */
@@ -6288,9 +6334,6 @@ export namespace google {
 
             /** PythonSettings common. */
             public common?: (google.api.ICommonLanguageSettings|null);
-
-            /** PythonSettings experimentalFeatures. */
-            public experimentalFeatures?: (google.api.PythonSettings.IExperimentalFeatures|null);
 
             /**
              * Creates a PythonSettings message from a plain object. Also converts values to their respective internal types.
@@ -6319,63 +6362,6 @@ export namespace google {
              * @returns The default type url
              */
             public static getTypeUrl(typeUrlPrefix?: string): string;
-        }
-
-        namespace PythonSettings {
-
-            /** Properties of an ExperimentalFeatures. */
-            interface IExperimentalFeatures {
-
-                /** ExperimentalFeatures restAsyncIoEnabled */
-                restAsyncIoEnabled?: (boolean|null);
-
-                /** ExperimentalFeatures protobufPythonicTypesEnabled */
-                protobufPythonicTypesEnabled?: (boolean|null);
-            }
-
-            /** Represents an ExperimentalFeatures. */
-            class ExperimentalFeatures implements IExperimentalFeatures {
-
-                /**
-                 * Constructs a new ExperimentalFeatures.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: google.api.PythonSettings.IExperimentalFeatures);
-
-                /** ExperimentalFeatures restAsyncIoEnabled. */
-                public restAsyncIoEnabled: boolean;
-
-                /** ExperimentalFeatures protobufPythonicTypesEnabled. */
-                public protobufPythonicTypesEnabled: boolean;
-
-                /**
-                 * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns ExperimentalFeatures
-                 */
-                public static fromObject(object: { [k: string]: any }): google.api.PythonSettings.ExperimentalFeatures;
-
-                /**
-                 * Creates a plain object from an ExperimentalFeatures message. Also converts values to other types if specified.
-                 * @param message ExperimentalFeatures
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: google.api.PythonSettings.ExperimentalFeatures, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                /**
-                 * Converts this ExperimentalFeatures to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-
-                /**
-                 * Gets the default type url for ExperimentalFeatures
-                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns The default type url
-                 */
-                public static getTypeUrl(typeUrlPrefix?: string): string;
-            }
         }
 
         /** Properties of a NodeSettings. */
@@ -6557,9 +6543,6 @@ export namespace google {
 
             /** GoSettings common */
             common?: (google.api.ICommonLanguageSettings|null);
-
-            /** GoSettings renamedServices */
-            renamedServices?: ({ [k: string]: string }|null);
         }
 
         /** Represents a GoSettings. */
@@ -6573,9 +6556,6 @@ export namespace google {
 
             /** GoSettings common. */
             public common?: (google.api.ICommonLanguageSettings|null);
-
-            /** GoSettings renamedServices. */
-            public renamedServices: { [k: string]: string };
 
             /**
              * Creates a GoSettings message from a plain object. Also converts values to their respective internal types.
@@ -6743,63 +6723,111 @@ export namespace google {
         type ClientLibraryDestination =
             "CLIENT_LIBRARY_DESTINATION_UNSPECIFIED"| "GITHUB"| "PACKAGE_MANAGER";
 
-        /** Properties of a SelectiveGapicGeneration. */
-        interface ISelectiveGapicGeneration {
+        /** LaunchStage enum. */
+        type LaunchStage =
+            "LAUNCH_STAGE_UNSPECIFIED"| "UNIMPLEMENTED"| "PRELAUNCH"| "EARLY_ACCESS"| "ALPHA"| "BETA"| "GA"| "DEPRECATED";
 
-            /** SelectiveGapicGeneration methods */
-            methods?: (string[]|null);
+        /** Properties of a RoutingRule. */
+        interface IRoutingRule {
 
-            /** SelectiveGapicGeneration generateOmittedAsInternal */
-            generateOmittedAsInternal?: (boolean|null);
+            /** RoutingRule routingParameters */
+            routingParameters?: (google.api.IRoutingParameter[]|null);
         }
 
-        /** Represents a SelectiveGapicGeneration. */
-        class SelectiveGapicGeneration implements ISelectiveGapicGeneration {
+        /** Represents a RoutingRule. */
+        class RoutingRule implements IRoutingRule {
 
             /**
-             * Constructs a new SelectiveGapicGeneration.
+             * Constructs a new RoutingRule.
              * @param [properties] Properties to set
              */
-            constructor(properties?: google.api.ISelectiveGapicGeneration);
+            constructor(properties?: google.api.IRoutingRule);
 
-            /** SelectiveGapicGeneration methods. */
-            public methods: string[];
-
-            /** SelectiveGapicGeneration generateOmittedAsInternal. */
-            public generateOmittedAsInternal: boolean;
+            /** RoutingRule routingParameters. */
+            public routingParameters: google.api.IRoutingParameter[];
 
             /**
-             * Creates a SelectiveGapicGeneration message from a plain object. Also converts values to their respective internal types.
+             * Creates a RoutingRule message from a plain object. Also converts values to their respective internal types.
              * @param object Plain object
-             * @returns SelectiveGapicGeneration
+             * @returns RoutingRule
              */
-            public static fromObject(object: { [k: string]: any }): google.api.SelectiveGapicGeneration;
+            public static fromObject(object: { [k: string]: any }): google.api.RoutingRule;
 
             /**
-             * Creates a plain object from a SelectiveGapicGeneration message. Also converts values to other types if specified.
-             * @param message SelectiveGapicGeneration
+             * Creates a plain object from a RoutingRule message. Also converts values to other types if specified.
+             * @param message RoutingRule
              * @param [options] Conversion options
              * @returns Plain object
              */
-            public static toObject(message: google.api.SelectiveGapicGeneration, options?: $protobuf.IConversionOptions): { [k: string]: any };
+            public static toObject(message: google.api.RoutingRule, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
             /**
-             * Converts this SelectiveGapicGeneration to JSON.
+             * Converts this RoutingRule to JSON.
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
 
             /**
-             * Gets the default type url for SelectiveGapicGeneration
+             * Gets the default type url for RoutingRule
              * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
              * @returns The default type url
              */
             public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
-        /** LaunchStage enum. */
-        type LaunchStage =
-            "LAUNCH_STAGE_UNSPECIFIED"| "UNIMPLEMENTED"| "PRELAUNCH"| "EARLY_ACCESS"| "ALPHA"| "BETA"| "GA"| "DEPRECATED";
+        /** Properties of a RoutingParameter. */
+        interface IRoutingParameter {
+
+            /** RoutingParameter field */
+            field?: (string|null);
+
+            /** RoutingParameter pathTemplate */
+            pathTemplate?: (string|null);
+        }
+
+        /** Represents a RoutingParameter. */
+        class RoutingParameter implements IRoutingParameter {
+
+            /**
+             * Constructs a new RoutingParameter.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IRoutingParameter);
+
+            /** RoutingParameter field. */
+            public field: string;
+
+            /** RoutingParameter pathTemplate. */
+            public pathTemplate: string;
+
+            /**
+             * Creates a RoutingParameter message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns RoutingParameter
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.RoutingParameter;
+
+            /**
+             * Creates a plain object from a RoutingParameter message. Also converts values to other types if specified.
+             * @param message RoutingParameter
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.RoutingParameter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this RoutingParameter to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for RoutingParameter
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
 
         /** Properties of a ResourceDescriptor. */
         interface IResourceDescriptor {
@@ -8736,6 +8764,9 @@ export namespace google {
             /** MethodOptions .google.api.methodSignature */
             ".google.api.methodSignature"?: (string[]|null);
 
+            /** MethodOptions .google.api.routing */
+            ".google.api.routing"?: (google.api.IRoutingRule|null);
+
             /** MethodOptions .google.longrunning.operationInfo */
             ".google.longrunning.operationInfo"?: (google.longrunning.IOperationInfo|null);
         }
@@ -9648,6 +9679,60 @@ export namespace google {
             public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
+        /** Properties of an Any. */
+        interface IAny {
+
+            /** Any type_url */
+            type_url?: (string|null);
+
+            /** Any value */
+            value?: (Uint8Array|null);
+        }
+
+        /** Represents an Any. */
+        class Any implements IAny {
+
+            /**
+             * Constructs a new Any.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IAny);
+
+            /** Any type_url. */
+            public type_url: string;
+
+            /** Any value. */
+            public value: Uint8Array;
+
+            /**
+             * Creates an Any message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Any
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Any;
+
+            /**
+             * Creates a plain object from an Any message. Also converts values to other types if specified.
+             * @param message Any
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Any, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Any to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Any
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
         /** Properties of a Duration. */
         interface IDuration {
 
@@ -10170,60 +10255,6 @@ export namespace google {
 
             /**
              * Gets the default type url for Empty
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
-             */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
-        }
-
-        /** Properties of an Any. */
-        interface IAny {
-
-            /** Any type_url */
-            type_url?: (string|null);
-
-            /** Any value */
-            value?: (Uint8Array|null);
-        }
-
-        /** Represents an Any. */
-        class Any implements IAny {
-
-            /**
-             * Constructs a new Any.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IAny);
-
-            /** Any type_url. */
-            public type_url: string;
-
-            /** Any value. */
-            public value: Uint8Array;
-
-            /**
-             * Creates an Any message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Any
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Any;
-
-            /**
-             * Creates a plain object from an Any message. Also converts values to other types if specified.
-             * @param message Any
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Any, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Any to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-
-            /**
-             * Gets the default type url for Any
              * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
              * @returns The default type url
              */
