@@ -291,7 +291,7 @@ export class RecursiveDelete {
       if (this.lastError === undefined) {
         this.completionDeferred.resolve();
       } else {
-        let error = new (require('google-gax/build/src/fallback').GoogleError)(
+        let error = new (require('google-gax/fallback').GoogleError)(
           `${this.errorCount} ` +
             `${this.errorCount !== 1 ? 'deletes' : 'delete'} ` +
             'failed. The last delete failed with: '

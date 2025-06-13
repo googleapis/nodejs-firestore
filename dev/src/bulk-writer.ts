@@ -292,7 +292,7 @@ class BulkCommitBatch extends WriteBatch {
             this.pendingOps[i].onSuccess(new WriteResult(updateTime));
           } else {
             const error =
-              new (require('google-gax/build/src/fallback').GoogleError)(
+              new (require('google-gax/fallback').GoogleError)(
                 status.message || undefined
               );
             error.code = status.code as number;
