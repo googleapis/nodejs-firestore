@@ -620,7 +620,7 @@ export class Firestore implements firestore.Firestore {
         let gax: typeof googleGax | typeof googleGaxFallback;
         if (useFallback) {
           if (!this._gaxFallback) {
-            gax = this._gaxFallback = require('google-gax/build/src/fallback');
+            gax = this._gaxFallback = require('google-gax/fallback');
           } else {
             gax = this._gaxFallback;
           }
@@ -1591,7 +1591,7 @@ export class Firestore implements firestore.Firestore {
     if (retryCodes) {
       const retryParams = getRetryParams(methodName);
       callOptions.retry =
-        new (require('google-gax/build/src/fallback').RetryOptions)(
+        new (require('google-gax/fallback').RetryOptions)(
           retryCodes,
           retryParams,
         );
