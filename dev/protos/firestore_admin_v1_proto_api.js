@@ -492,7 +492,9 @@
                          * @property {google.firestore.admin.v1.Database.ICmekConfig|null} [cmekConfig] Database cmekConfig
                          * @property {string|null} [previousId] Database previousId
                          * @property {google.firestore.admin.v1.Database.ISourceInfo|null} [sourceInfo] Database sourceInfo
+                         * @property {boolean|null} [freeTier] Database freeTier
                          * @property {string|null} [etag] Database etag
+                         * @property {google.firestore.admin.v1.Database.DatabaseEdition|null} [databaseEdition] Database databaseEdition
                          */
     
                         /**
@@ -647,12 +649,42 @@
                         Database.prototype.sourceInfo = null;
     
                         /**
+                         * Database freeTier.
+                         * @member {boolean|null|undefined} freeTier
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.freeTier = null;
+    
+                        /**
                          * Database etag.
                          * @member {string} etag
                          * @memberof google.firestore.admin.v1.Database
                          * @instance
                          */
                         Database.prototype.etag = "";
+    
+                        /**
+                         * Database databaseEdition.
+                         * @member {google.firestore.admin.v1.Database.DatabaseEdition} databaseEdition
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.databaseEdition = 0;
+    
+                        // OneOf field names bound to virtual getters and setters
+                        var $oneOfFields;
+    
+                        /**
+                         * Database _freeTier.
+                         * @member {"freeTier"|undefined} _freeTier
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Object.defineProperty(Database.prototype, "_freeTier", {
+                            get: $util.oneOfGetter($oneOfFields = ["freeTier"]),
+                            set: $util.oneOfSetter($oneOfFields)
+                        });
     
                         /**
                          * Creates a Database message from a plain object. Also converts values to their respective internal types.
@@ -815,8 +847,30 @@
                                     throw TypeError(".google.firestore.admin.v1.Database.sourceInfo: object expected");
                                 message.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.fromObject(object.sourceInfo);
                             }
+                            if (object.freeTier != null)
+                                message.freeTier = Boolean(object.freeTier);
                             if (object.etag != null)
                                 message.etag = String(object.etag);
+                            switch (object.databaseEdition) {
+                            default:
+                                if (typeof object.databaseEdition === "number") {
+                                    message.databaseEdition = object.databaseEdition;
+                                    break;
+                                }
+                                break;
+                            case "DATABASE_EDITION_UNSPECIFIED":
+                            case 0:
+                                message.databaseEdition = 0;
+                                break;
+                            case "STANDARD":
+                            case 1:
+                                message.databaseEdition = 1;
+                                break;
+                            case "ENTERPRISE":
+                            case 2:
+                                message.databaseEdition = 2;
+                                break;
+                            }
                             return message;
                         };
     
@@ -851,6 +905,7 @@
                                 object.cmekConfig = null;
                                 object.previousId = "";
                                 object.sourceInfo = null;
+                                object.databaseEdition = options.enums === String ? "DATABASE_EDITION_UNSPECIFIED" : 0;
                                 object.etag = "";
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
@@ -887,6 +942,13 @@
                                 object.previousId = message.previousId;
                             if (message.sourceInfo != null && message.hasOwnProperty("sourceInfo"))
                                 object.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.toObject(message.sourceInfo, options);
+                            if (message.databaseEdition != null && message.hasOwnProperty("databaseEdition"))
+                                object.databaseEdition = options.enums === String ? $root.google.firestore.admin.v1.Database.DatabaseEdition[message.databaseEdition] === undefined ? message.databaseEdition : $root.google.firestore.admin.v1.Database.DatabaseEdition[message.databaseEdition] : message.databaseEdition;
+                            if (message.freeTier != null && message.hasOwnProperty("freeTier")) {
+                                object.freeTier = message.freeTier;
+                                if (options.oneofs)
+                                    object._freeTier = "freeTier";
+                            }
                             if (message.etag != null && message.hasOwnProperty("etag"))
                                 object.etag = message.etag;
                             return object;
@@ -1761,6 +1823,22 @@
                             return EncryptionConfig;
                         })();
     
+                        /**
+                         * DatabaseEdition enum.
+                         * @name google.firestore.admin.v1.Database.DatabaseEdition
+                         * @enum {string}
+                         * @property {string} DATABASE_EDITION_UNSPECIFIED=DATABASE_EDITION_UNSPECIFIED DATABASE_EDITION_UNSPECIFIED value
+                         * @property {string} STANDARD=STANDARD STANDARD value
+                         * @property {string} ENTERPRISE=ENTERPRISE ENTERPRISE value
+                         */
+                        Database.DatabaseEdition = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "DATABASE_EDITION_UNSPECIFIED"] = "DATABASE_EDITION_UNSPECIFIED";
+                            values[valuesById[1] = "STANDARD"] = "STANDARD";
+                            values[valuesById[2] = "ENTERPRISE"] = "ENTERPRISE";
+                            return values;
+                        })();
+    
                         return Database;
                     })();
     
@@ -2200,6 +2278,9 @@
                          * @property {google.firestore.admin.v1.Index.ApiScope|null} [apiScope] Index apiScope
                          * @property {Array.<google.firestore.admin.v1.Index.IIndexField>|null} [fields] Index fields
                          * @property {google.firestore.admin.v1.Index.State|null} [state] Index state
+                         * @property {google.firestore.admin.v1.Index.Density|null} [density] Index density
+                         * @property {boolean|null} [multikey] Index multikey
+                         * @property {number|null} [shardCount] Index shardCount
                          */
     
                         /**
@@ -2259,6 +2340,30 @@
                         Index.prototype.state = 0;
     
                         /**
+                         * Index density.
+                         * @member {google.firestore.admin.v1.Index.Density} density
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.density = 0;
+    
+                        /**
+                         * Index multikey.
+                         * @member {boolean} multikey
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.multikey = false;
+    
+                        /**
+                         * Index shardCount.
+                         * @member {number} shardCount
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.shardCount = 0;
+    
+                        /**
                          * Creates an Index message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.Index
@@ -2311,6 +2416,10 @@
                             case 1:
                                 message.apiScope = 1;
                                 break;
+                            case "MONGODB_COMPATIBLE_API":
+                            case 2:
+                                message.apiScope = 2;
+                                break;
                             }
                             if (object.fields) {
                                 if (!Array.isArray(object.fields))
@@ -2346,6 +2455,34 @@
                                 message.state = 3;
                                 break;
                             }
+                            switch (object.density) {
+                            default:
+                                if (typeof object.density === "number") {
+                                    message.density = object.density;
+                                    break;
+                                }
+                                break;
+                            case "DENSITY_UNSPECIFIED":
+                            case 0:
+                                message.density = 0;
+                                break;
+                            case "SPARSE_ALL":
+                            case 1:
+                                message.density = 1;
+                                break;
+                            case "SPARSE_ANY":
+                            case 2:
+                                message.density = 2;
+                                break;
+                            case "DENSE":
+                            case 3:
+                                message.density = 3;
+                                break;
+                            }
+                            if (object.multikey != null)
+                                message.multikey = Boolean(object.multikey);
+                            if (object.shardCount != null)
+                                message.shardCount = object.shardCount | 0;
                             return message;
                         };
     
@@ -2369,6 +2506,9 @@
                                 object.queryScope = options.enums === String ? "QUERY_SCOPE_UNSPECIFIED" : 0;
                                 object.state = options.enums === String ? "STATE_UNSPECIFIED" : 0;
                                 object.apiScope = options.enums === String ? "ANY_API" : 0;
+                                object.density = options.enums === String ? "DENSITY_UNSPECIFIED" : 0;
+                                object.multikey = false;
+                                object.shardCount = 0;
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
@@ -2383,6 +2523,12 @@
                                 object.state = options.enums === String ? $root.google.firestore.admin.v1.Index.State[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.Index.State[message.state] : message.state;
                             if (message.apiScope != null && message.hasOwnProperty("apiScope"))
                                 object.apiScope = options.enums === String ? $root.google.firestore.admin.v1.Index.ApiScope[message.apiScope] === undefined ? message.apiScope : $root.google.firestore.admin.v1.Index.ApiScope[message.apiScope] : message.apiScope;
+                            if (message.density != null && message.hasOwnProperty("density"))
+                                object.density = options.enums === String ? $root.google.firestore.admin.v1.Index.Density[message.density] === undefined ? message.density : $root.google.firestore.admin.v1.Index.Density[message.density] : message.density;
+                            if (message.multikey != null && message.hasOwnProperty("multikey"))
+                                object.multikey = message.multikey;
+                            if (message.shardCount != null && message.hasOwnProperty("shardCount"))
+                                object.shardCount = message.shardCount;
                             return object;
                         };
     
@@ -2436,11 +2582,13 @@
                          * @enum {string}
                          * @property {string} ANY_API=ANY_API ANY_API value
                          * @property {string} DATASTORE_MODE_API=DATASTORE_MODE_API DATASTORE_MODE_API value
+                         * @property {string} MONGODB_COMPATIBLE_API=MONGODB_COMPATIBLE_API MONGODB_COMPATIBLE_API value
                          */
                         Index.ApiScope = (function() {
                             var valuesById = {}, values = Object.create(valuesById);
                             values[valuesById[0] = "ANY_API"] = "ANY_API";
                             values[valuesById[1] = "DATASTORE_MODE_API"] = "DATASTORE_MODE_API";
+                            values[valuesById[2] = "MONGODB_COMPATIBLE_API"] = "MONGODB_COMPATIBLE_API";
                             return values;
                         })();
     
@@ -2894,6 +3042,24 @@
                             values[valuesById[1] = "CREATING"] = "CREATING";
                             values[valuesById[2] = "READY"] = "READY";
                             values[valuesById[3] = "NEEDS_REPAIR"] = "NEEDS_REPAIR";
+                            return values;
+                        })();
+    
+                        /**
+                         * Density enum.
+                         * @name google.firestore.admin.v1.Index.Density
+                         * @enum {string}
+                         * @property {string} DENSITY_UNSPECIFIED=DENSITY_UNSPECIFIED DENSITY_UNSPECIFIED value
+                         * @property {string} SPARSE_ALL=SPARSE_ALL SPARSE_ALL value
+                         * @property {string} SPARSE_ANY=SPARSE_ANY SPARSE_ANY value
+                         * @property {string} DENSE=DENSE DENSE value
+                         */
+                        Index.Density = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "DENSITY_UNSPECIFIED"] = "DENSITY_UNSPECIFIED";
+                            values[valuesById[1] = "SPARSE_ALL"] = "SPARSE_ALL";
+                            values[valuesById[2] = "SPARSE_ANY"] = "SPARSE_ANY";
+                            values[valuesById[3] = "DENSE"] = "DENSE";
                             return values;
                         })();
     
@@ -3410,6 +3576,237 @@
                          * @instance
                          * @param {google.firestore.admin.v1.IDeleteDatabaseRequest} request DeleteDatabaseRequest message or plain object
                          * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef CreateUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.UserCreds} [response] UserCreds
+                         */
+    
+                        /**
+                         * Calls CreateUserCreds.
+                         * @function createUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICreateUserCredsRequest} request CreateUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.CreateUserCredsCallback} callback Node-style callback called with the error, if any, and UserCreds
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.createUserCreds = function createUserCreds(request, callback) {
+                            return this.rpcCall(createUserCreds, $root.google.firestore.admin.v1.CreateUserCredsRequest, $root.google.firestore.admin.v1.UserCreds, request, callback);
+                        }, "name", { value: "CreateUserCreds" });
+    
+                        /**
+                         * Calls CreateUserCreds.
+                         * @function createUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICreateUserCredsRequest} request CreateUserCredsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.UserCreds>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef GetUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.UserCreds} [response] UserCreds
+                         */
+    
+                        /**
+                         * Calls GetUserCreds.
+                         * @function getUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetUserCredsRequest} request GetUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.GetUserCredsCallback} callback Node-style callback called with the error, if any, and UserCreds
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.getUserCreds = function getUserCreds(request, callback) {
+                            return this.rpcCall(getUserCreds, $root.google.firestore.admin.v1.GetUserCredsRequest, $root.google.firestore.admin.v1.UserCreds, request, callback);
+                        }, "name", { value: "GetUserCreds" });
+    
+                        /**
+                         * Calls GetUserCreds.
+                         * @function getUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetUserCredsRequest} request GetUserCredsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.UserCreds>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef ListUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.ListUserCredsResponse} [response] ListUserCredsResponse
+                         */
+    
+                        /**
+                         * Calls ListUserCreds.
+                         * @function listUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListUserCredsRequest} request ListUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.ListUserCredsCallback} callback Node-style callback called with the error, if any, and ListUserCredsResponse
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.listUserCreds = function listUserCreds(request, callback) {
+                            return this.rpcCall(listUserCreds, $root.google.firestore.admin.v1.ListUserCredsRequest, $root.google.firestore.admin.v1.ListUserCredsResponse, request, callback);
+                        }, "name", { value: "ListUserCreds" });
+    
+                        /**
+                         * Calls ListUserCreds.
+                         * @function listUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListUserCredsRequest} request ListUserCredsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.ListUserCredsResponse>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#enableUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef EnableUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.UserCreds} [response] UserCreds
+                         */
+    
+                        /**
+                         * Calls EnableUserCreds.
+                         * @function enableUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IEnableUserCredsRequest} request EnableUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.EnableUserCredsCallback} callback Node-style callback called with the error, if any, and UserCreds
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.enableUserCreds = function enableUserCreds(request, callback) {
+                            return this.rpcCall(enableUserCreds, $root.google.firestore.admin.v1.EnableUserCredsRequest, $root.google.firestore.admin.v1.UserCreds, request, callback);
+                        }, "name", { value: "EnableUserCreds" });
+    
+                        /**
+                         * Calls EnableUserCreds.
+                         * @function enableUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IEnableUserCredsRequest} request EnableUserCredsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.UserCreds>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#disableUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef DisableUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.UserCreds} [response] UserCreds
+                         */
+    
+                        /**
+                         * Calls DisableUserCreds.
+                         * @function disableUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDisableUserCredsRequest} request DisableUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.DisableUserCredsCallback} callback Node-style callback called with the error, if any, and UserCreds
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.disableUserCreds = function disableUserCreds(request, callback) {
+                            return this.rpcCall(disableUserCreds, $root.google.firestore.admin.v1.DisableUserCredsRequest, $root.google.firestore.admin.v1.UserCreds, request, callback);
+                        }, "name", { value: "DisableUserCreds" });
+    
+                        /**
+                         * Calls DisableUserCreds.
+                         * @function disableUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDisableUserCredsRequest} request DisableUserCredsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.UserCreds>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#resetUserPassword}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef ResetUserPasswordCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.UserCreds} [response] UserCreds
+                         */
+    
+                        /**
+                         * Calls ResetUserPassword.
+                         * @function resetUserPassword
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IResetUserPasswordRequest} request ResetUserPasswordRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.ResetUserPasswordCallback} callback Node-style callback called with the error, if any, and UserCreds
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.resetUserPassword = function resetUserPassword(request, callback) {
+                            return this.rpcCall(resetUserPassword, $root.google.firestore.admin.v1.ResetUserPasswordRequest, $root.google.firestore.admin.v1.UserCreds, request, callback);
+                        }, "name", { value: "ResetUserPassword" });
+    
+                        /**
+                         * Calls ResetUserPassword.
+                         * @function resetUserPassword
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IResetUserPasswordRequest} request ResetUserPasswordRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.UserCreds>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteUserCreds}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef DeleteUserCredsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.protobuf.Empty} [response] Empty
+                         */
+    
+                        /**
+                         * Calls DeleteUserCreds.
+                         * @function deleteUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteUserCredsRequest} request DeleteUserCredsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.DeleteUserCredsCallback} callback Node-style callback called with the error, if any, and Empty
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.deleteUserCreds = function deleteUserCreds(request, callback) {
+                            return this.rpcCall(deleteUserCreds, $root.google.firestore.admin.v1.DeleteUserCredsRequest, $root.google.protobuf.Empty, request, callback);
+                        }, "name", { value: "DeleteUserCreds" });
+    
+                        /**
+                         * Calls DeleteUserCreds.
+                         * @function deleteUserCreds
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteUserCredsRequest} request DeleteUserCredsRequest message or plain object
+                         * @returns {Promise<google.protobuf.Empty>} Promise
                          * @variation 2
                          */
     
@@ -4655,6 +5052,834 @@
                         };
     
                         return DeleteDatabaseMetadata;
+                    })();
+    
+                    v1.CreateUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of a CreateUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface ICreateUserCredsRequest
+                         * @property {string|null} [parent] CreateUserCredsRequest parent
+                         * @property {google.firestore.admin.v1.IUserCreds|null} [userCreds] CreateUserCredsRequest userCreds
+                         * @property {string|null} [userCredsId] CreateUserCredsRequest userCredsId
+                         */
+    
+                        /**
+                         * Constructs a new CreateUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a CreateUserCredsRequest.
+                         * @implements ICreateUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.ICreateUserCredsRequest=} [properties] Properties to set
+                         */
+                        function CreateUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * CreateUserCredsRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @instance
+                         */
+                        CreateUserCredsRequest.prototype.parent = "";
+    
+                        /**
+                         * CreateUserCredsRequest userCreds.
+                         * @member {google.firestore.admin.v1.IUserCreds|null|undefined} userCreds
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @instance
+                         */
+                        CreateUserCredsRequest.prototype.userCreds = null;
+    
+                        /**
+                         * CreateUserCredsRequest userCredsId.
+                         * @member {string} userCredsId
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @instance
+                         */
+                        CreateUserCredsRequest.prototype.userCredsId = "";
+    
+                        /**
+                         * Creates a CreateUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.CreateUserCredsRequest} CreateUserCredsRequest
+                         */
+                        CreateUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.CreateUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.CreateUserCredsRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            if (object.userCreds != null) {
+                                if (typeof object.userCreds !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CreateUserCredsRequest.userCreds: object expected");
+                                message.userCreds = $root.google.firestore.admin.v1.UserCreds.fromObject(object.userCreds);
+                            }
+                            if (object.userCredsId != null)
+                                message.userCredsId = String(object.userCredsId);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a CreateUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.CreateUserCredsRequest} message CreateUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        CreateUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.parent = "";
+                                object.userCreds = null;
+                                object.userCredsId = "";
+                            }
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            if (message.userCreds != null && message.hasOwnProperty("userCreds"))
+                                object.userCreds = $root.google.firestore.admin.v1.UserCreds.toObject(message.userCreds, options);
+                            if (message.userCredsId != null && message.hasOwnProperty("userCredsId"))
+                                object.userCredsId = message.userCredsId;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this CreateUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        CreateUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for CreateUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.CreateUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        CreateUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.CreateUserCredsRequest";
+                        };
+    
+                        return CreateUserCredsRequest;
+                    })();
+    
+                    v1.GetUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of a GetUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IGetUserCredsRequest
+                         * @property {string|null} [name] GetUserCredsRequest name
+                         */
+    
+                        /**
+                         * Constructs a new GetUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a GetUserCredsRequest.
+                         * @implements IGetUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IGetUserCredsRequest=} [properties] Properties to set
+                         */
+                        function GetUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * GetUserCredsRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @instance
+                         */
+                        GetUserCredsRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a GetUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.GetUserCredsRequest} GetUserCredsRequest
+                         */
+                        GetUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.GetUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.GetUserCredsRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a GetUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.GetUserCredsRequest} message GetUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        GetUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this GetUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        GetUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for GetUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.GetUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        GetUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.GetUserCredsRequest";
+                        };
+    
+                        return GetUserCredsRequest;
+                    })();
+    
+                    v1.ListUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of a ListUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListUserCredsRequest
+                         * @property {string|null} [parent] ListUserCredsRequest parent
+                         */
+    
+                        /**
+                         * Constructs a new ListUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListUserCredsRequest.
+                         * @implements IListUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListUserCredsRequest=} [properties] Properties to set
+                         */
+                        function ListUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListUserCredsRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @instance
+                         */
+                        ListUserCredsRequest.prototype.parent = "";
+    
+                        /**
+                         * Creates a ListUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListUserCredsRequest} ListUserCredsRequest
+                         */
+                        ListUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListUserCredsRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ListUserCredsRequest} message ListUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.parent = "";
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListUserCredsRequest";
+                        };
+    
+                        return ListUserCredsRequest;
+                    })();
+    
+                    v1.ListUserCredsResponse = (function() {
+    
+                        /**
+                         * Properties of a ListUserCredsResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListUserCredsResponse
+                         * @property {Array.<google.firestore.admin.v1.IUserCreds>|null} [userCreds] ListUserCredsResponse userCreds
+                         */
+    
+                        /**
+                         * Constructs a new ListUserCredsResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListUserCredsResponse.
+                         * @implements IListUserCredsResponse
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListUserCredsResponse=} [properties] Properties to set
+                         */
+                        function ListUserCredsResponse(properties) {
+                            this.userCreds = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListUserCredsResponse userCreds.
+                         * @member {Array.<google.firestore.admin.v1.IUserCreds>} userCreds
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @instance
+                         */
+                        ListUserCredsResponse.prototype.userCreds = $util.emptyArray;
+    
+                        /**
+                         * Creates a ListUserCredsResponse message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListUserCredsResponse} ListUserCredsResponse
+                         */
+                        ListUserCredsResponse.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListUserCredsResponse)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListUserCredsResponse();
+                            if (object.userCreds) {
+                                if (!Array.isArray(object.userCreds))
+                                    throw TypeError(".google.firestore.admin.v1.ListUserCredsResponse.userCreds: array expected");
+                                message.userCreds = [];
+                                for (var i = 0; i < object.userCreds.length; ++i) {
+                                    if (typeof object.userCreds[i] !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.ListUserCredsResponse.userCreds: object expected");
+                                    message.userCreds[i] = $root.google.firestore.admin.v1.UserCreds.fromObject(object.userCreds[i]);
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListUserCredsResponse message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {google.firestore.admin.v1.ListUserCredsResponse} message ListUserCredsResponse
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListUserCredsResponse.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.userCreds = [];
+                            if (message.userCreds && message.userCreds.length) {
+                                object.userCreds = [];
+                                for (var j = 0; j < message.userCreds.length; ++j)
+                                    object.userCreds[j] = $root.google.firestore.admin.v1.UserCreds.toObject(message.userCreds[j], options);
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListUserCredsResponse to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListUserCredsResponse.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListUserCredsResponse
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListUserCredsResponse
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListUserCredsResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListUserCredsResponse";
+                        };
+    
+                        return ListUserCredsResponse;
+                    })();
+    
+                    v1.EnableUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of an EnableUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IEnableUserCredsRequest
+                         * @property {string|null} [name] EnableUserCredsRequest name
+                         */
+    
+                        /**
+                         * Constructs a new EnableUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents an EnableUserCredsRequest.
+                         * @implements IEnableUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IEnableUserCredsRequest=} [properties] Properties to set
+                         */
+                        function EnableUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * EnableUserCredsRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @instance
+                         */
+                        EnableUserCredsRequest.prototype.name = "";
+    
+                        /**
+                         * Creates an EnableUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.EnableUserCredsRequest} EnableUserCredsRequest
+                         */
+                        EnableUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.EnableUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.EnableUserCredsRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from an EnableUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.EnableUserCredsRequest} message EnableUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        EnableUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this EnableUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        EnableUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for EnableUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.EnableUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        EnableUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.EnableUserCredsRequest";
+                        };
+    
+                        return EnableUserCredsRequest;
+                    })();
+    
+                    v1.DisableUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of a DisableUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDisableUserCredsRequest
+                         * @property {string|null} [name] DisableUserCredsRequest name
+                         */
+    
+                        /**
+                         * Constructs a new DisableUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DisableUserCredsRequest.
+                         * @implements IDisableUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDisableUserCredsRequest=} [properties] Properties to set
+                         */
+                        function DisableUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * DisableUserCredsRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @instance
+                         */
+                        DisableUserCredsRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a DisableUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DisableUserCredsRequest} DisableUserCredsRequest
+                         */
+                        DisableUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DisableUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.DisableUserCredsRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a DisableUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.DisableUserCredsRequest} message DisableUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DisableUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this DisableUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DisableUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DisableUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DisableUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DisableUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DisableUserCredsRequest";
+                        };
+    
+                        return DisableUserCredsRequest;
+                    })();
+    
+                    v1.ResetUserPasswordRequest = (function() {
+    
+                        /**
+                         * Properties of a ResetUserPasswordRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IResetUserPasswordRequest
+                         * @property {string|null} [name] ResetUserPasswordRequest name
+                         */
+    
+                        /**
+                         * Constructs a new ResetUserPasswordRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ResetUserPasswordRequest.
+                         * @implements IResetUserPasswordRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IResetUserPasswordRequest=} [properties] Properties to set
+                         */
+                        function ResetUserPasswordRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ResetUserPasswordRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @instance
+                         */
+                        ResetUserPasswordRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a ResetUserPasswordRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ResetUserPasswordRequest} ResetUserPasswordRequest
+                         */
+                        ResetUserPasswordRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ResetUserPasswordRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ResetUserPasswordRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ResetUserPasswordRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ResetUserPasswordRequest} message ResetUserPasswordRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ResetUserPasswordRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ResetUserPasswordRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ResetUserPasswordRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ResetUserPasswordRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ResetUserPasswordRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ResetUserPasswordRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ResetUserPasswordRequest";
+                        };
+    
+                        return ResetUserPasswordRequest;
+                    })();
+    
+                    v1.DeleteUserCredsRequest = (function() {
+    
+                        /**
+                         * Properties of a DeleteUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDeleteUserCredsRequest
+                         * @property {string|null} [name] DeleteUserCredsRequest name
+                         */
+    
+                        /**
+                         * Constructs a new DeleteUserCredsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DeleteUserCredsRequest.
+                         * @implements IDeleteUserCredsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDeleteUserCredsRequest=} [properties] Properties to set
+                         */
+                        function DeleteUserCredsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * DeleteUserCredsRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @instance
+                         */
+                        DeleteUserCredsRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a DeleteUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DeleteUserCredsRequest} DeleteUserCredsRequest
+                         */
+                        DeleteUserCredsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DeleteUserCredsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.DeleteUserCredsRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a DeleteUserCredsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.DeleteUserCredsRequest} message DeleteUserCredsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DeleteUserCredsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this DeleteUserCredsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DeleteUserCredsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DeleteUserCredsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DeleteUserCredsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DeleteUserCredsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DeleteUserCredsRequest";
+                        };
+    
+                        return DeleteUserCredsRequest;
                     })();
     
                     v1.CreateBackupScheduleRequest = (function() {
@@ -9991,6 +11216,332 @@
                         return WeeklyRecurrence;
                     })();
     
+                    v1.UserCreds = (function() {
+    
+                        /**
+                         * Properties of a UserCreds.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IUserCreds
+                         * @property {string|null} [name] UserCreds name
+                         * @property {google.protobuf.ITimestamp|null} [createTime] UserCreds createTime
+                         * @property {google.protobuf.ITimestamp|null} [updateTime] UserCreds updateTime
+                         * @property {google.firestore.admin.v1.UserCreds.State|null} [state] UserCreds state
+                         * @property {string|null} [securePassword] UserCreds securePassword
+                         * @property {google.firestore.admin.v1.UserCreds.IResourceIdentity|null} [resourceIdentity] UserCreds resourceIdentity
+                         */
+    
+                        /**
+                         * Constructs a new UserCreds.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a UserCreds.
+                         * @implements IUserCreds
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IUserCreds=} [properties] Properties to set
+                         */
+                        function UserCreds(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * UserCreds name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.name = "";
+    
+                        /**
+                         * UserCreds createTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} createTime
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.createTime = null;
+    
+                        /**
+                         * UserCreds updateTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} updateTime
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.updateTime = null;
+    
+                        /**
+                         * UserCreds state.
+                         * @member {google.firestore.admin.v1.UserCreds.State} state
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.state = 0;
+    
+                        /**
+                         * UserCreds securePassword.
+                         * @member {string} securePassword
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.securePassword = "";
+    
+                        /**
+                         * UserCreds resourceIdentity.
+                         * @member {google.firestore.admin.v1.UserCreds.IResourceIdentity|null|undefined} resourceIdentity
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        UserCreds.prototype.resourceIdentity = null;
+    
+                        // OneOf field names bound to virtual getters and setters
+                        var $oneOfFields;
+    
+                        /**
+                         * UserCreds UserCredsIdentity.
+                         * @member {"resourceIdentity"|undefined} UserCredsIdentity
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         */
+                        Object.defineProperty(UserCreds.prototype, "UserCredsIdentity", {
+                            get: $util.oneOfGetter($oneOfFields = ["resourceIdentity"]),
+                            set: $util.oneOfSetter($oneOfFields)
+                        });
+    
+                        /**
+                         * Creates a UserCreds message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.UserCreds} UserCreds
+                         */
+                        UserCreds.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.UserCreds)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.UserCreds();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            if (object.createTime != null) {
+                                if (typeof object.createTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UserCreds.createTime: object expected");
+                                message.createTime = $root.google.protobuf.Timestamp.fromObject(object.createTime);
+                            }
+                            if (object.updateTime != null) {
+                                if (typeof object.updateTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UserCreds.updateTime: object expected");
+                                message.updateTime = $root.google.protobuf.Timestamp.fromObject(object.updateTime);
+                            }
+                            switch (object.state) {
+                            default:
+                                if (typeof object.state === "number") {
+                                    message.state = object.state;
+                                    break;
+                                }
+                                break;
+                            case "STATE_UNSPECIFIED":
+                            case 0:
+                                message.state = 0;
+                                break;
+                            case "ENABLED":
+                            case 1:
+                                message.state = 1;
+                                break;
+                            case "DISABLED":
+                            case 2:
+                                message.state = 2;
+                                break;
+                            }
+                            if (object.securePassword != null)
+                                message.securePassword = String(object.securePassword);
+                            if (object.resourceIdentity != null) {
+                                if (typeof object.resourceIdentity !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UserCreds.resourceIdentity: object expected");
+                                message.resourceIdentity = $root.google.firestore.admin.v1.UserCreds.ResourceIdentity.fromObject(object.resourceIdentity);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a UserCreds message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {google.firestore.admin.v1.UserCreds} message UserCreds
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        UserCreds.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.name = "";
+                                object.createTime = null;
+                                object.updateTime = null;
+                                object.state = options.enums === String ? "STATE_UNSPECIFIED" : 0;
+                                object.securePassword = "";
+                            }
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.createTime != null && message.hasOwnProperty("createTime"))
+                                object.createTime = $root.google.protobuf.Timestamp.toObject(message.createTime, options);
+                            if (message.updateTime != null && message.hasOwnProperty("updateTime"))
+                                object.updateTime = $root.google.protobuf.Timestamp.toObject(message.updateTime, options);
+                            if (message.state != null && message.hasOwnProperty("state"))
+                                object.state = options.enums === String ? $root.google.firestore.admin.v1.UserCreds.State[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.UserCreds.State[message.state] : message.state;
+                            if (message.securePassword != null && message.hasOwnProperty("securePassword"))
+                                object.securePassword = message.securePassword;
+                            if (message.resourceIdentity != null && message.hasOwnProperty("resourceIdentity")) {
+                                object.resourceIdentity = $root.google.firestore.admin.v1.UserCreds.ResourceIdentity.toObject(message.resourceIdentity, options);
+                                if (options.oneofs)
+                                    object.UserCredsIdentity = "resourceIdentity";
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this UserCreds to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        UserCreds.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for UserCreds
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.UserCreds
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        UserCreds.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.UserCreds";
+                        };
+    
+                        /**
+                         * State enum.
+                         * @name google.firestore.admin.v1.UserCreds.State
+                         * @enum {string}
+                         * @property {string} STATE_UNSPECIFIED=STATE_UNSPECIFIED STATE_UNSPECIFIED value
+                         * @property {string} ENABLED=ENABLED ENABLED value
+                         * @property {string} DISABLED=DISABLED DISABLED value
+                         */
+                        UserCreds.State = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "STATE_UNSPECIFIED"] = "STATE_UNSPECIFIED";
+                            values[valuesById[1] = "ENABLED"] = "ENABLED";
+                            values[valuesById[2] = "DISABLED"] = "DISABLED";
+                            return values;
+                        })();
+    
+                        UserCreds.ResourceIdentity = (function() {
+    
+                            /**
+                             * Properties of a ResourceIdentity.
+                             * @memberof google.firestore.admin.v1.UserCreds
+                             * @interface IResourceIdentity
+                             * @property {string|null} [principal] ResourceIdentity principal
+                             */
+    
+                            /**
+                             * Constructs a new ResourceIdentity.
+                             * @memberof google.firestore.admin.v1.UserCreds
+                             * @classdesc Represents a ResourceIdentity.
+                             * @implements IResourceIdentity
+                             * @constructor
+                             * @param {google.firestore.admin.v1.UserCreds.IResourceIdentity=} [properties] Properties to set
+                             */
+                            function ResourceIdentity(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * ResourceIdentity principal.
+                             * @member {string} principal
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @instance
+                             */
+                            ResourceIdentity.prototype.principal = "";
+    
+                            /**
+                             * Creates a ResourceIdentity message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.UserCreds.ResourceIdentity} ResourceIdentity
+                             */
+                            ResourceIdentity.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.UserCreds.ResourceIdentity)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.UserCreds.ResourceIdentity();
+                                if (object.principal != null)
+                                    message.principal = String(object.principal);
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a ResourceIdentity message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {google.firestore.admin.v1.UserCreds.ResourceIdentity} message ResourceIdentity
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            ResourceIdentity.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.principal = "";
+                                if (message.principal != null && message.hasOwnProperty("principal"))
+                                    object.principal = message.principal;
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this ResourceIdentity to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            ResourceIdentity.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for ResourceIdentity
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.UserCreds.ResourceIdentity
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            ResourceIdentity.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.UserCreds.ResourceIdentity";
+                            };
+    
+                            return ResourceIdentity;
+                        })();
+    
+                        return UserCreds;
+                    })();
+    
                     v1.LocationMetadata = (function() {
     
                         /**
@@ -11007,7 +12558,6 @@
                  * @interface ICommonLanguageSettings
                  * @property {string|null} [referenceDocsUri] CommonLanguageSettings referenceDocsUri
                  * @property {Array.<google.api.ClientLibraryDestination>|null} [destinations] CommonLanguageSettings destinations
-                 * @property {google.api.ISelectiveGapicGeneration|null} [selectiveGapicGeneration] CommonLanguageSettings selectiveGapicGeneration
                  */
     
                 /**
@@ -11041,14 +12591,6 @@
                  * @instance
                  */
                 CommonLanguageSettings.prototype.destinations = $util.emptyArray;
-    
-                /**
-                 * CommonLanguageSettings selectiveGapicGeneration.
-                 * @member {google.api.ISelectiveGapicGeneration|null|undefined} selectiveGapicGeneration
-                 * @memberof google.api.CommonLanguageSettings
-                 * @instance
-                 */
-                CommonLanguageSettings.prototype.selectiveGapicGeneration = null;
     
                 /**
                  * Creates a CommonLanguageSettings message from a plain object. Also converts values to their respective internal types.
@@ -11089,11 +12631,6 @@
                                 break;
                             }
                     }
-                    if (object.selectiveGapicGeneration != null) {
-                        if (typeof object.selectiveGapicGeneration !== "object")
-                            throw TypeError(".google.api.CommonLanguageSettings.selectiveGapicGeneration: object expected");
-                        message.selectiveGapicGeneration = $root.google.api.SelectiveGapicGeneration.fromObject(object.selectiveGapicGeneration);
-                    }
                     return message;
                 };
     
@@ -11112,10 +12649,8 @@
                     var object = {};
                     if (options.arrays || options.defaults)
                         object.destinations = [];
-                    if (options.defaults) {
+                    if (options.defaults)
                         object.referenceDocsUri = "";
-                        object.selectiveGapicGeneration = null;
-                    }
                     if (message.referenceDocsUri != null && message.hasOwnProperty("referenceDocsUri"))
                         object.referenceDocsUri = message.referenceDocsUri;
                     if (message.destinations && message.destinations.length) {
@@ -11123,8 +12658,6 @@
                         for (var j = 0; j < message.destinations.length; ++j)
                             object.destinations[j] = options.enums === String ? $root.google.api.ClientLibraryDestination[message.destinations[j]] === undefined ? message.destinations[j] : $root.google.api.ClientLibraryDestination[message.destinations[j]] : message.destinations[j];
                     }
-                    if (message.selectiveGapicGeneration != null && message.hasOwnProperty("selectiveGapicGeneration"))
-                        object.selectiveGapicGeneration = $root.google.api.SelectiveGapicGeneration.toObject(message.selectiveGapicGeneration, options);
                     return object;
                 };
     
@@ -12120,7 +13653,6 @@
                  * @memberof google.api
                  * @interface IPythonSettings
                  * @property {google.api.ICommonLanguageSettings|null} [common] PythonSettings common
-                 * @property {google.api.PythonSettings.IExperimentalFeatures|null} [experimentalFeatures] PythonSettings experimentalFeatures
                  */
     
                 /**
@@ -12147,14 +13679,6 @@
                 PythonSettings.prototype.common = null;
     
                 /**
-                 * PythonSettings experimentalFeatures.
-                 * @member {google.api.PythonSettings.IExperimentalFeatures|null|undefined} experimentalFeatures
-                 * @memberof google.api.PythonSettings
-                 * @instance
-                 */
-                PythonSettings.prototype.experimentalFeatures = null;
-    
-                /**
                  * Creates a PythonSettings message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.PythonSettings
@@ -12170,11 +13694,6 @@
                         if (typeof object.common !== "object")
                             throw TypeError(".google.api.PythonSettings.common: object expected");
                         message.common = $root.google.api.CommonLanguageSettings.fromObject(object.common);
-                    }
-                    if (object.experimentalFeatures != null) {
-                        if (typeof object.experimentalFeatures !== "object")
-                            throw TypeError(".google.api.PythonSettings.experimentalFeatures: object expected");
-                        message.experimentalFeatures = $root.google.api.PythonSettings.ExperimentalFeatures.fromObject(object.experimentalFeatures);
                     }
                     return message;
                 };
@@ -12192,14 +13711,10 @@
                     if (!options)
                         options = {};
                     var object = {};
-                    if (options.defaults) {
+                    if (options.defaults)
                         object.common = null;
-                        object.experimentalFeatures = null;
-                    }
                     if (message.common != null && message.hasOwnProperty("common"))
                         object.common = $root.google.api.CommonLanguageSettings.toObject(message.common, options);
-                    if (message.experimentalFeatures != null && message.hasOwnProperty("experimentalFeatures"))
-                        object.experimentalFeatures = $root.google.api.PythonSettings.ExperimentalFeatures.toObject(message.experimentalFeatures, options);
                     return object;
                 };
     
@@ -12228,119 +13743,6 @@
                     }
                     return typeUrlPrefix + "/google.api.PythonSettings";
                 };
-    
-                PythonSettings.ExperimentalFeatures = (function() {
-    
-                    /**
-                     * Properties of an ExperimentalFeatures.
-                     * @memberof google.api.PythonSettings
-                     * @interface IExperimentalFeatures
-                     * @property {boolean|null} [restAsyncIoEnabled] ExperimentalFeatures restAsyncIoEnabled
-                     * @property {boolean|null} [protobufPythonicTypesEnabled] ExperimentalFeatures protobufPythonicTypesEnabled
-                     */
-    
-                    /**
-                     * Constructs a new ExperimentalFeatures.
-                     * @memberof google.api.PythonSettings
-                     * @classdesc Represents an ExperimentalFeatures.
-                     * @implements IExperimentalFeatures
-                     * @constructor
-                     * @param {google.api.PythonSettings.IExperimentalFeatures=} [properties] Properties to set
-                     */
-                    function ExperimentalFeatures(properties) {
-                        if (properties)
-                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                if (properties[keys[i]] != null)
-                                    this[keys[i]] = properties[keys[i]];
-                    }
-    
-                    /**
-                     * ExperimentalFeatures restAsyncIoEnabled.
-                     * @member {boolean} restAsyncIoEnabled
-                     * @memberof google.api.PythonSettings.ExperimentalFeatures
-                     * @instance
-                     */
-                    ExperimentalFeatures.prototype.restAsyncIoEnabled = false;
-    
-                    /**
-                     * ExperimentalFeatures protobufPythonicTypesEnabled.
-                     * @member {boolean} protobufPythonicTypesEnabled
-                     * @memberof google.api.PythonSettings.ExperimentalFeatures
-                     * @instance
-                     */
-                    ExperimentalFeatures.prototype.protobufPythonicTypesEnabled = false;
-    
-                    /**
-                     * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
-                     * @function fromObject
-                     * @memberof google.api.PythonSettings.ExperimentalFeatures
-                     * @static
-                     * @param {Object.<string,*>} object Plain object
-                     * @returns {google.api.PythonSettings.ExperimentalFeatures} ExperimentalFeatures
-                     */
-                    ExperimentalFeatures.fromObject = function fromObject(object) {
-                        if (object instanceof $root.google.api.PythonSettings.ExperimentalFeatures)
-                            return object;
-                        var message = new $root.google.api.PythonSettings.ExperimentalFeatures();
-                        if (object.restAsyncIoEnabled != null)
-                            message.restAsyncIoEnabled = Boolean(object.restAsyncIoEnabled);
-                        if (object.protobufPythonicTypesEnabled != null)
-                            message.protobufPythonicTypesEnabled = Boolean(object.protobufPythonicTypesEnabled);
-                        return message;
-                    };
-    
-                    /**
-                     * Creates a plain object from an ExperimentalFeatures message. Also converts values to other types if specified.
-                     * @function toObject
-                     * @memberof google.api.PythonSettings.ExperimentalFeatures
-                     * @static
-                     * @param {google.api.PythonSettings.ExperimentalFeatures} message ExperimentalFeatures
-                     * @param {$protobuf.IConversionOptions} [options] Conversion options
-                     * @returns {Object.<string,*>} Plain object
-                     */
-                    ExperimentalFeatures.toObject = function toObject(message, options) {
-                        if (!options)
-                            options = {};
-                        var object = {};
-                        if (options.defaults) {
-                            object.restAsyncIoEnabled = false;
-                            object.protobufPythonicTypesEnabled = false;
-                        }
-                        if (message.restAsyncIoEnabled != null && message.hasOwnProperty("restAsyncIoEnabled"))
-                            object.restAsyncIoEnabled = message.restAsyncIoEnabled;
-                        if (message.protobufPythonicTypesEnabled != null && message.hasOwnProperty("protobufPythonicTypesEnabled"))
-                            object.protobufPythonicTypesEnabled = message.protobufPythonicTypesEnabled;
-                        return object;
-                    };
-    
-                    /**
-                     * Converts this ExperimentalFeatures to JSON.
-                     * @function toJSON
-                     * @memberof google.api.PythonSettings.ExperimentalFeatures
-                     * @instance
-                     * @returns {Object.<string,*>} JSON object
-                     */
-                    ExperimentalFeatures.prototype.toJSON = function toJSON() {
-                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                    };
-    
-                    /**
-                     * Gets the default type url for ExperimentalFeatures
-                     * @function getTypeUrl
-                     * @memberof google.api.PythonSettings.ExperimentalFeatures
-                     * @static
-                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                     * @returns {string} The default type url
-                     */
-                    ExperimentalFeatures.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                        if (typeUrlPrefix === undefined) {
-                            typeUrlPrefix = "type.googleapis.com";
-                        }
-                        return typeUrlPrefix + "/google.api.PythonSettings.ExperimentalFeatures";
-                    };
-    
-                    return ExperimentalFeatures;
-                })();
     
                 return PythonSettings;
             })();
@@ -12775,7 +14177,6 @@
                  * @memberof google.api
                  * @interface IGoSettings
                  * @property {google.api.ICommonLanguageSettings|null} [common] GoSettings common
-                 * @property {Object.<string,string>|null} [renamedServices] GoSettings renamedServices
                  */
     
                 /**
@@ -12787,7 +14188,6 @@
                  * @param {google.api.IGoSettings=} [properties] Properties to set
                  */
                 function GoSettings(properties) {
-                    this.renamedServices = {};
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -12801,14 +14201,6 @@
                  * @instance
                  */
                 GoSettings.prototype.common = null;
-    
-                /**
-                 * GoSettings renamedServices.
-                 * @member {Object.<string,string>} renamedServices
-                 * @memberof google.api.GoSettings
-                 * @instance
-                 */
-                GoSettings.prototype.renamedServices = $util.emptyObject;
     
                 /**
                  * Creates a GoSettings message from a plain object. Also converts values to their respective internal types.
@@ -12827,13 +14219,6 @@
                             throw TypeError(".google.api.GoSettings.common: object expected");
                         message.common = $root.google.api.CommonLanguageSettings.fromObject(object.common);
                     }
-                    if (object.renamedServices) {
-                        if (typeof object.renamedServices !== "object")
-                            throw TypeError(".google.api.GoSettings.renamedServices: object expected");
-                        message.renamedServices = {};
-                        for (var keys = Object.keys(object.renamedServices), i = 0; i < keys.length; ++i)
-                            message.renamedServices[keys[i]] = String(object.renamedServices[keys[i]]);
-                    }
                     return message;
                 };
     
@@ -12850,18 +14235,10 @@
                     if (!options)
                         options = {};
                     var object = {};
-                    if (options.objects || options.defaults)
-                        object.renamedServices = {};
                     if (options.defaults)
                         object.common = null;
                     if (message.common != null && message.hasOwnProperty("common"))
                         object.common = $root.google.api.CommonLanguageSettings.toObject(message.common, options);
-                    var keys2;
-                    if (message.renamedServices && (keys2 = Object.keys(message.renamedServices)).length) {
-                        object.renamedServices = {};
-                        for (var j = 0; j < keys2.length; ++j)
-                            object.renamedServices[keys2[j]] = message.renamedServices[keys2[j]];
-                    }
                     return object;
                 };
     
@@ -13226,128 +14603,6 @@
                 return values;
             })();
     
-            api.SelectiveGapicGeneration = (function() {
-    
-                /**
-                 * Properties of a SelectiveGapicGeneration.
-                 * @memberof google.api
-                 * @interface ISelectiveGapicGeneration
-                 * @property {Array.<string>|null} [methods] SelectiveGapicGeneration methods
-                 * @property {boolean|null} [generateOmittedAsInternal] SelectiveGapicGeneration generateOmittedAsInternal
-                 */
-    
-                /**
-                 * Constructs a new SelectiveGapicGeneration.
-                 * @memberof google.api
-                 * @classdesc Represents a SelectiveGapicGeneration.
-                 * @implements ISelectiveGapicGeneration
-                 * @constructor
-                 * @param {google.api.ISelectiveGapicGeneration=} [properties] Properties to set
-                 */
-                function SelectiveGapicGeneration(properties) {
-                    this.methods = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * SelectiveGapicGeneration methods.
-                 * @member {Array.<string>} methods
-                 * @memberof google.api.SelectiveGapicGeneration
-                 * @instance
-                 */
-                SelectiveGapicGeneration.prototype.methods = $util.emptyArray;
-    
-                /**
-                 * SelectiveGapicGeneration generateOmittedAsInternal.
-                 * @member {boolean} generateOmittedAsInternal
-                 * @memberof google.api.SelectiveGapicGeneration
-                 * @instance
-                 */
-                SelectiveGapicGeneration.prototype.generateOmittedAsInternal = false;
-    
-                /**
-                 * Creates a SelectiveGapicGeneration message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.api.SelectiveGapicGeneration
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.api.SelectiveGapicGeneration} SelectiveGapicGeneration
-                 */
-                SelectiveGapicGeneration.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.api.SelectiveGapicGeneration)
-                        return object;
-                    var message = new $root.google.api.SelectiveGapicGeneration();
-                    if (object.methods) {
-                        if (!Array.isArray(object.methods))
-                            throw TypeError(".google.api.SelectiveGapicGeneration.methods: array expected");
-                        message.methods = [];
-                        for (var i = 0; i < object.methods.length; ++i)
-                            message.methods[i] = String(object.methods[i]);
-                    }
-                    if (object.generateOmittedAsInternal != null)
-                        message.generateOmittedAsInternal = Boolean(object.generateOmittedAsInternal);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a SelectiveGapicGeneration message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.api.SelectiveGapicGeneration
-                 * @static
-                 * @param {google.api.SelectiveGapicGeneration} message SelectiveGapicGeneration
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                SelectiveGapicGeneration.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.methods = [];
-                    if (options.defaults)
-                        object.generateOmittedAsInternal = false;
-                    if (message.methods && message.methods.length) {
-                        object.methods = [];
-                        for (var j = 0; j < message.methods.length; ++j)
-                            object.methods[j] = message.methods[j];
-                    }
-                    if (message.generateOmittedAsInternal != null && message.hasOwnProperty("generateOmittedAsInternal"))
-                        object.generateOmittedAsInternal = message.generateOmittedAsInternal;
-                    return object;
-                };
-    
-                /**
-                 * Converts this SelectiveGapicGeneration to JSON.
-                 * @function toJSON
-                 * @memberof google.api.SelectiveGapicGeneration
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                SelectiveGapicGeneration.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * Gets the default type url for SelectiveGapicGeneration
-                 * @function getTypeUrl
-                 * @memberof google.api.SelectiveGapicGeneration
-                 * @static
-                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns {string} The default type url
-                 */
-                SelectiveGapicGeneration.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                    if (typeUrlPrefix === undefined) {
-                        typeUrlPrefix = "type.googleapis.com";
-                    }
-                    return typeUrlPrefix + "/google.api.SelectiveGapicGeneration";
-                };
-    
-                return SelectiveGapicGeneration;
-            })();
-    
             /**
              * LaunchStage enum.
              * @name google.api.LaunchStage
@@ -13372,6 +14627,229 @@
                 values[valuesById[4] = "GA"] = "GA";
                 values[valuesById[5] = "DEPRECATED"] = "DEPRECATED";
                 return values;
+            })();
+    
+            api.RoutingRule = (function() {
+    
+                /**
+                 * Properties of a RoutingRule.
+                 * @memberof google.api
+                 * @interface IRoutingRule
+                 * @property {Array.<google.api.IRoutingParameter>|null} [routingParameters] RoutingRule routingParameters
+                 */
+    
+                /**
+                 * Constructs a new RoutingRule.
+                 * @memberof google.api
+                 * @classdesc Represents a RoutingRule.
+                 * @implements IRoutingRule
+                 * @constructor
+                 * @param {google.api.IRoutingRule=} [properties] Properties to set
+                 */
+                function RoutingRule(properties) {
+                    this.routingParameters = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * RoutingRule routingParameters.
+                 * @member {Array.<google.api.IRoutingParameter>} routingParameters
+                 * @memberof google.api.RoutingRule
+                 * @instance
+                 */
+                RoutingRule.prototype.routingParameters = $util.emptyArray;
+    
+                /**
+                 * Creates a RoutingRule message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.RoutingRule} RoutingRule
+                 */
+                RoutingRule.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.RoutingRule)
+                        return object;
+                    var message = new $root.google.api.RoutingRule();
+                    if (object.routingParameters) {
+                        if (!Array.isArray(object.routingParameters))
+                            throw TypeError(".google.api.RoutingRule.routingParameters: array expected");
+                        message.routingParameters = [];
+                        for (var i = 0; i < object.routingParameters.length; ++i) {
+                            if (typeof object.routingParameters[i] !== "object")
+                                throw TypeError(".google.api.RoutingRule.routingParameters: object expected");
+                            message.routingParameters[i] = $root.google.api.RoutingParameter.fromObject(object.routingParameters[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a RoutingRule message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {google.api.RoutingRule} message RoutingRule
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                RoutingRule.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.routingParameters = [];
+                    if (message.routingParameters && message.routingParameters.length) {
+                        object.routingParameters = [];
+                        for (var j = 0; j < message.routingParameters.length; ++j)
+                            object.routingParameters[j] = $root.google.api.RoutingParameter.toObject(message.routingParameters[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this RoutingRule to JSON.
+                 * @function toJSON
+                 * @memberof google.api.RoutingRule
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                RoutingRule.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for RoutingRule
+                 * @function getTypeUrl
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                RoutingRule.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.RoutingRule";
+                };
+    
+                return RoutingRule;
+            })();
+    
+            api.RoutingParameter = (function() {
+    
+                /**
+                 * Properties of a RoutingParameter.
+                 * @memberof google.api
+                 * @interface IRoutingParameter
+                 * @property {string|null} [field] RoutingParameter field
+                 * @property {string|null} [pathTemplate] RoutingParameter pathTemplate
+                 */
+    
+                /**
+                 * Constructs a new RoutingParameter.
+                 * @memberof google.api
+                 * @classdesc Represents a RoutingParameter.
+                 * @implements IRoutingParameter
+                 * @constructor
+                 * @param {google.api.IRoutingParameter=} [properties] Properties to set
+                 */
+                function RoutingParameter(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * RoutingParameter field.
+                 * @member {string} field
+                 * @memberof google.api.RoutingParameter
+                 * @instance
+                 */
+                RoutingParameter.prototype.field = "";
+    
+                /**
+                 * RoutingParameter pathTemplate.
+                 * @member {string} pathTemplate
+                 * @memberof google.api.RoutingParameter
+                 * @instance
+                 */
+                RoutingParameter.prototype.pathTemplate = "";
+    
+                /**
+                 * Creates a RoutingParameter message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.RoutingParameter} RoutingParameter
+                 */
+                RoutingParameter.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.RoutingParameter)
+                        return object;
+                    var message = new $root.google.api.RoutingParameter();
+                    if (object.field != null)
+                        message.field = String(object.field);
+                    if (object.pathTemplate != null)
+                        message.pathTemplate = String(object.pathTemplate);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a RoutingParameter message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {google.api.RoutingParameter} message RoutingParameter
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                RoutingParameter.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.field = "";
+                        object.pathTemplate = "";
+                    }
+                    if (message.field != null && message.hasOwnProperty("field"))
+                        object.field = message.field;
+                    if (message.pathTemplate != null && message.hasOwnProperty("pathTemplate"))
+                        object.pathTemplate = message.pathTemplate;
+                    return object;
+                };
+    
+                /**
+                 * Converts this RoutingParameter to JSON.
+                 * @function toJSON
+                 * @memberof google.api.RoutingParameter
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                RoutingParameter.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for RoutingParameter
+                 * @function getTypeUrl
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                RoutingParameter.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.RoutingParameter";
+                };
+    
+                return RoutingParameter;
             })();
     
             return api;
@@ -18168,6 +19646,7 @@
                  * @property {google.api.IHttpRule|null} [".google.api.http"] MethodOptions .google.api.http
                  * @property {Array.<string>|null} [".google.api.methodSignature"] MethodOptions .google.api.methodSignature
                  * @property {google.longrunning.IOperationInfo|null} [".google.longrunning.operationInfo"] MethodOptions .google.longrunning.operationInfo
+                 * @property {google.api.IRoutingRule|null} [".google.api.routing"] MethodOptions .google.api.routing
                  */
     
                 /**
@@ -18244,6 +19723,14 @@
                 MethodOptions.prototype[".google.longrunning.operationInfo"] = null;
     
                 /**
+                 * MethodOptions .google.api.routing.
+                 * @member {google.api.IRoutingRule|null|undefined} .google.api.routing
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype[".google.api.routing"] = null;
+    
+                /**
                  * Creates a MethodOptions message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.protobuf.MethodOptions
@@ -18309,6 +19796,11 @@
                             throw TypeError(".google.protobuf.MethodOptions..google.longrunning.operationInfo: object expected");
                         message[".google.longrunning.operationInfo"] = $root.google.longrunning.OperationInfo.fromObject(object[".google.longrunning.operationInfo"]);
                     }
+                    if (object[".google.api.routing"] != null) {
+                        if (typeof object[".google.api.routing"] !== "object")
+                            throw TypeError(".google.protobuf.MethodOptions..google.api.routing: object expected");
+                        message[".google.api.routing"] = $root.google.api.RoutingRule.fromObject(object[".google.api.routing"]);
+                    }
                     return message;
                 };
     
@@ -18335,6 +19827,7 @@
                         object.features = null;
                         object[".google.longrunning.operationInfo"] = null;
                         object[".google.api.http"] = null;
+                        object[".google.api.routing"] = null;
                     }
                     if (message.deprecated != null && message.hasOwnProperty("deprecated"))
                         object.deprecated = message.deprecated;
@@ -18356,6 +19849,8 @@
                     }
                     if (message[".google.api.http"] != null && message.hasOwnProperty(".google.api.http"))
                         object[".google.api.http"] = $root.google.api.HttpRule.toObject(message[".google.api.http"], options);
+                    if (message[".google.api.routing"] != null && message.hasOwnProperty(".google.api.routing"))
+                        object[".google.api.routing"] = $root.google.api.RoutingRule.toObject(message[".google.api.routing"], options);
                     return object;
                 };
     
