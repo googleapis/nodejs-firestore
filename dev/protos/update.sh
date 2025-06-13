@@ -55,16 +55,22 @@ git clone --single-branch --branch v26.1 --depth 1 https://github.com/google/pro
 
 # Copy necessary protos.
 mkdir -p "${PROTOS_DIR}/google/api"
-cp googleapis/google/api/{annotations,client,field_behavior,http,launch_stage,resource}.proto \
+cp googleapis/google/api/{annotations,client,field_behavior,http,launch_stage,resource,routing}.proto \
    "${PROTOS_DIR}/google/api/"
 
 mkdir -p "${PROTOS_DIR}/google/firestore/v1"
 cp googleapis/google/firestore/v1/*.proto \
    "${PROTOS_DIR}/google/firestore/v1/"
 
+# If the USE_PREVIEW_BRANCH environment variable is set, skip v1beta1.
+# v1beta1/ does not exist in the 'preview' branch
 mkdir -p "${PROTOS_DIR}/google/firestore/v1beta1"
-cp googleapis/google/firestore/v1beta1/*.proto \
+if [[ -n "${USE_PREVIEW_BRANCH-}" ]]; then
+  echo "Skipping v1beta1 for 'preview' branch"
+else
+  cp googleapis/google/firestore/v1beta1/*.proto \
    "${PROTOS_DIR}/google/firestore/v1beta1/"
+fi
 
 mkdir -p "${PROTOS_DIR}/google/firestore/admin/v1"
 cp googleapis/google/firestore/admin/v1/*.proto \
