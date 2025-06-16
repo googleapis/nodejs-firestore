@@ -62,7 +62,7 @@ export class FirestoreClient {
   private _defaults: {[method: string]: gax.CallSettings};
   private _universeDomain: string;
   private _servicePath: string;
-  private _stubState: 'Success' | 'Fail' | undefined;
+  private _stubState: 'Success' | 'Fail' = 'Success';
   auth: gax.GoogleAuth;
   descriptors: Descriptors = {
     page: {},
@@ -307,14 +307,6 @@ export class FirestoreClient {
       this._providedCustomServicePath
     ) as Promise<{[method: string]: Function}>;
 
-    this.firestoreStub
-      .then(() => {
-        this._stubState = 'Success';
-      })
-      .catch(err => {
-        this._stubState = 'Fail';
-      });
-
     // Iterate over each of the methods that the service provides
     // and create an API call method for each.
     const firestoreStubMethods = [
@@ -337,8 +329,8 @@ export class FirestoreClient {
     ];
     for (const methodName of firestoreStubMethods) {
       const callPromise = this.firestoreStub.then(
-        stub =>
-          (...args: Array<{}>) => {
+        stub => {
+          return (...args: Array<{}>) => {
             if (this._terminated) {
               if (methodName in this.descriptors.stream) {
                 const stream = new PassThrough({objectMode: true});
@@ -356,9 +348,13 @@ export class FirestoreClient {
             }
             const func = stub[methodName];
             return func.apply(stub, args);
-          },
-        (err: Error | null | undefined) => () => {
-          throw err;
+          };
+        },
+        (err: Error | null | undefined) => {
+          this._stubState = 'Fail';
+          return () => {
+            throw err;
+          };
         }
       );
 
