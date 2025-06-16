@@ -412,9 +412,6 @@ export namespace google {
                     /** Database databaseEdition. */
                     public databaseEdition: (google.firestore.admin.v1.Database.DatabaseEdition|keyof typeof google.firestore.admin.v1.Database.DatabaseEdition);
 
-                    /** Database _freeTier. */
-                    public _freeTier?: "freeTier";
-
                     /**
                      * Creates a new Database instance using the specified properties.
                      * @param [properties] Properties to set

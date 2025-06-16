@@ -972,12 +972,7 @@
                         // OneOf field names bound to virtual getters and setters
                         var $oneOfFields;
     
-                        /**
-                         * Database _freeTier.
-                         * @member {"freeTier"|undefined} _freeTier
-                         * @memberof google.firestore.admin.v1.Database
-                         * @instance
-                         */
+                        // Virtual OneOf for proto3 optional field
                         Object.defineProperty(Database.prototype, "_freeTier", {
                             get: $util.oneOfGetter($oneOfFields = ["freeTier"]),
                             set: $util.oneOfSetter($oneOfFields)
