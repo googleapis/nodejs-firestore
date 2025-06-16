@@ -306,14 +306,14 @@ export class FirestoreClient {
       this._opts,
       this._providedCustomServicePath
     ) as Promise<{[method: string]: Function}>;
-    
+
     this.firestoreStub
-    .then(() => {
-      this._stubState = 'Success';
-    })
-    .catch(err => {
-      this._stubState = 'Fail';
-    });
+      .then(() => {
+        this._stubState = 'Success';
+      })
+      .catch(err => {
+        this._stubState = 'Fail';
+      });
 
     // Iterate over each of the methods that the service provides
     // and create an API call method for each.
