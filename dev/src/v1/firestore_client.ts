@@ -62,7 +62,7 @@ export class FirestoreClient {
   private _defaults: {[method: string]: gax.CallSettings};
   private _universeDomain: string;
   private _servicePath: string;
-  private _stubState: 'Success' | 'Fail' = 'Success';
+  private _stubFailed = false;
   auth: gax.GoogleAuth;
   descriptors: Descriptors = {
     page: {},
@@ -290,9 +290,12 @@ export class FirestoreClient {
    */
   initialize() {
     // If the client stub promise is already initialized, return immediately.
-    if (this.firestoreStub && this._stubState === 'Success') {
+    if (this.firestoreStub && !this._stubFailed) {
       return this.firestoreStub;
     }
+
+    // Reset _stubFailed because we are re-attempting create
+    this._stubFailed = false;
 
     // Put together the "service stub" for
     // google.firestore.v1.Firestore.
@@ -351,7 +354,7 @@ export class FirestoreClient {
           };
         },
         (err: Error | null | undefined) => {
-          this._stubState = 'Fail';
+          this._stubFailed = true;
           return () => {
             throw err;
           };
