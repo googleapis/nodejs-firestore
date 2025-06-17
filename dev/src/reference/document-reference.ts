@@ -269,11 +269,10 @@ export class DocumentReference<
             parent: this.formattedName,
           };
           return this._firestore
-            .request<api.IListCollectionIdsRequest, string[]>(
-              'listCollectionIds',
-              request,
-              tag
-            )
+            .request<
+              api.IListCollectionIdsRequest,
+              string[]
+            >('listCollectionIds', request, tag)
             .then(collectionIds => {
               const collections: Array<CollectionReference> = [];
 
