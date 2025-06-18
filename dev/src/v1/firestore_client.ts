@@ -31,6 +31,7 @@ import type {
 import {Transform, PassThrough} from 'stream';
 import * as protos from '../../protos/firestore_v1_proto_api';
 import jsonProtos = require('../../protos/v1.json');
+import {logger} from '../logger';
 
 /**
  * Client JSON configuration object, loaded from
@@ -355,6 +356,12 @@ export class FirestoreClient {
         },
         (err: Error | null | undefined) => {
           this._stubFailed = true;
+          logger(
+            'initialize',
+            null,
+            'Failed to create the gax client stub.',
+            err
+          );
           return () => {
             throw err;
           };
