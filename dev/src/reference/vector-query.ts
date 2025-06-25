@@ -17,9 +17,9 @@
 import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 import * as firestore from '@google-cloud/firestore';
-import {field} from '../expression';
-import {Pipeline} from '../pipeline';
-import {FindNearestOptions} from '../stage';
+import {field} from '../pipelines';
+import {Pipeline} from '../pipelines';
+import {FindNearestOptions} from '../pipelines';
 
 import {Timestamp} from '../timestamp';
 import {VectorValue} from '../field-value';
