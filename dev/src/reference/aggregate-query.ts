@@ -337,7 +337,7 @@ export class AggregateQuery<
     if (transactionOrReadTime instanceof Uint8Array) {
       runQueryRequest.transaction = transactionOrReadTime;
     } else if (transactionOrReadTime instanceof Timestamp) {
-      runQueryRequest.readTime = transactionOrReadTime;
+      runQueryRequest.readTime = transactionOrReadTime.toProto().timestampValue;
     } else if (transactionOrReadTime) {
       runQueryRequest.newTransaction = transactionOrReadTime;
     }
