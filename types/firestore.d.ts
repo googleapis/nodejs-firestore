@@ -40,7 +40,11 @@ declare namespace FirebaseFirestore {
     | (T extends Primitive
         ? T
         : T extends {}
-          ? {[K in keyof T]?: PartialWithFieldValue<T[K]> | FieldValue}
+          ? {
+              [K in keyof T]?: T[K] extends Function
+                ? T[K]
+                : PartialWithFieldValue<T[K]> | FieldValue;
+            }
           : never);
 
   /**
@@ -52,7 +56,11 @@ declare namespace FirebaseFirestore {
     | (T extends Primitive
         ? T
         : T extends {}
-          ? {[K in keyof T]: WithFieldValue<T[K]> | FieldValue}
+          ? {
+              [K in keyof T]: T[K] extends Function
+                ? T[K]
+                : WithFieldValue<T[K]> | FieldValue;
+            }
           : never);
 
   /**
