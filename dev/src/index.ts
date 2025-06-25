@@ -1601,11 +1601,10 @@ export class Firestore implements firestore.Firestore {
 
     if (retryCodes) {
       const retryParams = getRetryParams(methodName);
-      callOptions.retry =
-        new (require('google-gax/fallback').RetryOptions)(
-          retryCodes,
-          retryParams
-        );
+      callOptions.retry = new (require('google-gax/fallback').RetryOptions)(
+        retryCodes,
+        retryParams
+      );
     }
 
     return callOptions;
