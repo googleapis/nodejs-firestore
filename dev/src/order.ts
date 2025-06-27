@@ -26,11 +26,13 @@ import {
   RESERVED_BSON_TIMESTAMP_INCREMENT_KEY,
   RESERVED_BSON_TIMESTAMP_KEY,
   RESERVED_BSON_TIMESTAMP_SECONDS_KEY,
+  RESERVED_DECIMAL128_KEY,
   RESERVED_INT32_KEY,
   RESERVED_REGEX_KEY,
   RESERVED_REGEX_OPTIONS_KEY,
   RESERVED_REGEX_PATTERN_KEY,
 } from './map-type';
+import {Quadruple} from './quadruple';
 
 /*!
  * The type order as defined by the backend.
@@ -73,6 +75,7 @@ function typeOrder(val: api.IValue): TypeOrder {
       return TypeOrder.MIN_KEY;
     case 'integerValue':
     case 'int32Value':
+    case 'decimal128Value':
     case 'doubleValue':
       return TypeOrder.NUMBER;
     case 'bsonTimestampValue':
@@ -152,28 +155,74 @@ function compareNumbers(left: number, right: number): number {
  * @internal
  */
 function compareNumberProtos(left: api.IValue, right: api.IValue): number {
-  let leftValue, rightValue;
+  // If either number is Decimal128, we cast both to wider (128-bit)
+  // representation, and compare those.
+  if (
+    detectValueType(left) === 'decimal128Value' ||
+    detectValueType(right) === 'decimal128Value'
+  ) {
+    const lhs = convertNumberToQuadruple(left);
+    const rhs = convertNumberToQuadruple(right);
 
-  if (detectValueType(left) === 'int32Value') {
-    leftValue = Number(
-      left.mapValue!.fields?.[RESERVED_INT32_KEY]?.integerValue
-    );
-  } else if (left.integerValue !== undefined) {
-    leftValue = Number(left.integerValue!);
-  } else {
-    leftValue = Number(left.doubleValue!);
+    // Firestore sorts `NaN`s smaller than all numbers, but Quadruple considers
+    // `NaN`s bigger than all numbers.
+    if (lhs.isNaN()) {
+      return rhs.isNaN() ? 0 : -1;
+    } else if (rhs.isNaN()) {
+      // lhs is not NaN, and rhs is NaN.
+      return 1;
+    }
+
+    // Firestore considers -0 and +0 to be equal, but Quadruple does not.
+    if (lhs.isZero() && rhs.isZero()) {
+      return 0;
+    }
+
+    return lhs.compareTo(rhs);
   }
 
-  if (detectValueType(right) === 'int32Value') {
-    rightValue = Number(
-      right.mapValue!.fields?.[RESERVED_INT32_KEY]?.integerValue
-    );
-  } else if (right.integerValue !== undefined) {
-    rightValue = Number(right.integerValue);
-  } else {
-    rightValue = Number(right.doubleValue!);
+  return compareNumbers(
+    convertProtoValueToNumber(left),
+    convertProtoValueToNumber(right)
+  );
+}
+
+/*!
+ * Converts the given proto value to a `number`.
+ * Throws an exception if the value is larger than 64-bit value or is not numeric.
+ *
+ * @private
+ * @internal
+ */
+function convertProtoValueToNumber(value: api.IValue): number {
+  if (value.integerValue !== undefined) {
+    return Number(value.integerValue!);
+  } else if (value.doubleValue !== undefined) {
+    return Number(value.doubleValue!);
+  } else if (detectValueType(value) === 'int32Value') {
+    return Number(value.mapValue!.fields?.[RESERVED_INT32_KEY]?.integerValue);
   }
-  return compareNumbers(leftValue, rightValue);
+
+  throw new Error(
+    'convertProtoValueToNumber was called on an unsupported type.'
+  );
+}
+
+/*!
+ * Converts the given proto value to a `Quadruple`.
+ * Throws an exception if the value is not numeric.
+ *
+ * @private
+ * @internal
+ */
+function convertNumberToQuadruple(value: api.IValue): Quadruple {
+  if (detectValueType(value) === 'decimal128Value') {
+    return Quadruple.fromString(
+      value.mapValue!.fields![RESERVED_DECIMAL128_KEY].stringValue!
+    );
+  } else {
+    return Quadruple.fromNumber(convertProtoValueToNumber(value));
+  }
 }
 
 /*!

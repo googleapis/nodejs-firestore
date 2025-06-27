@@ -30,6 +30,7 @@ import {
   RESERVED_BSON_OBJECT_ID_KEY,
   RESERVED_REGEX_KEY,
   RESERVED_BSON_TIMESTAMP_KEY,
+  RESERVED_DECIMAL128_KEY,
 } from './map-type';
 
 /*!
@@ -141,6 +142,8 @@ function detectMapRepresentation(
       return 'bsonObjectIdValue';
     } else if (props.indexOf(RESERVED_INT32_KEY) !== -1) {
       return 'int32Value';
+    } else if (props.indexOf(RESERVED_DECIMAL128_KEY) !== -1) {
+      return 'decimal128Value';
     } else if (props.indexOf(RESERVED_BSON_TIMESTAMP_KEY) !== -1) {
       return 'bsonTimestampValue';
     } else if (props.indexOf(RESERVED_BSON_BINARY_KEY) !== -1) {
@@ -305,6 +308,7 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
     case 'bsonObjectIdValue':
     case 'bsonBinaryValue':
     case 'int32Value':
+    case 'decimal128Value':
     case 'bsonTimestampValue':
     case 'minKeyValue':
     case 'maxKeyValue': {

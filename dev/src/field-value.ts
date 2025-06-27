@@ -40,7 +40,9 @@ import {
   RESERVED_BSON_TIMESTAMP_INCREMENT_KEY,
   RESERVED_BSON_TIMESTAMP_KEY,
   RESERVED_BSON_TIMESTAMP_SECONDS_KEY,
+  RESERVED_DECIMAL128_KEY,
 } from './map-type';
+import {Quadruple} from './quadruple';
 
 /**
  * Represent a vector type in Firestore documents.
@@ -292,6 +294,55 @@ export class Int32Value implements firestore.Int32Value {
    */
   isEqual(other: Int32Value): boolean {
     return this.value === other.value;
+  }
+}
+
+/** Represents a 128-bit decimal type in Firestore documents. */
+export class Decimal128Value implements firestore.Decimal128Value {
+  /**
+   * Creates a new 128-bit decimal value.
+   *
+   * @param value - The string representation of the 128-bit decimal.
+   *
+   * @private
+   * @internal
+   */
+  constructor(readonly value: string) {}
+
+  /**
+   * @private
+   * @internal
+   */
+  _toProto(serializer: Serializer): api.IValue {
+    return serializer.encodeDecimal128(this.value);
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  static _fromProto(proto: api.IValue): Decimal128Value {
+    const value =
+      proto.mapValue!.fields?.[RESERVED_DECIMAL128_KEY]?.stringValue || '';
+    return new Decimal128Value(value);
+  }
+
+  /**
+   * Returns true if this `Decimal128Value` is equal to the provided one.
+   *
+   * @param other The `Decimal128Value` to compare against.
+   * @return 'true' if this `Decimal128Value` is equal to the provided one.
+   */
+  isEqual(other: Decimal128Value): boolean {
+    const lhs = Quadruple.fromString(this.value);
+    const rhs = Quadruple.fromString(other.value);
+
+    // Firestore considers -0 and +0 to be equal, but Quadruple does not.
+    if (lhs.isZero() && rhs.isZero()) {
+      return true;
+    }
+
+    return lhs.compareTo(rhs) === 0;
   }
 }
 

@@ -29,6 +29,7 @@ import {
   BsonObjectId,
   RegexValue,
   VectorValue,
+  Decimal128Value,
 } from './field-value';
 import {detectGoogleProtobufValueType, detectValueType} from './convert';
 import {GeoPoint} from './geo-point';
@@ -55,6 +56,7 @@ import {
   RESERVED_BSON_TIMESTAMP_KEY,
   RESERVED_BSON_TIMESTAMP_SECONDS_KEY,
   VECTOR_MAP_VECTORS_KEY,
+  RESERVED_DECIMAL128_KEY,
 } from './map-type';
 
 /**
@@ -199,6 +201,7 @@ export class Serializer {
       val instanceof VectorValue ||
       val instanceof RegexValue ||
       val instanceof Int32Value ||
+      val instanceof Decimal128Value ||
       val instanceof BsonTimestamp ||
       val instanceof BsonBinaryData ||
       val instanceof BsonObjectId ||
@@ -372,6 +375,21 @@ export class Serializer {
   /**
    * @private
    */
+  encodeDecimal128(value: string): api.IValue {
+    return {
+      mapValue: {
+        fields: {
+          [RESERVED_DECIMAL128_KEY]: {
+            stringValue: value,
+          },
+        },
+      },
+    };
+  }
+
+  /**
+   * @private
+   */
   encodeBsonTimestamp(seconds: number, increment: number): api.IValue {
     return {
       mapValue: {
@@ -488,6 +506,9 @@ export class Serializer {
       }
       case 'int32Value': {
         return Int32Value._fromProto(proto);
+      }
+      case 'decimal128Value': {
+        return Decimal128Value._fromProto(proto);
       }
       case 'bsonTimestampValue': {
         return BsonTimestamp._fromProto(proto);
@@ -671,6 +692,7 @@ export function validateUserInput(
     value instanceof RegexValue ||
     value instanceof BsonObjectId ||
     value instanceof Int32Value ||
+    value instanceof Decimal128Value ||
     value instanceof BsonTimestamp ||
     value instanceof BsonBinaryData ||
     value instanceof MinKey ||

@@ -22,6 +22,7 @@ import {
   BsonBinaryData,
   BsonObjectId,
   BsonTimestamp,
+  Decimal128Value,
   Int32Value,
   RegexValue,
 } from '../src';
@@ -314,6 +315,11 @@ describe('non-native types', () => {
     expect(intValue.value).to.equal(255);
   });
 
+  it('128-bit decimal', () => {
+    const decimal = new Decimal128Value('-1.2e-3');
+    expect(decimal.value).to.equal('-1.2e-3');
+  });
+
   it('min key', () => {
     const value1 = MinKey.instance();
     const value2 = MinKey.instance();
@@ -473,6 +479,36 @@ describe('non-native types', () => {
     const intValue2 = new Int32Value(255);
     expect(intValue1.isEqual(intValue2)).to.be.true;
     expect(intValue2.isEqual(intValue1)).to.be.true;
+  });
+
+  it('can create 128-bit decimal using new', () => {
+    const v1 = new Decimal128Value('1.2e3');
+    const v2 = new Decimal128Value('12e2');
+    const v3 = new Decimal128Value('0.12e4');
+    const v4 = new Decimal128Value('12000e-1');
+    const v5 = new Decimal128Value('1.2');
+    const v6 = new Decimal128Value('NaN');
+    const v7 = new Decimal128Value('NaN');
+    const v8 = new Decimal128Value('Infinity');
+    const v9 = new Decimal128Value('-Infinity');
+    const v10 = new Decimal128Value('-0');
+    const v11 = new Decimal128Value('-0.0');
+    const v12 = new Decimal128Value('0.0');
+    const v13 = new Decimal128Value('0');
+
+    expect(v1.isEqual(v2)).to.be.true;
+    expect(v1.isEqual(v3)).to.be.true;
+    expect(v1.isEqual(v4)).to.be.true;
+    expect(v1.isEqual(v5)).to.be.false;
+    expect(v1.isEqual(v6)).to.be.false;
+    expect(v1.isEqual(v7)).to.be.false;
+    expect(v1.isEqual(v8)).to.be.false;
+    expect(v1.isEqual(v9)).to.be.false;
+
+    expect(v6.isEqual(v7)).to.be.true;
+    expect(v10.isEqual(v11)).to.be.true;
+    expect(v10.isEqual(v12)).to.be.true;
+    expect(v10.isEqual(v13)).to.be.true;
   });
 
   it('can create BSON binary data using new', () => {

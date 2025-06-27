@@ -28,6 +28,7 @@ import {
   BsonBinaryData,
   BsonObjectId,
   BsonTimestamp,
+  Decimal128Value,
   Int32Value,
   MaxKey,
   MinKey,
@@ -216,6 +217,16 @@ const allSupportedTypesProtobufJs = document(
       fields: {
         __int__: {
           integerValue: 789,
+        },
+      },
+    },
+  },
+  'decimal128Value',
+  {
+    mapValue: {
+      fields: {
+        __decimal128__: {
+          stringValue: '1.2e-3',
         },
       },
     },
@@ -413,6 +424,15 @@ const allSupportedTypesJson = {
         },
       },
     },
+    decimal128Value: {
+      mapValue: {
+        fields: {
+          __decimal128__: {
+            stringValue: '1.2e-3',
+          },
+        },
+      },
+    },
     bsonTimestampValue: {
       mapValue: {
         fields: {
@@ -470,6 +490,7 @@ const allSupportedTypesInput = {
   integerValue: 0,
   doubleValue: 0.1,
   int32Value: new Int32Value(789),
+  decimal128Value: new Decimal128Value('1.2e-3'),
   infinityValue: Infinity,
   negativeInfinityValue: -Infinity,
   objectValue: {foo: 'bar'},
@@ -506,6 +527,7 @@ const allSupportedTypesOutput: {[field: string]: unknown} = {
   integerValue: 0,
   doubleValue: 0.1,
   int32Value: new Int32Value(789),
+  decimal128Value: new Decimal128Value('1.2e-3'),
   infinityValue: Infinity,
   negativeInfinityValue: -Infinity,
   objectValue: {foo: 'bar'},

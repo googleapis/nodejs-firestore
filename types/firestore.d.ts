@@ -2855,6 +2855,22 @@ declare namespace FirebaseFirestore {
     isEqual(other: Int32Value): boolean;
   }
 
+  /** Represents a 128-bit decimal type in Firestore documents. */
+  export class Decimal128Value {
+    constructor(value: string);
+
+    /** The underlying 128-bit decimal number */
+    readonly value: string;
+
+    /**
+     * Returns true if this `Decimal128Value` is equal to the provided one.
+     *
+     * @param other The `Decimal128Value` to compare against.
+     * @return 'true' if this `Decimal128Value` is equal to the provided one.
+     */
+    isEqual(other: Decimal128Value): boolean;
+  }
+
   /** Represents a BSON Timestamp type in Firestore documents. */
   export class BsonTimestamp {
     /**

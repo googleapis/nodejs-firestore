@@ -41,6 +41,7 @@ import {
   MinKey,
   MaxKey,
   Int32Value,
+  Decimal128Value,
   BsonTimestamp,
   BsonBinaryData,
   BsonObjectId,
@@ -67,6 +68,7 @@ import {CollectionGroup} from '../src/collection-group';
 import IBundleElement = firestore.IBundleElement;
 import {Filter} from '../src/filter';
 import {IndexTestHelper} from './index_test_helper';
+import {addEqualityMatcher} from './euqality_matcher';
 
 use(chaiAsPromised);
 
@@ -8437,6 +8439,7 @@ describe('Types test', () => {
 });
 
 describe('non-native Firestore types', () => {
+  addEqualityMatcher();
   let firestore: Firestore;
   let randomCol: CollectionReference;
   let doc: DocumentReference;
@@ -8488,6 +8491,10 @@ describe('non-native Firestore types', () => {
     return docSet.docs.map(d => d.data());
   }
 
+  function toIds(docSet: QuerySnapshot): string[] {
+    return docSet.docs.map(d => d.id);
+  }
+
   async function checkRoundTrip<T extends TypeWithEquality>(originalValue: T) {
     await doc.set({key: originalValue});
     const getResult = await doc.get();
@@ -8526,6 +8533,65 @@ describe('non-native Firestore types', () => {
     await checkRoundTrip(new Int32Value(-57));
     await checkRoundTrip(new Int32Value(0));
     await checkRoundTrip(new Int32Value(57));
+  });
+
+  it('round trip a 128-bit decimal', async () => {
+    await checkRoundTrip(new Decimal128Value('NaN'));
+    await checkRoundTrip(new Decimal128Value('-Infinity'));
+    await checkRoundTrip(new Decimal128Value('-1.2e3'));
+    await checkRoundTrip(new Decimal128Value('-4.2e+3'));
+    await checkRoundTrip(new Decimal128Value('-1.2e-3'));
+    await checkRoundTrip(new Decimal128Value('-4.2e-3'));
+    await checkRoundTrip(new Decimal128Value('-1'));
+    await checkRoundTrip(new Decimal128Value('-0'));
+    await checkRoundTrip(new Decimal128Value('0'));
+    await checkRoundTrip(new Decimal128Value('-0.0'));
+    await checkRoundTrip(new Decimal128Value('0.0'));
+    await checkRoundTrip(new Decimal128Value('1'));
+    await checkRoundTrip(new Decimal128Value('1.2e3'));
+    await checkRoundTrip(new Decimal128Value('4.2e+3'));
+    await checkRoundTrip(new Decimal128Value('1.2e-3'));
+    await checkRoundTrip(new Decimal128Value('4.2e-3'));
+    await checkRoundTrip(new Decimal128Value('Infinity'));
+    await checkRoundTrip(
+      new Decimal128Value('0.1234567890123456789012345678901234')
+    );
+    await checkRoundTrip(
+      new Decimal128Value('1234567890123456789012345678901234')
+    );
+    await checkRoundTrip(
+      new Decimal128Value('-0.1234567890123456789012345678901234')
+    );
+    await checkRoundTrip(
+      new Decimal128Value('-1234567890123456789012345678901234')
+    );
+  });
+
+  it('invalid decimal128 gets rejected', async () => {
+    const docRef = randomCol.doc();
+    let errorMessage = '';
+    try {
+      await docRef.set({key: new Decimal128Value('')});
+    } catch (err) {
+      errorMessage = err?.message;
+    }
+    expect(errorMessage).to.contains('Invalid decimal128 string');
+
+    try {
+      errorMessage = '';
+      await docRef.set({key: new Decimal128Value('1 23. 4')});
+    } catch (err) {
+      errorMessage = err?.message;
+    }
+    expect(errorMessage).to.contains('Invalid decimal128 string');
+
+    try {
+      errorMessage = '';
+      await docRef.set({key: new Decimal128Value('abc')});
+    } catch (err) {
+      errorMessage = err?.message;
+    }
+    expect(errorMessage).to.contains('Invalid decimal128 string');
   });
 
   it('round trip a BSON timestamp', async () => {
@@ -8705,6 +8771,159 @@ describe('non-native Firestore types', () => {
     expect(toDataArray(snapshot)).to.deep.equal([testDocs['c'], testDocs['a']]);
   });
 
+  it('can filter and order Decimal128 values', async () => {
+    const testDocs = {
+      a: {key: new Decimal128Value('-1.2e3')},
+      b: {key: new Decimal128Value('0')},
+      c: {key: new Decimal128Value('1.2e-3')},
+      d: {key: new Decimal128Value('NaN')},
+      e: {key: new Decimal128Value('-Infinity')},
+      f: {key: new Decimal128Value('Infinity')},
+    };
+    await addDocs(testDocs);
+    let orderedQuery = randomCol
+      .where('key', '>=', new Decimal128Value('-1.1'))
+      .orderBy('key', 'desc');
+
+    let snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toDataArray(snapshot)).to.deep.equal([
+      testDocs['f'],
+      testDocs['c'],
+      testDocs['b'],
+    ]);
+
+    orderedQuery = randomCol
+      .where('key', '!=', new Decimal128Value('0.0'))
+      .orderBy('key', 'desc');
+    snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toDataArray(snapshot)).to.deep.equal([
+      testDocs['f'],
+      testDocs['c'],
+      testDocs['a'],
+      testDocs['e'],
+      testDocs['d'],
+    ]);
+
+    orderedQuery = randomCol
+      .where('key', '>', new Decimal128Value('-1.2e-3'))
+      .orderBy('key', 'desc');
+    snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toDataArray(snapshot)).to.deep.equal([
+      testDocs['f'],
+      testDocs['c'],
+      testDocs['b'],
+    ]);
+
+    orderedQuery = randomCol
+      .where('key', '!=', new Decimal128Value('NaN'))
+      .orderBy('key');
+    snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toDataArray(snapshot)).to.deep.equal([
+      testDocs['e'],
+      testDocs['a'],
+      testDocs['b'],
+      testDocs['c'],
+      testDocs['f'],
+    ]);
+
+    orderedQuery = randomCol
+      .where('key', 'not-in', [
+        new Decimal128Value('1.2e-3'),
+        new Decimal128Value('Infinity'),
+      ])
+      .orderBy('key', 'desc');
+    snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toDataArray(snapshot)).to.deep.equal([
+      testDocs['b'],
+      testDocs['a'],
+      testDocs['e'],
+      testDocs['d'],
+    ]);
+  });
+
+  it('can filter and order numerical values ', async () => {
+    const testDocs = {
+      a: {key: new Decimal128Value('-1.2e3')}, // -1200
+      b: {key: new Int32Value(0)},
+      c: {key: new Decimal128Value('1')},
+      d: {key: new Int32Value(1)},
+      e: {key: 1},
+      f: {key: 1.0},
+      g: {key: new Decimal128Value('1.2e-3')}, // 0.0012
+      h: {key: new Int32Value(2)},
+      i: {key: new Decimal128Value('NaN')},
+      j: {key: new Decimal128Value('-Infinity')},
+      k: {key: NaN},
+      l: {key: Infinity},
+    };
+
+    await addDocs(testDocs);
+    let orderedQuery = randomCol.orderBy('key', 'desc');
+    let snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toIds(snapshot)).to.deep.equal([
+      'l', // Infinity
+      'h', // 2
+      'f', // 1.0
+      'e', // 1
+      'd', // 1
+      'c', // 1
+      'g', // 0.0012
+      'b', // 0
+      'a', // -1200
+      'j', // -Infinity
+      'k', // NaN
+      'i', // NaN
+    ]);
+
+    orderedQuery = randomCol
+      .where('key', '!=', new Decimal128Value('1.0'))
+      .orderBy('key', 'desc');
+    snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toIds(snapshot)).to.deep.equal([
+      'l',
+      'h',
+      'g',
+      'b',
+      'a',
+      'j',
+      'k',
+      'i',
+    ]);
+
+    orderedQuery = randomCol.where('key', '==', 1).orderBy('key', 'desc');
+    snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toIds(snapshot)).to.deep.equal(['f', 'e', 'd', 'c']);
+  });
+
+  it('decimal128 values with no 2s complement representation', async () => {
+    const testDocs = {
+      a: {key: new Decimal128Value('-1.1e-3')}, // -0.0011
+      b: {key: new Decimal128Value('1.1')},
+      c: {key: 1.1},
+      d: {key: 1.0},
+      e: {key: new Decimal128Value('1.1e-3')}, // 0.0011
+    };
+
+    await addDocs(testDocs);
+    let orderedQuery = randomCol.where('key', '==', new Decimal128Value('1.1'));
+    let snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toIds(snapshot)).to.deep.equal(['b']);
+
+    orderedQuery = randomCol
+      .where('key', '!=', new Decimal128Value('1.1'))
+      .orderBy('key');
+    snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toIds(snapshot)).to.deep.equal(['a', 'e', 'd', 'c']);
+
+    orderedQuery = randomCol.where('key', '==', 1.1);
+    snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toIds(snapshot)).to.deep.equal(['c']);
+
+    orderedQuery = randomCol.where('key', '!=', 1.1).orderBy('key');
+    snapshot = await getFirstSnapshot(orderedQuery);
+    expect(toIds(snapshot)).to.deep.equal(['a', 'e', 'd', 'b']);
+  });
+
   it('can filter and order Timestamp values', async () => {
     const testDocs = {
       a: {key: new BsonTimestamp(1, 1)},
@@ -8806,24 +9025,25 @@ describe('non-native Firestore types', () => {
 
   it('cross-type order', async () => {
     await addDocs({
-      s: {key: null},
-      t: {key: MinKey.instance()},
+      t: {key: null},
+      u: {key: MinKey.instance()},
       c: {key: true},
       d: {key: NaN},
       e: {key: new Int32Value(1)},
       f: {key: 2.0},
-      g: {key: 3},
-      h: {key: new Timestamp(100, 123456000)},
-      i: {key: new BsonTimestamp(1, 2)},
-      j: {key: 'string'},
-      k: {key: new Uint8Array([0, 1, 255])},
-      l: {key: new BsonBinaryData(1, new Uint8Array([1, 2, 3]))},
-      m: {key: randomCol.firestore.collection('c1').doc('doc')},
-      n: {key: new BsonObjectId('507f191e810c19729de860ea')},
-      o: {key: new GeoPoint(0, 0)},
-      p: {key: new RegexValue('^foo', 'i')},
-      q: {key: [1, 2]},
-      r: {key: FieldValue.vector([1, 2])},
+      g: {key: new Decimal128Value('2.01e-5')},
+      h: {key: 3},
+      i: {key: new Timestamp(100, 123456000)},
+      j: {key: new BsonTimestamp(1, 2)},
+      k: {key: 'string'},
+      l: {key: new Uint8Array([0, 1, 255])},
+      m: {key: new BsonBinaryData(1, new Uint8Array([1, 2, 3]))},
+      n: {key: randomCol.firestore.collection('c1').doc('doc')},
+      o: {key: new BsonObjectId('507f191e810c19729de860ea')},
+      p: {key: new GeoPoint(0, 0)},
+      q: {key: new RegexValue('^foo', 'i')},
+      r: {key: [1, 2]},
+      s: {key: FieldValue.vector([1, 2])},
       a: {key: {a: 1}},
       b: {key: MaxKey.instance()},
     });
@@ -8831,6 +9051,7 @@ describe('non-native Firestore types', () => {
     const expectedResult = [
       'b',
       'a',
+      's',
       'r',
       'q',
       'p',
@@ -8842,13 +9063,13 @@ describe('non-native Firestore types', () => {
       'j',
       'i',
       'h',
-      'g',
       'f',
       'e',
+      'g',
       'd',
       'c',
+      'u',
       't',
-      's',
     ];
 
     const result = await getFirstSnapshot(randomCol.orderBy('key', 'desc'));

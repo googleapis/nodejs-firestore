@@ -27,6 +27,7 @@ import {
   BsonBinaryData,
   BsonObjectId,
   BsonTimestamp,
+  Decimal128Value,
   Int32Value,
   MaxKey,
   MinKey,
@@ -166,29 +167,79 @@ describe('Order', () => {
 
       // numbers
       [double(NaN), double(NaN)],
-      [double(-Infinity)],
+      [double(-Infinity), wrap(new Decimal128Value('-Infinity'))],
       [double(-Number.MAX_VALUE)],
-      [int(Number.MIN_SAFE_INTEGER - 1)],
-      [int(Number.MIN_SAFE_INTEGER)],
+      [
+        int(Number.MIN_SAFE_INTEGER - 1),
+        wrap(new Decimal128Value('-9007199254740992')),
+      ],
+      [
+        int(Number.MIN_SAFE_INTEGER),
+        wrap(new Decimal128Value('-9007199254740991')),
+      ],
       // 64-bit and 32-bit integers order together numerically.
-      [int(-2147483648), wrap(new Int32Value(-2147483648))],
-      [double(-1.1)],
+      [
+        int(-2147483648),
+        wrap(new Int32Value(-2147483648)),
+        wrap(new Decimal128Value('-2147483648')),
+      ],
+      [double(-1.5), wrap(new Decimal128Value('-1.5'))],
       // Integers and Doubles and int32 order together numerically.
-      [int(-1), double(-1.0), wrap(new Int32Value(-1))],
+      [
+        int(-1),
+        double(-1.0),
+        wrap(new Int32Value(-1)),
+        wrap(new Decimal128Value('-1')),
+        wrap(new Decimal128Value('-1.0')),
+      ],
       [double(-Number.MIN_VALUE)],
       // zeros all compare the same.
-      [int(0), double(0.0), double(-0), wrap(new Int32Value(0))],
+      [
+        int(0),
+        double(0.0),
+        double(-0),
+        wrap(new Int32Value(0)),
+        wrap(new Decimal128Value('0')),
+        wrap(new Decimal128Value('-0')),
+      ],
       [double(Number.MIN_VALUE)],
-      [int(1), double(1.0), wrap(new Int32Value(1))],
-      [double(1.1)],
-      [int(2)],
-      [int(10)],
-      [wrap(new Int32Value(11))],
-      [wrap(new Int32Value(12))],
-      [wrap(new Int32Value(2147483647))],
-      [int(Number.MAX_SAFE_INTEGER)],
-      [int(Number.MAX_SAFE_INTEGER + 1)],
-      [double(Infinity)],
+      [
+        int(1),
+        double(1.0),
+        wrap(new Int32Value(1)),
+        wrap(new Decimal128Value('1')),
+        wrap(new Decimal128Value('1.0')),
+      ],
+      [double(1.5), wrap(new Decimal128Value('1.5'))],
+      [
+        int(2),
+        wrap(new Decimal128Value('2')),
+        wrap(new Decimal128Value('2.0')),
+      ],
+      [
+        int(10),
+        wrap(new Decimal128Value('10')),
+        wrap(new Decimal128Value('10.0')),
+      ],
+      [
+        wrap(new Int32Value(11)),
+        wrap(new Decimal128Value('11')),
+        wrap(new Decimal128Value('11.0')),
+      ],
+      [wrap(new Int32Value(12)), wrap(new Decimal128Value('12.0'))],
+      [
+        wrap(new Int32Value(2147483647)),
+        wrap(new Decimal128Value('2147483647')),
+      ],
+      [
+        int(Number.MAX_SAFE_INTEGER),
+        wrap(new Decimal128Value('9007199254740991')),
+      ],
+      [
+        int(Number.MAX_SAFE_INTEGER + 1),
+        wrap(new Decimal128Value('9007199254740992')),
+      ],
+      [double(Infinity), wrap(new Decimal128Value('Infinity'))],
 
       // timestamps
       [wrap(new Date(2016, 5, 20, 10, 20))],

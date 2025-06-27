@@ -32,6 +32,9 @@ export const RESERVED_BSON_OBJECT_ID_KEY = '__oid__';
 // For Int32 type
 export const RESERVED_INT32_KEY = '__int__';
 
+// For Decimal128 type
+export const RESERVED_DECIMAL128_KEY = '__decimal128__';
+
 // For BSON Timestamp
 export const RESERVED_BSON_TIMESTAMP_KEY = '__request_timestamp__';
 export const RESERVED_BSON_TIMESTAMP_SECONDS_KEY = 'seconds';

@@ -116,6 +116,7 @@ export {
   BsonObjectId,
   BsonTimestamp,
   BsonBinaryData,
+  Decimal128Value,
   RegexValue,
   Int32Value,
 } from './field-value';

@@ -28,6 +28,7 @@ import {
   BsonBinaryData,
   BsonObjectId,
   BsonTimestamp,
+  Decimal128Value,
   Int32Value,
   MaxKey,
   MinKey,
@@ -661,6 +662,34 @@ describe('serialize document', () => {
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
         myInt32: new Int32Value(12345),
+      });
+    });
+  });
+
+  it('is able to translate decimal128 to internal representation', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'myDecimal128', {
+              mapValue: {
+                fields: {
+                  __decimal128__: {
+                    stringValue: '1.2e-3',
+                  },
+                },
+              },
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        myDecimal128: new Decimal128Value('1.2e-3'),
       });
     });
   });
