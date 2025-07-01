@@ -16,28 +16,23 @@ syntax = "proto3";
 
 package google.firestore.v1;
 
-import "google/api/field_behavior.proto";
-import "google/firestore/v1/document.proto";
+import "google/protobuf/any.proto";
 
 option csharp_namespace = "Google.Cloud.Firestore.V1";
 option go_package = "cloud.google.com/go/firestore/apiv1/firestorepb;firestorepb";
 option java_multiple_files = true;
-option java_outer_classname = "PipelineProto";
+option java_outer_classname = "ExplainStatsProto";
 option java_package = "com.google.firestore.v1";
-option objc_class_prefix = "GCFS";
 option php_namespace = "Google\\Cloud\\Firestore\\V1";
 option ruby_package = "Google::Cloud::Firestore::V1";
 
-// A Firestore query represented as an ordered list of operations / stages.
-//
-// This is considered the top-level function which plans & executes a query.
-// It is logically equivalent to `query(stages, options)`, but prevents the
-// client from having to build a function wrapper.
-message StructuredPipeline {
-  // Required. The pipeline query to execute.
-  Pipeline pipeline = 1 [(google.api.field_behavior) = REQUIRED];
+// Specification of Firestore Explain Stats fields.
 
-  // Optional. Optional query-level arguments.
+// Explain stats for an RPC request, includes both the optimized plan and
+// execution stats.
+message ExplainStats {
+  // The format depends on the `output_format` options in the request.
   //
-  map<string, Value> options = 2 [(google.api.field_behavior) = OPTIONAL];
+  // The only option today is `TEXT`, which is a `google.protobuf.StringValue`.
+  google.protobuf.Any data = 1;
 }
