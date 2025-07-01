@@ -22,7 +22,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshot} from './document';
 import {DEFAULT_MAX_TRANSACTION_ATTEMPTS, Firestore, WriteBatch} from './index';
-import {Pipeline, PipelineResult, PipelineSnapshot} from './pipeline';
+import {Pipeline, PipelineResult, PipelineSnapshot} from './pipelines';
 import {Timestamp} from './timestamp';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
@@ -288,17 +288,15 @@ export class Transaction implements firestore.Transaction {
   }
 
   /**
-   * @beta
-   *
    * Executes this pipeline and returns a Promise to represent the asynchronous operation.
    *
    * <p>The returned Promise can be used to track the progress of the pipeline execution
    * and retrieve the results (or handle any errors) asynchronously.
    *
-   * <p>The pipeline results are returned as a list of {@link PipelineResult} objects. Each {@link
-   * PipelineResult} typically represents a single key/value map that has passed through all the
-   * stages of the pipeline, however this might differ depending on the stages involved in the
-   * pipeline. For example:
+   * <p>The pipeline results are returned in a {@link PipelineSnapshot} object, which contains a list of
+   * {@link PipelineResult} objects. Each {@link PipelineResult} typically represents a single key/value map that
+   * has passed through all the stages of the pipeline, however this might differ depending on the stages involved
+   * in the pipeline. For example:
    *
    * <ul>
    *   <li>If there are no stages or only transformation stages, each {@link PipelineResult}
@@ -321,7 +319,7 @@ export class Transaction implements firestore.Transaction {
    *
    * @return A Promise representing the asynchronous pipeline execution.
    */
-  execute(pipeline: firestore.Pipeline): Promise<PipelineSnapshot> {
+  execute(pipeline: Pipeline): Promise<PipelineSnapshot> {
     if (this._writeBatch && !this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
