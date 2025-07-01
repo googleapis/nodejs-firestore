@@ -99,6 +99,14 @@ import {
 import {StructuredPipeline} from './structured-pipeline';
 import Selectable = FirebaseFirestore.Pipelines.Selectable;
 
+import {
+  load as loadProtos,
+  Root as ProtoRoot,
+  Type as MessageType,
+  ReflectionObject,
+} from 'protobufjs';
+import {logger} from '../logger';
+
 /**
  * Represents the source of a Firestore {@link Pipeline}.
  */
@@ -1223,7 +1231,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @param other The other {@code Pipeline} that is part of union.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  union(other: Pipeline): Pipeline;
+  union(other: firestore.Pipelines.Pipeline): Pipeline;
   /**
    * Performs union of all documents from two pipelines, including duplicates.
    *
@@ -1244,7 +1252,9 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    */
   union(options: firestore.Pipelines.UnionStageOptions): Pipeline;
   union(
-    otherOrOptions: Pipeline | firestore.Pipelines.UnionStageOptions
+    otherOrOptions:
+      | firestore.Pipelines.Pipeline
+      | firestore.Pipelines.UnionStageOptions
   ): Pipeline {
     const options = isPipeline(otherOrOptions) ? {} : otherOrOptions;
 
@@ -1530,8 +1540,9 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     return this._execute(undefined, pipelineOptions).then(response => {
       const results = response.result || [];
       const executionTime = response.executionTime;
+      const stats = response.explainStats;
 
-      return new PipelineSnapshot(this, results, executionTime);
+      return new PipelineSnapshot(this, results, executionTime, stats);
     });
   }
 
@@ -1647,21 +1658,149 @@ function aggregateWithAliasToMap(
 }
 
 /**
+ * A wrapper object to access explain stats if explain or analyze
+ * was enabled for the Pipeline query execution.
+ */
+export class ExplainStats implements firestore.Pipelines.ExplainStats {
+  private static protoRoot: ProtoRoot | undefined = undefined;
+
+  /**
+   * @private
+   * @internal
+   */
+  static async _ensureMessageTypesLoaded(): Promise<void> {
+    if (ExplainStats.protoRoot) {
+      return;
+    }
+    this.protoRoot = await loadProtos(
+      '../protos/google/protobuf/wrappers.proto'
+    );
+  }
+
+  /**
+   * Decode an ExplainStats proto message into an ExplainStats object.
+   * @private
+   * @internal
+   * @param explainStatsMessage
+   */
+  static _decode(
+    explainStatsMessage: google.firestore.v1.IExplainStats
+  ): ExplainStats {
+    if (!ExplainStats.protoRoot) {
+      throw new Error(
+        'Ensure message types are loaded before attempting to decode ExplainStats'
+      );
+    }
+
+    if (!explainStatsMessage.data || !explainStatsMessage.data.value) {
+      throw new Error('Unexpected explainStatsMessage without data');
+    }
+
+    if (!explainStatsMessage.data.type_url) {
+      throw new Error('Unexpected explainStatsMessage without type_url');
+    }
+
+    const typeUrl = explainStatsMessage.data.type_url;
+    let reflectionObject: ReflectionObject | null = null;
+    const NAMESPACE = 'type.googleapis.com/';
+
+    if (
+      !typeUrl.startsWith(NAMESPACE) ||
+      !(reflectionObject = ExplainStats.protoRoot.lookup(
+        typeUrl.slice(NAMESPACE.length)
+      )) ||
+      !(reflectionObject instanceof MessageType)
+    ) {
+      throw new Error(
+        `Unsupported explainStatsMessage type_url: "${explainStatsMessage.data.type_url}"`
+      );
+    }
+
+    const messageType = reflectionObject as MessageType;
+
+    const value: unknown = messageType.toObject(
+      messageType.decode(explainStatsMessage.data.value)
+    ).value;
+
+    return new ExplainStats(value);
+  }
+
+  /**
+   * @private
+   * @internal
+   * @hideconstructor
+   * @param _value
+   */
+  constructor(private _value: unknown) {}
+
+  /**
+   * When explain stats were requested with `outputFormat = 'json'`, this returns
+   * the explain stats object parsed from the JSON string returned from the Firestore
+   * backend.
+   *
+   * If explain stats were not requested with `outputFormat = 'json'`, the behavior
+   * of this method is not guaranteed and is expected to throw.
+   */
+  get json(): {[key: string]: firestore.Pipelines.ExplainStatsFieldValue} {
+    if (isString(this._value)) {
+      try {
+        return JSON.parse(this._value);
+      } catch (error: unknown) {
+        logger('json', null, 'Error parsing explain stats to JSON.', error);
+      }
+    }
+
+    throw new Error(
+      "Unable to convert explain stats to an object, ensure you requested `explainOptions.outputFormat = 'json'`"
+    );
+  }
+
+  /**
+   * When explain stats were requested with `outputFormat = 'text'`, this returns
+   * the explain stats string verbatium as returned from the Firestore backend.
+   *
+   * If explain stats were requested with `outputFormat = 'json'`, this returns
+   * the explain stats as stringified JSON, which was returned from the Firestore backend.
+   */
+  get text(): string {
+    if (isString(this._value)) {
+      return this._value;
+    }
+
+    throw new Error(
+      "Explain stats is not in a string format, ensure you requested an `explainOptions.outputFormat` that returns a string value, such as 'text'."
+    );
+  }
+
+  /**
+   * Returns the explain stats verbatium as returned from the Firestore backend.
+   * The returned type is dependent on the `explainOptions.outputFormat` defined
+   * for the pipeline execution.
+   */
+  get rawValue(): unknown {
+    return this._value;
+  }
+}
+
+/**
  * TODO(docs)
  */
-export class PipelineSnapshot {
+export class PipelineSnapshot implements firestore.Pipelines.PipelineSnapshot {
   private readonly _pipeline: Pipeline;
   private readonly _executionTime: Timestamp | undefined;
   private readonly _results: PipelineResult[];
+  private readonly _explainStats: ExplainStats | undefined;
 
   constructor(
     pipeline: Pipeline,
     results: PipelineResult[],
-    executionTime?: Timestamp
+    executionTime?: Timestamp,
+    explainStats?: ExplainStats
   ) {
     this._pipeline = pipeline;
     this._executionTime = executionTime;
     this._results = results;
+    this._explainStats = explainStats;
   }
 
   /**
@@ -1691,6 +1830,15 @@ export class PipelineSnapshot {
       );
     }
     return this._executionTime;
+  }
+
+  /**
+   * Return stats from query explain.
+   *
+   * If `explainOptions.mode` was set to `execute` or left unset, then this returns `undefined`.
+   */
+  get explainStats(): ExplainStats | undefined {
+    return this._explainStats;
   }
 }
 

@@ -10427,6 +10427,49 @@ declare namespace FirebaseFirestore {
     };
 
     /**
+     * Type representing the possible explain stats values.
+     */
+    export type ExplainStatsFieldValue =
+      | null
+      | string
+      | number
+      | boolean
+      | {[key: string]: ExplainStatsFieldValue}
+      | ExplainStatsFieldValue[];
+
+    /**
+     * A wrapper object to access explain stats if explain or analyze
+     * was enabled for the Pipeline query execution.
+     */
+    export class ExplainStats {
+      /**
+       * When explain stats were requested with `outputFormat = 'json'`, this returns
+       * the explain stats object parsed from the JSON string returned from the Firestore
+       * backend.
+       *
+       * If explain stats were not requested with `outputFormat = 'json'`, the behavior
+       * of this method is not guaranteed and is expected to throw.
+       */
+      get json(): {[key: string]: ExplainStatsFieldValue};
+
+      /**
+       * When explain stats were requested with `outputFormat = 'text'`, this returns
+       * the explain stats string verbatium as returned from the Firestore backend.
+       *
+       * If explain stats were requested with `outputFormat = 'json'`, this returns
+       * the explain stats as stringified JSON, which was returned from the Firestore backend.
+       */
+      get text(): string;
+
+      /**
+       * Returns the explain stats verbatium as returned from the Firestore backend.
+       * The returned type is dependent on the `explainOptions.outputFormat` defined
+       * for the pipeline execution.
+       */
+      get rawValue(): unknown;
+    }
+
+    /**
      * TODO(docs)
      */
     export class PipelineSnapshot {
@@ -10443,10 +10486,16 @@ declare namespace FirebaseFirestore {
        * The time at which the pipeline producing this result is executed.
        *
        * @type {Timestamp}
-       * @readonly
        *
        */
       get executionTime(): Timestamp;
+
+      /**
+       * Return stats from query explain.
+       *
+       * If `explainOptions.mode` was set to `execute` or left unset, then this returns `undefined`.
+       */
+      get explainStats(): ExplainStats | undefined;
     }
 
     /**

@@ -61,6 +61,10 @@ describe('StructuredPipeline', () => {
       pipeline,
       {
         indexMode: 'recommended',
+        explainOptions: {
+          mode: 'explain',
+          outputFormat: 'json',
+        },
       },
       {}
     );
@@ -72,6 +76,18 @@ describe('StructuredPipeline', () => {
       options: {
         index_mode: {
           stringValue: 'recommended',
+        },
+        explain_options: {
+          mapValue: {
+            fields: {
+              mode: {
+                stringValue: 'explain',
+              },
+              output_format: {
+                stringValue: 'json',
+              },
+            },
+          },
         },
       },
     });
@@ -98,7 +114,9 @@ describe('StructuredPipeline', () => {
     expect(proto).to.deep.equal({
       pipeline: {},
       options: {
-        foo_bar: {stringValue: 'baz'},
+        foo_bar: {
+          stringValue: 'baz',
+        },
       },
     });
 

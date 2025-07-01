@@ -127,6 +127,7 @@ import {itIf, verifyInstance} from '../test/util/helpers';
 import {getTestDb, getTestRoot} from './firestore';
 
 import {Firestore as InternalFirestore} from '../src';
+import {isString} from '../src/pipelines/pipeline-util';
 
 use(chaiAsPromised);
 
@@ -441,6 +442,187 @@ describe.only('Pipeline class', () => {
         expect(doc.updateTime).to.be.undefined;
         expect(doc.createTime).to.be.undefined;
       });
+    });
+  });
+
+  describe('pipeline explain', () => {
+    it('mode: analyze, format: text', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          mode: 'analyze',
+          outputFormat: 'text',
+        },
+      });
+      expect(snapshot.explainStats).not.to.be.undefined;
+      expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
+      expect(snapshot.explainStats!.text.charAt(0)).not.to.equal('{');
+
+      if (isString(snapshot.explainStats!.rawValue)) {
+        expect(snapshot.explainStats!.rawValue.length).to.be.greaterThan(0);
+        expect(snapshot.explainStats!.rawValue.charAt(0)).not.to.equal('{');
+      } else {
+        expect.fail('explainStats.rawValue should be a string');
+      }
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
+    });
+
+    it('mode: analyze, format: unspecified', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          mode: 'analyze',
+        },
+      });
+      expect(snapshot.explainStats).not.to.be.undefined;
+      expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
+      expect(snapshot.explainStats!.text.charAt(0)).not.to.equal('{');
+
+      if (isString(snapshot.explainStats!.rawValue)) {
+        expect(snapshot.explainStats!.rawValue.length).to.be.greaterThan(0);
+        expect(snapshot.explainStats!.rawValue.charAt(0)).not.to.equal('{');
+      } else {
+        expect.fail('explainStats.rawValue should be a string');
+      }
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
+    });
+
+    it('mode: analyze, format: json', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          mode: 'analyze',
+          outputFormat: 'json',
+        },
+      });
+      expect(snapshot.explainStats).not.to.be.undefined;
+      expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
+      expect(snapshot.explainStats!.text.charAt(0)).to.equal('{');
+
+      if (isString(snapshot.explainStats!.rawValue)) {
+        expect(snapshot.explainStats!.rawValue.length).to.be.greaterThan(0);
+        expect(snapshot.explainStats!.rawValue.charAt(0)).to.equal('{');
+      } else {
+        expect.fail('explainStats.rawValue should be a string');
+      }
+
+      expect(snapshot.explainStats!.json).not.to.be.null;
+      expect(typeof snapshot.explainStats!.json).to.be.equal('object');
+      console.log(snapshot.explainStats!.json);
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
+    });
+
+    it('mode: execute, format: text', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          mode: 'execute',
+          outputFormat: 'text',
+        },
+      });
+      expect(snapshot.explainStats).to.be.undefined;
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
+    });
+
+    it('mode: unspecified, format: text', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          outputFormat: 'text',
+        },
+      });
+      expect(snapshot.explainStats).to.be.undefined;
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
     });
   });
 
@@ -3446,7 +3628,7 @@ describe.only('Pipeline class', () => {
 
 // This is the Query integration tests from the lite API (no cache support)
 // with some additional test cases added for more complete coverage.
-describe.only('Query to Pipeline', () => {
+describe('Query to Pipeline', () => {
   async function execute(ppl: Pipeline): Promise<PipelineSnapshot> {
     return ppl.execute();
   }

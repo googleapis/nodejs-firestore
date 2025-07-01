@@ -95,9 +95,16 @@ describe('execute(Pipeline|PipelineOptions)', () => {
       executePipeline: spy,
     });
 
-    await firestore.pipeline().collection('foo').execute({
-      indexMode: 'recommended',
-    });
+    await firestore
+      .pipeline()
+      .collection('foo')
+      .execute({
+        indexMode: 'recommended',
+        explainOptions: {
+          mode: 'analyze',
+          outputFormat: 'json',
+        },
+      });
 
     const executePipelineRequest: IExecutePipelineRequest = {
       database: 'projects/test-project/databases/(default)',
@@ -105,6 +112,18 @@ describe('execute(Pipeline|PipelineOptions)', () => {
         options: {
           index_mode: {
             stringValue: 'recommended',
+          },
+          explain_options: {
+            mapValue: {
+              fields: {
+                mode: {
+                  stringValue: 'explain',
+                },
+                output_format: {
+                  stringValue: 'json',
+                },
+              },
+            },
           },
         },
         pipeline: {

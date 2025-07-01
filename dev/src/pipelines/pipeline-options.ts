@@ -21,6 +21,24 @@ export interface PipelineOptions {
    */
   indexMode?: 'recommended';
 
+  /** Options used to configure explain queries. */
+  explainOptions?: {
+    /**
+     * The explain mode configures what explain data
+     * and query results are returned from the Pipeline query.
+     *
+     * `"execute"` - [DEFAULT] Execute the Pipeline and return results
+     * `"analyze"` - Plan the query and execute, returning both the planner
+     *               information and the Pipeline query results.
+     */
+    mode?: 'execute' | 'analyze';
+
+    /**
+     * Specifies the output format of the query planner information.
+     */
+    outputFormat?: 'text' | 'json';
+  };
+
   /**
    * An escape hatch to set options not known at SDK build time. These values
    * will be passed directly to the Firestore backend and not used by the SDK.

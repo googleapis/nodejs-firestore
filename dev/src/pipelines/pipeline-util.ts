@@ -66,7 +66,7 @@ import {
   Field,
   AggregateFunction,
 } from './expression';
-import {Pipeline, PipelineResult} from './pipelines';
+import {Pipeline, PipelineResult, ExplainStats} from './pipelines';
 import {StructuredPipeline} from './structured-pipeline';
 import Selectable = FirebaseFirestore.Pipelines.Selectable;
 
@@ -111,8 +111,8 @@ export class ExecutionUtil {
           if (element.executionTime) {
             output.executionTime = element.executionTime;
           }
-          if (element.explainMetrics) {
-            output.explainMetrics = element.explainMetrics;
+          if (element.explainStats) {
+            output.explainStats = element.explainStats;
           }
           if (element.result) {
             result.push(element.result);
@@ -183,46 +183,59 @@ export class ExecutionUtil {
           if (proto.executionTime) {
             output.executionTime = Timestamp.fromProto(proto.executionTime);
           }
+          if (proto.explainStats) {
+            console.log(proto.explainStats.data);
+          }
           callback(undefined, [output]);
         } else {
-          callback(
-            undefined,
-            proto.results.map(result => {
-              const output: PipelineStreamElement = {};
-              if (proto.transaction?.length) {
-                output.transaction = proto.transaction;
-              }
-              if (proto.executionTime) {
-                output.executionTime = Timestamp.fromProto(proto.executionTime);
-              }
+          let output: PipelineStreamElement[] = proto.results.map(result => {
+            const output: PipelineStreamElement = {};
+            if (proto.transaction?.length) {
+              output.transaction = proto.transaction;
+            }
+            if (proto.executionTime) {
+              output.executionTime = Timestamp.fromProto(proto.executionTime);
+            }
 
-              const ref = result.name
-                ? new DocumentReference(
-                    this._firestore,
-                    QualifiedResourcePath.fromSlashSeparatedString(result.name)
-                  )
-                : undefined;
-              output.result = new PipelineResult(
-                this._serializer,
-                ref,
-                result.fields || undefined,
-                Timestamp.fromProto(proto.executionTime!),
-                result.createTime
-                  ? Timestamp.fromProto(result.createTime!)
-                  : undefined,
-                result.updateTime
-                  ? Timestamp.fromProto(result.updateTime!)
-                  : undefined
-              );
-              return output;
-            })
-          );
+            const ref = result.name
+              ? new DocumentReference(
+                  this._firestore,
+                  QualifiedResourcePath.fromSlashSeparatedString(result.name)
+                )
+              : undefined;
+            output.result = new PipelineResult(
+              this._serializer,
+              ref,
+              result.fields || undefined,
+              Timestamp.fromProto(proto.executionTime!),
+              result.createTime
+                ? Timestamp.fromProto(result.createTime!)
+                : undefined,
+              result.updateTime
+                ? Timestamp.fromProto(result.updateTime!)
+                : undefined
+            );
+            return output;
+          });
+          if (proto.explainStats?.data?.value) {
+            const explainStats = ExplainStats._decode(proto.explainStats);
+
+            output = [
+              ...output,
+              {
+                explainStats,
+              } as PipelineStreamElement,
+            ];
+          }
+          callback(undefined, output);
         }
       },
     });
 
-    this._firestore
-      .initializeIfNeeded(tag)
+    Promise.all([
+      this._firestore.initializeIfNeeded(tag),
+      ExplainStats._ensureMessageTypesLoaded(),
+    ])
       .then(async () => {
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we

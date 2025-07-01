@@ -23,6 +23,10 @@ import {OptionsUtil} from './options-util';
 
 export type StructuredPipelineOptions = {
   indexMode?: 'recommended';
+  explainOptions?: {
+    mode?: 'execute' | 'explain' | 'analyze';
+    outputFormat?: 'text' | 'json';
+  };
 };
 
 export class StructuredPipeline
@@ -33,6 +37,25 @@ export class StructuredPipeline
       serverName: 'index_mode',
       supportedTypes: {
         string: true,
+      },
+    },
+    explainOptions: {
+      serverName: 'explain_options',
+      supportedTypes: {
+        nestedOptions: {
+          mode: {
+            serverName: 'mode',
+            supportedTypes: {
+              string: true,
+            },
+          },
+          outputFormat: {
+            serverName: 'output_format',
+            supportedTypes: {
+              string: true,
+            },
+          },
+        },
       },
     },
   });

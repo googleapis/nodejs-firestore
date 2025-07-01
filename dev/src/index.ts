@@ -624,7 +624,7 @@ export class Firestore implements firestore.Firestore {
         let gax: typeof googleGax | typeof googleGaxFallback;
         if (useFallback) {
           if (!this._gaxFallback) {
-            gax = this._gaxFallback = require('google-gax/fallback');
+            gax = this._gaxFallback = require('google-gax/build/src/fallback');
           } else {
             gax = this._gaxFallback;
           }
