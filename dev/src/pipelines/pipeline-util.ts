@@ -218,7 +218,7 @@ export class ExecutionUtil {
             return output;
           });
           if (proto.explainStats?.data?.value) {
-            const explainStats = ExplainStats._decode(proto.explainStats);
+            const explainStats = new ExplainStats(proto.explainStats.data);
 
             output = [
               ...output,

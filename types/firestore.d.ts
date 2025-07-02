@@ -10462,11 +10462,13 @@ declare namespace FirebaseFirestore {
       get text(): string;
 
       /**
-       * Returns the explain stats verbatium as returned from the Firestore backend.
-       * The returned type is dependent on the `explainOptions.outputFormat` defined
-       * for the pipeline execution.
+       * Returns the explain stats in an encoded proto format, as returned from the Firestore backend.
+       * The caller is responsible for unpacking this proto message.
        */
-      get rawValue(): unknown;
+      get rawData(): {
+        type_url?: string | null;
+        value?: Uint8Array | null;
+      };
     }
 
     /**

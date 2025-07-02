@@ -127,7 +127,6 @@ import {itIf, verifyInstance} from '../test/util/helpers';
 import {getTestDb, getTestRoot} from './firestore';
 
 import {Firestore as InternalFirestore} from '../src';
-import {isString} from '../src/pipelines/pipeline-util';
 
 use(chaiAsPromised);
 
@@ -451,22 +450,23 @@ describe.only('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .sort(ascending('__name__'));
+
       const snapshot = await ppl.execute({
         explainOptions: {
           mode: 'analyze',
           outputFormat: 'text',
         },
       });
+
       expect(snapshot.explainStats).not.to.be.undefined;
       expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
       expect(snapshot.explainStats!.text.charAt(0)).not.to.equal('{');
 
-      if (isString(snapshot.explainStats!.rawValue)) {
-        expect(snapshot.explainStats!.rawValue.length).to.be.greaterThan(0);
-        expect(snapshot.explainStats!.rawValue.charAt(0)).not.to.equal('{');
-      } else {
-        expect.fail('explainStats.rawValue should be a string');
-      }
+      expect(snapshot.explainStats!.rawData.type_url).to.equal(
+        'type.googleapis.com/google.protobuf.StringValue'
+      );
+      expect(snapshot.explainStats!.rawData.value).to.not.be.null;
+      expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
 
       expect(snapshot.results.length).to.equal(10);
       expect(snapshot.pipeline).to.equal(ppl);
@@ -499,12 +499,11 @@ describe.only('Pipeline class', () => {
       expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
       expect(snapshot.explainStats!.text.charAt(0)).not.to.equal('{');
 
-      if (isString(snapshot.explainStats!.rawValue)) {
-        expect(snapshot.explainStats!.rawValue.length).to.be.greaterThan(0);
-        expect(snapshot.explainStats!.rawValue.charAt(0)).not.to.equal('{');
-      } else {
-        expect.fail('explainStats.rawValue should be a string');
-      }
+      expect(snapshot.explainStats!.rawData.type_url).to.equal(
+        'type.googleapis.com/google.protobuf.StringValue'
+      );
+      expect(snapshot.explainStats!.rawData.value).to.not.be.null;
+      expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
 
       expect(snapshot.results.length).to.equal(10);
       expect(snapshot.pipeline).to.equal(ppl);
@@ -538,12 +537,11 @@ describe.only('Pipeline class', () => {
       expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
       expect(snapshot.explainStats!.text.charAt(0)).to.equal('{');
 
-      if (isString(snapshot.explainStats!.rawValue)) {
-        expect(snapshot.explainStats!.rawValue.length).to.be.greaterThan(0);
-        expect(snapshot.explainStats!.rawValue.charAt(0)).to.equal('{');
-      } else {
-        expect.fail('explainStats.rawValue should be a string');
-      }
+      expect(snapshot.explainStats!.rawData.type_url).to.equal(
+        'type.googleapis.com/google.protobuf.StringValue'
+      );
+      expect(snapshot.explainStats!.rawData.value).to.not.be.null;
+      expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
 
       expect(snapshot.explainStats!.json).not.to.be.null;
       expect(typeof snapshot.explainStats!.json).to.be.equal('object');

@@ -1678,29 +1678,35 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
   }
 
   /**
-   * Decode an ExplainStats proto message into an ExplainStats object.
+   * @private
+   * @internal
+   * @hideconstructor
+   * @param _value
+   */
+  constructor(private readonly explainStatsData: google.protobuf.IAny) {}
+
+  /**
+   * Decode an ExplainStats proto message into a value.
    * @private
    * @internal
    * @param explainStatsMessage
    */
-  static _decode(
-    explainStatsMessage: google.firestore.v1.IExplainStats
-  ): ExplainStats {
+  _decode(): unknown {
     if (!ExplainStats.protoRoot) {
       throw new Error(
         'Ensure message types are loaded before attempting to decode ExplainStats'
       );
     }
 
-    if (!explainStatsMessage.data || !explainStatsMessage.data.value) {
+    if (!this.explainStatsData.value) {
       throw new Error('Unexpected explainStatsMessage without data');
     }
 
-    if (!explainStatsMessage.data.type_url) {
+    if (!this.explainStatsData.type_url) {
       throw new Error('Unexpected explainStatsMessage without type_url');
     }
 
-    const typeUrl = explainStatsMessage.data.type_url;
+    const typeUrl = this.explainStatsData.type_url;
     let reflectionObject: ReflectionObject | null = null;
     const NAMESPACE = 'type.googleapis.com/';
 
@@ -1712,26 +1718,15 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
       !(reflectionObject instanceof MessageType)
     ) {
       throw new Error(
-        `Unsupported explainStatsMessage type_url: "${explainStatsMessage.data.type_url}"`
+        `Unsupported explainStatsMessage type_url "${this.explainStatsData.type_url}". Use \`.rawMessage\` to get access to the encoded explainStats message and perform the protobuf parsing in your application.`
       );
     }
 
     const messageType = reflectionObject as MessageType;
 
-    const value: unknown = messageType.toObject(
-      messageType.decode(explainStatsMessage.data.value)
-    ).value;
-
-    return new ExplainStats(value);
+    return messageType.toObject(messageType.decode(this.explainStatsData.value))
+      .value;
   }
-
-  /**
-   * @private
-   * @internal
-   * @hideconstructor
-   * @param _value
-   */
-  constructor(private _value: unknown) {}
 
   /**
    * When explain stats were requested with `outputFormat = 'json'`, this returns
@@ -1742,9 +1737,10 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
    * of this method is not guaranteed and is expected to throw.
    */
   get json(): {[key: string]: firestore.Pipelines.ExplainStatsFieldValue} {
-    if (isString(this._value)) {
+    const value = this._decode();
+    if (isString(value)) {
       try {
-        return JSON.parse(this._value);
+        return JSON.parse(value);
       } catch (error: unknown) {
         logger('json', null, 'Error parsing explain stats to JSON.', error);
       }
@@ -1763,8 +1759,9 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
    * the explain stats as stringified JSON, which was returned from the Firestore backend.
    */
   get text(): string {
-    if (isString(this._value)) {
-      return this._value;
+    const value = this._decode();
+    if (isString(value)) {
+      return value;
     }
 
     throw new Error(
@@ -1773,12 +1770,14 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
   }
 
   /**
-   * Returns the explain stats verbatium as returned from the Firestore backend.
-   * The returned type is dependent on the `explainOptions.outputFormat` defined
-   * for the pipeline execution.
+   * Returns the explain stats in an encoded proto format, as returned from the Firestore backend.
+   * The caller is responsible for unpacking this proto message.
    */
-  get rawValue(): unknown {
-    return this._value;
+  get rawData(): {
+    type_url?: string | null;
+    value?: Uint8Array | null;
+  } {
+    return this.explainStatsData;
   }
 }
 
