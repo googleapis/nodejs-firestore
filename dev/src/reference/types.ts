@@ -23,6 +23,7 @@ import {ExplainMetrics} from '../query-profile';
 import {QueryDocumentSnapshot} from '../document';
 
 import * as firestore from '@google-cloud/firestore';
+import {ExplainStats} from '../pipelines/pipelines';
 
 export interface QueryStreamElement<
   AppModelType = firestore.DocumentData,
@@ -63,15 +64,15 @@ export enum LimitType {
 export interface PipelineStreamElement {
   transaction?: Uint8Array;
   executionTime?: Timestamp;
-  explainMetrics?: ExplainMetrics;
+  explainStats?: ExplainStats;
   result?: PipelineResult;
 }
 
 export interface PipelineResponse {
   transaction?: Uint8Array;
   executionTime?: Timestamp;
-  explainMetrics?: ExplainMetrics;
   result?: Array<PipelineResult>;
+  explainStats?: ExplainStats;
 }
 
 /**

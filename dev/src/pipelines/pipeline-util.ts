@@ -19,7 +19,12 @@ import {google} from '../../protos/firestore_v1_proto_api';
 
 import * as protos from '../../protos/firestore_v1_proto_api';
 import './expression';
-import Firestore, {DocumentReference, Timestamp, VectorValue} from '../index';
+import Firestore, {
+  CollectionReference,
+  DocumentReference,
+  Timestamp,
+  VectorValue,
+} from '../index';
 import {logger} from '../logger';
 import {QualifiedResourcePath} from '../path';
 import {CompositeFilterInternal} from '../reference/composite-filter-internal';
@@ -58,8 +63,12 @@ import {
   Ordering,
   gt,
   lt,
+  Field,
+  AggregateFunction,
 } from './expression';
-import {Pipeline, PipelineResult} from './pipelines';
+import {Pipeline, PipelineResult, ExplainStats} from './pipelines';
+import {StructuredPipeline} from './structured-pipeline';
+import Selectable = FirebaseFirestore.Pipelines.Selectable;
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -77,9 +86,8 @@ export class ExecutionUtil {
   ) {}
 
   _getResponse(
-    pipeline: Pipeline,
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: firestore.ExplainOptions
+    structuredPipeline: StructuredPipeline,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): Promise<PipelineResponse> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -89,9 +97,8 @@ export class ExecutionUtil {
       const output: PipelineResponse = {};
 
       const stream: NodeJS.EventEmitter = this._stream(
-        pipeline,
-        transactionOrReadTime,
-        explainOptions
+        structuredPipeline,
+        transactionOrReadTime
       );
       stream.on('error', err => {
         reject(wrapError(err, stack));
@@ -104,8 +111,8 @@ export class ExecutionUtil {
           if (element.executionTime) {
             output.executionTime = element.executionTime;
           }
-          if (element.explainMetrics) {
-            output.explainMetrics = element.explainMetrics;
+          if (element.explainStats) {
+            output.explainStats = element.explainStats;
           }
           if (element.result) {
             result.push(element.result);
@@ -134,7 +141,9 @@ export class ExecutionUtil {
   }
 
   stream(pipeline: Pipeline): NodeJS.ReadableStream {
-    const responseStream = this._stream(pipeline);
+    // TODO(pipeline) implement options for stream
+    const structuredPipeline = new StructuredPipeline(pipeline, {}, {});
+    const responseStream = this._stream(structuredPipeline);
     const transform = new Transform({
       objectMode: true,
       transform(chunk, encoding, callback) {
@@ -148,9 +157,8 @@ export class ExecutionUtil {
   }
 
   _stream(
-    pipeline: Pipeline,
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    _?: firestore.ExplainOptions
+    structuredPipeline: StructuredPipeline,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): NodeJS.ReadableStream {
     const tag = requestTag();
 
@@ -175,55 +183,66 @@ export class ExecutionUtil {
           if (proto.executionTime) {
             output.executionTime = Timestamp.fromProto(proto.executionTime);
           }
+          if (proto.explainStats) {
+            console.log(proto.explainStats.data);
+          }
           callback(undefined, [output]);
         } else {
-          callback(
-            undefined,
-            proto.results.map(result => {
-              const output: PipelineStreamElement = {};
-              if (proto.transaction?.length) {
-                output.transaction = proto.transaction;
-              }
-              if (proto.executionTime) {
-                output.executionTime = Timestamp.fromProto(proto.executionTime);
-              }
+          let output: PipelineStreamElement[] = proto.results.map(result => {
+            const output: PipelineStreamElement = {};
+            if (proto.transaction?.length) {
+              output.transaction = proto.transaction;
+            }
+            if (proto.executionTime) {
+              output.executionTime = Timestamp.fromProto(proto.executionTime);
+            }
 
-              const ref = result.name
-                ? new DocumentReference(
-                    this._firestore,
-                    QualifiedResourcePath.fromSlashSeparatedString(result.name)
-                  )
-                : undefined;
-              output.result = new PipelineResult(
-                this._serializer,
-                ref,
-                result.fields || undefined,
-                Timestamp.fromProto(proto.executionTime!),
-                result.createTime
-                  ? Timestamp.fromProto(result.createTime!)
-                  : undefined,
-                result.updateTime
-                  ? Timestamp.fromProto(result.updateTime!)
-                  : undefined
-              );
-              return output;
-            })
-          );
+            const ref = result.name
+              ? new DocumentReference(
+                  this._firestore,
+                  QualifiedResourcePath.fromSlashSeparatedString(result.name)
+                )
+              : undefined;
+            output.result = new PipelineResult(
+              this._serializer,
+              ref,
+              result.fields || undefined,
+              Timestamp.fromProto(proto.executionTime!),
+              result.createTime
+                ? Timestamp.fromProto(result.createTime!)
+                : undefined,
+              result.updateTime
+                ? Timestamp.fromProto(result.updateTime!)
+                : undefined
+            );
+            return output;
+          });
+          if (proto.explainStats?.data?.value) {
+            const explainStats = new ExplainStats(proto.explainStats.data);
+
+            output = [
+              ...output,
+              {
+                explainStats,
+              } as PipelineStreamElement,
+            ];
+          }
+          callback(undefined, output);
         }
       },
     });
 
-    this._firestore
-      .initializeIfNeeded(tag)
+    Promise.all([
+      this._firestore.initializeIfNeeded(tag),
+      ExplainStats._ensureMessageTypesLoaded(),
+    ])
       .then(async () => {
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
         const request: api.IExecutePipelineRequest = {
           database: this._firestore.formattedName,
-          structuredPipeline: {
-            pipeline: pipeline._toProto(),
-          },
+          structuredPipeline: structuredPipeline._toProto(this._serializer),
         };
 
         if (transactionOrReadTime instanceof Uint8Array) {
@@ -532,6 +551,62 @@ export function isString(val: unknown): val is string {
   return typeof val === 'string';
 }
 
+export function isNumber(val: unknown): val is number {
+  return typeof val === 'number';
+}
+
+export function isSelectable(
+  val: unknown
+): val is firestore.Pipelines.Selectable {
+  const candidate = val as firestore.Pipelines.Selectable;
+  return (
+    candidate.selectable && isString(candidate.alias) && isExpr(candidate.expr)
+  );
+}
+
+export function isOrdering(val: unknown): val is firestore.Pipelines.Ordering {
+  const candidate = val as firestore.Pipelines.Ordering;
+  return (
+    isExpr(candidate.expr) &&
+    (candidate.direction === 'ascending' ||
+      candidate.direction === 'descending')
+  );
+}
+
+export function isAggregateWithAlias(
+  val: unknown
+): val is firestore.Pipelines.AggregateWithAlias {
+  const candidate = val as firestore.Pipelines.AggregateWithAlias;
+  return (
+    isString(candidate.alias) &&
+    candidate.aggregate instanceof AggregateFunction
+  );
+}
+
+export function isExpr(val: unknown): val is firestore.Pipelines.Expr {
+  return val instanceof Expr;
+}
+
+export function isBooleanExpr(
+  val: unknown
+): val is firestore.Pipelines.BooleanExpr {
+  return val instanceof BooleanExpr;
+}
+
+export function isField(val: unknown): val is firestore.Pipelines.Field {
+  return val instanceof Field;
+}
+
+export function isPipeline(val: unknown): val is firestore.Pipelines.Pipeline {
+  return val instanceof Pipeline;
+}
+
+export function isCollectionReference(
+  val: unknown
+): val is firestore.CollectionReference {
+  return val instanceof CollectionReference;
+}
+
 /**
  * Converts a value to an Expr, Returning either a Constant, MapFunction,
  * ArrayFunction, or the input itself (if it's already an expression).
@@ -599,5 +674,35 @@ export function fieldOrExpression(value: unknown): Expr {
     return result;
   } else {
     return valueToDefaultExpr(value);
+  }
+}
+
+export function toField(value: string | firestore.Pipelines.Field): Field {
+  if (isString(value)) {
+    const result = field(value);
+    result._createdFromLiteral = true;
+    return result;
+  } else {
+    return value as Field;
+  }
+}
+
+/**
+ * Converts a value to a Selectable, returning either a
+ * Field, or the input itself (if it's already a Selectable).
+ * If the input is a string, it is assumed to be a field name, and a
+ * field(value) is returned.
+ *
+ * @private
+ * @internal
+ * @param value
+ */
+export function fieldOrSelectable(value: string | Selectable): Selectable {
+  if (isString(value)) {
+    const result = field(value);
+    result._createdFromLiteral = true;
+    return result;
+  } else {
+    return value;
   }
 }
