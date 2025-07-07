@@ -281,8 +281,8 @@ export function compareUtf8Strings(left: string, right: string): number {
       return isSurrogate(leftChar) === isSurrogate(rightChar)
         ? primitiveComparator(leftChar, rightChar)
         : isSurrogate(leftChar)
-        ? 1
-        : -1;
+          ? 1
+          : -1;
     }
   }
 
