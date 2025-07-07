@@ -294,7 +294,7 @@ export function compareUtf8Strings(left: string, right: string): number {
 const MIN_SURROGATE = 0xd800;
 const MAX_SURROGATE = 0xdfff;
 
-export function isSurrogate(s: string): boolean {
+function isSurrogate(s: string): boolean {
   const c = s.charCodeAt(0);
   return c >= MIN_SURROGATE && c <= MAX_SURROGATE;
 }
