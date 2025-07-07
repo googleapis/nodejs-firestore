@@ -72,7 +72,7 @@
   "devDependencies": {
     "@google-cloud/promisify": "legacy-14",
     "@google-cloud/trace-agent": "^8.0.0",
-    "@googleapis/cloudtrace": "^1.1.2",
+    "@googleapis/cloudtrace": "^2.0.0",
     "@google-cloud/cloud-rad": "^0.4.0",
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.0.0",
     "@opentelemetry/context-async-hooks": "^1.24.1",
