@@ -127,6 +127,7 @@ import {itIf, verifyInstance} from '../test/util/helpers';
 import {getTestDb, getTestRoot} from './firestore';
 
 import {Firestore as InternalFirestore} from '../src';
+import {ServiceError} from 'google-gax';
 
 use(chaiAsPromised);
 
@@ -1608,6 +1609,35 @@ describe.only('Pipeline class', () => {
           {title: 'To Kill a Mockingbird', author: 'Harper Lee'},
           {title: 'The Lord of the Rings', author: 'J.R.R. Tolkien'}
         );
+      });
+    });
+
+    describe('error handling', () => {
+      it('error properties are propagated from the firestore backend', async () => {
+        try {
+          await firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .genericStage('select', [
+              // incorrect parameter type
+              field('title'),
+            ])
+            .execute();
+
+          expect.fail('expected pipeline.execute() to throw');
+        } catch (e: unknown) {
+          expect(e instanceof Error).to.be.true;
+          const err = e as ServiceError;
+          expect(err['code']).to.equal(3);
+          expect(typeof err['message']).to.equal('string');
+          expect(typeof err['details']).to.equal('string');
+          expect(typeof err['stack']).to.equal('string');
+          expect(err['metadata'] instanceof Object).to.be.true;
+
+          expect(err['message']).to.equal(
+            `${err.code} INVALID_ARGUMENT: ${err.details}`
+          );
+        }
       });
     });
 
