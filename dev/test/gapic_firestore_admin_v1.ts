@@ -1781,7 +1781,9 @@ describe('v1.FirestoreAdminClient', () => {
         ['backupSchedule', 'name']
       );
       request.backupSchedule.name = defaultValue1;
-      const expectedHeaderRequestParams = `backup_schedule.name=${defaultValue1 ?? ''}`;
+      const expectedHeaderRequestParams = `backup_schedule.name=${
+        defaultValue1 ?? ''
+      }`;
       const expectedResponse = generateSampleMessage(
         new protos.google.firestore.admin.v1.BackupSchedule()
       );
@@ -1814,7 +1816,9 @@ describe('v1.FirestoreAdminClient', () => {
         ['backupSchedule', 'name']
       );
       request.backupSchedule.name = defaultValue1;
-      const expectedHeaderRequestParams = `backup_schedule.name=${defaultValue1 ?? ''}`;
+      const expectedHeaderRequestParams = `backup_schedule.name=${
+        defaultValue1 ?? ''
+      }`;
       const expectedResponse = generateSampleMessage(
         new protos.google.firestore.admin.v1.BackupSchedule()
       );
@@ -1862,7 +1866,9 @@ describe('v1.FirestoreAdminClient', () => {
         ['backupSchedule', 'name']
       );
       request.backupSchedule.name = defaultValue1;
-      const expectedHeaderRequestParams = `backup_schedule.name=${defaultValue1 ?? ''}`;
+      const expectedHeaderRequestParams = `backup_schedule.name=${
+        defaultValue1 ?? ''
+      }`;
       const expectedError = new Error('expected');
       client.innerApiCalls.updateBackupSchedule = stubSimpleCall(
         undefined,
@@ -3207,7 +3213,9 @@ describe('v1.FirestoreAdminClient', () => {
         ['database', 'name']
       );
       request.database.name = defaultValue1;
-      const expectedHeaderRequestParams = `database.name=${defaultValue1 ?? ''}`;
+      const expectedHeaderRequestParams = `database.name=${
+        defaultValue1 ?? ''
+      }`;
       const expectedResponse = generateSampleMessage(
         new protos.google.longrunning.Operation()
       );
@@ -3241,7 +3249,9 @@ describe('v1.FirestoreAdminClient', () => {
         ['database', 'name']
       );
       request.database.name = defaultValue1;
-      const expectedHeaderRequestParams = `database.name=${defaultValue1 ?? ''}`;
+      const expectedHeaderRequestParams = `database.name=${
+        defaultValue1 ?? ''
+      }`;
       const expectedResponse = generateSampleMessage(
         new protos.google.longrunning.Operation()
       );
@@ -3296,7 +3306,9 @@ describe('v1.FirestoreAdminClient', () => {
         ['database', 'name']
       );
       request.database.name = defaultValue1;
-      const expectedHeaderRequestParams = `database.name=${defaultValue1 ?? ''}`;
+      const expectedHeaderRequestParams = `database.name=${
+        defaultValue1 ?? ''
+      }`;
       const expectedError = new Error('expected');
       client.innerApiCalls.updateDatabase = stubLongRunningCall(
         undefined,
@@ -3328,7 +3340,9 @@ describe('v1.FirestoreAdminClient', () => {
         ['database', 'name']
       );
       request.database.name = defaultValue1;
-      const expectedHeaderRequestParams = `database.name=${defaultValue1 ?? ''}`;
+      const expectedHeaderRequestParams = `database.name=${
+        defaultValue1 ?? ''
+      }`;
       const expectedError = new Error('expected');
       client.innerApiCalls.updateDatabase = stubLongRunningCall(
         undefined,
