@@ -127,6 +127,9 @@ import {itIf, verifyInstance} from '../test/util/helpers';
 import {getTestDb, getTestRoot} from './firestore';
 
 import {Firestore as InternalFirestore} from '../src';
+import {ServiceError} from 'google-gax';
+
+import * as google from '../protos/firestore_v1_proto_api';
 
 use(chaiAsPromised);
 
@@ -1608,6 +1611,76 @@ describe.only('Pipeline class', () => {
           {title: 'To Kill a Mockingbird', author: 'Harper Lee'},
           {title: 'The Lord of the Rings', author: 'J.R.R. Tolkien'}
         );
+      });
+    });
+
+    describe('error handling', () => {
+      it('error properties are propagated from the firestore backend', async () => {
+        try {
+          await firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .genericStage('select', [
+              // incorrect parameter type
+              field('title'),
+            ])
+            .execute();
+
+          expect.fail('expected pipeline.execute() to throw');
+        } catch (e: unknown) {
+          expect(e instanceof Error).to.be.true;
+          const err = e as ServiceError;
+          expect(err['code']).to.equal(3);
+          expect(typeof err['message']).to.equal('string');
+          expect(typeof err['details']).to.equal('string');
+          expect(typeof err['stack']).to.equal('string');
+          expect(err['metadata'] instanceof Object).to.be.true;
+
+          expect(err['message']).to.equal(
+            `${err.code} INVALID_ARGUMENT: ${err.details}`
+          );
+        }
+      });
+
+      it('can access explain stats in error condition', async () => {
+        try {
+          await firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .sort(field('rating').ascending())
+            .execute({
+              explainOptions: {
+                mode: 'analyze',
+              },
+              customOptions: {
+                memory_limit: 1,
+              },
+            });
+
+          expect.fail('expected pipeline.execute() to throw');
+        } catch (e: unknown) {
+          const err = e as {[k: string]: unknown};
+          expect(err instanceof Error).to.be.true;
+
+          expect(err['code']).to.equal(8);
+          expect(typeof err['message']).to.equal('string');
+          expect(typeof err['details']).to.equal('string');
+          expect(typeof err['stack']).to.equal('string');
+          expect(err['metadata'] instanceof Object).to.be.true;
+
+          expect(err['message']).to.equal(
+            `${err.code} RESOURCE_EXHAUSTED: ${err.details}`
+          );
+
+          expect('statusDetails' in err).to.be.true;
+          expect(Array.isArray(err['statusDetails'])).to.be.true;
+          const explainStatsAny = (
+            err['statusDetails'] as Array<unknown>
+          )[0] as google.google.protobuf.IAny;
+          expect(explainStatsAny['type_url']).to.equal(
+            'type.googleapis.com/google.firestore.v1.ExplainStats'
+          );
+        }
       });
     });
 
