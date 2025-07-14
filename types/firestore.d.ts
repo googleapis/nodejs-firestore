@@ -6863,6 +6863,36 @@ declare namespace FirebaseFirestore {
     /**
      * @beta
      *
+     * Creates an expression that reverses an array.
+     *
+     * ```typescript
+     * // Reverse the value of the 'myArray' field.
+     * arrayReverse(field("myArray"));
+     * ```
+     *
+     * @param arrayExpression An expression evaluating to an array value, which will be reversed.
+     * @return A new {@code Expr} representing the reversed array.
+     */
+    export function arrayReverse(arrayExpression: Expr): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that reverses an array.
+     *
+     * ```typescript
+     * // Reverse the value of the 'myArray' field.
+     * arrayReverse("myArray");
+     * ```
+     *
+     * @param fieldName The name of the field to reverse.
+     * @return A new {@code Expr} representing the reversed array.
+     */
+    export function arrayReverse(fieldName: string): FunctionExpr;
+
+    /**
+     * @beta
+     *
      * Creates an expression that calculates the byte length of a string in UTF-8, or just the length of a Blob.
      *
      * ```typescript

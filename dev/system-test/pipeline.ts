@@ -69,6 +69,7 @@ import {
   and,
   arrayContains,
   arrayContainsAny,
+  arrayReverse,
   avg,
   countAll,
   endsWith,
@@ -3204,6 +3205,32 @@ describe.only('Pipeline class', () => {
       expectResults(snapshot, {
         trueField: true,
         falseField: false,
+      });
+    });
+
+    it('can reverse an array', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('tags').arrayReverse().as('reversedTags'))
+        .execute();
+      expectResults(snapshot, {
+        reversedTags: ['adventure', 'space', 'comedy'],
+      });
+    });
+
+    it('can reverse an array with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(arrayReverse('tags').as('reversedTags'))
+        .execute();
+      expectResults(snapshot, {
+        reversedTags: ['adventure', 'space', 'comedy'],
       });
     });
   });

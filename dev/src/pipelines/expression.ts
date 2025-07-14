@@ -494,6 +494,20 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   }
 
   /**
+   * Creates an expression that reverses an array.
+   *
+   * ```typescript
+   * // Reverse the value of the 'myArray' field.
+   * field("myArray").arrayReverse();
+   * ```
+   *
+   * @return A new {@code Expr} representing the reversed array.
+   */
+  arrayReverse(): FunctionExpr {
+    return new FunctionExpr('array_reverse', [this]);
+  }
+
+  /**
    * Creates an expression that calculates the length of an array.
    *
    * ```typescript
@@ -4300,6 +4314,39 @@ export function reverse(stringExpression: Expr): FunctionExpr;
 export function reverse(field: string): FunctionExpr;
 export function reverse(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).reverse();
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that reverses an array.
+ *
+ * ```typescript
+ * // Reverse the value of the 'myArray' field.
+ * arrayReverse("myArray");
+ * ```
+ *
+ * @param fieldName The name of the field to reverse.
+ * @return A new {@code Expr} representing the reversed array.
+ */
+export function arrayReverse(fieldName: string): FunctionExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that reverses an array.
+ *
+ * ```typescript
+ * // Reverse the value of the 'myArray' field.
+ * arrayReverse(field("myArray"));
+ * ```
+ *
+ * @param arrayExpression An expression evaluating to an array value, which will be reversed.
+ * @return A new {@code Expr} representing the reversed array.
+ */
+export function arrayReverse(arrayExpression: Expr): FunctionExpr;
+export function arrayReverse(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).arrayReverse();
 }
 
 /**

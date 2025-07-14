@@ -23,6 +23,7 @@ export {
   and,
   arrayContains,
   arrayContainsAny,
+  arrayReverse,
   avg,
   eq,
   gt,
