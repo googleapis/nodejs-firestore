@@ -4498,7 +4498,7 @@ declare namespace FirebaseFirestore {
        * @param length Length of the substring. If not provided, the substring will
        * end at the end of the input.
        */
-      substr(position: number, length?: number): FunctionExpr;
+      substring(position: number, length?: number): FunctionExpr;
 
       /**
        * @beta
@@ -4509,7 +4509,7 @@ declare namespace FirebaseFirestore {
        * @param length An expression returning the length of the substring. If not provided the
        * substring will end at the end of the input.
        */
-      substr(position: Expr, length?: Expr): FunctionExpr;
+      substring(position: Expr, length?: Expr): FunctionExpr;
 
       /**
        * @beta
@@ -5419,7 +5419,7 @@ declare namespace FirebaseFirestore {
      * @param position Index of the first character of the substring.
      * @param length Length of the substring.
      */
-    export function substr(
+    export function substring(
       field: string,
       position: number,
       length?: number
@@ -5434,7 +5434,7 @@ declare namespace FirebaseFirestore {
      * @param position Index of the first character of the substring.
      * @param length Length of the substring.
      */
-    export function substr(
+    export function substring(
       input: Expr,
       position: number,
       length?: number
@@ -5449,7 +5449,7 @@ declare namespace FirebaseFirestore {
      * @param position An expression that returns the index of the first character of the substring.
      * @param length An expression that returns the length of the substring.
      */
-    export function substr(
+    export function substring(
       field: string,
       position: Expr,
       length?: Expr
@@ -5464,7 +5464,7 @@ declare namespace FirebaseFirestore {
      * @param position An expression that returns the index of the first character of the substring.
      * @param length An expression that returns the length of the substring.
      */
-    export function substr(
+    export function substring(
       input: Expr,
       position: Expr,
       length?: Expr

@@ -1353,7 +1353,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param length Length of the substring. If not provided, the substring will
    * end at the end of the input.
    */
-  substr(position: number, length?: number): FunctionExpr;
+  substring(position: number, length?: number): FunctionExpr;
 
   /**
    * Creates an expression that returns a substring of the results of this expression.
@@ -1362,13 +1362,13 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param length An expression returning the length of the substring. If not provided the
    * substring will end at the end of the input.
    */
-  substr(position: Expr, length?: Expr): FunctionExpr;
-  substr(position: Expr | number, length?: Expr | number): FunctionExpr {
+  substring(position: Expr, length?: Expr): FunctionExpr;
+  substring(position: Expr | number, length?: Expr | number): FunctionExpr {
     const positionExpr = valueToDefaultExpr(position);
     if (length === undefined) {
-      return new FunctionExpr('substr', [this, positionExpr]);
+      return new FunctionExpr('substring', [this, positionExpr]);
     } else {
-      return new FunctionExpr('substr', [
+      return new FunctionExpr('substring', [
         this,
         positionExpr,
         valueToDefaultExpr(length),
@@ -2671,7 +2671,7 @@ export function documentId(
  * @param position Index of the first character of the substring.
  * @param length Length of the substring.
  */
-export function substr(
+export function substring(
   field: string,
   position: number,
   length?: number
@@ -2686,7 +2686,7 @@ export function substr(
  * @param position Index of the first character of the substring.
  * @param length Length of the substring.
  */
-export function substr(
+export function substring(
   input: Expr,
   position: number,
   length?: number
@@ -2701,7 +2701,7 @@ export function substr(
  * @param position An expression that returns the index of the first character of the substring.
  * @param length An expression that returns the length of the substring.
  */
-export function substr(
+export function substring(
   field: string,
   position: Expr,
   length?: Expr
@@ -2716,13 +2716,13 @@ export function substr(
  * @param position An expression that returns the index of the first character of the substring.
  * @param length An expression that returns the length of the substring.
  */
-export function substr(
+export function substring(
   input: Expr,
   position: Expr,
   length?: Expr
 ): FunctionExpr;
 
-export function substr(
+export function substring(
   field: Expr | string,
   position: Expr | number,
   length?: Expr | number
@@ -2731,7 +2731,7 @@ export function substr(
   const positionExpr = valueToDefaultExpr(position);
   const lengthExpr =
     length === undefined ? undefined : valueToDefaultExpr(length);
-  return fieldExpr.substr(positionExpr, lengthExpr);
+  return fieldExpr.substring(positionExpr, lengthExpr);
 }
 
 /**

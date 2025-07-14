@@ -57,7 +57,7 @@ import {
   isError,
   isNan,
   arrayConcat,
-  substr,
+  substring,
   documentId,
   isNull,
   arrayContainsAll,
@@ -3232,13 +3232,13 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    itIf(testUnsupportedFeatures)('supports Substr', async () => {
+    it('supports substring', async () => {
       let snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .sort(field('rating').descending())
         .limit(1)
-        .select(substr('title', 9, 2).as('of'))
+        .select(substring('title', 9, 2).as('of'))
         .execute();
       expectResults(snapshot, {
         of: 'of',
@@ -3248,38 +3248,35 @@ describe.only('Pipeline class', () => {
         .collection(randomCol.path)
         .sort(field('rating').descending())
         .limit(1)
-        .select(field('title').substr(9, 2).as('of'))
+        .select(field('title').substring(9, 2).as('of'))
         .execute();
       expectResults(snapshot, {
         of: 'of',
       });
     });
 
-    itIf(testUnsupportedFeatures)(
-      'supports Substr without length',
-      async () => {
-        let snapshot = await firestore
-          .pipeline()
-          .collection(randomCol.path)
-          .sort(field('rating').descending())
-          .limit(1)
-          .select(substr('title', 9).as('of'))
-          .execute();
-        expectResults(snapshot, {
-          of: 'of the Rings',
-        });
-        snapshot = await firestore
-          .pipeline()
-          .collection(randomCol.path)
-          .sort(field('rating').descending())
-          .limit(1)
-          .select(field('title').substr(9).as('of'))
-          .execute();
-        expectResults(snapshot, {
-          of: 'of the Rings',
-        });
-      }
-    );
+    it('supports substring without length', async () => {
+      let snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(substring('title', 9).as('of'))
+        .execute();
+      expectResults(snapshot, {
+        of: 'of the Rings',
+      });
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(field('title').substring(9).as('of'))
+        .execute();
+      expectResults(snapshot, {
+        of: 'of the Rings',
+      });
+    });
 
     itIf(testUnsupportedFeatures)('arrayConcat works', async () => {
       const snapshot = await firestore

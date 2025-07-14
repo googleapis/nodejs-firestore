@@ -75,7 +75,7 @@ export {
   isError,
   isNan,
   arrayConcat,
-  substr,
+  substring,
   documentId,
   isNull,
   arrayContainsAll,
