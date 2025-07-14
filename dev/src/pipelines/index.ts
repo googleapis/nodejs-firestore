@@ -100,8 +100,6 @@ export {
   logicalMinimum,
   notEqAny,
   countAll,
-  replaceAll,
-  replaceFirst,
   timestampAdd,
   timestampSub,
   timestampToUnixMicros,

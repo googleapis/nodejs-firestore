@@ -61,8 +61,6 @@ import {
   documentId,
   isNull,
   arrayContainsAll,
-  replaceFirst,
-  replaceAll,
   mapRemove,
   mapMerge,
   unixSecondsToTimestamp,
@@ -2940,28 +2938,6 @@ describe.only('Pipeline class', () => {
           }
         );
       });
-    });
-
-    itIf(testUnsupportedFeatures)('testReplaceFirst', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .where(eq('title', 'The Lord of the Rings'))
-        .limit(1)
-        .select(replaceFirst('title', 'o', '0').as('newName'))
-        .execute();
-      expectResults(snapshot, {newName: 'The L0rd of the Rings'});
-    });
-
-    itIf(testUnsupportedFeatures)('testReplaceAll', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .where(eq('title', 'The Lord of the Rings'))
-        .limit(1)
-        .select(replaceAll('title', 'o', '0').as('newName'))
-        .execute();
-      expectResults(snapshot, {newName: 'The L0rd 0f the Rings'});
     });
 
     it('supports Rand', async () => {
