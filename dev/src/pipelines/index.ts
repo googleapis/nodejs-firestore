@@ -26,6 +26,7 @@ export {
   arrayReverse,
   avg,
   eq,
+  ceil,
   gt,
   like,
   lt,

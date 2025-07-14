@@ -4129,6 +4129,18 @@ declare namespace FirebaseFirestore {
       byteLength(): FunctionExpr;
 
       /**
+       * Creates an expression that computes the ceiling of a numeric value.
+       *
+       * ```typescript
+       * // Compute the ceiling of the 'price' field.
+       * field("price").ceil();
+       * ```
+       *
+       * @return A new {@code Expr} representing the ceiling of the numeric value.
+       */
+      ceil(): FunctionExpr;
+
+      /**
        * Accesses a value from a map (object) field using the provided key.
        *
        * ```typescript
@@ -6889,6 +6901,36 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expr} representing the reversed array.
      */
     export function arrayReverse(fieldName: string): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that computes the ceiling of a numeric value.
+     *
+     * ```typescript
+     * // Compute the ceiling of the 'price' field.
+     * ceil(field("price"));
+     * ```
+     *
+     * @param expression An expression evaluating to a numeric value, which the ceiling will be computed for.
+     * @return A new {@code Expr} representing the ceiling of the numeric value.
+     */
+    export function ceil(expression: Expr): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that computes the ceiling of a numeric value.
+     *
+     * ```typescript
+     * // Compute the ceiling of the 'price' field.
+     * ceil("price");
+     * ```
+     *
+     * @param fieldName The name of the field to compute the ceiling of.
+     * @return A new {@code Expr} representing the ceiling of the numeric value.
+     */
+    export function ceil(fieldName: string): FunctionExpr;
 
     /**
      * @beta

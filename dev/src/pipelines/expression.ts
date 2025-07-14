@@ -929,6 +929,20 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   }
 
   /**
+   * Creates an expression that computes the ceiling of a numeric value.
+   *
+   * ```typescript
+   * // Compute the ceiling of the 'price' field.
+   * field("price").ceil();
+   * ```
+   *
+   * @return A new {@code Expr} representing the ceiling of the numeric value.
+   */
+  ceil(): FunctionExpr {
+    return new FunctionExpr('ceil', [this]);
+  }
+
+  /**
    * Accesses a value from a map (object) field using the provided key.
    *
    * ```typescript
@@ -4381,6 +4395,39 @@ export function byteLength(fieldName: string): FunctionExpr;
 export function byteLength(expr: Expr | string): FunctionExpr {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.byteLength();
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that computes the ceiling of a numeric value.
+ *
+ * ```typescript
+ * // Compute the ceiling of the 'price' field.
+ * ceil("price");
+ * ```
+ *
+ * @param fieldName The name of the field to compute the ceiling of.
+ * @return A new {@code Expr} representing the ceiling of the numeric value.
+ */
+export function ceil(fieldName: string): FunctionExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that computes the ceiling of a numeric value.
+ *
+ * ```typescript
+ * // Compute the ceiling of the 'price' field.
+ * ceil(field("price"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the ceiling will be computed for.
+ * @return A new {@code Expr} representing the ceiling of the numeric value.
+ */
+export function ceil(expression: Expr): FunctionExpr;
+export function ceil(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).ceil();
 }
 
 /**

@@ -20,6 +20,7 @@ import {
   map,
   array,
   field,
+  ceil,
   xor,
   AggregateFunction,
   rand,
@@ -3231,6 +3232,32 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         reversedTags: ['adventure', 'space', 'comedy'],
+      });
+    });
+
+    it('can compute the ceiling of a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('rating').ceil().as('ceilingRating'))
+        .execute();
+      expectResults(snapshot, {
+        ceilingRating: 5,
+      });
+    });
+
+    it('can compute the ceiling of a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(ceil('rating').as('ceilingRating'))
+        .execute();
+      expectResults(snapshot, {
+        ceilingRating: 5,
       });
     });
   });
