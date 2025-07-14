@@ -19,7 +19,6 @@ import {
   constantVector,
   map,
   array,
-  bitNot,
   field,
   xor,
   AggregateFunction,
@@ -32,7 +31,6 @@ import {
   timestampSub,
   timestampAdd,
   byteLength,
-  bitAnd,
   multiply,
   sum,
   maximum,
@@ -69,10 +67,6 @@ import {
   mapMerge,
   unixSecondsToTimestamp,
   unixMillisToTimestamp,
-  bitOr,
-  bitXor,
-  bitLeftShift,
-  bitRightShift,
   add,
   and,
   arrayContains,
@@ -3239,135 +3233,6 @@ describe.only('Pipeline class', () => {
   });
 
   describe('not yet implemented in backend', () => {
-    itIf(testUnsupportedFeatures)('supports Bit_and', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(bitAnd(constant(5), 12).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: 4,
-      });
-    });
-
-    itIf(testUnsupportedFeatures)('supports Bit_and', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(constant(5).bitAnd(12).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: 4,
-      });
-    });
-
-    itIf(testUnsupportedFeatures)('supports Bit_or', async () => {
-      let snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(bitOr(constant(5), 12).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: 13,
-      });
-      snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(constant(5).bitOr(12).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: 13,
-      });
-    });
-
-    itIf(testUnsupportedFeatures)('supports Bit_xor', async () => {
-      let snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(bitXor(constant(5), 12).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: 9,
-      });
-      snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(constant(5).bitXor(12).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: 9,
-      });
-    });
-
-    itIf(testUnsupportedFeatures)('supports Bit_not', async () => {
-      let snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(bitNot(constant(Uint8Array.of(0xfd))).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: Uint8Array.of(0x02),
-      });
-      snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(constant(Uint8Array.of(0xfd)).bitNot().as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: Uint8Array.of(0x02),
-      });
-    });
-
-    itIf(testUnsupportedFeatures)('supports Bit_left_shift', async () => {
-      let snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(bitLeftShift(constant(Uint8Array.of(0x02)), 2).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: Uint8Array.of(0x04),
-      });
-      snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(constant(Uint8Array.of(0x02)).bitLeftShift(2).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: Uint8Array.of(0x04),
-      });
-    });
-
-    itIf(testUnsupportedFeatures)('supports Bit_right_shift', async () => {
-      let snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(bitRightShift(constant(Uint8Array.of(0x02)), 2).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: Uint8Array.of(0x01),
-      });
-      snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(constant(Uint8Array.of(0x02)).bitRightShift(2).as('result'))
-        .execute();
-      expectResults(snapshot, {
-        result: Uint8Array.of(0x01),
-      });
-    });
-
     itIf(testUnsupportedFeatures)('supports Document_id', async () => {
       let snapshot = await firestore
         .pipeline()
