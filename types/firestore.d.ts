@@ -4731,35 +4731,35 @@ declare namespace FirebaseFirestore {
       /**
        * @beta
        * Creates an expression that indexes into an array from the beginning or end
-       * and returns the element. If the offset exceeds the array length, an error is
-       * returned. A negative offset, starts from the end.
+       * and returns the element. If the index exceeds the array length, an error is
+       * returned. A negative index, starts from the end.
        *
        * ```typescript
        * // Return the value in the 'tags' field array at index `1`.
-       * field('tags').arrayOffset(1);
+       * field('tags').arrayGet(1);
        * ```
        *
-       * @param offset The index of the element to return.
-       * @return A new Expr representing the 'arrayOffset' operation.
+       * @param index The index of the element to return.
+       * @return A new Expr representing the 'arrayGet' operation.
        */
-      arrayOffset(offset: number): FunctionExpr;
+      arrayGet(index: number): FunctionExpr;
 
       /**
        * @beta
        * Creates an expression that indexes into an array from the beginning or end
-       * and returns the element. If the offset exceeds the array length, an error is
-       * returned. A negative offset, starts from the end.
+       * and returns the element. If the index exceeds the array length, an error is
+       * returned. A negative index, starts from the end.
        *
        * ```typescript
        * // Return the value in the tags field array at index specified by field
        * // 'favoriteTag'.
-       * field('tags').arrayOffset(field('favoriteTag'));
+       * field('tags').arrayGet(field('favoriteTag'));
        * ```
        *
-       * @param offsetExpr An Expr evaluating to the index of the element to return.
-       * @return A new Expr representing the 'arrayOffset' operation.
+       * @param indexExpr An Expr evaluating to the index of the element to return.
+       * @return A new Expr representing the 'arrayGet' operation.
        */
-      arrayOffset(offsetExpr: Expr): FunctionExpr;
+      arrayGet(indexExpr: Expr): FunctionExpr;
 
       /**
        * @beta
@@ -4784,7 +4784,7 @@ declare namespace FirebaseFirestore {
        * ```typescript
        * // Returns the first item in the title field arrays, or returns
        * // the entire title field if the array is empty or the field is another type.
-       * field("title").arrayOffset(0).ifError(field("title"));
+       * field("title").arrayGet(0).ifError(field("title"));
        * ```
        *
        * @param catchExpr The catch expression that will be evaluated and
@@ -4802,7 +4802,7 @@ declare namespace FirebaseFirestore {
        * ```typescript
        * // Returns the first item in the title field arrays, or returns
        * // "Default Title"
-       * field("title").arrayOffset(0).ifError("Default Title");
+       * field("title").arrayGet(0).ifError("Default Title");
        * ```
        *
        * @param catchValue The value that will be returned if this expression
@@ -5610,83 +5610,77 @@ declare namespace FirebaseFirestore {
     /**
      * @beta
      * Creates an expression that indexes into an array from the beginning or end
-     * and return the element. If the offset exceeds the array length, an error is
-     * returned. A negative offset, starts from the end.
+     * and return the element. If the index exceeds the array length, an error is
+     * returned. A negative index, starts from the end.
      *
      * ```typescript
      * // Return the value in the tags field array at index 1.
-     * arrayOffset('tags', 1);
+     * arrayGet('tags', 1);
      * ```
      *
      * @param arrayField The name of the array field.
-     * @param offset The index of the element to return.
-     * @return A new Expr representing the 'arrayOffset' operation.
+     * @param index The index of the element to return.
+     * @return A new Expr representing the 'arrayGet' operation.
      */
-    export function arrayOffset(
-      arrayField: string,
-      offset: number
-    ): FunctionExpr;
+    export function arrayGet(arrayField: string, index: number): FunctionExpr;
 
     /**
      * @beta
      * Creates an expression that indexes into an array from the beginning or end
-     * and return the element. If the offset exceeds the array length, an error is
-     * returned. A negative offset, starts from the end.
+     * and return the element. If the index exceeds the array length, an error is
+     * returned. A negative index, starts from the end.
      *
      * ```typescript
      * // Return the value in the tags field array at index specified by field
      * // 'favoriteTag'.
-     * arrayOffset('tags', field('favoriteTag'));
+     * arrayGet('tags', field('favoriteTag'));
      * ```
      *
      * @param arrayField The name of the array field.
-     * @param offsetExpr An Expr evaluating to the index of the element to return.
-     * @return A new Expr representing the 'arrayOffset' operation.
+     * @param indexExpr An Expr evaluating to the index of the element to return.
+     * @return A new Expr representing the 'arrayGet' operation.
      */
-    export function arrayOffset(
-      arrayField: string,
-      offsetExpr: Expr
-    ): FunctionExpr;
+    export function arrayGet(arrayField: string, indexExpr: Expr): FunctionExpr;
 
     /**
      * @beta
      * Creates an expression that indexes into an array from the beginning or end
-     * and return the element. If the offset exceeds the array length, an error is
-     * returned. A negative offset, starts from the end.
+     * and return the element. If the index exceeds the array length, an error is
+     * returned. A negative index, starts from the end.
      *
      * ```typescript
      * // Return the value in the tags field array at index 1.
-     * arrayOffset(field('tags'), 1);
+     * arrayGet(field('tags'), 1);
      * ```
      *
      * @param arrayExpression An Expr evaluating to an array.
-     * @param offset The index of the element to return.
-     * @return A new Expr representing the 'arrayOffset' operation.
+     * @param index The index of the element to return.
+     * @return A new Expr representing the 'arrayGet' operation.
      */
-    export function arrayOffset(
+    export function arrayGet(
       arrayExpression: Expr,
-      offset: number
+      index: number
     ): FunctionExpr;
 
     /**
      * @beta
      * Creates an expression that indexes into an array from the beginning or end
-     * and return the element. If the offset exceeds the array length, an error is
-     * returned. A negative offset, starts from the end.
+     * and return the element. If the index exceeds the array length, an error is
+     * returned. A negative index, starts from the end.
      *
      * ```typescript
      * // Return the value in the tags field array at index specified by field
      * // 'favoriteTag'.
-     * arrayOffset(field('tags'), field('favoriteTag'));
+     * arrayGet(field('tags'), field('favoriteTag'));
      * ```
      *
      * @param arrayExpression An Expr evaluating to an array.
-     * @param offsetExpr An Expr evaluating to the index of the element to return.
-     * @return A new Expr representing the 'arrayOffset' operation.
+     * @param indexExpr An Expr evaluating to the index of the element to return.
+     * @return A new Expr representing the 'arrayGet' operation.
      */
-    export function arrayOffset(
+    export function arrayGet(
       arrayExpression: Expr,
-      offsetExpr: Expr
+      indexExpr: Expr
     ): FunctionExpr;
 
     /**
@@ -5713,7 +5707,7 @@ declare namespace FirebaseFirestore {
      * ```typescript
      * // Returns the first item in the title field arrays, or returns
      * // the entire title field if the array is empty or the field is another type.
-     * ifError(field("title").arrayOffset(0), field("title"));
+     * ifError(field("title").arrayGet(0), field("title"));
      * ```
      *
      * @param tryExpr The try expression.
@@ -5732,7 +5726,7 @@ declare namespace FirebaseFirestore {
      * ```typescript
      * // Returns the first item in the title field arrays, or returns
      * // "Default Title"
-     * ifError(field("title").arrayOffset(0), "Default Title");
+     * ifError(field("title").arrayGet(0), "Default Title");
      * ```
      *
      * @param tryExpr The try expression.

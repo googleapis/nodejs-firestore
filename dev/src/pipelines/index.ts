@@ -50,7 +50,7 @@ export {
   xor,
   AggregateFunction,
   rand,
-  arrayOffset,
+  arrayGet,
   add,
   BooleanExpr,
   Expr,

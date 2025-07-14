@@ -24,7 +24,7 @@ import {
   xor,
   AggregateFunction,
   rand,
-  arrayOffset,
+  arrayGet,
   timestampToUnixMicros,
   timestampToUnixSeconds,
   unixMicrosToTimestamp,
@@ -2683,8 +2683,8 @@ describe.only('Pipeline class', () => {
         .select(
           isNull('rating').as('ratingIsNull'),
           isNan('rating').as('ratingIsNaN'),
-          isError(arrayOffset('title', 0)).as('isError'),
-          ifError(arrayOffset('title', 0), constant('was error')).as('ifError'),
+          isError(arrayGet('title', 0)).as('isError'),
+          ifError(arrayGet('title', 0), constant('was error')).as('ifError'),
           isAbsent('foo').as('isAbsent'),
           isNotNull('title').as('titleIsNotNull'),
           isNotNan('cost').as('costIsNotNan'),
@@ -2712,8 +2712,8 @@ describe.only('Pipeline class', () => {
         .select(
           field('rating').isNull().as('ratingIsNull'),
           field('rating').isNan().as('ratingIsNaN'),
-          arrayOffset('title', 0).isError().as('isError'),
-          arrayOffset('title', 0).ifError(constant('was error')).as('ifError'),
+          arrayGet('title', 0).isError().as('isError'),
+          arrayGet('title', 0).ifError(constant('was error')).as('ifError'),
           field('foo').isAbsent().as('isAbsent'),
           field('title').isNotNull().as('titleIsNotNull'),
           field('cost').isNotNan().as('costIsNotNan')
@@ -3014,13 +3014,13 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it('supports arrayOffset', async () => {
+    it('supports arrayGet', async () => {
       let snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .sort(field('rating').descending())
         .limit(3)
-        .select(arrayOffset('tags', 0).as('firstTag'))
+        .select(arrayGet('tags', 0).as('firstTag'))
         .execute();
       const expectedResults = [
         {
@@ -3040,7 +3040,7 @@ describe.only('Pipeline class', () => {
         .collection(randomCol.path)
         .sort(field('rating').descending())
         .limit(3)
-        .select(field('tags').arrayOffset(0).as('firstTag'))
+        .select(field('tags').arrayGet(0).as('firstTag'))
         .execute();
       expectResults(snapshot, ...expectedResults);
     });
