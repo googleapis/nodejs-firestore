@@ -333,6 +333,9 @@ export namespace google {
                     /** Database sourceInfo */
                     sourceInfo?: (google.firestore.admin.v1.Database.ISourceInfo|null);
 
+                    /** Database tags */
+                    tags?: ({ [k: string]: string }|null);
+
                     /** Database freeTier */
                     freeTier?: (boolean|null);
 
@@ -402,6 +405,9 @@ export namespace google {
 
                     /** Database sourceInfo. */
                     public sourceInfo?: (google.firestore.admin.v1.Database.ISourceInfo|null);
+
+                    /** Database tags. */
+                    public tags: { [k: string]: string };
 
                     /** Database freeTier. */
                     public freeTier?: (boolean|null);
@@ -6812,6 +6818,9 @@ export namespace google {
 
                     /** RestoreDatabaseRequest encryptionConfig */
                     encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** RestoreDatabaseRequest tags */
+                    tags?: ({ [k: string]: string }|null);
                 }
 
                 /** Represents a RestoreDatabaseRequest. */
@@ -6834,6 +6843,9 @@ export namespace google {
 
                     /** RestoreDatabaseRequest encryptionConfig. */
                     public encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** RestoreDatabaseRequest tags. */
+                    public tags: { [k: string]: string };
 
                     /**
                      * Creates a new RestoreDatabaseRequest instance using the specified properties.

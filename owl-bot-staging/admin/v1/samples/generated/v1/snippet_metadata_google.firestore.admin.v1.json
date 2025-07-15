@@ -1122,7 +1122,7 @@
       "segments": [
         {
           "start": 25,
-          "end": 82,
+          "end": 89,
           "type": "FULL"
         }
       ],
@@ -1146,6 +1146,10 @@
           {
             "name": "encryption_config",
             "type": ".google.firestore.admin.v1.Database.EncryptionConfig"
+          },
+          {
+            "name": "tags",
+            "type": "TYPE_MESSAGE[]"
           }
         ],
         "resultType": ".google.longrunning.Operation",

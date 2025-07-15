@@ -20,7 +20,7 @@
 
 'use strict';
 
-function main(parent, databaseId, backup) {
+function main(parent, databaseId, backup, tags) {
   // [START firestore_v1_generated_FirestoreAdmin_RestoreDatabase_async]
   /**
    * This snippet has been automatically generated and should be regarded as a code template only.
@@ -58,6 +58,12 @@ function main(parent, databaseId, backup) {
    *  use_source_encryption google.firestore.admin.v1.Database.EncryptionConfig.use_source_encryption.
    */
   // const encryptionConfig = {}
+  /**
+   *  Optional. Immutable. Tags to be bound to the restored database.
+   *  The tags should be provided in the format of
+   *  `tagKeys/{tag_key_id} -> tagValues/{tag_value_id}`.
+   */
+  // const tags = [1,2,3,4]
 
   // Imports the Admin library
   const {FirestoreAdminClient} = require('@google-cloud/firestore-admin').v1;
@@ -71,6 +77,7 @@ function main(parent, databaseId, backup) {
       parent,
       databaseId,
       backup,
+      tags,
     };
 
     // Run request

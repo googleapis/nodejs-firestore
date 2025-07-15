@@ -789,6 +789,7 @@
                          * @property {google.firestore.admin.v1.Database.ICmekConfig|null} [cmekConfig] Database cmekConfig
                          * @property {string|null} [previousId] Database previousId
                          * @property {google.firestore.admin.v1.Database.ISourceInfo|null} [sourceInfo] Database sourceInfo
+                         * @property {Object.<string,string>|null} [tags] Database tags
                          * @property {boolean|null} [freeTier] Database freeTier
                          * @property {string|null} [etag] Database etag
                          * @property {google.firestore.admin.v1.Database.DatabaseEdition|null} [databaseEdition] Database databaseEdition
@@ -803,6 +804,7 @@
                          * @param {google.firestore.admin.v1.IDatabase=} [properties] Properties to set
                          */
                         function Database(properties) {
+                            this.tags = {};
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -946,6 +948,14 @@
                         Database.prototype.sourceInfo = null;
     
                         /**
+                         * Database tags.
+                         * @member {Object.<string,string>} tags
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.tags = $util.emptyObject;
+    
+                        /**
                          * Database freeTier.
                          * @member {boolean|null|undefined} freeTier
                          * @memberof google.firestore.admin.v1.Database
@@ -1038,6 +1048,9 @@
                                 $root.google.firestore.admin.v1.Database.SourceInfo.encode(message.sourceInfo, writer.uint32(/* id 26, wireType 2 =*/210).fork()).ldelim();
                             if (message.databaseEdition != null && Object.hasOwnProperty.call(message, "databaseEdition"))
                                 writer.uint32(/* id 28, wireType 0 =*/224).int32(message.databaseEdition);
+                            if (message.tags != null && Object.hasOwnProperty.call(message, "tags"))
+                                for (var keys = Object.keys(message.tags), i = 0; i < keys.length; ++i)
+                                    writer.uint32(/* id 29, wireType 2 =*/234).fork().uint32(/* id 1, wireType 2 =*/10).string(keys[i]).uint32(/* id 2, wireType 2 =*/18).string(message.tags[keys[i]]).ldelim();
                             if (message.freeTier != null && Object.hasOwnProperty.call(message, "freeTier"))
                                 writer.uint32(/* id 30, wireType 0 =*/240).bool(message.freeTier);
                             if (message.etag != null && Object.hasOwnProperty.call(message, "etag"))
@@ -1072,7 +1085,7 @@
                         Database.decode = function decode(reader, length, error) {
                             if (!(reader instanceof $Reader))
                                 reader = $Reader.create(reader);
-                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.Database();
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.Database(), key, value;
                             while (reader.pos < end) {
                                 var tag = reader.uint32();
                                 if (tag === error)
@@ -1144,6 +1157,29 @@
                                     }
                                 case 26: {
                                         message.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 29: {
+                                        if (message.tags === $util.emptyObject)
+                                            message.tags = {};
+                                        var end2 = reader.uint32() + reader.pos;
+                                        key = "";
+                                        value = "";
+                                        while (reader.pos < end2) {
+                                            var tag2 = reader.uint32();
+                                            switch (tag2 >>> 3) {
+                                            case 1:
+                                                key = reader.string();
+                                                break;
+                                            case 2:
+                                                value = reader.string();
+                                                break;
+                                            default:
+                                                reader.skipType(tag2 & 7);
+                                                break;
+                                            }
+                                        }
+                                        message.tags[key] = value;
                                         break;
                                     }
                                 case 30: {
@@ -1289,6 +1325,14 @@
                                 var error = $root.google.firestore.admin.v1.Database.SourceInfo.verify(message.sourceInfo);
                                 if (error)
                                     return "sourceInfo." + error;
+                            }
+                            if (message.tags != null && message.hasOwnProperty("tags")) {
+                                if (!$util.isObject(message.tags))
+                                    return "tags: object expected";
+                                var key = Object.keys(message.tags);
+                                for (var i = 0; i < key.length; ++i)
+                                    if (!$util.isString(message.tags[key[i]]))
+                                        return "tags: string{k:string} expected";
                             }
                             if (message.freeTier != null && message.hasOwnProperty("freeTier")) {
                                 properties._freeTier = 1;
@@ -1471,6 +1515,13 @@
                                     throw TypeError(".google.firestore.admin.v1.Database.sourceInfo: object expected");
                                 message.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.fromObject(object.sourceInfo);
                             }
+                            if (object.tags) {
+                                if (typeof object.tags !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.tags: object expected");
+                                message.tags = {};
+                                for (var keys = Object.keys(object.tags), i = 0; i < keys.length; ++i)
+                                    message.tags[keys[i]] = String(object.tags[keys[i]]);
+                            }
                             if (object.freeTier != null)
                                 message.freeTier = Boolean(object.freeTier);
                             if (object.etag != null)
@@ -1511,6 +1562,8 @@
                             if (!options)
                                 options = {};
                             var object = {};
+                            if (options.objects || options.defaults)
+                                object.tags = {};
                             if (options.defaults) {
                                 object.name = "";
                                 object.uid = "";
@@ -1568,6 +1621,12 @@
                                 object.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.toObject(message.sourceInfo, options);
                             if (message.databaseEdition != null && message.hasOwnProperty("databaseEdition"))
                                 object.databaseEdition = options.enums === String ? $root.google.firestore.admin.v1.Database.DatabaseEdition[message.databaseEdition] === undefined ? message.databaseEdition : $root.google.firestore.admin.v1.Database.DatabaseEdition[message.databaseEdition] : message.databaseEdition;
+                            var keys2;
+                            if (message.tags && (keys2 = Object.keys(message.tags)).length) {
+                                object.tags = {};
+                                for (var j = 0; j < keys2.length; ++j)
+                                    object.tags[keys2[j]] = message.tags[keys2[j]];
+                            }
                             if (message.freeTier != null && message.hasOwnProperty("freeTier")) {
                                 object.freeTier = message.freeTier;
                                 if (options.oneofs)
@@ -15663,6 +15722,7 @@
                          * @property {string|null} [databaseId] RestoreDatabaseRequest databaseId
                          * @property {string|null} [backup] RestoreDatabaseRequest backup
                          * @property {google.firestore.admin.v1.Database.IEncryptionConfig|null} [encryptionConfig] RestoreDatabaseRequest encryptionConfig
+                         * @property {Object.<string,string>|null} [tags] RestoreDatabaseRequest tags
                          */
     
                         /**
@@ -15674,6 +15734,7 @@
                          * @param {google.firestore.admin.v1.IRestoreDatabaseRequest=} [properties] Properties to set
                          */
                         function RestoreDatabaseRequest(properties) {
+                            this.tags = {};
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -15713,6 +15774,14 @@
                         RestoreDatabaseRequest.prototype.encryptionConfig = null;
     
                         /**
+                         * RestoreDatabaseRequest tags.
+                         * @member {Object.<string,string>} tags
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
+                         * @instance
+                         */
+                        RestoreDatabaseRequest.prototype.tags = $util.emptyObject;
+    
+                        /**
                          * Creates a new RestoreDatabaseRequest instance using the specified properties.
                          * @function create
                          * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
@@ -15744,6 +15813,9 @@
                                 writer.uint32(/* id 3, wireType 2 =*/26).string(message.backup);
                             if (message.encryptionConfig != null && Object.hasOwnProperty.call(message, "encryptionConfig"))
                                 $root.google.firestore.admin.v1.Database.EncryptionConfig.encode(message.encryptionConfig, writer.uint32(/* id 9, wireType 2 =*/74).fork()).ldelim();
+                            if (message.tags != null && Object.hasOwnProperty.call(message, "tags"))
+                                for (var keys = Object.keys(message.tags), i = 0; i < keys.length; ++i)
+                                    writer.uint32(/* id 10, wireType 2 =*/82).fork().uint32(/* id 1, wireType 2 =*/10).string(keys[i]).uint32(/* id 2, wireType 2 =*/18).string(message.tags[keys[i]]).ldelim();
                             return writer;
                         };
     
@@ -15774,7 +15846,7 @@
                         RestoreDatabaseRequest.decode = function decode(reader, length, error) {
                             if (!(reader instanceof $Reader))
                                 reader = $Reader.create(reader);
-                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.RestoreDatabaseRequest();
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.RestoreDatabaseRequest(), key, value;
                             while (reader.pos < end) {
                                 var tag = reader.uint32();
                                 if (tag === error)
@@ -15794,6 +15866,29 @@
                                     }
                                 case 9: {
                                         message.encryptionConfig = $root.google.firestore.admin.v1.Database.EncryptionConfig.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 10: {
+                                        if (message.tags === $util.emptyObject)
+                                            message.tags = {};
+                                        var end2 = reader.uint32() + reader.pos;
+                                        key = "";
+                                        value = "";
+                                        while (reader.pos < end2) {
+                                            var tag2 = reader.uint32();
+                                            switch (tag2 >>> 3) {
+                                            case 1:
+                                                key = reader.string();
+                                                break;
+                                            case 2:
+                                                value = reader.string();
+                                                break;
+                                            default:
+                                                reader.skipType(tag2 & 7);
+                                                break;
+                                            }
+                                        }
+                                        message.tags[key] = value;
                                         break;
                                     }
                                 default:
@@ -15845,6 +15940,14 @@
                                 if (error)
                                     return "encryptionConfig." + error;
                             }
+                            if (message.tags != null && message.hasOwnProperty("tags")) {
+                                if (!$util.isObject(message.tags))
+                                    return "tags: object expected";
+                                var key = Object.keys(message.tags);
+                                for (var i = 0; i < key.length; ++i)
+                                    if (!$util.isString(message.tags[key[i]]))
+                                        return "tags: string{k:string} expected";
+                            }
                             return null;
                         };
     
@@ -15871,6 +15974,13 @@
                                     throw TypeError(".google.firestore.admin.v1.RestoreDatabaseRequest.encryptionConfig: object expected");
                                 message.encryptionConfig = $root.google.firestore.admin.v1.Database.EncryptionConfig.fromObject(object.encryptionConfig);
                             }
+                            if (object.tags) {
+                                if (typeof object.tags !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.RestoreDatabaseRequest.tags: object expected");
+                                message.tags = {};
+                                for (var keys = Object.keys(object.tags), i = 0; i < keys.length; ++i)
+                                    message.tags[keys[i]] = String(object.tags[keys[i]]);
+                            }
                             return message;
                         };
     
@@ -15887,6 +15997,8 @@
                             if (!options)
                                 options = {};
                             var object = {};
+                            if (options.objects || options.defaults)
+                                object.tags = {};
                             if (options.defaults) {
                                 object.parent = "";
                                 object.databaseId = "";
@@ -15901,6 +16013,12 @@
                                 object.backup = message.backup;
                             if (message.encryptionConfig != null && message.hasOwnProperty("encryptionConfig"))
                                 object.encryptionConfig = $root.google.firestore.admin.v1.Database.EncryptionConfig.toObject(message.encryptionConfig, options);
+                            var keys2;
+                            if (message.tags && (keys2 = Object.keys(message.tags)).length) {
+                                object.tags = {};
+                                for (var j = 0; j < keys2.length; ++j)
+                                    object.tags[keys2[j]] = message.tags[keys2[j]];
+                            }
                             return object;
                         };
     

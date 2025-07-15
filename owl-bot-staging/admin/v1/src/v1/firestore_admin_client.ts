@@ -3462,6 +3462,11 @@ export class FirestoreAdminClient {
  *   If this field is not specified, the restored database will use
  *   the same encryption configuration as the backup, namely
  *   {@link protos.google.firestore.admin.v1.Database.EncryptionConfig.use_source_encryption|use_source_encryption}.
+ * @param {number[]} request.tags
+ *   Optional. Immutable. Tags to be bound to the restored database.
+ *
+ *   The tags should be provided in the format of
+ *   `tagKeys/{tag_key_id} -> tagValues/{tag_value_id}`.
  * @param {object} [options]
  *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
  * @returns {Promise} - The promise which resolves to an array.
