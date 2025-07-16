@@ -27,6 +27,7 @@ export {
   avg,
   eq,
   ceil,
+  exp,
   gt,
   like,
   lt,

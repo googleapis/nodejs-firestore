@@ -943,6 +943,20 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   }
 
   /**
+   * Creates an expression that computes e to the power of this expression.
+   *
+   * ```typescript
+   * // Compute e to the power of the 'value' field.
+   * field("value").exp();
+   * ```
+   *
+   * @return A new {@code Expr} representing the exp of the numeric value.
+   */
+  exp(): FunctionExpr {
+    return new FunctionExpr('exp', [this]);
+  }
+
+  /**
    * Accesses a value from a map (object) field using the provided key.
    *
    * ```typescript
@@ -4409,6 +4423,34 @@ export function byteLength(fieldName: string): FunctionExpr;
 export function byteLength(expr: Expr | string): FunctionExpr {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.byteLength();
+}
+
+/**
+ * Creates an expression that computes e to the power of the expression's result.
+ *
+ * ```typescript
+ * // Compute e to the power of 2.
+ * exp(constant(2));
+ * ```
+ *
+ * @return A new {@code Expr} representing the exp of the numeric value.
+ */
+export function exp(expression: Expr): FunctionExpr;
+
+/**
+ * Creates an expression that computes e to the power of the expression's result.
+ *
+ * ```typescript
+ * // Compute e to the power of the 'value' field.
+ * exp('value');
+ * ```
+ *
+ * @return A new {@code Expr} representing the exp of the numeric value.
+ */
+export function exp(fieldName: string): FunctionExpr;
+
+export function exp(expressionOrFieldName: Expr | string): FunctionExpr {
+  return fieldOrExpression(expressionOrFieldName).exp();
 }
 
 /**

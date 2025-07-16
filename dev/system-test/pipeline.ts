@@ -21,6 +21,7 @@ import {
   array,
   field,
   ceil,
+  exp,
   xor,
   AggregateFunction,
   rand,
@@ -3268,6 +3269,32 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         ceilingRating: 5,
+      });
+    });
+
+    it('can compute e to the power of a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq('The Lord of the Rings'))
+        .limit(1)
+        .select(field('rating').exp().as('expRating'))
+        .execute();
+      expectResults(snapshot, {
+        expRating: 109.94717245212352,
+      });
+    });
+
+    it('can compute e to the power of a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq('The Lord of the Rings'))
+        .limit(1)
+        .select(exp('rating').as('expRating'))
+        .execute();
+      expectResults(snapshot, {
+        expRating: Math.exp(4.7),
       });
     });
   });

@@ -4141,6 +4141,18 @@ declare namespace FirebaseFirestore {
       ceil(): FunctionExpr;
 
       /**
+       * Creates an expression that computes e to the power of this expression.
+       *
+       * ```typescript
+       * // Compute e to the power of the 'value' field.
+       * field("value").exp();
+       * ```
+       *
+       * @return A new {@code Expr} representing the exp of the numeric value.
+       */
+      exp(): FunctionExpr;
+
+      /**
        * Creates an aggregation that counts the number of distinct values of the expression or field.
        *
        * @return A new `AggregateFunction` representing the 'count_distinct' aggregation.
@@ -6938,6 +6950,30 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expr} representing the ceiling of the numeric value.
      */
     export function ceil(fieldName: string): FunctionExpr;
+
+    /**
+     * Creates an expression that computes e to the power of the expression's result.
+     *
+     * ```typescript
+     * // Compute e to the power of 2.
+     * exp(constant(2));
+     * ```
+     *
+     * @return A new {@code Expr} representing the exp of the numeric value.
+     */
+    export function exp(expression: Expr): FunctionExpr;
+
+    /**
+     * Creates an expression that computes e to the power of the expression's result.
+     *
+     * ```typescript
+     * // Compute e to the power of the 'value' field.
+     * exp('value');
+     * ```
+     *
+     * @return A new {@code Expr} representing the exp of the numeric value.
+     */
+    export function exp(fieldName: string): FunctionExpr;
 
     /**
      * Creates an aggregation that counts the number of distinct values of an evaluated expression.
