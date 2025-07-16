@@ -943,6 +943,20 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   }
 
   /**
+   * Creates an expression that computes the floor of a numeric value.
+   *
+   * ```typescript
+   * // Compute the floor of the 'price' field.
+   * field("price").floor();
+   * ```
+   *
+   * @return A new {@code Expr} representing the floor of the numeric value.
+   */
+  floor(): FunctionExpr {
+    return new FunctionExpr('floor', [this]);
+  }
+
+  /**
    * Creates an expression that computes e to the power of this expression.
    *
    * ```typescript
@@ -4484,6 +4498,25 @@ export function ceil(fieldName: string): FunctionExpr;
 export function ceil(expression: Expr): FunctionExpr;
 export function ceil(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).ceil();
+}
+
+/**
+ * Creates an expression that computes the floor of a numeric value.
+ *
+ * @param expr The expression to compute the floor of.
+ * @return A new {@code Expr} representing the floor of the numeric value.
+ */
+export function floor(expr: Expr): FunctionExpr;
+
+/**
+ * Creates an expression that computes the floor of a numeric value.
+ *
+ * @param fieldName The name of the field to compute the floor of.
+ * @return A new {@code Expr} representing the floor of the numeric value.
+ */
+export function floor(fieldName: string): FunctionExpr;
+export function floor(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).floor();
 }
 
 /**

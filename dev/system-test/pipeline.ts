@@ -21,6 +21,7 @@ import {
   array,
   field,
   ceil,
+  floor,
   exp,
   xor,
   AggregateFunction,
@@ -3269,6 +3270,32 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         ceilingRating: 5,
+      });
+    });
+
+    it('can compute the floor of a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('rating').floor().as('floorRating'))
+        .execute();
+      expectResults(snapshot, {
+        floorRating: 4,
+      });
+    });
+
+    it('can compute the floor of a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(floor('rating').as('floorRating'))
+        .execute();
+      expectResults(snapshot, {
+        floorRating: 4,
       });
     });
 

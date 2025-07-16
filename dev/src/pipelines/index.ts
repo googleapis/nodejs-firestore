@@ -28,6 +28,7 @@ export {
   eq,
   ceil,
   exp,
+  floor,
   gt,
   like,
   lt,
