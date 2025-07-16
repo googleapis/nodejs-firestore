@@ -40,6 +40,7 @@ export {
   strConcat,
   subtract,
   cosineDistance,
+  countDistinct,
   dotProduct,
   euclideanDistance,
   mapGet,

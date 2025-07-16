@@ -1030,6 +1030,20 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   }
 
   /**
+   * Creates an aggregation that counts the number of distinct values of the expression or field.
+   *
+   * ```typescript
+   * // Count the distinct number of products
+   * field("productId").countDistinct().as("distinctProducts");
+   * ```
+   *
+   * @return A new `AggregateFunction` representing the 'count_distinct' aggregation.
+   */
+  countDistinct(): AggregateFunction {
+    return new AggregateFunction('count_distinct', [this]);
+  }
+
+  /**
    * Creates an expression that returns the larger value between this expression and another expression, based on Firestore's value type ordering.
    *
    * ```typescript
@@ -4428,6 +4442,16 @@ export function ceil(fieldName: string): FunctionExpr;
 export function ceil(expression: Expr): FunctionExpr;
 export function ceil(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).ceil();
+}
+
+/**
+ * Creates an aggregation that counts the number of distinct values of a field.
+ *
+ * @param expr The expression or field to count distinct values of.
+ * @return A new `AggregateFunction` representing the 'count_distinct' aggregation.
+ */
+export function countDistinct(expr: Expr | string): AggregateFunction {
+  return fieldOrExpression(expr).countDistinct();
 }
 
 /**

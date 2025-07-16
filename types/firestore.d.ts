@@ -4141,6 +4141,13 @@ declare namespace FirebaseFirestore {
       ceil(): FunctionExpr;
 
       /**
+       * Creates an aggregation that counts the number of distinct values of the expression or field.
+       *
+       * @return A new `AggregateFunction` representing the 'count_distinct' aggregation.
+       */
+      countDistinct(): AggregateFunction;
+
+      /**
        * Accesses a value from a map (object) field using the provided key.
        *
        * ```typescript
@@ -6931,6 +6938,22 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expr} representing the ceiling of the numeric value.
      */
     export function ceil(fieldName: string): FunctionExpr;
+
+    /**
+     * Creates an aggregation that counts the number of distinct values of an evaluated expression.
+     *
+     * @param expression The expression to count distinct values of.
+     * @return A new `AggregateFunction` representing the 'count_distinct' aggregation.
+     */
+    export function countDistinct(expression: Expr): AggregateFunction;
+
+    /**
+     * Creates an aggregation that counts the number of distinct values of a field.
+     *
+     * @param fieldName The field to count distinct values of.
+     * @return A new `AggregateFunction` representing the 'count_distinct' aggregation.
+     */
+    export function countDistinct(fieldName: string): AggregateFunction;
 
     /**
      * @beta

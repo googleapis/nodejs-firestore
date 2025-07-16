@@ -101,6 +101,7 @@ import {
   PipelineResult,
   PipelineSnapshot,
   Pipeline,
+  countDistinct,
 } from '../src/pipelines';
 
 import {
@@ -1112,6 +1113,15 @@ describe.only('Pipeline class', () => {
           .aggregate(field('rating').gt(4.3).countIf().as('count'))
           .execute();
         expectResults(snapshot, expectedResults);
+      });
+
+      it('returns countDistinct accumulation', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .aggregate(countDistinct('genre').as('distinctGenres'))
+          .execute();
+        expectResults(snapshot, {distinctGenres: 8});
       });
     });
 
