@@ -1661,6 +1661,20 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     return new FunctionExpr('pow', [this, valueToDefaultExpr(exponent)]);
   }
 
+  /**
+   * Creates an expression that rounds a numeric value to the nearest whole number.
+   *
+   * ```typescript
+   * // Round the value of the 'price' field.
+   * field("price").round();
+   * ```
+   *
+   * @return A new `Expr` representing the rounded value.
+   */
+  round(): FunctionExpr {
+    return new FunctionExpr('round', [this]);
+  }
+
   // TODO(new-expression): Add new expression method definitions above this line
 
   /**
@@ -6181,6 +6195,35 @@ export function pow(
   exponent: Expr | number
 ): FunctionExpr {
   return fieldOrExpression(base).pow(exponent as number);
+}
+
+/**
+ * Creates an expression that rounds a numeric value to the nearest whole number.
+ *
+ * ```typescript
+ * // Round the value of the 'price' field.
+ * round("price");
+ * ```
+ *
+ * @param fieldName The name of the field to round.
+ * @return A new `Expr` representing the rounded value.
+ */
+export function round(fieldName: string): FunctionExpr;
+
+/**
+ * Creates an expression that rounds a numeric value to the nearest whole number.
+ *
+ * ```typescript
+ * // Round the value of the 'price' field.
+ * round(field("price"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which will be rounded.
+ * @return A new `Expr` representing the rounded value.
+ */
+export function round(expression: Expr): FunctionExpr;
+export function round(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).round();
 }
 
 // TODO(new-expression): Add new top-level expression function definitions above this line

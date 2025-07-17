@@ -4758,6 +4758,18 @@ declare namespace FirebaseFirestore {
        */
       pow(exponent: number): FunctionExpr;
 
+      /**
+       * Creates an expression that rounds a numeric value to the nearest whole number.
+       *
+       * ```typescript
+       * // Round the value of the 'price' field.
+       * field("price").round();
+       * ```
+       *
+       * @return A new `Expr` representing the rounded value.
+       */
+      round(): FunctionExpr;
+
       // TODO(new-expression): Add new expression method declarations above this line
 
       /**
@@ -8556,6 +8568,36 @@ declare namespace FirebaseFirestore {
      * @return A new `Expr` representing the power operation.
      */
     export function pow(base: string, exponent: number): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that rounds a numeric value to the nearest whole number.
+     *
+     * ```typescript
+     * // Round the value of the 'price' field.
+     * round("price");
+     * ```
+     *
+     * @param fieldName The name of the field to round.
+     * @return A new `Expr` representing the rounded value.
+     */
+    export function round(fieldName: string): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that rounds a numeric value to the nearest whole number.
+     *
+     * ```typescript
+     * // Round the value of the 'price' field.
+     * round(field("price"));
+     * ```
+     *
+     * @param expression An expression evaluating to a numeric value, which will be rounded.
+     * @return A new `Expr` representing the rounded value.
+     */
+    export function round(expression: Expr): FunctionExpr;
 
     // TODO(new-expression): Add new top-level expression function declarations above this line
 

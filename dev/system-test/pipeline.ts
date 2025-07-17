@@ -105,6 +105,7 @@ import {
   Pipeline,
   countDistinct,
   pow,
+  round,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -3350,6 +3351,60 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         powerRating: 17.640000000000004,
+      });
+    });
+
+    it.only('can round a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('rating').round().as('roundedRating'))
+        .execute();
+      expectResults(snapshot, {
+        roundedRating: 4,
+      });
+    });
+
+    it.only('can round a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(round('rating').as('roundedRating'))
+        .execute();
+      expectResults(snapshot, {
+        roundedRating: 4,
+      });
+    });
+
+    it.only('can round a numeric value away from zero for positive half-way values', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .addFields(constant(1.5).as('positiveHalf'))
+        .select(field('positiveHalf').round().as('roundedRating'))
+        .execute();
+      expectResults(snapshot, {
+        roundedRating: 2,
+      });
+    });
+
+    it.only('can round a numeric value away from zero for negative half-way values', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .addFields(constant(-1.5).as('negativeHalf'))
+        .select(field('negativeHalf').round().as('roundedRating'))
+        .execute();
+      expectResults(snapshot, {
+        roundedRating: -2,
       });
     });
 

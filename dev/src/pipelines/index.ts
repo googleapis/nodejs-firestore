@@ -114,5 +114,6 @@ export {
   unixSecondsToTimestamp,
   unixMillisToTimestamp,
   pow,
+  round,
   // TODO(new-expression): Add new expression exports above this line
 } from './expression';
