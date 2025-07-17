@@ -104,6 +104,7 @@ import {
   PipelineSnapshot,
   Pipeline,
   countDistinct,
+    // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
 import {
@@ -3324,6 +3325,8 @@ describe.only('Pipeline class', () => {
         expRating: Math.exp(4.7),
       });
     });
+
+    // TODO(new-expression): Add new expression tests above this line
   });
 
   describe('not yet implemented in backend', () => {

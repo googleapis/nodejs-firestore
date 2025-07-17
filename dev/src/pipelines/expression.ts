@@ -1632,6 +1632,8 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     ]);
   }
 
+  // TODO(new-expression): Add new expression method definitions above this line
+
   /**
    * Creates an {@link Ordering} that sorts documents in ascending order based on this expression.
    *
@@ -6089,6 +6091,8 @@ export function or(
 ): BooleanExpr {
   return new BooleanExpr('or', [first, second, ...more]);
 }
+
+// TODO(new-expression): Add new top-level expression function definitions above this line
 
 /**
  * @beta

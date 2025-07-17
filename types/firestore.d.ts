@@ -8465,6 +8465,8 @@ declare namespace FirebaseFirestore {
       ...more: BooleanExpr[]
     ): BooleanExpr;
 
+    // TODO(new-expression): Add new top-level expression function declarations above this line
+
     /**
      * @beta
      *
@@ -9458,6 +9460,8 @@ declare namespace FirebaseFirestore {
        * @return A new {@code Pipeline} object with this stage appended to the stage list.
        */
       sort(options: SortStageOptions): Pipeline;
+
+      // TODO(new-expression): Add new expression method declarations above this line
 
       /**
        * Adds a generic stage to the pipeline.
