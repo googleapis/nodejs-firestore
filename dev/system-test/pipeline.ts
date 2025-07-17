@@ -104,7 +104,8 @@ import {
   PipelineSnapshot,
   Pipeline,
   countDistinct,
-    // TODO(new-expression): add new expression imports above this line
+  pow,
+  // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
 import {
@@ -3323,6 +3324,32 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         expRating: Math.exp(4.7),
+      });
+    });
+
+    it.only('can compute the power of a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('rating').pow(2).as('powerRating'))
+        .execute();
+      expectResults(snapshot, {
+        powerRating: 17.640000000000004,
+      });
+    });
+
+    it.only('can compute the power of a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(pow('rating', 2).as('powerRating'))
+        .execute();
+      expectResults(snapshot, {
+        powerRating: 17.640000000000004,
       });
     });
 

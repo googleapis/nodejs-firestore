@@ -4733,6 +4733,34 @@ declare namespace FirebaseFirestore {
       ): FunctionExpr;
 
       /**
+       * Creates an expression that returns the value of this expression raised to the power of another expression.
+       *
+       * ```typescript
+       * // Raise the value of the 'base' field to the power of the 'exponent' field.
+       * field("base").pow(field("exponent"));
+       * ```
+       *
+       * @param exponent The expression to raise this expression to the power of.
+       * @return A new `Expr` representing the power operation.
+       */
+      pow(exponent: Expr): FunctionExpr;
+
+      /**
+       * Creates an expression that returns the value of this expression raised to the power of a constant value.
+       *
+       * ```typescript
+       * // Raise the value of the 'base' field to the power of 2.
+       * field("base").pow(2);
+       * ```
+       *
+       * @param exponent The constant value to raise this expression to the power of.
+       * @return A new `Expr` representing the power operation.
+       */
+      pow(exponent: number): FunctionExpr;
+
+      // TODO(new-expression): Add new expression method declarations above this line
+
+      /**
        * Creates an {@link Ordering} that sorts documents in ascending order based on this expression.
        *
        * ```typescript
@@ -8465,6 +8493,70 @@ declare namespace FirebaseFirestore {
       ...more: BooleanExpr[]
     ): BooleanExpr;
 
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the value of the base expression raised to the power of the exponent expression.
+     *
+     * ```typescript
+     * // Raise the value of the 'base' field to the power of the 'exponent' field.
+     * pow(field("base"), field("exponent"));
+     * ```
+     *
+     * @param base The expression to raise to the power of the exponent.
+     * @param exponent The expression to raise the base to the power of.
+     * @return A new `Expr` representing the power operation.
+     */
+    export function pow(base: Expr, exponent: Expr): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the value of the base expression raised to the power of the exponent.
+     *
+     * ```typescript
+     * // Raise the value of the 'base' field to the power of 2.
+     * pow(field("base"), 2);
+     * ```
+     *
+     * @param base The expression to raise to the power of the exponent.
+     * @param exponent The constant value to raise the base to the power of.
+     * @return A new `Expr` representing the power operation.
+     */
+    export function pow(base: Expr, exponent: number): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the value of the base field raised to the power of the exponent expression.
+     *
+     * ```typescript
+     * // Raise the value of the 'base' field to the power of the 'exponent' field.
+     * pow("base", field("exponent"));
+     * ```
+     *
+     * @param base The name of the field to raise to the power of the exponent.
+     * @param exponent The expression to raise the base to the power of.
+     * @return A new `Expr` representing the power operation.
+     */
+    export function pow(base: string, exponent: Expr): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the value of the base field raised to the power of the exponent.
+     *
+     * ```typescript
+     * // Raise the value of the 'base' field to the power of 2.
+     * pow("base", 2);
+     * ```
+     *
+     * @param base The name of the field to raise to the power of the exponent.
+     * @param exponent The constant value to raise the base to the power of.
+     * @return A new `Expr` representing the power operation.
+     */
+    export function pow(base: string, exponent: number): FunctionExpr;
+
     // TODO(new-expression): Add new top-level expression function declarations above this line
 
     /**
@@ -9460,8 +9552,6 @@ declare namespace FirebaseFirestore {
        * @return A new {@code Pipeline} object with this stage appended to the stage list.
        */
       sort(options: SortStageOptions): Pipeline;
-
-      // TODO(new-expression): Add new expression method declarations above this line
 
       /**
        * Adds a generic stage to the pipeline.
