@@ -3,8 +3,9 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "outDir": "build",
+    "target": "es2020",
     "lib": [
-      "es2016",
+      "es2020",
       "dom"
     ],
     "useUnknownInCatchVariables": false,
