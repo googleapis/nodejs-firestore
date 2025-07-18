@@ -1675,6 +1675,20 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     return new FunctionExpr('round', [this]);
   }
 
+  /**
+   * Creates an expression that returns the collection ID from a path.
+   *
+   * ```typescript
+   * // Get the collection ID from a path.
+   * field("__path__").collectionId();
+   * ```
+   *
+   * @return A new {@code Expr} representing the collectionId operation.
+   */
+  collectionId(): FunctionExpr {
+    return new FunctionExpr('collection_id', [this]);
+  }
+
   // TODO(new-expression): Add new expression method definitions above this line
 
   /**
@@ -6224,6 +6238,35 @@ export function round(fieldName: string): FunctionExpr;
 export function round(expression: Expr): FunctionExpr;
 export function round(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).round();
+}
+
+/**
+ * Creates an expression that returns the collection ID from a path.
+ *
+ * ```typescript
+ * // Get the collection ID from a path.
+ * collectionId("__name__");
+ * ```
+ *
+ * @param fieldName The name of the field to get the collection ID from.
+ * @return A new {@code Expr} representing the collectionId operation.
+ */
+export function collectionId(fieldName: string): FunctionExpr;
+
+/**
+ * Creates an expression that returns the collection ID from a path.
+ *
+ * ```typescript
+ * // Get the collection ID from a path.
+ * collectionId(field("__name__"));
+ * ```
+ *
+ * @param expression An expression evaluating to a path, which the collection ID will be extracted from.
+ * @return A new {@code Expr} representing the collectionId operation.
+ */
+export function collectionId(expression: Expr): FunctionExpr;
+export function collectionId(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).collectionId();
 }
 
 // TODO(new-expression): Add new top-level expression function definitions above this line

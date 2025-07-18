@@ -4770,6 +4770,18 @@ declare namespace FirebaseFirestore {
        */
       round(): FunctionExpr;
 
+      /**
+       * Creates an expression that returns the collection ID from a path.
+       *
+       * ```typescript
+       * // Get the collection ID from a path.
+       * field("__name__").collectionId();
+       * ```
+       *
+       * @return A new {@code Expr} representing the collectionId operation.
+       */
+      collectionId(): FunctionExpr;
+
       // TODO(new-expression): Add new expression method declarations above this line
 
       /**
@@ -8598,6 +8610,36 @@ declare namespace FirebaseFirestore {
      * @return A new `Expr` representing the rounded value.
      */
     export function round(expression: Expr): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the collection ID from a path.
+     *
+     * ```typescript
+     * // Get the collection ID from a path.
+     * collectionId(field("__name__"));
+     * ```
+     *
+     * @param expression An expression evaluating to a path, which the collection ID will be extracted from.
+     * @return A new {@code Expr} representing the collectionId operation.
+     */
+    export function collectionId(expression: Expr): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the collection ID from a path.
+     *
+     * ```typescript
+     * // Get the collection ID from a path.
+     * collectionId("__name__");
+     * ```
+     *
+     * @param fieldName The name of the field to get the collection ID from.
+     * @return A new {@code Expr} representing the collectionId operation.
+     */
+    export function collectionId(fieldName: string): FunctionExpr;
 
     // TODO(new-expression): Add new top-level expression function declarations above this line
 

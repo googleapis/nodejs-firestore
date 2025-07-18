@@ -106,6 +106,7 @@ import {
   countDistinct,
   pow,
   round,
+  collectionId,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -3405,6 +3406,30 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         roundedRating: -2,
+      });
+    });
+
+    it.only('can get the collectionId from a path', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(field('__name__').collectionId().as('collectionId'))
+        .execute();
+      expectResults(snapshot, {
+        collectionId: randomCol.id,
+      });
+    });
+
+    it.only('can get the collectionId from a path with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(collectionId('__name__').as('collectionId'))
+        .execute();
+      expectResults(snapshot, {
+        collectionId: randomCol.id,
       });
     });
 

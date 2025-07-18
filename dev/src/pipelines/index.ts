@@ -115,5 +115,6 @@ export {
   unixMillisToTimestamp,
   pow,
   round,
+  collectionId,
   // TODO(new-expression): Add new expression exports above this line
 } from './expression';
