@@ -4780,7 +4780,22 @@ declare namespace FirebaseFirestore {
        *
        * @return A new {@code Expr} representing the collectionId operation.
        */
+
       collectionId(): FunctionExpr;
+      /**
+       * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
+       *
+       * ```typescript
+       * // Get the length of the 'name' field.
+       * field("name").length();
+       *
+       * // Get the number of items in the 'cart' array.
+       * field("cart").length();
+       * ```
+       *
+       * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+       */
+      length(): FunctionExpr;
 
       // TODO(new-expression): Add new expression method declarations above this line
 
@@ -8640,6 +8655,42 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expr} representing the collectionId operation.
      */
     export function collectionId(fieldName: string): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
+     *
+     * ```typescript
+     * // Get the length of the 'name' field.
+     * length(field("name"));
+     *
+     * // Get the number of items in the 'cart' array.
+     * length(field("cart"));
+     * ```
+     *
+     * @param expression An expression evaluating to a string, array, map, vector, or bytes, which the length will be calculated for.
+     * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+     */
+    export function length(expression: Expr): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
+     *
+     * ```typescript
+     * // Get the length of the 'name' field.
+     * length("name");
+     *
+     * // Get the number of items in the 'cart' array.
+     * length("cart");
+     * ```
+     *
+     * @param fieldName The name of the field to calculate the length of.
+     * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+     */
+    export function length(fieldName: string): FunctionExpr;
 
     // TODO(new-expression): Add new top-level expression function declarations above this line
 

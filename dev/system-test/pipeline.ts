@@ -107,6 +107,7 @@ import {
   pow,
   round,
   collectionId,
+  length,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -3430,6 +3431,97 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         collectionId: randomCol.id,
+      });
+    });
+
+    it.only('can compute the length of a string value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('title').length().as('titleLength'))
+        .execute();
+      expectResults(snapshot, {
+        titleLength: 36,
+      });
+    });
+
+    it.only('can compute the length of a string value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(length('title').as('titleLength'))
+        .execute();
+      expectResults(snapshot, {
+        titleLength: 36,
+      });
+    });
+
+    it.only('can compute the length of an array value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('tags').length().as('tagsLength'))
+        .execute();
+      expectResults(snapshot, {
+        tagsLength: 3,
+      });
+    });
+
+    it.only('can compute the length of an array value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(length('tags').as('tagsLength'))
+        .execute();
+      expectResults(snapshot, {
+        tagsLength: 3,
+      });
+    });
+
+    it.only('can compute the length of a map value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('awards').length().as('awardsLength'))
+        .execute();
+      expectResults(snapshot, {
+        awardsLength: 3,
+      });
+    });
+
+    it.only('can compute the length of a vector value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('embedding').length().as('embeddingLength'))
+        .execute();
+      expectResults(snapshot, {
+        embeddingLength: 10,
+      });
+    });
+
+    it.only('can compute the length of a bytes value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .select(constant('12é').as('value'))
+        .limit(1)
+        .select(field('value').byteLength().as('valueLength'))
+        .execute();
+      expectResults(snapshot, {
+        valueLength: 4,
       });
     });
 

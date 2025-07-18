@@ -1689,6 +1689,23 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     return new FunctionExpr('collection_id', [this]);
   }
 
+  /**
+   * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
+   *
+   * ```typescript
+   * // Get the length of the 'name' field.
+   * field("name").length();
+   *
+   * // Get the number of items in the 'cart' array.
+   * field("cart").length();
+   * ```
+   *
+   * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+   */
+  length(): FunctionExpr {
+    return new FunctionExpr('length', [this]);
+  }
+
   // TODO(new-expression): Add new expression method definitions above this line
 
   /**
@@ -6269,12 +6286,45 @@ export function collectionId(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).collectionId();
 }
 
+/**
+ * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
+ *
+ * ```typescript
+ * // Get the length of the 'name' field.
+ * length("name");
+ *
+ * // Get the number of items in the 'cart' array.
+ * length("cart");
+ * ```
+ *
+ * @param fieldName The name of the field to calculate the length of.
+ * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+ */
+export function length(fieldName: string): FunctionExpr;
+
+/**
+ * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
+ *
+ * ```typescript
+ * // Get the length of the 'name' field.
+ * length(field("name"));
+ *
+ * // Get the number of items in the 'cart' array.
+ * length(field("cart"));
+ * ```
+ *
+ * @param expression An expression evaluating to a string, array, map, vector, or bytes, which the length will be calculated for.
+ * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+ */
+export function length(expression: Expr): FunctionExpr;
+export function length(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).length();
+}
+
 // TODO(new-expression): Add new top-level expression function definitions above this line
 
 /**
- * @beta
- *
- * Creates an {@link Ordering} that sorts documents in ascending order based on an expression.
+ * Creates a {@link Field} instance representing the field at the given path.
  *
  * ```typescript
  * // Sort documents by the 'name' field in lowercase in ascending order

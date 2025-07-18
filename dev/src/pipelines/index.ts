@@ -116,5 +116,6 @@ export {
   pow,
   round,
   collectionId,
+  length,
   // TODO(new-expression): Add new expression exports above this line
 } from './expression';
