@@ -1706,6 +1706,63 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     return new FunctionExpr('length', [this]);
   }
 
+  /**
+   * Creates an expression that computes the natural logarithm of a numeric value.
+   *
+   * ```typescript
+   * // Compute the natural logarithm of the 'value' field.
+   * field("value").ln();
+   * ```
+   *
+   * @return A new {@code Expr} representing the natural logarithm of the numeric value.
+   */
+  ln(): FunctionExpr {
+    return new FunctionExpr('ln', [this]);
+  }
+
+  /**
+   * Creates an expression that computes the logarithm of this expression to a given base.
+   *
+   * ```typescript
+   * // Compute the logarithm of the 'value' field with base 10.
+   * field("value").log(10);
+   * ```
+   *
+   * @param base The base of the logarithm.
+   * @return A new {@code Expr} representing the logarithm of the numeric value.
+   */
+  log(base: number): FunctionExpr;
+
+  /**
+   * Creates an expression that computes the logarithm of this expression to a given base.
+   *
+   * ```typescript
+   * // Compute the logarithm of the 'value' field with the base in the 'base' field.
+   * field("value").log(field("base"));
+   * ```
+   *
+   * @param base The base of the logarithm.
+   * @return A new {@code Expr} representing the logarithm of the numeric value.
+   */
+  log(base: Expr): FunctionExpr;
+  log(base: number | Expr): FunctionExpr {
+    return new FunctionExpr('log', [this, valueToDefaultExpr(base)]);
+  }
+
+  /**
+   * Creates an expression that computes the square root of a numeric value.
+   *
+   * ```typescript
+   * // Compute the square root of the 'value' field.
+   * field("value").sqrt();
+   * ```
+   *
+   * @return A new {@code Expr} representing the square root of the numeric value.
+   */
+  sqrt(): FunctionExpr {
+    return new FunctionExpr('sqrt', [this]);
+  }
+
   // TODO(new-expression): Add new expression method definitions above this line
 
   /**
@@ -6319,6 +6376,120 @@ export function length(fieldName: string): FunctionExpr;
 export function length(expression: Expr): FunctionExpr;
 export function length(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).length();
+}
+
+/**
+ * Creates an expression that computes the natural logarithm of a numeric value.
+ *
+ * ```typescript
+ * // Compute the natural logarithm of the 'value' field.
+ * ln("value");
+ * ```
+ *
+ * @param fieldName The name of the field to compute the natural logarithm of.
+ * @return A new `Expr` representing the natural logarithm of the numeric value.
+ */
+export function ln(fieldName: string): FunctionExpr;
+
+/**
+ * Creates an expression that computes the natural logarithm of a numeric value.
+ *
+ * ```typescript
+ * // Compute the natural logarithm of the 'value' field.
+ * ln(field("value"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the natural logarithm will be computed for.
+ * @return A new `Expr` representing the natural logarithm of the numeric value.
+ */
+export function ln(expression: Expr): FunctionExpr;
+export function ln(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).ln();
+}
+
+/**
+ * Creates an expression that computes the logarithm of an expression to a given base.
+ *
+ * ```typescript
+ * // Compute the logarithm of the 'value' field with base 10.
+ * log(field("value"), 10);
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the logarithm will be computed for.
+ * @param base The base of the logarithm.
+ * @return A new {@code Expr} representing the logarithm of the numeric value.
+ */
+export function log(expression: Expr, base: number): FunctionExpr;
+/**
+ * Creates an expression that computes the logarithm of an expression to a given base.
+ *
+ * ```typescript
+ * // Compute the logarithm of the 'value' field with the base in the 'base' field.
+ * log(field("value"), field("base"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the logarithm will be computed for.
+ * @param base The base of the logarithm.
+ * @return A new {@code Expr} representing the logarithm of the numeric value.
+ */
+export function log(expression: Expr, base: Expr): FunctionExpr;
+/**
+ * Creates an expression that computes the logarithm of a field to a given base.
+ *
+ * ```typescript
+ * // Compute the logarithm of the 'value' field with base 10.
+ * log("value", 10);
+ * ```
+ *
+ * @param fieldName The name of the field to compute the logarithm of.
+ * @param base The base of the logarithm.
+ * @return A new {@code Expr} representing the logarithm of the numeric value.
+ */
+export function log(fieldName: string, base: number): FunctionExpr;
+/**
+ * Creates an expression that computes the logarithm of a field to a given base.
+ *
+ * ```typescript
+ * // Compute the logarithm of the 'value' field with the base in the 'base' field.
+ * log("value", field("base"));
+ * ```
+ *
+ * @param fieldName The name of the field to compute the logarithm of.
+ * @param base The base of the logarithm.
+ * @return A new {@code Expr} representing the logarithm of the numeric value.
+ */
+export function log(fieldName: string, base: Expr): FunctionExpr;
+export function log(expr: Expr | string, base: number | Expr): FunctionExpr {
+  // @ts-ignore
+  return fieldOrExpression(expr).log(base);
+}
+
+/**
+ * Creates an expression that computes the square root of a numeric value.
+ *
+ * ```typescript
+ * // Compute the square root of the 'value' field.
+ * sqrt(field("value"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the square root will be computed for.
+ * @return A new {@code Expr} representing the square root of the numeric value.
+ */
+export function sqrt(expression: Expr): FunctionExpr;
+/**
+ * Creates an expression that computes the square root of a numeric value.
+ *
+ * ```typescript
+ * // Compute the square root of the 'value' field.
+ * sqrt("value");
+ * ```
+ *
+ * @param fieldName The name of the field to compute the square root of.
+ * @return A new {@code Expr} representing the square root of the numeric value.
+ */
+export function sqrt(fieldName: string): FunctionExpr;
+export function sqrt(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).sqrt();
 }
 
 // TODO(new-expression): Add new top-level expression function definitions above this line

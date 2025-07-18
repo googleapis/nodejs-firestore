@@ -108,6 +108,9 @@ import {
   round,
   collectionId,
   length,
+  ln,
+  log,
+  sqrt,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -3522,6 +3525,119 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         valueLength: 4,
+      });
+    });
+
+    it.only('can compute the natural logarithm of a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('rating').ln().as('lnRating'))
+        .execute();
+      expect(snapshot.results[0]!.data()!.lnRating).to.be.closeTo(1.435, 0.001);
+    });
+
+    it.only('can compute the natural logarithm of a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(ln('rating').as('lnRating'))
+        .execute();
+      expect(snapshot.results[0]!.data()!.lnRating).to.be.closeTo(1.435, 0.001);
+    });
+
+    it.only('can compute the natural logarithm of a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(ln('rating').as('lnRating'))
+        .execute();
+      expectResults(snapshot, {
+        lnRating: 1.4350845252893227,
+      });
+    });
+
+    it.only('can compute the logarithm of a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('rating').log(10).as('logRating'))
+        .execute();
+      expectResults(snapshot, {
+        logRating: 0.6232492903979004,
+      });
+    });
+
+    it.only('can compute the logarithm of a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(log('rating', 10).as('logRating'))
+        .execute();
+      expectResults(snapshot, {
+        logRating: 0.6232492903979004,
+      });
+    });
+
+    it.only('can round a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('rating').round().as('roundedRating'))
+        .execute();
+      expectResults(snapshot, {
+        roundedRating: 4,
+      });
+    });
+
+    it.only('can round a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(round('rating').as('roundedRating'))
+        .execute();
+      expectResults(snapshot, {
+        roundedRating: 4,
+      });
+    });
+
+    it.only('can compute the square root of a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('rating').sqrt().as('sqrtRating'))
+        .execute();
+      expectResults(snapshot, {
+        sqrtRating: 2.04939015319192,
+      });
+    });
+
+    it.only('can compute the square root of a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(sqrt('rating').as('sqrtRating'))
+        .execute();
+      expectResults(snapshot, {
+        sqrtRating: 2.04939015319192,
       });
     });
 

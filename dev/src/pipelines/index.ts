@@ -114,8 +114,11 @@ export {
   unixSecondsToTimestamp,
   unixMillisToTimestamp,
   pow,
-  round,
   collectionId,
   length,
+  ln,
+  log,
+  round,
+  sqrt,
   // TODO(new-expression): Add new expression exports above this line
 } from './expression';
