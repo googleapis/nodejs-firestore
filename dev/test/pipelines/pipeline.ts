@@ -117,7 +117,7 @@ describe('execute(Pipeline|PipelineOptions)', () => {
             mapValue: {
               fields: {
                 mode: {
-                  stringValue: 'explain',
+                  stringValue: 'analyze',
                 },
                 output_format: {
                   stringValue: 'json',

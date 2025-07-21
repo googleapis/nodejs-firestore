@@ -1763,6 +1763,20 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     return new FunctionExpr('sqrt', [this]);
   }
 
+  /**
+   * Creates an expression that reverses a string.
+   *
+   * ```typescript
+   * // Reverse the value of the 'myString' field.
+   * field("myString").strReverse();
+   * ```
+   *
+   * @return A new {@code Expr} representing the reversed string.
+   */
+  strReverse(): FunctionExpr {
+    return new FunctionExpr('str_reverse', [this]);
+  }
+
   // TODO(new-expression): Add new expression method definitions above this line
 
   /**
@@ -6490,6 +6504,39 @@ export function sqrt(expression: Expr): FunctionExpr;
 export function sqrt(fieldName: string): FunctionExpr;
 export function sqrt(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).sqrt();
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that reverses a string.
+ *
+ * ```typescript
+ * // Reverse the value of the 'myString' field.
+ * strReverse(field("myString"));
+ * ```
+ *
+ * @param stringExpression An expression evaluating to a string value, which will be reversed.
+ * @return A new {@code Expr} representing the reversed string.
+ */
+export function strReverse(stringExpression: Expr): FunctionExpr;
+
+/**
+ * @beta
+ *
+ * Creates an expression that reverses a string value in the specified field.
+ *
+ * ```typescript
+ * // Reverse the value of the 'myString' field.
+ * strReverse("myString");
+ * ```
+ *
+ * @param field The name of the field representing the string to reverse.
+ * @return A new {@code Expr} representing the reversed string.
+ */
+export function strReverse(field: string): FunctionExpr;
+export function strReverse(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).strReverse();
 }
 
 // TODO(new-expression): Add new top-level expression function definitions above this line
