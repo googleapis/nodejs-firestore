@@ -465,39 +465,38 @@ class StringBuilder {
   }
 }
 
-// TODO(b/352223847): Re-enable this test after fixing the timeout issue.
-// describe('CompareUtf8Strings', () => {
-//   it('compareUtf8Strings should return correct results', () => {
-//     const errors = [];
-//     const seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-//     let passCount = 0;
-//     const stringGenerator = new StringGenerator(new Random(seed), 0.33, 20);
-//     const stringPairGenerator = new StringPairGenerator(stringGenerator);
+describe('CompareUtf8Strings', () => {
+  it('compareUtf8Strings should return correct results', () => {
+    const errors = [];
+    const seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+    let passCount = 0;
+    const stringGenerator = new StringGenerator(new Random(seed), 0.33, 20);
+    const stringPairGenerator = new StringPairGenerator(stringGenerator);
 
-//     for (let i = 0; i < 1000000 && errors.length < 10; i++) {
-//       const {s1, s2} = stringPairGenerator.next();
+    for (let i = 0; i < 1000000 && errors.length < 10; i++) {
+      const {s1, s2} = stringPairGenerator.next();
 
-//       const actual = order.compareUtf8Strings(s1, s2);
-//       const expected = Buffer.from(s1, 'utf8').compare(Buffer.from(s2, 'utf8'));
+      const actual = order.compareUtf8Strings(s1, s2);
+      const expected = Buffer.from(s1, 'utf8').compare(Buffer.from(s2, 'utf8'));
 
-//       if (actual === expected) {
-//         passCount++;
-//       } else {
-//         errors.push(
-//           `compareUtf8Strings(s1="${s1}", s2="${s2}") returned ${actual}, ` +
-//             `but expected ${expected} (i=${i}, s1.length=${s1.length}, s2.length=${s2.length})`
-//         );
-//       }
-//     }
+      if (actual === expected) {
+        passCount++;
+      } else {
+        errors.push(
+          `compareUtf8Strings(s1="${s1}", s2="${s2}") returned ${actual}, ` +
+            `but expected ${expected} (i=${i}, s1.length=${s1.length}, s2.length=${s2.length})`
+        );
+      }
+    }
 
-//     if (errors.length > 0) {
-//       console.error(
-//         `${errors.length} test cases failed, ${passCount} test cases passed, seed=${seed};`
-//       );
-//       errors.forEach((error, index) =>
-//         console.error(`errors[${index}]: ${error}`)
-//       );
-//       throw new Error('Test failed');
-//     }
-//   }).timeout(20000);
-// });
+    if (errors.length > 0) {
+      console.error(
+        `${errors.length} test cases failed, ${passCount} test cases passed, seed=${seed};`
+      );
+      errors.forEach((error, index) =>
+        console.error(`errors[${index}]: ${error}`)
+      );
+      throw new Error('Test failed');
+    }
+  }).timeout(20000);
+});
