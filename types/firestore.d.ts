@@ -4860,6 +4860,20 @@ declare namespace FirebaseFirestore {
        */
       strReverse(): FunctionExpr;
 
+      /**
+       * Creates an expression that returns the parent of a document reference.
+       *
+       * @return A new {@code Expr} representing the parent of the document reference.
+       */
+      parent(): FunctionExpr;
+
+      /**
+       * Creates an expression that returns the namespace of a document reference.
+       *
+       * @return A new {@code Expr} representing the namespace of the document reference.
+       */
+      namespace(): FunctionExpr;
+
       // TODO(new-expression): Add new expression method declarations above this line
 
       /**
@@ -8784,6 +8798,50 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expr} representing the reversed string.
      */
     export function strReverse(field: string): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the parent of a document reference.
+     *
+     * @param documentPathExpr The expression that returns the document reference.
+     * @return A new {@code Expr} representing the parent of the document reference.
+     */
+    export function parent(documentPathExpr: Expr): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the parent of a document reference.
+     *
+     * @param documentPath The document reference.
+     * @return A new {@code Expr} representing the parent of the document reference.
+     */
+    export function parent(
+      documentPath: string | DocumentReference
+    ): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the namespace of a document reference.
+     *
+     * @param documentPathExpr The expression that returns the document reference.
+     * @return A new {@code Expr} representing the namespace of the document reference.
+     */
+    export function namespace(documentPathExpr: Expr): FunctionExpr;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the namespace of a document reference.
+     *
+     * @param documentPath The document reference.
+     * @return A new {@code Expr} representing the namespace of the document reference.
+     */
+    export function namespace(
+      documentPath: string | DocumentReference
+    ): FunctionExpr;
 
     // TODO(new-expression): Add new top-level expression function declarations above this line
 

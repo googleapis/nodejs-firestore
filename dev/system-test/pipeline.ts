@@ -112,6 +112,8 @@ import {
   log,
   sqrt,
   strReverse,
+  parent,
+  namespace,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -412,6 +414,54 @@ describe.only('Pipeline class', () => {
         expect(doc.createTime!.toDate().valueOf()).to.be.lessThan(
           doc.updateTime!.toDate().valueOf()
         );
+      });
+    });
+
+    it.only('can get the parent from a path', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(field('__name__').parent().as('parent'))
+        .execute();
+      expectResults(snapshot, {
+        parent: randomCol,
+      });
+    });
+
+    it.only('can get the parent from a path with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(parent('__name__').as('parent'))
+        .execute();
+      expectResults(snapshot, {
+        parent: randomCol,
+      });
+    });
+
+    it.only('can get the namespace from a path', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(field('__name__').namespace().as('namespace'))
+        .execute();
+      expectResults(snapshot, {
+        namespace: '(default)',
+      });
+    });
+
+    it.only('can get the namespace from a path with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(namespace('__name__').as('namespace'))
+        .execute();
+      expectResults(snapshot, {
+        namespace: '(default)',
       });
     });
 

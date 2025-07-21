@@ -1777,6 +1777,24 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     return new FunctionExpr('str_reverse', [this]);
   }
 
+  /**
+   * Creates an expression that returns the parent of a document reference.
+   *
+   * @return A new {@code Expr} representing the parent of the document reference.
+   */
+  parent(): FunctionExpr {
+    return new FunctionExpr('parent', [this]);
+  }
+
+  /**
+   * Creates an expression that returns the namespace of a document reference.
+   *
+   * @return A new {@code Expr} representing the namespace of the document reference.
+   */
+  namespace(): FunctionExpr {
+    return new FunctionExpr('namespace', [this]);
+  }
+
   // TODO(new-expression): Add new expression method definitions above this line
 
   /**
@@ -6537,6 +6555,58 @@ export function strReverse(stringExpression: Expr): FunctionExpr;
 export function strReverse(field: string): FunctionExpr;
 export function strReverse(expr: Expr | string): FunctionExpr {
   return fieldOrExpression(expr).strReverse();
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the parent of a document reference.
+ *
+ * @param documentPathExpr The expression that returns the document reference.
+ * @return A new {@code Expr} representing the parent of the document reference.
+ */
+export function parent(documentPathExpr: Expr): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that returns the parent of a document reference.
+ *
+ * @param documentPath The document reference.
+ * @return A new {@code Expr} representing the parent of the document reference.
+ */
+export function parent(
+  documentPath: string | firestore.DocumentReference
+): FunctionExpr;
+export function parent(
+  documentPath: Expr | string | firestore.DocumentReference
+): FunctionExpr {
+  return valueToDefaultExpr(documentPath).parent();
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that returns the namespace of a document reference.
+ *
+ * @param documentPathExpr The expression that returns the document reference.
+ * @return A new {@code Expr} representing the namespace of the document reference.
+ */
+export function namespace(documentPathExpr: Expr): FunctionExpr;
+/**
+ * @beta
+ *
+ * Creates an expression that returns the namespace of a document reference.
+ *
+ * @param documentPath The document reference.
+ * @return A new {@code Expr} representing the namespace of the document reference.
+ */
+export function namespace(
+  documentPath: string | firestore.DocumentReference
+): FunctionExpr;
+export function namespace(
+  documentPath: Expr | string | firestore.DocumentReference
+): FunctionExpr {
+  return valueToDefaultExpr(documentPath).namespace();
 }
 
 // TODO(new-expression): Add new top-level expression function definitions above this line

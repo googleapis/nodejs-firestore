@@ -121,5 +121,7 @@ export {
   round,
   sqrt,
   strReverse,
+  parent,
+  namespace,
   // TODO(new-expression): Add new expression exports above this line
 } from './expression';
