@@ -111,6 +111,7 @@ import {
   ln,
   log,
   sqrt,
+  strReverse,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -3638,6 +3639,32 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         sqrtRating: 2.04939015319192,
+      });
+    });
+
+    it.only('can reverse a string', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(field('title').strReverse().as('reversedTitle'))
+        .execute();
+      expectResults(snapshot, {
+        reversedTitle: 'yxalaG eht ot ediuG s\'rekihhctiH ehT',
+      });
+    });
+
+    it.only('can reverse a string with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .limit(1)
+        .select(strReverse('title').as('reversedTitle'))
+        .execute();
+      expectResults(snapshot, {
+        reversedTitle: 'yxalaG eht ot ediuG s\'rekihhctiH ehT',
       });
     });
 
