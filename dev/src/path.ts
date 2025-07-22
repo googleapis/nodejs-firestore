@@ -44,7 +44,7 @@ export const DEFAULT_DATABASE_ID = '(default)';
  */
 const RESOURCE_PATH_RE =
   // Note: [\s\S] matches all characters including newlines.
-  /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?([\s\S]*)$/;
+  /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents(?:\/([\s\S]+))?)?$/;
 
 /*!
  * A regular expression to verify whether a field name can be passed to the
@@ -455,7 +455,7 @@ export class QualifiedResourcePath extends ResourcePath {
     if (elements) {
       const project = elements[1];
       const database = elements[2];
-      const path = elements[3];
+      const path = elements[3] ?? '';
       return new QualifiedResourcePath(project, database).append(path);
     }
 

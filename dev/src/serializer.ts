@@ -21,7 +21,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 import {DeleteTransform, FieldTransform, VectorValue} from './field-value';
 import {detectGoogleProtobufValueType, detectValueType} from './convert';
 import {GeoPoint} from './geo-point';
-import {DocumentReference, Firestore} from './index';
+import {DocumentReference, CollectionReference, Firestore} from './index';
 import {FieldPath, ObjectValueFieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, ValidationOptions} from './types';
@@ -68,14 +68,16 @@ export interface Serializable {
  */
 export class Serializer {
   private allowUndefined: boolean;
-  private createReference: (path: string) => DocumentReference;
+  private createDocumentReference: (path: string) => DocumentReference;
+  private createCollectionReference: (path: string) => CollectionReference;
   private createInteger: (n: number | string) => number | BigInt;
 
-  constructor(firestore: Firestore) {
+  constructor(private firestore: Firestore) {
     // Instead of storing the `firestore` object, we store just a reference to
     // its `.doc()` method. This avoid a circular reference, which breaks
     // JSON.stringify().
-    this.createReference = path => firestore.doc(path);
+    this.createDocumentReference = path => firestore.doc(path);
+    this.createCollectionReference = path => firestore.collection(path);
     this.createInteger = n =>
       firestore._settings.useBigInt ? BigInt(n) : Number(n);
     this.allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
@@ -340,7 +342,15 @@ export class Serializer {
         const resourcePath = QualifiedResourcePath.fromSlashSeparatedString(
           proto.referenceValue!
         );
-        return this.createReference(resourcePath.relativeName);
+        if (resourcePath.isDocument) {
+          return this.createDocumentReference(resourcePath.relativeName);
+        } else if (resourcePath.isCollection) {
+          return this.createCollectionReference(resourcePath.relativeName);
+        } else if (resourcePath.relativeName === '') {
+          return this.firestore;
+        } else {
+          throw `Unsupported resource path ${resourcePath.formattedName}`;
+        }
       }
       case 'arrayValue': {
         const array: unknown[] = [];
