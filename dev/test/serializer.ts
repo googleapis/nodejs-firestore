@@ -14,7 +14,10 @@
 
 import {it} from 'mocha';
 import {expect} from 'chai';
-import {validateUserInput} from '../src/serializer';
+import * as sinon from 'sinon';
+import {validateUserInput, Serializer} from '../src/serializer';
+import {DocumentReference, Firestore} from '../src';
+import {SinonStubbedInstance} from 'sinon';
 
 describe('validateUserInput', () => {
   it('validates the depth of nested objects and arrays - 20', () => {
@@ -242,5 +245,58 @@ describe('validateUserInput', () => {
         allowUndefined: false,
       })
     ).to.throw(/Input object is deeper than 20 levels/i);
+  });
+});
+
+describe('serializer', () => {
+  const PROJECT_ID = 'test-project';
+  const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
+
+  let serializer: Serializer | undefined;
+  let firestoreStub: SinonStubbedInstance<Firestore> | undefined;
+
+  const mockResult = {};
+
+  beforeEach(() => {
+    firestoreStub = sinon.stub({
+      doc: (path: string) => {
+        return mockResult;
+      },
+      _settings: {},
+    } as Firestore);
+    firestoreStub.doc.returns(mockResult as DocumentReference);
+
+    serializer = new Serializer(firestoreStub);
+  });
+
+  describe('decodeValue', () => {
+    it('decodes reference to document', () => {
+      const result = serializer!.decodeValue({
+        referenceValue: `${DATABASE_ROOT}/documents/foo/bar`,
+      }) as DocumentReference;
+
+      expect(result).to.equal(mockResult);
+      expect(firestoreStub!.doc.calledOnceWith('foo/bar')).to.be.true;
+    });
+
+    it('throws when given a reference to collection', () => {
+      expect(() => {
+        const result = serializer!.decodeValue({
+          referenceValue: `${DATABASE_ROOT}/documents/foo`,
+        }) as DocumentReference;
+      }).to.throw(
+        'The SDK does not currently support decoding referenceValues for collections or partitions.'
+      );
+    });
+
+    it('throws when given a reference to db root', () => {
+      expect(() => {
+        const result = serializer!.decodeValue({
+          referenceValue: `${DATABASE_ROOT}/documents`,
+        }) as DocumentReference;
+      }).to.throw(
+        'The SDK does not currently support decoding referenceValues for collections or partitions.'
+      );
+    });
   });
 });

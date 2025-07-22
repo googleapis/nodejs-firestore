@@ -45,12 +45,36 @@ describe('ResourcePath', () => {
   });
 
   it('parses strings', () => {
+    // parse reference to db root
     let path = QualifiedResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
+    expect(path.isCollection).to.equal(false);
+    expect(path.isDocument).to.equal(false);
+
+    // parse reference to db root with `/documents`
+    path = QualifiedResourcePath.fromSlashSeparatedString(
+      `${DATABASE_ROOT}/documents`
+    );
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
+    expect(path.isCollection).to.equal(false);
+    expect(path.isDocument).to.equal(false);
+
+    // parse reference to collection
     path = QualifiedResourcePath.fromSlashSeparatedString(
       `${DATABASE_ROOT}/documents/foo`
     );
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
+    expect(path.isCollection).to.equal(true);
+    expect(path.isDocument).to.equal(false);
+
+    // parse reference to document
+    path = QualifiedResourcePath.fromSlashSeparatedString(
+      `${DATABASE_ROOT}/documents/foo/bar`
+    );
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo/bar`);
+    expect(path.isCollection).to.equal(false);
+    expect(path.isDocument).to.equal(true);
+
     expect(() => {
       path = QualifiedResourcePath.fromSlashSeparatedString(
         'projects/project/databases'
