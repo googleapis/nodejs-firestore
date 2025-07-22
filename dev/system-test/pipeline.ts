@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData, Pipelines} from '@google-cloud/firestore';
+import {
+  DocumentData,
+  DocumentReference,
+  Pipelines,
+} from '@google-cloud/firestore';
 
 import {
   BooleanExpr,
@@ -114,6 +118,7 @@ import {
   strReverse,
   parent,
   namespace,
+  Constant,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -418,38 +423,111 @@ describe.only('Pipeline class', () => {
     });
 
     it.only('can get the parent from a path', async () => {
+      // randomCol is a top level collection initialized outside of the test, e.g. '/randomNamedCollectionForTest_123034594585340'
+
+      // subColl is a second level collection, e.g. '/randomNamedCollectionForTest_123034594585340/foo/bar'
+      const subColl = randomCol.doc('foo').collection('bar');
+
+      // docRef is a document in the second level collection, e.g. '/randomNamedCollectionForTest_123034594585340/foo/bar/baz'
+      const docRef = subColl.doc('baz');
+
+      // Create a doc at docRef
+      await docRef.set({});
+
+      // Run pipeline to test `.parent()` expression on docRef
       const snapshot = await firestore
         .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(field('__name__').parent().as('parent'))
+        .documents([docRef])
+        .select(
+          field('__name__').as('name'), // /randomNamedCollectionForTest_123034594585340/foo/bar/baz
+          field('__name__').parent().as('parent'), // /randomNamedCollectionForTest_123034594585340/foo
+          field('__name__').parent().parent().as('grandParent'), // /    <-- root: not a doc or collection
+          field('__name__').parent().parent().parent().as('grandParent2') // does not exist
+        )
         .execute();
-      expectResults(snapshot, {
-        parent: randomCol,
-      });
+
+      // Assertions
+      expect(snapshot.results.length).to.equal(1);
+      const docResult = snapshot.results[0];
+
+      // expression `field("__name__")` returns a DocumentReference to the current document
+      expect((docResult.get('name') as DocumentReference).path).to.equal(
+        docRef.path
+      );
+
+      // expression `.parent()` gets the parent document. It's always the parent document, and will skip the parent collection.
+      // `DocumentReference.parent` gets the immediates parent collection or document.
+      expect((docResult.get('parent') as DocumentReference).path).to.equal(
+        docRef.parent!.parent!.path
+      );
+
+      // If the `.parent()` expression results in a reference to the database root, the SDK will
+      // return the `Firestore` instance.
+      // For comparsion, if `CollectionReference.parent` is called on a top level collection, the call will return `null`.
+      expect(docRef.parent!.parent!.parent!.parent!).to.be.null;
+      expect(docResult.get('grandParent') as Firestore).to.equal(firestore);
+
+      // `.parent()` expression evaluated on the root returns null
+      expect(docResult.get('grandParent2') as Firestore).to.be.null;
     });
 
     it.only('can get the parent from a path with the top-level function', async () => {
+      // subColl is a second level collection, e.g. '/randomNamedCollectionForTest_123034594585340/foo/bar'
+      const subColl = randomCol.doc('foo').collection('bar');
+
+      // docRef is a document in the second level collection, e.g. '/randomNamedCollectionForTest_123034594585340/foo/bar/baz'
+      const docRef = subColl.doc('baz');
+
+      // Create a doc at docRef
+      await docRef.set({});
+
+      // Run pipeline to test `.parent()` expression on docRef
       const snapshot = await firestore
         .pipeline()
-        .collection(randomCol.path)
-        .limit(1)
-        .select(parent('__name__').as('parent'))
+        .documents([docRef])
+        .select(
+          field('__name__').parent().as('parent') // /randomNamedCollectionForTest_123034594585340/foo
+        )
         .execute();
-      expectResults(snapshot, {
-        parent: randomCol,
-      });
+
+      // Assertions
+      expect(snapshot.results.length).to.equal(1);
+      const docResult = snapshot.results[0];
+
+      // expression `.parent()` gets the parent document. It's always the parent document, and will skip the parent collection.
+      // `DocumentReference.parent` gets the immediates parent collection or document.
+      expect((docResult.get('parent') as DocumentReference).path).to.equal(
+        docRef.parent!.parent!.path
+      );
+    });
+
+    it.only('can get the top level documents', async () => {
+      const dbRoot = `projects/firestore-sdk-nightly/databases/${firestore._settings.databaseId}/documents`;
+
+      // Run pipeline to test `.parent()` expression on docRef
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol)
+        // TODO(parent-expression) update this test because `Constant._fromProto(...)` is not a public method.
+        .where(
+          parent('__name__').eq(Constant._fromProto({referenceValue: dbRoot}))
+        )
+        .execute();
+
+      // Assertions
+      expect(snapshot.results.length).to.equal(10);
     });
 
     it.only('can get the namespace from a path', async () => {
+      // Run pipeline to test `.parent()` expression on docRef
       const snapshot = await firestore
         .pipeline()
-        .collection(randomCol.path)
+        .collection(randomCol)
         .limit(1)
         .select(field('__name__').namespace().as('namespace'))
         .execute();
       expectResults(snapshot, {
-        namespace: '(default)',
+        namespace: '',
       });
     });
 
@@ -461,7 +539,7 @@ describe.only('Pipeline class', () => {
         .select(namespace('__name__').as('namespace'))
         .execute();
       expectResults(snapshot, {
-        namespace: '(default)',
+        namespace: '',
       });
     });
 
@@ -3384,7 +3462,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the power of a numeric value', async () => {
+    it('can compute the power of a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3397,7 +3475,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the power of a numeric value with the top-level function', async () => {
+    it('can compute the power of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3410,7 +3488,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value', async () => {
+    it('can round a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3423,7 +3501,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value with the top-level function', async () => {
+    it('can round a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3436,7 +3514,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value away from zero for positive half-way values', async () => {
+    it('can round a numeric value away from zero for positive half-way values', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3450,7 +3528,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value away from zero for negative half-way values', async () => {
+    it('can round a numeric value away from zero for negative half-way values', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3464,7 +3542,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can get the collectionId from a path', async () => {
+    it('can get the collectionId from a path', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3476,7 +3554,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can get the collectionId from a path with the top-level function', async () => {
+    it('can get the collectionId from a path with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3488,7 +3566,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of a string value', async () => {
+    it('can compute the length of a string value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3501,7 +3579,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of a string value with the top-level function', async () => {
+    it('can compute the length of a string value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3514,7 +3592,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of an array value', async () => {
+    it('can compute the length of an array value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3527,7 +3605,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of an array value with the top-level function', async () => {
+    it('can compute the length of an array value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3540,7 +3618,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of a map value', async () => {
+    it('can compute the length of a map value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3553,7 +3631,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of a vector value', async () => {
+    it('can compute the length of a vector value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3566,7 +3644,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of a bytes value', async () => {
+    it('can compute the length of a bytes value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3579,7 +3657,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the natural logarithm of a numeric value', async () => {
+    it('can compute the natural logarithm of a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3590,7 +3668,7 @@ describe.only('Pipeline class', () => {
       expect(snapshot.results[0]!.data()!.lnRating).to.be.closeTo(1.435, 0.001);
     });
 
-    it.only('can compute the natural logarithm of a numeric value with the top-level function', async () => {
+    it('can compute the natural logarithm of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3601,7 +3679,7 @@ describe.only('Pipeline class', () => {
       expect(snapshot.results[0]!.data()!.lnRating).to.be.closeTo(1.435, 0.001);
     });
 
-    it.only('can compute the natural logarithm of a numeric value with the top-level function', async () => {
+    it('can compute the natural logarithm of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3614,7 +3692,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the logarithm of a numeric value', async () => {
+    it('can compute the logarithm of a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3627,7 +3705,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the logarithm of a numeric value with the top-level function', async () => {
+    it('can compute the logarithm of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3640,7 +3718,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value', async () => {
+    it('can round a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3653,7 +3731,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value with the top-level function', async () => {
+    it('can round a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3666,7 +3744,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the square root of a numeric value', async () => {
+    it('can compute the square root of a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3679,7 +3757,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the square root of a numeric value with the top-level function', async () => {
+    it('can compute the square root of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3692,7 +3770,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can reverse a string', async () => {
+    it('can reverse a string', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3701,11 +3779,11 @@ describe.only('Pipeline class', () => {
         .select(field('title').strReverse().as('reversedTitle'))
         .execute();
       expectResults(snapshot, {
-        reversedTitle: 'yxalaG eht ot ediuG s\'rekihhctiH ehT',
+        reversedTitle: "yxalaG eht ot ediuG s'rekihhctiH ehT",
       });
     });
 
-    it.only('can reverse a string with the top-level function', async () => {
+    it('can reverse a string with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3714,7 +3792,7 @@ describe.only('Pipeline class', () => {
         .select(strReverse('title').as('reversedTitle'))
         .execute();
       expectResults(snapshot, {
-        reversedTitle: 'yxalaG eht ot ediuG s\'rekihhctiH ehT',
+        reversedTitle: "yxalaG eht ot ediuG s'rekihhctiH ehT",
       });
     });
 

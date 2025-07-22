@@ -6580,7 +6580,7 @@ export function parent(
 export function parent(
   documentPath: Expr | string | firestore.DocumentReference
 ): FunctionExpr {
-  return valueToDefaultExpr(documentPath).parent();
+  return fieldOrExpression(documentPath).parent();
 }
 
 /**
@@ -6606,7 +6606,7 @@ export function namespace(
 export function namespace(
   documentPath: Expr | string | firestore.DocumentReference
 ): FunctionExpr {
-  return valueToDefaultExpr(documentPath).namespace();
+  return fieldOrExpression(documentPath).namespace();
 }
 
 // TODO(new-expression): Add new top-level expression function definitions above this line
