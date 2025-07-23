@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,24 @@
 
 import * as firestore from '@google-cloud/firestore';
 import * as deepEqual from 'fast-deep-equal';
-import {google} from '../protos/firestore_v1_proto_api';
+import {google} from '../../protos/firestore_v1_proto_api';
+import Firestore, {
+  CollectionReference,
+  FieldPath,
+  Query,
+  Timestamp,
+} from '../index';
+import {validateFieldPath} from '../path';
+import {ExecutionUtil, fieldOrExpression} from './pipeline-util';
+import {DocumentReference} from '../reference/document-reference';
+import {PipelineResponse} from '../reference/types';
+import {HasUserData, hasUserData, Serializer} from '../serializer';
+import {ApiMapValue} from '../types';
+import * as protos from '../../protos/firestore_v1_proto_api';
+import api = protos.google.firestore.v1;
+import IStage = google.firestore.v1.Pipeline.IStage;
+import {cast, isOptionalEqual, isPlainObject} from '../util';
+
 import {
   AggregateFunction,
   AggregateWithAlias,
@@ -27,17 +44,6 @@ import {
   _mapValue,
   field,
 } from './expression';
-import Firestore, {
-  CollectionReference,
-  FieldPath,
-  Query,
-  Timestamp,
-} from './index';
-import {validateFieldPath} from './path';
-import {ExecutionUtil, fieldOrExpression} from './pipeline-util';
-import {DocumentReference} from './reference/document-reference';
-import {PipelineResponse} from './reference/types';
-import {HasUserData, hasUserData, Serializer} from './serializer';
 import {
   AddFields,
   Aggregate,
@@ -60,17 +66,11 @@ import {
   Union,
   Unnest,
 } from './stage';
-import {ApiMapValue} from './types';
-import * as protos from '../protos/firestore_v1_proto_api';
-import api = protos.google.firestore.v1;
-import IStage = google.firestore.v1.Pipeline.IStage;
-import {cast, isOptionalEqual, isPlainObject} from './util';
 
 /**
  * Represents the source of a Firestore {@link Pipeline}.
- * @beta
  */
-export class PipelineSource implements firestore.PipelineSource {
+export class PipelineSource implements firestore.Pipelines.PipelineSource {
   constructor(private db: Firestore) {}
 
   collection(collection: string | firestore.CollectionReference): Pipeline {
@@ -137,8 +137,6 @@ export class PipelineSource implements firestore.PipelineSource {
 }
 
 /**
- * @beta
- *
  * The Pipeline class provides a flexible and expressive framework for building complex data
  * transformation and query pipelines for Firestore.
  *
@@ -178,7 +176,7 @@ export class PipelineSource implements firestore.PipelineSource {
  *     .execute();
  * ```
  */
-export class Pipeline implements firestore.Pipeline {
+export class Pipeline implements firestore.Pipelines.Pipeline {
   constructor(
     private db: Firestore,
     private stages: Stage[]
@@ -218,8 +216,8 @@ export class Pipeline implements firestore.Pipeline {
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   addFields(
-    field: firestore.Selectable,
-    ...additionalFields: firestore.Selectable[]
+    field: firestore.Pipelines.Selectable,
+    ...additionalFields: firestore.Pipelines.Selectable[]
   ): Pipeline {
     return this._addStage(
       new AddFields(
@@ -250,8 +248,8 @@ export class Pipeline implements firestore.Pipeline {
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   removeFields(
-    fieldValue: firestore.Field | string,
-    ...additionalFields: Array<firestore.Field | string>
+    fieldValue: firestore.Pipelines.Field | string,
+    ...additionalFields: Array<firestore.Pipelines.Field | string>
   ): Pipeline {
     const fieldExpressions = [fieldValue, ...additionalFields].map(f =>
       typeof f === 'string' ? field(f) : (f as Field)
@@ -279,7 +277,7 @@ export class Pipeline implements firestore.Pipeline {
    * <p>Example:
    *
    * ```typescript
-   * firestore.pipeline().collection("books")
+   * db.pipeline().collection("books")
    *   .select(
    *     "firstName",
    *     field("lastName"),
@@ -294,8 +292,8 @@ export class Pipeline implements firestore.Pipeline {
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   select(
-    selection: firestore.Selectable | string,
-    ...additionalSelections: Array<firestore.Selectable | string>
+    selection: firestore.Pipelines.Selectable | string,
+    ...additionalSelections: Array<firestore.Pipelines.Selectable | string>
   ): Pipeline {
     let projections: Map<string, Expr> = this.selectablesToMap([
       selection,
@@ -306,7 +304,7 @@ export class Pipeline implements firestore.Pipeline {
   }
 
   private selectablesToMap(
-    selectables: (firestore.Selectable | string)[]
+    selectables: (firestore.Pipelines.Selectable | string)[]
   ): Map<string, Expr> {
     const result = new Map<string, Expr>();
     for (const selectable of selectables) {
@@ -321,7 +319,7 @@ export class Pipeline implements firestore.Pipeline {
         const expr = selectable as ExprWithAlias;
         result.set(expr.alias, expr.expr as unknown as Expr);
       } else {
-        throw new Error('unexpected selectable: ' + selectable);
+        throw new Error('unexpected selectable: ' + JSON.stringify(selectable));
       }
     }
     return result;
@@ -384,7 +382,7 @@ export class Pipeline implements firestore.Pipeline {
    * @param condition The {@link BooleanExpr} to apply.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  where(condition: firestore.BooleanExpr): Pipeline {
+  where(condition: firestore.Pipelines.BooleanExpr): Pipeline {
     const booleanExpr = condition as BooleanExpr;
     this.validateUserData('where', booleanExpr);
     return this._addStage(new Where(booleanExpr));
@@ -472,8 +470,8 @@ export class Pipeline implements firestore.Pipeline {
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   distinct(
-    group: string | firestore.Selectable,
-    ...additionalGroups: Array<string | firestore.Selectable>
+    group: string | firestore.Pipelines.Selectable,
+    ...additionalGroups: Array<string | firestore.Pipelines.Selectable>
   ): Pipeline {
     return this._addStage(
       new Distinct(
@@ -510,8 +508,8 @@ export class Pipeline implements firestore.Pipeline {
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   aggregate(
-    accumulator: firestore.AggregateWithAlias,
-    ...additionalAccumulators: firestore.AggregateWithAlias[]
+    accumulator: firestore.Pipelines.AggregateWithAlias,
+    ...additionalAccumulators: firestore.Pipelines.AggregateWithAlias[]
   ): Pipeline;
   /**
    * Performs optionally grouped aggregation operations on the documents from previous stages.
@@ -547,24 +545,24 @@ export class Pipeline implements firestore.Pipeline {
    * list.
    */
   aggregate(options: {
-    accumulators: firestore.AggregateWithAlias[];
-    groups?: Array<string | firestore.Selectable>;
+    accumulators: firestore.Pipelines.AggregateWithAlias[];
+    groups?: Array<string | firestore.Pipelines.Selectable>;
   }): Pipeline;
   aggregate(
     optionsOrTarget:
-      | firestore.AggregateWithAlias
+      | firestore.Pipelines.AggregateWithAlias
       | {
-          accumulators: firestore.AggregateWithAlias[];
-          groups?: Array<string | firestore.Selectable>;
+          accumulators: firestore.Pipelines.AggregateWithAlias[];
+          groups?: Array<string | firestore.Pipelines.Selectable>;
         },
-    ...rest: firestore.AggregateWithAlias[]
+    ...rest: firestore.Pipelines.AggregateWithAlias[]
   ): Pipeline {
     if ('accumulators' in optionsOrTarget) {
       return this._addStage(
         new Aggregate(
           new Map<string, AggregateFunction>(
             optionsOrTarget.accumulators.map(
-              (target: firestore.AggregateWithAlias) => {
+              (target: firestore.Pipelines.AggregateWithAlias) => {
                 this.validateUserData(
                   'aggregate',
                   target as unknown as AggregateWithAlias
@@ -600,7 +598,7 @@ export class Pipeline implements firestore.Pipeline {
     }
   }
 
-  findNearest(options: firestore.FindNearestOptions): Pipeline {
+  findNearest(options: firestore.Pipelines.FindNearestOptions): Pipeline {
     return this._addStage(new FindNearest(options));
   }
 
@@ -673,8 +671,8 @@ export class Pipeline implements firestore.Pipeline {
    * @param expr An {@link Expr} that when returned evaluates to a map.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  replaceWith(expr: firestore.Expr): Pipeline;
-  replaceWith(value: firestore.Expr | string): Pipeline {
+  replaceWith(expr: firestore.Pipelines.Expr): Pipeline;
+  replaceWith(value: firestore.Pipelines.Expr | string): Pipeline {
     const expr = fieldOrExpression(value);
     this.validateUserData('replaceWith', expr);
     return this._addStage(new ReplaceWith(expr, 'full_replace'));
@@ -791,7 +789,10 @@ export class Pipeline implements firestore.Pipeline {
    * @param indexField An optional string value specifying the field path to write the offset (starting at zero) into the array the un-nested element is from
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  unnest(selectable: firestore.Selectable, indexField?: string): Pipeline {
+  unnest(
+    selectable: firestore.Pipelines.Selectable,
+    indexField?: string
+  ): Pipeline {
     return this._addStage(
       new Unnest({
         expr: cast<Expr>(selectable.expr),
@@ -827,8 +828,8 @@ export class Pipeline implements firestore.Pipeline {
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   sort(
-    ordering: firestore.Ordering,
-    ...additionalOrderings: firestore.Ordering[]
+    ordering: firestore.Pipelines.Ordering,
+    ...additionalOrderings: firestore.Pipelines.Ordering[]
   ): Pipeline {
     // Ordering object
     const orderings = [ordering, ...additionalOrderings] as Ordering[];
@@ -887,10 +888,10 @@ export class Pipeline implements firestore.Pipeline {
    * <p>The returned Promise can be used to track the progress of the pipeline execution
    * and retrieve the results (or handle any errors) asynchronously.
    *
-   * <p>The pipeline results are returned as a list of {@link PipelineResult} objects. Each {@link
-   * PipelineResult} typically represents a single key/value map that has passed through all the
-   * stages of the pipeline, however this might differ depending on the stages involved in the
-   * pipeline. For example:
+   * <p>The pipeline results are returned in a {@link PipelineSnapshot} object, which contains a list of
+   * {@link PipelineResult} objects. Each {@link PipelineResult} typically represents a single key/value map that
+   * has passed through all the stages of the pipeline, however this might differ depending on the stages involved
+   * in the pipeline. For example:
    *
    * <ul>
    *   <li>If there are no stages or only transformation stages, each {@link PipelineResult}
@@ -967,6 +968,7 @@ export class PipelineSnapshot {
   private readonly _pipeline: Pipeline;
   private readonly _executionTime: Timestamp | undefined;
   private readonly _results: PipelineResult[];
+
   constructor(
     pipeline: Pipeline,
     results: PipelineResult[],
@@ -1008,15 +1010,13 @@ export class PipelineSnapshot {
 }
 
 /**
- * @beta
- *
  * A PipelineResult contains data read from a Firestore Pipeline. The data can be extracted with the
  * {@link #data()} or {@link #get(String)} methods.
  *
  * <p>If the PipelineResult represents a non-document result, `ref` will return a undefined
  * value.
  */
-export class PipelineResult implements firestore.PipelineResult {
+export class PipelineResult implements firestore.Pipelines.PipelineResult {
   private readonly _ref: DocumentReference | undefined;
   private _serializer: Serializer;
   public readonly _executionTime: Timestamp | undefined;

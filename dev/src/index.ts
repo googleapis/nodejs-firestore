@@ -41,7 +41,6 @@ import {
   ResourcePath,
   validateResourcePath,
 } from './path';
-import {PipelineSource} from './pipeline';
 import {ClientPool} from './pool';
 import {CollectionReference} from './reference/collection-reference';
 import {DocumentReference} from './reference/document-reference';
@@ -95,6 +94,10 @@ import {
 } from './telemetry/trace-util';
 import {DisabledTraceUtil} from './telemetry/disabled-trace-util';
 import {EnabledTraceUtil} from './telemetry/enabled-trace-util';
+import {PipelineSource} from './pipelines';
+
+import * as Pipelines from './pipelines';
+export {Pipelines};
 
 export {CollectionReference} from './reference/collection-reference';
 export {DocumentReference} from './reference/document-reference';
@@ -133,110 +136,6 @@ export type {
   ExplainMetrics,
   ExplainResults,
 } from './query-profile';
-export {
-  Pipeline,
-  PipelineResult,
-  PipelineSource,
-  PipelineSnapshot,
-} from './pipeline';
-export type {FindNearestOptions} from './stage';
-export {
-  BooleanExpr,
-  AggregateWithAlias,
-  AggregateFunction,
-  Expr,
-  ExprWithAlias,
-  Field,
-  Constant,
-  FunctionExpr,
-  Ordering,
-  constant,
-  constantVector,
-  map,
-  array,
-  bitNot,
-  field,
-  xor,
-  rand,
-  arrayOffset,
-  timestampToUnixMicros,
-  timestampToUnixSeconds,
-  unixMicrosToTimestamp,
-  timestampToUnixMillis,
-  timestampSub,
-  timestampAdd,
-  byteLength,
-  bitAnd,
-  multiply,
-  sum,
-  maximum,
-  descending,
-  minimum,
-  count,
-  countIf,
-  arrayLength,
-  strContains,
-  charLength,
-  divide,
-  mod,
-  reverse,
-  trim,
-  toUpper,
-  toLower,
-  vectorLength,
-  isNotNan,
-  exists,
-  isNotNull,
-  isAbsent,
-  ifError,
-  isError,
-  isNan,
-  arrayConcat,
-  substr,
-  documentId,
-  isNull,
-  arrayContainsAll,
-  replaceFirst,
-  replaceAll,
-  mapRemove,
-  mapMerge,
-  unixSecondsToTimestamp,
-  unixMillisToTimestamp,
-  bitOr,
-  bitXor,
-  bitLeftShift,
-  bitRightShift,
-  add,
-  and,
-  arrayContains,
-  arrayContainsAny,
-  avg,
-  countAll,
-  endsWith,
-  eq,
-  gt,
-  like,
-  lt,
-  neq,
-  ascending,
-  not,
-  or,
-  regexContains,
-  regexMatch,
-  startsWith,
-  strConcat,
-  subtract,
-  cosineDistance,
-  dotProduct,
-  euclideanDistance,
-  mapGet,
-  lte,
-  eqAny,
-  notEqAny,
-  logicalMinimum,
-  logicalMaximum,
-  cond,
-} from './expression';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
@@ -1049,6 +948,9 @@ export class Firestore implements firestore.Firestore {
     return new CollectionGroup(this, collectionId, /* converter= */ undefined);
   }
 
+  /**
+   * TODO
+   */
   pipeline(): PipelineSource {
     return new PipelineSource(this);
   }

@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,34 @@
 import type * as firestore from '@google-cloud/firestore';
 import {GoogleError} from 'google-gax';
 import {Duplex, Transform} from 'stream';
-import {google} from '../protos/firestore_v1_proto_api';
+import {google} from '../../protos/firestore_v1_proto_api';
 
-import * as protos from '../protos/firestore_v1_proto_api';
+import * as protos from '../../protos/firestore_v1_proto_api';
+import './expression';
+import Firestore, {DocumentReference, Timestamp, VectorValue} from '../index';
+import {logger} from '../logger';
+import {QualifiedResourcePath} from '../path';
+import {CompositeFilterInternal} from '../reference/composite-filter-internal';
+import {NOOP_MESSAGE} from '../reference/constants';
+import {FieldFilterInternal} from '../reference/field-filter-internal';
+import {FilterInternal} from '../reference/filter-internal';
+import {
+  PipelineResponse,
+  PipelineStreamElement,
+  QueryCursor,
+} from '../reference/types';
+import {Serializer} from '../serializer';
+import {
+  Deferred,
+  getTotalTimeout,
+  isObject,
+  isPermanentRpcError,
+  isPlainObject,
+  requestTag,
+  wrapError,
+} from '../util';
+import api = protos.google.firestore.v1;
+
 import {
   Expr,
   BooleanExpr,
@@ -34,30 +59,7 @@ import {
   gt,
   lt,
 } from './expression';
-import Firestore, {DocumentReference, Timestamp, VectorValue} from './index';
-import {logger} from './logger';
-import {QualifiedResourcePath} from './path';
-import {Pipeline, PipelineResult} from './pipeline';
-import {CompositeFilterInternal} from './reference/composite-filter-internal';
-import {NOOP_MESSAGE} from './reference/constants';
-import {FieldFilterInternal} from './reference/field-filter-internal';
-import {FilterInternal} from './reference/filter-internal';
-import {
-  PipelineResponse,
-  PipelineStreamElement,
-  QueryCursor,
-} from './reference/types';
-import {Serializer} from './serializer';
-import {
-  Deferred,
-  getTotalTimeout,
-  isObject,
-  isPermanentRpcError,
-  isPlainObject,
-  requestTag,
-  wrapError,
-} from './util';
-import api = protos.google.firestore.v1;
+import {Pipeline, PipelineResult} from './pipelines';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -567,7 +569,7 @@ export function valueToDefaultExpr(value: unknown): Expr {
  * @param value
  */
 export function vectorToExpr(
-  value: firestore.VectorValue | number[] | firestore.Expr
+  value: firestore.VectorValue | number[] | Expr
 ): Expr {
   if (value instanceof Expr) {
     return value;

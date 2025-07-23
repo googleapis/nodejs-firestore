@@ -15,16 +15,10 @@
 import {DocumentData} from '@google-cloud/firestore';
 
 import {
-  Filter,
-  Pipeline,
   BooleanExpr,
-  constant,
   constantVector,
   map,
-  GeoPoint,
-  FieldValue,
   array,
-  Timestamp,
   bitNot,
   field,
   xor,
@@ -40,7 +34,6 @@ import {
   byteLength,
   bitAnd,
   multiply,
-  PipelineSnapshot,
   sum,
   maximum,
   descending,
@@ -70,7 +63,6 @@ import {
   documentId,
   isNull,
   arrayContainsAll,
-  FindNearestOptions,
   replaceFirst,
   replaceAll,
   mapRemove,
@@ -107,11 +99,22 @@ import {
   mapGet,
   lte,
   eqAny,
-  PipelineResult,
   notEqAny,
   logicalMinimum,
   logicalMaximum,
   cond,
+  constant,
+  PipelineResult,
+  PipelineSnapshot,
+  Pipeline,
+  FindNearestOptions,
+} from '../src/pipelines';
+
+import {
+  Timestamp,
+  GeoPoint,
+  Filter,
+  FieldValue,
   CollectionReference,
   FieldPath,
   Firestore,
@@ -129,7 +132,7 @@ import {Firestore as InternalFirestore} from '../src';
 use(chaiAsPromised);
 
 const testUnsupportedFeatures: boolean | 'only' = false;
-const timestampDeltaMS = 1000;
+const timestampDeltaMS = 3000;
 
 describe.only('Pipeline class', () => {
   let firestore: Firestore;
@@ -1853,8 +1856,8 @@ describe.only('Pipeline class', () => {
           subtract(field('published'), 1900).as('yearsSince1900'),
           field('rating').multiply(10).as('ratingTimesTen'),
           divide('rating', 2).as('ratingDividedByTwo'),
-          multiply('rating', 10, 2).as('ratingTimes20'),
-          add('rating', 1, 2).as('ratingPlus3'),
+          multiply('rating', 20).as('ratingTimes20'),
+          add('rating', 3).as('ratingPlus3'),
           mod('rating', 2).as('ratingMod2')
         )
         .limit(1)

@@ -15,7 +15,7 @@
  */
 
 import * as protos from '../../protos/firestore_v1_proto_api';
-import {PipelineResult} from '../pipeline';
+import {PipelineResult} from '../pipelines';
 import api = protos.google.firestore.v1;
 
 import {Timestamp} from '../timestamp';
