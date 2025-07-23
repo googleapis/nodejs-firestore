@@ -1064,7 +1064,6 @@ describe('listCollections() method', () => {
       listCollectionIds: request => {
         expect(request).to.deep.eq({
           parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
-          pageSize: 65535,
         });
 
         return response(['first', 'second']);

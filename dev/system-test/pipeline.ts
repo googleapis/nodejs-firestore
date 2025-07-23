@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
+import {DocumentData, Pipelines} from '@google-cloud/firestore';
 
 import {
   BooleanExpr,
@@ -107,7 +107,6 @@ import {
   PipelineResult,
   PipelineSnapshot,
   Pipeline,
-  FindNearestOptions,
 } from '../src/pipelines';
 
 import {
@@ -442,6 +441,186 @@ describe.only('Pipeline class', () => {
         expect(doc.updateTime).to.be.undefined;
         expect(doc.createTime).to.be.undefined;
       });
+    });
+  });
+
+  describe('pipeline explain', () => {
+    it('mode: analyze, format: text', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          mode: 'analyze',
+          outputFormat: 'text',
+        },
+      });
+
+      expect(snapshot.explainStats).not.to.be.undefined;
+      expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
+      expect(snapshot.explainStats!.text.charAt(0)).not.to.equal('{');
+
+      expect(snapshot.explainStats!.rawData.type_url).to.equal(
+        'type.googleapis.com/google.protobuf.StringValue'
+      );
+      expect(snapshot.explainStats!.rawData.value).to.not.be.null;
+      expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
+    });
+
+    it('mode: analyze, format: unspecified', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          mode: 'analyze',
+        },
+      });
+      expect(snapshot.explainStats).not.to.be.undefined;
+      expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
+      expect(snapshot.explainStats!.text.charAt(0)).not.to.equal('{');
+
+      expect(snapshot.explainStats!.rawData.type_url).to.equal(
+        'type.googleapis.com/google.protobuf.StringValue'
+      );
+      expect(snapshot.explainStats!.rawData.value).to.not.be.null;
+      expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
+    });
+
+    it('mode: analyze, format: json', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          mode: 'analyze',
+          outputFormat: 'json',
+        },
+      });
+      expect(snapshot.explainStats).not.to.be.undefined;
+      expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
+      expect(snapshot.explainStats!.text.charAt(0)).to.equal('{');
+
+      expect(snapshot.explainStats!.rawData.type_url).to.equal(
+        'type.googleapis.com/google.protobuf.StringValue'
+      );
+      expect(snapshot.explainStats!.rawData.value).to.not.be.null;
+      expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
+
+      expect(snapshot.explainStats!.json).not.to.be.null;
+      expect(typeof snapshot.explainStats!.json).to.be.equal('object');
+      console.log(snapshot.explainStats!.json);
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
+    });
+
+    it('mode: execute, format: text', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          mode: 'execute',
+          outputFormat: 'text',
+        },
+      });
+      expect(snapshot.explainStats).to.be.undefined;
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
+    });
+
+    it('mode: unspecified, format: text', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          outputFormat: 'text',
+        },
+      });
+      expect(snapshot.explainStats).to.be.undefined;
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
     });
   });
 
@@ -837,6 +1016,35 @@ describe.only('Pipeline class', () => {
         });
       });
 
+      it('supports aggregate options', async () => {
+        let snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .aggregate({
+            accumulators: [countAll().as('count')],
+          })
+          .execute();
+        expectResults(snapshot, {count: 10});
+
+        snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .where(eq('genre', 'Science Fiction'))
+          .aggregate(
+            countAll().as('count'),
+            avg('rating').as('avgRating'),
+            maximum('rating').as('maxRating'),
+            sum('rating').as('sumRating')
+          )
+          .execute();
+        expectResults(snapshot, {
+          count: 2,
+          avgRating: 4.4,
+          maxRating: 4.6,
+          sumRating: 8.8,
+        });
+      });
+
       it('rejects groups without accumulators', async () => {
         expect(
           firestore
@@ -932,6 +1140,33 @@ describe.only('Pipeline class', () => {
           {genre: 'Southern Gothic', author: 'Harper Lee'}
         );
       });
+
+      it('supports options', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .distinct('genre', 'author')
+          .sort({
+            orderings: [
+              field('genre').ascending(),
+              field('author').ascending(),
+            ],
+          })
+          .execute();
+        expectResults(
+          snapshot,
+          {genre: 'Dystopian', author: 'George Orwell'},
+          {genre: 'Dystopian', author: 'Margaret Atwood'},
+          {genre: 'Fantasy', author: 'J.R.R. Tolkien'},
+          {genre: 'Magical Realism', author: 'Gabriel García Márquez'},
+          {genre: 'Modernist', author: 'F. Scott Fitzgerald'},
+          {genre: 'Psychological Thriller', author: 'Fyodor Dostoevsky'},
+          {genre: 'Romance', author: 'Jane Austen'},
+          {genre: 'Science Fiction', author: 'Douglas Adams'},
+          {genre: 'Science Fiction', author: 'Frank Herbert'},
+          {genre: 'Southern Gothic', author: 'Harper Lee'}
+        );
+      });
     });
 
     describe('select stage', () => {
@@ -962,6 +1197,24 @@ describe.only('Pipeline class', () => {
           {title: "The Handmaid's Tale", author: 'Margaret Atwood'}
         );
       });
+
+      it('supports options', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .select({selections: ['title', field('author').as('auth0r')]})
+          .sort(field('auth0r').ascending())
+          .limit(2)
+          .execute();
+        expectResults(
+          snapshot,
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+            auth0r: 'Douglas Adams',
+          },
+          {title: 'The Great Gatsby', auth0r: 'F. Scott Fitzgerald'}
+        );
+      });
     });
 
     describe('addField stage', () => {
@@ -971,6 +1224,59 @@ describe.only('Pipeline class', () => {
           .collection(randomCol.path)
           .select('title', 'author')
           .addFields(constant('bar').as('foo'))
+          .sort(field('author').ascending())
+          .execute();
+        expectResults(
+          snapshot,
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+            author: 'Douglas Adams',
+            foo: 'bar',
+          },
+          {
+            title: 'The Great Gatsby',
+            author: 'F. Scott Fitzgerald',
+            foo: 'bar',
+          },
+          {title: 'Dune', author: 'Frank Herbert', foo: 'bar'},
+          {
+            title: 'Crime and Punishment',
+            author: 'Fyodor Dostoevsky',
+            foo: 'bar',
+          },
+          {
+            title: 'One Hundred Years of Solitude',
+            author: 'Gabriel García Márquez',
+            foo: 'bar',
+          },
+          {title: '1984', author: 'George Orwell', foo: 'bar'},
+          {
+            title: 'To Kill a Mockingbird',
+            author: 'Harper Lee',
+            foo: 'bar',
+          },
+          {
+            title: 'The Lord of the Rings',
+            author: 'J.R.R. Tolkien',
+            foo: 'bar',
+          },
+          {title: 'Pride and Prejudice', author: 'Jane Austen', foo: 'bar'},
+          {
+            title: "The Handmaid's Tale",
+            author: 'Margaret Atwood',
+            foo: 'bar',
+          }
+        );
+      });
+
+      it('supports options', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .select('title', 'author')
+          .addFields({
+            fields: [constant('bar').as('foo')],
+          })
           .sort(field('author').ascending())
           .execute();
         expectResults(
@@ -1055,6 +1361,126 @@ describe.only('Pipeline class', () => {
           }
         );
       });
+
+      it('supports options', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .select('title', 'author', 'genre')
+          .sort(field('author').ascending())
+          .removeFields({
+            fields: [field('author'), 'genre'],
+          })
+          .sort(field('author').ascending())
+          .execute();
+        expectResults(
+          snapshot,
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+          },
+          {
+            title: 'The Great Gatsby',
+          },
+          {title: 'Dune'},
+          {
+            title: 'Crime and Punishment',
+          },
+          {
+            title: 'One Hundred Years of Solitude',
+          },
+          {title: '1984'},
+          {
+            title: 'To Kill a Mockingbird',
+          },
+          {
+            title: 'The Lord of the Rings',
+          },
+          {title: 'Pride and Prejudice'},
+          {
+            title: "The Handmaid's Tale",
+          }
+        );
+      });
+    });
+
+    describe('findNearest stage', () => {
+      it('can find nearest', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .select('title', 'author')
+          .sort(field('author').ascending())
+          .removeFields(field('author'))
+          .sort(field('author').ascending())
+          .execute();
+        expectResults(
+          snapshot,
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+          },
+          {
+            title: 'The Great Gatsby',
+          },
+          {title: 'Dune'},
+          {
+            title: 'Crime and Punishment',
+          },
+          {
+            title: 'One Hundred Years of Solitude',
+          },
+          {title: '1984'},
+          {
+            title: 'To Kill a Mockingbird',
+          },
+          {
+            title: 'The Lord of the Rings',
+          },
+          {title: 'Pride and Prejudice'},
+          {
+            title: "The Handmaid's Tale",
+          }
+        );
+      });
+
+      it('supports options', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .select('title', 'author', 'genre')
+          .sort(field('author').ascending())
+          .removeFields({
+            fields: [field('author'), 'genre'],
+          })
+          .sort(field('author').ascending())
+          .execute();
+        expectResults(
+          snapshot,
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+          },
+          {
+            title: 'The Great Gatsby',
+          },
+          {title: 'Dune'},
+          {
+            title: 'Crime and Punishment',
+          },
+          {
+            title: 'One Hundred Years of Solitude',
+          },
+          {title: '1984'},
+          {
+            title: 'To Kill a Mockingbird',
+          },
+          {
+            title: 'The Lord of the Rings',
+          },
+          {title: 'Pride and Prejudice'},
+          {
+            title: "The Handmaid's Tale",
+          }
+        );
+      });
     });
 
     describe('where stage', () => {
@@ -1071,6 +1497,7 @@ describe.only('Pipeline class', () => {
           .execute();
         expectResults(snapshot, 'book10', 'book4');
       });
+
       it('where with and (3 conditions)', async () => {
         const snapshot = await firestore
           .pipeline()
@@ -1085,6 +1512,7 @@ describe.only('Pipeline class', () => {
           .execute();
         expectResults(snapshot, 'book4');
       });
+
       it('where with or', async () => {
         const snapshot = await firestore
           .pipeline()
@@ -1129,6 +1557,20 @@ describe.only('Pipeline class', () => {
           {title: "The Handmaid's Tale"}
         );
       });
+
+      it('supports options', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .where({
+            condition: and(
+              gt('rating', 4.5),
+              eqAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
+            ),
+          })
+          .execute();
+        expectResults(snapshot, 'book10', 'book4');
+      });
     });
 
     describe('sort, offset, and limit stages', () => {
@@ -1139,6 +1581,25 @@ describe.only('Pipeline class', () => {
           .sort(field('author').ascending())
           .offset(5)
           .limit(3)
+          .select('title', 'author')
+          .execute();
+        expectResults(
+          snapshot,
+          {title: '1984', author: 'George Orwell'},
+          {title: 'To Kill a Mockingbird', author: 'Harper Lee'},
+          {title: 'The Lord of the Rings', author: 'J.R.R. Tolkien'}
+        );
+      });
+
+      it('sort, offset, and limit stages support options', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .sort({
+            orderings: [field('author').ascending()],
+          })
+          .offset({offset: 5})
+          .limit({limit: 3})
           .select('title', 'author')
           .execute();
         expectResults(
@@ -1275,6 +1736,37 @@ describe.only('Pipeline class', () => {
           }
         );
       });
+
+      it('can perform FindNearest query', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol)
+          .genericStage(
+            'find_nearest',
+            [
+              field('embedding'),
+              FieldValue.vector([10, 1, 2, 1, 1, 1, 1, 1, 1, 1]),
+              'euclidean',
+            ],
+            {
+              distance_field: field('computedDistance'),
+              limit: 2,
+            }
+          )
+          .select('title', 'computedDistance')
+          .execute();
+        expectResults(
+          snapshot,
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+            computedDistance: 1,
+          },
+          {
+            title: 'One Hundred Years of Solitude',
+            computedDistance: 12.041594578792296,
+          }
+        );
+      });
     });
 
     describe('replaceWith stage', () => {
@@ -1309,6 +1801,20 @@ describe.only('Pipeline class', () => {
         expectResults(snapshot, {
           foo: 'bar',
           baz: {title: "The Hitchhiker's Guide to the Galaxy"},
+        });
+      });
+
+      it('supports options', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .replaceWith({map: 'awards'})
+          .execute();
+        expectResults(snapshot, {
+          hugo: true,
+          nebula: false,
+          others: {unknown: {year: 1980}},
         });
       });
     });
@@ -1355,6 +1861,38 @@ describe.only('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .union(firestore.pipeline().collection(randomCol.path))
+          .sort(field(FieldPath.documentId()).ascending())
+          .execute();
+        expectResults(
+          snapshot,
+          'book1',
+          'book1',
+          'book10',
+          'book10',
+          'book2',
+          'book2',
+          'book3',
+          'book3',
+          'book4',
+          'book4',
+          'book5',
+          'book5',
+          'book6',
+          'book6',
+          'book7',
+          'book7',
+          'book8',
+          'book8',
+          'book9',
+          'book9'
+        );
+      });
+
+      it('supports options', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .union({other: firestore.pipeline().collection(randomCol.path)})
           .sort(field(FieldPath.documentId()).ascending())
           .execute();
         expectResults(
@@ -1451,6 +1989,78 @@ describe.only('Pipeline class', () => {
           }
         );
       });
+
+      it('unnest with index field', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .unnest(field('tags').as('tag'), 'tagsIndex')
+          .select(
+            'title',
+            'author',
+            'genre',
+            'published',
+            'rating',
+            'tags',
+            'tag',
+            'awards',
+            'nestedField'
+          )
+          .execute();
+        expectResults(
+          snapshot,
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+            author: 'Douglas Adams',
+            genre: 'Science Fiction',
+            published: 1979,
+            rating: 4.2,
+            tags: ['comedy', 'space', 'adventure'],
+            tag: 'comedy',
+            awards: {
+              hugo: true,
+              nebula: false,
+              others: {unknown: {year: 1980}},
+            },
+            nestedField: {'level.1': {'level.2': true}},
+            tagsIndex: 0,
+          },
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+            author: 'Douglas Adams',
+            genre: 'Science Fiction',
+            published: 1979,
+            rating: 4.2,
+            tags: ['comedy', 'space', 'adventure'],
+            tag: 'space',
+            awards: {
+              hugo: true,
+              nebula: false,
+              others: {unknown: {year: 1980}},
+            },
+            nestedField: {'level.1': {'level.2': true}},
+            tagsIndex: 1,
+          },
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+            author: 'Douglas Adams',
+            genre: 'Science Fiction',
+            published: 1979,
+            rating: 4.2,
+            tags: ['comedy', 'space', 'adventure'],
+            tag: 'adventure',
+            awards: {
+              hugo: true,
+              nebula: false,
+              others: {unknown: {year: 1980}},
+            },
+            nestedField: {'level.1': {'level.2': true}},
+            tagsIndex: 2,
+          }
+        );
+      });
+
       it('unnest an expr', async () => {
         const snapshot = await firestore
           .pipeline()
@@ -1518,15 +2128,87 @@ describe.only('Pipeline class', () => {
           }
         );
       });
+
+      it('supports options', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .unnest({
+            selectable: field('tags').as('tag'),
+            indexField: 'tagsIndex',
+          })
+          .select(
+            'title',
+            'author',
+            'genre',
+            'published',
+            'rating',
+            'tags',
+            'tag',
+            'awards',
+            'nestedField'
+          )
+          .execute();
+        expectResults(
+          snapshot,
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+            author: 'Douglas Adams',
+            genre: 'Science Fiction',
+            published: 1979,
+            rating: 4.2,
+            tags: ['comedy', 'space', 'adventure'],
+            tag: 'comedy',
+            awards: {
+              hugo: true,
+              nebula: false,
+              others: {unknown: {year: 1980}},
+            },
+            nestedField: {'level.1': {'level.2': true}},
+            tagsIndex: 0,
+          },
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+            author: 'Douglas Adams',
+            genre: 'Science Fiction',
+            published: 1979,
+            rating: 4.2,
+            tags: ['comedy', 'space', 'adventure'],
+            tag: 'space',
+            awards: {
+              hugo: true,
+              nebula: false,
+              others: {unknown: {year: 1980}},
+            },
+            nestedField: {'level.1': {'level.2': true}},
+            tagsIndex: 1,
+          },
+          {
+            title: "The Hitchhiker's Guide to the Galaxy",
+            author: 'Douglas Adams',
+            genre: 'Science Fiction',
+            published: 1979,
+            rating: 4.2,
+            tags: ['comedy', 'space', 'adventure'],
+            tag: 'adventure',
+            awards: {
+              hugo: true,
+              nebula: false,
+              others: {unknown: {year: 1980}},
+            },
+            nestedField: {'level.1': {'level.2': true}},
+            tagsIndex: 2,
+          }
+        );
+      });
     });
 
     describe('findNearest stage', () => {
       it('run pipeline with findNearest', async () => {
-        const measures: Array<FindNearestOptions['distanceMeasure']> = [
-          'euclidean',
-          'dot_product',
-          'cosine',
-        ];
+        const measures: Array<
+          Pipelines.FindNearestStageOptions['distanceMeasure']
+        > = ['euclidean', 'dot_product', 'cosine'];
         for (const measure of measures) {
           const snapshot = await firestore
             .pipeline()
@@ -2912,28 +3594,39 @@ describe.only('Pipeline class', () => {
       }
     );
   });
-});
 
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+  describe('stage options', () => {
+    describe('forceIndex', () => {
+      // SKIP: requires pre-existing index
+      it.skip('Collection Stage', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection({
+            collection: randomCol,
+            forceIndex: 'unknown',
+          })
+          .execute();
+        expect(snapshot.results.length).to.equal(10);
+      });
+
+      // SKIP: requires pre-existing index
+      it.skip('CollectionGroup Stage', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collectionGroup({
+            collectionId: randomCol.id,
+            forceIndex: 'unknown',
+          })
+          .execute();
+        expect(snapshot.results.length).to.equal(10);
+      });
+    });
+  });
+});
 
 // This is the Query integration tests from the lite API (no cache support)
 // with some additional test cases added for more complete coverage.
-describe.only('Query to Pipeline', () => {
+describe('Query to Pipeline', () => {
   async function execute(ppl: Pipeline): Promise<PipelineSnapshot> {
     return ppl.execute();
   }

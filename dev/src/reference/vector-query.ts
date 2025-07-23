@@ -19,7 +19,6 @@ import api = protos.google.firestore.v1;
 import * as firestore from '@google-cloud/firestore';
 import {field} from '../pipelines';
 import {Pipeline} from '../pipelines';
-import {FindNearestOptions} from '../pipelines';
 
 import {Timestamp} from '../timestamp';
 import {VectorValue} from '../field-value';
@@ -142,7 +141,7 @@ export class VectorQuery<
   }
 
   toPipeline(): Pipeline {
-    const options: FindNearestOptions = {
+    const options: firestore.Pipelines.FindNearestStageOptions = {
       field: field(this._options.vectorField),
       vectorValue: this._options.queryVector,
       limit: this._options.limit,

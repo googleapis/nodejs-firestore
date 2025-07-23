@@ -117,5 +117,3 @@ export {
   unixSecondsToTimestamp,
   unixMillisToTimestamp,
 } from './expression';
-
-export {FindNearestOptions} from './stage';

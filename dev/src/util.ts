@@ -162,11 +162,11 @@ let serviceConfig: Record<string, CallSettings> | undefined;
  **/
 function getServiceConfig(methodName: string): CallSettings | undefined {
   if (!serviceConfig) {
-    serviceConfig = require('google-gax/build/src/fallback').constructSettings(
+    serviceConfig = require('google-gax/fallback').constructSettings(
       'google.firestore.v1.Firestore',
       gapicConfig as ClientConfig,
       {},
-      require('google-gax/build/src/status').Status
+      require('google-gax').Status
     ) as {[k: string]: CallSettings};
   }
   return serviceConfig[methodName];
@@ -205,7 +205,7 @@ export function getTotalTimeout(methodName: string): number {
 export function getRetryParams(methodName: string): BackoffSettings {
   return (
     getServiceConfig(methodName)?.retry?.backoffSettings ??
-    require('google-gax/build/src/fallback').createDefaultBackoffSettings()
+    require('google-gax/fallback').createDefaultBackoffSettings()
   );
 }
 
@@ -377,4 +377,15 @@ export function cast<T>(
   }
 
   throw new Error(`${val} not instance of ${constructor}`);
+}
+
+export function forEach<V>(
+  obj: Record<string, V> | undefined,
+  fn: (key: string, val: V) => void
+): void {
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      fn(key, obj[key]);
+    }
+  }
 }

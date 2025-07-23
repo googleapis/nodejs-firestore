@@ -16,19 +16,19 @@ import * as firestore from '@google-cloud/firestore';
 import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 
-import {VectorValue} from '../field-value';
 import {DocumentReference} from '../reference/document-reference';
 import {ProtoSerializable, Serializer} from '../serializer';
 
 import {
   AggregateFunction,
+  BooleanExpr,
   Expr,
   Field,
-  Ordering,
   field,
-  BooleanExpr,
+  Ordering,
 } from './expression';
-import {Pipeline} from './pipelines';
+import {OptionsUtil} from './options-util';
+import {CollectionReference} from '../reference/collection-reference';
 
 /**
  *
@@ -39,384 +39,553 @@ export interface Stage extends ProtoSerializable<api.Pipeline.IStage> {
   _toProto(serializer: Serializer): api.Pipeline.IStage;
 }
 
-/**
- *
- */
-export class AddFields implements Stage {
-  name = 'add_fields';
-
-  constructor(private fields: Map<string, Expr>) {}
-
-  _toProto(serializer: Serializer): api.Pipeline.IStage {
-    return {
-      name: this.name,
-      args: [serializer.encodeValue(this.fields)!],
-    };
-  }
-}
+export type InternalRemoveFieldsStageOptions = Omit<
+  firestore.Pipelines.RemoveFieldsStageOptions,
+  'fields'
+> & {
+  fields: Array<Field>;
+};
 
 /**
  *
  */
 export class RemoveFields implements Stage {
   name = 'remove_fields';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(private fields: Field[]) {}
+  constructor(private options: InternalRemoveFieldsStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: this.fields.map(f => serializer.encodeValue(f)!),
+      args: this.options.fields.map(f => serializer.encodeValue(f)!),
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalAggregateStageOptions = Omit<
+  firestore.Pipelines.AggregateStageOptions,
+  'groups' | 'accumulators'
+> & {
+  groups: Map<string, Expr>;
+  accumulators: Map<string, AggregateFunction>;
+};
 
 /**
  */
 export class Aggregate implements Stage {
   name = 'aggregate';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(
-    private accumulators: Map<string, AggregateFunction>,
-    private groups: Map<string, Expr>
-  ) {}
+  constructor(private options: InternalAggregateStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
       args: [
-        serializer.encodeValue(this.accumulators)!,
-        serializer.encodeValue(this.groups)!,
+        serializer.encodeValue(this.options.accumulators)!,
+        serializer.encodeValue(this.options.groups)!,
       ],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalDistinctStageOptions = Omit<
+  firestore.Pipelines.DistinctStageOptions,
+  'groups'
+> & {
+  groups: Map<string, Expr>;
+};
 
 /**
  * @beta
  */
 export class Distinct implements Stage {
   name = 'distinct';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(private groups: Map<string, Expr>) {}
+  constructor(private options: InternalDistinctStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: [serializer.encodeValue(this.groups)!],
+      args: [serializer.encodeValue(this.options.groups)!],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalCollectionStageOptions = Omit<
+  firestore.Pipelines.CollectionStageOptions,
+  'collection'
+> & {
+  collection: CollectionReference;
+};
 
 /**
  * @beta
  */
 export class CollectionSource implements Stage {
   name = 'collection';
+  readonly optionsUtil = new OptionsUtil({
+    forceIndex: {
+      serverName: 'force_index',
+    },
+  });
+  readonly collectionPath: string;
 
-  constructor(private collectionPath: string) {
+  constructor(private options: InternalCollectionStageOptions) {
+    this.collectionPath = this.options.collection.path;
+    // prepend slash to collection string
     if (!this.collectionPath.startsWith('/')) {
       this.collectionPath = '/' + this.collectionPath;
     }
   }
 
-  _toProto(_: Serializer): api.Pipeline.IStage {
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: [{referenceValue: this.collectionPath}],
+      args: [serializer.encodeReference(this.collectionPath)],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalCollectionGroupStageOptions =
+  firestore.Pipelines.CollectionGroupStageOptions;
 
 /**
  * @beta
  */
 export class CollectionGroupSource implements Stage {
   name = 'collection_group';
+  readonly optionsUtil = new OptionsUtil({
+    forceIndex: {
+      serverName: 'force_index',
+    },
+  });
 
-  constructor(private collectionId: string) {}
+  constructor(private options: InternalCollectionGroupStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: [{referenceValue: ''}, serializer.encodeValue(this.collectionId)!],
+      args: [
+        serializer.encodeReference(''),
+        serializer.encodeValue(this.options.collectionId)!,
+      ],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalDatabaseStageOptions =
+  firestore.Pipelines.DatabaseStageOptions;
 
 /**
  * @beta
  */
 export class DatabaseSource implements Stage {
   name = 'database';
+  readonly optionsUtil = new OptionsUtil({});
 
-  _toProto(_: Serializer): api.Pipeline.IStage {
+  constructor(private options: InternalDatabaseStageOptions) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalDocumentsStageOptions = Omit<
+  firestore.Pipelines.DocumentsStageOptions,
+  'docs'
+> & {
+  docs: Array<DocumentReference>;
+};
 
 /**
  * @beta
  */
 export class DocumentsSource implements Stage {
   name = 'documents';
+  readonly optionsUtil = new OptionsUtil({});
+  readonly formattedPaths: string[];
 
-  constructor(private docPaths: string[]) {}
-
-  static of(refs: Array<string | DocumentReference>): DocumentsSource {
-    return new DocumentsSource(
-      refs.map(ref =>
-        ref instanceof DocumentReference
-          ? '/' + ref.path
-          : ref.startsWith('/')
-            ? ref
-            : '/' + ref
-      )
-    );
+  constructor(private options: InternalDocumentsStageOptions) {
+    this.formattedPaths = options.docs.map(ref => '/' + ref.path);
   }
 
-  _toProto(_: Serializer): api.Pipeline.IStage {
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: this.docPaths.map(p => {
-        return {referenceValue: p};
-      }),
+      args: this.formattedPaths.map(p => serializer.encodeReference(p)!),
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalWhereStageOptions = Omit<
+  firestore.Pipelines.WhereStageOptions,
+  'condition'
+> & {
+  condition: BooleanExpr;
+};
 
 /**
  * @beta
  */
 export class Where implements Stage {
   name = 'where';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(private condition: BooleanExpr) {}
+  constructor(private options: InternalWhereStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: [(this.condition as unknown as Expr)._toProto(serializer)],
+      args: [this.options.condition._toProto(serializer)],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
 
-/**
- * @beta
- */
-export interface FindNearestOptions {
-  field: firestore.Pipelines.Field | string;
-  vectorValue: firestore.VectorValue | number[];
-  distanceMeasure: 'euclidean' | 'cosine' | 'dot_product';
-  limit?: number;
-  distanceField?: string;
-}
+export type InternalFindNearestStageOptions = Omit<
+  firestore.Pipelines.FindNearestStageOptions,
+  'vectorValue' | 'field' | 'distanceField'
+> & {
+  vectorValue: Expr;
+  field: Field;
+  distanceField?: Field;
+};
 
 /**
  * @beta
  */
 export class FindNearest implements Stage {
   name = 'find_nearest';
+  readonly optionsUtil = new OptionsUtil({
+    limit: {
+      serverName: 'limit',
+    },
+    distanceField: {
+      serverName: 'distance_field',
+    },
+  });
 
-  constructor(private _options: FindNearestOptions) {}
+  constructor(private _options: InternalFindNearestStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
-    const options: {[k: string]: api.IValue} = {
-      limit: serializer.encodeValue(this._options.limit)!,
-    };
-    if (this._options.distanceField) {
-      options.distance_field = field(this._options.distanceField)._toProto(
-        serializer
-      );
-    }
-
     return {
       name: this.name,
       args: [
-        (typeof this._options.field === 'string'
-          ? field(this._options.field)
-          : (this._options.field as unknown as Field)
-        )._toProto(serializer),
-        this._options.vectorValue instanceof VectorValue
-          ? serializer.encodeValue(this._options.vectorValue)!
-          : serializer.encodeVector(this._options.vectorValue as number[]),
+        serializer.encodeValue(this._options.field)!,
+        serializer.encodeValue(this._options.vectorValue)!,
         serializer.encodeValue(this._options.distanceMeasure)!,
       ],
-      options,
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this._options,
+        this._options.customOptions
+      ),
     };
   }
 }
 
-/**
- * @beta
- */
-export interface SampleOptions {
-  limit: number;
-  mode: 'documents' | 'percent';
-}
+export type InternalSampleStageOptions = Omit<
+  firestore.Pipelines.SampleStageOptions,
+  'percentage' | 'documents'
+> & {
+  rate: number;
+  mode: 'percent' | 'documents';
+};
 
 /**
  * @beta
  */
 export class Sample implements Stage {
   name = 'sample';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(private _options: SampleOptions) {}
+  constructor(private options: InternalSampleStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
       args: [
-        serializer.encodeValue(this._options.limit)!,
-        serializer.encodeValue(this._options.mode)!,
+        serializer.encodeValue(this.options.rate)!,
+        serializer.encodeValue(this.options.mode)!,
       ],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalUnionStageOptions = firestore.Pipelines.UnionStageOptions;
 
 /**
  * @beta
  */
 export class Union implements Stage {
   name = 'union';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(private _other: Pipeline) {}
+  constructor(private options: InternalUnionStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: [serializer.encodeValue(this._other)],
+      args: [serializer.encodeValue(this.options.other)!],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
 
-/**
- * @beta
- */
-export interface UnnestOptions {
+export type InternalUnnestStageOptions = Omit<
+  firestore.Pipelines.UnnestStageOptions,
+  'selectable' | 'indexField'
+> & {
+  alias: string;
   expr: Expr;
-  alias: Field;
-  indexField?: string;
-}
+  indexField?: Field;
+};
 
 /**
  * @beta
  */
 export class Unnest implements Stage {
   name = 'unnest';
+  readonly optionsUtil = new OptionsUtil({
+    indexField: {
+      serverName: 'index_field',
+    },
+  });
 
-  constructor(private options: UnnestOptions) {}
+  constructor(private options: InternalUnnestStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
-    const args: api.IValue[] = [
-      this.options.expr._toProto(serializer),
-      this.options.alias._toProto(serializer),
-    ];
-    const indexField = this.options?.indexField;
-    if (indexField) {
-      return {
-        name: this.name,
-        args: args,
-        options: {
-          indexField: serializer.encodeValue(indexField),
-        },
-      };
-    } else {
-      return {
-        name: this.name,
-        args: args,
-      };
-    }
+    return {
+      name: this.name,
+      args: [
+        serializer.encodeValue(this.options.expr)!,
+        serializer.encodeValue(field(this.options.alias))!,
+      ],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
+    };
   }
 }
+
+export type InternalLimitStageOptions = firestore.Pipelines.LimitStageOptions;
 
 /**
  * @beta
  */
 export class Limit implements Stage {
   name = 'limit';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(private limit: number) {}
+  constructor(private options: InternalLimitStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: [serializer.encodeValue(this.limit)!],
+      args: [serializer.encodeValue(this.options.limit)!],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalOffsetStageOptions = firestore.Pipelines.OffsetStageOptions;
 
 /**
  * @beta
  */
 export class Offset implements Stage {
   name = 'offset';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(private offset: number) {}
+  constructor(private options: InternalOffsetStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: [serializer.encodeValue(this.offset)!],
+      args: [serializer.encodeValue(this.options.offset)!],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalReplaceWithStageOptions = Omit<
+  firestore.Pipelines.ReplaceWithStageOptions,
+  'map'
+> & {
+  map: Expr;
+};
 
 /**
  * @beta
  */
 export class ReplaceWith implements Stage {
   name = 'replace_with';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(
-    private field: Expr,
-    private mode:
-      | 'full_replace'
-      | 'merge_prefer_nest'
-      | 'merge_prefer_parent' = 'full_replace'
-  ) {}
+  constructor(private options: InternalReplaceWithStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
       args: [
-        serializer.encodeValue(this.field)!,
-        serializer.encodeValue(this.mode),
+        serializer.encodeValue(this.options.map)!,
+        serializer.encodeValue('full_replace'),
       ],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalSelectStageOptions = Omit<
+  firestore.Pipelines.SelectStageOptions,
+  'selections'
+> & {
+  selections: Map<string, Expr>;
+};
 
 /**
  * @beta
  */
 export class Select implements Stage {
   name = 'select';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(private projections: Map<string, Expr>) {}
+  constructor(private options: InternalSelectStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: [serializer.encodeValue(this.projections)!],
+      args: [serializer.encodeValue(this.options.selections)!],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
+
+export type InternalAddFieldsStageOptions = Omit<
+  firestore.Pipelines.AddFieldsStageOptions,
+  'fields'
+> & {
+  fields: Map<string, Expr>;
+};
+
+/**
+ *
+ */
+export class AddFields implements Stage {
+  name = 'add_fields';
+  readonly optionsUtil = new OptionsUtil({});
+
+  constructor(private options: InternalAddFieldsStageOptions) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    return {
+      name: this.name,
+      args: [serializer.encodeValue(this.options.fields)!],
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
+    };
+  }
+}
+
+export type InternalSortStageOptions = Omit<
+  firestore.Pipelines.SortStageOptions,
+  'orderings'
+> & {
+  orderings: Array<Ordering>;
+};
 
 /**
  * @beta
  */
 export class Sort implements Stage {
   name = 'sort';
+  readonly optionsUtil = new OptionsUtil({});
 
-  constructor(private orders: Ordering[]) {}
+  constructor(private options: InternalSortStageOptions) {}
 
   _toProto(serializer: Serializer): api.Pipeline.IStage {
     return {
       name: this.name,
-      args: this.orders.map(o => o._toProto(serializer)),
+      args: this.options.orderings.map(o => serializer.encodeValue(o)!),
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        this.options,
+        this.options.customOptions
+      ),
     };
   }
 }
@@ -425,13 +594,16 @@ export class Sort implements Stage {
  * @beta
  */
 export class GenericStage implements Stage {
+  readonly optionsUtil = new OptionsUtil({});
+
   /**
    * @private
    * @internal
    */
   constructor(
     public name: string,
-    private params: Array<AggregateFunction | Expr>
+    private params: Array<AggregateFunction | Expr>,
+    private rawOptions: Record<string, unknown>
   ) {}
 
   /**
@@ -442,6 +614,11 @@ export class GenericStage implements Stage {
     return {
       name: this.name,
       args: this.params.map(o => o._toProto(serializer)),
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        {},
+        this.rawOptions
+      ),
     };
   }
 }
