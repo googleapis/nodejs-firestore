@@ -18,16 +18,10 @@ import {ApiMapValue} from '../types';
 import {isPlainObject, mapToArray} from '../util';
 import {google} from '../../protos/firestore_v1_proto_api';
 import IValue = google.firestore.v1.IValue;
-import {isField, isNumber, isString} from './pipeline-util';
 export type OptionsDefinitions = Record<string, OptionDefinition>;
 export type OptionDefinition = {
   serverName: string;
-  supportedTypes: {
-    string?: boolean;
-    number?: boolean;
-    field?: boolean;
-    nestedOptions?: OptionsDefinitions;
-  };
+  nestedOptions?: OptionsDefinitions;
 };
 
 export class OptionsUtil {
@@ -48,34 +42,15 @@ export class OptionsUtil {
         const optionValue: unknown = options[knownOptionKey];
         let protoValue: IValue | undefined = undefined;
 
-        if (optionDefinition.supportedTypes.string && isString(optionValue)) {
-          protoValue = serializer.encodeValue(optionValue);
-        } else if (
-          optionDefinition.supportedTypes.number &&
-          isNumber(optionValue)
-        ) {
-          protoValue = serializer.encodeValue(optionValue);
-        } else if (
-          optionDefinition.supportedTypes.field &&
-          isField(optionValue)
-        ) {
-          protoValue = serializer.encodeValue(optionValue)!;
-        } else if (
-          optionDefinition.supportedTypes.nestedOptions &&
-          isPlainObject(optionValue)
-        ) {
-          const nestedUtil = new OptionsUtil(
-            optionDefinition.supportedTypes.nestedOptions
-          );
+        if (optionDefinition.nestedOptions && isPlainObject(optionValue)) {
+          const nestedUtil = new OptionsUtil(optionDefinition.nestedOptions);
           protoValue = {
             mapValue: {
               fields: nestedUtil.getOptionsProto(serializer, optionValue),
             },
           };
-        } else if (optionValue !== undefined) {
-          throw new Error(
-            `Unsupported value for option '${knownOptionKey}': ${optionValue}`
-          );
+        } else if (optionValue) {
+          protoValue = serializer.encodeValue(optionValue) ?? undefined;
         }
 
         if (protoValue) {
