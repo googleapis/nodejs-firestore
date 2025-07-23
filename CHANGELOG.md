@@ -4,6 +4,20 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.11.3](https://github.com/googleapis/nodejs-firestore/compare/v7.11.2...v7.11.3) (2025-07-09)
+
+
+### Bug Fixes
+
+* Improve performance of the UTF-8 string comparison logic ([#2380](https://github.com/googleapis/nodejs-firestore/issues/2380)) ([bc6a03e](https://github.com/googleapis/nodejs-firestore/commit/bc6a03e2b44e740b32676d7d0bec07feaa509b5b))
+
+## [7.11.2](https://github.com/googleapis/nodejs-firestore/compare/v7.11.1...v7.11.2) (2025-06-19)
+
+
+### Bug Fixes
+
+* Firestore Client caching stub in bad state issue ([#2365](https://github.com/googleapis/nodejs-firestore/issues/2365)) ([04ad0a4](https://github.com/googleapis/nodejs-firestore/commit/04ad0a4c0fb370db8aeae87dc6ab8bd06eafedd4))
+
 ## [7.11.1](https://github.com/googleapis/nodejs-firestore/compare/v7.11.0...v7.11.1) (2025-05-02)
 
 

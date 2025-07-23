@@ -26,6 +26,7 @@ import * as firestoreModule from '../src/v1';
 import {PassThrough} from 'stream';
 
 import {protobuf, LocationProtos} from 'google-gax';
+import {expect} from 'chai';
 
 // Dynamically loaded proto JSON is needed to get the type information
 // to fill in default values for request objects
@@ -3374,6 +3375,53 @@ describe('v1.FirestoreClient', () => {
             expectedHeaderRequestParams
           )
       );
+    });
+  });
+
+  describe('initialize', () => {
+    it('retries on error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      const createStubStub = sinon.stub();
+      createStubStub.returns(Promise.reject('error'));
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore -- typing not required for testing
+      client['_gaxGrpc'] = {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore -- typing not required for testing
+        createStub: createStubStub,
+      };
+
+      try {
+        await client.initialize();
+      } catch (e: unknown) {
+        expect(e).to.equal('error');
+      }
+
+      try {
+        await client.initialize();
+      } catch (e: unknown) {
+        expect(e).to.equal('error');
+      }
+
+      expect(createStubStub.callCount).to.equal(2);
+    });
+
+    it('does not recreate stub when one exists', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+
+      const createStubSpy = sinon.spy(client['_gaxGrpc'], 'createStub');
+
+      await client.initialize();
+      await client.initialize();
+
+      expect(createStubSpy.callCount).to.equal(1);
     });
   });
 });
