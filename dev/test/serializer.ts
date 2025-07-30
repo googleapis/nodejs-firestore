@@ -259,7 +259,7 @@ describe('serializer', () => {
 
   beforeEach(() => {
     firestoreStub = sinon.stub({
-      doc: (path: string) => {
+      doc: (_: string) => {
         return mockResult;
       },
       _settings: {},
@@ -281,7 +281,7 @@ describe('serializer', () => {
 
     it('throws when given a reference to collection', () => {
       expect(() => {
-        const result = serializer!.decodeValue({
+        serializer!.decodeValue({
           referenceValue: `${DATABASE_ROOT}/documents/foo`,
         }) as DocumentReference;
       }).to.throw(
@@ -291,7 +291,7 @@ describe('serializer', () => {
 
     it('throws when given a reference to db root', () => {
       expect(() => {
-        const result = serializer!.decodeValue({
+        serializer!.decodeValue({
           referenceValue: `${DATABASE_ROOT}/documents`,
         }) as DocumentReference;
       }).to.throw(
