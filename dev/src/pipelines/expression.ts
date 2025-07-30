@@ -6474,8 +6474,7 @@ export function log(fieldName: string, base: number): FunctionExpr;
  */
 export function log(fieldName: string, base: Expr): FunctionExpr;
 export function log(expr: Expr | string, base: number | Expr): FunctionExpr {
-  // @ts-ignore
-  return fieldOrExpression(expr).log(base);
+  return fieldOrExpression(expr).log(valueToDefaultExpr(base));
 }
 
 /**

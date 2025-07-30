@@ -18,7 +18,6 @@ import {ApiMapValue} from '../types';
 import {isPlainObject, mapToArray} from '../util';
 import {google} from '../../protos/firestore_v1_proto_api';
 import IValue = google.firestore.v1.IValue;
-import {isField, isNumber, isString} from './pipeline-util';
 export type OptionsDefinitions = Record<string, OptionDefinition>;
 export type OptionDefinition = {
   serverName: string;

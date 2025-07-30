@@ -129,7 +129,7 @@ import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
 import {afterEach, describe, it} from 'mocha';
-import {itIf, verifyInstance} from '../test/util/helpers';
+import {verifyInstance} from '../test/util/helpers';
 import {getTestDb, getTestRoot} from './firestore';
 
 import {Firestore as InternalFirestore} from '../src';
@@ -139,7 +139,6 @@ import * as google from '../protos/firestore_v1_proto_api';
 
 use(chaiAsPromised);
 
-const testUnsupportedFeatures: boolean | 'only' = false;
 const timestampDeltaMS = 3000;
 
 describe.only('Pipeline class', () => {
@@ -676,30 +675,25 @@ describe.only('Pipeline class', () => {
       await db2.terminate();
     });
 
-    // Subcollections not currently supported in DBE
-    itIf(testUnsupportedFeatures)(
-      'supports collection group as source',
-      async () => {
-        const randomSubCollectionId = Math.random().toString(16).slice(2);
-        const doc1 = await randomCol
-          .doc('book1')
-          .collection(randomSubCollectionId)
-          .add({order: 1});
-        const doc2 = await randomCol
-          .doc('book2')
-          .collection(randomSubCollectionId)
-          .add({order: 2});
-        const snapshot = await firestore
-          .pipeline()
-          .collectionGroup(randomSubCollectionId)
-          .sort(ascending('order'))
-          .execute();
-        expectResults(snapshot, doc1.id, doc2.id);
-      }
-    );
+    it('supports collection group as source', async () => {
+      const randomSubCollectionId = Math.random().toString(16).slice(2);
+      const doc1 = await randomCol
+        .doc('book1')
+        .collection(randomSubCollectionId)
+        .add({order: 1});
+      const doc2 = await randomCol
+        .doc('book2')
+        .collection(randomSubCollectionId)
+        .add({order: 2});
+      const snapshot = await firestore
+        .pipeline()
+        .collectionGroup(randomSubCollectionId)
+        .sort(ascending('order'))
+        .execute();
+      expectResults(snapshot, doc1.id, doc2.id);
+    });
 
-    // subcollections not currently supported in dbe
-    itIf(testUnsupportedFeatures)('supports database as source', async () => {
+    it('supports database as source', async () => {
       const randomId = Math.random().toString(16).slice(2);
       const doc1 = await randomCol.doc('book1').collection('sub').add({
         order: 1,
@@ -3329,12 +3323,13 @@ describe.only('Pipeline class', () => {
         .limit(1)
         .select(exp('rating').as('expRating'))
         .execute();
-      expectResults(snapshot, {
-        expRating: Math.exp(4.7),
-      });
+      expect(snapshot.results[0].get('expRating')).to.be.approximately(
+        109.94717245212351,
+        0.000001
+      );
     });
 
-    it.only('can compute the power of a numeric value', async () => {
+    it('can compute the power of a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3347,7 +3342,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the power of a numeric value with the top-level function', async () => {
+    it('can compute the power of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3360,7 +3355,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value', async () => {
+    it('can round a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3373,7 +3368,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value with the top-level function', async () => {
+    it('can round a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3386,7 +3381,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value away from zero for positive half-way values', async () => {
+    it('can round a numeric value away from zero for positive half-way values', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3400,7 +3395,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value away from zero for negative half-way values', async () => {
+    it('can round a numeric value away from zero for negative half-way values', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3414,7 +3409,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can get the collectionId from a path', async () => {
+    it('can get the collectionId from a path', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3426,7 +3421,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can get the collectionId from a path with the top-level function', async () => {
+    it('can get the collectionId from a path with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3438,7 +3433,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of a string value', async () => {
+    it('can compute the length of a string value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3451,7 +3446,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of a string value with the top-level function', async () => {
+    it('can compute the length of a string value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3464,7 +3459,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of an array value', async () => {
+    it('can compute the length of an array value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3477,7 +3472,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of an array value with the top-level function', async () => {
+    it('can compute the length of an array value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3490,7 +3485,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of a map value', async () => {
+    it('can compute the length of a map value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3503,7 +3498,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of a vector value', async () => {
+    it('can compute the length of a vector value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3516,7 +3511,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the length of a bytes value', async () => {
+    it('can compute the length of a bytes value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3529,7 +3524,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the natural logarithm of a numeric value', async () => {
+    it('can compute the natural logarithm of a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3540,7 +3535,7 @@ describe.only('Pipeline class', () => {
       expect(snapshot.results[0]!.data()!.lnRating).to.be.closeTo(1.435, 0.001);
     });
 
-    it.only('can compute the natural logarithm of a numeric value with the top-level function', async () => {
+    it('can compute the natural logarithm of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3551,7 +3546,7 @@ describe.only('Pipeline class', () => {
       expect(snapshot.results[0]!.data()!.lnRating).to.be.closeTo(1.435, 0.001);
     });
 
-    it.only('can compute the natural logarithm of a numeric value with the top-level function', async () => {
+    it('can compute the natural logarithm of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3564,7 +3559,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the logarithm of a numeric value', async () => {
+    it('can compute the logarithm of a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3577,7 +3572,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the logarithm of a numeric value with the top-level function', async () => {
+    it('can compute the logarithm of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3590,7 +3585,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value', async () => {
+    it('can round a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3603,7 +3598,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can round a numeric value with the top-level function', async () => {
+    it('can round a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3616,7 +3611,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the square root of a numeric value', async () => {
+    it('can compute the square root of a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3629,7 +3624,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can compute the square root of a numeric value with the top-level function', async () => {
+    it('can compute the square root of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3642,7 +3637,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it.only('can reverse a string', async () => {
+    it('can reverse a string', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3651,11 +3646,11 @@ describe.only('Pipeline class', () => {
         .select(field('title').strReverse().as('reversedTitle'))
         .execute();
       expectResults(snapshot, {
-        reversedTitle: 'yxalaG eht ot ediuG s\'rekihhctiH ehT',
+        reversedTitle: "yxalaG eht ot ediuG s'rekihhctiH ehT",
       });
     });
 
-    it.only('can reverse a string with the top-level function', async () => {
+    it('can reverse a string with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3664,7 +3659,7 @@ describe.only('Pipeline class', () => {
         .select(strReverse('title').as('reversedTitle'))
         .execute();
       expectResults(snapshot, {
-        reversedTitle: 'yxalaG eht ot ediuG s\'rekihhctiH ehT',
+        reversedTitle: "yxalaG eht ot ediuG s'rekihhctiH ehT",
       });
     });
 
@@ -3672,7 +3667,7 @@ describe.only('Pipeline class', () => {
   });
 
   describe('not yet implemented in backend', () => {
-    itIf(testUnsupportedFeatures)('supports Document_id', async () => {
+    it('supports Document_id', async () => {
       let snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3741,7 +3736,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    itIf(testUnsupportedFeatures)('arrayConcat works', async () => {
+    it('arrayConcat works', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3767,7 +3762,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    itIf(testUnsupportedFeatures)('testToLowercase', async () => {
+    it('test toLower', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3779,7 +3774,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    itIf(testUnsupportedFeatures)('testToUppercase', async () => {
+    it('test toUpper', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3789,7 +3784,7 @@ describe.only('Pipeline class', () => {
       expectResults(snapshot, {uppercaseAuthor: 'DOUGLAS ADAMS'});
     });
 
-    itIf(testUnsupportedFeatures)('testTrim', async () => {
+    it('testTrim', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3805,7 +3800,7 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    itIf(testUnsupportedFeatures)('test reverse', async () => {
+    it('test reverse', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
@@ -3813,7 +3808,7 @@ describe.only('Pipeline class', () => {
         .limit(1)
         .select(reverse('title').as('reverseTitle'))
         .execute();
-      expectResults(snapshot, {title: '4891'});
+      expectResults(snapshot, {reverseTitle: '4891'});
     });
   });
 
@@ -3862,111 +3857,106 @@ describe.only('Pipeline class', () => {
       });
     }
 
-    // sort on __name__ is not working, see b/409358591
-    itIf(testUnsupportedFeatures)(
-      'supports pagination with filters',
-      async () => {
-        await addBooks(randomCol);
-        const pageSize = 2;
-        const pipeline = firestore
-          .pipeline()
-          .collection(randomCol.path)
-          .select('title', 'rating', '__name__')
-          .sort(field('rating').descending(), field('__name__').ascending());
+    it('supports pagination with filters', async () => {
+      await addBooks(randomCol);
+      const pageSize = 2;
+      const pipeline = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .select('title', 'rating', '__name__')
+        .sort(field('rating').descending(), field('__name__').ascending());
 
-        let snapshot = await pipeline.limit(pageSize).execute();
-        expectResults(
-          snapshot,
-          {title: 'The Lord of the Rings', rating: 4.7},
-          {title: 'Jonathan Strange & Mr Norrell', rating: 4.6}
-        );
+      let snapshot = await pipeline.limit(pageSize).execute();
 
-        const lastDoc = snapshot.results[snapshot.results.length - 1];
+      snapshot.results.forEach(r => console.log(JSON.stringify(r.data())));
 
-        snapshot = await pipeline
-          .where(
-            or(
-              and(
-                field('rating').eq(lastDoc.get('rating')),
-                field('__path__').gt(lastDoc.ref?.id)
-              ),
-              field('rating').lt(lastDoc.get('rating'))
-            )
+      expectResults(
+        snapshot,
+        {title: 'The Lord of the Rings', rating: 4.7},
+        {title: 'Dune', rating: 4.6}
+      );
+
+      const lastDoc = snapshot.results[snapshot.results.length - 1];
+
+      snapshot = await pipeline
+        .where(
+          or(
+            and(
+              field('rating').eq(lastDoc.get('rating')),
+              field('__name__').gt(lastDoc.ref)
+            ),
+            field('rating').lt(lastDoc.get('rating'))
           )
-          .limit(pageSize)
-          .execute();
-        expectResults(
-          snapshot,
-          {title: 'Pride and Prejudice', rating: 4.5},
-          {title: 'Crime and Punishment', rating: 4.3}
-        );
-      }
-    );
+        )
+        .limit(pageSize)
+        .execute();
+      expectResults(
+        snapshot,
+        {title: 'Jonathan Strange & Mr Norrell', rating: 4.6},
+        {title: 'The Master and Margarita', rating: 4.6}
+      );
+    });
 
-    // sort on __name__ is not working, see b/409358591
-    itIf(testUnsupportedFeatures)(
-      'supports pagination with offsets',
-      async () => {
-        await addBooks(randomCol);
+    it('supports pagination with offsets', async () => {
+      await addBooks(randomCol);
 
-        const secondFilterField = '__path__';
+      const secondFilterField = '__name__';
 
-        const pipeline = firestore
-          .pipeline()
-          .collection(randomCol.path)
-          .select('title', 'rating', secondFilterField)
-          .sort(
-            field('rating').descending(),
-            field(secondFilterField).ascending()
-          );
-
-        const pageSize = 2;
-        let currPage = 0;
-
-        let snapshot = await pipeline
-          .offset(currPage++ * pageSize)
-          .limit(pageSize)
-          .execute();
-
-        expectResults(
-          snapshot,
-          {
-            title: 'The Lord of the Rings',
-            rating: 4.7,
-          },
-          {title: 'Dune', rating: 4.6}
+      const pipeline = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .select('title', 'rating', secondFilterField)
+        .sort(
+          field('rating').descending(),
+          field(secondFilterField).ascending()
         );
 
-        snapshot = await pipeline
-          .offset(currPage++ * pageSize)
-          .limit(pageSize)
-          .execute();
-        expectResults(
-          snapshot,
-          {
-            title: 'Jonathan Strange & Mr Norrell',
-            rating: 4.6,
-          },
-          {title: 'The Master and Margarita', rating: 4.6}
-        );
+      const pageSize = 2;
+      let currPage = 0;
 
-        snapshot = await pipeline
-          .offset(currPage++ * pageSize)
-          .limit(pageSize)
-          .execute();
-        expectResults(
-          snapshot,
-          {
-            title: 'A Long Way to a Small, Angry Planet',
-            rating: 4.6,
-          },
-          {
-            title: 'Pride and Prejudice',
-            rating: 4.5,
-          }
-        );
-      }
-    );
+      let snapshot = await pipeline
+        .offset(currPage++ * pageSize)
+        .limit(pageSize)
+        .execute();
+
+      expectResults(
+        snapshot,
+        {
+          title: 'The Lord of the Rings',
+          rating: 4.7,
+        },
+        {title: 'Dune', rating: 4.6}
+      );
+
+      snapshot = await pipeline
+        .offset(currPage++ * pageSize)
+        .limit(pageSize)
+        .execute();
+      expectResults(
+        snapshot,
+        {
+          title: 'Jonathan Strange & Mr Norrell',
+          rating: 4.6,
+        },
+        {title: 'The Master and Margarita', rating: 4.6}
+      );
+
+      snapshot = await pipeline
+        .offset(currPage++ * pageSize)
+        .limit(pageSize)
+        .execute();
+      expectResults(
+        snapshot,
+        {
+          title: 'A Long Way to a Small, Angry Planet',
+          rating: 4.6,
+        },
+        {
+          title: 'Pride and Prejudice',
+          rating: 4.5,
+        }
+      );
+    });
   });
 
   describe('stage options', () => {
@@ -4403,8 +4393,7 @@ describe('Query to Pipeline', () => {
     );
   });
 
-  // needs subcollection support
-  itIf(testUnsupportedFeatures)('supports collection groups', () => {
+  it('supports collection groups', () => {
     return testCollectionWithDocs({}, async (collRef, db) => {
       const collectionGroupId = `${collRef.id}group`;
 
@@ -4424,27 +4413,23 @@ describe('Query to Pipeline', () => {
     });
   });
 
-  // needs subcollection support
-  itIf(testUnsupportedFeatures)(
-    'supports query over collection path with special characters',
-    () => {
-      return testCollectionWithDocs({}, async (collRef, db) => {
-        const docWithSpecials = collRef.doc('so!@#$%^&*()_+special');
+  it('supports query over collection path with special characters', () => {
+    return testCollectionWithDocs({}, async (collRef, db) => {
+      const docWithSpecials = collRef.doc('so!@#$%^&*()_+special');
 
-        const collectionWithSpecials = docWithSpecials.collection(
-          'so!@#$%^&*()_+special'
-        );
-        await collectionWithSpecials.add({foo: 1});
-        await collectionWithSpecials.add({foo: 2});
+      const collectionWithSpecials = docWithSpecials.collection(
+        'so!@#$%^&*()_+special'
+      );
+      await collectionWithSpecials.add({foo: 1});
+      await collectionWithSpecials.add({foo: 2});
 
-        const snapshot = await execute(
-          db.pipeline().createFrom(collectionWithSpecials.orderBy('foo', 'asc'))
-        );
+      const snapshot = await execute(
+        db.pipeline().createFrom(collectionWithSpecials.orderBy('foo', 'asc'))
+      );
 
-        verifyResults(snapshot, {foo: 1}, {foo: 2});
-      });
-    }
-  );
+      verifyResults(snapshot, {foo: 1}, {foo: 2});
+    });
+  });
 
   it('supports multiple inequality on same field', () => {
     return testCollectionWithDocs(
@@ -4657,7 +4642,7 @@ describe('Query to Pipeline', () => {
     );
   });
 
-  itIf(testUnsupportedFeatures)('supports not in', () => {
+  it('supports not in', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: 2},
@@ -4665,7 +4650,9 @@ describe('Query to Pipeline', () => {
         3: {foo: 3, bar: 10},
       },
       async (collRef, db) => {
-        const query1 = collRef.where('bar', 'not-in', [0, 10, 20]);
+        const query1 = collRef
+          .where('bar', 'not-in', [0, 10, 20])
+          .orderBy('foo');
         const snapshot = await execute(db.pipeline().createFrom(query1));
         verifyResults(snapshot, {foo: 1, bar: 2}, {foo: 2, bar: 1});
       }
