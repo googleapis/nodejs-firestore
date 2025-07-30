@@ -63,8 +63,8 @@ export class FirestoreClient {
   private _defaults: {[method: string]: gax.CallSettings};
   private _universeDomain: string;
   private _servicePath: string;
+  private _stubFailed = false;
   private _log = logging.log('firestore');
-
   auth: gax.GoogleAuth;
   descriptors: Descriptors = {
     page: {},
@@ -294,9 +294,12 @@ export class FirestoreClient {
    */
   initialize() {
     // If the client stub promise is already initialized, return immediately.
-    if (this.firestoreStub) {
+    if (this.firestoreStub && !this._stubFailed) {
       return this.firestoreStub;
     }
+
+    // Reset _stubFailed because we are re-attempting create
+    this._stubFailed = false;
 
     // Put together the "service stub" for
     // google.firestore.v1.Firestore.
@@ -334,8 +337,8 @@ export class FirestoreClient {
     ];
     for (const methodName of firestoreStubMethods) {
       const callPromise = this.firestoreStub.then(
-        stub =>
-          (...args: Array<{}>) => {
+        stub => {
+          return (...args: Array<{}>) => {
             if (this._terminated) {
               if (methodName in this.descriptors.stream) {
                 const stream = new PassThrough({objectMode: true});
@@ -353,9 +356,17 @@ export class FirestoreClient {
             }
             const func = stub[methodName];
             return func.apply(stub, args);
-          },
-        (err: Error | null | undefined) => () => {
-          throw err;
+          };
+        },
+        (err: Error | null | undefined) => {
+          this._stubFailed = true;
+          this._log.error(
+            'Failed to create the gax client stub.',
+            err
+          );
+          return () => {
+            throw err;
+          };
         }
       );
 

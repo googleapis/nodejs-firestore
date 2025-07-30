@@ -38,9 +38,6 @@ describe('OptionsUtil', () => {
     const optionsUtil = new OptionsUtil({
       fooBar: {
         serverName: 'foo_bar',
-        supportedTypes: {
-          string: true,
-        },
       },
     });
     const proto = optionsUtil.getOptionsProto(new Serializer(db!), {
@@ -92,9 +89,6 @@ describe('OptionsUtil', () => {
     const optionsUtil = new OptionsUtil({
       indexMode: {
         serverName: 'index_mode',
-        supportedTypes: {
-          string: true,
-        },
       },
     });
     const proto = optionsUtil.getOptionsProto(
@@ -118,21 +112,12 @@ describe('OptionsUtil', () => {
     const optionsUtil = new OptionsUtil({
       foo: {
         serverName: 'foo',
-        supportedTypes: {
-          string: true,
-          nestedOptions: {
-            bar: {
-              serverName: 'bar',
-              supportedTypes: {
-                string: true,
-              },
-            },
-            waldo: {
-              serverName: 'waldo',
-              supportedTypes: {
-                string: true,
-              },
-            },
+        nestedOptions: {
+          bar: {
+            serverName: 'bar',
+          },
+          waldo: {
+            serverName: 'waldo',
           },
         },
       },
@@ -171,21 +156,12 @@ describe('OptionsUtil', () => {
     const optionsUtil = new OptionsUtil({
       foo: {
         serverName: 'foo',
-        supportedTypes: {
-          string: true,
-          nestedOptions: {
-            bar: {
-              serverName: 'bar',
-              supportedTypes: {
-                string: true,
-              },
-            },
-            waldo: {
-              serverName: 'waldo',
-              supportedTypes: {
-                string: true,
-              },
-            },
+        nestedOptions: {
+          bar: {
+            serverName: 'bar',
+          },
+          waldo: {
+            serverName: 'waldo',
           },
         },
       },
@@ -219,9 +195,6 @@ describe('OptionsUtil', () => {
     const optionsUtil = new OptionsUtil({
       foo: {
         serverName: 'foo',
-        supportedTypes: {
-          string: true,
-        },
       },
     });
 

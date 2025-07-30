@@ -144,9 +144,6 @@ export class CollectionSource implements Stage {
   readonly optionsUtil = new OptionsUtil({
     forceIndex: {
       serverName: 'force_index',
-      supportedTypes: {
-        string: true,
-      },
     },
   });
   readonly collectionPath: string;
@@ -183,9 +180,6 @@ export class CollectionGroupSource implements Stage {
   readonly optionsUtil = new OptionsUtil({
     forceIndex: {
       serverName: 'force_index',
-      supportedTypes: {
-        string: true,
-      },
     },
   });
 
@@ -309,15 +303,9 @@ export class FindNearest implements Stage {
   readonly optionsUtil = new OptionsUtil({
     limit: {
       serverName: 'limit',
-      supportedTypes: {
-        number: true,
-      },
     },
     distanceField: {
       serverName: 'distance_field',
-      supportedTypes: {
-        field: true,
-      },
     },
   });
 
@@ -414,9 +402,6 @@ export class Unnest implements Stage {
   readonly optionsUtil = new OptionsUtil({
     indexField: {
       serverName: 'index_field',
-      supportedTypes: {
-        field: true,
-      },
     },
   });
 
