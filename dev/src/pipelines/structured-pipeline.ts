@@ -35,26 +35,15 @@ export class StructuredPipeline
   readonly optionsUtil = new OptionsUtil({
     indexMode: {
       serverName: 'index_mode',
-      supportedTypes: {
-        string: true,
-      },
     },
     explainOptions: {
       serverName: 'explain_options',
-      supportedTypes: {
-        nestedOptions: {
-          mode: {
-            serverName: 'mode',
-            supportedTypes: {
-              string: true,
-            },
-          },
-          outputFormat: {
-            serverName: 'output_format',
-            supportedTypes: {
-              string: true,
-            },
-          },
+      nestedOptions: {
+        mode: {
+          serverName: 'mode',
+        },
+        outputFormat: {
+          serverName: 'output_format',
         },
       },
     },
