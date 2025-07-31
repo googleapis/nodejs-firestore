@@ -8662,36 +8662,6 @@ declare namespace FirebaseFirestore {
     /**
      * @beta
      *
-     * Creates an expression that rounds a numeric value to the nearest whole number.
-     *
-     * ```typescript
-     * // Round the value of the 'price' field.
-     * round("price");
-     * ```
-     *
-     * @param fieldName The name of the field to round.
-     * @return A new `Expr` representing the rounded value.
-     */
-    export function round(fieldName: string): FunctionExpr;
-
-    /**
-     * @beta
-     *
-     * Creates an expression that rounds a numeric value to the nearest whole number.
-     *
-     * ```typescript
-     * // Round the value of the 'price' field.
-     * round(field("price"));
-     * ```
-     *
-     * @param expression An expression evaluating to a numeric value, which will be rounded.
-     * @return A new `Expr` representing the rounded value.
-     */
-    export function round(expression: Expr): FunctionExpr;
-
-    /**
-     * @beta
-     *
      * Creates an expression that returns the collection ID from a path.
      *
      * ```typescript
@@ -8895,41 +8865,6 @@ declare namespace FirebaseFirestore {
      * @return A new `Expr` representing the rounded value.
      */
     export function round(expression: Expr): FunctionExpr;
-
-    /**
-     * @beta
-     *
-     * Creates an expression that rounds a numeric value to a specified number of decimal places.
-     *
-     * ```typescript
-     * // Round the 'price' field to 2 decimal places.
-     * round("price", 2);
-     * ```
-     *
-     * @param fieldName The name of the field to round.
-     * @param decimalPlaces The number of decimal places to round to.
-     * @return A new `Expr` representing the rounded value.
-     */
-    export function round(
-      fieldName: string,
-      decimalPlaces: number
-    ): FunctionExpr;
-
-    /**
-     * @beta
-     *
-     * Creates an expression that rounds a numeric value to a specified number of decimal places.
-     *
-     * ```typescript
-     * // Round the 'price' field to the number of decimal places in the 'places' field.
-     * round("price", field("places"));
-     * ```
-     *
-     * @param fieldName The name of the field to round.
-     * @param decimalPlaces The number of decimal places to round to.
-     * @return A new `Expr` representing the rounded value.
-     */
-    export function round(fieldName: string, decimalPlaces: Expr): FunctionExpr;
 
     /**
      * @beta
