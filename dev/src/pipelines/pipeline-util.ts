@@ -183,9 +183,6 @@ export class ExecutionUtil {
           if (proto.executionTime) {
             output.executionTime = Timestamp.fromProto(proto.executionTime);
           }
-          if (proto.explainStats) {
-            console.log(proto.explainStats.data);
-          }
           callback(undefined, [output]);
         } else {
           let output: PipelineStreamElement[] = proto.results.map(result => {
