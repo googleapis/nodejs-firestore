@@ -360,10 +360,7 @@ export class FirestoreClient {
         },
         (err: Error | null | undefined) => {
           this._stubFailed = true;
-          this._log.error(
-            'Failed to create the gax client stub.',
-            err
-          );
+          this._log.error('Failed to create the gax client stub.', err);
           return () => {
             throw err;
           };
