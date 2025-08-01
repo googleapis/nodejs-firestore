@@ -166,7 +166,7 @@ function getServiceConfig(methodName: string): CallSettings | undefined {
       'google.firestore.v1.Firestore',
       gapicConfig as ClientConfig,
       {},
-      require('google-gax').Status
+      require('google-gax').Status,
     ) as {[k: string]: CallSettings};
   }
   return serviceConfig[methodName];
