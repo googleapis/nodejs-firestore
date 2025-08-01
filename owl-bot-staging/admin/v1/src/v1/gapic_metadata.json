@@ -155,6 +155,11 @@
                 "restoreDatabase"
               ]
             },
+            "CloneDatabase": {
+              "methods": [
+                "cloneDatabase"
+              ]
+            },
             "ListIndexes": {
               "methods": [
                 "listIndexes",
@@ -317,6 +322,11 @@
             "RestoreDatabase": {
               "methods": [
                 "restoreDatabase"
+              ]
+            },
+            "CloneDatabase": {
+              "methods": [
+                "cloneDatabase"
               ]
             },
             "ListIndexes": {

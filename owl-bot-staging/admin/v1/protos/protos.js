@@ -6575,6 +6575,39 @@
                          * @variation 2
                          */
     
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin|cloneDatabase}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef CloneDatabaseCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.longrunning.Operation} [response] Operation
+                         */
+    
+                        /**
+                         * Calls CloneDatabase.
+                         * @function cloneDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICloneDatabaseRequest} request CloneDatabaseRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.CloneDatabaseCallback} callback Node-style callback called with the error, if any, and Operation
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.cloneDatabase = function cloneDatabase(request, callback) {
+                            return this.rpcCall(cloneDatabase, $root.google.firestore.admin.v1.CloneDatabaseRequest, $root.google.longrunning.Operation, request, callback);
+                        }, "name", { value: "CloneDatabase" });
+    
+                        /**
+                         * Calls CloneDatabase.
+                         * @function cloneDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICloneDatabaseRequest} request CloneDatabaseRequest message or plain object
+                         * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
                         return FirestoreAdmin;
                     })();
     
@@ -16051,6 +16084,350 @@
                         return RestoreDatabaseRequest;
                     })();
     
+                    v1.CloneDatabaseRequest = (function() {
+    
+                        /**
+                         * Properties of a CloneDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface ICloneDatabaseRequest
+                         * @property {string|null} [parent] CloneDatabaseRequest parent
+                         * @property {string|null} [databaseId] CloneDatabaseRequest databaseId
+                         * @property {google.firestore.admin.v1.IPitrSnapshot|null} [pitrSnapshot] CloneDatabaseRequest pitrSnapshot
+                         * @property {google.firestore.admin.v1.Database.IEncryptionConfig|null} [encryptionConfig] CloneDatabaseRequest encryptionConfig
+                         * @property {Object.<string,string>|null} [tags] CloneDatabaseRequest tags
+                         */
+    
+                        /**
+                         * Constructs a new CloneDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a CloneDatabaseRequest.
+                         * @implements ICloneDatabaseRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.ICloneDatabaseRequest=} [properties] Properties to set
+                         */
+                        function CloneDatabaseRequest(properties) {
+                            this.tags = {};
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * CloneDatabaseRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @instance
+                         */
+                        CloneDatabaseRequest.prototype.parent = "";
+    
+                        /**
+                         * CloneDatabaseRequest databaseId.
+                         * @member {string} databaseId
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @instance
+                         */
+                        CloneDatabaseRequest.prototype.databaseId = "";
+    
+                        /**
+                         * CloneDatabaseRequest pitrSnapshot.
+                         * @member {google.firestore.admin.v1.IPitrSnapshot|null|undefined} pitrSnapshot
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @instance
+                         */
+                        CloneDatabaseRequest.prototype.pitrSnapshot = null;
+    
+                        /**
+                         * CloneDatabaseRequest encryptionConfig.
+                         * @member {google.firestore.admin.v1.Database.IEncryptionConfig|null|undefined} encryptionConfig
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @instance
+                         */
+                        CloneDatabaseRequest.prototype.encryptionConfig = null;
+    
+                        /**
+                         * CloneDatabaseRequest tags.
+                         * @member {Object.<string,string>} tags
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @instance
+                         */
+                        CloneDatabaseRequest.prototype.tags = $util.emptyObject;
+    
+                        /**
+                         * Creates a new CloneDatabaseRequest instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ICloneDatabaseRequest=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.CloneDatabaseRequest} CloneDatabaseRequest instance
+                         */
+                        CloneDatabaseRequest.create = function create(properties) {
+                            return new CloneDatabaseRequest(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified CloneDatabaseRequest message. Does not implicitly {@link google.firestore.admin.v1.CloneDatabaseRequest.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ICloneDatabaseRequest} message CloneDatabaseRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        CloneDatabaseRequest.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.parent != null && Object.hasOwnProperty.call(message, "parent"))
+                                writer.uint32(/* id 1, wireType 2 =*/10).string(message.parent);
+                            if (message.databaseId != null && Object.hasOwnProperty.call(message, "databaseId"))
+                                writer.uint32(/* id 2, wireType 2 =*/18).string(message.databaseId);
+                            if (message.encryptionConfig != null && Object.hasOwnProperty.call(message, "encryptionConfig"))
+                                $root.google.firestore.admin.v1.Database.EncryptionConfig.encode(message.encryptionConfig, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
+                            if (message.tags != null && Object.hasOwnProperty.call(message, "tags"))
+                                for (var keys = Object.keys(message.tags), i = 0; i < keys.length; ++i)
+                                    writer.uint32(/* id 5, wireType 2 =*/42).fork().uint32(/* id 1, wireType 2 =*/10).string(keys[i]).uint32(/* id 2, wireType 2 =*/18).string(message.tags[keys[i]]).ldelim();
+                            if (message.pitrSnapshot != null && Object.hasOwnProperty.call(message, "pitrSnapshot"))
+                                $root.google.firestore.admin.v1.PitrSnapshot.encode(message.pitrSnapshot, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified CloneDatabaseRequest message, length delimited. Does not implicitly {@link google.firestore.admin.v1.CloneDatabaseRequest.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ICloneDatabaseRequest} message CloneDatabaseRequest message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        CloneDatabaseRequest.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a CloneDatabaseRequest message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.CloneDatabaseRequest} CloneDatabaseRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        CloneDatabaseRequest.decode = function decode(reader, length, error) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.CloneDatabaseRequest(), key, value;
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                if (tag === error)
+                                    break;
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.parent = reader.string();
+                                        break;
+                                    }
+                                case 2: {
+                                        message.databaseId = reader.string();
+                                        break;
+                                    }
+                                case 6: {
+                                        message.pitrSnapshot = $root.google.firestore.admin.v1.PitrSnapshot.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 4: {
+                                        message.encryptionConfig = $root.google.firestore.admin.v1.Database.EncryptionConfig.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 5: {
+                                        if (message.tags === $util.emptyObject)
+                                            message.tags = {};
+                                        var end2 = reader.uint32() + reader.pos;
+                                        key = "";
+                                        value = "";
+                                        while (reader.pos < end2) {
+                                            var tag2 = reader.uint32();
+                                            switch (tag2 >>> 3) {
+                                            case 1:
+                                                key = reader.string();
+                                                break;
+                                            case 2:
+                                                value = reader.string();
+                                                break;
+                                            default:
+                                                reader.skipType(tag2 & 7);
+                                                break;
+                                            }
+                                        }
+                                        message.tags[key] = value;
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a CloneDatabaseRequest message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.CloneDatabaseRequest} CloneDatabaseRequest
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        CloneDatabaseRequest.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a CloneDatabaseRequest message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        CloneDatabaseRequest.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                if (!$util.isString(message.parent))
+                                    return "parent: string expected";
+                            if (message.databaseId != null && message.hasOwnProperty("databaseId"))
+                                if (!$util.isString(message.databaseId))
+                                    return "databaseId: string expected";
+                            if (message.pitrSnapshot != null && message.hasOwnProperty("pitrSnapshot")) {
+                                var error = $root.google.firestore.admin.v1.PitrSnapshot.verify(message.pitrSnapshot);
+                                if (error)
+                                    return "pitrSnapshot." + error;
+                            }
+                            if (message.encryptionConfig != null && message.hasOwnProperty("encryptionConfig")) {
+                                var error = $root.google.firestore.admin.v1.Database.EncryptionConfig.verify(message.encryptionConfig);
+                                if (error)
+                                    return "encryptionConfig." + error;
+                            }
+                            if (message.tags != null && message.hasOwnProperty("tags")) {
+                                if (!$util.isObject(message.tags))
+                                    return "tags: object expected";
+                                var key = Object.keys(message.tags);
+                                for (var i = 0; i < key.length; ++i)
+                                    if (!$util.isString(message.tags[key[i]]))
+                                        return "tags: string{k:string} expected";
+                            }
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a CloneDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.CloneDatabaseRequest} CloneDatabaseRequest
+                         */
+                        CloneDatabaseRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.CloneDatabaseRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.CloneDatabaseRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            if (object.databaseId != null)
+                                message.databaseId = String(object.databaseId);
+                            if (object.pitrSnapshot != null) {
+                                if (typeof object.pitrSnapshot !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CloneDatabaseRequest.pitrSnapshot: object expected");
+                                message.pitrSnapshot = $root.google.firestore.admin.v1.PitrSnapshot.fromObject(object.pitrSnapshot);
+                            }
+                            if (object.encryptionConfig != null) {
+                                if (typeof object.encryptionConfig !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CloneDatabaseRequest.encryptionConfig: object expected");
+                                message.encryptionConfig = $root.google.firestore.admin.v1.Database.EncryptionConfig.fromObject(object.encryptionConfig);
+                            }
+                            if (object.tags) {
+                                if (typeof object.tags !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CloneDatabaseRequest.tags: object expected");
+                                message.tags = {};
+                                for (var keys = Object.keys(object.tags), i = 0; i < keys.length; ++i)
+                                    message.tags[keys[i]] = String(object.tags[keys[i]]);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a CloneDatabaseRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.CloneDatabaseRequest} message CloneDatabaseRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        CloneDatabaseRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.objects || options.defaults)
+                                object.tags = {};
+                            if (options.defaults) {
+                                object.parent = "";
+                                object.databaseId = "";
+                                object.encryptionConfig = null;
+                                object.pitrSnapshot = null;
+                            }
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            if (message.databaseId != null && message.hasOwnProperty("databaseId"))
+                                object.databaseId = message.databaseId;
+                            if (message.encryptionConfig != null && message.hasOwnProperty("encryptionConfig"))
+                                object.encryptionConfig = $root.google.firestore.admin.v1.Database.EncryptionConfig.toObject(message.encryptionConfig, options);
+                            var keys2;
+                            if (message.tags && (keys2 = Object.keys(message.tags)).length) {
+                                object.tags = {};
+                                for (var j = 0; j < keys2.length; ++j)
+                                    object.tags[keys2[j]] = message.tags[keys2[j]];
+                            }
+                            if (message.pitrSnapshot != null && message.hasOwnProperty("pitrSnapshot"))
+                                object.pitrSnapshot = $root.google.firestore.admin.v1.PitrSnapshot.toObject(message.pitrSnapshot, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this CloneDatabaseRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        CloneDatabaseRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for CloneDatabaseRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.CloneDatabaseRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        CloneDatabaseRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.CloneDatabaseRequest";
+                        };
+    
+                        return CloneDatabaseRequest;
+                    })();
+    
                     v1.IndexOperationMetadata = (function() {
     
                         /**
@@ -19456,6 +19833,396 @@
                         return RestoreDatabaseMetadata;
                     })();
     
+                    v1.CloneDatabaseMetadata = (function() {
+    
+                        /**
+                         * Properties of a CloneDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @interface ICloneDatabaseMetadata
+                         * @property {google.protobuf.ITimestamp|null} [startTime] CloneDatabaseMetadata startTime
+                         * @property {google.protobuf.ITimestamp|null} [endTime] CloneDatabaseMetadata endTime
+                         * @property {google.firestore.admin.v1.OperationState|null} [operationState] CloneDatabaseMetadata operationState
+                         * @property {string|null} [database] CloneDatabaseMetadata database
+                         * @property {google.firestore.admin.v1.IPitrSnapshot|null} [pitrSnapshot] CloneDatabaseMetadata pitrSnapshot
+                         * @property {google.firestore.admin.v1.IProgress|null} [progressPercentage] CloneDatabaseMetadata progressPercentage
+                         */
+    
+                        /**
+                         * Constructs a new CloneDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a CloneDatabaseMetadata.
+                         * @implements ICloneDatabaseMetadata
+                         * @constructor
+                         * @param {google.firestore.admin.v1.ICloneDatabaseMetadata=} [properties] Properties to set
+                         */
+                        function CloneDatabaseMetadata(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * CloneDatabaseMetadata startTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} startTime
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @instance
+                         */
+                        CloneDatabaseMetadata.prototype.startTime = null;
+    
+                        /**
+                         * CloneDatabaseMetadata endTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} endTime
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @instance
+                         */
+                        CloneDatabaseMetadata.prototype.endTime = null;
+    
+                        /**
+                         * CloneDatabaseMetadata operationState.
+                         * @member {google.firestore.admin.v1.OperationState} operationState
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @instance
+                         */
+                        CloneDatabaseMetadata.prototype.operationState = 0;
+    
+                        /**
+                         * CloneDatabaseMetadata database.
+                         * @member {string} database
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @instance
+                         */
+                        CloneDatabaseMetadata.prototype.database = "";
+    
+                        /**
+                         * CloneDatabaseMetadata pitrSnapshot.
+                         * @member {google.firestore.admin.v1.IPitrSnapshot|null|undefined} pitrSnapshot
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @instance
+                         */
+                        CloneDatabaseMetadata.prototype.pitrSnapshot = null;
+    
+                        /**
+                         * CloneDatabaseMetadata progressPercentage.
+                         * @member {google.firestore.admin.v1.IProgress|null|undefined} progressPercentage
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @instance
+                         */
+                        CloneDatabaseMetadata.prototype.progressPercentage = null;
+    
+                        /**
+                         * Creates a new CloneDatabaseMetadata instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.ICloneDatabaseMetadata=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.CloneDatabaseMetadata} CloneDatabaseMetadata instance
+                         */
+                        CloneDatabaseMetadata.create = function create(properties) {
+                            return new CloneDatabaseMetadata(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified CloneDatabaseMetadata message. Does not implicitly {@link google.firestore.admin.v1.CloneDatabaseMetadata.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.ICloneDatabaseMetadata} message CloneDatabaseMetadata message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        CloneDatabaseMetadata.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.startTime != null && Object.hasOwnProperty.call(message, "startTime"))
+                                $root.google.protobuf.Timestamp.encode(message.startTime, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+                            if (message.endTime != null && Object.hasOwnProperty.call(message, "endTime"))
+                                $root.google.protobuf.Timestamp.encode(message.endTime, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                            if (message.operationState != null && Object.hasOwnProperty.call(message, "operationState"))
+                                writer.uint32(/* id 3, wireType 0 =*/24).int32(message.operationState);
+                            if (message.database != null && Object.hasOwnProperty.call(message, "database"))
+                                writer.uint32(/* id 4, wireType 2 =*/34).string(message.database);
+                            if (message.progressPercentage != null && Object.hasOwnProperty.call(message, "progressPercentage"))
+                                $root.google.firestore.admin.v1.Progress.encode(message.progressPercentage, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+                            if (message.pitrSnapshot != null && Object.hasOwnProperty.call(message, "pitrSnapshot"))
+                                $root.google.firestore.admin.v1.PitrSnapshot.encode(message.pitrSnapshot, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified CloneDatabaseMetadata message, length delimited. Does not implicitly {@link google.firestore.admin.v1.CloneDatabaseMetadata.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.ICloneDatabaseMetadata} message CloneDatabaseMetadata message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        CloneDatabaseMetadata.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a CloneDatabaseMetadata message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.CloneDatabaseMetadata} CloneDatabaseMetadata
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        CloneDatabaseMetadata.decode = function decode(reader, length, error) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.CloneDatabaseMetadata();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                if (tag === error)
+                                    break;
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.startTime = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 2: {
+                                        message.endTime = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 3: {
+                                        message.operationState = reader.int32();
+                                        break;
+                                    }
+                                case 4: {
+                                        message.database = reader.string();
+                                        break;
+                                    }
+                                case 7: {
+                                        message.pitrSnapshot = $root.google.firestore.admin.v1.PitrSnapshot.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                case 6: {
+                                        message.progressPercentage = $root.google.firestore.admin.v1.Progress.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a CloneDatabaseMetadata message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.CloneDatabaseMetadata} CloneDatabaseMetadata
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        CloneDatabaseMetadata.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a CloneDatabaseMetadata message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        CloneDatabaseMetadata.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.startTime != null && message.hasOwnProperty("startTime")) {
+                                var error = $root.google.protobuf.Timestamp.verify(message.startTime);
+                                if (error)
+                                    return "startTime." + error;
+                            }
+                            if (message.endTime != null && message.hasOwnProperty("endTime")) {
+                                var error = $root.google.protobuf.Timestamp.verify(message.endTime);
+                                if (error)
+                                    return "endTime." + error;
+                            }
+                            if (message.operationState != null && message.hasOwnProperty("operationState"))
+                                switch (message.operationState) {
+                                default:
+                                    return "operationState: enum value expected";
+                                case 0:
+                                case 1:
+                                case 2:
+                                case 3:
+                                case 4:
+                                case 5:
+                                case 6:
+                                case 7:
+                                    break;
+                                }
+                            if (message.database != null && message.hasOwnProperty("database"))
+                                if (!$util.isString(message.database))
+                                    return "database: string expected";
+                            if (message.pitrSnapshot != null && message.hasOwnProperty("pitrSnapshot")) {
+                                var error = $root.google.firestore.admin.v1.PitrSnapshot.verify(message.pitrSnapshot);
+                                if (error)
+                                    return "pitrSnapshot." + error;
+                            }
+                            if (message.progressPercentage != null && message.hasOwnProperty("progressPercentage")) {
+                                var error = $root.google.firestore.admin.v1.Progress.verify(message.progressPercentage);
+                                if (error)
+                                    return "progressPercentage." + error;
+                            }
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a CloneDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.CloneDatabaseMetadata} CloneDatabaseMetadata
+                         */
+                        CloneDatabaseMetadata.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.CloneDatabaseMetadata)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.CloneDatabaseMetadata();
+                            if (object.startTime != null) {
+                                if (typeof object.startTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CloneDatabaseMetadata.startTime: object expected");
+                                message.startTime = $root.google.protobuf.Timestamp.fromObject(object.startTime);
+                            }
+                            if (object.endTime != null) {
+                                if (typeof object.endTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CloneDatabaseMetadata.endTime: object expected");
+                                message.endTime = $root.google.protobuf.Timestamp.fromObject(object.endTime);
+                            }
+                            switch (object.operationState) {
+                            default:
+                                if (typeof object.operationState === "number") {
+                                    message.operationState = object.operationState;
+                                    break;
+                                }
+                                break;
+                            case "OPERATION_STATE_UNSPECIFIED":
+                            case 0:
+                                message.operationState = 0;
+                                break;
+                            case "INITIALIZING":
+                            case 1:
+                                message.operationState = 1;
+                                break;
+                            case "PROCESSING":
+                            case 2:
+                                message.operationState = 2;
+                                break;
+                            case "CANCELLING":
+                            case 3:
+                                message.operationState = 3;
+                                break;
+                            case "FINALIZING":
+                            case 4:
+                                message.operationState = 4;
+                                break;
+                            case "SUCCESSFUL":
+                            case 5:
+                                message.operationState = 5;
+                                break;
+                            case "FAILED":
+                            case 6:
+                                message.operationState = 6;
+                                break;
+                            case "CANCELLED":
+                            case 7:
+                                message.operationState = 7;
+                                break;
+                            }
+                            if (object.database != null)
+                                message.database = String(object.database);
+                            if (object.pitrSnapshot != null) {
+                                if (typeof object.pitrSnapshot !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CloneDatabaseMetadata.pitrSnapshot: object expected");
+                                message.pitrSnapshot = $root.google.firestore.admin.v1.PitrSnapshot.fromObject(object.pitrSnapshot);
+                            }
+                            if (object.progressPercentage != null) {
+                                if (typeof object.progressPercentage !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CloneDatabaseMetadata.progressPercentage: object expected");
+                                message.progressPercentage = $root.google.firestore.admin.v1.Progress.fromObject(object.progressPercentage);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a CloneDatabaseMetadata message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.CloneDatabaseMetadata} message CloneDatabaseMetadata
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        CloneDatabaseMetadata.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.startTime = null;
+                                object.endTime = null;
+                                object.operationState = options.enums === String ? "OPERATION_STATE_UNSPECIFIED" : 0;
+                                object.database = "";
+                                object.progressPercentage = null;
+                                object.pitrSnapshot = null;
+                            }
+                            if (message.startTime != null && message.hasOwnProperty("startTime"))
+                                object.startTime = $root.google.protobuf.Timestamp.toObject(message.startTime, options);
+                            if (message.endTime != null && message.hasOwnProperty("endTime"))
+                                object.endTime = $root.google.protobuf.Timestamp.toObject(message.endTime, options);
+                            if (message.operationState != null && message.hasOwnProperty("operationState"))
+                                object.operationState = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.operationState] === undefined ? message.operationState : $root.google.firestore.admin.v1.OperationState[message.operationState] : message.operationState;
+                            if (message.database != null && message.hasOwnProperty("database"))
+                                object.database = message.database;
+                            if (message.progressPercentage != null && message.hasOwnProperty("progressPercentage"))
+                                object.progressPercentage = $root.google.firestore.admin.v1.Progress.toObject(message.progressPercentage, options);
+                            if (message.pitrSnapshot != null && message.hasOwnProperty("pitrSnapshot"))
+                                object.pitrSnapshot = $root.google.firestore.admin.v1.PitrSnapshot.toObject(message.pitrSnapshot, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this CloneDatabaseMetadata to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        CloneDatabaseMetadata.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for CloneDatabaseMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.CloneDatabaseMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        CloneDatabaseMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.CloneDatabaseMetadata";
+                        };
+    
+                        return CloneDatabaseMetadata;
+                    })();
+    
                     v1.Progress = (function() {
     
                         /**
@@ -19737,6 +20504,272 @@
                         values[valuesById[6] = "FAILED"] = 6;
                         values[valuesById[7] = "CANCELLED"] = 7;
                         return values;
+                    })();
+    
+                    v1.PitrSnapshot = (function() {
+    
+                        /**
+                         * Properties of a PitrSnapshot.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IPitrSnapshot
+                         * @property {string|null} [database] PitrSnapshot database
+                         * @property {Uint8Array|null} [databaseUid] PitrSnapshot databaseUid
+                         * @property {google.protobuf.ITimestamp|null} [snapshotTime] PitrSnapshot snapshotTime
+                         */
+    
+                        /**
+                         * Constructs a new PitrSnapshot.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a PitrSnapshot.
+                         * @implements IPitrSnapshot
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IPitrSnapshot=} [properties] Properties to set
+                         */
+                        function PitrSnapshot(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * PitrSnapshot database.
+                         * @member {string} database
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @instance
+                         */
+                        PitrSnapshot.prototype.database = "";
+    
+                        /**
+                         * PitrSnapshot databaseUid.
+                         * @member {Uint8Array} databaseUid
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @instance
+                         */
+                        PitrSnapshot.prototype.databaseUid = $util.newBuffer([]);
+    
+                        /**
+                         * PitrSnapshot snapshotTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} snapshotTime
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @instance
+                         */
+                        PitrSnapshot.prototype.snapshotTime = null;
+    
+                        /**
+                         * Creates a new PitrSnapshot instance using the specified properties.
+                         * @function create
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @static
+                         * @param {google.firestore.admin.v1.IPitrSnapshot=} [properties] Properties to set
+                         * @returns {google.firestore.admin.v1.PitrSnapshot} PitrSnapshot instance
+                         */
+                        PitrSnapshot.create = function create(properties) {
+                            return new PitrSnapshot(properties);
+                        };
+    
+                        /**
+                         * Encodes the specified PitrSnapshot message. Does not implicitly {@link google.firestore.admin.v1.PitrSnapshot.verify|verify} messages.
+                         * @function encode
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @static
+                         * @param {google.firestore.admin.v1.IPitrSnapshot} message PitrSnapshot message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        PitrSnapshot.encode = function encode(message, writer) {
+                            if (!writer)
+                                writer = $Writer.create();
+                            if (message.database != null && Object.hasOwnProperty.call(message, "database"))
+                                writer.uint32(/* id 1, wireType 2 =*/10).string(message.database);
+                            if (message.databaseUid != null && Object.hasOwnProperty.call(message, "databaseUid"))
+                                writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.databaseUid);
+                            if (message.snapshotTime != null && Object.hasOwnProperty.call(message, "snapshotTime"))
+                                $root.google.protobuf.Timestamp.encode(message.snapshotTime, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+                            return writer;
+                        };
+    
+                        /**
+                         * Encodes the specified PitrSnapshot message, length delimited. Does not implicitly {@link google.firestore.admin.v1.PitrSnapshot.verify|verify} messages.
+                         * @function encodeDelimited
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @static
+                         * @param {google.firestore.admin.v1.IPitrSnapshot} message PitrSnapshot message or plain object to encode
+                         * @param {$protobuf.Writer} [writer] Writer to encode to
+                         * @returns {$protobuf.Writer} Writer
+                         */
+                        PitrSnapshot.encodeDelimited = function encodeDelimited(message, writer) {
+                            return this.encode(message, writer).ldelim();
+                        };
+    
+                        /**
+                         * Decodes a PitrSnapshot message from the specified reader or buffer.
+                         * @function decode
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @param {number} [length] Message length if known beforehand
+                         * @returns {google.firestore.admin.v1.PitrSnapshot} PitrSnapshot
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        PitrSnapshot.decode = function decode(reader, length, error) {
+                            if (!(reader instanceof $Reader))
+                                reader = $Reader.create(reader);
+                            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.firestore.admin.v1.PitrSnapshot();
+                            while (reader.pos < end) {
+                                var tag = reader.uint32();
+                                if (tag === error)
+                                    break;
+                                switch (tag >>> 3) {
+                                case 1: {
+                                        message.database = reader.string();
+                                        break;
+                                    }
+                                case 2: {
+                                        message.databaseUid = reader.bytes();
+                                        break;
+                                    }
+                                case 3: {
+                                        message.snapshotTime = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
+                                        break;
+                                    }
+                                default:
+                                    reader.skipType(tag & 7);
+                                    break;
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Decodes a PitrSnapshot message from the specified reader or buffer, length delimited.
+                         * @function decodeDelimited
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @static
+                         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                         * @returns {google.firestore.admin.v1.PitrSnapshot} PitrSnapshot
+                         * @throws {Error} If the payload is not a reader or valid buffer
+                         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                         */
+                        PitrSnapshot.decodeDelimited = function decodeDelimited(reader) {
+                            if (!(reader instanceof $Reader))
+                                reader = new $Reader(reader);
+                            return this.decode(reader, reader.uint32());
+                        };
+    
+                        /**
+                         * Verifies a PitrSnapshot message.
+                         * @function verify
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @static
+                         * @param {Object.<string,*>} message Plain object to verify
+                         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                         */
+                        PitrSnapshot.verify = function verify(message) {
+                            if (typeof message !== "object" || message === null)
+                                return "object expected";
+                            if (message.database != null && message.hasOwnProperty("database"))
+                                if (!$util.isString(message.database))
+                                    return "database: string expected";
+                            if (message.databaseUid != null && message.hasOwnProperty("databaseUid"))
+                                if (!(message.databaseUid && typeof message.databaseUid.length === "number" || $util.isString(message.databaseUid)))
+                                    return "databaseUid: buffer expected";
+                            if (message.snapshotTime != null && message.hasOwnProperty("snapshotTime")) {
+                                var error = $root.google.protobuf.Timestamp.verify(message.snapshotTime);
+                                if (error)
+                                    return "snapshotTime." + error;
+                            }
+                            return null;
+                        };
+    
+                        /**
+                         * Creates a PitrSnapshot message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.PitrSnapshot} PitrSnapshot
+                         */
+                        PitrSnapshot.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.PitrSnapshot)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.PitrSnapshot();
+                            if (object.database != null)
+                                message.database = String(object.database);
+                            if (object.databaseUid != null)
+                                if (typeof object.databaseUid === "string")
+                                    $util.base64.decode(object.databaseUid, message.databaseUid = $util.newBuffer($util.base64.length(object.databaseUid)), 0);
+                                else if (object.databaseUid.length >= 0)
+                                    message.databaseUid = object.databaseUid;
+                            if (object.snapshotTime != null) {
+                                if (typeof object.snapshotTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.PitrSnapshot.snapshotTime: object expected");
+                                message.snapshotTime = $root.google.protobuf.Timestamp.fromObject(object.snapshotTime);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a PitrSnapshot message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @static
+                         * @param {google.firestore.admin.v1.PitrSnapshot} message PitrSnapshot
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        PitrSnapshot.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.database = "";
+                                if (options.bytes === String)
+                                    object.databaseUid = "";
+                                else {
+                                    object.databaseUid = [];
+                                    if (options.bytes !== Array)
+                                        object.databaseUid = $util.newBuffer(object.databaseUid);
+                                }
+                                object.snapshotTime = null;
+                            }
+                            if (message.database != null && message.hasOwnProperty("database"))
+                                object.database = message.database;
+                            if (message.databaseUid != null && message.hasOwnProperty("databaseUid"))
+                                object.databaseUid = options.bytes === String ? $util.base64.encode(message.databaseUid, 0, message.databaseUid.length) : options.bytes === Array ? Array.prototype.slice.call(message.databaseUid) : message.databaseUid;
+                            if (message.snapshotTime != null && message.hasOwnProperty("snapshotTime"))
+                                object.snapshotTime = $root.google.protobuf.Timestamp.toObject(message.snapshotTime, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this PitrSnapshot to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        PitrSnapshot.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for PitrSnapshot
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.PitrSnapshot
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        PitrSnapshot.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.PitrSnapshot";
+                        };
+    
+                        return PitrSnapshot;
                     })();
     
                     v1.BackupSchedule = (function() {
@@ -27000,6 +28033,461 @@
                 values[valuesById[4] = "GA"] = 4;
                 values[valuesById[5] = "DEPRECATED"] = 5;
                 return values;
+            })();
+    
+            api.RoutingRule = (function() {
+    
+                /**
+                 * Properties of a RoutingRule.
+                 * @memberof google.api
+                 * @interface IRoutingRule
+                 * @property {Array.<google.api.IRoutingParameter>|null} [routingParameters] RoutingRule routingParameters
+                 */
+    
+                /**
+                 * Constructs a new RoutingRule.
+                 * @memberof google.api
+                 * @classdesc Represents a RoutingRule.
+                 * @implements IRoutingRule
+                 * @constructor
+                 * @param {google.api.IRoutingRule=} [properties] Properties to set
+                 */
+                function RoutingRule(properties) {
+                    this.routingParameters = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * RoutingRule routingParameters.
+                 * @member {Array.<google.api.IRoutingParameter>} routingParameters
+                 * @memberof google.api.RoutingRule
+                 * @instance
+                 */
+                RoutingRule.prototype.routingParameters = $util.emptyArray;
+    
+                /**
+                 * Creates a new RoutingRule instance using the specified properties.
+                 * @function create
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {google.api.IRoutingRule=} [properties] Properties to set
+                 * @returns {google.api.RoutingRule} RoutingRule instance
+                 */
+                RoutingRule.create = function create(properties) {
+                    return new RoutingRule(properties);
+                };
+    
+                /**
+                 * Encodes the specified RoutingRule message. Does not implicitly {@link google.api.RoutingRule.verify|verify} messages.
+                 * @function encode
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {google.api.IRoutingRule} message RoutingRule message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                RoutingRule.encode = function encode(message, writer) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (message.routingParameters != null && message.routingParameters.length)
+                        for (var i = 0; i < message.routingParameters.length; ++i)
+                            $root.google.api.RoutingParameter.encode(message.routingParameters[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                    return writer;
+                };
+    
+                /**
+                 * Encodes the specified RoutingRule message, length delimited. Does not implicitly {@link google.api.RoutingRule.verify|verify} messages.
+                 * @function encodeDelimited
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {google.api.IRoutingRule} message RoutingRule message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                RoutingRule.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
+    
+                /**
+                 * Decodes a RoutingRule message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {google.api.RoutingRule} RoutingRule
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                RoutingRule.decode = function decode(reader, length, error) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.api.RoutingRule();
+                    while (reader.pos < end) {
+                        var tag = reader.uint32();
+                        if (tag === error)
+                            break;
+                        switch (tag >>> 3) {
+                        case 2: {
+                                if (!(message.routingParameters && message.routingParameters.length))
+                                    message.routingParameters = [];
+                                message.routingParameters.push($root.google.api.RoutingParameter.decode(reader, reader.uint32()));
+                                break;
+                            }
+                        default:
+                            reader.skipType(tag & 7);
+                            break;
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Decodes a RoutingRule message from the specified reader or buffer, length delimited.
+                 * @function decodeDelimited
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @returns {google.api.RoutingRule} RoutingRule
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                RoutingRule.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
+                };
+    
+                /**
+                 * Verifies a RoutingRule message.
+                 * @function verify
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {Object.<string,*>} message Plain object to verify
+                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                 */
+                RoutingRule.verify = function verify(message) {
+                    if (typeof message !== "object" || message === null)
+                        return "object expected";
+                    if (message.routingParameters != null && message.hasOwnProperty("routingParameters")) {
+                        if (!Array.isArray(message.routingParameters))
+                            return "routingParameters: array expected";
+                        for (var i = 0; i < message.routingParameters.length; ++i) {
+                            var error = $root.google.api.RoutingParameter.verify(message.routingParameters[i]);
+                            if (error)
+                                return "routingParameters." + error;
+                        }
+                    }
+                    return null;
+                };
+    
+                /**
+                 * Creates a RoutingRule message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.RoutingRule} RoutingRule
+                 */
+                RoutingRule.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.RoutingRule)
+                        return object;
+                    var message = new $root.google.api.RoutingRule();
+                    if (object.routingParameters) {
+                        if (!Array.isArray(object.routingParameters))
+                            throw TypeError(".google.api.RoutingRule.routingParameters: array expected");
+                        message.routingParameters = [];
+                        for (var i = 0; i < object.routingParameters.length; ++i) {
+                            if (typeof object.routingParameters[i] !== "object")
+                                throw TypeError(".google.api.RoutingRule.routingParameters: object expected");
+                            message.routingParameters[i] = $root.google.api.RoutingParameter.fromObject(object.routingParameters[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a RoutingRule message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {google.api.RoutingRule} message RoutingRule
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                RoutingRule.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.routingParameters = [];
+                    if (message.routingParameters && message.routingParameters.length) {
+                        object.routingParameters = [];
+                        for (var j = 0; j < message.routingParameters.length; ++j)
+                            object.routingParameters[j] = $root.google.api.RoutingParameter.toObject(message.routingParameters[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this RoutingRule to JSON.
+                 * @function toJSON
+                 * @memberof google.api.RoutingRule
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                RoutingRule.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for RoutingRule
+                 * @function getTypeUrl
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                RoutingRule.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.RoutingRule";
+                };
+    
+                return RoutingRule;
+            })();
+    
+            api.RoutingParameter = (function() {
+    
+                /**
+                 * Properties of a RoutingParameter.
+                 * @memberof google.api
+                 * @interface IRoutingParameter
+                 * @property {string|null} [field] RoutingParameter field
+                 * @property {string|null} [pathTemplate] RoutingParameter pathTemplate
+                 */
+    
+                /**
+                 * Constructs a new RoutingParameter.
+                 * @memberof google.api
+                 * @classdesc Represents a RoutingParameter.
+                 * @implements IRoutingParameter
+                 * @constructor
+                 * @param {google.api.IRoutingParameter=} [properties] Properties to set
+                 */
+                function RoutingParameter(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * RoutingParameter field.
+                 * @member {string} field
+                 * @memberof google.api.RoutingParameter
+                 * @instance
+                 */
+                RoutingParameter.prototype.field = "";
+    
+                /**
+                 * RoutingParameter pathTemplate.
+                 * @member {string} pathTemplate
+                 * @memberof google.api.RoutingParameter
+                 * @instance
+                 */
+                RoutingParameter.prototype.pathTemplate = "";
+    
+                /**
+                 * Creates a new RoutingParameter instance using the specified properties.
+                 * @function create
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {google.api.IRoutingParameter=} [properties] Properties to set
+                 * @returns {google.api.RoutingParameter} RoutingParameter instance
+                 */
+                RoutingParameter.create = function create(properties) {
+                    return new RoutingParameter(properties);
+                };
+    
+                /**
+                 * Encodes the specified RoutingParameter message. Does not implicitly {@link google.api.RoutingParameter.verify|verify} messages.
+                 * @function encode
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {google.api.IRoutingParameter} message RoutingParameter message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                RoutingParameter.encode = function encode(message, writer) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (message.field != null && Object.hasOwnProperty.call(message, "field"))
+                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.field);
+                    if (message.pathTemplate != null && Object.hasOwnProperty.call(message, "pathTemplate"))
+                        writer.uint32(/* id 2, wireType 2 =*/18).string(message.pathTemplate);
+                    return writer;
+                };
+    
+                /**
+                 * Encodes the specified RoutingParameter message, length delimited. Does not implicitly {@link google.api.RoutingParameter.verify|verify} messages.
+                 * @function encodeDelimited
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {google.api.IRoutingParameter} message RoutingParameter message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                RoutingParameter.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
+    
+                /**
+                 * Decodes a RoutingParameter message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {google.api.RoutingParameter} RoutingParameter
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                RoutingParameter.decode = function decode(reader, length, error) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.api.RoutingParameter();
+                    while (reader.pos < end) {
+                        var tag = reader.uint32();
+                        if (tag === error)
+                            break;
+                        switch (tag >>> 3) {
+                        case 1: {
+                                message.field = reader.string();
+                                break;
+                            }
+                        case 2: {
+                                message.pathTemplate = reader.string();
+                                break;
+                            }
+                        default:
+                            reader.skipType(tag & 7);
+                            break;
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Decodes a RoutingParameter message from the specified reader or buffer, length delimited.
+                 * @function decodeDelimited
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @returns {google.api.RoutingParameter} RoutingParameter
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                RoutingParameter.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
+                };
+    
+                /**
+                 * Verifies a RoutingParameter message.
+                 * @function verify
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {Object.<string,*>} message Plain object to verify
+                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                 */
+                RoutingParameter.verify = function verify(message) {
+                    if (typeof message !== "object" || message === null)
+                        return "object expected";
+                    if (message.field != null && message.hasOwnProperty("field"))
+                        if (!$util.isString(message.field))
+                            return "field: string expected";
+                    if (message.pathTemplate != null && message.hasOwnProperty("pathTemplate"))
+                        if (!$util.isString(message.pathTemplate))
+                            return "pathTemplate: string expected";
+                    return null;
+                };
+    
+                /**
+                 * Creates a RoutingParameter message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.RoutingParameter} RoutingParameter
+                 */
+                RoutingParameter.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.RoutingParameter)
+                        return object;
+                    var message = new $root.google.api.RoutingParameter();
+                    if (object.field != null)
+                        message.field = String(object.field);
+                    if (object.pathTemplate != null)
+                        message.pathTemplate = String(object.pathTemplate);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a RoutingParameter message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {google.api.RoutingParameter} message RoutingParameter
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                RoutingParameter.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.field = "";
+                        object.pathTemplate = "";
+                    }
+                    if (message.field != null && message.hasOwnProperty("field"))
+                        object.field = message.field;
+                    if (message.pathTemplate != null && message.hasOwnProperty("pathTemplate"))
+                        object.pathTemplate = message.pathTemplate;
+                    return object;
+                };
+    
+                /**
+                 * Converts this RoutingParameter to JSON.
+                 * @function toJSON
+                 * @memberof google.api.RoutingParameter
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                RoutingParameter.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for RoutingParameter
+                 * @function getTypeUrl
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                RoutingParameter.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.RoutingParameter";
+                };
+    
+                return RoutingParameter;
             })();
     
             return api;
@@ -35609,6 +37097,7 @@
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] MethodOptions uninterpretedOption
                  * @property {google.api.IHttpRule|null} [".google.api.http"] MethodOptions .google.api.http
                  * @property {Array.<string>|null} [".google.api.methodSignature"] MethodOptions .google.api.methodSignature
+                 * @property {google.api.IRoutingRule|null} [".google.api.routing"] MethodOptions .google.api.routing
                  * @property {google.longrunning.IOperationInfo|null} [".google.longrunning.operationInfo"] MethodOptions .google.longrunning.operationInfo
                  */
     
@@ -35678,6 +37167,14 @@
                 MethodOptions.prototype[".google.api.methodSignature"] = $util.emptyArray;
     
                 /**
+                 * MethodOptions .google.api.routing.
+                 * @member {google.api.IRoutingRule|null|undefined} .google.api.routing
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype[".google.api.routing"] = null;
+    
+                /**
                  * MethodOptions .google.longrunning.operationInfo.
                  * @member {google.longrunning.IOperationInfo|null|undefined} .google.longrunning.operationInfo
                  * @memberof google.protobuf.MethodOptions
@@ -35725,6 +37222,8 @@
                             writer.uint32(/* id 1051, wireType 2 =*/8410).string(message[".google.api.methodSignature"][i]);
                     if (message[".google.api.http"] != null && Object.hasOwnProperty.call(message, ".google.api.http"))
                         $root.google.api.HttpRule.encode(message[".google.api.http"], writer.uint32(/* id 72295728, wireType 2 =*/578365826).fork()).ldelim();
+                    if (message[".google.api.routing"] != null && Object.hasOwnProperty.call(message, ".google.api.routing"))
+                        $root.google.api.RoutingRule.encode(message[".google.api.routing"], writer.uint32(/* id 72295729, wireType 2 =*/578365834).fork()).ldelim();
                     return writer;
                 };
     
@@ -35787,6 +37286,10 @@
                                 if (!(message[".google.api.methodSignature"] && message[".google.api.methodSignature"].length))
                                     message[".google.api.methodSignature"] = [];
                                 message[".google.api.methodSignature"].push(reader.string());
+                                break;
+                            }
+                        case 72295729: {
+                                message[".google.api.routing"] = $root.google.api.RoutingRule.decode(reader, reader.uint32());
                                 break;
                             }
                         case 1049: {
@@ -35866,6 +37369,11 @@
                             if (!$util.isString(message[".google.api.methodSignature"][i]))
                                 return ".google.api.methodSignature: string[] expected";
                     }
+                    if (message[".google.api.routing"] != null && message.hasOwnProperty(".google.api.routing")) {
+                        var error = $root.google.api.RoutingRule.verify(message[".google.api.routing"]);
+                        if (error)
+                            return ".google.api.routing." + error;
+                    }
                     if (message[".google.longrunning.operationInfo"] != null && message.hasOwnProperty(".google.longrunning.operationInfo")) {
                         var error = $root.google.longrunning.OperationInfo.verify(message[".google.longrunning.operationInfo"]);
                         if (error)
@@ -35935,6 +37443,11 @@
                         for (var i = 0; i < object[".google.api.methodSignature"].length; ++i)
                             message[".google.api.methodSignature"][i] = String(object[".google.api.methodSignature"][i]);
                     }
+                    if (object[".google.api.routing"] != null) {
+                        if (typeof object[".google.api.routing"] !== "object")
+                            throw TypeError(".google.protobuf.MethodOptions..google.api.routing: object expected");
+                        message[".google.api.routing"] = $root.google.api.RoutingRule.fromObject(object[".google.api.routing"]);
+                    }
                     if (object[".google.longrunning.operationInfo"] != null) {
                         if (typeof object[".google.longrunning.operationInfo"] !== "object")
                             throw TypeError(".google.protobuf.MethodOptions..google.longrunning.operationInfo: object expected");
@@ -35966,6 +37479,7 @@
                         object.features = null;
                         object[".google.longrunning.operationInfo"] = null;
                         object[".google.api.http"] = null;
+                        object[".google.api.routing"] = null;
                     }
                     if (message.deprecated != null && message.hasOwnProperty("deprecated"))
                         object.deprecated = message.deprecated;
@@ -35987,6 +37501,8 @@
                     }
                     if (message[".google.api.http"] != null && message.hasOwnProperty(".google.api.http"))
                         object[".google.api.http"] = $root.google.api.HttpRule.toObject(message[".google.api.http"], options);
+                    if (message[".google.api.routing"] != null && message.hasOwnProperty(".google.api.routing"))
+                        object[".google.api.routing"] = $root.google.api.RoutingRule.toObject(message[".google.api.routing"], options);
                     return object;
                 };
     

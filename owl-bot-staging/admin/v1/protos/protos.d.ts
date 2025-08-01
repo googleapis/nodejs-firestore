@@ -2540,6 +2540,20 @@ export namespace google {
                      * @returns Promise
                      */
                     public deleteBackupSchedule(request: google.firestore.admin.v1.IDeleteBackupScheduleRequest): Promise<google.protobuf.Empty>;
+
+                    /**
+                     * Calls CloneDatabase.
+                     * @param request CloneDatabaseRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public cloneDatabase(request: google.firestore.admin.v1.ICloneDatabaseRequest, callback: google.firestore.admin.v1.FirestoreAdmin.CloneDatabaseCallback): void;
+
+                    /**
+                     * Calls CloneDatabase.
+                     * @param request CloneDatabaseRequest message or plain object
+                     * @returns Promise
+                     */
+                    public cloneDatabase(request: google.firestore.admin.v1.ICloneDatabaseRequest): Promise<google.longrunning.Operation>;
                 }
 
                 namespace FirestoreAdmin {
@@ -2760,6 +2774,13 @@ export namespace google {
                      * @param [response] Empty
                      */
                     type DeleteBackupScheduleCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin|cloneDatabase}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type CloneDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
                 }
 
                 /** Properties of a ListDatabasesRequest. */
@@ -6925,6 +6946,127 @@ export namespace google {
                     public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
+                /** Properties of a CloneDatabaseRequest. */
+                interface ICloneDatabaseRequest {
+
+                    /** CloneDatabaseRequest parent */
+                    parent?: (string|null);
+
+                    /** CloneDatabaseRequest databaseId */
+                    databaseId?: (string|null);
+
+                    /** CloneDatabaseRequest pitrSnapshot */
+                    pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseRequest encryptionConfig */
+                    encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** CloneDatabaseRequest tags */
+                    tags?: ({ [k: string]: string }|null);
+                }
+
+                /** Represents a CloneDatabaseRequest. */
+                class CloneDatabaseRequest implements ICloneDatabaseRequest {
+
+                    /**
+                     * Constructs a new CloneDatabaseRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ICloneDatabaseRequest);
+
+                    /** CloneDatabaseRequest parent. */
+                    public parent: string;
+
+                    /** CloneDatabaseRequest databaseId. */
+                    public databaseId: string;
+
+                    /** CloneDatabaseRequest pitrSnapshot. */
+                    public pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseRequest encryptionConfig. */
+                    public encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** CloneDatabaseRequest tags. */
+                    public tags: { [k: string]: string };
+
+                    /**
+                     * Creates a new CloneDatabaseRequest instance using the specified properties.
+                     * @param [properties] Properties to set
+                     * @returns CloneDatabaseRequest instance
+                     */
+                    public static create(properties?: google.firestore.admin.v1.ICloneDatabaseRequest): google.firestore.admin.v1.CloneDatabaseRequest;
+
+                    /**
+                     * Encodes the specified CloneDatabaseRequest message. Does not implicitly {@link google.firestore.admin.v1.CloneDatabaseRequest.verify|verify} messages.
+                     * @param message CloneDatabaseRequest message or plain object to encode
+                     * @param [writer] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encode(message: google.firestore.admin.v1.ICloneDatabaseRequest, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Encodes the specified CloneDatabaseRequest message, length delimited. Does not implicitly {@link google.firestore.admin.v1.CloneDatabaseRequest.verify|verify} messages.
+                     * @param message CloneDatabaseRequest message or plain object to encode
+                     * @param [writer] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encodeDelimited(message: google.firestore.admin.v1.ICloneDatabaseRequest, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Decodes a CloneDatabaseRequest message from the specified reader or buffer.
+                     * @param reader Reader or buffer to decode from
+                     * @param [length] Message length if known beforehand
+                     * @returns CloneDatabaseRequest
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): google.firestore.admin.v1.CloneDatabaseRequest;
+
+                    /**
+                     * Decodes a CloneDatabaseRequest message from the specified reader or buffer, length delimited.
+                     * @param reader Reader or buffer to decode from
+                     * @returns CloneDatabaseRequest
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): google.firestore.admin.v1.CloneDatabaseRequest;
+
+                    /**
+                     * Verifies a CloneDatabaseRequest message.
+                     * @param message Plain object to verify
+                     * @returns `null` if valid, otherwise the reason why it is not
+                     */
+                    public static verify(message: { [k: string]: any }): (string|null);
+
+                    /**
+                     * Creates a CloneDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CloneDatabaseRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.CloneDatabaseRequest;
+
+                    /**
+                     * Creates a plain object from a CloneDatabaseRequest message. Also converts values to other types if specified.
+                     * @param message CloneDatabaseRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.CloneDatabaseRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CloneDatabaseRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CloneDatabaseRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
                 /** Properties of an IndexOperationMetadata. */
                 interface IIndexOperationMetadata {
 
@@ -8061,6 +8203,133 @@ export namespace google {
                     public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
+                /** Properties of a CloneDatabaseMetadata. */
+                interface ICloneDatabaseMetadata {
+
+                    /** CloneDatabaseMetadata startTime */
+                    startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata endTime */
+                    endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata operationState */
+                    operationState?: (google.firestore.admin.v1.OperationState|keyof typeof google.firestore.admin.v1.OperationState|null);
+
+                    /** CloneDatabaseMetadata database */
+                    database?: (string|null);
+
+                    /** CloneDatabaseMetadata pitrSnapshot */
+                    pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseMetadata progressPercentage */
+                    progressPercentage?: (google.firestore.admin.v1.IProgress|null);
+                }
+
+                /** Represents a CloneDatabaseMetadata. */
+                class CloneDatabaseMetadata implements ICloneDatabaseMetadata {
+
+                    /**
+                     * Constructs a new CloneDatabaseMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ICloneDatabaseMetadata);
+
+                    /** CloneDatabaseMetadata startTime. */
+                    public startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata endTime. */
+                    public endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata operationState. */
+                    public operationState: (google.firestore.admin.v1.OperationState|keyof typeof google.firestore.admin.v1.OperationState);
+
+                    /** CloneDatabaseMetadata database. */
+                    public database: string;
+
+                    /** CloneDatabaseMetadata pitrSnapshot. */
+                    public pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseMetadata progressPercentage. */
+                    public progressPercentage?: (google.firestore.admin.v1.IProgress|null);
+
+                    /**
+                     * Creates a new CloneDatabaseMetadata instance using the specified properties.
+                     * @param [properties] Properties to set
+                     * @returns CloneDatabaseMetadata instance
+                     */
+                    public static create(properties?: google.firestore.admin.v1.ICloneDatabaseMetadata): google.firestore.admin.v1.CloneDatabaseMetadata;
+
+                    /**
+                     * Encodes the specified CloneDatabaseMetadata message. Does not implicitly {@link google.firestore.admin.v1.CloneDatabaseMetadata.verify|verify} messages.
+                     * @param message CloneDatabaseMetadata message or plain object to encode
+                     * @param [writer] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encode(message: google.firestore.admin.v1.ICloneDatabaseMetadata, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Encodes the specified CloneDatabaseMetadata message, length delimited. Does not implicitly {@link google.firestore.admin.v1.CloneDatabaseMetadata.verify|verify} messages.
+                     * @param message CloneDatabaseMetadata message or plain object to encode
+                     * @param [writer] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encodeDelimited(message: google.firestore.admin.v1.ICloneDatabaseMetadata, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Decodes a CloneDatabaseMetadata message from the specified reader or buffer.
+                     * @param reader Reader or buffer to decode from
+                     * @param [length] Message length if known beforehand
+                     * @returns CloneDatabaseMetadata
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): google.firestore.admin.v1.CloneDatabaseMetadata;
+
+                    /**
+                     * Decodes a CloneDatabaseMetadata message from the specified reader or buffer, length delimited.
+                     * @param reader Reader or buffer to decode from
+                     * @returns CloneDatabaseMetadata
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): google.firestore.admin.v1.CloneDatabaseMetadata;
+
+                    /**
+                     * Verifies a CloneDatabaseMetadata message.
+                     * @param message Plain object to verify
+                     * @returns `null` if valid, otherwise the reason why it is not
+                     */
+                    public static verify(message: { [k: string]: any }): (string|null);
+
+                    /**
+                     * Creates a CloneDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CloneDatabaseMetadata
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.CloneDatabaseMetadata;
+
+                    /**
+                     * Creates a plain object from a CloneDatabaseMetadata message. Also converts values to other types if specified.
+                     * @param message CloneDatabaseMetadata
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.CloneDatabaseMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CloneDatabaseMetadata to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CloneDatabaseMetadata
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
                 /** Properties of a Progress. */
                 interface IProgress {
 
@@ -8174,6 +8443,115 @@ export namespace google {
                     SUCCESSFUL = 5,
                     FAILED = 6,
                     CANCELLED = 7
+                }
+
+                /** Properties of a PitrSnapshot. */
+                interface IPitrSnapshot {
+
+                    /** PitrSnapshot database */
+                    database?: (string|null);
+
+                    /** PitrSnapshot databaseUid */
+                    databaseUid?: (Uint8Array|Buffer|string|null);
+
+                    /** PitrSnapshot snapshotTime */
+                    snapshotTime?: (google.protobuf.ITimestamp|null);
+                }
+
+                /** Represents a PitrSnapshot. */
+                class PitrSnapshot implements IPitrSnapshot {
+
+                    /**
+                     * Constructs a new PitrSnapshot.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IPitrSnapshot);
+
+                    /** PitrSnapshot database. */
+                    public database: string;
+
+                    /** PitrSnapshot databaseUid. */
+                    public databaseUid: (Uint8Array|Buffer|string);
+
+                    /** PitrSnapshot snapshotTime. */
+                    public snapshotTime?: (google.protobuf.ITimestamp|null);
+
+                    /**
+                     * Creates a new PitrSnapshot instance using the specified properties.
+                     * @param [properties] Properties to set
+                     * @returns PitrSnapshot instance
+                     */
+                    public static create(properties?: google.firestore.admin.v1.IPitrSnapshot): google.firestore.admin.v1.PitrSnapshot;
+
+                    /**
+                     * Encodes the specified PitrSnapshot message. Does not implicitly {@link google.firestore.admin.v1.PitrSnapshot.verify|verify} messages.
+                     * @param message PitrSnapshot message or plain object to encode
+                     * @param [writer] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encode(message: google.firestore.admin.v1.IPitrSnapshot, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Encodes the specified PitrSnapshot message, length delimited. Does not implicitly {@link google.firestore.admin.v1.PitrSnapshot.verify|verify} messages.
+                     * @param message PitrSnapshot message or plain object to encode
+                     * @param [writer] Writer to encode to
+                     * @returns Writer
+                     */
+                    public static encodeDelimited(message: google.firestore.admin.v1.IPitrSnapshot, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                    /**
+                     * Decodes a PitrSnapshot message from the specified reader or buffer.
+                     * @param reader Reader or buffer to decode from
+                     * @param [length] Message length if known beforehand
+                     * @returns PitrSnapshot
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): google.firestore.admin.v1.PitrSnapshot;
+
+                    /**
+                     * Decodes a PitrSnapshot message from the specified reader or buffer, length delimited.
+                     * @param reader Reader or buffer to decode from
+                     * @returns PitrSnapshot
+                     * @throws {Error} If the payload is not a reader or valid buffer
+                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                     */
+                    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): google.firestore.admin.v1.PitrSnapshot;
+
+                    /**
+                     * Verifies a PitrSnapshot message.
+                     * @param message Plain object to verify
+                     * @returns `null` if valid, otherwise the reason why it is not
+                     */
+                    public static verify(message: { [k: string]: any }): (string|null);
+
+                    /**
+                     * Creates a PitrSnapshot message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns PitrSnapshot
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.PitrSnapshot;
+
+                    /**
+                     * Creates a plain object from a PitrSnapshot message. Also converts values to other types if specified.
+                     * @param message PitrSnapshot
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.PitrSnapshot, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this PitrSnapshot to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for PitrSnapshot
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
                 /** Properties of a BackupSchedule. */
@@ -10944,6 +11322,206 @@ export namespace google {
             BETA = 3,
             GA = 4,
             DEPRECATED = 5
+        }
+
+        /** Properties of a RoutingRule. */
+        interface IRoutingRule {
+
+            /** RoutingRule routingParameters */
+            routingParameters?: (google.api.IRoutingParameter[]|null);
+        }
+
+        /** Represents a RoutingRule. */
+        class RoutingRule implements IRoutingRule {
+
+            /**
+             * Constructs a new RoutingRule.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IRoutingRule);
+
+            /** RoutingRule routingParameters. */
+            public routingParameters: google.api.IRoutingParameter[];
+
+            /**
+             * Creates a new RoutingRule instance using the specified properties.
+             * @param [properties] Properties to set
+             * @returns RoutingRule instance
+             */
+            public static create(properties?: google.api.IRoutingRule): google.api.RoutingRule;
+
+            /**
+             * Encodes the specified RoutingRule message. Does not implicitly {@link google.api.RoutingRule.verify|verify} messages.
+             * @param message RoutingRule message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encode(message: google.api.IRoutingRule, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Encodes the specified RoutingRule message, length delimited. Does not implicitly {@link google.api.RoutingRule.verify|verify} messages.
+             * @param message RoutingRule message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encodeDelimited(message: google.api.IRoutingRule, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Decodes a RoutingRule message from the specified reader or buffer.
+             * @param reader Reader or buffer to decode from
+             * @param [length] Message length if known beforehand
+             * @returns RoutingRule
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): google.api.RoutingRule;
+
+            /**
+             * Decodes a RoutingRule message from the specified reader or buffer, length delimited.
+             * @param reader Reader or buffer to decode from
+             * @returns RoutingRule
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): google.api.RoutingRule;
+
+            /**
+             * Verifies a RoutingRule message.
+             * @param message Plain object to verify
+             * @returns `null` if valid, otherwise the reason why it is not
+             */
+            public static verify(message: { [k: string]: any }): (string|null);
+
+            /**
+             * Creates a RoutingRule message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns RoutingRule
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.RoutingRule;
+
+            /**
+             * Creates a plain object from a RoutingRule message. Also converts values to other types if specified.
+             * @param message RoutingRule
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.RoutingRule, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this RoutingRule to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for RoutingRule
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a RoutingParameter. */
+        interface IRoutingParameter {
+
+            /** RoutingParameter field */
+            field?: (string|null);
+
+            /** RoutingParameter pathTemplate */
+            pathTemplate?: (string|null);
+        }
+
+        /** Represents a RoutingParameter. */
+        class RoutingParameter implements IRoutingParameter {
+
+            /**
+             * Constructs a new RoutingParameter.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IRoutingParameter);
+
+            /** RoutingParameter field. */
+            public field: string;
+
+            /** RoutingParameter pathTemplate. */
+            public pathTemplate: string;
+
+            /**
+             * Creates a new RoutingParameter instance using the specified properties.
+             * @param [properties] Properties to set
+             * @returns RoutingParameter instance
+             */
+            public static create(properties?: google.api.IRoutingParameter): google.api.RoutingParameter;
+
+            /**
+             * Encodes the specified RoutingParameter message. Does not implicitly {@link google.api.RoutingParameter.verify|verify} messages.
+             * @param message RoutingParameter message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encode(message: google.api.IRoutingParameter, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Encodes the specified RoutingParameter message, length delimited. Does not implicitly {@link google.api.RoutingParameter.verify|verify} messages.
+             * @param message RoutingParameter message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encodeDelimited(message: google.api.IRoutingParameter, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Decodes a RoutingParameter message from the specified reader or buffer.
+             * @param reader Reader or buffer to decode from
+             * @param [length] Message length if known beforehand
+             * @returns RoutingParameter
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): google.api.RoutingParameter;
+
+            /**
+             * Decodes a RoutingParameter message from the specified reader or buffer, length delimited.
+             * @param reader Reader or buffer to decode from
+             * @returns RoutingParameter
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): google.api.RoutingParameter;
+
+            /**
+             * Verifies a RoutingParameter message.
+             * @param message Plain object to verify
+             * @returns `null` if valid, otherwise the reason why it is not
+             */
+            public static verify(message: { [k: string]: any }): (string|null);
+
+            /**
+             * Creates a RoutingParameter message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns RoutingParameter
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.RoutingParameter;
+
+            /**
+             * Creates a plain object from a RoutingParameter message. Also converts values to other types if specified.
+             * @param message RoutingParameter
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.RoutingParameter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this RoutingParameter to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for RoutingParameter
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
     }
 
@@ -13865,6 +14443,9 @@ export namespace google {
 
             /** MethodOptions .google.api.methodSignature */
             ".google.api.methodSignature"?: (string[]|null);
+
+            /** MethodOptions .google.api.routing */
+            ".google.api.routing"?: (google.api.IRoutingRule|null);
 
             /** MethodOptions .google.longrunning.operationInfo */
             ".google.longrunning.operationInfo"?: (google.longrunning.IOperationInfo|null);
