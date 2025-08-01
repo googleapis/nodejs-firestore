@@ -58,7 +58,7 @@ async function apiReport(opts) {
   const apiExtractorConfigPath = join(cwd, 'api-extractor.json');
   await fs.writeFile(
     apiExtractorConfigPath,
-    JSON.stringify(apiExtractorConfig, null, 2)
+    JSON.stringify(apiExtractorConfig, null, 2),
   );
 
   // Run API Extractor
@@ -66,7 +66,7 @@ async function apiReport(opts) {
     process.cwd(),
     'node_modules',
     '.bin',
-    'api-extractor'
+    'api-extractor',
   );
   await withLogs(execaNode)(apiExtractorCmd, ['run', '--local']);
 
@@ -89,7 +89,7 @@ function withLogs(execaFn) {
 
 apiReport({
   cloudRadApiExtractorConfigPath: require.resolve(
-    '@google-cloud/cloud-rad/api-extractor.json'
+    '@google-cloud/cloud-rad/api-extractor.json',
   ),
   cwd: process.cwd(),
 })

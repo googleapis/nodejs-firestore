@@ -48,7 +48,7 @@ describe('ignores undefined values', () => {
           request,
           set({
             document: document('documentId', 'foo', 'foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -60,7 +60,7 @@ describe('ignores undefined values', () => {
           foo: 'foo',
           bar: undefined,
         });
-      }
+      },
     );
   });
 
@@ -72,7 +72,7 @@ describe('ignores undefined values', () => {
           set({
             document: document('documentId', 'foo', 'foo'),
             mask: updateMask('foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -85,9 +85,9 @@ describe('ignores undefined values', () => {
             foo: 'foo',
             bar: undefined,
           },
-          {merge: true}
+          {merge: true},
         );
-      }
+      },
     );
   });
 
@@ -98,7 +98,7 @@ describe('ignores undefined values', () => {
           request,
           create({
             document: document('documentId', 'foo', 'foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -110,7 +110,7 @@ describe('ignores undefined values', () => {
           foo: 'foo',
           bar: undefined,
         });
-      }
+      },
     );
   });
 
@@ -122,7 +122,7 @@ describe('ignores undefined values', () => {
           update({
             document: document('documentId', 'foo', FOO_MAP),
             mask: updateMask('foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -137,7 +137,7 @@ describe('ignores undefined values', () => {
         await firestore
           .doc('collectionId/documentId')
           .update({foo: {bar: 'bar', baz: undefined}});
-      }
+      },
     );
   });
 
@@ -149,7 +149,7 @@ describe('ignores undefined values', () => {
           update({
             document: document('documentId', 'foo', 'bar'),
             mask: updateMask('foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -161,7 +161,7 @@ describe('ignores undefined values', () => {
           foo: 'bar',
           ignored: undefined,
         });
-      }
+      },
     );
   });
 
@@ -179,7 +179,7 @@ describe('ignores undefined values', () => {
           .collection('collectionId')
           .where('foo', '==', {bar: 'bar', baz: undefined})
           .get();
-      }
+      },
     );
   });
 
@@ -189,7 +189,7 @@ describe('ignores undefined values', () => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING'),
-          startAt(true, FOO_MAP)
+          startAt(true, FOO_MAP),
         );
         return emptyQueryStream();
       },
@@ -202,7 +202,7 @@ describe('ignores undefined values', () => {
           .orderBy('foo')
           .startAt({bar: 'bar', baz: undefined})
           .get();
-      }
+      },
     );
   });
 });
@@ -217,9 +217,9 @@ describe('rejects undefined values', () => {
               .doc('collectionId/documentId')
               .set(undefined as InvalidApiUsage);
           }).to.throw(
-            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
           );
-        }
+        },
       );
     });
 
@@ -231,9 +231,9 @@ describe('rejects undefined values', () => {
               .doc('collectionId/documentId')
               .create(undefined as InvalidApiUsage);
           }).to.throw(
-            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
           );
-        }
+        },
       );
     });
 
@@ -243,7 +243,7 @@ describe('rejects undefined values', () => {
           expect(() => {
             firestore.doc('collectionId/documentId').update('foo', undefined);
           }).to.throw('"undefined" values are only ignored inside of objects.');
-        }
+        },
       );
     });
 
@@ -256,7 +256,7 @@ describe('rejects undefined values', () => {
               .collection('collectionId')
               .where('foo', '==', undefined);
           }).to.throw('"undefined" values are only ignored inside of objects.');
-        }
+        },
       );
     });
 
@@ -270,7 +270,7 @@ describe('rejects undefined values', () => {
               .orderBy('foo')
               .startAt(undefined);
           }).to.throw('"undefined" values are only ignored inside of objects.');
-        }
+        },
       );
     });
   });
@@ -284,7 +284,7 @@ describe('rejects undefined values', () => {
             bar: undefined,
           });
         }).to.throw(
-          'Cannot use "undefined" as a Firestore value (found in field "bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.'
+          'Cannot use "undefined" as a Firestore value (found in field "bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
         );
       });
     });
@@ -297,7 +297,7 @@ describe('rejects undefined values', () => {
             bar: undefined,
           });
         }).to.throw(
-          'Cannot use "undefined" as a Firestore value (found in field "bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.'
+          'Cannot use "undefined" as a Firestore value (found in field "bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
         );
       });
     });
@@ -310,7 +310,7 @@ describe('rejects undefined values', () => {
             bar: undefined,
           });
         }).to.throw(
-          'Cannot use "undefined" as a Firestore value (found in field "foo.bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.'
+          'Cannot use "undefined" as a Firestore value (found in field "foo.bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
         );
       });
     });
@@ -322,7 +322,7 @@ describe('rejects undefined values', () => {
             .collection('collectionId')
             .where('foo', '==', {bar: 'bar', baz: undefined});
         }).to.throw(
-          'Cannot use "undefined" as a Firestore value (found in field "baz"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.'
+          'Cannot use "undefined" as a Firestore value (found in field "baz"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
         );
       });
     });
@@ -335,7 +335,7 @@ describe('rejects undefined values', () => {
             .orderBy('foo')
             .startAt({bar: 'bar', baz: undefined});
         }).to.throw(
-          'Cannot use "undefined" as a Firestore value (found in field "baz"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.'
+          'Cannot use "undefined" as a Firestore value (found in field "baz"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
         );
       });
     });

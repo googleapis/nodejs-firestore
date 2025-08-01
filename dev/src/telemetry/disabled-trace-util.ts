@@ -31,7 +31,7 @@ export class DisabledTraceUtil implements TraceUtil {
     name: string,
     fn: F,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    attributes?: Attributes
+    attributes?: Attributes,
   ): ReturnType<F> {
     const emptySpan = new Span();
     return fn(emptySpan) as ReturnType<F>;

@@ -33,7 +33,7 @@ import {comparisonOperators, directionOperators} from './constants';
  */
 export function validateQueryOrder(
   arg: string,
-  op: unknown
+  op: unknown,
 ): firestore.OrderByDirection | undefined {
   // For backwards compatibility, we support both lower and uppercase values.
   op = typeof op === 'string' ? op.toLowerCase() : op;
@@ -56,7 +56,7 @@ export function validateQueryOrder(
 export function validateQueryOperator(
   arg: string | number,
   op: unknown,
-  fieldValue: unknown
+  fieldValue: unknown,
 ): firestore.WhereFilterOp {
   // For backwards compatibility, we support both `=` and `==` for "equals".
   if (op === '=') {
@@ -72,13 +72,13 @@ export function validateQueryOperator(
     op !== '!='
   ) {
     throw new Error(
-      "Invalid query. You can only perform '==' and '!=' comparisons on NaN."
+      "Invalid query. You can only perform '==' and '!=' comparisons on NaN.",
     );
   }
 
   if (fieldValue === null && op !== '==' && op !== '!=') {
     throw new Error(
-      "Invalid query. You can only perform '==' and '!=' comparisons on Null."
+      "Invalid query. You can only perform '==' and '!=' comparisons on Null.",
     );
   }
 
@@ -99,7 +99,7 @@ export function validateDocumentReference<
   DbModelType extends firestore.DocumentData,
 >(
   arg: string | number,
-  value: firestore.DocumentReference<AppModelType, DbModelType>
+  value: firestore.DocumentReference<AppModelType, DbModelType>,
 ): DocumentReference<AppModelType, DbModelType> {
   if (!(value instanceof DocumentReference)) {
     throw new Error(invalidArgumentMessage(arg, 'DocumentReference'));
@@ -119,7 +119,7 @@ export function validateDocumentReference<
 export function validateQueryValue(
   arg: string | number,
   value: unknown,
-  allowUndefined: boolean
+  allowUndefined: boolean,
 ): void {
   validateUserInput(arg, value, 'query constraint', {
     allowDeletes: 'none',

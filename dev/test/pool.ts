@@ -37,7 +37,7 @@ function deferredPromises(count: number): Array<Deferred<void>> {
 function assertOpCount<T>(
   pool: ClientPool<T>,
   grpcClientOpCount: number,
-  restClientOpCount: number
+  restClientOpCount: number,
 ): void {
   let actualGrpcClientOpCount = 0;
   let actualRestClientOpCount = 0;
@@ -87,7 +87,7 @@ describe('Client pool', () => {
     const completionPromise = clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[0].promise
+      () => operationPromises[0].promise,
     );
     expect(clientPool.size).to.equal(1);
     clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[1].promise);
@@ -117,7 +117,7 @@ describe('Client pool', () => {
     let completionPromise = clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[0].promise
+      () => operationPromises[0].promise,
     );
     expect(clientPool.size).to.equal(1);
     operationPromises[0].resolve();
@@ -126,7 +126,7 @@ describe('Client pool', () => {
     completionPromise = clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[1].promise
+      () => operationPromises[1].promise,
     );
     expect(clientPool.size).to.equal(1);
     operationPromises[1].resolve();
@@ -145,12 +145,12 @@ describe('Client pool', () => {
     void clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[0].promise
+      () => operationPromises[0].promise,
     );
     void clientPool.run(
       REQUEST_TAG,
       USE_GRPC,
-      () => operationPromises[1].promise
+      () => operationPromises[1].promise,
     );
     expect(clientPool.size).to.equal(2);
     assertOpCount(clientPool, 1, 1);
@@ -169,12 +169,12 @@ describe('Client pool', () => {
     void clientPool.run(
       REQUEST_TAG,
       USE_GRPC,
-      () => operationPromises[0].promise
+      () => operationPromises[0].promise,
     );
     void clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[1].promise
+      () => operationPromises[1].promise,
     );
     expect(clientPool.size).to.equal(1);
     assertOpCount(clientPool, 2, 0);
@@ -193,17 +193,17 @@ describe('Client pool', () => {
     void clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[0].promise
+      () => operationPromises[0].promise,
     );
     void clientPool.run(
       REQUEST_TAG,
       USE_GRPC,
-      () => operationPromises[1].promise
+      () => operationPromises[1].promise,
     );
     void clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[2].promise
+      () => operationPromises[2].promise,
     );
 
     expect(clientPool.size).to.equal(2);
@@ -224,12 +224,12 @@ describe('Client pool', () => {
     const restOperation = clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[0].promise
+      () => operationPromises[0].promise,
     );
     void clientPool.run(
       REQUEST_TAG,
       USE_GRPC,
-      () => operationPromises[1].promise
+      () => operationPromises[1].promise,
     );
 
     // resolve rest operation
@@ -241,7 +241,7 @@ describe('Client pool', () => {
     void clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[2].promise
+      () => operationPromises[2].promise,
     );
 
     // Assert client pool status
@@ -319,8 +319,8 @@ describe('Client pool', () => {
 
     const grpcOperation = clientPool.run(REQUEST_TAG, USE_GRPC, () =>
       Promise.reject(
-        new GoogleError('13 INTERNAL: Received RST_STREAM with code 2')
-      )
+        new GoogleError('13 INTERNAL: Received RST_STREAM with code 2'),
+      ),
     );
 
     await grpcOperation.catch(e => e);
@@ -329,7 +329,7 @@ describe('Client pool', () => {
     void clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[0].promise
+      () => operationPromises[0].promise,
     );
 
     // Assert client pool status
@@ -393,19 +393,19 @@ describe('Client pool', () => {
     const completionPromises: Array<Promise<void>> = [];
 
     completionPromises.push(
-      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[0].promise)
+      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[0].promise),
     );
     expect(clientPool.size).to.equal(1);
     completionPromises.push(
-      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[1].promise)
+      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[1].promise),
     );
     expect(clientPool.size).to.equal(1);
     completionPromises.push(
-      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[2].promise)
+      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[2].promise),
     );
     expect(clientPool.size).to.equal(2);
     completionPromises.push(
-      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[3].promise)
+      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[3].promise),
     );
     expect(clientPool.size).to.equal(2);
 
@@ -427,26 +427,26 @@ describe('Client pool', () => {
     const completionPromises: Array<Promise<void>> = [];
 
     completionPromises.push(
-      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[0].promise)
+      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[0].promise),
     );
     expect(clientPool.size).to.equal(1);
     completionPromises.push(
-      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[1].promise)
+      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[1].promise),
     );
     expect(clientPool.size).to.equal(1);
     completionPromises.push(
-      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[2].promise)
+      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[2].promise),
     );
     expect(clientPool.size).to.equal(2);
     completionPromises.push(
-      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[3].promise)
+      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[3].promise),
     );
     expect(clientPool.size).to.equal(2);
 
     operationPromises.forEach(deferred => deferred.reject(new Error()));
 
     return Promise.all(completionPromises.map(p => p.catch(() => {}))).then(
-      () => expect(clientPool.size).to.equal(0)
+      () => expect(clientPool.size).to.equal(0),
     );
   });
 
@@ -457,7 +457,7 @@ describe('Client pool', () => {
       1,
       0,
       () => ({}),
-      () => Promise.resolve(garbageCollect.resolve())
+      () => Promise.resolve(garbageCollect.resolve()),
     );
 
     const operationPromises = deferredPromises(2);
@@ -477,7 +477,7 @@ describe('Client pool', () => {
     });
 
     const op = clientPool.run(REQUEST_TAG, USE_REST, () =>
-      Promise.resolve('Success')
+      Promise.resolve('Success'),
     );
     return expect(op).to.become('Success');
   });
@@ -488,7 +488,7 @@ describe('Client pool', () => {
     });
 
     const op = clientPool.run(REQUEST_TAG, USE_REST, () =>
-      Promise.reject('Generated error')
+      Promise.reject('Generated error'),
     );
     return expect(op).to.eventually.be.rejectedWith('Generated error');
   });
@@ -502,8 +502,8 @@ describe('Client pool', () => {
 
     const op = clientPool.run(REQUEST_TAG, USE_REST, () =>
       Promise.reject(
-        new GoogleError('13 INTERNAL: Received RST_STREAM with code 2')
-      )
+        new GoogleError('13 INTERNAL: Received RST_STREAM with code 2'),
+      ),
     );
     await op.catch(() => {});
 
@@ -519,8 +519,8 @@ describe('Client pool', () => {
 
     const op = clientPool.run(REQUEST_TAG, USE_REST, () =>
       Promise.reject(
-        new GoogleError('13 INTERNAL: Received RST_STREAM with code 2')
-      )
+        new GoogleError('13 INTERNAL: Received RST_STREAM with code 2'),
+      ),
     );
     await op.catch(() => {});
 
@@ -544,7 +544,7 @@ describe('Client pool', () => {
       /* maxIdleClients= */ 3,
       () => {
         return {};
-      }
+      },
     );
 
     const operationPromises = deferredPromises(4);
@@ -554,7 +554,7 @@ describe('Client pool', () => {
     const lastOp = clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[3].promise
+      () => operationPromises[3].promise,
     );
     expect(clientPool.size).to.equal(4);
 
@@ -571,7 +571,7 @@ describe('Client pool', () => {
       /* maxIdleClients= git c*/ 1,
       () => {
         return {};
-      }
+      },
     );
 
     const operationPromises = deferredPromises(2);
@@ -579,7 +579,7 @@ describe('Client pool', () => {
     const completionPromise = clientPool.run(
       REQUEST_TAG,
       USE_REST,
-      () => operationPromises[1].promise
+      () => operationPromises[1].promise,
     );
     expect(clientPool.size).to.equal(2);
 
@@ -598,7 +598,7 @@ describe('Client pool', () => {
       .terminate()
       .then(() => {
         return clientPool.run(REQUEST_TAG, USE_REST, () =>
-          Promise.reject('Call to run() should have failed')
+          Promise.reject('Call to run() should have failed'),
         );
       })
       .catch((err: Error) => {

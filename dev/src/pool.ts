@@ -79,7 +79,7 @@ export class ClientPool<T> {
     private readonly maxIdleClients: number,
     private readonly clientFactory: (requiresGrpc: boolean) => T,
     private readonly clientDestructor: (client: T) => Promise<void> = () =>
-      Promise.resolve()
+      Promise.resolve(),
   ) {}
 
   /**
@@ -119,20 +119,20 @@ export class ClientPool<T> {
         'ClientPool.acquire',
         requestTag,
         'Re-using existing client with %s remaining operations',
-        this.concurrentOperationLimit - selectedClientRequestCount
+        this.concurrentOperationLimit - selectedClientRequestCount,
       );
     } else {
       logger(
         'ClientPool.acquire',
         requestTag,
         'Creating a new client (requiresGrpc: %s)',
-        requiresGrpc
+        requiresGrpc,
       );
       selectedClient = this.clientFactory(requiresGrpc);
       selectedClientRequestCount = 0;
       assert(
         !this.activeClients.has(selectedClient),
-        'The provided client factory returned an existing instance'
+        'The provided client factory returned an existing instance',
       );
     }
 
@@ -229,7 +229,7 @@ export class ClientPool<T> {
   get opCount(): number {
     let activeOperationCount = 0;
     this.activeClients.forEach(
-      metadata => (activeOperationCount += metadata.activeRequestCount)
+      metadata => (activeOperationCount += metadata.activeRequestCount),
     );
     return activeOperationCount;
   }
@@ -264,7 +264,7 @@ export class ClientPool<T> {
   run<V>(
     requestTag: string,
     requiresGrpc: boolean,
-    op: (client: T) => Promise<V>
+    op: (client: T) => Promise<V>,
   ): Promise<V> {
     if (this.terminated) {
       return Promise.reject(new Error(CLIENT_TERMINATED_ERROR_MSG));
@@ -297,7 +297,7 @@ export class ClientPool<T> {
         'ClientPool.terminate',
         /* requestTag= */ null,
         'Waiting for %s pending operations to complete before terminating',
-        this.opCount
+        this.opCount,
       );
       await this.terminateDeferred.promise;
     }

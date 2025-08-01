@@ -29,7 +29,7 @@ export class Aggregate {
   constructor(
     readonly alias: string,
     readonly aggregateType: AggregateType,
-    readonly fieldPath?: string | FieldPath
+    readonly fieldPath?: string | FieldPath,
   ) {}
 
   /**
@@ -43,7 +43,7 @@ export class Aggregate {
     } else if (this.aggregateType === 'sum') {
       assert(
         this.fieldPath !== undefined,
-        'Missing field path for sum aggregation.'
+        'Missing field path for sum aggregation.',
       );
       proto.sum = {
         field: {
@@ -53,7 +53,7 @@ export class Aggregate {
     } else if (this.aggregateType === 'avg') {
       assert(
         this.fieldPath !== undefined,
-        'Missing field path for average aggregation.'
+        'Missing field path for average aggregation.',
       );
       proto.avg = {
         field: {
@@ -89,7 +89,7 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
    */
   private constructor(
     public readonly aggregateType: AggregateType,
-    field?: string | FieldPath
+    field?: string | FieldPath,
   ) {
     this._field = field;
   }
@@ -112,7 +112,7 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
         (this._field !== undefined &&
           other._field !== undefined &&
           FieldPath.fromArgument(this._field).isEqual(
-            FieldPath.fromArgument(other._field)
+            FieldPath.fromArgument(other._field),
           )))
     );
   }

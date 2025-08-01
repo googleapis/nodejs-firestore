@@ -35,7 +35,7 @@ export class FieldOrder {
    */
   constructor(
     readonly field: FieldPath,
-    readonly direction: api.StructuredQuery.Direction = 'ASCENDING'
+    readonly direction: api.StructuredQuery.Direction = 'ASCENDING',
   ) {}
 
   /**

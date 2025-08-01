@@ -59,7 +59,7 @@ export class QueryOptions<
     // Whether to require consistent documents when restarting the query. By
     // default, restarting the query uses the readTime offset of the original
     // query to provide consistent results.
-    readonly requireConsistency = true
+    readonly requireConsistency = true,
   ) {}
 
   /**
@@ -72,7 +72,7 @@ export class QueryOptions<
     DbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     collectionId: string,
-    converter = defaultConverter<AppModelType, DbModelType>()
+    converter = defaultConverter<AppModelType, DbModelType>(),
   ): QueryOptions<AppModelType, DbModelType> {
     return new QueryOptions<AppModelType, DbModelType>(
       /*parentPath=*/ ResourcePath.EMPTY,
@@ -80,7 +80,7 @@ export class QueryOptions<
       converter,
       /*allDescendants=*/ true,
       /*fieldFilters=*/ [],
-      /*fieldOrders=*/ []
+      /*fieldOrders=*/ [],
     );
   }
 
@@ -94,7 +94,7 @@ export class QueryOptions<
     DbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
     collectionRef: ResourcePath,
-    converter = defaultConverter<AppModelType, DbModelType>()
+    converter = defaultConverter<AppModelType, DbModelType>(),
   ): QueryOptions<AppModelType, DbModelType> {
     return new QueryOptions<AppModelType, DbModelType>(
       collectionRef.parent()!,
@@ -102,7 +102,7 @@ export class QueryOptions<
       converter,
       /*allDescendants=*/ false,
       /*fieldFilters=*/ [],
-      /*fieldOrders=*/ []
+      /*fieldOrders=*/ [],
     );
   }
 
@@ -116,7 +116,7 @@ export class QueryOptions<
   static forKindlessAllDescendants(
     parent: ResourcePath,
     id: string,
-    requireConsistency = true
+    requireConsistency = true,
   ): QueryOptions<firestore.DocumentData, firestore.DocumentData> {
     let options = new QueryOptions<
       firestore.DocumentData,
@@ -127,7 +127,7 @@ export class QueryOptions<
       defaultConverter(),
       /*allDescendants=*/ true,
       /*fieldFilters=*/ [],
-      /*fieldOrders=*/ []
+      /*fieldOrders=*/ [],
     );
 
     options = options.with({
@@ -145,7 +145,7 @@ export class QueryOptions<
   with(
     settings: Partial<
       Omit<QueryOptions<AppModelType, DbModelType>, 'converter'>
-    >
+    >,
   ): QueryOptions<AppModelType, DbModelType> {
     return new QueryOptions(
       coalesce(settings.parentPath, this.parentPath)!,
@@ -161,7 +161,7 @@ export class QueryOptions<
       coalesce(settings.offset, this.offset),
       coalesce(settings.projection, this.projection),
       coalesce(settings.kindless, this.kindless),
-      coalesce(settings.requireConsistency, this.requireConsistency)
+      coalesce(settings.requireConsistency, this.requireConsistency),
     );
   }
 
@@ -169,7 +169,10 @@ export class QueryOptions<
     NewAppModelType,
     NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
-    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+    converter: firestore.FirestoreDataConverter<
+      NewAppModelType,
+      NewDbModelType
+    >,
   ): QueryOptions<NewAppModelType, NewDbModelType> {
     return new QueryOptions<NewAppModelType, NewDbModelType>(
       this.parentPath,
@@ -183,7 +186,7 @@ export class QueryOptions<
       this.limit,
       this.limitType,
       this.offset,
-      this.projection
+      this.projection,
     );
   }
 

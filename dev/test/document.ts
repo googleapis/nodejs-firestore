@@ -56,7 +56,7 @@ const PROJECT_ID = 'test-project';
 const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
   'Update\\(\\) requires either ' +
     'a single JavaScript object or an alternating list of field/value pairs ' +
-    'that can be followed by an optional precondition.'
+    'that can be followed by an optional precondition.',
 );
 
 // Change the argument to 'console.log' to enable debug output.
@@ -77,14 +77,14 @@ describe('DocumentReference interface', () => {
 
   it('has collection() method', () => {
     expect(() => documentRef.collection(42 as InvalidApiUsage)).to.throw(
-      'Value for argument "collectionPath" is not a valid resource path. Path must be a non-empty string.'
+      'Value for argument "collectionPath" is not a valid resource path. Path must be a non-empty string.',
     );
 
     let collection = documentRef.collection('col');
     expect(collection.id).to.equal('col');
 
     expect(() => documentRef.collection('col/doc')).to.throw(
-      'Value for argument "collectionPath" must point to a collection, but was "col/doc". Your path does not contain an odd number of components.'
+      'Value for argument "collectionPath" must point to a collection, but was "col/doc". Your path does not contain an odd number of components.',
     );
 
     collection = documentRef.collection('col/doc/col');
@@ -128,7 +128,7 @@ describe('serialize document', () => {
             document: document('documentId', 'bytes', {
               bytesValue: Buffer.from('AG=', 'base64'),
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -145,7 +145,7 @@ describe('serialize document', () => {
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: undefined});
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "foo").'
+      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "foo").',
     );
 
     expect(() => {
@@ -153,14 +153,14 @@ describe('serialize document', () => {
         foo: FieldPath.documentId(),
       });
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Cannot use object of type "FieldPath" as a Firestore value (found in field "foo").'
+      'Value for argument "data" is not a valid Firestore document. Cannot use object of type "FieldPath" as a Firestore value (found in field "foo").',
     );
 
     expect(() => {
       class Foo {}
       firestore.doc('collectionId/documentId').set({foo: new Foo()});
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo" (found in field "foo"). Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
+      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo" (found in field "foo"). Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).',
     );
 
     expect(() => {
@@ -169,7 +169,7 @@ describe('serialize document', () => {
         .doc('collectionId/documentId')
         .set(new Foo() as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
+      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).',
     );
 
     expect(() => {
@@ -179,7 +179,7 @@ describe('serialize document', () => {
         .doc('collectionId/documentId')
         .set(new Bar() as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Bar". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
+      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Bar". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).',
     );
   });
 
@@ -197,7 +197,7 @@ describe('serialize document', () => {
           .set(customClass as InvalidApiUsage);
       }).to.throw(
         'Value for argument "data" is not a valid Firestore document. ' +
-          `Detected an object of type "${customClass.constructor.name}" that doesn't match the expected instance.`
+          `Detected an object of type "${customClass.constructor.name}" that doesn't match the expected instance.`,
       );
     }
   });
@@ -211,7 +211,7 @@ describe('serialize document', () => {
             document: document('documentId', 'largeNumber', {
               doubleValue: 18014398509481984,
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -234,7 +234,7 @@ describe('serialize document', () => {
             document: document('documentId', 'negativeZero', {
               doubleValue: -0,
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -260,7 +260,7 @@ describe('serialize document', () => {
                 seconds: -14182920,
               },
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -291,7 +291,7 @@ describe('serialize document', () => {
                 seconds: -14182920,
               },
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -313,7 +313,7 @@ describe('serialize document', () => {
             document: document('documentId', 'bigIntValue', {
               integerValue: '9007199254740992',
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -333,7 +333,7 @@ describe('serialize document', () => {
           request,
           set({
             document: document('documentId', '😀', '😜'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -359,9 +359,9 @@ describe('serialize document', () => {
               'blob2',
               {
                 bytesValue: Buffer.from([0, 1, 2]),
-              }
+              },
             ),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -417,19 +417,19 @@ describe('serialize document', () => {
     expect(() => {
       new GeoPoint(Infinity, 0);
     }).to.throw(
-      'Value for argument "latitude" must be within [-90, 90] inclusive, but was: Infinity'
+      'Value for argument "latitude" must be within [-90, 90] inclusive, but was: Infinity',
     );
 
     expect(() => {
       new GeoPoint(91, 0);
     }).to.throw(
-      'Value for argument "latitude" must be within [-90, 90] inclusive, but was: 91'
+      'Value for argument "latitude" must be within [-90, 90] inclusive, but was: 91',
     );
 
     expect(() => {
       new GeoPoint(90, 181);
     }).to.throw(
-      'Value for argument "longitude" must be within [-180, 180] inclusive, but was: 181'
+      'Value for argument "longitude" must be within [-180, 180] inclusive, but was: 181',
     );
   });
 
@@ -440,7 +440,7 @@ describe('serialize document', () => {
     expect(() => {
       firestore.doc('collectionId/documentId').update(obj);
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid Firestore value. Input object is deeper than 20 levels or contains a cycle.'
+      'Value for argument "dataOrField" is not a valid Firestore value. Input object is deeper than 20 levels or contains a cycle.',
     );
   });
 
@@ -453,7 +453,7 @@ describe('serialize document', () => {
             document: document('documentId', 'ref', {
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/documents/collectionId/documentId`,
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -496,7 +496,7 @@ describe('serialize document', () => {
                 },
               },
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -518,8 +518,8 @@ describe('deserialize document', () => {
           found(
             document('documentId', 'foo', {
               bytesValue: Buffer.from('AG=', 'base64'),
-            })
-          )
+            }),
+          ),
         );
       },
     };
@@ -544,8 +544,8 @@ describe('deserialize document', () => {
                 nanos: 123000000,
                 seconds: -14182920,
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
@@ -556,7 +556,7 @@ describe('deserialize document', () => {
         .get()
         .then(res => {
           expect(res.get('moonLanding').toMillis()).to.equal(
-            new Date('Jul 20 1969 20:18:00.123 UTC').getTime()
+            new Date('Jul 20 1969 20:18:00.123 UTC').getTime(),
           );
         });
     });
@@ -592,9 +592,9 @@ describe('deserialize document', () => {
               'posInfinity',
               {doubleValue: Infinity},
               'negInfinity',
-              {doubleValue: -Infinity}
-            )
-          )
+              {doubleValue: -Infinity},
+            ),
+          ),
         );
       },
     };
@@ -619,8 +619,8 @@ describe('deserialize document', () => {
           found(
             document('documentId', 'bigIntValue', {
               integerValue: '9007199254740992',
-            })
-          )
+            }),
+          ),
         );
       },
     };
@@ -658,8 +658,8 @@ describe('deserialize document', () => {
                   },
                 },
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
@@ -670,7 +670,7 @@ describe('deserialize document', () => {
         .get()
         .then(res => {
           expect(res.get('embedding')).to.deep.equal(
-            FieldValue.vector([-41.0, 0, 42])
+            FieldValue.vector([-41.0, 0, 42]),
           );
         });
     });
@@ -683,8 +683,8 @@ describe('deserialize document', () => {
           found(
             document('documentId', 'moonLanding', {
               valueType: 'foo',
-            } as InvalidApiUsage)
-          )
+            } as InvalidApiUsage),
+          ),
         );
       },
     };
@@ -697,7 +697,7 @@ describe('deserialize document', () => {
           expect(() => {
             doc.data();
           }).to.throw(
-            'Cannot decode type from Firestore Value: {"valueType":"foo"}'
+            'Cannot decode type from Firestore Value: {"valueType":"foo"}',
           );
         });
     });
@@ -713,8 +713,8 @@ describe('deserialize document', () => {
                 latitude: 'foo' as InvalidApiUsage,
                 longitude: -122.947778,
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
@@ -725,7 +725,7 @@ describe('deserialize document', () => {
         .get()
         .then(doc => {
           expect(() => doc.data()).to.throw(
-            'Value for argument "latitude" is not a valid number.'
+            'Value for argument "latitude" is not a valid number.',
           );
         });
     });
@@ -741,8 +741,8 @@ describe('deserialize document', () => {
                 latitude: 50.1430847,
                 longitude: 'foo' as InvalidApiUsage,
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
@@ -753,7 +753,7 @@ describe('deserialize document', () => {
         .get()
         .then(doc => {
           expect(() => doc.data()).to.throw(
-            'Value for argument "longitude" is not a valid number.'
+            'Value for argument "longitude" is not a valid number.',
           );
         });
     });
@@ -776,8 +776,8 @@ describe('get document', () => {
                   },
                 },
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
@@ -868,8 +868,8 @@ describe('get document', () => {
                   },
                 },
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
@@ -880,7 +880,7 @@ describe('get document', () => {
         .get()
         .then(doc => {
           expect(() => (doc as InvalidApiUsage).get()).to.throw(
-            'Value for argument "field" is not a valid field path. The path cannot be omitted.'
+            'Value for argument "field" is not a valid field path. The path cannot be omitted.',
           );
         });
     });
@@ -948,7 +948,7 @@ describe('delete document', () => {
               nanos: 123000000,
               seconds: '479978400',
             },
-          })
+          }),
         );
 
         return response(writeResult(1));
@@ -1024,7 +1024,7 @@ describe('set document', () => {
           request,
           set({
             document: document('documentId'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1044,7 +1044,7 @@ describe('set document', () => {
             document: document('documentId', 'a', {
               mapValue: {},
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1064,7 +1064,7 @@ describe('set document', () => {
             document: document('documentId'),
             transforms: [serverTimestamp('a'), serverTimestamp('b.c')],
             mask: updateMask(),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1076,7 +1076,7 @@ describe('set document', () => {
           a: FieldValue.serverTimestamp(),
           b: {c: FieldValue.serverTimestamp()},
         },
-        {merge: true}
+        {merge: true},
       );
     });
   });
@@ -1089,7 +1089,7 @@ describe('set document', () => {
           set({
             document: document('documentId'),
             transforms: [serverTimestamp('a'), serverTimestamp('b.c')],
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1119,7 +1119,7 @@ describe('set document', () => {
               },
             }),
             mask: updateMask('a', 'c.d', 'f'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1161,10 +1161,10 @@ describe('set document', () => {
                     },
                   },
                 },
-              }
+              },
             ),
             mask: updateMask('a', 'b', 'd.e', 'f'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1180,7 +1180,7 @@ describe('set document', () => {
           ignore: 'foo',
           ignoreMap: {a: 'foo'},
         },
-        {mergeFields: ['a', new FieldPath('b'), 'd.e', 'f']}
+        {mergeFields: ['a', new FieldPath('b'), 'd.e', 'f']},
       );
     });
   });
@@ -1193,7 +1193,7 @@ describe('set document', () => {
           set({
             document: document('documentId'),
             mask: updateMask(),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1204,7 +1204,7 @@ describe('set document', () => {
         {},
         {
           mergeFields: [],
-        }
+        },
       );
     });
   });
@@ -1236,10 +1236,10 @@ describe('set document', () => {
                     },
                   },
                 },
-              }
+              },
             ),
             mask: updateMask('a', 'c.d'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1251,7 +1251,7 @@ describe('set document', () => {
           a: {b: {}},
           c: {d: {}},
         },
-        {mergeFields: ['a', new FieldPath('c', 'd')]}
+        {mergeFields: ['a', new FieldPath('c', 'd')]},
       );
     });
   });
@@ -1269,7 +1269,7 @@ describe('set document', () => {
               serverTimestamp('b.c'),
               serverTimestamp('d.e'),
             ],
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1288,7 +1288,7 @@ describe('set document', () => {
           ignore: FieldValue.serverTimestamp(),
           ignoreMap: {a: FieldValue.serverTimestamp()},
         },
-        {mergeFields: ['a', new FieldPath('b'), 'd.e', 'f']}
+        {mergeFields: ['a', new FieldPath('b'), 'd.e', 'f']},
       );
     });
   });
@@ -1301,7 +1301,7 @@ describe('set document', () => {
           set({
             document: document('documentId'),
             mask: updateMask(),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1322,7 +1322,7 @@ describe('set document', () => {
               mapValue: {},
             }),
             mask: updateMask('a'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1333,7 +1333,7 @@ describe('set document', () => {
         {a: {}},
         {
           merge: true,
-        }
+        },
       );
     });
   });
@@ -1348,7 +1348,7 @@ describe('set document', () => {
               stringValue: 'story',
             }),
             mask: updateMask('title'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1374,7 +1374,7 @@ describe('set document', () => {
               stringValue: 'story',
             }),
             mask: updateMask('title'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1397,7 +1397,7 @@ describe('set document', () => {
           request,
           set({
             document: document('documentId', 'a.b', 'c'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1414,7 +1414,7 @@ describe('set document', () => {
         {foo: 'bar'},
         {
           mergeFields: ['foobar'],
-        }
+        },
       );
     }).to.throw('Input data is missing for field "foobar".');
 
@@ -1423,12 +1423,12 @@ describe('set document', () => {
         {foo: 'bar'},
         {
           mergeFields: ['foobar..'],
-        }
+        },
       );
     }).to.throw(
       'Value for argument "options" is not a valid set() options argument. ' +
         '"mergeFields" is not valid: Element at index 0 is not a valid ' +
-        'field path. Paths must not contain ".." in them.'
+        'field path. Paths must not contain ".." in them.',
     );
 
     expect(() => {
@@ -1436,7 +1436,7 @@ describe('set document', () => {
         .doc('collectionId/documentId')
         .set({foo: 'bar'}, {merge: true, mergeFields: []});
     }).to.throw(
-      'Value for argument "options" is not a valid set() options argument. You cannot specify both "merge" and "mergeFields".'
+      'Value for argument "options" is not a valid set() options argument. You cannot specify both "merge" and "mergeFields".',
     );
   });
 
@@ -1444,7 +1444,7 @@ describe('set document', () => {
     expect(() => {
       firestore.doc('collectionId/documentId').set(null as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 
@@ -1452,7 +1452,7 @@ describe('set document', () => {
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: FieldValue.delete()});
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "foo").'
+      'Value for argument "data" is not a valid Firestore document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "foo").',
     );
   });
 
@@ -1460,7 +1460,7 @@ describe('set document', () => {
     expect(() => {
       firestore.doc('collectionId/documentId').set([42] as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 });
@@ -1533,7 +1533,7 @@ describe('create document', () => {
               serverTimestamp('field'),
               serverTimestamp('map.field'),
             ],
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1562,7 +1562,7 @@ describe('create document', () => {
                 },
               },
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1577,7 +1577,7 @@ describe('create document', () => {
     expect(() => {
       firestore.doc('collectionId/documentId').create(null as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 
@@ -1585,7 +1585,7 @@ describe('create document', () => {
     expect(() => {
       firestore.doc('collectionId/documentId').create([42] as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 });
@@ -1609,7 +1609,7 @@ describe('update document', () => {
           update({
             document: document('documentId', 'foo', 'bar'),
             mask: updateMask('foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1631,7 +1631,7 @@ describe('update document', () => {
             }),
             transforms: [serverTimestamp('a.b'), serverTimestamp('c.d')],
             mask: updateMask('a', 'foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1654,7 +1654,7 @@ describe('update document', () => {
           update({
             document: document('documentId'),
             transforms: [serverTimestamp('a')],
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1677,7 +1677,7 @@ describe('update document', () => {
               mapValue: {},
             }),
             mask: updateMask('a'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1693,7 +1693,7 @@ describe('update document', () => {
       commit: request => {
         requestEquals(
           request,
-          update({document: document('documentId'), mask: updateMask('a.b')})
+          update({document: document('documentId'), mask: updateMask('a.b')}),
         );
         return response(writeResult(1));
       },
@@ -1714,7 +1714,7 @@ describe('update document', () => {
           update({
             document: document('documentId', 'foo', 'bar'),
             mask: updateMask('foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1735,7 +1735,7 @@ describe('update document', () => {
           update({
             document: document('documentId', 'foo', 'bar'),
             mask: updateMask('foo'),
-          })
+          }),
         );
         return response({
           commitTime: {
@@ -1779,7 +1779,7 @@ describe('update document', () => {
                 seconds: '479978400',
               },
             },
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1791,7 +1791,7 @@ describe('update document', () => {
           {foo: 'bar'},
           {
             lastUpdateTime: new Timestamp(479978400, 123000000),
-          }
+          },
         ),
         firestore.doc('collectionId/documentId').update('foo', 'bar', {
           lastUpdateTime: new Timestamp(479978400, 123000000),
@@ -1819,7 +1819,7 @@ describe('update document', () => {
     expect(() => {
       (firestore.doc('collectionId/documentId') as InvalidApiUsage).update();
     }).to.throw(
-      'Function "DocumentReference.update()" requires at least 1 argument.'
+      'Function "DocumentReference.update()" requires at least 1 argument.',
     );
   });
 
@@ -1829,7 +1829,7 @@ describe('update document', () => {
         a: {b: FieldValue.delete()},
       });
     }).to.throw(
-      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "a.b").'
+      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "a.b").',
     );
 
     expect(() => {
@@ -1837,7 +1837,7 @@ describe('update document', () => {
         b: FieldValue.delete(),
       });
     }).to.throw(
-      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 1 is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "a.b").'
+      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 1 is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "a.b").',
     );
 
     expect(() => {
@@ -1845,7 +1845,7 @@ describe('update document', () => {
         .doc('collectionId/documentId')
         .update('a', FieldValue.arrayUnion(FieldValue.delete()));
     }).to.throw(
-      'Element at index 0 is not a valid array element. FieldValue.delete() cannot be used inside of an array.'
+      'Element at index 0 is not a valid array element. FieldValue.delete() cannot be used inside of an array.',
     );
   });
 
@@ -1857,7 +1857,7 @@ describe('update document', () => {
           update({
             document: document('documentId', 'foo', 'bar'),
             mask: updateMask('foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1903,10 +1903,10 @@ describe('update document', () => {
                     },
                   },
                 },
-              }
+              },
             ),
             mask: updateMask('a.b.c', 'foo.bar'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1951,9 +1951,9 @@ describe('update document', () => {
               'foo.bar',
               'foo.deep.bar',
               'foo.deep.foo',
-              'foo.foo'
+              'foo.foo',
             ),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1977,7 +1977,7 @@ describe('update document', () => {
             'foo.deep.foo',
             'one',
             'foo.deep.bar',
-            'two'
+            'two',
           ),
       ]);
     });
@@ -2017,9 +2017,9 @@ describe('update document', () => {
               'a.b.delete',
               'a.b.keep',
               'a.c.delete',
-              'a.c.keep'
+              'a.c.keep',
             ),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -2043,7 +2043,7 @@ describe('update document', () => {
           update({
             document: document('documentId', 'a.b', 'c'),
             mask: updateMask('`a.b`'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -2062,7 +2062,7 @@ describe('update document', () => {
         'foo.bar': 'foobar',
       });
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
 
     expect(() => {
@@ -2071,7 +2071,7 @@ describe('update document', () => {
         'foo.bar.foobar': 'foobar',
       });
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
 
     expect(() => {
@@ -2080,7 +2080,7 @@ describe('update document', () => {
         foo: 'foobar',
       });
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
 
     expect(() => {
@@ -2089,7 +2089,7 @@ describe('update document', () => {
         'foo.bar.foo': 'foobar',
       });
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo.bar" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo.bar" was specified multiple times.',
     );
 
     expect(() => {
@@ -2098,7 +2098,7 @@ describe('update document', () => {
         'foo.bar.foo': 'foobar',
       });
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo.bar" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo.bar" was specified multiple times.',
     );
 
     expect(() => {
@@ -2106,7 +2106,7 @@ describe('update document', () => {
         .doc('collectionId/documentId')
         .update('foo.bar', 'foobar', 'foo', 'foobar');
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
 
     expect(() => {
@@ -2114,7 +2114,7 @@ describe('update document', () => {
         .doc('collectionId/documentId')
         .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
 
     expect(() => {
@@ -2122,7 +2122,7 @@ describe('update document', () => {
         .doc('collectionId/documentId')
         .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
   });
 
@@ -2139,7 +2139,7 @@ describe('update document', () => {
       const doc = {'': 'foo'};
       firestore.doc('col/doc').update(doc);
     }).to.throw(
-      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 0 should not be an empty string.'
+      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 0 should not be an empty string.',
     );
   });
 
@@ -2180,17 +2180,17 @@ describe('update document', () => {
 
   it('accepts an object', () => {
     expect(() =>
-      firestore.doc('collectionId/documentId').update(null as InvalidApiUsage)
+      firestore.doc('collectionId/documentId').update(null as InvalidApiUsage),
     ).to.throw(
-      'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 
   it("doesn't accept arrays", () => {
     expect(() =>
-      firestore.doc('collectionId/documentId').update([42] as InvalidApiUsage)
+      firestore.doc('collectionId/documentId').update([42] as InvalidApiUsage),
     ).to.throw(
-      'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 
@@ -2202,7 +2202,7 @@ describe('update document', () => {
           update({
             document: document('documentId', 'bar', 'foobar'),
             mask: updateMask('bar', 'foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },

@@ -66,7 +66,7 @@ export class BundleBuilder {
    */
   add(
     documentOrName: DocumentSnapshot | string,
-    querySnapshot?: QuerySnapshot
+    querySnapshot?: QuerySnapshot,
   ): BundleBuilder {
     // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('BundleBuilder.add', arguments, 1);
@@ -143,7 +143,7 @@ export class BundleBuilder {
    * @internal
    */
   private elementToLengthPrefixedBuffer(
-    bundleElement: firestore.IBundleElement
+    bundleElement: firestore.IBundleElement,
   ): Buffer {
     // Convert to a valid proto message object then take its JSON representation.
     // This take cares of stuff like converting internal byte array fields
@@ -209,7 +209,7 @@ export class BundleBuilder {
 class BundledDocument {
   constructor(
     readonly metadata: firestore.IBundledDocumentMetadata,
-    readonly document?: api.IDocument
+    readonly document?: api.IDocument,
   ) {}
 }
 

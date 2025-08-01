@@ -46,41 +46,41 @@ export interface GapicClient {
   getProjectId(): Promise<string>;
   beginTransaction(
     request: api.IBeginTransactionRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<[api.IBeginTransactionResponse, unknown, unknown]>;
   commit(
     request: api.ICommitRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<[api.ICommitResponse, unknown, unknown]>;
   batchWrite(
     request: api.IBatchWriteRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<[api.IBatchWriteResponse, unknown, unknown]>;
   rollback(
     request: api.IRollbackRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<[google.protobuf.IEmpty, unknown, unknown]>;
   batchGetDocuments(
     request?: api.IBatchGetDocumentsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Duplex;
   runQuery(request?: api.IRunQueryRequest, options?: CallOptions): Duplex;
   runAggregationQuery(
     request?: api.IRunAggregationQueryRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Duplex;
   listDocuments(
     request: api.IListDocumentsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<[api.IDocument[], unknown, unknown]>;
   listCollectionIds(
     request: api.IListCollectionIdsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<[string[], unknown, unknown]>;
   listen(options?: CallOptions): Duplex;
   partitionQueryStream(
     request?: api.IPartitionQueryRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Duplex;
   close(): Promise<void>;
 }
@@ -105,7 +105,7 @@ export type FirestoreStreamingMethod =
 /** Type signature for the unary methods in the GAPIC layer. */
 export type UnaryMethod<Req, Resp> = (
   request: Req,
-  callOptions: CallOptions
+  callOptions: CallOptions,
 ) => Promise<[Resp, unknown, unknown]>;
 
 // We don't have type information for the npm package

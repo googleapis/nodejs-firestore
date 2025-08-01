@@ -168,7 +168,7 @@ describe('ExponentialBackoff', () => {
 
     backoff.backoffAndWait().then(nop);
     await expect(backoff.backoffAndWait()).to.eventually.be.rejectedWith(
-      'A backoff operation is already in progress.'
+      'A backoff operation is already in progress.',
     );
   });
 });

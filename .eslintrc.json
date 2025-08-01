@@ -34,7 +34,8 @@
             "object": "it",
             "property": "only"
           }
-        ]
+        ],
+        "@typescript-eslint/no-floating-promises": ["off"]
       }
     }
   ]

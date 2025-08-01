@@ -56,7 +56,7 @@ export class VectorQuery<
    */
   constructor(
     private readonly _query: Query<AppModelType, DbModelType>,
-    private readonly _options: VectorQueryOptions
+    private readonly _options: VectorQueryOptions,
   ) {
     this._queryUtil = new QueryUtil<
       AppModelType,
@@ -113,7 +113,7 @@ export class VectorQuery<
    *  from the query execution (if any), and the query results (if any).
    */
   async explain(
-    options?: firestore.ExplainOptions
+    options?: firestore.ExplainOptions,
   ): Promise<ExplainResults<VectorQuerySnapshot<AppModelType, DbModelType>>> {
     if (options === undefined) {
       options = {};
@@ -139,14 +139,14 @@ export class VectorQuery<
   }
 
   _getResponse(
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
   ): Promise<QueryResponse<VectorQuerySnapshot<AppModelType, DbModelType>>> {
     return this._queryUtil._getResponse(
       this,
       /*transactionOrReadTime*/ undefined,
       // VectorQuery cannot be retried with cursors as they do not support cursors yet.
       /*retryWithCursor*/ false,
-      explainOptions
+      explainOptions,
     );
   }
 
@@ -162,7 +162,7 @@ export class VectorQuery<
     return this._queryUtil._stream(
       this,
       transactionId,
-      /*retryWithCursor*/ false
+      /*retryWithCursor*/ false,
     );
   }
 
@@ -176,7 +176,7 @@ export class VectorQuery<
    */
   toProto(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
   ): api.IRunQueryRequest {
     const queryProto = this._query.toProto(transactionOrReadTime);
 
@@ -218,14 +218,14 @@ export class VectorQuery<
     readTime: Timestamp,
     size: number,
     docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
-    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>,
   ): VectorQuerySnapshot<AppModelType, DbModelType> {
     return new VectorQuerySnapshot<AppModelType, DbModelType>(
       this,
       readTime,
       size,
       docs,
-      changes
+      changes,
     );
   }
 
@@ -242,7 +242,7 @@ export class VectorQuery<
     ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): VectorQuery<AppModelType, DbModelType> {
     throw new Error(
-      'Unimplemented: Vector query does not support cursors yet.'
+      'Unimplemented: Vector query does not support cursors yet.',
     );
   }
 

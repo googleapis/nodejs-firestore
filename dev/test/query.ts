@@ -67,11 +67,11 @@ use(chaiAsPromised);
 
 function snapshot(
   relativePath: string,
-  data: DocumentData
+  data: DocumentData,
 ): Promise<DocumentSnapshot> {
   return createInstance().then(firestore => {
     const path = QualifiedResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/${relativePath}`
+      `${DATABASE_ROOT}/documents/${relativePath}`,
     );
     const ref = new DocumentReference(firestore, path);
     const snapshot = new DocumentSnapshotBuilder(ref);
@@ -154,7 +154,7 @@ export function fieldFilters(
 export function fieldFilter(
   fieldPath: string,
   op: api.StructuredQuery.FieldFilter.Operator,
-  value: string | api.IValue
+  value: string | api.IValue,
 ): api.StructuredQuery.IFilter {
   return fieldFilters(fieldPath, op, value);
 }
@@ -353,7 +353,7 @@ function endAt(
  */
 export function readTime(
   seconds?: number,
-  nanos?: number
+  nanos?: number,
 ): protobuf.ITimestamp {
   if (seconds === undefined && nanos === undefined) {
     return {seconds: '5', nanos: 6};
@@ -437,7 +437,7 @@ function bundledQueryEquals(
 
 export function result(
   documentId: string,
-  setDone?: boolean
+  setDone?: boolean,
 ): api.IRunQueryResponse {
   if (setDone) {
     return {
@@ -493,7 +493,7 @@ describe('query interface', () => {
 
     queryEquals(
       [queryA.where('a', '==', '1'), queryB.where('a', '==', '1')],
-      [queryA.where('a', '=' as InvalidApiUsage, 1)]
+      [queryA.where('a', '=' as InvalidApiUsage, 1)],
     );
 
     queryEquals(
@@ -501,7 +501,7 @@ describe('query interface', () => {
         queryA.where('a', '==', '1').where('b', '==', 2),
         queryB.where('a', '==', '1').where('b', '==', 2),
       ],
-      []
+      [],
     );
 
     queryEquals(
@@ -511,17 +511,17 @@ describe('query interface', () => {
         queryB.orderBy('__name__', 'ASC' as InvalidApiUsage),
         queryB.orderBy(FieldPath.documentId()),
       ],
-      [queryA.orderBy('foo'), queryB.orderBy(FieldPath.documentId(), 'desc')]
+      [queryA.orderBy('foo'), queryB.orderBy(FieldPath.documentId(), 'desc')],
     );
 
     queryEquals(
       [queryA.limit(0), queryB.limit(0).limit(0)],
-      [queryA, queryB.limit(10)]
+      [queryA, queryB.limit(10)],
     );
 
     queryEquals(
       [queryA.offset(0), queryB.offset(0).offset(0)],
-      [queryA, queryB.offset(10)]
+      [queryA, queryB.offset(10)],
     );
 
     queryEquals(
@@ -532,7 +532,7 @@ describe('query interface', () => {
         queryA.orderBy('foo').endBefore('a'),
         queryB.orderBy('foo').startAt('b'),
         queryA.orderBy('bar').startAt('a'),
-      ]
+      ],
     );
 
     queryEquals(
@@ -543,7 +543,7 @@ describe('query interface', () => {
       [
         queryA.orderBy('foo').startAfter('b'),
         queryB.orderBy('bar').startAfter('a'),
-      ]
+      ],
     );
 
     queryEquals(
@@ -554,12 +554,12 @@ describe('query interface', () => {
       [
         queryA.orderBy('foo').endBefore('b'),
         queryB.orderBy('bar').endBefore('a'),
-      ]
+      ],
     );
 
     queryEquals(
       [queryA.orderBy('foo').endAt('a'), queryB.orderBy('foo').endAt('a')],
-      [queryA.orderBy('foo').endAt('b'), queryB.orderBy('bar').endAt('a')]
+      [queryA.orderBy('foo').endAt('b'), queryB.orderBy('bar').endAt('a')],
     );
 
     queryEquals(
@@ -567,7 +567,7 @@ describe('query interface', () => {
         queryA.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
         queryB.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
       ],
-      []
+      [],
     );
   });
 
@@ -578,7 +578,7 @@ describe('query interface', () => {
           request,
           fieldFiltersQuery('foo', 'EQUAL', 'bar'),
           orderBy('foo', 'ASCENDING'),
-          limit(10)
+          limit(10),
         );
 
         return emptyQueryStream();
@@ -825,7 +825,7 @@ describe('query interface', () => {
   });
 
   function handlesRetryableExceptionUntilProgressStops(
-    withHeartbeat: boolean
+    withHeartbeat: boolean,
   ): Promise<void> {
     let attempts = 0;
 
@@ -853,11 +853,11 @@ describe('query interface', () => {
             x?.structuredQuery?.startAt?.values?.[0].referenceValue || '';
           const docId = docPath.substring(docPath.lastIndexOf('/'));
           expect(docId).to.equal(
-            `/id-${Math.min(initializationsWithProgress, attempts - 1)}`
+            `/id-${Math.min(initializationsWithProgress, attempts - 1)}`,
           );
           expect(x?.structuredQuery?.orderBy?.length).to.equal(1);
           expect(x?.structuredQuery?.orderBy?.[0].field?.fieldPath).to.equal(
-            '__name__'
+            '__name__',
           );
         }
 
@@ -919,7 +919,7 @@ describe('query interface', () => {
           // the last retry will fail with an uninitialized stream.
           const initilizationRetries = withHeartbeat ? 1 : 5;
           expect(attempts).to.equal(
-            initializationsWithProgress + initilizationRetries
+            initializationsWithProgress + initilizationRetries,
           );
         });
     });
@@ -1178,12 +1178,12 @@ describe('query interface', () => {
             compositeFilter(
               'OR',
               fieldFilter('a', 'GREATER_THAN', {integerValue: 10}),
-              unaryFilters('b', 'IS_NOT_NULL')
-            )
+              unaryFilters('b', 'IS_NOT_NULL'),
+            ),
           ),
           limit(3),
           orderBy('a', 'ASCENDING'),
-          startAt(true, {integerValue: 1})
+          startAt(true, {integerValue: 1}),
         );
         return emptyQueryStream();
       },
@@ -1194,7 +1194,7 @@ describe('query interface', () => {
       let query: Query = firestore.collection('collectionId');
       query = query
         .where(
-          Filter.or(Filter.where('a', '>', 10), Filter.where('b', '!=', null))
+          Filter.or(Filter.where('a', '>', 10), Filter.where('b', '!=', null)),
         )
         .orderBy('a')
         .startAt(1)
@@ -1278,8 +1278,8 @@ describe('where() interface', () => {
             'barEqualsLong',
             'fooNotIn',
             'NOT_IN',
-            arrValue
-          )
+            arrValue,
+          ),
         );
 
         return emptyQueryStream();
@@ -1315,7 +1315,7 @@ describe('where() interface', () => {
                 foo: {stringValue: 'bar'},
               },
             },
-          })
+          }),
         );
 
         return emptyQueryStream();
@@ -1341,8 +1341,8 @@ describe('where() interface', () => {
             'foobar',
             'bar.foo',
             'EQUAL',
-            'foobar'
-          )
+            'foobar',
+          ),
         );
         return emptyQueryStream();
       },
@@ -1366,7 +1366,7 @@ describe('where() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/foo',
-          })
+          }),
         );
 
         return emptyQueryStream();
@@ -1397,7 +1397,7 @@ describe('where() interface', () => {
                 },
               ],
             },
-          })
+          }),
         );
 
         return emptyQueryStream();
@@ -1434,7 +1434,7 @@ describe('where() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc1',
-          })
+          }),
         );
 
         return emptyQueryStream();
@@ -1457,37 +1457,37 @@ describe('where() interface', () => {
     expect(() => {
       query.where(FieldPath.documentId(), 'in', ['foo', 42]);
     }).to.throw(
-      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".',
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'in', 42);
     }).to.throw(
-      "Invalid Query. A non-empty array is required for 'in' filters."
+      "Invalid Query. A non-empty array is required for 'in' filters.",
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'in', []);
     }).to.throw(
-      "Invalid Query. A non-empty array is required for 'in' filters."
+      "Invalid Query. A non-empty array is required for 'in' filters.",
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'not-in', ['foo', 42]);
     }).to.throw(
-      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".',
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'not-in', 42);
     }).to.throw(
-      "Invalid Query. A non-empty array is required for 'not-in' filters."
+      "Invalid Query. A non-empty array is required for 'not-in' filters.",
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'not-in', []);
     }).to.throw(
-      "Invalid Query. A non-empty array is required for 'not-in' filters."
+      "Invalid Query. A non-empty array is required for 'not-in' filters.",
     );
   });
 
@@ -1497,13 +1497,13 @@ describe('where() interface', () => {
     expect(() => {
       query.where(FieldPath.documentId(), 'array-contains', query.doc());
     }).to.throw(
-      "Invalid Query. You can't perform 'array-contains' queries on FieldPath.documentId()."
+      "Invalid Query. You can't perform 'array-contains' queries on FieldPath.documentId().",
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'array-contains-any', query.doc());
     }).to.throw(
-      "Invalid Query. You can't perform 'array-contains-any' queries on FieldPath.documentId()."
+      "Invalid Query. You can't perform 'array-contains-any' queries on FieldPath.documentId().",
     );
   });
 
@@ -1513,7 +1513,7 @@ describe('where() interface', () => {
       query = query.where({} as InvalidApiUsage, '==', 'bar');
       return query.get();
     }).to.throw(
-      'Value for argument "fieldPath" is not a valid field path. Paths can only be specified as strings or via a FieldPath object.'
+      'Value for argument "fieldPath" is not a valid field path. Paths can only be specified as strings or via a FieldPath object.',
     );
 
     class FieldPath {}
@@ -1522,7 +1522,7 @@ describe('where() interface', () => {
       query = query.where(new FieldPath() as InvalidApiUsage, '==', 'bar');
       return query.get();
     }).to.throw(
-      'Detected an object of type "FieldPath" that doesn\'t match the expected instance.'
+      'Detected an object of type "FieldPath" that doesn\'t match the expected instance.',
     );
   });
 
@@ -1532,7 +1532,7 @@ describe('where() interface', () => {
       query = query.where('foo', '==', new FieldPath('bar'));
       return query.get();
     }).to.throw(
-      'Value for argument "value" is not a valid query constraint. Cannot use object of type "FieldPath" as a Firestore value.'
+      'Value for argument "value" is not a valid query constraint. Cannot use object of type "FieldPath" as a Firestore value.',
     );
   });
 
@@ -1542,7 +1542,7 @@ describe('where() interface', () => {
       query = query.where('foo', '==', FieldValue.delete());
       return query.get();
     }).to.throw(
-      'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.'
+      'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.',
     );
   });
 
@@ -1558,31 +1558,31 @@ describe('where() interface', () => {
     expect(() => {
       query.where('foo', '==', new Foo()).get();
     }).to.throw(
-      'Value for argument "value" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
+      'Value for argument "value" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).',
     );
 
     expect(() => {
       query.where('foo', '==', new FieldPath()).get();
     }).to.throw(
-      'Detected an object of type "FieldPath" that doesn\'t match the expected instance.'
+      'Detected an object of type "FieldPath" that doesn\'t match the expected instance.',
     );
 
     expect(() => {
       query.where('foo', '==', new FieldValue()).get();
     }).to.throw(
-      'Detected an object of type "FieldValue" that doesn\'t match the expected instance.'
+      'Detected an object of type "FieldValue" that doesn\'t match the expected instance.',
     );
 
     expect(() => {
       query.where('foo', '==', new DocumentReference()).get();
     }).to.throw(
-      'Detected an object of type "DocumentReference" that doesn\'t match the expected instance.'
+      'Detected an object of type "DocumentReference" that doesn\'t match the expected instance.',
     );
 
     expect(() => {
       query.where('foo', '==', new GeoPoint()).get();
     }).to.throw(
-      'Detected an object of type "GeoPoint" that doesn\'t match the expected instance.'
+      'Detected an object of type "GeoPoint" that doesn\'t match the expected instance.',
     );
   });
 
@@ -1591,7 +1591,7 @@ describe('where() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          unaryFiltersQuery('foo', 'IS_NAN', 'bar', 'IS_NULL')
+          unaryFiltersQuery('foo', 'IS_NAN', 'bar', 'IS_NULL'),
         );
 
         return emptyQueryStream();
@@ -1612,7 +1612,7 @@ describe('where() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          unaryFiltersQuery('foo', 'IS_NOT_NAN', 'bar', 'IS_NOT_NULL')
+          unaryFiltersQuery('foo', 'IS_NOT_NAN', 'bar', 'IS_NOT_NULL'),
         );
 
         return emptyQueryStream();
@@ -1634,7 +1634,7 @@ describe('where() interface', () => {
       query = query.where('foo', '>', NaN);
       return query.get();
     }).to.throw(
-      "Invalid query. You can only perform '==' and '!=' comparisons on NaN."
+      "Invalid query. You can only perform '==' and '!=' comparisons on NaN.",
     );
   });
 
@@ -1644,7 +1644,7 @@ describe('where() interface', () => {
       query = query.where('foo', '>', null);
       return query.get();
     }).to.throw(
-      "Invalid query. You can only perform '==' and '!=' comparisons on Null."
+      "Invalid query. You can only perform '==' and '!=' comparisons on Null.",
     );
   });
 
@@ -1653,7 +1653,7 @@ describe('where() interface', () => {
     expect(() => {
       query = query.where('foo.', '==', 'foobar');
     }).to.throw(
-      'Value for argument "fieldPath" is not a valid field path. Paths must not start or end with ".".'
+      'Value for argument "fieldPath" is not a valid field path. Paths must not start or end with ".".',
     );
   });
 
@@ -1662,7 +1662,7 @@ describe('where() interface', () => {
     expect(() => {
       query = query.where('foo', '@' as InvalidApiUsage, 'foobar');
     }).to.throw(
-      'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, !=, >, >=, array-contains, in, not-in, array-contains-any'
+      'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, !=, >, >=, array-contains, in, not-in, array-contains-any',
     );
   });
 
@@ -1682,12 +1682,12 @@ describe('where() interface', () => {
                 compositeFilter(
                   'OR',
                   fieldFilter('d', 'EQUAL', {integerValue: 40}),
-                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50})
+                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50}),
                 ),
-                unaryFilters('f', 'IS_NAN')
-              )
-            )
-          )
+                unaryFilters('f', 'IS_NAN'),
+              ),
+            ),
+          ),
         );
         return emptyQueryStream();
       },
@@ -1704,9 +1704,9 @@ describe('where() interface', () => {
             Filter.where('c', '==', 30),
             Filter.or(Filter.where('d', '==', 40), Filter.where('e', '>', 50)),
             Filter.or(Filter.where('f', '==', NaN)),
-            Filter.and(Filter.or())
-          )
-        )
+            Filter.and(Filter.or()),
+          ),
+        ),
       );
       return query.get();
     });
@@ -1728,12 +1728,12 @@ describe('where() interface', () => {
                 compositeFilter(
                   'AND',
                   fieldFilter('d', 'EQUAL', {integerValue: 40}),
-                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50})
+                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50}),
                 ),
-                unaryFilters('f', 'IS_NAN')
-              )
-            )
-          )
+                unaryFilters('f', 'IS_NAN'),
+              ),
+            ),
+          ),
         );
         return emptyQueryStream();
       },
@@ -1750,9 +1750,9 @@ describe('where() interface', () => {
             Filter.where('c', '==', 30),
             Filter.and(Filter.where('d', '==', 40), Filter.where('e', '>', 50)),
             Filter.and(Filter.where('f', '==', NaN)),
-            Filter.or(Filter.and())
-          )
-        )
+            Filter.or(Filter.and()),
+          ),
+        ),
       );
       return query.get();
     });
@@ -1771,9 +1771,9 @@ describe('where() interface', () => {
               fieldFilter('c', 'EQUAL', {integerValue: 30}),
               fieldFilter('d', 'EQUAL', {integerValue: 40}),
               fieldFilter('e', 'GREATER_THAN', {integerValue: 50}),
-              unaryFilters('f', 'IS_NAN')
-            )
-          )
+              unaryFilters('f', 'IS_NAN'),
+            ),
+          ),
         );
         return emptyQueryStream();
       },
@@ -1798,7 +1798,7 @@ describe('where() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          where(fieldFilter('a', 'GREATER_THAN', {integerValue: 10}))
+          where(fieldFilter('a', 'GREATER_THAN', {integerValue: 10})),
         );
         return emptyQueryStream();
       },
@@ -1817,8 +1817,8 @@ describe('where() interface', () => {
           let query: Query = firestore.collection('collectionId');
           query = query.where(filter);
           return query.get();
-        })
-      )
+        }),
+      ),
     );
   });
 });
@@ -1890,7 +1890,7 @@ describe('orderBy() interface', () => {
     expect(() => {
       query = query.orderBy('foo', 'foo' as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "directionStr" is invalid. Acceptable values are: asc, desc'
+      'Value for argument "directionStr" is invalid. Acceptable values are: asc, desc',
     );
   });
 
@@ -1899,7 +1899,7 @@ describe('orderBy() interface', () => {
       runQuery: request => {
         queryEquals(
           request,
-          orderBy('foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING')
+          orderBy('foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING'),
         );
 
         return emptyQueryStream();
@@ -1920,7 +1920,7 @@ describe('orderBy() interface', () => {
     expect(() => {
       query = query.orderBy('foo.');
     }).to.throw(
-      'Value for argument "fieldPath" is not a valid field path. Paths must not start or end with ".".'
+      'Value for argument "fieldPath" is not a valid field path. Paths must not start or end with ".".',
     );
   });
 
@@ -1931,7 +1931,7 @@ describe('orderBy() interface', () => {
       expect(() => {
         query = query.orderBy('foo').startAt('foo').orderBy('foo');
       }).to.throw(
-        'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().'
+        'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().',
       );
 
       expect(() => {
@@ -1940,13 +1940,13 @@ describe('orderBy() interface', () => {
           .startAt(snapshot)
           .where('foo', '>', 'bar');
       }).to.throw(
-        'Cannot specify a where() filter after calling startAt(), startAfter(), endBefore() or endAt().'
+        'Cannot specify a where() filter after calling startAt(), startAfter(), endBefore() or endAt().',
       );
 
       expect(() => {
         query = query.orderBy('foo').endAt('foo').orderBy('foo');
       }).to.throw(
-        'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().'
+        'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().',
       );
 
       expect(() => {
@@ -1955,7 +1955,7 @@ describe('orderBy() interface', () => {
           .endAt(snapshot)
           .where('foo', '>', 'bar');
       }).to.throw(
-        'Cannot specify a where() filter after calling startAt(), startAfter(), endBefore() or endAt().'
+        'Cannot specify a where() filter after calling startAt(), startAfter(), endBefore() or endAt().',
       );
     });
   });
@@ -1971,8 +1971,8 @@ describe('orderBy() interface', () => {
             'bar',
             'DESCENDING',
             'foobar',
-            'ASCENDING'
-          )
+            'ASCENDING',
+          ),
         );
 
         return emptyQueryStream();
@@ -2021,7 +2021,7 @@ describe('limit() interface', () => {
   it('expects number', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.limit(Infinity)).to.throw(
-      'Value for argument "limit" is not a valid integer.'
+      'Value for argument "limit" is not a valid integer.',
     );
   });
 
@@ -2077,7 +2077,7 @@ describe('limitToLast() interface', () => {
           orderBy('foo', 'DESCENDING'),
           startAt(true, 'end'),
           endAt(false, 'start'),
-          limit(10)
+          limit(10),
         );
         return emptyQueryStream();
       },
@@ -2116,7 +2116,7 @@ describe('limitToLast() interface', () => {
   it('expects number', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.limitToLast(Infinity)).to.throw(
-      'Value for argument "limitToLast" is not a valid integer.'
+      'Value for argument "limitToLast" is not a valid integer.',
     );
   });
 
@@ -2124,14 +2124,14 @@ describe('limitToLast() interface', () => {
     const query = firestore.collection('collectionId');
     const result = query.limitToLast(1).get();
     return expect(result).to.eventually.be.rejectedWith(
-      'limitToLast() queries require specifying at least one orderBy() clause.'
+      'limitToLast() queries require specifying at least one orderBy() clause.',
     );
   });
 
   it('rejects Query.stream()', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.limitToLast(1).stream()).to.throw(
-      'Query results for queries that include limitToLast() constraints cannot be streamed. Use Query.get() instead.'
+      'Query results for queries that include limitToLast() constraints cannot be streamed. Use Query.get() instead.',
     );
   });
 
@@ -2160,7 +2160,7 @@ describe('limitToLast() interface', () => {
         bundledQuery,
         'LAST',
         orderBy('foo', 'ASCENDING'),
-        limit(10)
+        limit(10),
       );
     });
   });
@@ -2180,7 +2180,7 @@ describe('limitToLast() interface', () => {
         orderBy('foo', 'ASCENDING'),
         limit(10),
         startAt(true, 'start'),
-        endAt(false, 'end')
+        endAt(false, 'end'),
       );
     });
   });
@@ -2194,7 +2194,7 @@ describe('limitToLast() interface', () => {
         bundledQuery,
         'LAST',
         orderBy('foo', 'ASCENDING'),
-        limit(10)
+        limit(10),
       );
     });
   });
@@ -2214,7 +2214,7 @@ describe('limitToLast() interface', () => {
         orderBy('foo', 'ASCENDING'),
         limit(10),
         startAt(true, 'start'),
-        endAt(false, 'end')
+        endAt(false, 'end'),
       );
     });
   });
@@ -2250,7 +2250,7 @@ describe('offset() interface', () => {
   it('expects number', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.offset(Infinity)).to.throw(
-      'Value for argument "offset" is not a valid integer.'
+      'Value for argument "offset" is not a valid integer.',
     );
   });
 
@@ -2304,11 +2304,11 @@ describe('select() interface', () => {
   it('validates field path', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.select(1 as InvalidApiUsage)).to.throw(
-      'Element at index 0 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.'
+      'Element at index 0 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.',
     );
 
     expect(() => query.select('.')).to.throw(
-      'Element at index 0 is not a valid field path. Paths must not start or end with ".".'
+      'Element at index 0 is not a valid field path. Paths must not start or end with ".".',
     );
   });
 
@@ -2362,7 +2362,7 @@ describe('startAt() interface', () => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          startAt(true, 'foo', 'bar')
+          startAt(true, 'foo', 'bar'),
         );
 
         return emptyQueryStream();
@@ -2387,7 +2387,7 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
@@ -2413,7 +2413,7 @@ describe('startAt() interface', () => {
     expect(() => {
       query.orderBy(FieldPath.documentId()).startAt(42);
     }).to.throw(
-      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".',
     );
 
     expect(() => {
@@ -2421,7 +2421,7 @@ describe('startAt() interface', () => {
         .orderBy(FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/other/doc'));
     }).to.throw(
-      '"coll/doc/other/doc" is not part of the query result set and cannot be used as a query boundary.'
+      '"coll/doc/other/doc" is not part of the query result set and cannot be used as a query boundary.',
     );
 
     expect(() => {
@@ -2429,13 +2429,13 @@ describe('startAt() interface', () => {
         .orderBy(FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/coll_suffix/doc'));
     }).to.throw(
-      '"coll/doc/coll_suffix/doc" is not part of the query result set and cannot be used as a query boundary.'
+      '"coll/doc/coll_suffix/doc" is not part of the query result set and cannot be used as a query boundary.',
     );
 
     expect(() => {
       query.orderBy(FieldPath.documentId()).startAt(firestore.doc('coll/doc'));
     }).to.throw(
-      '"coll/doc" is not part of the query result set and cannot be used as a query boundary.'
+      '"coll/doc" is not part of the query result set and cannot be used as a query boundary.',
     );
 
     expect(() => {
@@ -2443,7 +2443,7 @@ describe('startAt() interface', () => {
         .orderBy(FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/coll/doc/coll/doc'));
     }).to.throw(
-      'Only a direct child can be used as a query boundary. Found: "coll/doc/coll/doc/coll/doc".'
+      'Only a direct child can be used as a query boundary. Found: "coll/doc/coll/doc/coll/doc".',
     );
 
     // Validate that we can't pass a reference to a collection.
@@ -2452,7 +2452,7 @@ describe('startAt() interface', () => {
     }).to.throw(
       'When querying a collection and ordering by FieldPath.documentId(), ' +
         'the corresponding value must be a plain document ID, but ' +
-        "'doc/coll' contains a slash."
+        "'doc/coll' contains a slash.",
     );
   });
 
@@ -2474,7 +2474,7 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
@@ -2500,7 +2500,7 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
@@ -2529,7 +2529,7 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
@@ -2556,7 +2556,7 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
@@ -2583,7 +2583,7 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
@@ -2625,8 +2625,8 @@ describe('startAt() interface', () => {
             'c',
             'd',
             'EQUAL',
-            'd'
-          )
+            'd',
+          ),
         );
 
         return emptyQueryStream();
@@ -2659,7 +2659,7 @@ describe('startAt() interface', () => {
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
           }),
-          fieldFiltersQuery('foo', 'EQUAL', 'bar')
+          fieldFiltersQuery('foo', 'EQUAL', 'bar'),
         );
 
         return emptyQueryStream();
@@ -2694,7 +2694,7 @@ describe('startAt() interface', () => {
               'b',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(true, 'A', 'a', 'aa', 'b', {
               referenceValue:
@@ -2716,8 +2716,8 @@ describe('startAt() interface', () => {
               'value',
               'A',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
@@ -2759,7 +2759,7 @@ describe('startAt() interface', () => {
               'a',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(true, '1', '19', '2', 'a', {
               referenceValue:
@@ -2778,8 +2778,8 @@ describe('startAt() interface', () => {
               'value',
               '`2`',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
@@ -2818,7 +2818,7 @@ describe('startAt() interface', () => {
               'aa',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(
               true,
@@ -2837,7 +2837,7 @@ describe('startAt() interface', () => {
                 referenceValue:
                   `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
-              }
+              },
             ),
             fieldFiltersQuery(
               'a',
@@ -2848,8 +2848,8 @@ describe('startAt() interface', () => {
               'value',
               'aa',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
@@ -2866,7 +2866,7 @@ describe('startAt() interface', () => {
               .where('aa', '>', 'value')
               .startAt(doc);
             return query.get();
-          }
+          },
         );
       });
     });
@@ -2884,7 +2884,7 @@ describe('startAt() interface', () => {
               'a.a',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(
               true,
@@ -2903,7 +2903,7 @@ describe('startAt() interface', () => {
                 referenceValue:
                   `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
-              }
+              },
             ),
             fieldFiltersQuery(
               'a',
@@ -2914,8 +2914,8 @@ describe('startAt() interface', () => {
               '_a',
               'a.a',
               'GREATER_THAN',
-              'a.a'
-            )
+              'a.a',
+            ),
           );
           return emptyQueryStream();
         },
@@ -2932,7 +2932,7 @@ describe('startAt() interface', () => {
               .where('a.a', '>', 'a.a')
               .startAt(doc);
             return query.get();
-          }
+          },
         );
       });
     });
@@ -2950,7 +2950,7 @@ describe('startAt() interface', () => {
               '`a.a`',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(
               true,
@@ -2969,7 +2969,7 @@ describe('startAt() interface', () => {
                 referenceValue:
                   `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
-              }
+              },
             ),
             fieldFiltersQuery(
               'a',
@@ -2980,8 +2980,8 @@ describe('startAt() interface', () => {
               'value',
               'a.z',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
@@ -2998,7 +2998,7 @@ describe('startAt() interface', () => {
               .where('a.z', '>', 'value') // nested field
               .startAt(doc);
             return query.get();
-          }
+          },
         );
       });
     });
@@ -3018,7 +3018,7 @@ describe('startAt() interface', () => {
               'd',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(true, 'a', 'b', 'c', 'd', {
               referenceValue:
@@ -3035,16 +3035,16 @@ describe('startAt() interface', () => {
                   compositeFilter(
                     'OR',
                     fieldFilter('b', 'GREATER_THAN_OR_EQUAL', 'value'),
-                    fieldFilter('c', 'LESS_THAN_OR_EQUAL', 'value')
+                    fieldFilter('c', 'LESS_THAN_OR_EQUAL', 'value'),
                   ),
                   compositeFilter(
                     'OR',
                     fieldFilter('d', 'GREATER_THAN', 'value'),
-                    fieldFilter('e', 'EQUAL', 'value')
-                  )
-                )
-              )
-            )
+                    fieldFilter('e', 'EQUAL', 'value'),
+                  ),
+                ),
+              ),
+            ),
           );
           return emptyQueryStream();
         },
@@ -3066,13 +3066,13 @@ describe('startAt() interface', () => {
               Filter.and(
                 Filter.or(
                   Filter.where('b', '>=', 'value'),
-                  Filter.where('c', '<=', 'value')
+                  Filter.where('c', '<=', 'value'),
                 ),
                 Filter.or(
                   Filter.where('d', '>', 'value'),
-                  Filter.where('e', '==', 'value')
-                )
-              )
+                  Filter.where('e', '==', 'value'),
+                ),
+              ),
             )
             .startAt(doc);
           return query.get();
@@ -3093,7 +3093,7 @@ describe('startAt() interface', () => {
               'b',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(true, 'z', 'a', 'b', {
               referenceValue:
@@ -3109,8 +3109,8 @@ describe('startAt() interface', () => {
               'value',
               'z',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
@@ -3148,7 +3148,7 @@ describe('startAt() interface', () => {
               'b',
               'DESCENDING',
               '__name__',
-              'DESCENDING'
+              'DESCENDING',
             ),
             startAt(true, 'z', 'a', 'b', {
               referenceValue:
@@ -3161,8 +3161,8 @@ describe('startAt() interface', () => {
               'value',
               'a',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
@@ -3201,7 +3201,7 @@ describe('startAt() interface', () => {
               'b',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(true, 'z', 'c', 'a', 'b', {
               referenceValue:
@@ -3214,8 +3214,8 @@ describe('startAt() interface', () => {
               'value',
               'a',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
@@ -3247,7 +3247,7 @@ describe('startAt() interface', () => {
 
     return snapshot('collectionId/doc', {}).then(doc => {
       expect(() => query.startAt(doc)).to.throw(
-        'Field "foo" is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy() and where() constraints.'
+        'Field "foo" is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy() and where() constraints.',
       );
     });
   });
@@ -3258,7 +3258,7 @@ describe('startAt() interface', () => {
     expect(() => {
       query.orderBy('foo').startAt('foo', FieldValue.delete());
     }).to.throw(
-      'Element at index 1 is not a valid query constraint. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.'
+      'Element at index 1 is not a valid query constraint. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.',
     );
   });
 
@@ -3267,7 +3267,7 @@ describe('startAt() interface', () => {
     query = query.orderBy('foo');
 
     expect(() => query.startAt('foo', 'bar')).to.throw(
-      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.'
+      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.',
     );
   });
 
@@ -3277,7 +3277,7 @@ describe('startAt() interface', () => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          startAt(true, 'foo')
+          startAt(true, 'foo'),
         );
 
         return emptyQueryStream();
@@ -3295,7 +3295,7 @@ describe('startAt() interface', () => {
   it('validates input', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.startAt(123)).to.throw(
-      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.'
+      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.',
     );
   });
 
@@ -3334,7 +3334,7 @@ describe('startAfter() interface', () => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          startAt(false, 'foo', 'bar')
+          startAt(false, 'foo', 'bar'),
         );
 
         return emptyQueryStream();
@@ -3352,7 +3352,7 @@ describe('startAfter() interface', () => {
   it('validates input', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.startAfter(123)).to.throw(
-      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.'
+      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.',
     );
   });
 
@@ -3362,7 +3362,7 @@ describe('startAfter() interface', () => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING'),
-          startAt(false, 'bar')
+          startAt(false, 'bar'),
         );
 
         return emptyQueryStream();
@@ -3395,7 +3395,7 @@ describe('endAt() interface', () => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          endAt(false, 'foo', 'bar')
+          endAt(false, 'foo', 'bar'),
         );
 
         return emptyQueryStream();
@@ -3413,7 +3413,7 @@ describe('endAt() interface', () => {
   it('validates input', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.endAt(123)).to.throw(
-      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.'
+      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.',
     );
   });
 
@@ -3452,7 +3452,7 @@ describe('endBefore() interface', () => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          endAt(true, 'foo', 'bar')
+          endAt(true, 'foo', 'bar'),
         );
 
         return emptyQueryStream();
@@ -3470,7 +3470,7 @@ describe('endBefore() interface', () => {
   it('validates input', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.endBefore(123)).to.throw(
-      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.'
+      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.',
     );
   });
 
@@ -3525,7 +3525,7 @@ describe('collectionGroup queries', () => {
         queryEquals(
           request,
           allDescendants(),
-          fieldFiltersQuery('foo', 'EQUAL', 'bar')
+          fieldFiltersQuery('foo', 'EQUAL', 'bar'),
         );
         return emptyQueryStream();
       },
@@ -3541,7 +3541,7 @@ describe('collectionGroup queries', () => {
   it('rejects slashes', () => {
     return createInstance().then(firestore => {
       expect(() => firestore.collectionGroup('foo/bar')).to.throw(
-        "Invalid collectionId 'foo/bar'. Collection IDs must not contain '/'."
+        "Invalid collectionId 'foo/bar'. Collection IDs must not contain '/'.",
       );
     });
   });
@@ -3556,7 +3556,7 @@ describe('collectionGroup queries', () => {
         'When querying a collection group and ordering by ' +
           'FieldPath.documentId(), the corresponding value must result in a ' +
           "valid document path, but 'coll' is not because it contains an odd " +
-          'number of segments.'
+          'number of segments.',
       );
     });
   });
@@ -3582,7 +3582,7 @@ describe('query resumption', () => {
     documentIds: string[],
     numDocs: number,
     error: Error,
-    startAtEnd?: boolean
+    startAtEnd?: boolean,
   ): Generator<api.IRunQueryResponse | Error> {
     assert(numDocs <= documentIds.length);
     const sliced = startAtEnd
@@ -3609,7 +3609,7 @@ describe('query resumption', () => {
     options?: {
       numDocs?: number;
       error?: Error;
-    }
+    },
   ): Generator<api.IRunQueryResponse | Error> {
     let begin: number | null | undefined;
     let end: number | null | undefined;
@@ -3666,7 +3666,7 @@ describe('query resumption', () => {
   // "startAt" of the given request. Returns `null` if it cannot find one.
   function getStartAtDocumentIndex(
     request: api.IRunQueryRequest,
-    documentIds: string[]
+    documentIds: string[],
   ): number | null {
     const startAt = request.structuredQuery?.startAt;
     const startAtValue = startAt?.values?.[0]?.referenceValue;
@@ -3686,7 +3686,7 @@ describe('query resumption', () => {
   // "endAt" of the given request. Returns `null` if it cannot find one.
   function getEndAtDocumentIndex(
     request: api.IRunQueryRequest,
-    documentIds: string[]
+    documentIds: string[],
   ): number | null {
     const endAt = request.structuredQuery?.endAt;
     const endAtValue = endAt?.values?.[0]?.referenceValue;
@@ -3720,8 +3720,8 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 2,
-                new GoogleError('simulated retryable error')
-              )
+                new GoogleError('simulated retryable error'),
+              ),
             );
           case 2:
             // Return the remaining documents.
@@ -3762,8 +3762,8 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 2,
-                new GoogleError('simulated retryable error')
-              )
+                new GoogleError('simulated retryable error'),
+              ),
             );
           case 2:
             return stream(...getDocResponsesForRequest(request!, documentIds));
@@ -3806,8 +3806,8 @@ describe('query resumption', () => {
                 documentIds,
                 documentIds.length / 2,
                 new GoogleError('simulated retryable error'),
-                /*startAtEnd*/ true
-              )
+                /*startAtEnd*/ true,
+              ),
             );
           case 2:
             return stream(...getDocResponsesForRequest(request!, documentIds));
@@ -3852,8 +3852,8 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 10,
-                new GoogleError('simulated retryable error')
-              )
+                new GoogleError('simulated retryable error'),
+              ),
             );
           case 2:
             // Get the another 120 documents followed by a retryable error.
@@ -3861,7 +3861,7 @@ describe('query resumption', () => {
               ...getDocResponsesForRequest(request!, documentIds, {
                 numDocs: documentIds.length / 5,
                 error: new GoogleError('simulated retryable error'),
-              })
+              }),
             );
           case 3:
             // Get the rest of the documents.
@@ -3906,8 +3906,8 @@ describe('query resumption', () => {
                 documentIds,
                 documentIds.length / 10,
                 new GoogleError('simulated retryable error'),
-                /*startAtEnd*/ true
-              )
+                /*startAtEnd*/ true,
+              ),
             );
           case 2:
             // Get the another 120 documents followed by a retryable error.
@@ -3915,7 +3915,7 @@ describe('query resumption', () => {
               ...getDocResponsesForRequest(request!, documentIds, {
                 numDocs: documentIds.length / 5,
                 error: new GoogleError('simulated retryable error'),
-              })
+              }),
             );
           case 3:
             // Get the rest of the documents.
