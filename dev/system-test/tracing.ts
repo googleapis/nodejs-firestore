@@ -38,6 +38,7 @@ import {
   InMemorySpanExporter,
   NodeTracerProvider,
   ReadableSpan,
+  SpanProcessor,
   TimedEvent,
 } from '@opentelemetry/sdk-trace-node';
 import {setLogFunction, Firestore} from '../src';
@@ -242,29 +243,27 @@ describe('Tracing Tests', () => {
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
 
-    // Create a new tracer and span processor for each test to make sure there
-    // are no overlaps when reading the results.
-    tracerProvider = new NodeTracerProvider({
-      sampler: new AlwaysOnSampler(),
-    });
-
     inMemorySpanExporter = new InMemorySpanExporter();
     consoleSpanExporter = new ConsoleSpanExporter();
     gcpTraceExporter = new TraceExporter();
 
-    // TODO(node-18 upgrade) uncomment and fix this code
-    // // Always add the console exporter for local debugging.
-    // tracerProvider.addSpanProcessor(
-    //   new BatchSpanProcessor(consoleSpanExporter)
-    // );
+    const spanProcessors: SpanProcessor[] = [
+      // Always add the console exporter for local debugging.
+      new BatchSpanProcessor(consoleSpanExporter),
+    ];
 
-    // if (testConfig.e2e) {
-    //   tracerProvider.addSpanProcessor(new BatchSpanProcessor(gcpTraceExporter));
-    // } else {
-    //   tracerProvider.addSpanProcessor(
-    //     new BatchSpanProcessor(inMemorySpanExporter)
-    //   );
-    // }
+    if (testConfig.e2e) {
+      spanProcessors.push(new BatchSpanProcessor(gcpTraceExporter));
+    } else {
+      spanProcessors.push(new BatchSpanProcessor(inMemorySpanExporter));
+    }
+
+    // Create a new tracer and span processor for each test to make sure there
+    // are no overlaps when reading the results.
+    tracerProvider = new NodeTracerProvider({
+      sampler: new AlwaysOnSampler(),
+      spanProcessors,
+    });
 
     if (testConfig.useGlobalOpenTelemetry) {
       trace.setGlobalTracerProvider(tracerProvider);
