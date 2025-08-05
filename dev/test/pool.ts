@@ -64,18 +64,34 @@ describe('Client pool', () => {
 
     const operationPromises = deferredPromises(4);
 
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[0].promise);
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[0].promise,
+    );
     expect(clientPool.size).to.equal(1);
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[1].promise);
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[1].promise,
+    );
     expect(clientPool.size).to.equal(1);
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[2].promise);
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[2].promise,
+    );
     expect(clientPool.size).to.equal(1);
 
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[3].promise);
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[3].promise,
+    );
     expect(clientPool.size).to.equal(2);
   });
 
-  it('re-uses instances with remaining capacity', () => {
+  it('re-uses instances with remaining capacity', async () => {
     const clientPool = new ClientPool<{}>(2, 0, () => {
       return {};
     });
@@ -90,19 +106,34 @@ describe('Client pool', () => {
       () => operationPromises[0].promise,
     );
     expect(clientPool.size).to.equal(1);
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[1].promise);
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[1].promise,
+    );
     expect(clientPool.size).to.equal(1);
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[2].promise);
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[2].promise,
+    );
     expect(clientPool.size).to.equal(2);
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[3].promise);
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[3].promise,
+    );
     expect(clientPool.size).to.equal(2);
 
     operationPromises[0].resolve();
 
-    return completionPromise.then(() => {
-      clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[4].promise);
-      expect(clientPool.size).to.equal(2);
-    });
+    await completionPromise;
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[4].promise,
+    );
+    expect(clientPool.size).to.equal(2);
   });
 
   it('re-uses idle instances', async () => {
@@ -362,11 +393,11 @@ describe('Client pool', () => {
       expect(client).to.be.equal(2);
       return operationPromises[2].promise;
     });
-    clientPool.run(REQUEST_TAG, USE_REST, client => {
+    void clientPool.run(REQUEST_TAG, USE_REST, client => {
       expect(client).to.be.equal(2);
       return operationPromises[3].promise;
     });
-    clientPool.run(REQUEST_TAG, USE_REST, client => {
+    void clientPool.run(REQUEST_TAG, USE_REST, client => {
       expect(client).to.be.equal(3);
       return operationPromises[4].promise;
     });
@@ -377,12 +408,12 @@ describe('Client pool', () => {
 
     // A newly scheduled operation should use the first client that has a free
     // slot.
-    clientPool.run(REQUEST_TAG, USE_REST, async client => {
+    void clientPool.run(REQUEST_TAG, USE_REST, async client => {
       expect(client).to.be.equal(2);
     });
   });
 
-  it('garbage collects after success', () => {
+  it('garbage collects after success', async () => {
     const clientPool = new ClientPool<{}>(2, 0, () => {
       return {};
     });
@@ -411,12 +442,11 @@ describe('Client pool', () => {
 
     operationPromises.forEach(deferred => deferred.resolve());
 
-    return Promise.all(completionPromises).then(() => {
-      expect(clientPool.size).to.equal(0);
-    });
+    await Promise.all(completionPromises);
+    expect(clientPool.size).to.equal(0);
   });
 
-  it('garbage collects after error', () => {
+  it('garbage collects after error', async () => {
     const clientPool = new ClientPool<{}>(2, 0, () => {
       return {};
     });
@@ -445,9 +475,8 @@ describe('Client pool', () => {
 
     operationPromises.forEach(deferred => deferred.reject(new Error()));
 
-    return Promise.all(completionPromises.map(p => p.catch(() => {}))).then(
-      () => expect(clientPool.size).to.equal(0),
-    );
+    await Promise.all(completionPromises.map(p => p.catch(() => {})));
+    expect(clientPool.size).to.equal(0);
   });
 
   it('garbage collection calls destructor', () => {
@@ -463,8 +492,16 @@ describe('Client pool', () => {
     const operationPromises = deferredPromises(2);
 
     // Create two pending operations that each spawn their own client
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[0].promise);
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[1].promise);
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[0].promise,
+    );
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[1].promise,
+    );
 
     operationPromises.forEach(deferred => deferred.resolve());
 
@@ -548,9 +585,21 @@ describe('Client pool', () => {
     );
 
     const operationPromises = deferredPromises(4);
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[0].promise);
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[1].promise);
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[2].promise);
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[0].promise,
+    );
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[1].promise,
+    );
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[2].promise,
+    );
     const lastOp = clientPool.run(
       REQUEST_TAG,
       USE_REST,
@@ -575,7 +624,11 @@ describe('Client pool', () => {
     );
 
     const operationPromises = deferredPromises(2);
-    clientPool.run(REQUEST_TAG, USE_REST, () => operationPromises[0].promise);
+    void clientPool.run(
+      REQUEST_TAG,
+      USE_REST,
+      () => operationPromises[0].promise,
+    );
     const completionPromise = clientPool.run(
       REQUEST_TAG,
       USE_REST,
@@ -589,24 +642,20 @@ describe('Client pool', () => {
     expect(clientPool.size).to.equal(1);
   });
 
-  it('rejects subsequent operations after being terminated', () => {
+  it('rejects subsequent operations after being terminated', async () => {
     const clientPool = new ClientPool<{}>(1, 0, () => {
       return {};
     });
 
-    return clientPool
-      .terminate()
-      .then(() => {
-        return clientPool.run(REQUEST_TAG, USE_REST, () =>
-          Promise.reject('Call to run() should have failed'),
-        );
-      })
-      .catch((err: Error) => {
-        expect(err.message).to.equal(CLIENT_TERMINATED_ERROR_MSG);
-      });
+    await clientPool.terminate();
+    await expect(
+      clientPool.run(REQUEST_TAG, USE_REST, () =>
+        Promise.reject('Call to run() should have failed'),
+      ),
+    ).to.be.rejectedWith(CLIENT_TERMINATED_ERROR_MSG);
   });
 
-  it('waits for existing operations to complete before releasing clients', done => {
+  it('waits for existing operations to complete before releasing clients', async () => {
     const clientPool = new ClientPool<{}>(1, 0, () => {
       return {};
     });
@@ -614,7 +663,7 @@ describe('Client pool', () => {
     let terminated = false;
 
     // Run operation that completes after terminate() is called.
-    clientPool.run(REQUEST_TAG, USE_REST, () => {
+    void clientPool.run(REQUEST_TAG, USE_REST, () => {
       return deferred.promise;
     });
     const terminateOp = clientPool.terminate().then(() => {
@@ -624,9 +673,7 @@ describe('Client pool', () => {
     expect(terminated).to.be.false;
     // Mark the mock operation as "complete".
     deferred.resolve();
-    terminateOp.then(() => {
-      expect(terminated).to.be.true;
-      done();
-    });
+    await terminateOp;
+    expect(terminated).to.be.true;
   });
 });

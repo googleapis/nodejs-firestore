@@ -552,17 +552,12 @@ describe('Firestore class', () => {
     expect(docs[1].data()!.toString()).to.deep.equal('post2, by author2');
   });
 
-  it('cannot make calls after the client has been terminated', () => {
+  it('cannot make calls after the client has been terminated', async () => {
     const ref1 = randomCol.doc('doc1');
-    return firestore
-      .terminate()
-      .then(() => {
-        return ref1.set({foo: 100});
-      })
-      .then(() => Promise.reject('set() should have failed'))
-      .catch(err => {
-        expect(err.message).to.equal('The client has already been terminated');
-      });
+    await firestore.terminate();
+    return expect(ref1.set({foo: 100})).to.eventually.be.rejectedWith(
+      'The client has already been terminated',
+    );
   });
 
   it('throws an error if terminate() is called with active listeners', async () => {
@@ -1287,7 +1282,7 @@ describe('DocumentReference class', () => {
         });
     }
 
-    return promise;
+    void promise;
   });
 
   // tslint:disable-next-line:only-arrow-function
@@ -5208,7 +5203,7 @@ describe('Aggregation queries', () => {
   });
 
   it("terminate doesn't crash when there is aggregate query in flight", async () => {
-    col.aggregate({count: AggregateField.count()}).get();
+    void col.aggregate({count: AggregateField.count()}).get();
     await firestore.terminate();
   });
 
@@ -7053,12 +7048,13 @@ describe('WriteBatch class', () => {
     const ref = randomCol.doc('__doc__');
     const batch = firestore.batch();
     batch.set(ref, {foo: 'a'});
-    return batch
+    const promise = batch
       .commit()
       .then(() => Promise.reject('commit() should have failed'))
       .catch((err: Error) => {
         expect(err.stack).to.contain('WriteBatch.commit');
       });
+    void promise;
   });
 
   it('has update() method', () => {

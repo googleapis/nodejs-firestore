@@ -678,7 +678,7 @@ describe('Query watch', () => {
   /** The GAPIC callback that executes the listen. */
   let listenCallback: () => Duplex;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // We are intentionally skipping the delays to ensure fast test execution.
     // The retry semantics are unaffected by this, as we maintain their
     // asynchronous behavior.
@@ -693,26 +693,21 @@ describe('Query watch', () => {
     streamHelper = new StreamHelper();
     listenCallback = streamHelper.getListenCallback();
 
-    return createInstance({listen: () => listenCallback()}).then(
-      firestoreClient => {
-        firestore = firestoreClient;
-
-        watchHelper = new WatchHelper(
-          streamHelper,
-          firestore.collection('col'),
-          targetId,
-        );
-
-        colRef = firestore.collection('col');
-
-        doc1 = firestore.doc('col/doc1');
-        doc2 = firestore.doc('col/doc2');
-        doc3 = firestore.doc('col/doc3');
-        doc4 = firestore.doc('col/doc4');
-
-        lastSnapshot = EMPTY;
-      },
+    firestore = await createInstance({listen: () => listenCallback()});
+    watchHelper = new WatchHelper(
+      streamHelper,
+      firestore.collection('col'),
+      targetId,
     );
+
+    colRef = firestore.collection('col');
+
+    doc1 = firestore.doc('col/doc1');
+    doc2 = firestore.doc('col/doc2');
+    doc3 = firestore.doc('col/doc3');
+    doc4 = firestore.doc('col/doc4');
+
+    lastSnapshot = EMPTY;
   });
 
   afterEach(() => {
@@ -736,7 +731,7 @@ describe('Query watch', () => {
       done();
     });
 
-    streamHelper.awaitOpen().then(() => {
+    void streamHelper.awaitOpen().then(() => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
@@ -888,15 +883,15 @@ describe('Query watch', () => {
       err.code = statusCode;
 
       if (expectRetry) {
-        await watchHelper.runTest(collQueryJSON(), () => {
-          watchHelper.sendAddTarget();
-          watchHelper.sendCurrent();
-          watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
-          return watchHelper.await('snapshot').then(() => {
-            streamHelper.destroyStream(err);
-            return streamHelper.awaitReopen();
-          });
+      return watchHelper.runTest(collQueryJSON(), () => {
+        watchHelper.sendAddTarget();
+        watchHelper.sendCurrent();
+        watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
+        return watchHelper.await('snapshot').then(() => {
+          streamHelper.destroyStream(err);
+          return streamHelper.awaitReopen();
         });
+      });
       } else {
         await watchHelper.runFailedTest(
           collQueryJSON(),
@@ -2280,7 +2275,7 @@ describe('DocumentReference watch', () => {
     };
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // We are intentionally skipping the delays to ensure fast test execution.
     // The retry semantics are unaffected by this, as we maintain their
     // asynchronous behavior.
@@ -2294,11 +2289,9 @@ describe('DocumentReference watch', () => {
     streamHelper = new StreamHelper();
 
     const overrides = {listen: streamHelper.getListenCallback()};
-    return createInstance(overrides).then(firestoreClient => {
-      firestore = firestoreClient;
-      doc = firestore.doc('col/doc');
-      watchHelper = new WatchHelper(streamHelper, doc, targetId);
-    });
+    firestore = await createInstance(overrides);
+    doc = firestore.doc('col/doc');
+    watchHelper = new WatchHelper(streamHelper, doc, targetId);
   });
 
   afterEach(() => {
@@ -2322,7 +2315,7 @@ describe('DocumentReference watch', () => {
       done();
     });
 
-    streamHelper.awaitOpen().then(() => {
+    void streamHelper.awaitOpen().then(() => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
@@ -2635,17 +2628,15 @@ describe('Query comparator', () => {
   let doc3: DocumentReference;
   let doc4: DocumentReference;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreClient => {
-      firestore = firestoreClient;
+  beforeEach(async () => {
+    firestore = await createInstance();
 
-      colRef = firestore.collection('col');
+    colRef = firestore.collection('col');
 
-      doc1 = firestore.doc('col/doc1');
-      doc2 = firestore.doc('col/doc2');
-      doc3 = firestore.doc('col/doc3');
-      doc4 = firestore.doc('col/doc4');
-    });
+    doc1 = firestore.doc('col/doc1');
+    doc2 = firestore.doc('col/doc2');
+    doc3 = firestore.doc('col/doc3');
+    doc4 = firestore.doc('col/doc4');
   });
 
   afterEach(() => verifyInstance(firestore));

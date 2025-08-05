@@ -980,11 +980,11 @@ describe('Tracing Tests', () => {
       await runFirestoreOperationInRootSpan(async () => {
         const bulkWriter = firestore.bulkWriter();
         // No need to await the set operations as 'close()' will commit all writes before closing.
-        bulkWriter.set(firestore.collection('foo').doc(), {foo: 1});
-        bulkWriter.set(firestore.collection('foo').doc(), {foo: 2});
-        bulkWriter.set(firestore.collection('foo').doc(), {foo: 3});
-        bulkWriter.set(firestore.collection('foo').doc(), {foo: 4});
-        bulkWriter.set(firestore.collection('foo').doc(), {foo: 5});
+        void bulkWriter.set(firestore.collection('foo').doc(), {foo: 1});
+        void bulkWriter.set(firestore.collection('foo').doc(), {foo: 2});
+        void bulkWriter.set(firestore.collection('foo').doc(), {foo: 3});
+        void bulkWriter.set(firestore.collection('foo').doc(), {foo: 4});
+        void bulkWriter.set(firestore.collection('foo').doc(), {foo: 5});
         await bulkWriter.close();
       });
 
