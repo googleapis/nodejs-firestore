@@ -285,7 +285,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       assert(client.firestoreStub);
       await client.close();
     });
@@ -340,7 +340,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.GetDocumentRequest(),
       );
@@ -371,7 +371,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.GetDocumentRequest(),
       );
@@ -418,7 +418,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.GetDocumentRequest(),
       );
@@ -449,7 +449,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.GetDocumentRequest(),
       );
@@ -470,7 +470,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.UpdateDocumentRequest(),
       );
@@ -502,7 +502,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.UpdateDocumentRequest(),
       );
@@ -550,7 +550,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.UpdateDocumentRequest(),
       );
@@ -582,7 +582,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.UpdateDocumentRequest(),
       );
@@ -604,7 +604,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.DeleteDocumentRequest(),
       );
@@ -635,7 +635,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.DeleteDocumentRequest(),
       );
@@ -682,7 +682,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.DeleteDocumentRequest(),
       );
@@ -713,7 +713,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.DeleteDocumentRequest(),
       );
@@ -734,7 +734,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BeginTransactionRequest(),
       );
@@ -765,7 +765,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BeginTransactionRequest(),
       );
@@ -812,7 +812,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BeginTransactionRequest(),
       );
@@ -843,7 +843,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BeginTransactionRequest(),
       );
@@ -864,7 +864,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CommitRequest(),
       );
@@ -895,7 +895,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CommitRequest(),
       );
@@ -942,7 +942,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CommitRequest(),
       );
@@ -970,7 +970,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CommitRequest(),
       );
@@ -991,7 +991,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RollbackRequest(),
       );
@@ -1022,7 +1022,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RollbackRequest(),
       );
@@ -1069,7 +1069,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RollbackRequest(),
       );
@@ -1097,7 +1097,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RollbackRequest(),
       );
@@ -1118,7 +1118,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchWriteRequest(),
       );
@@ -1149,7 +1149,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchWriteRequest(),
       );
@@ -1196,7 +1196,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchWriteRequest(),
       );
@@ -1227,7 +1227,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchWriteRequest(),
       );
@@ -1248,7 +1248,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CreateDocumentRequest(),
       );
@@ -1284,7 +1284,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CreateDocumentRequest(),
       );
@@ -1336,7 +1336,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CreateDocumentRequest(),
       );
@@ -1372,7 +1372,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.CreateDocumentRequest(),
       );
@@ -1398,7 +1398,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchGetDocumentsRequest(),
       );
@@ -1489,7 +1489,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchGetDocumentsRequest(),
       );
@@ -1534,7 +1534,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchGetDocumentsRequest(),
       );
@@ -1577,7 +1577,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RunQueryRequest(),
       );
@@ -1619,7 +1619,7 @@ describe('v1beta1.FirestoreClient', () => {
       const client = new firestoreModule.FirestoreClient({
         gaxServerStreamingRetries: true,
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RunQueryRequest(),
       );
@@ -1662,7 +1662,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RunQueryRequest(),
       );
@@ -1705,7 +1705,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.RunQueryRequest(),
       );
@@ -1746,7 +1746,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.WriteRequest(),
       );
@@ -1786,7 +1786,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.WriteRequest(),
       );
@@ -1827,7 +1827,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListenRequest(),
       );
@@ -1867,7 +1867,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListenRequest(),
       );
@@ -1908,7 +1908,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest(),
       );
@@ -1946,7 +1946,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest(),
       );
@@ -2000,7 +2000,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest(),
       );
@@ -2036,7 +2036,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest(),
       );
@@ -2095,7 +2095,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest(),
       );
@@ -2149,7 +2149,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest(),
       );
@@ -2197,7 +2197,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListDocumentsRequest(),
       );
@@ -2244,7 +2244,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest(),
       );
@@ -2277,7 +2277,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest(),
       );
@@ -2326,7 +2326,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest(),
       );
@@ -2357,7 +2357,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest(),
       );
@@ -2411,7 +2411,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest(),
       );
@@ -2460,7 +2460,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest(),
       );
@@ -2503,7 +2503,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.PartitionQueryRequest(),
       );
@@ -2545,7 +2545,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest(),
       );
@@ -2574,7 +2574,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest(),
       );
@@ -2616,7 +2616,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest(),
       );
@@ -2647,7 +2647,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest(),
       );
@@ -2694,7 +2694,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest(),
       );
@@ -2740,7 +2740,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest(),
       );
@@ -2779,7 +2779,7 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.ListCollectionIdsRequest(),
       );
