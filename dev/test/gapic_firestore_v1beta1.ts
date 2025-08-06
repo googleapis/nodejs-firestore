@@ -1443,7 +1443,7 @@ describe('v1beta1.FirestoreClient', () => {
       const client = new firestoreModule.FirestoreClient({
         gaxServerStreamingRetries: true,
       });
-      await client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.v1beta1.BatchGetDocumentsRequest(),
       );
