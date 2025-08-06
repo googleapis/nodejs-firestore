@@ -430,7 +430,7 @@ describe('serialize document', () => {
     obj.foo = obj;
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update(obj);
+      void firestore.doc('collectionId/documentId').update(obj);
     }).to.throw(
       'Value for argument "dataOrField" is not a valid Firestore value. Input object is deeper than 20 levels or contains a cycle.',
     );
@@ -653,9 +653,7 @@ describe('deserialize document', () => {
     const doc = await firestore.doc('collectionId/documentId').get();
     expect(() => {
       doc.data();
-    }).to.throw(
-      'Cannot decode type from Firestore Value: {"valueType":"foo"}',
-    );
+    }).to.throw('Cannot decode type from Firestore Value: {"valueType":"foo"}');
   });
 
   it("doesn't deserialize invalid latitude", async () => {
@@ -774,7 +772,7 @@ describe('get document', () => {
       },
     };
 
-    createInstance(overrides).then(firestore => {
+    void createInstance(overrides).then(firestore => {
       firestore
         .doc('collectionId/documentId')
         .get()
@@ -1323,7 +1321,7 @@ describe('set document', () => {
 
   it('validates merge option', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set(
+      void firestore.doc('collectionId/documentId').set(
         {foo: 'bar'},
         {
           mergeFields: ['foobar'],
@@ -1332,7 +1330,7 @@ describe('set document', () => {
     }).to.throw('Input data is missing for field "foobar".');
 
     expect(() => {
-      firestore.doc('collectionId/documentId').set(
+      void firestore.doc('collectionId/documentId').set(
         {foo: 'bar'},
         {
           mergeFields: ['foobar..'],
@@ -1345,7 +1343,7 @@ describe('set document', () => {
     );
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .set({foo: 'bar'}, {merge: true, mergeFields: []});
     }).to.throw(
@@ -1355,7 +1353,9 @@ describe('set document', () => {
 
   it('requires an object', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set(null as InvalidApiUsage);
+      void firestore
+        .doc('collectionId/documentId')
+        .set(null as InvalidApiUsage);
     }).to.throw(
       'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
@@ -1363,7 +1363,9 @@ describe('set document', () => {
 
   it("doesn't support non-merge deletes", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set({foo: FieldValue.delete()});
+      void firestore
+        .doc('collectionId/documentId')
+        .set({foo: FieldValue.delete()});
     }).to.throw(
       'Value for argument "data" is not a valid Firestore document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "foo").',
     );
@@ -1371,7 +1373,9 @@ describe('set document', () => {
 
   it("doesn't accept arrays", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set([42] as InvalidApiUsage);
+      void firestore
+        .doc('collectionId/documentId')
+        .set([42] as InvalidApiUsage);
     }).to.throw(
       'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
@@ -1480,7 +1484,9 @@ describe('create document', () => {
 
   it('requires an object', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').create(null as InvalidApiUsage);
+      void firestore
+        .doc('collectionId/documentId')
+        .create(null as InvalidApiUsage);
     }).to.throw(
       'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
@@ -1488,7 +1494,9 @@ describe('create document', () => {
 
   it("doesn't accept arrays", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').create([42] as InvalidApiUsage);
+      void firestore
+        .doc('collectionId/documentId')
+        .create([42] as InvalidApiUsage);
     }).to.throw(
       'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
@@ -1653,7 +1661,9 @@ describe('update document', () => {
     };
 
     const firestore = await createInstance(overrides);
-    const res = await firestore.doc('collectionId/documentId').update({foo: 'bar'});
+    const res = await firestore
+      .doc('collectionId/documentId')
+      .update({foo: 'bar'});
     expect(res.writeTime.isEqual(new Timestamp(479978400, 123000000))).to.be
       .true;
   });
@@ -1697,7 +1707,7 @@ describe('update document', () => {
       const malformedPrecondition: Precondition = {
         lastUpdateTime: 'foo',
       } as unknown as Precondition;
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update({foo: 'bar'}, malformedPrecondition);
     }).to.throw('"lastUpdateTime" is not a Firestore Timestamp.');
@@ -1705,7 +1715,7 @@ describe('update document', () => {
 
   it('requires at least one field', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').update({});
+      void firestore.doc('collectionId/documentId').update({});
     }).to.throw('At least one field must be updated.');
 
     expect(() => {
@@ -1717,7 +1727,7 @@ describe('update document', () => {
 
   it('rejects nested deletes', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         a: {b: FieldValue.delete()},
       });
     }).to.throw(
@@ -1725,7 +1735,7 @@ describe('update document', () => {
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update('a', {
+      void firestore.doc('collectionId/documentId').update('a', {
         b: FieldValue.delete(),
       });
     }).to.throw(
@@ -1733,7 +1743,7 @@ describe('update document', () => {
     );
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update('a', FieldValue.arrayUnion(FieldValue.delete()));
     }).to.throw(
@@ -1944,7 +1954,7 @@ describe('update document', () => {
 
   it('with conflicting update', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         foo: 'foobar',
         'foo.bar': 'foobar',
       });
@@ -1953,7 +1963,7 @@ describe('update document', () => {
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         foo: 'foobar',
         'foo.bar.foobar': 'foobar',
       });
@@ -1962,7 +1972,7 @@ describe('update document', () => {
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         'foo.bar': 'foobar',
         foo: 'foobar',
       });
@@ -1971,7 +1981,7 @@ describe('update document', () => {
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         'foo.bar': 'foobar',
         'foo.bar.foo': 'foobar',
       });
@@ -1980,7 +1990,7 @@ describe('update document', () => {
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         'foo.bar': {foo: 'foobar'},
         'foo.bar.foo': 'foobar',
       });
@@ -1989,7 +1999,7 @@ describe('update document', () => {
     );
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update('foo.bar', 'foobar', 'foo', 'foobar');
     }).to.throw(
@@ -1997,7 +2007,7 @@ describe('update document', () => {
     );
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
     }).to.throw(
@@ -2005,7 +2015,7 @@ describe('update document', () => {
     );
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
     }).to.throw(
@@ -2024,7 +2034,7 @@ describe('update document', () => {
   it('with empty field path', () => {
     expect(() => {
       const doc = {'': 'foo'};
-      firestore.doc('col/doc').update(doc);
+      void firestore.doc('col/doc').update(doc);
     }).to.throw(
       'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 0 should not be an empty string.',
     );
@@ -2046,20 +2056,20 @@ describe('update document', () => {
       expect(() => {
         const doc: {[k: string]: string} = {};
         doc[invalidFields[i]] = 'foo';
-        firestore.doc('col/doc').update(doc);
+        void firestore.doc('col/doc').update(doc);
       }).to.throw(/Value for argument ".*" is not a valid field path/);
     }
   });
 
   it("doesn't accept argument after precondition", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').update('foo', 'bar', {
+      void firestore.doc('collectionId/documentId').update('foo', 'bar', {
         exists: false,
       });
     }).to.throw(INVALID_ARGUMENTS_TO_UPDATE);
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update({foo: 'bar'}, {exists: true}, 'foo');
     }).to.throw(INVALID_ARGUMENTS_TO_UPDATE);

@@ -1464,31 +1464,31 @@ describe('where() interface', () => {
     const query = firestore.collection('collectionId');
 
     expect(() => {
-      query.where('foo', '==', new Foo()).get();
+      void query.where('foo', '==', new Foo()).get();
     }).to.throw(
       'Value for argument "value" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).',
     );
 
     expect(() => {
-      query.where('foo', '==', new FieldPath()).get();
+      void query.where('foo', '==', new FieldPath()).get();
     }).to.throw(
       'Detected an object of type "FieldPath" that doesn\'t match the expected instance.',
     );
 
     expect(() => {
-      query.where('foo', '==', new FieldValue()).get();
+      void query.where('foo', '==', new FieldValue()).get();
     }).to.throw(
       'Detected an object of type "FieldValue" that doesn\'t match the expected instance.',
     );
 
     expect(() => {
-      query.where('foo', '==', new DocumentReference()).get();
+      void query.where('foo', '==', new DocumentReference()).get();
     }).to.throw(
       'Detected an object of type "DocumentReference" that doesn\'t match the expected instance.',
     );
 
     expect(() => {
-      query.where('foo', '==', new GeoPoint()).get();
+      void query.where('foo', '==', new GeoPoint()).get();
     }).to.throw(
       'Detected an object of type "GeoPoint" that doesn\'t match the expected instance.',
     );

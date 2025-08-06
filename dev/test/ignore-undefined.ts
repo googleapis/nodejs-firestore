@@ -207,8 +207,8 @@ describe('rejects undefined values', () => {
         {},
         {ignoreUndefinedProperties: true},
       );
-      void expect(() => {
-        firestore
+      expect(() => {
+        void firestore
           .doc('collectionId/documentId')
           .set(undefined as InvalidApiUsage);
       }).to.throw(
@@ -221,8 +221,8 @@ describe('rejects undefined values', () => {
         {},
         {ignoreUndefinedProperties: true},
       );
-      void expect(() => {
-        firestore
+      expect(() => {
+        void firestore
           .doc('collectionId/documentId')
           .create(undefined as InvalidApiUsage);
       }).to.throw(
@@ -235,8 +235,8 @@ describe('rejects undefined values', () => {
         {},
         {ignoreUndefinedProperties: true},
       );
-      void expect(() => {
-        firestore.doc('collectionId/documentId').update('foo', undefined);
+      expect(() => {
+        void firestore.doc('collectionId/documentId').update('foo', undefined);
       }).to.throw('"undefined" values are only ignored inside of objects.');
     });
 
@@ -245,7 +245,7 @@ describe('rejects undefined values', () => {
         {},
         {ignoreUndefinedProperties: true},
       );
-      void expect(() => {
+      expect(() => {
         firestore
           .doc('collectionId/documentId')
           .collection('collectionId')
@@ -258,7 +258,7 @@ describe('rejects undefined values', () => {
         {},
         {ignoreUndefinedProperties: true},
       );
-      void expect(() => {
+      expect(() => {
         firestore
           .doc('collectionId/documentId')
           .collection('collectionId')
@@ -271,8 +271,8 @@ describe('rejects undefined values', () => {
   describe('when setting is disabled', () => {
     it('in set()', async () => {
       const firestore = await createInstance({});
-      void expect(() => {
-        firestore.doc('collectionId/documentId').set({
+      expect(() => {
+        void firestore.doc('collectionId/documentId').set({
           foo: 'foo',
           bar: undefined,
         });
@@ -283,8 +283,8 @@ describe('rejects undefined values', () => {
 
     it('in create()', async () => {
       const firestore = await createInstance({});
-      void expect(() => {
-        firestore.doc('collectionId/documentId').create({
+      expect(() => {
+        void firestore.doc('collectionId/documentId').create({
           foo: 'foo',
           bar: undefined,
         });
@@ -295,8 +295,8 @@ describe('rejects undefined values', () => {
 
     it('in update()', async () => {
       const firestore = await createInstance({});
-      void expect(() => {
-        firestore.doc('collectionId/documentId').update('foo', {
+      expect(() => {
+        void firestore.doc('collectionId/documentId').update('foo', {
           foo: 'foo',
           bar: undefined,
         });
@@ -307,7 +307,7 @@ describe('rejects undefined values', () => {
 
     it('in query filters', async () => {
       const firestore = await createInstance({});
-      void expect(() => {
+      expect(() => {
         firestore
           .collection('collectionId')
           .where('foo', '==', {bar: 'bar', baz: undefined});
@@ -318,7 +318,7 @@ describe('rejects undefined values', () => {
 
     it('in query cursors', async () => {
       const firestore = await createInstance({});
-      void expect(() => {
+      expect(() => {
         firestore
           .collection('collectionId')
           .orderBy('foo')

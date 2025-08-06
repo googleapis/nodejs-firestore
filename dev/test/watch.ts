@@ -883,15 +883,15 @@ describe('Query watch', () => {
       err.code = statusCode;
 
       if (expectRetry) {
-      return watchHelper.runTest(collQueryJSON(), () => {
-        watchHelper.sendAddTarget();
-        watchHelper.sendCurrent();
-        watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
-        return watchHelper.await('snapshot').then(() => {
-          streamHelper.destroyStream(err);
-          return streamHelper.awaitReopen();
+        return watchHelper.runTest(collQueryJSON(), () => {
+          watchHelper.sendAddTarget();
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
+          return watchHelper.await('snapshot').then(() => {
+            streamHelper.destroyStream(err);
+            return streamHelper.awaitReopen();
+          });
         });
-      });
       } else {
         await watchHelper.runFailedTest(
           collQueryJSON(),
@@ -1991,7 +1991,7 @@ describe('Query watch', () => {
       baseSnapshot: QuerySnapshot,
       watchStep: (currentSnapshot: QuerySnapshot) => Promise<void> | void,
     ): Promise<QuerySnapshot> {
-      watchStep(baseSnapshot);
+      void watchStep(baseSnapshot);
       watchHelper.sendSnapshot(++snapshotVersion);
       return watchHelper.await('snapshot') as Promise<QuerySnapshot>;
     }

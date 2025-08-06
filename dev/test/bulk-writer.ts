@@ -393,7 +393,7 @@ describe.skip('BulkWriter', () => {
     ]);
 
     const doc = firestore.doc('collectionId/doc');
-    bulkWriter.set(doc, {foo: 'bar'});
+    void bulkWriter.set(doc, {foo: 'bar'});
 
     await bulkWriter.close();
     await unhandledDeferred.promise;
@@ -409,7 +409,7 @@ describe.skip('BulkWriter', () => {
     ]);
 
     const doc = firestore.doc('collectionId/doc');
-    bulkWriter.set(doc, {foo: 'bar'});
+    void bulkWriter.set(doc, {foo: 'bar'});
     // Set the error handler after calling set() to ensure that the check is
     // performed when the promise resolves.
     bulkWriter.onWriteError(() => false);
@@ -636,10 +636,10 @@ describe.skip('BulkWriter', () => {
     bulkWriter.onWriteResult((documentRef, result) => {
       writeResults.push(result.writeTime.seconds);
     });
-    bulkWriter.create(firestore.doc('collectionId/doc1'), {foo: 'bar'});
-    bulkWriter.set(firestore.doc('collectionId/doc2'), {foo: 'bar'});
-    bulkWriter.update(firestore.doc('collectionId/doc3'), {foo: 'bar'});
-    bulkWriter.delete(firestore.doc('collectionId/doc4'));
+    void bulkWriter.create(firestore.doc('collectionId/doc1'), {foo: 'bar'});
+    void bulkWriter.set(firestore.doc('collectionId/doc2'), {foo: 'bar'});
+    void bulkWriter.update(firestore.doc('collectionId/doc3'), {foo: 'bar'});
+    void bulkWriter.delete(firestore.doc('collectionId/doc4'));
     return bulkWriter.close().then(() => {
       expect(writeResults).to.deep.equal([1, 2, 3, 4]);
     });
@@ -684,10 +684,10 @@ describe.skip('BulkWriter', () => {
       ops.push('success');
       writeResults.push(result.writeTime.seconds);
     });
-    bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
-    bulkWriter.update(firestore.doc('collectionId/doc2'), {foo: 'bar'});
-    bulkWriter.delete(firestore.doc('collectionId/doc3'));
+    void bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    void bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
+    void bulkWriter.update(firestore.doc('collectionId/doc2'), {foo: 'bar'});
+    void bulkWriter.delete(firestore.doc('collectionId/doc3'));
     return bulkWriter.close().then(() => {
       expect(ops).to.deep.equal([
         'success',
@@ -1128,7 +1128,7 @@ describe.skip('BulkWriter', () => {
     }
 
     it('does not send batches if doing so exceeds the rate limit', done => {
-      instantiateInstance({throttling: {maxOpsPerSecond: 5}}).then(
+      void instantiateInstance({throttling: {maxOpsPerSecond: 5}}).then(
         bulkWriter => {
           let timeoutCalled = false;
           setTimeoutHandler((_, timeout) => {
@@ -1138,13 +1138,15 @@ describe.skip('BulkWriter', () => {
             }
           });
           for (let i = 0; i < 500; i++) {
-            bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
+            void bulkWriter.set(firestore.doc('collectionId/doc' + i), {
+              foo: 'bar',
+            });
           }
           // The close() promise will never resolve. Since we do not call the
           // callback function in the overridden handler, subsequent requests
           // after the timeout will not be made. The close() call is used to
           // ensure that the final batch is sent.
-          bulkWriter.close();
+          void bulkWriter.close();
         },
       );
     });
@@ -1177,7 +1179,7 @@ describe.skip('BulkWriter', () => {
     }
     const bulkWriter = await instantiateInstance();
     let writeResult: WriteResult;
-    bulkWriter
+    void bulkWriter
       .create(firestore.doc('collectionId/doc'), {
         foo: 'bar',
       })
@@ -1306,10 +1308,10 @@ describe.skip('BulkWriter', () => {
     ]);
 
     bulkWriter.onWriteError(err => err.failedAttempts < 5);
-    bulkWriter.create(firestore.doc('collectionId/doc1'), {
+    void bulkWriter.create(firestore.doc('collectionId/doc1'), {
       foo: 'bar',
     });
-    bulkWriter.set(firestore.doc('collectionId/doc2'), {
+    void bulkWriter.set(firestore.doc('collectionId/doc2'), {
       foo: 'bar',
     });
     return bulkWriter.close().then(() => {

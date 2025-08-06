@@ -381,11 +381,11 @@ describe('Client pool', () => {
     // Create 5 operations, which should schedule 2 operations on the first
     // client, 2 on the second and 1 on the third.
     const operationPromises = deferredPromises(7);
-    clientPool.run(REQUEST_TAG, USE_REST, client => {
+    void clientPool.run(REQUEST_TAG, USE_REST, client => {
       expect(client).to.be.equal(1);
       return operationPromises[0].promise;
     });
-    clientPool.run(REQUEST_TAG, USE_REST, client => {
+    void clientPool.run(REQUEST_TAG, USE_REST, client => {
       expect(client).to.be.equal(1);
       return operationPromises[1].promise;
     });
