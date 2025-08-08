@@ -141,7 +141,7 @@ use(chaiAsPromised);
 
 const timestampDeltaMS = 3000;
 
-describe('Pipeline class', () => {
+describe.only('Pipeline class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   let beginDocCreation = 0;

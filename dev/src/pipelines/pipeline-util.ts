@@ -570,10 +570,10 @@ export function isOrdering(val: unknown): val is firestore.Pipelines.Ordering {
   );
 }
 
-export function isAggregateWithAlias(
+export function isAliasedAggregate(
   val: unknown
-): val is firestore.Pipelines.AggregateWithAlias {
-  const candidate = val as firestore.Pipelines.AggregateWithAlias;
+): val is firestore.Pipelines.AliasedAggregate {
+  const candidate = val as firestore.Pipelines.AliasedAggregate;
   return (
     isString(candidate.alias) &&
     candidate.aggregate instanceof AggregateFunction

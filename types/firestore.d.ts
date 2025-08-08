@@ -3388,7 +3388,7 @@ declare namespace FirebaseFirestore {
       | 'Function'
       | 'AggregateFunction'
       | 'ListOfExprs'
-      | 'ExprWithAlias';
+      | 'AliasedExpr';
 
     /**
      * @beta
@@ -4901,10 +4901,10 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param name The alias to assign to this expression.
-       * @return A new {@link ExprWithAlias} that wraps this
+       * @return A new {@link AliasedExpr} that wraps this
        *     expression and associates it with the provided alias.
        */
-      as(name: string): ExprWithAlias;
+      as(name: string): AliasedExpr;
     }
 
     /**
@@ -4938,10 +4938,10 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param name The alias to assign to this AggregateFunction.
-       * @return A new {@link AggregateWithAlias} that wraps this
+       * @return A new {@link AliasedAggregate} that wraps this
        *     AggregateFunction and associates it with the provided alias.
        */
-      as(name: string): AggregateWithAlias;
+      as(name: string): AliasedAggregate;
     }
 
     /**
@@ -4949,7 +4949,7 @@ declare namespace FirebaseFirestore {
      *
      * An AggregateFunction with alias.
      */
-    export class AggregateWithAlias {
+    export class AliasedAggregate {
       readonly aggregate: AggregateFunction;
       readonly alias: string;
     }
@@ -4957,7 +4957,7 @@ declare namespace FirebaseFirestore {
     /**
      * @beta
      */
-    export class ExprWithAlias implements Selectable {
+    export class AliasedExpr implements Selectable {
       exprType: ExprType;
       selectable: true;
 
@@ -9440,7 +9440,7 @@ declare namespace FirebaseFirestore {
        *
        * - {@code string}: Name of an existing field
        * - {@link Field}: References an existing document field.
-       * - {@link ExprWithAlias}: Represents the result of a function with an assigned alias name
+       * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
        *   using {@link Expr#as}.
        *
        * Example:
@@ -9472,7 +9472,7 @@ declare namespace FirebaseFirestore {
        *
        * - {@code string}: Name of an existing field
        * - {@link Field}: References an existing document field.
-       * - {@link ExprWithAlias}: Represents the result of a function with an assigned alias name
+       * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
        *   using {@link Expr#as}.
        *
        * Example:
@@ -9493,7 +9493,7 @@ declare namespace FirebaseFirestore {
        * Performs aggregation operations on the documents from previous stages.
        *
        * <p>This stage allows you to calculate aggregate values over a set of documents. You define the
-       * aggregations to perform using {@link AggregateWithAlias} expressions which are typically results of
+       * aggregations to perform using {@link AliasedAggregate} expressions which are typically results of
        * calling {@link Expr#as} on {@link AggregateFunction} instances.
        *
        * <p>Example:
@@ -9507,15 +9507,15 @@ declare namespace FirebaseFirestore {
        *     );
        * ```
        *
-       * @param accumulator The first {@link AggregateWithAlias}, wrapping an {@link AggregateFunction}
+       * @param accumulator The first {@link AliasedAggregate}, wrapping an {@link AggregateFunction}
        *     and providing a name for the accumulated results.
-       * @param additionalAccumulators Optional additional {@link AggregateWithAlias}, each wrapping an {@link AggregateFunction}
+       * @param additionalAccumulators Optional additional {@link AliasedAggregate}, each wrapping an {@link AggregateFunction}
        *     and providing a name for the accumulated results.
        * @return A new Pipeline object with this stage appended to the stage list.
        */
       aggregate(
-        accumulator: AggregateWithAlias,
-        ...additionalAccumulators: AggregateWithAlias[]
+        accumulator: AliasedAggregate,
+        ...additionalAccumulators: AliasedAggregate[]
       ): Pipeline;
       /**
        * Performs optionally grouped aggregation operations on the documents from previous stages.
@@ -9529,7 +9529,7 @@ declare namespace FirebaseFirestore {
        *       If no grouping fields are provided, a single group containing all documents is used. Not
        *       specifying groups is the same as putting the entire inputs into one group.</li>
        *   <li>**Accumulators:** One or more accumulation operations to perform within each group. These
-       *       are defined using {@link AggregateWithAlias} expressions, which are typically created by
+       *       are defined using {@link AliasedAggregate} expressions, which are typically created by
        *       calling {@link Expr#as} on {@link AggregateFunction} instances. Each aggregation
        *       calculates a value (e.g., sum, average, count) based on the documents within its group.</li>
        * </ul>
@@ -10191,10 +10191,10 @@ declare namespace FirebaseFirestore {
      */
     export type AggregateStageOptions = StageOptions & {
       /**
-       * The {@link AggregateWithAlias} values specifying aggregate operations to
+       * The {@link AliasedAggregate} values specifying aggregate operations to
        * perform on the input documents.
        */
-      accumulators: AggregateWithAlias[];
+      accumulators: AliasedAggregate[];
 
       /**
        * The {@link Selectable} expressions or field names to consider when determining

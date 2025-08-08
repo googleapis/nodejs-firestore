@@ -25,7 +25,7 @@ import {validateFieldPath} from '../path';
 import {
   ExecutionUtil,
   fieldOrExpression,
-  isAggregateWithAlias,
+  isAliasedAggregate,
   isBooleanExpr,
   isCollectionReference,
   isExpr,
@@ -50,9 +50,9 @@ import {isOptionalEqual, isPlainObject} from '../util';
 
 import {
   AggregateFunction,
-  AggregateWithAlias,
+  AliasedAggregate,
   Expr,
-  ExprWithAlias,
+  AliasedExpr,
   Field,
   BooleanExpr,
   Ordering,
@@ -806,7 +806,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * - {@code string}: Name of an existing field
    * - {@link Field}: References an existing document field.
-   * - {@link ExprWithAlias}: Represents the result of a function with an assigned alias name
+   * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
    *   using {@link Expr#as}.
    *
    * Example:
@@ -838,7 +838,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * - {@code string}: Name of an existing field
    * - {@link Field}: References an existing document field.
-   * - {@link ExprWithAlias}: Represents the result of a function with an assigned alias name
+   * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
    *   using {@link Expr#as}.
    *
    * Example:
@@ -885,7 +885,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * Performs aggregation operations on the documents from previous stages.
    *
    * <p>This stage allows you to calculate aggregate values over a set of documents. You define the
-   * aggregations to perform using {@link AggregateWithAlias} expressions which are typically results of
+   * aggregations to perform using {@link AliasedAggregate} expressions which are typically results of
    * calling {@link Expr#as} on {@link AggregateFunction} instances.
    *
    * <p>Example:
@@ -899,15 +899,15 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *     );
    * ```
    *
-   * @param accumulator The first {@link AggregateWithAlias}, wrapping an {@link AggregateFunction}
+   * @param accumulator The first {@link AliasedAggregate}, wrapping an {@link AggregateFunction}
    *     and providing a name for the accumulated results.
-   * @param additionalAccumulators Optional additional {@link AggregateWithAlias}, each wrapping an {@link AggregateFunction}
+   * @param additionalAccumulators Optional additional {@link AliasedAggregate}, each wrapping an {@link AggregateFunction}
    *     and providing a name for the accumulated results.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   aggregate(
-    accumulator: firestore.Pipelines.AggregateWithAlias,
-    ...additionalAccumulators: firestore.Pipelines.AggregateWithAlias[]
+    accumulator: firestore.Pipelines.AliasedAggregate,
+    ...additionalAccumulators: firestore.Pipelines.AliasedAggregate[]
   ): Pipeline;
   /**
    * Performs optionally grouped aggregation operations on the documents from previous stages.
@@ -921,7 +921,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *       If no grouping fields are provided, a single group containing all documents is used. Not
    *       specifying groups is the same as putting the entire inputs into one group.</li>
    *   <li>**Accumulators:** One or more accumulation operations to perform within each group. These
-   *       are defined using {@link AggregateWithAlias} expressions, which are typically created by
+   *       are defined using {@link AliasedAggregate} expressions, which are typically created by
    *       calling {@link Expr#as} on {@link AggregateFunction} instances. Each aggregation
    *       calculates a value (e.g., sum, average, count) based on the documents within its group.</li>
    * </ul>
@@ -944,22 +944,20 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   aggregate(options: firestore.Pipelines.AggregateStageOptions): Pipeline;
   aggregate(
     targetOrOptions:
-      | firestore.Pipelines.AggregateWithAlias
+      | firestore.Pipelines.AliasedAggregate
       | firestore.Pipelines.AggregateStageOptions,
-    ...rest: firestore.Pipelines.AggregateWithAlias[]
+    ...rest: firestore.Pipelines.AliasedAggregate[]
   ): Pipeline {
-    const options = isAggregateWithAlias(targetOrOptions)
-      ? {}
-      : targetOrOptions;
+    const options = isAliasedAggregate(targetOrOptions) ? {} : targetOrOptions;
 
-    const accumulators: Array<firestore.Pipelines.AggregateWithAlias> =
-      isAggregateWithAlias(targetOrOptions)
+    const accumulators: Array<firestore.Pipelines.AliasedAggregate> =
+      isAliasedAggregate(targetOrOptions)
         ? [targetOrOptions, ...rest]
         : targetOrOptions.accumulators;
     const convertedAccumulators: Map<string, AggregateFunction> =
-      aggregateWithAliasToMap(accumulators);
+      aliasedAggregateToMap(accumulators);
     const groups: Array<firestore.Pipelines.Selectable | string> =
-      isAggregateWithAlias(targetOrOptions) ? [] : targetOrOptions.groups ?? [];
+      isAliasedAggregate(targetOrOptions) ? [] : targetOrOptions.groups ?? [];
     const convertedGroups: Map<string, Expr> = selectablesToMap(groups);
     this._validateUserData('aggregate', convertedGroups);
 
@@ -1632,8 +1630,8 @@ function selectablesToMap(
       );
     } else if (selectable instanceof Field) {
       result.set((selectable as Field).fieldName(), selectable);
-    } else if (selectable instanceof ExprWithAlias) {
-      const expr = selectable as ExprWithAlias;
+    } else if (selectable instanceof AliasedExpr) {
+      const expr = selectable as AliasedExpr;
       result.set(expr.alias, expr.expr as unknown as Expr);
     } else {
       throw new Error('unexpected selectable: ' + JSON.stringify(selectable));
@@ -1642,13 +1640,13 @@ function selectablesToMap(
   return result;
 }
 
-function aggregateWithAliasToMap(
-  aggregateWithAliases: firestore.Pipelines.AggregateWithAlias[]
+function aliasedAggregateToMap(
+  aliasedAggregatees: firestore.Pipelines.AliasedAggregate[]
 ): Map<string, AggregateFunction> {
-  return aggregateWithAliases.reduce(
+  return aliasedAggregatees.reduce(
     (
       map: Map<string, AggregateFunction>,
-      selectable: firestore.Pipelines.AggregateWithAlias
+      selectable: firestore.Pipelines.AliasedAggregate
     ) => {
       map.set(selectable.alias, selectable.aggregate as AggregateFunction);
       return map;

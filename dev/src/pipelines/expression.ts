@@ -1822,11 +1822,11 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * ```
    *
    * @param name The alias to assign to this expression.
-   * @return A new {@link ExprWithAlias} that wraps this
+   * @return A new {@link AliasedExpr} that wraps this
    *     expression and associates it with the provided alias.
    */
-  as(name: string): ExprWithAlias {
-    return new ExprWithAlias(this, name);
+  as(name: string): AliasedExpr {
+    return new AliasedExpr(this, name);
   }
 }
 
@@ -1870,11 +1870,11 @@ export class AggregateFunction implements AggregateFunction, HasUserData {
    * ```
    *
    * @param name The alias to assign to this AggregateFunction.
-   * @return A new {@link AggregateWithAlias} that wraps this
+   * @return A new {@link AliasedAggregate} that wraps this
    *     AggregateFunction and associates it with the provided alias.
    */
-  as(name: string): AggregateWithAlias {
-    return new AggregateWithAlias(this, name);
+  as(name: string): AliasedAggregate {
+    return new AliasedAggregate(this, name);
   }
 
   /**
@@ -1896,7 +1896,7 @@ export class AggregateFunction implements AggregateFunction, HasUserData {
 /**
  * An AggregateFunction with alias.
  */
-export class AggregateWithAlias implements AggregateWithAlias, HasUserData {
+export class AliasedAggregate implements AliasedAggregate, HasUserData {
   constructor(
     readonly aggregate: AggregateFunction,
     readonly alias: string
@@ -1922,10 +1922,10 @@ export class AggregateWithAlias implements AggregateWithAlias, HasUserData {
 /**
  * TODO
  */
-export class ExprWithAlias
+export class AliasedExpr
   implements firestore.Pipelines.Selectable, HasUserData
 {
-  exprType: firestore.Pipelines.ExprType = 'ExprWithAlias';
+  exprType: firestore.Pipelines.ExprType = 'AliasedExpr';
   selectable = true as const;
 
   /**
