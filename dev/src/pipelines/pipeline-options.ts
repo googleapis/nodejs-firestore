@@ -50,14 +50,14 @@ export interface PipelineOptions {
    * by Firestore (for example: string, boolean, number, map, …). Value types
    * not known to the SDK will be rejected.
    *
-   * Values specified in customOptions will take precedence over any options
+   * Values specified in rawOptions will take precedence over any options
    * with the same name set by the SDK.
    *
    * Override the `example_option`:
    * ```
    *   execute({
    *     pipeline: myPipeline,
-   *     customOptions: {
+   *     rawOptions: {
    *       // Override `example_option`. This will not
    *       // merge with the existing `example_option` object.
    *       "example_option": {
@@ -67,12 +67,12 @@ export interface PipelineOptions {
    *   }
    * ```
    *
-   * `customOptions` supports dot notation, if you want to override
+   * `rawOptions` supports dot notation, if you want to override
    * a nested option.
    * ```
    *   execute({
    *     pipeline: myPipeline,
-   *     customOptions: {
+   *     rawOptions: {
    *       // Override `example_option.foo` and do not override
    *       // any other properties of `example_option`.
    *       "example_option.foo": "bar"
@@ -80,7 +80,7 @@ export interface PipelineOptions {
    *   }
    * ```
    */
-  customOptions?: {
+  rawOptions?: {
     [name: string]: unknown;
   };
 }

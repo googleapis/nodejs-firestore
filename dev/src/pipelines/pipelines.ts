@@ -1555,7 +1555,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
 
   _toStructuredPipeline(pipelineOptions?: PipelineOptions): StructuredPipeline {
     const structuredPipelineOptions = pipelineOptions ?? {};
-    const optionsOverride = pipelineOptions?.customOptions ?? {};
+    const optionsOverride = pipelineOptions?.rawOptions ?? {};
     return new StructuredPipeline(
       this,
       structuredPipelineOptions,
