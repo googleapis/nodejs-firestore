@@ -9935,10 +9935,12 @@ declare namespace FirebaseFirestore {
        *     .execute();
        * ```
        *
-       * @param pipelineOptions - Optionally specify pipeline execution behavior.
+       * @param pipelineExecuteOptions - Optionally specify pipeline execution behavior.
        * @return A Promise representing the asynchronous pipeline execution.
        */
-      execute(pipelineOptions?: PipelineOptions): Promise<PipelineSnapshot>;
+      execute(
+        pipelineExecuteOptions?: PipelineExecuteOptions
+      ): Promise<PipelineSnapshot>;
 
       /**
        * Executes this pipeline and streams the results as {@link PipelineResult}s.
@@ -9962,16 +9964,29 @@ declare namespace FirebaseFirestore {
     /**
      * Options defining how a Pipeline is evaluated.
      */
-    export type PipelineOptions = {
-      /**
-       * Pipeline to be evaluated.
-       */
-      pipeline: Pipeline;
-
+    export type PipelineExecuteOptions = {
       /**
        * Specify the index mode.
        */
       indexMode?: 'recommended';
+
+      /** Options used to configure explain queries. */
+      explainOptions?: {
+        /**
+         * The explain mode configures what explain data
+         * and query results are returned from the Pipeline query.
+         *
+         * `"execute"` - [DEFAULT] Execute the Pipeline and return results
+         * `"analyze"` - Plan the query and execute, returning both the planner
+         *               information and the Pipeline query results.
+         */
+        mode?: 'execute' | 'analyze';
+
+        /**
+         * Specifies the output format of the query planner information.
+         */
+        outputFormat?: 'text' | 'json';
+      };
 
       /**
        * An escape hatch to set options not known at SDK build time. These values

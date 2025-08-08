@@ -38,7 +38,6 @@ import {
   toField,
   vectorToExpr,
 } from './pipeline-util';
-import {PipelineOptions} from './pipeline-options';
 import {DocumentReference} from '../reference/document-reference';
 import {PipelineResponse} from '../reference/types';
 import {HasUserData, hasUserData, Serializer} from '../serializer';
@@ -1529,11 +1528,13 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *     .execute();
    * ```
    *
-   * @param pipelineOptions - Optionally specify pipeline execution behavior.
+   * @param pipelineExecuteOptions - Optionally specify pipeline execution behavior.
    * @return A Promise representing the asynchronous pipeline execution.
    */
-  execute(pipelineOptions?: PipelineOptions): Promise<PipelineSnapshot> {
-    return this._execute(undefined, pipelineOptions).then(response => {
+  execute(
+    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions
+  ): Promise<PipelineSnapshot> {
+    return this._execute(undefined, pipelineExecuteOptions).then(response => {
       const results = response.result || [];
       const executionTime = response.executionTime;
       const stats = response.explainStats;
@@ -1544,18 +1545,22 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
 
   _execute(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    pipelineOptions?: PipelineOptions
+    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions
   ): Promise<PipelineResponse> {
     const util = new ExecutionUtil(this.db, this.db._serializer!);
-    const structuredPipeline = this._toStructuredPipeline(pipelineOptions);
+    const structuredPipeline = this._toStructuredPipeline(
+      pipelineExecuteOptions
+    );
     return util
       ._getResponse(structuredPipeline, transactionOrReadTime)
       .then(result => result!);
   }
 
-  _toStructuredPipeline(pipelineOptions?: PipelineOptions): StructuredPipeline {
-    const structuredPipelineOptions = pipelineOptions ?? {};
-    const optionsOverride = pipelineOptions?.rawOptions ?? {};
+  _toStructuredPipeline(
+    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions
+  ): StructuredPipeline {
+    const structuredPipelineOptions = pipelineExecuteOptions ?? {};
+    const optionsOverride = pipelineExecuteOptions?.rawOptions ?? {};
     return new StructuredPipeline(
       this,
       structuredPipelineOptions,
@@ -1600,7 +1605,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    */
   _validateUserData<
     T extends Map<string, HasUserData> | HasUserData[] | HasUserData,
-  >(name: string, val: T): T {
+  >(_: string, val: T): T {
     const ignoreUndefinedProperties =
       !!this.db._settings.ignoreUndefinedProperties;
     if (hasUserData(val)) {

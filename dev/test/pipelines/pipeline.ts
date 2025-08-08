@@ -31,7 +31,7 @@ import IValue = google.firestore.v1.IValue;
 const FIRST_CALL = 0;
 const EXECUTE_PIPELINE_REQUEST = 0;
 
-describe('execute(Pipeline|PipelineOptions)', () => {
+describe('execute(Pipeline|PipelineExecuteOptions)', () => {
   it('returns execution time with empty results', async () => {
     const executeTime = Timestamp.now();
     const results: IExecutePipelineResponse[] = [
