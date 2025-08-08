@@ -146,7 +146,7 @@ describe('execute(Pipeline|PipelineOptions)', () => {
     );
   });
 
-  it('serializes the pipeline generic options', async () => {
+  it('serializes the pipeline raw options', async () => {
     const spy = sinon.fake.returns(stream());
     const firestore = await createInstance({
       executePipeline: spy,

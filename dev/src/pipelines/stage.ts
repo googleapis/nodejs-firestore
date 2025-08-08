@@ -593,7 +593,7 @@ export class Sort implements Stage {
 /**
  * @beta
  */
-export class GenericStage implements Stage {
+export class RawStage implements Stage {
   readonly optionsUtil = new OptionsUtil({});
 
   /**

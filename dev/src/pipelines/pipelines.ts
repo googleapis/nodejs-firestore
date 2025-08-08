@@ -69,7 +69,7 @@ import {
   DocumentsSource,
   Where,
   FindNearest,
-  GenericStage,
+  RawStage,
   Limit,
   Offset,
   Select,
@@ -1451,10 +1451,10 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   }
 
   /**
-   * Adds a generic stage to the pipeline.
+   * Adds a raw stage to the pipeline.
    *
    * <p>This method provides a flexible way to extend the pipeline's functionality by adding custom
-   * stages. Each generic stage is defined by a unique `name` and a set of `params` that control its
+   * stages. Each raw stage is defined by a unique `name` and a set of `params` that control its
    * behavior.
    *
    * <p>Example (Assuming there is no 'where' stage available in SDK):
@@ -1462,16 +1462,16 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * ```typescript
    * // Assume we don't have a built-in 'where' stage
    * firestore.pipeline().collection('books')
-   *     .genericStage('where', [field('published').lt(1900)]) // Custom 'where' stage
+   *     .rawStage('where', [field('published').lt(1900)]) // Custom 'where' stage
    *     .select('title', 'author');
    * ```
    *
-   * @param name - The unique name of the generic stage to add.
-   * @param params - A list of parameters to configure the generic stage's behavior.
+   * @param name - The unique name of the raw stage to add.
+   * @param params - A list of parameters to configure the raw stage's behavior.
    * @param options - An object of key value pairs that specifies optional parameters for the stage.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  genericStage(
+  rawStage(
     name: string,
     params: unknown[],
     options?: {[key: string]: Expr | unknown}
@@ -1497,9 +1497,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
         param._validateUserData(!!this.db._settings.ignoreUndefinedProperties);
       }
     });
-    return this._addStage(
-      new GenericStage(name, expressionParams, options ?? {})
-    );
+    return this._addStage(new RawStage(name, expressionParams, options ?? {}));
   }
 
   /**

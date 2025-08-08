@@ -1629,7 +1629,7 @@ describe.only('Pipeline class', () => {
           await firestore
             .pipeline()
             .collection(randomCol.path)
-            .genericStage('select', [
+            .rawStage('select', [
               // incorrect parameter type
               field('title'),
             ])
@@ -1693,12 +1693,12 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    describe('generic stage', () => {
+    describe('raw stage', () => {
       it('can select fields', async () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .genericStage('select', [
+          .rawStage('select', [
             {
               title: field('title'),
               metadata: {
@@ -1724,7 +1724,7 @@ describe.only('Pipeline class', () => {
           .sort(field('author').ascending())
           .limit(1)
           .select('title', 'author')
-          .genericStage('add_fields', [
+          .rawStage('add_fields', [
             {
               display: strConcat('title', ' - ', field('author')),
             },
@@ -1742,7 +1742,7 @@ describe.only('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author')
-          .genericStage('where', [field('author').eq('Douglas Adams')])
+          .rawStage('where', [field('author').eq('Douglas Adams')])
           .execute();
         expectResults(snapshot, {
           title: "The Hitchhiker's Guide to the Galaxy",
@@ -1755,14 +1755,14 @@ describe.only('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author')
-          .genericStage('sort', [
+          .rawStage('sort', [
             {
               direction: 'ascending',
               expression: field('author'),
             },
           ])
-          .genericStage('offset', [3])
-          .genericStage('limit', [1])
+          .rawStage('offset', [3])
+          .rawStage('limit', [1])
           .execute();
         expectResults(snapshot, {
           author: 'Fyodor Dostoevsky',
@@ -1775,10 +1775,7 @@ describe.only('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author', 'rating')
-          .genericStage('aggregate', [
-            {averageRating: field('rating').avg()},
-            {},
-          ])
+          .rawStage('aggregate', [{averageRating: field('rating').avg()}, {}])
           .execute();
         expectResults(snapshot, {
           averageRating: 4.3100000000000005,
@@ -1790,7 +1787,7 @@ describe.only('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author', 'rating')
-          .genericStage('distinct', [{rating: field('rating')}])
+          .rawStage('distinct', [{rating: field('rating')}])
           .sort(field('rating').descending())
           .execute();
         expectResults(
@@ -1823,7 +1820,7 @@ describe.only('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol)
-          .genericStage(
+          .rawStage(
             'find_nearest',
             [
               field('embedding'),

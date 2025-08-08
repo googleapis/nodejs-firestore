@@ -9722,27 +9722,6 @@ declare namespace FirebaseFirestore {
        * firestore.pipeline().collection("books")
        *     .sample({ percentage: 0.5 });
        *
-       * @param options The {@code SampleOptions} specifies how sampling is performed.
-       * @return A new {@code Pipeline} object with this stage appended to the stage list.
-       */
-      sample(options: {percentage: number} | {documents: number}): Pipeline;
-
-      /**
-       * Performs a pseudo-random sampling of the documents from the previous stage.
-       *
-       * <p>This stage will filter documents pseudo-randomly. The 'options' parameter specifies how
-       * sampling will be performed. See {@code SampleOptions} for more information.
-       *
-       * <p>Examples:
-       *
-       * // Sample 10 books, if available.
-       * firestore.pipeline().collection("books")
-       *     .sample({ documents: 10 });
-       *
-       * // Sample 50% of books.
-       * firestore.pipeline().collection("books")
-       *     .sample({ percentage: 0.5 });
-       *
        * @param options - An object that specifies required and optional parameters for the stage.
        * @return A new {@code Pipeline} object with this stage appended to the stage list.
        */
@@ -9906,10 +9885,10 @@ declare namespace FirebaseFirestore {
       sort(options: SortStageOptions): Pipeline;
 
       /**
-       * Adds a generic stage to the pipeline.
+       * Adds a raw stage to the pipeline.
        *
        * <p>This method provides a flexible way to extend the pipeline's functionality by adding custom
-       * stages. Each generic stage is defined by a unique `name` and a set of `params` that control its
+       * stages. Each raw stage is defined by a unique `name` and a set of `params` that control its
        * behavior.
        *
        * <p>Example (Assuming there is no "where" stage available in SDK):
@@ -9917,15 +9896,15 @@ declare namespace FirebaseFirestore {
        * ```typescript
        * // Assume we don't have a built-in "where" stage
        * firestore.pipeline().collection("books")
-       *     .genericStage("where", [Field.of("published").lt(1900)]) // Custom "where" stage
+       *     .rawStage("where", [Field.of("published").lt(1900)]) // Custom "where" stage
        *     .select("title", "author");
        * ```
        *
-       * @param name The unique name of the generic stage to add.
-       * @param params A list of parameters to configure the generic stage's behavior.
+       * @param name The unique name of the raw stage to add.
+       * @param params A list of parameters to configure the raw stage's behavior.
        * @return A new {@code Pipeline} object with this stage appended to the stage list.
        */
-      genericStage(name: string, params: any[]): Pipeline;
+      rawStage(name: string, params: any[]): Pipeline;
 
       /**
        * Executes this pipeline and returns a Promise to represent the asynchronous operation.

@@ -2420,7 +2420,10 @@ class ArrayFunctionExpr extends FunctionExpr {
  * This expression type is useful for filter conditions.
  *
  */
-export class BooleanExpr extends FunctionExpr implements firestore.Pipelines.BooleanExpr {
+export class BooleanExpr
+  extends FunctionExpr
+  implements firestore.Pipelines.BooleanExpr
+{
   returnType: 'boolean' = 'boolean';
 
   /**
