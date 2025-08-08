@@ -3477,10 +3477,10 @@ declare namespace FirebaseFirestore {
        * field("total").divide(field("count"));
        * ```
        *
-       * @param other The expression to divide by.
+       * @param divisor The expression to divide by.
        * @return A new `Expr` representing the division operation.
        */
-      divide(other: Expr): FunctionExpr;
+      divide(divisor: Expr): FunctionExpr;
 
       /**
        * Creates an expression that divides this expression by a constant value.
@@ -3490,10 +3490,10 @@ declare namespace FirebaseFirestore {
        * field("value").divide(10);
        * ```
        *
-       * @param other The constant value to divide by.
+       * @param divisor The constant value to divide by.
        * @return A new `Expr` representing the division operation.
        */
-      divide(other: number): FunctionExpr;
+      divide(divisor: number): FunctionExpr;
 
       /**
        * Creates an expression that calculates the modulo (remainder) of dividing this expression by another expression.
@@ -5801,11 +5801,11 @@ declare namespace FirebaseFirestore {
      * divide(field("total"), field("count"));
      * ```
      *
-     * @param left The expression to be divided.
-     * @param right The expression to divide by.
+     * @param dividend The expression to be divided.
+     * @param divisor The expression to divide by.
      * @return A new {@code Expr} representing the division operation.
      */
-    export function divide(left: Expr, right: Expr): FunctionExpr;
+    export function divide(dividend: Expr, divisor: Expr): FunctionExpr;
 
     /**
      * @beta
@@ -5817,11 +5817,11 @@ declare namespace FirebaseFirestore {
      * divide(field("value"), 10);
      * ```
      *
-     * @param expression The expression to be divided.
-     * @param value The constant value to divide by.
+     * @param dividend The expression to be divided.
+     * @param divisor The constant value to divide by.
      * @return A new {@code Expr} representing the division operation.
      */
-    export function divide(expression: Expr, value: unknown): FunctionExpr;
+    export function divide(dividend: Expr, divisor: unknown): FunctionExpr;
 
     /**
      * @beta
@@ -5833,11 +5833,11 @@ declare namespace FirebaseFirestore {
      * divide("total", field("count"));
      * ```
      *
-     * @param fieldName The field name to be divided.
-     * @param expressions The expression to divide by.
+     * @param dividend The field name to be divided.
+     * @param divisor The expression to divide by.
      * @return A new {@code Expr} representing the division operation.
      */
-    export function divide(fieldName: string, expressions: Expr): FunctionExpr;
+    export function divide(dividend: string, divisor: Expr): FunctionExpr;
 
     /**
      * @beta
@@ -5849,11 +5849,11 @@ declare namespace FirebaseFirestore {
      * divide("value", 10);
      * ```
      *
-     * @param fieldName The field name to be divided.
-     * @param value The constant value to divide by.
+     * @param dividend The field name to be divided.
+     * @param divisor The constant value to divide by.
      * @return A new {@code Expr} representing the division operation.
      */
-    export function divide(fieldName: string, value: unknown): FunctionExpr;
+    export function divide(dividend: string, divisor: unknown): FunctionExpr;
 
     /**
      * @beta

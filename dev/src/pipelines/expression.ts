@@ -149,10 +149,10 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("total").divide(field("count"));
    * ```
    *
-   * @param other The expression to divide by.
+   * @param divisor The expression to divide by.
    * @return A new `Expr` representing the division operation.
    */
-  divide(other: Expr): FunctionExpr;
+  divide(divisor: Expr): FunctionExpr;
 
   /**
    * Creates an expression that divides this expression by a constant value.
@@ -162,12 +162,12 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("value").divide(10);
    * ```
    *
-   * @param other The constant value to divide by.
+   * @param divisor The constant value to divide by.
    * @return A new `Expr` representing the division operation.
    */
-  divide(other: number): FunctionExpr;
-  divide(other: number | Expr): FunctionExpr {
-    return new FunctionExpr('divide', [this, valueToDefaultExpr(other)]);
+  divide(divisor: number): FunctionExpr;
+  divide(divisor: number | Expr): FunctionExpr {
+    return new FunctionExpr('divide', [this, valueToDefaultExpr(divisor)]);
   }
 
   /**
@@ -3120,11 +3120,11 @@ export function multiply(
  * divide(field("total"), field("count"));
  * ```
  *
- * @param left The expression to be divided.
- * @param right The expression to divide by.
+ * @param dividend The expression to be divided.
+ * @param divisort The expression to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(left: Expr, right: Expr): FunctionExpr;
+export function divide(dividend: Expr, divisort: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -3136,11 +3136,11 @@ export function divide(left: Expr, right: Expr): FunctionExpr;
  * divide(field("value"), 10);
  * ```
  *
- * @param expression The expression to be divided.
- * @param value The constant value to divide by.
+ * @param dividend The expression to be divided.
+ * @param divisor The constant value to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(expression: Expr, value: unknown): FunctionExpr;
+export function divide(dividend: Expr, divisor: unknown): FunctionExpr;
 
 /**
  * @beta
@@ -3152,11 +3152,11 @@ export function divide(expression: Expr, value: unknown): FunctionExpr;
  * divide("total", field("count"));
  * ```
  *
- * @param fieldName The field name to be divided.
- * @param expressions The expression to divide by.
+ * @param dividend The field name to be divided.
+ * @param divisor The expression to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(fieldName: string, expressions: Expr): FunctionExpr;
+export function divide(dividend: string, divisor: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -3168,17 +3168,17 @@ export function divide(fieldName: string, expressions: Expr): FunctionExpr;
  * divide("value", 10);
  * ```
  *
- * @param fieldName The field name to be divided.
- * @param value The constant value to divide by.
+ * @param dividend The field name to be divided.
+ * @param divisor The constant value to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(fieldName: string, value: unknown): FunctionExpr;
+export function divide(dividend: string, divisor: unknown): FunctionExpr;
 export function divide(
-  left: Expr | string,
-  right: Expr | unknown
+  dividend: Expr | string,
+  divisor: Expr | unknown
 ): FunctionExpr {
-  const normalizedLeft = fieldOrExpression(left);
-  const normalizedRight = valueToDefaultExpr(right);
+  const normalizedLeft = fieldOrExpression(dividend);
+  const normalizedRight = valueToDefaultExpr(divisor);
   return normalizedLeft.divide(normalizedRight);
 }
 
