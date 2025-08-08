@@ -2415,10 +2415,13 @@ class ArrayFunctionExpr extends FunctionExpr {
 }
 
 /**
- * An interface that represents a filter condition.
+ * An expression that evaluates to a boolean value.
+ *
+ * This expression type is useful for filter conditions.
+ *
  */
-export class BooleanExpr extends FunctionExpr implements BooleanExpr {
-  filterable: true = true as const;
+export class BooleanExpr extends FunctionExpr implements firestore.Pipelines.BooleanExpr {
+  returnType: 'boolean' = 'boolean';
 
   /**
    * Creates an aggregation that finds the count of input documents satisfying

@@ -3494,7 +3494,6 @@ declare namespace FirebaseFirestore {
        * @return A new `Expr` representing the division operation.
        */
       divide(other: number): FunctionExpr;
-      divide(other: number | Expr): FunctionExpr;
 
       /**
        * Creates an expression that calculates the modulo (remainder) of dividing this expression by another expression.
@@ -5142,12 +5141,13 @@ declare namespace FirebaseFirestore {
     }
 
     /**
-     * @beta
+     * An expression that evaluates to a boolean value.
      *
-     * An interface that represents a filter condition.
+     * This expression type is useful for filter conditions.
+     *
      */
     export class BooleanExpr extends FunctionExpr {
-      filterable: true;
+      returnType: 'boolean';
 
       /**
        * Creates an aggregation that finds the count of input documents satisfying
