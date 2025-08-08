@@ -3434,10 +3434,10 @@ declare namespace FirebaseFirestore {
        * field("price").subtract(field("discount"));
        * ```
        *
-       * @param other The expression to subtract from this expression.
+       * @param subtrahend The expression to subtract from this expression.
        * @return A new `Expr` representing the subtraction operation.
        */
-      subtract(other: Expr): FunctionExpr;
+      subtract(subtrahend: Expr): FunctionExpr;
 
       /**
        * Creates an expression that subtracts a constant value from this expression.
@@ -3447,10 +3447,10 @@ declare namespace FirebaseFirestore {
        * field("total").subtract(20);
        * ```
        *
-       * @param other The constant value to subtract.
+       * @param subtrahend The constant value to subtract.
        * @return A new `Expr` representing the subtraction operation.
        */
-      subtract(other: number): FunctionExpr;
+      subtract(subtrahend: number): FunctionExpr;
 
       /**
        * Creates an expression that multiplies this expression by another expression.
@@ -5695,11 +5695,11 @@ declare namespace FirebaseFirestore {
      * subtract(field("price"), field("discount"));
      * ```
      *
-     * @param left The expression to subtract from.
-     * @param right The expression to subtract.
+     * @param minuend The expression to subtract from.
+     * @param subtrahend The expression to subtract.
      * @return A new {@code Expr} representing the subtraction operation.
      */
-    export function subtract(left: Expr, right: Expr): FunctionExpr;
+    export function subtract(minuend: Expr, subtrahend: Expr): FunctionExpr;
 
     /**
      * @beta
@@ -5711,11 +5711,11 @@ declare namespace FirebaseFirestore {
      * subtract(field("value"), 2);
      * ```
      *
-     * @param expression The expression to subtract from.
-     * @param value The constant value to subtract.
+     * @param minuend The expression to subtract from.
+     * @param subtrahend The constant value to subtract.
      * @return A new {@code Expr} representing the subtraction operation.
      */
-    export function subtract(expression: Expr, value: unknown): FunctionExpr;
+    export function subtract(minuend: Expr, subtrahend: unknown): FunctionExpr;
 
     /**
      * @beta
@@ -5727,11 +5727,14 @@ declare namespace FirebaseFirestore {
      * subtract("price", field("discount"));
      * ```
      *
-     * @param fieldName The field name to subtract from.
-     * @param expression The expression to subtract.
+     * @param minuendFieldName The field name to subtract from.
+     * @param subtrahend The expression to subtract.
      * @return A new {@code Expr} representing the subtraction operation.
      */
-    export function subtract(fieldName: string, expression: Expr): FunctionExpr;
+    export function subtract(
+      minuendFieldName: string,
+      subtrahend: Expr
+    ): FunctionExpr;
 
     /**
      * @beta
@@ -5743,11 +5746,14 @@ declare namespace FirebaseFirestore {
      * subtract("total", 20);
      * ```
      *
-     * @param fieldName The field name to subtract from.
-     * @param value The constant value to subtract.
+     * @param minuendFieldName The field name to subtract from.
+     * @param subtrahend The constant value to subtract.
      * @return A new {@code Expr} representing the subtraction operation.
      */
-    export function subtract(fieldName: string, value: unknown): FunctionExpr;
+    export function subtract(
+      minuendFieldName: string,
+      subtrahend: unknown
+    ): FunctionExpr;
 
     /**
      * @beta

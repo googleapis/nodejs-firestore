@@ -97,10 +97,10 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("price").subtract(field("discount"));
    * ```
    *
-   * @param other The expression to subtract from this expression.
+   * @param subtrahend The expression to subtract from this expression.
    * @return A new `Expr` representing the subtraction operation.
    */
-  subtract(other: firestore.Pipelines.Expr): FunctionExpr;
+  subtract(subtrahend: firestore.Pipelines.Expr): FunctionExpr;
 
   /**
    * Creates an expression that subtracts a constant value from this expression.
@@ -110,12 +110,12 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("total").subtract(20);
    * ```
    *
-   * @param other The constant value to subtract.
+   * @param subtrahend The constant value to subtract.
    * @return A new `Expr` representing the subtraction operation.
    */
-  subtract(other: number): FunctionExpr;
-  subtract(other: number | firestore.Pipelines.Expr): FunctionExpr {
-    return new FunctionExpr('subtract', [this, valueToDefaultExpr(other)]);
+  subtract(subtrahend: number): FunctionExpr;
+  subtract(subtrahend: number | firestore.Pipelines.Expr): FunctionExpr {
+    return new FunctionExpr('subtract', [this, valueToDefaultExpr(subtrahend)]);
   }
 
   /**
@@ -3006,11 +3006,11 @@ export function add(
  * subtract(field("price"), field("discount"));
  * ```
  *
- * @param left The expression to subtract from.
- * @param right The expression to subtract.
+ * @param minuend The expression to subtract from.
+ * @param subtrahend The expression to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(left: Expr, right: Expr): FunctionExpr;
+export function subtract(minuend: Expr, subtrahend: Expr): FunctionExpr;
 
 /**
  * @beta
@@ -3022,11 +3022,11 @@ export function subtract(left: Expr, right: Expr): FunctionExpr;
  * subtract(field("value"), 2);
  * ```
  *
- * @param expression The expression to subtract from.
- * @param value The constant value to subtract.
+ * @param minuend The expression to subtract from.
+ * @param subtrahend The constant value to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(expression: Expr, value: unknown): FunctionExpr;
+export function subtract(minuend: Expr, subtrahend: unknown): FunctionExpr;
 
 /**
  * @beta
@@ -3038,11 +3038,14 @@ export function subtract(expression: Expr, value: unknown): FunctionExpr;
  * subtract("price", field("discount"));
  * ```
  *
- * @param fieldName The field name to subtract from.
- * @param expression The expression to subtract.
+ * @param minuendFieldName The field name to subtract from.
+ * @param subtrahend The expression to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(fieldName: string, expression: Expr): FunctionExpr;
+export function subtract(
+  minuendFieldName: string,
+  subtrahend: Expr
+): FunctionExpr;
 
 /**
  * @beta
@@ -3054,11 +3057,14 @@ export function subtract(fieldName: string, expression: Expr): FunctionExpr;
  * subtract("total", 20);
  * ```
  *
- * @param fieldName The field name to subtract from.
- * @param value The constant value to subtract.
+ * @param minuendFieldName The field name to subtract from.
+ * @param subtrahend The constant value to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(fieldName: string, value: unknown): FunctionExpr;
+export function subtract(
+  minuendFieldName: string,
+  subtrahend: unknown
+): FunctionExpr;
 export function subtract(
   left: Expr | string,
   right: Expr | unknown
