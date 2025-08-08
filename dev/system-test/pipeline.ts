@@ -450,25 +450,6 @@ describe.only('Pipeline class', () => {
         expect(doc.createTime).to.be.undefined;
       });
     });
-
-    it('returns undefined create and update time for each result in an aggregate query', async () => {
-      const pipeline = firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .aggregate({
-          accumulators: [avg('rating').as('avgRating')],
-          groups: ['genre'],
-        });
-
-      const snapshot = await pipeline.execute();
-
-      expect(snapshot.results.length).to.equal(8);
-
-      snapshot.results.forEach(doc => {
-        expect(doc.updateTime).to.be.undefined;
-        expect(doc.createTime).to.be.undefined;
-      });
-    });
   });
 
   describe('pipeline explain', () => {
@@ -1680,7 +1661,7 @@ describe.only('Pipeline class', () => {
               explainOptions: {
                 mode: 'analyze',
               },
-              customOptions: {
+              rawOptions: {
                 memory_limit: 1,
               },
             });

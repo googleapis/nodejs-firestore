@@ -62,7 +62,7 @@ export class RemoveFields implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -94,7 +94,7 @@ export class Aggregate implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -123,7 +123,7 @@ export class Distinct implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -163,7 +163,7 @@ export class CollectionSource implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -195,7 +195,7 @@ export class CollectionGroupSource implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -219,7 +219,7 @@ export class DatabaseSource implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -251,7 +251,7 @@ export class DocumentsSource implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -280,7 +280,7 @@ export class Where implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -322,7 +322,7 @@ export class FindNearest implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this._options,
-        this._options.customOptions
+        this._options.rawOptions
       ),
     };
   }
@@ -355,7 +355,7 @@ export class Sample implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -379,7 +379,7 @@ export class Union implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -417,7 +417,7 @@ export class Unnest implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -441,7 +441,7 @@ export class Limit implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -465,7 +465,7 @@ export class Offset implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -497,7 +497,7 @@ export class ReplaceWith implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -526,7 +526,7 @@ export class Select implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -555,7 +555,7 @@ export class AddFields implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -584,7 +584,7 @@ export class Sort implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
