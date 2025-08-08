@@ -156,7 +156,7 @@ describe('execute(Pipeline|PipelineOptions)', () => {
       .pipeline()
       .collection('foo')
       .execute({
-        customOptions: {
+        rawOptions: {
           foo: 'bar',
         },
       });
@@ -191,7 +191,7 @@ describe('execute(Pipeline|PipelineOptions)', () => {
 });
 
 describe('stage option serialization', () => {
-  // Default custom options
+  // Default rawOptions
   const customOptions: Record<string, unknown> = {
     foo: 'bar1',
   };
