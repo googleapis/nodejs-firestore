@@ -2347,7 +2347,7 @@ class MapFunctionExpr extends FunctionExpr {
       if (Object.prototype.hasOwnProperty.call(this.map, key)) {
         if (this.map[key]) {
           args.push(constant(key)._toProto(serializer));
-          args.push(this.map[key]._toProto(serializer));
+          args.push(this.map[key]!._toProto(serializer));
         }
       }
     }
@@ -2396,7 +2396,7 @@ class ArrayFunctionExpr extends FunctionExpr {
         name: this.name,
         args: this.values
           .filter(v => !!v)
-          .map(value => value._toProto(serializer)),
+          .map(value => value!._toProto(serializer)),
       },
     };
   }
