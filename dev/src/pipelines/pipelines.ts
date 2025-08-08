@@ -1971,7 +1971,7 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
   /**
    * Retrieves the field specified by `field`.
    *
-   * @param {string|FieldPath} field The field path
+   * @param {string|FieldPath} fieldPath The field path
    * (e.g. 'foo' or 'foo.bar') to a specific field.
    * @returns {*} The data at the specified field location or undefined if no
    * such field exists.
@@ -1989,10 +1989,10 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get(field: string | FieldPath): any {
-    validateFieldPath('field', field);
+  get(fieldPath: string | FieldPath): any {
+    validateFieldPath('field', fieldPath);
 
-    const protoField = this.protoField(field);
+    const protoField = this.protoField(fieldPath);
 
     if (protoField === undefined) {
       return undefined;

@@ -10385,7 +10385,7 @@ declare namespace FirebaseFirestore {
       /**
        * The reference of the document, if it is a document; otherwise `undefined`.
        */
-      // get ref(): DocumentReference | undefined;
+      get ref(): DocumentReference | undefined;
 
       /**
        * The ID of the document for which this PipelineResult contains data, if it is a document; otherwise `undefined`.
@@ -10395,8 +10395,6 @@ declare namespace FirebaseFirestore {
        *
        */
       get id(): string | undefined;
-
-      get ref(): DocumentReference | undefined;
 
       /**
        * Retrieves all fields in the result as an object.
@@ -10418,7 +10416,7 @@ declare namespace FirebaseFirestore {
       /**
        * Retrieves the field specified by `field`.
        *
-       * @param {string|FieldPath} field The field path
+       * @param {string|FieldPath} fieldPath The field path
        * (e.g. 'foo' or 'foo.bar') to a specific field.
        * @returns {*} The data at the specified field location or undefined if no
        * such field exists.
@@ -10436,7 +10434,7 @@ declare namespace FirebaseFirestore {
       // We deliberately use `any` in the external API to not impose type-checking
       // on end users.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      get(field: string | FieldPath): any;
+      get(fieldPath: string | FieldPath): any;
 
       /**
        * Returns true if the document's data and path in this `PipelineResult` is
