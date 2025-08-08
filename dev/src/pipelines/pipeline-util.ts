@@ -200,10 +200,19 @@ export class ExecutionUtil {
                   QualifiedResourcePath.fromSlashSeparatedString(result.name)
                 )
               : undefined;
+
+            if (!result.fields) {
+              logger(
+                '_stream',
+                null,
+                'Unexpected state: `result.fields` was falsey. Using an empty map.'
+              );
+            }
+
             output.result = new PipelineResult(
               this._serializer,
+              result.fields || {},
               ref,
-              result.fields || undefined,
               Timestamp.fromProto(proto.executionTime!),
               result.createTime
                 ? Timestamp.fromProto(result.createTime!)

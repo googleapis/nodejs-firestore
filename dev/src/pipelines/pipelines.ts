@@ -1866,12 +1866,12 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
    */
   constructor(
     serializer: Serializer,
-    ref?: DocumentReference,
     /**
      * @internal
      * @private
      **/
-    readonly _fieldsProto?: ApiMapValue,
+    readonly _fieldsProto: ApiMapValue,
+    ref?: DocumentReference,
     readTime?: Timestamp,
     createTime?: Timestamp,
     updateTime?: Timestamp
@@ -1939,11 +1939,9 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
   }
 
   /**
-   * Retrieves all fields in the result as an object. Returns 'undefined' if
-   * the document doesn't exist.
+   * Retrieves all fields in the result as an object.
    *
-   * @returns {T|undefined} An object containing all fields in the document or
-   * 'undefined' if the document doesn't exist.
+   * @returns {T} An object containing all fields in the document.
    *
    * @example
    * ```
@@ -1955,12 +1953,8 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
    * });
    * ```
    */
-  data(): firestore.DocumentData | undefined {
+  data(): firestore.DocumentData {
     const fields = this._fieldsProto;
-
-    if (fields === undefined) {
-      return undefined;
-    }
 
     const obj: firestore.DocumentData = {};
     for (const prop of Object.keys(fields)) {

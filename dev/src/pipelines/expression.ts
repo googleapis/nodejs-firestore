@@ -2424,7 +2424,7 @@ export class BooleanExpr
   extends FunctionExpr
   implements firestore.Pipelines.BooleanExpr
 {
-  returnType: 'boolean' = 'boolean';
+  returnType: 'boolean' = 'boolean' as const;
 
   /**
    * Creates an aggregation that finds the count of input documents satisfying

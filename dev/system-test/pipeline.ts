@@ -450,6 +450,25 @@ describe.only('Pipeline class', () => {
         expect(doc.createTime).to.be.undefined;
       });
     });
+
+    it('returns undefined create and update time for each result in an aggregate query', async () => {
+      const pipeline = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .aggregate({
+          accumulators: [avg('rating').as('avgRating')],
+          groups: ['genre'],
+        });
+
+      const snapshot = await pipeline.execute();
+
+      expect(snapshot.results.length).to.equal(8);
+
+      snapshot.results.forEach(doc => {
+        expect(doc.updateTime).to.be.undefined;
+        expect(doc.createTime).to.be.undefined;
+      });
+    });
   });
 
   describe('pipeline explain', () => {
@@ -3529,7 +3548,7 @@ describe.only('Pipeline class', () => {
         .limit(1)
         .select(field('rating').ln().as('lnRating'))
         .execute();
-      expect(snapshot.results[0]!.data()!.lnRating).to.be.closeTo(1.435, 0.001);
+      expect(snapshot.results[0]!.data().lnRating).to.be.closeTo(1.435, 0.001);
     });
 
     it('can compute the natural logarithm of a numeric value with the top-level function', async () => {
@@ -3540,7 +3559,7 @@ describe.only('Pipeline class', () => {
         .limit(1)
         .select(ln('rating').as('lnRating'))
         .execute();
-      expect(snapshot.results[0]!.data()!.lnRating).to.be.closeTo(1.435, 0.001);
+      expect(snapshot.results[0]!.data().lnRating).to.be.closeTo(1.435, 0.001);
     });
 
     it('can compute the natural logarithm of a numeric value with the top-level function', async () => {

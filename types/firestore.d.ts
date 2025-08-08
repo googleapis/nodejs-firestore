@@ -10384,11 +10384,9 @@ declare namespace FirebaseFirestore {
       get ref(): DocumentReference | undefined;
 
       /**
-       * Retrieves all fields in the result as an object. Returns 'undefined' if
-       * the document doesn't exist.
+       * Retrieves all fields in the result as an object.
        *
-       * @returns {T|undefined} An object containing all fields in the document or
-       * 'undefined' if the document doesn't exist.
+       * @returns {T} An object containing all fields in the document.
        *
        * @example
        * ```
@@ -10400,7 +10398,7 @@ declare namespace FirebaseFirestore {
        * });
        * ```
        */
-      data(): DocumentData | undefined;
+      data(): DocumentData;
 
       /**
        * Retrieves the field specified by `field`.
