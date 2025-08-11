@@ -377,26 +377,6 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   }
 
   /**
-   * Creates an expression that concatenates an array expression with one or more other arrays.
-   *
-   * ```typescript
-   * // Combine the 'items' array with another array field.
-   * field("items").arrayConcat(field("otherItems"));
-   * ```
-   * @param secondArray Second array expression or array literal to concatenate.
-   * @param otherArrays Optional additional array expressions or array literals to concatenate.
-   * @return A new `Expr` representing the concatenated array.
-   */
-  arrayConcat(
-    secondArray: Expr | unknown[],
-    ...otherArrays: Array<Expr | unknown[]>
-  ): FunctionExpr {
-    const elements = [secondArray, ...otherArrays];
-    const exprValues = elements.map(value => valueToDefaultExpr(value));
-    return new FunctionExpr('array_concat', [this, ...exprValues]);
-  }
-
-  /**
    * Creates an expression that checks if an array contains a specific element.
    *
    * ```typescript
@@ -1040,7 +1020,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @return A new `AggregateFunction` representing the 'min' aggregation.
    */
   minimum(): AggregateFunction {
-    return new AggregateFunction('minimum', [this]);
+    return new AggregateFunction('min', [this]);
   }
 
   /**
@@ -1054,7 +1034,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @return A new `AggregateFunction` representing the 'max' aggregation.
    */
   maximum(): AggregateFunction {
-    return new AggregateFunction('maximum', [this]);
+    return new AggregateFunction('max', [this]);
   }
 
   /**
@@ -1088,10 +1068,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     ...others: Array<Expr | unknown>
   ): FunctionExpr {
     const values = [second, ...others];
-    return new FunctionExpr('logical_maximum', [
-      this,
-      ...values.map(valueToDefaultExpr),
-    ]);
+    return new FunctionExpr('max', [this, ...values.map(valueToDefaultExpr)]);
   }
 
   /**
@@ -1111,10 +1088,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     ...others: Array<Expr | unknown>
   ): FunctionExpr {
     const values = [second, ...others];
-    return new FunctionExpr('logical_minimum', [
-      this,
-      ...values.map(valueToDefaultExpr),
-    ]);
+    return new FunctionExpr('min', [this, ...values.map(valueToDefaultExpr)]);
   }
 
   /**
@@ -1436,9 +1410,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   substring(position: Expr | number, length?: Expr | number): FunctionExpr {
     const positionExpr = valueToDefaultExpr(position);
     if (length === undefined) {
-      return new FunctionExpr('substring', [this, positionExpr]);
+      return new FunctionExpr('substr', [this, positionExpr]);
     } else {
-      return new FunctionExpr('substring', [
+      return new FunctionExpr('substr', [
         this,
         positionExpr,
         valueToDefaultExpr(length),
@@ -2232,27 +2206,6 @@ export function constant(value: unknown): Constant;
 
 export function constant(value: unknown): Constant {
   return new Constant(value);
-}
-
-/**
- * Creates a `Constant` instance for a VectorValue value.
- *
- * ```typescript
- * // Create a Constant instance for a vector value
- * const vectorConstant = constantVector([1, 2, 3]);
- * ```
- *
- * @param value The VectorValue value.
- * @return A new `Constant` instance.
- */
-export function constantVector(
-  value: number[] | firestore.VectorValue
-): Constant {
-  if (Array.isArray(value)) {
-    return constant(new VectorValue(value as number[]));
-  } else {
-    return constant(value);
-  }
 }
 
 /**
@@ -3742,60 +3695,6 @@ export function gte(left: Expr | string, right: unknown): BooleanExpr {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.gte(rightExpr);
-}
-
-/**
- * @beta
- *
- * Creates an expression that concatenates an array expression with other arrays.
- *
- * ```typescript
- * // Combine the 'items' array with two new item arrays
- * arrayConcat(field("items"), [field("newItems"), field("otherItems")]);
- * ```
- *
- * @param firstArray The first array expression to concatenate to.
- * @param secondArray The second array expression or array literal to concatenate to.
- * @param otherArrays Optional additional array expressions or array literals to concatenate.
- * @return A new {@code Expr} representing the concatenated array.
- */
-export function arrayConcat(
-  firstArray: Expr,
-  secondArray: Expr | unknown[],
-  ...otherArrays: Array<Expr | unknown[]>
-): FunctionExpr;
-
-/**
- * @beta
- *
- * Creates an expression that concatenates a field's array value with other arrays.
- *
- * ```typescript
- * // Combine the 'items' array with two new item arrays
- * arrayConcat("items", [field("newItems"), field("otherItems")]);
- * ```
- *
- * @param firstArrayField The first array to concatenate to.
- * @param secondArray The second array expression or array literal to concatenate to.
- * @param otherArrays Optional additional array expressions or array literals to concatenate.
- * @return A new {@code Expr} representing the concatenated array.
- */
-export function arrayConcat(
-  firstArrayField: string,
-  secondArray: Expr | unknown[],
-  ...otherArrays: Array<Expr | unknown[]>
-): FunctionExpr;
-
-export function arrayConcat(
-  firstArray: Expr | string,
-  secondArray: Expr | unknown[],
-  ...otherArrays: Array<Expr | unknown[]>
-): FunctionExpr {
-  const exprValues = otherArrays.map(element => valueToDefaultExpr(element));
-  return fieldOrExpression(firstArray).arrayConcat(
-    fieldOrExpression(secondArray),
-    ...exprValues
-  );
 }
 
 /**
@@ -5601,7 +5500,7 @@ export function cosineDistance(
  */
 export function cosineDistance(
   vectorExpression: Expr,
-  vector: number[] | Expr
+  vector: number[] | VectorValue
 ): FunctionExpr;
 
 /**
@@ -5624,7 +5523,7 @@ export function cosineDistance(
 ): FunctionExpr;
 export function cosineDistance(
   expr: Expr | string,
-  other: Expr | number[] | VectorValue
+  other: Expr | number[] | firestore.VectorValue
 ): FunctionExpr {
   const expr1 = fieldOrExpression(expr);
   const expr2 = vectorToExpr(other);

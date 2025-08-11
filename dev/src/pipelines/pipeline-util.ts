@@ -22,6 +22,7 @@ import './expression';
 import Firestore, {
   CollectionReference,
   DocumentReference,
+  FieldValue,
   Timestamp,
   VectorValue,
 } from '../index';
@@ -58,7 +59,6 @@ import {
   map,
   array,
   Constant,
-  constantVector,
   field,
   Ordering,
   gt,
@@ -654,8 +654,12 @@ export function vectorToExpr(
 ): Expr {
   if (value instanceof Expr) {
     return value;
-  } else if (value instanceof VectorValue || Array.isArray(value)) {
-    const result = constantVector(value);
+  } else if (value instanceof VectorValue) {
+    const result = constant(value);
+    result._createdFromLiteral = true;
+    return result;
+  } else if (Array.isArray(value)) {
+    const result = constant(FieldValue.vector(value));
     result._createdFromLiteral = true;
     return result;
   } else {

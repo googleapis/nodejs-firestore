@@ -3681,22 +3681,6 @@ declare namespace FirebaseFirestore {
       gte(value: unknown): BooleanExpr;
 
       /**
-       * Creates an expression that concatenates an array expression with one or more other arrays.
-       *
-       * ```typescript
-       * // Combine the 'items' array with another array field.
-       * field("items").arrayConcat(field("otherItems"));
-       * ```
-       * @param secondArray Second array expression or array literal to concatenate.
-       * @param otherArrays Optional additional array expressions or array literals to concatenate.
-       * @return A new `Expr` representing the concatenated array.
-       */
-      arrayConcat(
-        secondArray: Expr | unknown[],
-        ...otherArrays: Array<Expr | unknown[]>
-      ): FunctionExpr;
-
-      /**
        * Creates an expression that checks if an array contains a specific element.
        *
        * ```typescript
@@ -5113,19 +5097,6 @@ declare namespace FirebaseFirestore {
     export function constant(value: VectorValue): Constant;
 
     /**
-     * Creates a `Constant` instance for a VectorValue value.
-     *
-     * ```typescript
-     * // Create a Constant instance for a vector value
-     * const vectorConstant = constantVector([1, 2, 3]);
-     * ```
-     *
-     * @param value The VectorValue value.
-     * @return A new `Constant` instance.
-     */
-    export function constantVector(value: number[] | VectorValue): Constant;
-
-    /**
      * @beta
      *
      * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
@@ -6341,48 +6312,6 @@ declare namespace FirebaseFirestore {
      * @return A new `Expr` representing the greater than or equal to comparison.
      */
     export function gte(fieldName: string, value: unknown): BooleanExpr;
-
-    /**
-     * @beta
-     *
-     * Creates an expression that concatenates an array expression with other arrays.
-     *
-     * ```typescript
-     * // Combine the 'items' array with two new item arrays
-     * arrayConcat(field("items"), [field("newItems"), field("otherItems")]);
-     * ```
-     *
-     * @param firstArray The first array expression to concatenate to.
-     * @param secondArray The second array expression or array literal to concatenate to.
-     * @param otherArrays Optional additional array expressions or array literals to concatenate.
-     * @return A new {@code Expr} representing the concatenated array.
-     */
-    export function arrayConcat(
-      firstArray: Expr,
-      secondArray: Expr | unknown[],
-      ...otherArrays: Array<Expr | unknown[]>
-    ): FunctionExpr;
-
-    /**
-     * @beta
-     *
-     * Creates an expression that concatenates a field's array value with other arrays.
-     *
-     * ```typescript
-     * // Combine the 'items' array with two new item arrays
-     * arrayConcat("items", [field("newItems"), field("otherItems")]);
-     * ```
-     *
-     * @param firstArrayField The first array to concatenate to.
-     * @param secondArray The second array expression or array literal to concatenate to.
-     * @param otherArrays Optional additional array expressions or array literals to concatenate.
-     * @return A new {@code Expr} representing the concatenated array.
-     */
-    export function arrayConcat(
-      firstArrayField: string,
-      secondArray: Expr | unknown[],
-      ...otherArrays: Array<Expr | unknown[]>
-    ): FunctionExpr;
 
     /**
      * @beta

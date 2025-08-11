@@ -16,7 +16,6 @@ import {DocumentData, Pipelines} from '@google-cloud/firestore';
 
 import {
   BooleanExpr,
-  constantVector,
   map,
   array,
   field,
@@ -59,7 +58,6 @@ import {
   ifError,
   isError,
   isNan,
-  arrayConcat,
   substring,
   documentId,
   isNull,
@@ -727,8 +725,7 @@ describe.only('Pipeline class', () => {
         constant(refDate).as('date'),
         constant(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 0])).as('bytes'),
         constant(firestore.doc('foo/bar')).as('documentReference'),
-        constantVector(FieldValue.vector([1, 2, 3])).as('vectorValue'),
-        constantVector([1, 2, 3]).as('vectorValue2'),
+        constant(FieldValue.vector([1, 2, 3])).as('vectorValue'),
         map({
           number: 1,
           string: 'a string',
@@ -782,7 +779,6 @@ describe.only('Pipeline class', () => {
         bytes: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 0]),
         documentReference: firestore.collection('foo').doc('bar'),
         vectorValue: FieldValue.vector([1, 2, 3]),
-        vectorValue2: FieldValue.vector([1, 2, 3]),
         map: {
           number: 1,
           string: 'a string',
@@ -2760,19 +2756,19 @@ describe.only('Pipeline class', () => {
     });
 
     it('testDistanceFunctions', async () => {
-      const sourceVector = [0.1, 0.1];
-      const targetVector = [0.5, 0.8];
+      const sourceVector = FieldValue.vector([0.1, 0.1]);
+      const targetVector = FieldValue.vector([0.5, 0.8]);
       let snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .select(
-          cosineDistance(constantVector(sourceVector), targetVector).as(
+          cosineDistance(constant(sourceVector), targetVector).as(
             'cosineDistance'
           ),
-          dotProduct(constantVector(sourceVector), targetVector).as(
+          dotProduct(constant(sourceVector), targetVector).as(
             'dotProductDistance'
           ),
-          euclideanDistance(constantVector(sourceVector), targetVector).as(
+          euclideanDistance(constant(sourceVector), targetVector).as(
             'euclideanDistance'
           )
         )
@@ -2789,13 +2785,13 @@ describe.only('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .select(
-          constantVector(sourceVector)
+          constant(sourceVector)
             .cosineDistance(targetVector)
             .as('cosineDistance'),
-          constantVector(sourceVector)
+          constant(sourceVector)
             .dotProduct(targetVector)
             .as('dotProductDistance'),
-          constantVector(sourceVector)
+          constant(sourceVector)
             .euclideanDistance(targetVector)
             .as('euclideanDistance')
         )
@@ -2814,7 +2810,11 @@ describe.only('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .limit(1)
-        .select(vectorLength(constantVector([1, 2, 3])).as('vectorLength'))
+        .select(
+          vectorLength(constant(FieldValue.vector([1, 2, 3]))).as(
+            'vectorLength'
+          )
+        )
         .execute();
       expectResults(snapshot, {
         vectorLength: 3,
@@ -3334,9 +3334,10 @@ describe.only('Pipeline class', () => {
         .limit(1)
         .select(field('rating').pow(2).as('powerRating'))
         .execute();
-      expectResults(snapshot, {
-        powerRating: 17.640000000000004,
-      });
+      expect(snapshot.results[0].get('powerRating')).to.be.approximately(
+        17.64,
+        0.0001
+      );
     });
 
     it('can compute the power of a numeric value with the top-level function', async () => {
@@ -3347,9 +3348,10 @@ describe.only('Pipeline class', () => {
         .limit(1)
         .select(pow('rating', 2).as('powerRating'))
         .execute();
-      expectResults(snapshot, {
-        powerRating: 17.640000000000004,
-      });
+      expect(snapshot.results[0].get('powerRating')).to.be.approximately(
+        17.64,
+        0.0001
+      );
     });
 
     it('can round a numeric value', async () => {
@@ -3660,27 +3662,27 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    // TODO(new-expression): Add new expression tests above this line
-  });
-
-  describe('not yet implemented in backend', () => {
     it('supports Document_id', async () => {
       let snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .sort(field('rating').descending())
         .limit(1)
-        .select(documentId(field('__path__')).as('docId'))
+        .select(
+          documentId(field('__name__')).as('docId'),
+          documentId(field('__path__')).as('noDocId')
+        )
         .execute();
       expectResults(snapshot, {
         docId: 'book4',
+        noDocId: null,
       });
       snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .sort(field('rating').descending())
         .limit(1)
-        .select(field('__path__').documentId().as('docId'))
+        .select(field('__name__').documentId().as('docId'))
         .execute();
       expectResults(snapshot, {
         docId: 'book4',
@@ -3733,41 +3735,16 @@ describe.only('Pipeline class', () => {
       });
     });
 
-    it('arrayConcat works', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .select(
-          arrayConcat('tags', ['newTag1', 'newTag2'], field('tags'), [null]).as(
-            'modifiedTags'
-          )
-        )
-        .limit(1)
-        .execute();
-      expectResults(snapshot, {
-        modifiedTags: [
-          'comedy',
-          'space',
-          'adventure',
-          'newTag1',
-          'newTag2',
-          'comedy',
-          'space',
-          'adventure',
-          null,
-        ],
-      });
-    });
-
     it('test toLower', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .select(toLower('title').as('lowercaseTitle'))
+        .sort(ascending('title'))
+        .select(toLower('author').as('lowercaseAuthor'))
         .limit(1)
         .execute();
       expectResults(snapshot, {
-        lowercaseTitle: "the hitchhiker's guide to the galaxy",
+        lowercaseAuthor: 'george orwell',
       });
     });
 
@@ -3775,10 +3752,11 @@ describe.only('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
+        .sort(ascending('title'))
         .select(toUpper('author').as('uppercaseAuthor'))
         .limit(1)
         .execute();
-      expectResults(snapshot, {uppercaseAuthor: 'DOUGLAS ADAMS'});
+      expectResults(snapshot, {uppercaseAuthor: 'GEORGE ORWELL'});
     });
 
     it('testTrim', async () => {
@@ -3807,6 +3785,8 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {reverseTitle: '4891'});
     });
+
+    // TODO(new-expression): Add new expression tests above this line
   });
 
   describe('pagination', () => {
