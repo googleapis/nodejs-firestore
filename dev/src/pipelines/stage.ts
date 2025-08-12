@@ -108,7 +108,6 @@ export type InternalDistinctStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Distinct implements Stage {
   name = 'distinct';
@@ -137,7 +136,6 @@ export type InternalCollectionStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class CollectionSource implements Stage {
   name = 'collection';
@@ -173,7 +171,6 @@ export type InternalCollectionGroupStageOptions =
   firestore.Pipelines.CollectionGroupStageOptions;
 
 /**
- * @beta
  */
 export class CollectionGroupSource implements Stage {
   name = 'collection_group';
@@ -205,7 +202,6 @@ export type InternalDatabaseStageOptions =
   firestore.Pipelines.DatabaseStageOptions;
 
 /**
- * @beta
  */
 export class DatabaseSource implements Stage {
   name = 'database';
@@ -233,7 +229,6 @@ export type InternalDocumentsStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class DocumentsSource implements Stage {
   name = 'documents';
@@ -265,7 +260,6 @@ export type InternalWhereStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Where implements Stage {
   name = 'where';
@@ -296,7 +290,6 @@ export type InternalFindNearestStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class FindNearest implements Stage {
   name = 'find_nearest';
@@ -337,7 +330,6 @@ export type InternalSampleStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Sample implements Stage {
   name = 'sample';
@@ -364,7 +356,6 @@ export class Sample implements Stage {
 export type InternalUnionStageOptions = firestore.Pipelines.UnionStageOptions;
 
 /**
- * @beta
  */
 export class Union implements Stage {
   name = 'union';
@@ -395,7 +386,6 @@ export type InternalUnnestStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Unnest implements Stage {
   name = 'unnest';
@@ -426,7 +416,6 @@ export class Unnest implements Stage {
 export type InternalLimitStageOptions = firestore.Pipelines.LimitStageOptions;
 
 /**
- * @beta
  */
 export class Limit implements Stage {
   name = 'limit';
@@ -450,7 +439,6 @@ export class Limit implements Stage {
 export type InternalOffsetStageOptions = firestore.Pipelines.OffsetStageOptions;
 
 /**
- * @beta
  */
 export class Offset implements Stage {
   name = 'offset';
@@ -479,7 +467,6 @@ export type InternalReplaceWithStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class ReplaceWith implements Stage {
   name = 'replace_with';
@@ -511,7 +498,6 @@ export type InternalSelectStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Select implements Stage {
   name = 'select';
@@ -569,7 +555,6 @@ export type InternalSortStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Sort implements Stage {
   name = 'sort';
@@ -591,7 +576,6 @@ export class Sort implements Stage {
 }
 
 /**
- * @beta
  */
 export class RawStage implements Stage {
   readonly optionsUtil = new OptionsUtil({});
