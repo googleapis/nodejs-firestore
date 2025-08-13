@@ -2792,31 +2792,12 @@ export function mapMerge(
  *
  * ```typescript
  * // Get the document ID from a path.
- * documentId(myDocumentReference);
- * ```
- *
- * @return A new {@code Expr} representing the documentId operation.
- */
-export function documentId(
-  documentPath: string | firestore.DocumentReference
-): FunctionExpr;
-
-/**
- * Creates an expression that returns the document ID from a path.
- *
- * ```typescript
- * // Get the document ID from a path.
  * documentId(field("__path__"));
  * ```
  *
  * @return A new {@code Expr} representing the documentId operation.
  */
-export function documentId(documentPathExpr: Expr): FunctionExpr;
-
-export function documentId(
-  documentPath: Expr | string | firestore.DocumentReference
-): FunctionExpr {
-  const documentPathExpr = valueToDefaultExpr(documentPath);
+export function documentId(documentPathExpr: Expr): FunctionExpr {
   return documentPathExpr.documentId();
 }
 
