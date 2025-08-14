@@ -140,14 +140,23 @@ export class ExecutionUtil {
     return Date.now() - startTime >= totalTimeout;
   }
 
-  stream(pipeline: Pipeline): NodeJS.ReadableStream {
-    // TODO(pipeline) implement options for stream
-    const structuredPipeline = new StructuredPipeline(pipeline, {}, {});
-    const responseStream = this._stream(structuredPipeline);
+  stream(
+    structuredPipeline: StructuredPipeline,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+  ): NodeJS.ReadableStream {
+    const responseStream = this._stream(
+      structuredPipeline,
+      transactionOrReadTime
+    );
     const transform = new Transform({
       objectMode: true,
-      transform(chunk, encoding, callback) {
-        callback(undefined, chunk.result);
+      transform(chunk: Array<PipelineStreamElement>, encoding, callback) {
+        chunk.forEach(item => {
+          if (item.result) {
+            this.push(item.result);
+          }
+        });
+        callback();
       },
     });
 

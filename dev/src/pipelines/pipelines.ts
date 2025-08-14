@@ -1586,7 +1586,9 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    */
   stream(): NodeJS.ReadableStream {
     const util = new ExecutionUtil(this.db, this.db._serializer!);
-    return util.stream(this);
+    // TODO(pipelines) support options
+    const structuredPipeline = this._toStructuredPipeline();
+    return util.stream(structuredPipeline, undefined);
   }
 
   _toProto(): api.IPipeline {

@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData, Pipelines} from '@google-cloud/firestore';
+import {
+  DocumentData,
+  DocumentReference,
+  Pipelines,
+} from '@google-cloud/firestore';
 
 import {
   BooleanExpr,
@@ -3790,6 +3794,8 @@ describe('Pipeline class', () => {
   });
 
   describe('pagination', () => {
+    let addedDocs: DocumentReference[] = [];
+
     /**
      * Adds several books to the test collection. These
      * additional books support pagination test scenarios
@@ -3800,7 +3806,9 @@ describe('Pipeline class', () => {
     async function addBooks(
       collectionReference: CollectionReference
     ): Promise<void> {
-      await collectionReference.doc('book11').set({
+      let docRef = collectionReference.doc('book11');
+      addedDocs.push(docRef);
+      await docRef.set({
         title: 'Jonathan Strange & Mr Norrell',
         author: 'Susanna Clarke',
         genre: 'Fantasy',
@@ -3809,7 +3817,9 @@ describe('Pipeline class', () => {
         tags: ['historical fantasy', 'magic', 'alternate history', 'england'],
         awards: {hugo: false, nebula: false},
       });
-      await collectionReference.doc('book12').set({
+      docRef = collectionReference.doc('book12');
+      addedDocs.push(collectionReference.doc('book12'));
+      await docRef.set({
         title: 'The Master and Margarita',
         author: 'Mikhail Bulgakov',
         genre: 'Satire',
@@ -3823,7 +3833,9 @@ describe('Pipeline class', () => {
         ],
         awards: {},
       });
-      await collectionReference.doc('book13').set({
+      docRef = collectionReference.doc('book13');
+      addedDocs.push(docRef);
+      await docRef.set({
         title: 'A Long Way to a Small, Angry Planet',
         author: 'Becky Chambers',
         genre: 'Science Fiction',
@@ -3833,6 +3845,13 @@ describe('Pipeline class', () => {
         awards: {hugo: false, nebula: false, kitschies: true},
       });
     }
+
+    afterEach(async () => {
+      for (let i = 0; i < addedDocs.length; i++) {
+        await addedDocs[i].delete();
+      }
+      addedDocs = [];
+    });
 
     it('supports pagination with filters', async () => {
       await addBooks(randomCol);
@@ -3961,6 +3980,85 @@ describe('Pipeline class', () => {
           .execute();
         expect(snapshot.results.length).to.equal(10);
       });
+    });
+  });
+
+  describe('stream', () => {
+    it('full results as expected', done => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshotStream = ppl.stream();
+
+      const expected = [
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9',
+      ];
+
+      let received = 0;
+      snapshotStream
+        .on('data', d => {
+          expect(d).to.be.an.instanceOf(PipelineResult);
+          const rslt = d as PipelineResult;
+          expect(rslt.id).to.equal(expected.shift());
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(10);
+          done();
+        });
+    });
+
+    it('empty snapshot', done => {
+      const ppl = firestore.pipeline().collection(randomCol.path).limit(0);
+      const snapshotStream = ppl.stream();
+
+      let received = 0;
+      snapshotStream
+        .on('data', _ => {
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(0);
+          done();
+        });
+    });
+
+    it('document transform', done => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'))
+        .limit(2)
+        .select('title');
+      const snapshotStream = ppl.stream();
+
+      const expected = [
+        {title: "The Hitchhiker's Guide to the Galaxy"},
+        {title: 'Dune'},
+      ];
+
+      let received = 0;
+      snapshotStream
+        .on('data', d => {
+          expect(d).to.be.an.instanceOf(PipelineResult);
+          const rslt = d as PipelineResult;
+          expect(rslt.data()).to.deep.equal(expected.shift());
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(2);
+          done();
+        });
     });
   });
 });
