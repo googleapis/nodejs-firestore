@@ -4605,7 +4605,7 @@ declare namespace FirebaseFirestore {
       readonly aggregate: AggregateFunction;
 
       /**
-       * TODO(tsdoc)
+       * Specifies the name of the property that will contain the aggregate result in the output document.
        */
       readonly alias: string;
     }
@@ -4619,22 +4619,23 @@ declare namespace FirebaseFirestore {
      */
     export class AliasedExpr implements Selectable {
       /**
-       * TODO(tsdoc)
+       * @internal Specifies that the instance is an AliasedExpr.
        */
       exprType: ExprType;
 
       /**
-       * TODO(tsdoc)
+       * Specifies that this class is selectable, meaning it contains an {@link Expr} and an alias,
+       * and can be provided to the Select stage of a pipeline.
        */
       selectable: true;
 
       /**
-       * TODO(tsdoc)
+       * The underlying expression that is being aliased.
        */
       readonly expr: Expr;
 
       /**
-       * TODO(tsdoc)
+       * Specifies the name of the property that will contain the aggregate result in the output document.
        */
       readonly alias: string;
     }
@@ -4651,23 +4652,36 @@ declare namespace FirebaseFirestore {
      */
     export class Field extends Expr implements Selectable {
       /**
-       * TODO(tsdoc)
+       * @internal Specifies that the instance is a Field.
        */
       readonly exprType: ExprType;
       /**
-       * TODO(tsdoc)
+       * Specifies that this class is selectable, meaning it contains an {@link Expr} and an alias,
+       * and can be provided to the Select stage of a pipeline.
        */
       selectable: true;
       /**
-       * TODO(tsdoc)
+       * Returns the name of the field.
+       *
+       * @example
+       * ```typescript
+       * const name = field("price").fieldName();
+       * console.log(name); // "price"
+       * ```
+       *
+       * @returns The name of the field.
        */
       fieldName(): string;
       /**
-       * TODO(tsdoc)
+       * Returns the alias of the field, which is the field-name itself.
+       *
+       * @returns The field name itself.
        */
       get alias(): string;
       /**
-       * TODO(tsdoc)
+       * Self-referential getter that returns this.
+       *
+       * @returns This {@link Field} object.
        */
       get expr(): Expr;
     }
@@ -4690,7 +4704,10 @@ declare namespace FirebaseFirestore {
      */
     export function field(name: string): Field;
     /**
-     * TODO(tsdoc)
+     * Creates a new Field instance from a given FieldPath.
+     *
+     * @param path The FieldPath to convert into a Field.
+     * @returns A new {@link Field} instance representing the specified path.
      */
     export function field(path: FieldPath): Field;
 
@@ -4802,11 +4819,18 @@ declare namespace FirebaseFirestore {
      */
     export class FunctionExpr extends Expr {
       /**
-       * TODO(tsdoc)
+       * @internal
+       * Indicates that this expression is a `FunctionExpr`.
        */
       readonly exprType: ExprType;
       /**
-       * TODO(tsdoc)
+       * @private
+       * @internal
+       *
+       * Initializes a new `FunctionExpr` instance with the given function name and parameters.
+       *
+       * @param name The name of the function.
+       * @param params An array of `Expr` instances representing the parameters of the function.
        */
       constructor(name: string, params: Expr[]);
     }
