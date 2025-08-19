@@ -62,7 +62,7 @@ export class RemoveFields implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -94,7 +94,7 @@ export class Aggregate implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -108,7 +108,6 @@ export type InternalDistinctStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Distinct implements Stage {
   name = 'distinct';
@@ -123,7 +122,7 @@ export class Distinct implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -137,7 +136,6 @@ export type InternalCollectionStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class CollectionSource implements Stage {
   name = 'collection';
@@ -163,7 +161,7 @@ export class CollectionSource implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -173,7 +171,6 @@ export type InternalCollectionGroupStageOptions =
   firestore.Pipelines.CollectionGroupStageOptions;
 
 /**
- * @beta
  */
 export class CollectionGroupSource implements Stage {
   name = 'collection_group';
@@ -195,7 +192,7 @@ export class CollectionGroupSource implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -205,7 +202,6 @@ export type InternalDatabaseStageOptions =
   firestore.Pipelines.DatabaseStageOptions;
 
 /**
- * @beta
  */
 export class DatabaseSource implements Stage {
   name = 'database';
@@ -219,7 +215,7 @@ export class DatabaseSource implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -233,7 +229,6 @@ export type InternalDocumentsStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class DocumentsSource implements Stage {
   name = 'documents';
@@ -251,7 +246,7 @@ export class DocumentsSource implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -265,7 +260,6 @@ export type InternalWhereStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Where implements Stage {
   name = 'where';
@@ -280,7 +274,7 @@ export class Where implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -296,7 +290,6 @@ export type InternalFindNearestStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class FindNearest implements Stage {
   name = 'find_nearest';
@@ -322,7 +315,7 @@ export class FindNearest implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this._options,
-        this._options.customOptions
+        this._options.rawOptions
       ),
     };
   }
@@ -337,7 +330,6 @@ export type InternalSampleStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Sample implements Stage {
   name = 'sample';
@@ -355,7 +347,7 @@ export class Sample implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -364,7 +356,6 @@ export class Sample implements Stage {
 export type InternalUnionStageOptions = firestore.Pipelines.UnionStageOptions;
 
 /**
- * @beta
  */
 export class Union implements Stage {
   name = 'union';
@@ -379,7 +370,7 @@ export class Union implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -395,7 +386,6 @@ export type InternalUnnestStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Unnest implements Stage {
   name = 'unnest';
@@ -417,7 +407,7 @@ export class Unnest implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -426,7 +416,6 @@ export class Unnest implements Stage {
 export type InternalLimitStageOptions = firestore.Pipelines.LimitStageOptions;
 
 /**
- * @beta
  */
 export class Limit implements Stage {
   name = 'limit';
@@ -441,7 +430,7 @@ export class Limit implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -450,7 +439,6 @@ export class Limit implements Stage {
 export type InternalOffsetStageOptions = firestore.Pipelines.OffsetStageOptions;
 
 /**
- * @beta
  */
 export class Offset implements Stage {
   name = 'offset';
@@ -465,7 +453,7 @@ export class Offset implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -479,7 +467,6 @@ export type InternalReplaceWithStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class ReplaceWith implements Stage {
   name = 'replace_with';
@@ -497,7 +484,7 @@ export class ReplaceWith implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -511,7 +498,6 @@ export type InternalSelectStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Select implements Stage {
   name = 'select';
@@ -526,7 +512,7 @@ export class Select implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -555,7 +541,7 @@ export class AddFields implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
@@ -569,7 +555,6 @@ export type InternalSortStageOptions = Omit<
 };
 
 /**
- * @beta
  */
 export class Sort implements Stage {
   name = 'sort';
@@ -584,16 +569,15 @@ export class Sort implements Stage {
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.options.customOptions
+        this.options.rawOptions
       ),
     };
   }
 }
 
 /**
- * @beta
  */
-export class GenericStage implements Stage {
+export class RawStage implements Stage {
   readonly optionsUtil = new OptionsUtil({});
 
   /**

@@ -25,7 +25,7 @@ import {validateFieldPath} from '../path';
 import {
   ExecutionUtil,
   fieldOrExpression,
-  isAggregateWithAlias,
+  isAliasedAggregate,
   isBooleanExpr,
   isCollectionReference,
   isExpr,
@@ -38,7 +38,6 @@ import {
   toField,
   vectorToExpr,
 } from './pipeline-util';
-import {PipelineOptions} from './pipeline-options';
 import {DocumentReference} from '../reference/document-reference';
 import {PipelineResponse} from '../reference/types';
 import {HasUserData, hasUserData, Serializer} from '../serializer';
@@ -50,9 +49,9 @@ import {isOptionalEqual, isPlainObject} from '../util';
 
 import {
   AggregateFunction,
-  AggregateWithAlias,
+  AliasedAggregate,
   Expr,
-  ExprWithAlias,
+  AliasedExpr,
   Field,
   BooleanExpr,
   Ordering,
@@ -69,7 +68,7 @@ import {
   DocumentsSource,
   Where,
   FindNearest,
-  GenericStage,
+  RawStage,
   Limit,
   Offset,
   Select,
@@ -806,7 +805,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * - {@code string}: Name of an existing field
    * - {@link Field}: References an existing document field.
-   * - {@link ExprWithAlias}: Represents the result of a function with an assigned alias name
+   * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
    *   using {@link Expr#as}.
    *
    * Example:
@@ -838,7 +837,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * - {@code string}: Name of an existing field
    * - {@link Field}: References an existing document field.
-   * - {@link ExprWithAlias}: Represents the result of a function with an assigned alias name
+   * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
    *   using {@link Expr#as}.
    *
    * Example:
@@ -885,7 +884,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * Performs aggregation operations on the documents from previous stages.
    *
    * <p>This stage allows you to calculate aggregate values over a set of documents. You define the
-   * aggregations to perform using {@link AggregateWithAlias} expressions which are typically results of
+   * aggregations to perform using {@link AliasedAggregate} expressions which are typically results of
    * calling {@link Expr#as} on {@link AggregateFunction} instances.
    *
    * <p>Example:
@@ -899,15 +898,15 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *     );
    * ```
    *
-   * @param accumulator The first {@link AggregateWithAlias}, wrapping an {@link AggregateFunction}
+   * @param accumulator The first {@link AliasedAggregate}, wrapping an {@link AggregateFunction}
    *     and providing a name for the accumulated results.
-   * @param additionalAccumulators Optional additional {@link AggregateWithAlias}, each wrapping an {@link AggregateFunction}
+   * @param additionalAccumulators Optional additional {@link AliasedAggregate}, each wrapping an {@link AggregateFunction}
    *     and providing a name for the accumulated results.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
   aggregate(
-    accumulator: firestore.Pipelines.AggregateWithAlias,
-    ...additionalAccumulators: firestore.Pipelines.AggregateWithAlias[]
+    accumulator: firestore.Pipelines.AliasedAggregate,
+    ...additionalAccumulators: firestore.Pipelines.AliasedAggregate[]
   ): Pipeline;
   /**
    * Performs optionally grouped aggregation operations on the documents from previous stages.
@@ -921,7 +920,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *       If no grouping fields are provided, a single group containing all documents is used. Not
    *       specifying groups is the same as putting the entire inputs into one group.</li>
    *   <li>**Accumulators:** One or more accumulation operations to perform within each group. These
-   *       are defined using {@link AggregateWithAlias} expressions, which are typically created by
+   *       are defined using {@link AliasedAggregate} expressions, which are typically created by
    *       calling {@link Expr#as} on {@link AggregateFunction} instances. Each aggregation
    *       calculates a value (e.g., sum, average, count) based on the documents within its group.</li>
    * </ul>
@@ -944,22 +943,20 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   aggregate(options: firestore.Pipelines.AggregateStageOptions): Pipeline;
   aggregate(
     targetOrOptions:
-      | firestore.Pipelines.AggregateWithAlias
+      | firestore.Pipelines.AliasedAggregate
       | firestore.Pipelines.AggregateStageOptions,
-    ...rest: firestore.Pipelines.AggregateWithAlias[]
+    ...rest: firestore.Pipelines.AliasedAggregate[]
   ): Pipeline {
-    const options = isAggregateWithAlias(targetOrOptions)
-      ? {}
-      : targetOrOptions;
+    const options = isAliasedAggregate(targetOrOptions) ? {} : targetOrOptions;
 
-    const accumulators: Array<firestore.Pipelines.AggregateWithAlias> =
-      isAggregateWithAlias(targetOrOptions)
+    const accumulators: Array<firestore.Pipelines.AliasedAggregate> =
+      isAliasedAggregate(targetOrOptions)
         ? [targetOrOptions, ...rest]
         : targetOrOptions.accumulators;
     const convertedAccumulators: Map<string, AggregateFunction> =
-      aggregateWithAliasToMap(accumulators);
+      aliasedAggregateToMap(accumulators);
     const groups: Array<firestore.Pipelines.Selectable | string> =
-      isAggregateWithAlias(targetOrOptions) ? [] : targetOrOptions.groups ?? [];
+      isAliasedAggregate(targetOrOptions) ? [] : targetOrOptions.groups ?? [];
     const convertedGroups: Map<string, Expr> = selectablesToMap(groups);
     this._validateUserData('aggregate', convertedGroups);
 
@@ -1453,10 +1450,10 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   }
 
   /**
-   * Adds a generic stage to the pipeline.
+   * Adds a raw stage to the pipeline.
    *
    * <p>This method provides a flexible way to extend the pipeline's functionality by adding custom
-   * stages. Each generic stage is defined by a unique `name` and a set of `params` that control its
+   * stages. Each raw stage is defined by a unique `name` and a set of `params` that control its
    * behavior.
    *
    * <p>Example (Assuming there is no 'where' stage available in SDK):
@@ -1464,16 +1461,16 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * ```typescript
    * // Assume we don't have a built-in 'where' stage
    * firestore.pipeline().collection('books')
-   *     .genericStage('where', [field('published').lt(1900)]) // Custom 'where' stage
+   *     .rawStage('where', [field('published').lt(1900)]) // Custom 'where' stage
    *     .select('title', 'author');
    * ```
    *
-   * @param name - The unique name of the generic stage to add.
-   * @param params - A list of parameters to configure the generic stage's behavior.
+   * @param name - The unique name of the raw stage to add.
+   * @param params - A list of parameters to configure the raw stage's behavior.
    * @param options - An object of key value pairs that specifies optional parameters for the stage.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  genericStage(
+  rawStage(
     name: string,
     params: unknown[],
     options?: {[key: string]: Expr | unknown}
@@ -1499,9 +1496,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
         param._validateUserData(!!this.db._settings.ignoreUndefinedProperties);
       }
     });
-    return this._addStage(
-      new GenericStage(name, expressionParams, options ?? {})
-    );
+    return this._addStage(new RawStage(name, expressionParams, options ?? {}));
   }
 
   /**
@@ -1533,11 +1528,13 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *     .execute();
    * ```
    *
-   * @param pipelineOptions - Optionally specify pipeline execution behavior.
+   * @param pipelineExecuteOptions - Optionally specify pipeline execution behavior.
    * @return A Promise representing the asynchronous pipeline execution.
    */
-  execute(pipelineOptions?: PipelineOptions): Promise<PipelineSnapshot> {
-    return this._execute(undefined, pipelineOptions).then(response => {
+  execute(
+    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions
+  ): Promise<PipelineSnapshot> {
+    return this._execute(undefined, pipelineExecuteOptions).then(response => {
       const results = response.result || [];
       const executionTime = response.executionTime;
       const stats = response.explainStats;
@@ -1548,18 +1545,22 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
 
   _execute(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    pipelineOptions?: PipelineOptions
+    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions
   ): Promise<PipelineResponse> {
     const util = new ExecutionUtil(this.db, this.db._serializer!);
-    const structuredPipeline = this._toStructuredPipeline(pipelineOptions);
+    const structuredPipeline = this._toStructuredPipeline(
+      pipelineExecuteOptions
+    );
     return util
       ._getResponse(structuredPipeline, transactionOrReadTime)
       .then(result => result!);
   }
 
-  _toStructuredPipeline(pipelineOptions?: PipelineOptions): StructuredPipeline {
-    const structuredPipelineOptions = pipelineOptions ?? {};
-    const optionsOverride = pipelineOptions?.customOptions ?? {};
+  _toStructuredPipeline(
+    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions
+  ): StructuredPipeline {
+    const structuredPipelineOptions = pipelineExecuteOptions ?? {};
+    const optionsOverride = pipelineExecuteOptions?.rawOptions ?? {};
     return new StructuredPipeline(
       this,
       structuredPipelineOptions,
@@ -1585,7 +1586,9 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    */
   stream(): NodeJS.ReadableStream {
     const util = new ExecutionUtil(this.db, this.db._serializer!);
-    return util.stream(this);
+    // TODO(pipelines) support options
+    const structuredPipeline = this._toStructuredPipeline();
+    return util.stream(structuredPipeline, undefined);
   }
 
   _toProto(): api.IPipeline {
@@ -1604,7 +1607,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    */
   _validateUserData<
     T extends Map<string, HasUserData> | HasUserData[] | HasUserData,
-  >(name: string, val: T): T {
+  >(_: string, val: T): T {
     const ignoreUndefinedProperties =
       !!this.db._settings.ignoreUndefinedProperties;
     if (hasUserData(val)) {
@@ -1632,8 +1635,8 @@ function selectablesToMap(
       );
     } else if (selectable instanceof Field) {
       result.set((selectable as Field).fieldName(), selectable);
-    } else if (selectable instanceof ExprWithAlias) {
-      const expr = selectable as ExprWithAlias;
+    } else if (selectable instanceof AliasedExpr) {
+      const expr = selectable as AliasedExpr;
       result.set(expr.alias, expr.expr as unknown as Expr);
     } else {
       throw new Error('unexpected selectable: ' + JSON.stringify(selectable));
@@ -1642,13 +1645,13 @@ function selectablesToMap(
   return result;
 }
 
-function aggregateWithAliasToMap(
-  aggregateWithAliases: firestore.Pipelines.AggregateWithAlias[]
+function aliasedAggregateToMap(
+  aliasedAggregatees: firestore.Pipelines.AliasedAggregate[]
 ): Map<string, AggregateFunction> {
-  return aggregateWithAliases.reduce(
+  return aliasedAggregatees.reduce(
     (
       map: Map<string, AggregateFunction>,
-      selectable: firestore.Pipelines.AggregateWithAlias
+      selectable: firestore.Pipelines.AliasedAggregate
     ) => {
       map.set(selectable.alias, selectable.aggregate as AggregateFunction);
       return map;
@@ -1870,12 +1873,12 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
    */
   constructor(
     serializer: Serializer,
-    ref?: DocumentReference,
     /**
      * @internal
      * @private
      **/
-    readonly _fieldsProto?: ApiMapValue,
+    readonly _fieldsProto: ApiMapValue,
+    ref?: DocumentReference,
     readTime?: Timestamp,
     createTime?: Timestamp,
     updateTime?: Timestamp
@@ -1943,11 +1946,9 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
   }
 
   /**
-   * Retrieves all fields in the result as an object. Returns 'undefined' if
-   * the document doesn't exist.
+   * Retrieves all fields in the result as an object.
    *
-   * @returns {T|undefined} An object containing all fields in the document or
-   * 'undefined' if the document doesn't exist.
+   * @returns {T} An object containing all fields in the document.
    *
    * @example
    * ```
@@ -1959,12 +1960,8 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
    * });
    * ```
    */
-  data(): firestore.DocumentData | undefined {
+  data(): firestore.DocumentData {
     const fields = this._fieldsProto;
-
-    if (fields === undefined) {
-      return undefined;
-    }
 
     const obj: firestore.DocumentData = {};
     for (const prop of Object.keys(fields)) {
@@ -1976,7 +1973,7 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
   /**
    * Retrieves the field specified by `field`.
    *
-   * @param {string|FieldPath} field The field path
+   * @param {string|FieldPath} fieldPath The field path
    * (e.g. 'foo' or 'foo.bar') to a specific field.
    * @returns {*} The data at the specified field location or undefined if no
    * such field exists.
@@ -1994,10 +1991,10 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get(field: string | FieldPath): any {
-    validateFieldPath('field', field);
+  get(fieldPath: string | FieldPath): any {
+    validateFieldPath('field', fieldPath);
 
-    const protoField = this.protoField(field);
+    const protoField = this.protoField(fieldPath);
 
     if (protoField === undefined) {
       return undefined;

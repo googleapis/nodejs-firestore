@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData, Pipelines} from '@google-cloud/firestore';
+import {
+  DocumentData,
+  DocumentReference,
+  Pipelines,
+} from '@google-cloud/firestore';
 
 import {
   BooleanExpr,
-  constantVector,
   map,
   array,
   field,
@@ -59,7 +62,6 @@ import {
   ifError,
   isError,
   isNan,
-  arrayConcat,
   substring,
   documentId,
   isNull,
@@ -727,8 +729,7 @@ describe('Pipeline class', () => {
         constant(refDate).as('date'),
         constant(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 0])).as('bytes'),
         constant(firestore.doc('foo/bar')).as('documentReference'),
-        constantVector(FieldValue.vector([1, 2, 3])).as('vectorValue'),
-        constantVector([1, 2, 3]).as('vectorValue2'),
+        constant(FieldValue.vector([1, 2, 3])).as('vectorValue'),
         map({
           number: 1,
           string: 'a string',
@@ -782,7 +783,6 @@ describe('Pipeline class', () => {
         bytes: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 0]),
         documentReference: firestore.collection('foo').doc('bar'),
         vectorValue: FieldValue.vector([1, 2, 3]),
-        vectorValue2: FieldValue.vector([1, 2, 3]),
         map: {
           number: 1,
           string: 'a string',
@@ -1629,7 +1629,7 @@ describe('Pipeline class', () => {
           await firestore
             .pipeline()
             .collection(randomCol.path)
-            .genericStage('select', [
+            .rawStage('select', [
               // incorrect parameter type
               field('title'),
             ])
@@ -1661,7 +1661,7 @@ describe('Pipeline class', () => {
               explainOptions: {
                 mode: 'analyze',
               },
-              customOptions: {
+              rawOptions: {
                 memory_limit: 1,
               },
             });
@@ -1693,12 +1693,12 @@ describe('Pipeline class', () => {
       });
     });
 
-    describe('generic stage', () => {
+    describe('raw stage', () => {
       it('can select fields', async () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .genericStage('select', [
+          .rawStage('select', [
             {
               title: field('title'),
               metadata: {
@@ -1724,7 +1724,7 @@ describe('Pipeline class', () => {
           .sort(field('author').ascending())
           .limit(1)
           .select('title', 'author')
-          .genericStage('add_fields', [
+          .rawStage('add_fields', [
             {
               display: strConcat('title', ' - ', field('author')),
             },
@@ -1742,7 +1742,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author')
-          .genericStage('where', [field('author').eq('Douglas Adams')])
+          .rawStage('where', [field('author').eq('Douglas Adams')])
           .execute();
         expectResults(snapshot, {
           title: "The Hitchhiker's Guide to the Galaxy",
@@ -1755,14 +1755,14 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author')
-          .genericStage('sort', [
+          .rawStage('sort', [
             {
               direction: 'ascending',
               expression: field('author'),
             },
           ])
-          .genericStage('offset', [3])
-          .genericStage('limit', [1])
+          .rawStage('offset', [3])
+          .rawStage('limit', [1])
           .execute();
         expectResults(snapshot, {
           author: 'Fyodor Dostoevsky',
@@ -1775,10 +1775,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author', 'rating')
-          .genericStage('aggregate', [
-            {averageRating: field('rating').avg()},
-            {},
-          ])
+          .rawStage('aggregate', [{averageRating: field('rating').avg()}, {}])
           .execute();
         expectResults(snapshot, {
           averageRating: 4.3100000000000005,
@@ -1790,7 +1787,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author', 'rating')
-          .genericStage('distinct', [{rating: field('rating')}])
+          .rawStage('distinct', [{rating: field('rating')}])
           .sort(field('rating').descending())
           .execute();
         expectResults(
@@ -1823,7 +1820,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol)
-          .genericStage(
+          .rawStage(
             'find_nearest',
             [
               field('embedding'),
@@ -2763,19 +2760,19 @@ describe('Pipeline class', () => {
     });
 
     it('testDistanceFunctions', async () => {
-      const sourceVector = [0.1, 0.1];
-      const targetVector = [0.5, 0.8];
+      const sourceVector = FieldValue.vector([0.1, 0.1]);
+      const targetVector = FieldValue.vector([0.5, 0.8]);
       let snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .select(
-          cosineDistance(constantVector(sourceVector), targetVector).as(
+          cosineDistance(constant(sourceVector), targetVector).as(
             'cosineDistance'
           ),
-          dotProduct(constantVector(sourceVector), targetVector).as(
+          dotProduct(constant(sourceVector), targetVector).as(
             'dotProductDistance'
           ),
-          euclideanDistance(constantVector(sourceVector), targetVector).as(
+          euclideanDistance(constant(sourceVector), targetVector).as(
             'euclideanDistance'
           )
         )
@@ -2792,13 +2789,13 @@ describe('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .select(
-          constantVector(sourceVector)
+          constant(sourceVector)
             .cosineDistance(targetVector)
             .as('cosineDistance'),
-          constantVector(sourceVector)
+          constant(sourceVector)
             .dotProduct(targetVector)
             .as('dotProductDistance'),
-          constantVector(sourceVector)
+          constant(sourceVector)
             .euclideanDistance(targetVector)
             .as('euclideanDistance')
         )
@@ -2817,7 +2814,11 @@ describe('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .limit(1)
-        .select(vectorLength(constantVector([1, 2, 3])).as('vectorLength'))
+        .select(
+          vectorLength(constant(FieldValue.vector([1, 2, 3]))).as(
+            'vectorLength'
+          )
+        )
         .execute();
       expectResults(snapshot, {
         vectorLength: 3,
@@ -3337,9 +3338,10 @@ describe('Pipeline class', () => {
         .limit(1)
         .select(field('rating').pow(2).as('powerRating'))
         .execute();
-      expectResults(snapshot, {
-        powerRating: 17.640000000000004,
-      });
+      expect(snapshot.results[0].get('powerRating')).to.be.approximately(
+        17.64,
+        0.0001
+      );
     });
 
     it('can compute the power of a numeric value with the top-level function', async () => {
@@ -3350,9 +3352,10 @@ describe('Pipeline class', () => {
         .limit(1)
         .select(pow('rating', 2).as('powerRating'))
         .execute();
-      expectResults(snapshot, {
-        powerRating: 17.640000000000004,
-      });
+      expect(snapshot.results[0].get('powerRating')).to.be.approximately(
+        17.64,
+        0.0001
+      );
     });
 
     it('can round a numeric value', async () => {
@@ -3532,7 +3535,7 @@ describe('Pipeline class', () => {
         .limit(1)
         .select(field('rating').ln().as('lnRating'))
         .execute();
-      expect(snapshot.results[0]!.data()!.lnRating).to.be.closeTo(1.435, 0.001);
+      expect(snapshot.results[0]!.data().lnRating).to.be.closeTo(1.435, 0.001);
     });
 
     it('can compute the natural logarithm of a numeric value with the top-level function', async () => {
@@ -3543,7 +3546,7 @@ describe('Pipeline class', () => {
         .limit(1)
         .select(ln('rating').as('lnRating'))
         .execute();
-      expect(snapshot.results[0]!.data()!.lnRating).to.be.closeTo(1.435, 0.001);
+      expect(snapshot.results[0]!.data().lnRating).to.be.closeTo(1.435, 0.001);
     });
 
     it('can compute the natural logarithm of a numeric value with the top-level function', async () => {
@@ -3663,27 +3666,27 @@ describe('Pipeline class', () => {
       });
     });
 
-    // TODO(new-expression): Add new expression tests above this line
-  });
-
-  describe('not yet implemented in backend', () => {
     it('supports Document_id', async () => {
       let snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .sort(field('rating').descending())
         .limit(1)
-        .select(documentId(field('__path__')).as('docId'))
+        .select(
+          documentId(field('__name__')).as('docId'),
+          documentId(field('__path__')).as('noDocId')
+        )
         .execute();
       expectResults(snapshot, {
         docId: 'book4',
+        noDocId: null,
       });
       snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .sort(field('rating').descending())
         .limit(1)
-        .select(field('__path__').documentId().as('docId'))
+        .select(field('__name__').documentId().as('docId'))
         .execute();
       expectResults(snapshot, {
         docId: 'book4',
@@ -3736,41 +3739,16 @@ describe('Pipeline class', () => {
       });
     });
 
-    it('arrayConcat works', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .select(
-          arrayConcat('tags', ['newTag1', 'newTag2'], field('tags'), [null]).as(
-            'modifiedTags'
-          )
-        )
-        .limit(1)
-        .execute();
-      expectResults(snapshot, {
-        modifiedTags: [
-          'comedy',
-          'space',
-          'adventure',
-          'newTag1',
-          'newTag2',
-          'comedy',
-          'space',
-          'adventure',
-          null,
-        ],
-      });
-    });
-
     it('test toLower', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .select(toLower('title').as('lowercaseTitle'))
+        .sort(ascending('title'))
+        .select(toLower('author').as('lowercaseAuthor'))
         .limit(1)
         .execute();
       expectResults(snapshot, {
-        lowercaseTitle: "the hitchhiker's guide to the galaxy",
+        lowercaseAuthor: 'george orwell',
       });
     });
 
@@ -3778,10 +3756,11 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
+        .sort(ascending('title'))
         .select(toUpper('author').as('uppercaseAuthor'))
         .limit(1)
         .execute();
-      expectResults(snapshot, {uppercaseAuthor: 'DOUGLAS ADAMS'});
+      expectResults(snapshot, {uppercaseAuthor: 'GEORGE ORWELL'});
     });
 
     it('testTrim', async () => {
@@ -3810,9 +3789,13 @@ describe('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {reverseTitle: '4891'});
     });
+
+    // TODO(new-expression): Add new expression tests above this line
   });
 
   describe('pagination', () => {
+    let addedDocs: DocumentReference[] = [];
+
     /**
      * Adds several books to the test collection. These
      * additional books support pagination test scenarios
@@ -3823,7 +3806,9 @@ describe('Pipeline class', () => {
     async function addBooks(
       collectionReference: CollectionReference
     ): Promise<void> {
-      await collectionReference.doc('book11').set({
+      let docRef = collectionReference.doc('book11');
+      addedDocs.push(docRef);
+      await docRef.set({
         title: 'Jonathan Strange & Mr Norrell',
         author: 'Susanna Clarke',
         genre: 'Fantasy',
@@ -3832,7 +3817,9 @@ describe('Pipeline class', () => {
         tags: ['historical fantasy', 'magic', 'alternate history', 'england'],
         awards: {hugo: false, nebula: false},
       });
-      await collectionReference.doc('book12').set({
+      docRef = collectionReference.doc('book12');
+      addedDocs.push(collectionReference.doc('book12'));
+      await docRef.set({
         title: 'The Master and Margarita',
         author: 'Mikhail Bulgakov',
         genre: 'Satire',
@@ -3846,7 +3833,9 @@ describe('Pipeline class', () => {
         ],
         awards: {},
       });
-      await collectionReference.doc('book13').set({
+      docRef = collectionReference.doc('book13');
+      addedDocs.push(docRef);
+      await docRef.set({
         title: 'A Long Way to a Small, Angry Planet',
         author: 'Becky Chambers',
         genre: 'Science Fiction',
@@ -3856,6 +3845,13 @@ describe('Pipeline class', () => {
         awards: {hugo: false, nebula: false, kitschies: true},
       });
     }
+
+    afterEach(async () => {
+      for (let i = 0; i < addedDocs.length; i++) {
+        await addedDocs[i].delete();
+      }
+      addedDocs = [];
+    });
 
     it('supports pagination with filters', async () => {
       await addBooks(randomCol);
@@ -3984,6 +3980,85 @@ describe('Pipeline class', () => {
           .execute();
         expect(snapshot.results.length).to.equal(10);
       });
+    });
+  });
+
+  describe('stream', () => {
+    it('full results as expected', done => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+      const snapshotStream = ppl.stream();
+
+      const expected = [
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9',
+      ];
+
+      let received = 0;
+      snapshotStream
+        .on('data', d => {
+          expect(d).to.be.an.instanceOf(PipelineResult);
+          const rslt = d as PipelineResult;
+          expect(rslt.id).to.equal(expected.shift());
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(10);
+          done();
+        });
+    });
+
+    it('empty snapshot', done => {
+      const ppl = firestore.pipeline().collection(randomCol.path).limit(0);
+      const snapshotStream = ppl.stream();
+
+      let received = 0;
+      snapshotStream
+        .on('data', _ => {
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(0);
+          done();
+        });
+    });
+
+    it('document transform', done => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'))
+        .limit(2)
+        .select('title');
+      const snapshotStream = ppl.stream();
+
+      const expected = [
+        {title: "The Hitchhiker's Guide to the Galaxy"},
+        {title: 'Dune'},
+      ];
+
+      let received = 0;
+      snapshotStream
+        .on('data', d => {
+          expect(d).to.be.an.instanceOf(PipelineResult);
+          const rslt = d as PipelineResult;
+          expect(rslt.data()).to.deep.equal(expected.shift());
+          ++received;
+        })
+        .on('end', () => {
+          expect(received).to.equal(2);
+          done();
+        });
     });
   });
 });
