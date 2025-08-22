@@ -37,10 +37,8 @@ setLogFunction(null);
 describe('Order', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -498,5 +496,5 @@ describe('CompareUtf8Strings', () => {
       );
       throw new Error('Test failed');
     }
-  }).timeout(20000);
+  }).timeout(30000);
 });

@@ -41,7 +41,7 @@ const FOO_MAP = {
 };
 
 describe('ignores undefined values', () => {
-  it('in set()', () => {
+  it('in set()', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -54,17 +54,16 @@ describe('ignores undefined values', () => {
       },
     };
 
-    return createInstance(overrides, {ignoreUndefinedProperties: true}).then(
-      firestore => {
-        return firestore.doc('collectionId/documentId').set({
-          foo: 'foo',
-          bar: undefined,
-        });
-      },
-    );
+    const firestore = await createInstance(overrides, {
+      ignoreUndefinedProperties: true,
+    });
+    await firestore.doc('collectionId/documentId').set({
+      foo: 'foo',
+      bar: undefined,
+    });
   });
 
-  it('in set({ merge: true })', () => {
+  it('in set({ merge: true })', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -78,20 +77,19 @@ describe('ignores undefined values', () => {
       },
     };
 
-    return createInstance(overrides, {ignoreUndefinedProperties: true}).then(
-      firestore => {
-        return firestore.doc('collectionId/documentId').set(
-          {
-            foo: 'foo',
-            bar: undefined,
-          },
-          {merge: true},
-        );
+    const firestore = await createInstance(overrides, {
+      ignoreUndefinedProperties: true,
+    });
+    await firestore.doc('collectionId/documentId').set(
+      {
+        foo: 'foo',
+        bar: undefined,
       },
+      {merge: true},
     );
   });
 
-  it('in create()', () => {
+  it('in create()', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -104,17 +102,16 @@ describe('ignores undefined values', () => {
       },
     };
 
-    return createInstance(overrides, {ignoreUndefinedProperties: true}).then(
-      firestore => {
-        return firestore.doc('collectionId/documentId').create({
-          foo: 'foo',
-          bar: undefined,
-        });
-      },
-    );
+    const firestore = await createInstance(overrides, {
+      ignoreUndefinedProperties: true,
+    });
+    await firestore.doc('collectionId/documentId').create({
+      foo: 'foo',
+      bar: undefined,
+    });
   });
 
-  it('in update()', () => {
+  it('in update()', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -128,20 +125,19 @@ describe('ignores undefined values', () => {
       },
     };
 
-    return createInstance(overrides, {ignoreUndefinedProperties: true}).then(
-      async firestore => {
-        await firestore.doc('collectionId/documentId').update('foo', {
-          bar: 'bar',
-          baz: undefined,
-        });
-        await firestore
-          .doc('collectionId/documentId')
-          .update({foo: {bar: 'bar', baz: undefined}});
-      },
-    );
+    const firestore = await createInstance(overrides, {
+      ignoreUndefinedProperties: true,
+    });
+    await firestore.doc('collectionId/documentId').update('foo', {
+      bar: 'bar',
+      baz: undefined,
+    });
+    await firestore
+      .doc('collectionId/documentId')
+      .update({foo: {bar: 'bar', baz: undefined}});
   });
 
-  it('with top-level field in update()', () => {
+  it('with top-level field in update()', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -155,17 +151,16 @@ describe('ignores undefined values', () => {
       },
     };
 
-    return createInstance(overrides, {ignoreUndefinedProperties: true}).then(
-      async firestore => {
-        await firestore.doc('collectionId/documentId').update({
-          foo: 'bar',
-          ignored: undefined,
-        });
-      },
-    );
+    const firestore = await createInstance(overrides, {
+      ignoreUndefinedProperties: true,
+    });
+    await firestore.doc('collectionId/documentId').update({
+      foo: 'bar',
+      ignored: undefined,
+    });
   });
 
-  it('in query filters', () => {
+  it('in query filters', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, fieldFiltersQuery('foo', 'EQUAL', FOO_MAP));
@@ -173,17 +168,16 @@ describe('ignores undefined values', () => {
       },
     };
 
-    return createInstance(overrides, {ignoreUndefinedProperties: true}).then(
-      firestore => {
-        return firestore
-          .collection('collectionId')
-          .where('foo', '==', {bar: 'bar', baz: undefined})
-          .get();
-      },
-    );
+    const firestore = await createInstance(overrides, {
+      ignoreUndefinedProperties: true,
+    });
+    await firestore
+      .collection('collectionId')
+      .where('foo', '==', {bar: 'bar', baz: undefined})
+      .get();
   });
 
-  it('in query cursors', () => {
+  it('in query cursors', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -195,149 +189,143 @@ describe('ignores undefined values', () => {
       },
     };
 
-    return createInstance(overrides, {ignoreUndefinedProperties: true}).then(
-      firestore => {
-        return firestore
-          .collection('collectionId')
-          .orderBy('foo')
-          .startAt({bar: 'bar', baz: undefined})
-          .get();
-      },
-    );
+    const firestore = await createInstance(overrides, {
+      ignoreUndefinedProperties: true,
+    });
+    await firestore
+      .collection('collectionId')
+      .orderBy('foo')
+      .startAt({bar: 'bar', baz: undefined})
+      .get();
   });
 });
 
 describe('rejects undefined values', () => {
   describe('in top-level call', () => {
-    it('to set()', () => {
-      return createInstance({}, {ignoreUndefinedProperties: true}).then(
-        firestore => {
-          expect(() => {
-            firestore
-              .doc('collectionId/documentId')
-              .set(undefined as InvalidApiUsage);
-          }).to.throw(
-            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
-          );
-        },
+    it('to set()', async () => {
+      const firestore = await createInstance(
+        {},
+        {ignoreUndefinedProperties: true},
+      );
+      expect(() => {
+        void firestore
+          .doc('collectionId/documentId')
+          .set(undefined as InvalidApiUsage);
+      }).to.throw(
+        'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
       );
     });
 
-    it('to create()', () => {
-      return createInstance({}, {ignoreUndefinedProperties: true}).then(
-        firestore => {
-          expect(() => {
-            firestore
-              .doc('collectionId/documentId')
-              .create(undefined as InvalidApiUsage);
-          }).to.throw(
-            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
-          );
-        },
+    it('to create()', async () => {
+      const firestore = await createInstance(
+        {},
+        {ignoreUndefinedProperties: true},
+      );
+      expect(() => {
+        void firestore
+          .doc('collectionId/documentId')
+          .create(undefined as InvalidApiUsage);
+      }).to.throw(
+        'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
       );
     });
 
-    it('to update()', () => {
-      return createInstance({}, {ignoreUndefinedProperties: true}).then(
-        firestore => {
-          expect(() => {
-            firestore.doc('collectionId/documentId').update('foo', undefined);
-          }).to.throw('"undefined" values are only ignored inside of objects.');
-        },
+    it('to update()', async () => {
+      const firestore = await createInstance(
+        {},
+        {ignoreUndefinedProperties: true},
       );
+      expect(() => {
+        void firestore.doc('collectionId/documentId').update('foo', undefined);
+      }).to.throw('"undefined" values are only ignored inside of objects.');
     });
 
-    it('to Query.where()', () => {
-      return createInstance({}, {ignoreUndefinedProperties: true}).then(
-        firestore => {
-          expect(() => {
-            firestore
-              .doc('collectionId/documentId')
-              .collection('collectionId')
-              .where('foo', '==', undefined);
-          }).to.throw('"undefined" values are only ignored inside of objects.');
-        },
+    it('to Query.where()', async () => {
+      const firestore = await createInstance(
+        {},
+        {ignoreUndefinedProperties: true},
       );
+      expect(() => {
+        firestore
+          .doc('collectionId/documentId')
+          .collection('collectionId')
+          .where('foo', '==', undefined);
+      }).to.throw('"undefined" values are only ignored inside of objects.');
     });
 
-    it('to Query.startAt()', () => {
-      return createInstance({}, {ignoreUndefinedProperties: true}).then(
-        firestore => {
-          expect(() => {
-            firestore
-              .doc('collectionId/documentId')
-              .collection('collectionId')
-              .orderBy('foo')
-              .startAt(undefined);
-          }).to.throw('"undefined" values are only ignored inside of objects.');
-        },
+    it('to Query.startAt()', async () => {
+      const firestore = await createInstance(
+        {},
+        {ignoreUndefinedProperties: true},
       );
+      expect(() => {
+        firestore
+          .doc('collectionId/documentId')
+          .collection('collectionId')
+          .orderBy('foo')
+          .startAt(undefined);
+      }).to.throw('"undefined" values are only ignored inside of objects.');
     });
   });
 
   describe('when setting is disabled', () => {
-    it('in set()', () => {
-      return createInstance({}).then(firestore => {
-        expect(() => {
-          firestore.doc('collectionId/documentId').set({
-            foo: 'foo',
-            bar: undefined,
-          });
-        }).to.throw(
-          'Cannot use "undefined" as a Firestore value (found in field "bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
-        );
-      });
+    it('in set()', async () => {
+      const firestore = await createInstance({});
+      expect(() => {
+        void firestore.doc('collectionId/documentId').set({
+          foo: 'foo',
+          bar: undefined,
+        });
+      }).to.throw(
+        'Cannot use "undefined" as a Firestore value (found in field "bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
+      );
     });
 
-    it('in create()', () => {
-      return createInstance({}).then(firestore => {
-        expect(() => {
-          firestore.doc('collectionId/documentId').create({
-            foo: 'foo',
-            bar: undefined,
-          });
-        }).to.throw(
-          'Cannot use "undefined" as a Firestore value (found in field "bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
-        );
-      });
+    it('in create()', async () => {
+      const firestore = await createInstance({});
+      expect(() => {
+        void firestore.doc('collectionId/documentId').create({
+          foo: 'foo',
+          bar: undefined,
+        });
+      }).to.throw(
+        'Cannot use "undefined" as a Firestore value (found in field "bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
+      );
     });
 
-    it('in update()', () => {
-      return createInstance({}).then(firestore => {
-        expect(() => {
-          firestore.doc('collectionId/documentId').update('foo', {
-            foo: 'foo',
-            bar: undefined,
-          });
-        }).to.throw(
-          'Cannot use "undefined" as a Firestore value (found in field "foo.bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
-        );
-      });
+    it('in update()', async () => {
+      const firestore = await createInstance({});
+      expect(() => {
+        void firestore.doc('collectionId/documentId').update('foo', {
+          foo: 'foo',
+          bar: undefined,
+        });
+      }).to.throw(
+        'Cannot use "undefined" as a Firestore value (found in field "foo.bar"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
+      );
     });
 
-    it('in query filters', () => {
-      return createInstance({}).then(firestore => {
-        expect(() => {
-          firestore
-            .collection('collectionId')
-            .where('foo', '==', {bar: 'bar', baz: undefined});
-        }).to.throw(
-          'Cannot use "undefined" as a Firestore value (found in field "baz"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
-        );
-      });
+    it('in query filters', async () => {
+      const firestore = await createInstance({});
+      expect(() => {
+        firestore
+          .collection('collectionId')
+          .where('foo', '==', {bar: 'bar', baz: undefined});
+      }).to.throw(
+        'Cannot use "undefined" as a Firestore value (found in field "baz"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
+      );
     });
 
-    it('in query cursors', () => {
-      return createInstance({}).then(firestore => {
-        expect(() => {
-          firestore
-            .collection('collectionId')
-            .orderBy('foo')
-            .startAt({bar: 'bar', baz: undefined});
-        }).to.throw(
-          'Cannot use "undefined" as a Firestore value (found in field "baz"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
-        );
-      });
+    it('in query cursors', async () => {
+      const firestore = await createInstance({});
+      expect(() => {
+        firestore
+          .collection('collectionId')
+          .orderBy('foo')
+          .startAt({bar: 'bar', baz: undefined});
+      }).to.throw(
+        'Cannot use "undefined" as a Firestore value (found in field "baz"). If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
+      );
     });
   });
 });

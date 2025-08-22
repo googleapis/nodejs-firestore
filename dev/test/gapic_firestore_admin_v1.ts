@@ -284,27 +284,23 @@ describe('v1.FirestoreAdminClient', () => {
       assert(client.firestoreAdminStub);
     });
 
-    it('has close method for the initialized client', done => {
+    it('has close method for the initialized client', async () => {
       const client = new firestoreadminModule.FirestoreAdminClient({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       assert(client.firestoreAdminStub);
-      client.close().then(() => {
-        done();
-      });
+      await client.close();
     });
 
-    it('has close method for the non-initialized client', done => {
+    it('has close method for the non-initialized client', async () => {
       const client = new firestoreadminModule.FirestoreAdminClient({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
       assert.strictEqual(client.firestoreAdminStub, undefined);
-      client.close().then(() => {
-        done();
-      });
+      await client.close();
     });
 
     it('has getProjectId method', async () => {
@@ -348,7 +344,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetIndexRequest(),
       );
@@ -379,7 +375,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetIndexRequest(),
       );
@@ -426,7 +422,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetIndexRequest(),
       );
@@ -454,7 +450,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetIndexRequest(),
       );
@@ -464,7 +460,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.getIndex(request), expectedError);
     });
   });
@@ -475,7 +471,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteIndexRequest(),
       );
@@ -506,7 +502,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteIndexRequest(),
       );
@@ -553,7 +549,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteIndexRequest(),
       );
@@ -584,7 +580,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteIndexRequest(),
       );
@@ -594,7 +590,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.deleteIndex(request), expectedError);
     });
   });
@@ -605,7 +601,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetFieldRequest(),
       );
@@ -636,7 +632,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetFieldRequest(),
       );
@@ -683,7 +679,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetFieldRequest(),
       );
@@ -711,7 +707,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetFieldRequest(),
       );
@@ -721,7 +717,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.getField(request), expectedError);
     });
   });
@@ -732,7 +728,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetDatabaseRequest(),
       );
@@ -763,7 +759,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetDatabaseRequest(),
       );
@@ -810,7 +806,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetDatabaseRequest(),
       );
@@ -841,7 +837,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetDatabaseRequest(),
       );
@@ -851,7 +847,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.getDatabase(request), expectedError);
     });
   });
@@ -862,7 +858,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListDatabasesRequest(),
       );
@@ -893,7 +889,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListDatabasesRequest(),
       );
@@ -940,7 +936,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListDatabasesRequest(),
       );
@@ -971,7 +967,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListDatabasesRequest(),
       );
@@ -981,7 +977,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.parent = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.listDatabases(request), expectedError);
     });
   });
@@ -992,7 +988,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetBackupRequest(),
       );
@@ -1023,7 +1019,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetBackupRequest(),
       );
@@ -1070,7 +1066,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetBackupRequest(),
       );
@@ -1098,7 +1094,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetBackupRequest(),
       );
@@ -1108,7 +1104,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.getBackup(request), expectedError);
     });
   });
@@ -1119,7 +1115,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListBackupsRequest(),
       );
@@ -1150,7 +1146,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListBackupsRequest(),
       );
@@ -1197,7 +1193,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListBackupsRequest(),
       );
@@ -1228,7 +1224,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListBackupsRequest(),
       );
@@ -1238,7 +1234,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.parent = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.listBackups(request), expectedError);
     });
   });
@@ -1249,7 +1245,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteBackupRequest(),
       );
@@ -1280,7 +1276,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteBackupRequest(),
       );
@@ -1327,7 +1323,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteBackupRequest(),
       );
@@ -1358,7 +1354,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteBackupRequest(),
       );
@@ -1368,7 +1364,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.deleteBackup(request), expectedError);
     });
   });
@@ -1379,7 +1375,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateBackupScheduleRequest(),
       );
@@ -1411,7 +1407,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateBackupScheduleRequest(),
       );
@@ -1458,7 +1454,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateBackupScheduleRequest(),
       );
@@ -1489,7 +1485,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateBackupScheduleRequest(),
       );
@@ -1499,7 +1495,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.parent = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.createBackupSchedule(request), expectedError);
     });
   });
@@ -1510,7 +1506,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetBackupScheduleRequest(),
       );
@@ -1541,7 +1537,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetBackupScheduleRequest(),
       );
@@ -1588,7 +1584,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetBackupScheduleRequest(),
       );
@@ -1619,7 +1615,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.GetBackupScheduleRequest(),
       );
@@ -1629,7 +1625,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.getBackupSchedule(request), expectedError);
     });
   });
@@ -1640,7 +1636,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListBackupSchedulesRequest(),
       );
@@ -1672,7 +1668,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListBackupSchedulesRequest(),
       );
@@ -1719,7 +1715,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListBackupSchedulesRequest(),
       );
@@ -1750,7 +1746,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListBackupSchedulesRequest(),
       );
@@ -1760,7 +1756,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.parent = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.listBackupSchedules(request), expectedError);
     });
   });
@@ -1771,7 +1767,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateBackupScheduleRequest(),
       );
@@ -1804,7 +1800,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateBackupScheduleRequest(),
       );
@@ -1852,7 +1848,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateBackupScheduleRequest(),
       );
@@ -1884,7 +1880,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateBackupScheduleRequest(),
       );
@@ -1895,7 +1891,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.backupSchedule.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.updateBackupSchedule(request), expectedError);
     });
   });
@@ -1906,7 +1902,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteBackupScheduleRequest(),
       );
@@ -1938,7 +1934,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteBackupScheduleRequest(),
       );
@@ -1985,7 +1981,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteBackupScheduleRequest(),
       );
@@ -2016,7 +2012,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteBackupScheduleRequest(),
       );
@@ -2026,7 +2022,7 @@ describe('v1.FirestoreAdminClient', () => {
       );
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
-      client.close();
+      await client.close();
       await assert.rejects(client.deleteBackupSchedule(request), expectedError);
     });
   });
@@ -2037,7 +2033,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateIndexRequest(),
       );
@@ -2069,7 +2065,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateIndexRequest(),
       );
@@ -2123,7 +2119,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateIndexRequest(),
       );
@@ -2154,7 +2150,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateIndexRequest(),
       );
@@ -2187,7 +2183,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedResponse = generateSampleMessage(
         new operationsProtos.google.longrunning.Operation(),
       );
@@ -2209,7 +2205,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedError = new Error('expected');
 
       client.operationsClient.getOperation = stubSimpleCall(
@@ -2227,7 +2223,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateFieldRequest(),
       );
@@ -2260,7 +2256,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateFieldRequest(),
       );
@@ -2315,7 +2311,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateFieldRequest(),
       );
@@ -2347,7 +2343,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateFieldRequest(),
       );
@@ -2381,7 +2377,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedResponse = generateSampleMessage(
         new operationsProtos.google.longrunning.Operation(),
       );
@@ -2403,7 +2399,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedError = new Error('expected');
 
       client.operationsClient.getOperation = stubSimpleCall(
@@ -2421,7 +2417,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ExportDocumentsRequest(),
       );
@@ -2454,7 +2450,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ExportDocumentsRequest(),
       );
@@ -2508,7 +2504,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ExportDocumentsRequest(),
       );
@@ -2539,7 +2535,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ExportDocumentsRequest(),
       );
@@ -2572,7 +2568,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedResponse = generateSampleMessage(
         new operationsProtos.google.longrunning.Operation(),
       );
@@ -2594,7 +2590,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedError = new Error('expected');
 
       client.operationsClient.getOperation = stubSimpleCall(
@@ -2615,7 +2611,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ImportDocumentsRequest(),
       );
@@ -2648,7 +2644,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ImportDocumentsRequest(),
       );
@@ -2702,7 +2698,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ImportDocumentsRequest(),
       );
@@ -2733,7 +2729,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ImportDocumentsRequest(),
       );
@@ -2766,7 +2762,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedResponse = generateSampleMessage(
         new operationsProtos.google.longrunning.Operation(),
       );
@@ -2788,7 +2784,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedError = new Error('expected');
 
       client.operationsClient.getOperation = stubSimpleCall(
@@ -2809,7 +2805,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.BulkDeleteDocumentsRequest(),
       );
@@ -2842,7 +2838,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.BulkDeleteDocumentsRequest(),
       );
@@ -2896,7 +2892,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.BulkDeleteDocumentsRequest(),
       );
@@ -2927,7 +2923,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.BulkDeleteDocumentsRequest(),
       );
@@ -2960,7 +2956,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedResponse = generateSampleMessage(
         new operationsProtos.google.longrunning.Operation(),
       );
@@ -2982,7 +2978,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedError = new Error('expected');
 
       client.operationsClient.getOperation = stubSimpleCall(
@@ -3003,7 +2999,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateDatabaseRequest(),
       );
@@ -3036,7 +3032,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateDatabaseRequest(),
       );
@@ -3090,7 +3086,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateDatabaseRequest(),
       );
@@ -3121,7 +3117,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.CreateDatabaseRequest(),
       );
@@ -3154,7 +3150,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedResponse = generateSampleMessage(
         new operationsProtos.google.longrunning.Operation(),
       );
@@ -3176,7 +3172,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedError = new Error('expected');
 
       client.operationsClient.getOperation = stubSimpleCall(
@@ -3197,7 +3193,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateDatabaseRequest(),
       );
@@ -3231,7 +3227,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateDatabaseRequest(),
       );
@@ -3286,7 +3282,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateDatabaseRequest(),
       );
@@ -3318,7 +3314,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.UpdateDatabaseRequest(),
       );
@@ -3352,7 +3348,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedResponse = generateSampleMessage(
         new operationsProtos.google.longrunning.Operation(),
       );
@@ -3374,7 +3370,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedError = new Error('expected');
 
       client.operationsClient.getOperation = stubSimpleCall(
@@ -3395,7 +3391,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteDatabaseRequest(),
       );
@@ -3428,7 +3424,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteDatabaseRequest(),
       );
@@ -3482,7 +3478,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteDatabaseRequest(),
       );
@@ -3513,7 +3509,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.DeleteDatabaseRequest(),
       );
@@ -3546,7 +3542,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedResponse = generateSampleMessage(
         new operationsProtos.google.longrunning.Operation(),
       );
@@ -3568,7 +3564,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedError = new Error('expected');
 
       client.operationsClient.getOperation = stubSimpleCall(
@@ -3589,7 +3585,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.RestoreDatabaseRequest(),
       );
@@ -3622,7 +3618,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.RestoreDatabaseRequest(),
       );
@@ -3676,7 +3672,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.RestoreDatabaseRequest(),
       );
@@ -3707,7 +3703,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.RestoreDatabaseRequest(),
       );
@@ -3740,7 +3736,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedResponse = generateSampleMessage(
         new operationsProtos.google.longrunning.Operation(),
       );
@@ -3762,7 +3758,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const expectedError = new Error('expected');
 
       client.operationsClient.getOperation = stubSimpleCall(
@@ -3783,7 +3779,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest(),
       );
@@ -3816,7 +3812,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest(),
       );
@@ -3865,7 +3861,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest(),
       );
@@ -3896,7 +3892,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest(),
       );
@@ -3950,7 +3946,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest(),
       );
@@ -4001,7 +3997,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest(),
       );
@@ -4044,7 +4040,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListIndexesRequest(),
       );
@@ -4088,7 +4084,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest(),
       );
@@ -4121,7 +4117,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest(),
       );
@@ -4170,7 +4166,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest(),
       );
@@ -4201,7 +4197,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest(),
       );
@@ -4255,7 +4251,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest(),
       );
@@ -4306,7 +4302,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest(),
       );
@@ -4349,7 +4345,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new protos.google.firestore.admin.v1.ListFieldsRequest(),
       );
@@ -4392,7 +4388,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new LocationProtos.google.cloud.location.GetLocationRequest(),
       );
@@ -4422,7 +4418,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new LocationProtos.google.cloud.location.GetLocationRequest(),
       );
@@ -4442,7 +4438,7 @@ describe('v1.FirestoreAdminClient', () => {
         .stub()
         .callsArgWith(2, null, expectedResponse);
       const promise = new Promise((resolve, reject) => {
-        client.getLocation(
+        void client.getLocation(
           request,
           expectedOptions,
           (
@@ -4466,7 +4462,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new LocationProtos.google.cloud.location.GetLocationRequest(),
       );
@@ -4501,7 +4497,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new LocationProtos.google.cloud.location.ListLocationsRequest(),
       );
@@ -4549,7 +4545,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new LocationProtos.google.cloud.location.ListLocationsRequest(),
       );
@@ -4590,7 +4586,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new operationsProtos.google.longrunning.GetOperationRequest(),
       );
@@ -4621,7 +4617,7 @@ describe('v1.FirestoreAdminClient', () => {
         .stub()
         .callsArgWith(2, null, expectedResponse);
       const promise = new Promise((resolve, reject) => {
-        client.operationsClient.getOperation(
+        void client.operationsClient.getOperation(
           request,
           undefined,
           (
@@ -4669,7 +4665,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new operationsProtos.google.longrunning.CancelOperationRequest(),
       );
@@ -4701,7 +4697,7 @@ describe('v1.FirestoreAdminClient', () => {
         .stub()
         .callsArgWith(2, null, expectedResponse);
       const promise = new Promise((resolve, reject) => {
-        client.operationsClient.cancelOperation(
+        void client.operationsClient.cancelOperation(
           request,
           undefined,
           (
@@ -4749,7 +4745,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new operationsProtos.google.longrunning.DeleteOperationRequest(),
       );
@@ -4781,7 +4777,7 @@ describe('v1.FirestoreAdminClient', () => {
         .stub()
         .callsArgWith(2, null, expectedResponse);
       const promise = new Promise((resolve, reject) => {
-        client.operationsClient.deleteOperation(
+        void client.operationsClient.deleteOperation(
           request,
           undefined,
           (
@@ -4864,7 +4860,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       const request = generateSampleMessage(
         new operationsProtos.google.longrunning.ListOperationsRequest(),
       );
@@ -4889,7 +4885,7 @@ describe('v1.FirestoreAdminClient', () => {
   });
 
   describe('Path templates', () => {
-    describe('backup', () => {
+    describe('backup', async () => {
       const fakePath = '/rendered/path/backup';
       const expectedParameters = {
         project: 'projectValue',
@@ -4900,7 +4896,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       client.pathTemplates.backupPathTemplate.render = sinon
         .stub()
         .returns(fakePath);
@@ -4953,7 +4949,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
     });
 
-    describe('backupSchedule', () => {
+    describe('backupSchedule', async () => {
       const fakePath = '/rendered/path/backupSchedule';
       const expectedParameters = {
         project: 'projectValue',
@@ -4964,7 +4960,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       client.pathTemplates.backupSchedulePathTemplate.render = sinon
         .stub()
         .returns(fakePath);
@@ -5018,7 +5014,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
     });
 
-    describe('collectionGroup', () => {
+    describe('collectionGroup', async () => {
       const fakePath = '/rendered/path/collectionGroup';
       const expectedParameters = {
         project: 'projectValue',
@@ -5029,7 +5025,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       client.pathTemplates.collectionGroupPathTemplate.render = sinon
         .stub()
         .returns(fakePath);
@@ -5082,7 +5078,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
     });
 
-    describe('database', () => {
+    describe('database', async () => {
       const fakePath = '/rendered/path/database';
       const expectedParameters = {
         project: 'projectValue',
@@ -5092,7 +5088,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       client.pathTemplates.databasePathTemplate.render = sinon
         .stub()
         .returns(fakePath);
@@ -5131,7 +5127,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
     });
 
-    describe('field', () => {
+    describe('field', async () => {
       const fakePath = '/rendered/path/field';
       const expectedParameters = {
         project: 'projectValue',
@@ -5143,7 +5139,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       client.pathTemplates.fieldPathTemplate.render = sinon
         .stub()
         .returns(fakePath);
@@ -5207,7 +5203,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
     });
 
-    describe('index', () => {
+    describe('index', async () => {
       const fakePath = '/rendered/path/index';
       const expectedParameters = {
         project: 'projectValue',
@@ -5219,7 +5215,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       client.pathTemplates.indexPathTemplate.render = sinon
         .stub()
         .returns(fakePath);
@@ -5283,7 +5279,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
     });
 
-    describe('location', () => {
+    describe('location', async () => {
       const fakePath = '/rendered/path/location';
       const expectedParameters = {
         project: 'projectValue',
@@ -5293,7 +5289,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       client.pathTemplates.locationPathTemplate.render = sinon
         .stub()
         .returns(fakePath);
@@ -5332,7 +5328,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
     });
 
-    describe('project', () => {
+    describe('project', async () => {
       const fakePath = '/rendered/path/project';
       const expectedParameters = {
         project: 'projectValue',
@@ -5341,7 +5337,7 @@ describe('v1.FirestoreAdminClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
-      client.initialize();
+      void client.initialize();
       client.pathTemplates.projectPathTemplate.render = sinon
         .stub()
         .returns(fakePath);

@@ -552,17 +552,12 @@ describe('Firestore class', () => {
     expect(docs[1].data()!.toString()).to.deep.equal('post2, by author2');
   });
 
-  it('cannot make calls after the client has been terminated', () => {
+  it('cannot make calls after the client has been terminated', async () => {
     const ref1 = randomCol.doc('doc1');
-    return firestore
-      .terminate()
-      .then(() => {
-        return ref1.set({foo: 100});
-      })
-      .then(() => Promise.reject('set() should have failed'))
-      .catch(err => {
-        expect(err.message).to.equal('The client has already been terminated');
-      });
+    await firestore.terminate();
+    return expect(ref1.set({foo: 100})).to.eventually.be.rejectedWith(
+      'The client has already been terminated',
+    );
   });
 
   it('throws an error if terminate() is called with active listeners', async () => {
@@ -582,7 +577,7 @@ describe('Firestore class', () => {
   it('throws an error if terminate() is called with pending BulkWriter operations', async () => {
     const writer = firestore.bulkWriter();
     const ref = randomCol.doc('doc-1');
-    writer.set(ref, {foo: 'bar'});
+    void writer.set(ref, {foo: 'bar'});
     await expect(firestore.terminate()).to.eventually.be.rejectedWith(
       'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
         'instances must be closed before terminating the client. There are 0 ' +
@@ -1217,7 +1212,7 @@ describe('DocumentReference class', () => {
   });
 
   // tslint:disable-next-line:only-arrow-function
-  it('can add and delete fields sequentially', function () {
+  it('can add and delete fields sequentially', async function () {
     this.timeout(30 * 1000);
 
     const ref = randomCol.doc('doc');
@@ -1287,7 +1282,7 @@ describe('DocumentReference class', () => {
         });
     }
 
-    return promise;
+    await promise;
   });
 
   // tslint:disable-next-line:only-arrow-function
@@ -1555,7 +1550,7 @@ describe('DocumentReference class', () => {
         () => {
           unsubscribe1();
           unsubscribe2();
-          Promise.all(promises).then(() => done());
+          void Promise.all(promises).then(() => done());
         },
       ];
 
@@ -1595,7 +1590,7 @@ describe('DocumentReference class', () => {
         () => {
           unsubscribe1();
           unsubscribe2();
-          Promise.all(promises).then(() => done());
+          void Promise.all(promises).then(() => done());
         },
       ];
 
@@ -3161,7 +3156,7 @@ describe('Query class', () => {
     const ref1 = randomCol.doc('doc1');
     const ref2 = randomCol.doc('doc2');
 
-    Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})]).then(() => {
+    void Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})]).then(() => {
       return randomCol
         .stream()
         .on('data', d => {
@@ -5208,7 +5203,7 @@ describe('Aggregation queries', () => {
   });
 
   it("terminate doesn't crash when there is aggregate query in flight", async () => {
-    col.aggregate({count: AggregateField.count()}).get();
+    void col.aggregate({count: AggregateField.count()}).get();
     await firestore.terminate();
   });
 
@@ -7048,12 +7043,12 @@ describe('WriteBatch class', () => {
       });
   });
 
-  it('has a full stack trace if set() errors', () => {
+  it('has a full stack trace if set() errors', async () => {
     // Use an invalid document name that the backend will reject.
     const ref = randomCol.doc('__doc__');
     const batch = firestore.batch();
     batch.set(ref, {foo: 'a'});
-    return batch
+    await batch
       .commit()
       .then(() => Promise.reject('commit() should have failed'))
       .catch((err: Error) => {
@@ -7265,7 +7260,7 @@ describe('BulkWriter class', () => {
 
   it('can terminate once BulkWriter is closed', async () => {
     const ref = randomCol.doc('doc1');
-    writer.set(ref, {foo: 'bar'});
+    void writer.set(ref, {foo: 'bar'});
     await writer.close();
     return firestore.terminate();
   });
