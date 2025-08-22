@@ -1113,7 +1113,7 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
+    return createInstance(overrides).then(async firestoreInstance => {
       firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query
@@ -1123,7 +1123,7 @@ describe('query interface', () => {
         .orderBy('a')
         .startAt(1)
         .limit(3);
-      void query.get();
+      await query.get();
     });
   });
 });

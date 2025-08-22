@@ -367,7 +367,7 @@ describe.skip('BulkWriter', () => {
     ]);
 
     const doc = firestore.doc('collectionId/doc');
-    await bulkWriter.set(doc, {foo: 'bar'}).catch(err => {
+    void bulkWriter.set(doc, {foo: 'bar'}).catch(err => {
       incrementOpCount();
       expect(err instanceof BulkWriterError).to.be.true;
       expect(err.code).to.equal(Status.DEADLINE_EXCEEDED);

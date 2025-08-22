@@ -1582,10 +1582,11 @@ describe('update document', () => {
       commit: request => {
         requestEquals(
           request,
-          set({
+          update({
             document: document('documentId', 'a', {
               mapValue: {},
             }),
+            mask: updateMask('a'),
           }),
         );
         return response(writeResult(1));
@@ -1593,7 +1594,7 @@ describe('update document', () => {
     };
 
     const firestore = await createInstance(overrides);
-    await firestore.doc('collectionId/documentId').set({a: {}});
+    await firestore.doc('collectionId/documentId').update({a: {}});
   });
 
   it('supports nested delete', async () => {
