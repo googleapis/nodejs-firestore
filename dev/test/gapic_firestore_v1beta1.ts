@@ -433,7 +433,7 @@ describe('v1beta1.FirestoreClient', () => {
         undefined,
         expectedError,
       );
-      void assert.rejects(client.getDocument(request), expectedError);
+      await assert.rejects(client.getDocument(request), expectedError);
       const actualRequest = (
         client.innerApiCalls.getDocument as SinonStub
       ).getCall(0).args[0];
@@ -460,7 +460,7 @@ describe('v1beta1.FirestoreClient', () => {
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       await client.close();
-      void assert.rejects(client.getDocument(request), expectedError);
+      await assert.rejects(client.getDocument(request), expectedError);
     });
   });
 
@@ -566,7 +566,7 @@ describe('v1beta1.FirestoreClient', () => {
         undefined,
         expectedError,
       );
-      void assert.rejects(client.updateDocument(request), expectedError);
+      await assert.rejects(client.updateDocument(request), expectedError);
       const actualRequest = (
         client.innerApiCalls.updateDocument as SinonStub
       ).getCall(0).args[0];
@@ -594,7 +594,7 @@ describe('v1beta1.FirestoreClient', () => {
       request.document.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       await client.close();
-      void assert.rejects(client.updateDocument(request), expectedError);
+      await assert.rejects(client.updateDocument(request), expectedError);
     });
   });
 
@@ -697,7 +697,7 @@ describe('v1beta1.FirestoreClient', () => {
         undefined,
         expectedError,
       );
-      void assert.rejects(client.deleteDocument(request), expectedError);
+      await assert.rejects(client.deleteDocument(request), expectedError);
       const actualRequest = (
         client.innerApiCalls.deleteDocument as SinonStub
       ).getCall(0).args[0];
@@ -724,7 +724,7 @@ describe('v1beta1.FirestoreClient', () => {
       request.name = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       await client.close();
-      void assert.rejects(client.deleteDocument(request), expectedError);
+      await assert.rejects(client.deleteDocument(request), expectedError);
     });
   });
 
@@ -827,7 +827,7 @@ describe('v1beta1.FirestoreClient', () => {
         undefined,
         expectedError,
       );
-      void assert.rejects(client.beginTransaction(request), expectedError);
+      await assert.rejects(client.beginTransaction(request), expectedError);
       const actualRequest = (
         client.innerApiCalls.beginTransaction as SinonStub
       ).getCall(0).args[0];
@@ -854,7 +854,7 @@ describe('v1beta1.FirestoreClient', () => {
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       await client.close();
-      void assert.rejects(client.beginTransaction(request), expectedError);
+      await assert.rejects(client.beginTransaction(request), expectedError);
     });
   });
 
@@ -954,7 +954,7 @@ describe('v1beta1.FirestoreClient', () => {
       const expectedHeaderRequestParams = `database=${defaultValue1 ?? ''}`;
       const expectedError = new Error('expected');
       client.innerApiCalls.commit = stubSimpleCall(undefined, expectedError);
-      void assert.rejects(client.commit(request), expectedError);
+      await assert.rejects(client.commit(request), expectedError);
       const actualRequest = (client.innerApiCalls.commit as SinonStub).getCall(
         0,
       ).args[0];
@@ -981,7 +981,7 @@ describe('v1beta1.FirestoreClient', () => {
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       await client.close();
-      void assert.rejects(client.commit(request), expectedError);
+      await assert.rejects(client.commit(request), expectedError);
     });
   });
 
@@ -1081,7 +1081,7 @@ describe('v1beta1.FirestoreClient', () => {
       const expectedHeaderRequestParams = `database=${defaultValue1 ?? ''}`;
       const expectedError = new Error('expected');
       client.innerApiCalls.rollback = stubSimpleCall(undefined, expectedError);
-      void assert.rejects(client.rollback(request), expectedError);
+      await assert.rejects(client.rollback(request), expectedError);
       const actualRequest = (
         client.innerApiCalls.rollback as SinonStub
       ).getCall(0).args[0];
@@ -1108,7 +1108,7 @@ describe('v1beta1.FirestoreClient', () => {
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       await client.close();
-      void assert.rejects(client.rollback(request), expectedError);
+      await assert.rejects(client.rollback(request), expectedError);
     });
   });
 
@@ -1211,7 +1211,7 @@ describe('v1beta1.FirestoreClient', () => {
         undefined,
         expectedError,
       );
-      void assert.rejects(client.batchWrite(request), expectedError);
+      await assert.rejects(client.batchWrite(request), expectedError);
       const actualRequest = (
         client.innerApiCalls.batchWrite as SinonStub
       ).getCall(0).args[0];
@@ -1238,7 +1238,7 @@ describe('v1beta1.FirestoreClient', () => {
       request.database = defaultValue1;
       const expectedError = new Error('The client has already been closed.');
       await client.close();
-      void assert.rejects(client.batchWrite(request), expectedError);
+      await assert.rejects(client.batchWrite(request), expectedError);
     });
   });
 
@@ -1356,7 +1356,7 @@ describe('v1beta1.FirestoreClient', () => {
         undefined,
         expectedError,
       );
-      void assert.rejects(client.createDocument(request), expectedError);
+      await assert.rejects(client.createDocument(request), expectedError);
       const actualRequest = (
         client.innerApiCalls.createDocument as SinonStub
       ).getCall(0).args[0];
@@ -1388,7 +1388,7 @@ describe('v1beta1.FirestoreClient', () => {
       request.collectionId = defaultValue2;
       const expectedError = new Error('The client has already been closed.');
       await client.close();
-      void assert.rejects(client.createDocument(request), expectedError);
+      await assert.rejects(client.createDocument(request), expectedError);
     });
   });
 
@@ -1518,7 +1518,7 @@ describe('v1beta1.FirestoreClient', () => {
           reject(err);
         });
       });
-      void assert.rejects(promise, expectedError);
+      await assert.rejects(promise, expectedError);
       const actualRequest = (
         client.innerApiCalls.batchGetDocuments as SinonStub
       ).getCall(0).args[0];
@@ -1561,7 +1561,7 @@ describe('v1beta1.FirestoreClient', () => {
           reject(err);
         });
       });
-      void assert.rejects(promise, expectedError);
+      await assert.rejects(promise, expectedError);
     });
     it('should create a client with gaxServerStreamingRetries enabled', () => {
       const client = new firestoreModule.FirestoreClient({
@@ -1689,7 +1689,7 @@ describe('v1beta1.FirestoreClient', () => {
           reject(err);
         });
       });
-      void assert.rejects(promise, expectedError);
+      await assert.rejects(promise, expectedError);
       const actualRequest = (
         client.innerApiCalls.runQuery as SinonStub
       ).getCall(0).args[0];
@@ -1730,7 +1730,7 @@ describe('v1beta1.FirestoreClient', () => {
           reject(err);
         });
       });
-      void assert.rejects(promise, expectedError);
+      await assert.rejects(promise, expectedError);
     });
     it('should create a client with gaxServerStreamingRetries enabled', () => {
       const client = new firestoreModule.FirestoreClient({
@@ -1809,7 +1809,7 @@ describe('v1beta1.FirestoreClient', () => {
         stream.write(request);
         stream.end();
       });
-      void assert.rejects(promise, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.innerApiCalls.write as SinonStub).getCall(0).calledWith(null),
       );
@@ -1890,7 +1890,7 @@ describe('v1beta1.FirestoreClient', () => {
         stream.write(request);
         stream.end();
       });
-      void assert.rejects(promise, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.innerApiCalls.listen as SinonStub).getCall(0).calledWith(null),
       );
@@ -2020,7 +2020,7 @@ describe('v1beta1.FirestoreClient', () => {
         undefined,
         expectedError,
       );
-      void assert.rejects(client.listDocuments(request), expectedError);
+      await assert.rejects(client.listDocuments(request), expectedError);
       const actualRequest = (
         client.innerApiCalls.listDocuments as SinonStub
       ).getCall(0).args[0];
@@ -2129,7 +2129,7 @@ describe('v1beta1.FirestoreClient', () => {
           reject(err);
         });
       });
-      void assert.rejects(promise, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.descriptors.page.listDocuments.createStream as SinonStub)
           .getCall(0)
@@ -2216,7 +2216,7 @@ describe('v1beta1.FirestoreClient', () => {
       client.descriptors.page.listDocuments.asyncIterate =
         stubAsyncIterationCall(undefined, expectedError);
       const iterable = client.listDocumentsAsync(request);
-      void assert.rejects(async () => {
+      await assert.rejects(async () => {
         const responses: protos.google.firestore.v1beta1.IDocument[] = [];
         for await (const resource of iterable) {
           responses.push(resource!);
@@ -2341,7 +2341,7 @@ describe('v1beta1.FirestoreClient', () => {
         undefined,
         expectedError,
       );
-      void assert.rejects(client.partitionQuery(request), expectedError);
+      await assert.rejects(client.partitionQuery(request), expectedError);
       const actualRequest = (
         client.innerApiCalls.partitionQuery as SinonStub
       ).getCall(0).args[0];
@@ -2440,7 +2440,7 @@ describe('v1beta1.FirestoreClient', () => {
           reject(err);
         });
       });
-      void assert.rejects(promise, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.descriptors.page.partitionQuery.createStream as SinonStub)
           .getCall(0)
@@ -2517,7 +2517,7 @@ describe('v1beta1.FirestoreClient', () => {
       client.descriptors.page.partitionQuery.asyncIterate =
         stubAsyncIterationCall(undefined, expectedError);
       const iterable = client.partitionQueryAsync(request);
-      void assert.rejects(async () => {
+      await assert.rejects(async () => {
         const responses: protos.google.firestore.v1beta1.ICursor[] = [];
         for await (const resource of iterable) {
           responses.push(resource!);
@@ -2631,7 +2631,7 @@ describe('v1beta1.FirestoreClient', () => {
         undefined,
         expectedError,
       );
-      void assert.rejects(client.listCollectionIds(request), expectedError);
+      await assert.rejects(client.listCollectionIds(request), expectedError);
       const actualRequest = (
         client.innerApiCalls.listCollectionIds as SinonStub
       ).getCall(0).args[0];
@@ -2720,7 +2720,7 @@ describe('v1beta1.FirestoreClient', () => {
           reject(err);
         });
       });
-      void assert.rejects(promise, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.descriptors.page.listCollectionIds.createStream as SinonStub)
           .getCall(0)
@@ -2793,7 +2793,7 @@ describe('v1beta1.FirestoreClient', () => {
       client.descriptors.page.listCollectionIds.asyncIterate =
         stubAsyncIterationCall(undefined, expectedError);
       const iterable = client.listCollectionIdsAsync(request);
-      void assert.rejects(async () => {
+      await assert.rejects(async () => {
         const responses: string[] = [];
         for await (const resource of iterable) {
           responses.push(resource!);
