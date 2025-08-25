@@ -9459,17 +9459,6 @@ declare namespace FirebaseFirestore {
      */
     export class ExplainStats {
       /**
-       * When explain stats were requested with `outputFormat = 'json'`, this returns
-       * the explain stats object parsed from the JSON string returned from the Firestore
-       * backend.
-       *
-       * If explain stats were not requested with `outputFormat = 'json'`, the behavior
-       * of this method is not guaranteed and is expected to throw.
-       */
-      get json(): {
-        [key: string]: ExplainStatsFieldValue;
-      };
-      /**
        * When explain stats were requested with `outputFormat = 'text'`, this returns
        * the explain stats string verbatium as returned from the Firestore backend.
        *

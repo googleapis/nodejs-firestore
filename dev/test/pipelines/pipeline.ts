@@ -102,7 +102,6 @@ describe('execute(Pipeline|PipelineExecuteOptions)', () => {
         indexMode: 'recommended',
         explainOptions: {
           mode: 'analyze',
-          outputFormat: 'json',
         },
       });
 
@@ -118,10 +117,7 @@ describe('execute(Pipeline|PipelineExecuteOptions)', () => {
               fields: {
                 mode: {
                   stringValue: 'analyze',
-                },
-                output_format: {
-                  stringValue: 'json',
-                },
+                }
               },
             },
           },

@@ -455,47 +455,7 @@ describe('Pipeline class', () => {
   });
 
   describe('pipeline explain', () => {
-    it('mode: analyze, format: text', async () => {
-      const ppl = firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .sort(ascending('__name__'));
-
-      const snapshot = await ppl.execute({
-        explainOptions: {
-          mode: 'analyze',
-          outputFormat: 'text',
-        },
-      });
-
-      expect(snapshot.explainStats).not.to.be.undefined;
-      expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
-      expect(snapshot.explainStats!.text.charAt(0)).not.to.equal('{');
-
-      expect(snapshot.explainStats!.rawData.type_url).to.equal(
-        'type.googleapis.com/google.protobuf.StringValue'
-      );
-      expect(snapshot.explainStats!.rawData.value).to.not.be.null;
-      expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
-
-      expect(snapshot.results.length).to.equal(10);
-      expect(snapshot.pipeline).to.equal(ppl);
-      expectResults(
-        snapshot,
-        'book1',
-        'book10',
-        'book2',
-        'book3',
-        'book4',
-        'book5',
-        'book6',
-        'book7',
-        'book8',
-        'book9'
-      );
-    });
-
-    it('mode: analyze, format: unspecified', async () => {
+    it('mode: analyze', async () => {
       const ppl = firestore
         .pipeline()
         .collection(randomCol.path)
@@ -532,57 +492,13 @@ describe('Pipeline class', () => {
       );
     });
 
-    it('mode: analyze, format: json', async () => {
+    it('mode: unspecified', async () => {
       const ppl = firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .sort(ascending('__name__'));
+          .pipeline()
+          .collection(randomCol.path)
+          .sort(ascending('__name__'));
       const snapshot = await ppl.execute({
         explainOptions: {
-          mode: 'analyze',
-          outputFormat: 'json',
-        },
-      });
-      expect(snapshot.explainStats).not.to.be.undefined;
-      expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
-      expect(snapshot.explainStats!.text.charAt(0)).to.equal('{');
-
-      expect(snapshot.explainStats!.rawData.type_url).to.equal(
-        'type.googleapis.com/google.protobuf.StringValue'
-      );
-      expect(snapshot.explainStats!.rawData.value).to.not.be.null;
-      expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
-
-      expect(snapshot.explainStats!.json).not.to.be.null;
-      expect(typeof snapshot.explainStats!.json).to.be.equal('object');
-      console.log(snapshot.explainStats!.json);
-
-      expect(snapshot.results.length).to.equal(10);
-      expect(snapshot.pipeline).to.equal(ppl);
-      expectResults(
-        snapshot,
-        'book1',
-        'book10',
-        'book2',
-        'book3',
-        'book4',
-        'book5',
-        'book6',
-        'book7',
-        'book8',
-        'book9'
-      );
-    });
-
-    it('mode: execute, format: text', async () => {
-      const ppl = firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .sort(ascending('__name__'));
-      const snapshot = await ppl.execute({
-        explainOptions: {
-          mode: 'execute',
-          outputFormat: 'text',
         },
       });
       expect(snapshot.explainStats).to.be.undefined;
@@ -590,28 +506,28 @@ describe('Pipeline class', () => {
       expect(snapshot.results.length).to.equal(10);
       expect(snapshot.pipeline).to.equal(ppl);
       expectResults(
-        snapshot,
-        'book1',
-        'book10',
-        'book2',
-        'book3',
-        'book4',
-        'book5',
-        'book6',
-        'book7',
-        'book8',
-        'book9'
+          snapshot,
+          'book1',
+          'book10',
+          'book2',
+          'book3',
+          'book4',
+          'book5',
+          'book6',
+          'book7',
+          'book8',
+          'book9'
       );
     });
 
-    it('mode: unspecified, format: text', async () => {
+    it('mode: undefined', async () => {
       const ppl = firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .sort(ascending('__name__'));
+          .pipeline()
+          .collection(randomCol.path)
+          .sort(ascending('__name__'));
       const snapshot = await ppl.execute({
         explainOptions: {
-          outputFormat: 'text',
+          mode: undefined
         },
       });
       expect(snapshot.explainStats).to.be.undefined;
@@ -619,17 +535,17 @@ describe('Pipeline class', () => {
       expect(snapshot.results.length).to.equal(10);
       expect(snapshot.pipeline).to.equal(ppl);
       expectResults(
-        snapshot,
-        'book1',
-        'book10',
-        'book2',
-        'book3',
-        'book4',
-        'book5',
-        'book6',
-        'book7',
-        'book8',
-        'book9'
+          snapshot,
+          'book1',
+          'book10',
+          'book2',
+          'book3',
+          'book4',
+          'book5',
+          'book6',
+          'book7',
+          'book8',
+          'book9'
       );
     });
   });
