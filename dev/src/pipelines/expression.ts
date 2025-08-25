@@ -97,10 +97,10 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("price").subtract(field("discount"));
    * ```
    *
-   * @param other The expression to subtract from this expression.
+   * @param subtrahend The expression to subtract from this expression.
    * @return A new `Expr` representing the subtraction operation.
    */
-  subtract(other: firestore.Pipelines.Expr): FunctionExpr;
+  subtract(subtrahend: firestore.Pipelines.Expr): FunctionExpr;
 
   /**
    * Creates an expression that subtracts a constant value from this expression.
@@ -110,12 +110,12 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("total").subtract(20);
    * ```
    *
-   * @param other The constant value to subtract.
+   * @param subtrahend The constant value to subtract.
    * @return A new `Expr` representing the subtraction operation.
    */
-  subtract(other: number): FunctionExpr;
-  subtract(other: number | firestore.Pipelines.Expr): FunctionExpr {
-    return new FunctionExpr('subtract', [this, valueToDefaultExpr(other)]);
+  subtract(subtrahend: number): FunctionExpr;
+  subtract(subtrahend: number | firestore.Pipelines.Expr): FunctionExpr {
+    return new FunctionExpr('subtract', [this, valueToDefaultExpr(subtrahend)]);
   }
 
   /**
@@ -149,10 +149,10 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("total").divide(field("count"));
    * ```
    *
-   * @param other The expression to divide by.
+   * @param divisor The expression to divide by.
    * @return A new `Expr` representing the division operation.
    */
-  divide(other: Expr): FunctionExpr;
+  divide(divisor: Expr): FunctionExpr;
 
   /**
    * Creates an expression that divides this expression by a constant value.
@@ -162,12 +162,12 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("value").divide(10);
    * ```
    *
-   * @param other The constant value to divide by.
+   * @param divisor The constant value to divide by.
    * @return A new `Expr` representing the division operation.
    */
-  divide(other: number): FunctionExpr;
-  divide(other: number | Expr): FunctionExpr {
-    return new FunctionExpr('divide', [this, valueToDefaultExpr(other)]);
+  divide(divisor: number): FunctionExpr;
+  divide(divisor: number | Expr): FunctionExpr {
+    return new FunctionExpr('divide', [this, valueToDefaultExpr(divisor)]);
   }
 
   /**
@@ -377,26 +377,6 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   }
 
   /**
-   * Creates an expression that concatenates an array expression with one or more other arrays.
-   *
-   * ```typescript
-   * // Combine the 'items' array with another array field.
-   * field("items").arrayConcat(field("otherItems"));
-   * ```
-   * @param secondArray Second array expression or array literal to concatenate.
-   * @param otherArrays Optional additional array expressions or array literals to concatenate.
-   * @return A new `Expr` representing the concatenated array.
-   */
-  arrayConcat(
-    secondArray: Expr | unknown[],
-    ...otherArrays: Array<Expr | unknown[]>
-  ): FunctionExpr {
-    const elements = [secondArray, ...otherArrays];
-    const exprValues = elements.map(value => valueToDefaultExpr(value));
-    return new FunctionExpr('array_concat', [this, ...exprValues]);
-  }
-
-  /**
    * Creates an expression that checks if an array contains a specific element.
    *
    * ```typescript
@@ -491,6 +471,20 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
       ? new ListOfExprs(values.map(valueToDefaultExpr))
       : cast<Expr>(values);
     return new BooleanExpr('array_contains_any', [this, normalizedExpr]);
+  }
+
+  /**
+   * Creates an expression that reverses an array.
+   *
+   * ```typescript
+   * // Reverse the value of the 'myArray' field.
+   * field("myArray").arrayReverse();
+   * ```
+   *
+   * @return A new {@code Expr} representing the reversed array.
+   */
+  arrayReverse(): FunctionExpr {
+    return new FunctionExpr('array_reverse', [this]);
   }
 
   /**
@@ -901,78 +895,6 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   }
 
   /**
-   * Creates an expression that replaces the first occurrence of a substring within this string expression with another substring.
-   *
-   * ```typescript
-   * // Replace the first occurrence of "hello" with "hi" in the 'message' field
-   * field("message").replaceFirst("hello", "hi");
-   * ```
-   *
-   * @param find The substring to search for.
-   * @param replace The substring to replace the first occurrence of 'find' with.
-   * @return A new {@code Expr} representing the string with the first occurrence replaced.
-   */
-  replaceFirst(find: string, replace: string): FunctionExpr;
-
-  /**
-   * Creates an expression that replaces the first occurrence of a substring within this string expression with another substring,
-   * where the substring to find and the replacement substring are specified by expressions.
-   *
-   * ```typescript
-   * // Replace the first occurrence of the value in 'findField' with the value in 'replaceField' in the 'message' field
-   * field("message").replaceFirst(field("findField"), field("replaceField"));
-   * ```
-   *
-   * @param find The expression representing the substring to search for.
-   * @param replace The expression representing the substring to replace the first occurrence of 'find' with.
-   * @return A new {@code Expr} representing the string with the first occurrence replaced.
-   */
-  replaceFirst(find: Expr, replace: Expr): FunctionExpr;
-  replaceFirst(find: Expr | string, replace: Expr | string): FunctionExpr {
-    return new FunctionExpr('replace_first', [
-      this,
-      valueToDefaultExpr(find),
-      valueToDefaultExpr(replace),
-    ]);
-  }
-
-  /**
-   * Creates an expression that replaces all occurrences of a substring within this string expression with another substring.
-   *
-   * ```typescript
-   * // Replace all occurrences of "hello" with "hi" in the 'message' field
-   * field("message").replaceAll("hello", "hi");
-   * ```
-   *
-   * @param find The substring to search for.
-   * @param replace The substring to replace all occurrences of 'find' with.
-   * @return A new {@code Expr} representing the string with all occurrences replaced.
-   */
-  replaceAll(find: string, replace: string): FunctionExpr;
-
-  /**
-   * Creates an expression that replaces all occurrences of a substring within this string expression with another substring,
-   * where the substring to find and the replacement substring are specified by expressions.
-   *
-   * ```typescript
-   * // Replace all occurrences of the value in 'findField' with the value in 'replaceField' in the 'message' field
-   * field("message").replaceAll(field("findField"), field("replaceField"));
-   * ```
-   *
-   * @param find The expression representing the substring to search for.
-   * @param replace The expression representing the substring to replace all occurrences of 'find' with.
-   * @return A new {@code Expr} representing the string with all occurrences replaced.
-   */
-  replaceAll(find: Expr, replace: Expr): FunctionExpr;
-  replaceAll(find: Expr | string, replace: Expr | string): FunctionExpr {
-    return new FunctionExpr('replace_all', [
-      this,
-      valueToDefaultExpr(find),
-      valueToDefaultExpr(replace),
-    ]);
-  }
-
-  /**
    * Creates an expression that calculates the length of this string expression in bytes.
    *
    * ```typescript
@@ -984,6 +906,48 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    */
   byteLength(): FunctionExpr {
     return new FunctionExpr('byte_length', [this]);
+  }
+
+  /**
+   * Creates an expression that computes the ceiling of a numeric value.
+   *
+   * ```typescript
+   * // Compute the ceiling of the 'price' field.
+   * field("price").ceil();
+   * ```
+   *
+   * @return A new {@code Expr} representing the ceiling of the numeric value.
+   */
+  ceil(): FunctionExpr {
+    return new FunctionExpr('ceil', [this]);
+  }
+
+  /**
+   * Creates an expression that computes the floor of a numeric value.
+   *
+   * ```typescript
+   * // Compute the floor of the 'price' field.
+   * field("price").floor();
+   * ```
+   *
+   * @return A new {@code Expr} representing the floor of the numeric value.
+   */
+  floor(): FunctionExpr {
+    return new FunctionExpr('floor', [this]);
+  }
+
+  /**
+   * Creates an expression that computes e to the power of this expression.
+   *
+   * ```typescript
+   * // Compute e to the power of the 'value' field.
+   * field("value").exp();
+   * ```
+   *
+   * @return A new {@code Expr} representing the exp of the numeric value.
+   */
+  exp(): FunctionExpr {
+    return new FunctionExpr('exp', [this]);
   }
 
   /**
@@ -1056,7 +1020,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @return A new `AggregateFunction` representing the 'min' aggregation.
    */
   minimum(): AggregateFunction {
-    return new AggregateFunction('minimum', [this]);
+    return new AggregateFunction('min', [this]);
   }
 
   /**
@@ -1070,7 +1034,21 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @return A new `AggregateFunction` representing the 'max' aggregation.
    */
   maximum(): AggregateFunction {
-    return new AggregateFunction('maximum', [this]);
+    return new AggregateFunction('max', [this]);
+  }
+
+  /**
+   * Creates an aggregation that counts the number of distinct values of the expression or field.
+   *
+   * ```typescript
+   * // Count the distinct number of products
+   * field("productId").countDistinct().as("distinctProducts");
+   * ```
+   *
+   * @return A new `AggregateFunction` representing the 'count_distinct' aggregation.
+   */
+  countDistinct(): AggregateFunction {
+    return new AggregateFunction('count_distinct', [this]);
   }
 
   /**
@@ -1090,10 +1068,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     ...others: Array<Expr | unknown>
   ): FunctionExpr {
     const values = [second, ...others];
-    return new FunctionExpr('logical_maximum', [
-      this,
-      ...values.map(valueToDefaultExpr),
-    ]);
+    return new FunctionExpr('max', [this, ...values.map(valueToDefaultExpr)]);
   }
 
   /**
@@ -1113,10 +1088,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
     ...others: Array<Expr | unknown>
   ): FunctionExpr {
     const values = [second, ...others];
-    return new FunctionExpr('logical_minimum', [
-      this,
-      ...values.map(valueToDefaultExpr),
-    ]);
+    return new FunctionExpr('min', [this, ...values.map(valueToDefaultExpr)]);
   }
 
   /**
@@ -1405,175 +1377,6 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   }
 
   /**
-   * Creates an expression that applies a bitwise AND operation between this expression and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise AND of 'field1' and 0xFF.
-   * field("field1").bitAnd(0xFF);
-   * ```
-   *
-   * @param otherBits A constant representing bits.
-   * @return A new {@code Expr} representing the bitwise AND operation.
-   */
-  bitAnd(otherBits: number | Buffer | Uint8Array): FunctionExpr;
-  /**
-   * Creates an expression that applies a bitwise AND operation between two expressions.
-   *
-   * ```typescript
-   * // Calculate the bitwise AND of 'field1' and 'field2'.
-   * field("field1").bitAnd(field("field2"));
-   * ```
-   *
-   * @param bitsExpression An expression that returns bits when evaluated.
-   * @return A new {@code Expr} representing the bitwise AND operation.
-   */
-  bitAnd(bitsExpression: Expr): FunctionExpr;
-  bitAnd(bitsOrExpression: number | Expr | Buffer | Uint8Array): FunctionExpr {
-    return new FunctionExpr('bit_and', [
-      this,
-      valueToDefaultExpr(bitsOrExpression),
-    ]);
-  }
-
-  /**
-   * Creates an expression that applies a bitwise OR operation between this expression and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise OR of 'field1' and 0xFF.
-   * field("field1").bitOr(0xFF);
-   * ```
-   *
-   * @param otherBits A constant representing bits.
-   * @return A new {@code Expr} representing the bitwise OR operation.
-   */
-  bitOr(otherBits: number | Buffer | Uint8Array): FunctionExpr;
-  /**
-   * Creates an expression that applies a bitwise OR operation between two expressions.
-   *
-   * ```typescript
-   * // Calculate the bitwise OR of 'field1' and 'field2'.
-   * field("field1").bitOr(field("field2"));
-   * ```
-   *
-   * @param bitsExpression An expression that returns bits when evaluated.
-   * @return A new {@code Expr} representing the bitwise OR operation.
-   */
-  bitOr(bitsExpression: Expr): FunctionExpr;
-  bitOr(bitsOrExpression: number | Expr | Buffer | Uint8Array): FunctionExpr {
-    return new FunctionExpr('bit_or', [
-      this,
-      valueToDefaultExpr(bitsOrExpression),
-    ]);
-  }
-
-  /**
-   * Creates an expression that applies a bitwise XOR operation between this expression and a constant.
-   *
-   * ```typescript
-   * // Calculate the bitwise XOR of 'field1' and 0xFF.
-   * field("field1").bitXor(0xFF);
-   * ```
-   *
-   * @param otherBits A constant representing bits.
-   * @return A new {@code Expr} representing the bitwise XOR operation.
-   */
-  bitXor(otherBits: number | Buffer | Uint8Array): FunctionExpr;
-  /**
-   * Creates an expression that applies a bitwise XOR operation between two expressions.
-   *
-   * ```typescript
-   * // Calculate the bitwise XOR of 'field1' and 'field2'.
-   * field("field1").bitXor(field("field2"));
-   * ```
-   *
-   * @param bitsExpression An expression that returns bits when evaluated.
-   * @return A new {@code Expr} representing the bitwise XOR operation.
-   */
-  bitXor(bitsExpression: Expr): FunctionExpr;
-  bitXor(bitsOrExpression: number | Expr | Buffer | Uint8Array): FunctionExpr {
-    return new FunctionExpr('bit_xor', [
-      this,
-      valueToDefaultExpr(bitsOrExpression),
-    ]);
-  }
-
-  /**
-   * Creates an expression that applies a bitwise NOT operation to this expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise NOT of 'field1'.
-   * field("field1").bitNot();
-   * ```
-   *
-   * @return A new {@code Expr} representing the bitwise NOT operation.
-   */
-  bitNot(): FunctionExpr {
-    return new FunctionExpr('bit_not', [this]);
-  }
-
-  /**
-   * Creates an expression that applies a bitwise left shift operation to this expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise left shift of 'field1' by 2 bits.
-   * field("field1").bitLeftShift(2);
-   * ```
-   *
-   * @param y The operand constant representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise left shift operation.
-   */
-  bitLeftShift(y: number): FunctionExpr;
-  /**
-   * Creates an expression that applies a bitwise left shift operation to this expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
-   * field("field1").bitLeftShift(field("field2"));
-   * ```
-   *
-   * @param numberExpr The operand expression representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise left shift operation.
-   */
-  bitLeftShift(numberExpr: Expr): FunctionExpr;
-  bitLeftShift(numberExpr: number | Expr): FunctionExpr {
-    return new FunctionExpr('bit_left_shift', [
-      this,
-      valueToDefaultExpr(numberExpr),
-    ]);
-  }
-
-  /**
-   * Creates an expression that applies a bitwise right shift operation to this expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise right shift of 'field1' by 2 bits.
-   * field("field1").bitRightShift(2);
-   * ```
-   *
-   * @param right The operand constant representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise right shift operation.
-   */
-  bitRightShift(y: number): FunctionExpr;
-  /**
-   * Creates an expression that applies a bitwise right shift operation to this expression.
-   *
-   * ```typescript
-   * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
-   * field("field1").bitRightShift(field("field2"));
-   * ```
-   *
-   * @param numberExpr The operand expression representing the number of bits to shift.
-   * @return A new {@code Expr} representing the bitwise right shift operation.
-   */
-  bitRightShift(numberExpr: Expr): FunctionExpr;
-  bitRightShift(numberExpr: number | Expr): FunctionExpr {
-    return new FunctionExpr('bit_right_shift', [
-      this,
-      valueToDefaultExpr(numberExpr),
-    ]);
-  }
-
-  /**
    * Creates an expression that returns the document ID from a path.
    *
    * ```typescript
@@ -1594,7 +1397,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param length Length of the substring. If not provided, the substring will
    * end at the end of the input.
    */
-  substr(position: number, length?: number): FunctionExpr;
+  substring(position: number, length?: number): FunctionExpr;
 
   /**
    * Creates an expression that returns a substring of the results of this expression.
@@ -1603,8 +1406,8 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param length An expression returning the length of the substring. If not provided the
    * substring will end at the end of the input.
    */
-  substr(position: Expr, length?: Expr): FunctionExpr;
-  substr(position: Expr | number, length?: Expr | number): FunctionExpr {
+  substring(position: Expr, length?: Expr): FunctionExpr;
+  substring(position: Expr | number, length?: Expr | number): FunctionExpr {
     const positionExpr = valueToDefaultExpr(position);
     if (length === undefined) {
       return new FunctionExpr('substr', [this, positionExpr]);
@@ -1619,36 +1422,36 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
 
   /**
    * Creates an expression that indexes into an array from the beginning or end
-   * and returns the element. If the offset exceeds the array length, an error is
-   * returned. A negative offset, starts from the end.
+   * and returns the element. If the index exceeds the array length, an error is
+   * returned. A negative index, starts from the end.
    *
    * ```typescript
    * // Return the value in the 'tags' field array at index `1`.
-   * field('tags').arrayOffset(1);
+   * field('tags').arrayGet(1);
    * ```
    *
-   * @param offset The index of the element to return.
-   * @return A new Expr representing the 'arrayOffset' operation.
+   * @param index The index of the element to return.
+   * @return A new Expr representing the 'arrayGet' operation.
    */
-  arrayOffset(offset: number): FunctionExpr;
+  arrayGet(index: number): FunctionExpr;
 
   /**
    * Creates an expression that indexes into an array from the beginning or end
-   * and returns the element. If the offset exceeds the array length, an error is
-   * returned. A negative offset, starts from the end.
+   * and returns the element. If the index exceeds the array length, an error is
+   * returned. A negative index, starts from the end.
    *
    * ```typescript
    * // Return the value in the tags field array at index specified by field
    * // 'favoriteTag'.
-   * field('tags').arrayOffset(field('favoriteTag'));
+   * field('tags').arrayGet(field('favoriteTag'));
    * ```
    *
-   * @param offsetExpr An Expr evaluating to the index of the element to return.
-   * @return A new Expr representing the 'arrayOffset' operation.
+   * @param indexExpr An Expr evaluating to the index of the element to return.
+   * @return A new Expr representing the 'arrayGet' operation.
    */
-  arrayOffset(offsetExpr: Expr): FunctionExpr;
-  arrayOffset(offset: Expr | number): FunctionExpr {
-    return new FunctionExpr('array_offset', [this, valueToDefaultExpr(offset)]);
+  arrayGet(indexExpr: Expr): FunctionExpr;
+  arrayGet(index: Expr | number): FunctionExpr {
+    return new FunctionExpr('array_get', [this, valueToDefaultExpr(index)]);
   }
 
   /**
@@ -1672,7 +1475,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * ```typescript
    * // Returns the first item in the title field arrays, or returns
    * // the entire title field if the array is empty or the field is another type.
-   * field("title").arrayOffset(0).ifError(field("title"));
+   * field("title").arrayGet(0).ifError(field("title"));
    * ```
    *
    * @param catchExpr The catch expression that will be evaluated and
@@ -1688,7 +1491,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * ```typescript
    * // Returns the first item in the title field arrays, or returns
    * // "Default Title"
-   * field("title").arrayOffset(0).ifError("Default Title");
+   * field("title").arrayGet(0).ifError("Default Title");
    * ```
    *
    * @param catchValue The value that will be returned if this expression
@@ -1804,6 +1607,153 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
   }
 
   /**
+   * Creates an expression that returns the value of this expression raised to the power of another expression.
+   *
+   * ```typescript
+   * // Raise the value of the 'base' field to the power of the 'exponent' field.
+   * field("base").pow(field("exponent"));
+   * ```
+   *
+   * @param exponent The expression to raise this expression to the power of.
+   * @return A new `Expr` representing the power operation.
+   */
+  pow(exponent: Expr): FunctionExpr;
+
+  /**
+   * Creates an expression that returns the value of this expression raised to the power of a constant value.
+   *
+   * ```typescript
+   * // Raise the value of the 'base' field to the power of 2.
+   * field("base").pow(2);
+   * ```
+   *
+   * @param exponent The constant value to raise this expression to the power of.
+   * @return A new `Expr` representing the power operation.
+   */
+  pow(exponent: number): FunctionExpr;
+  pow(exponent: number | Expr): FunctionExpr {
+    return new FunctionExpr('pow', [this, valueToDefaultExpr(exponent)]);
+  }
+
+  /**
+   * Creates an expression that rounds a numeric value to the nearest whole number.
+   *
+   * ```typescript
+   * // Round the value of the 'price' field.
+   * field("price").round();
+   * ```
+   *
+   * @return A new `Expr` representing the rounded value.
+   */
+  round(): FunctionExpr {
+    return new FunctionExpr('round', [this]);
+  }
+
+  /**
+   * Creates an expression that returns the collection ID from a path.
+   *
+   * ```typescript
+   * // Get the collection ID from a path.
+   * field("__path__").collectionId();
+   * ```
+   *
+   * @return A new {@code Expr} representing the collectionId operation.
+   */
+  collectionId(): FunctionExpr {
+    return new FunctionExpr('collection_id', [this]);
+  }
+
+  /**
+   * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
+   *
+   * ```typescript
+   * // Get the length of the 'name' field.
+   * field("name").length();
+   *
+   * // Get the number of items in the 'cart' array.
+   * field("cart").length();
+   * ```
+   *
+   * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+   */
+  length(): FunctionExpr {
+    return new FunctionExpr('length', [this]);
+  }
+
+  /**
+   * Creates an expression that computes the natural logarithm of a numeric value.
+   *
+   * ```typescript
+   * // Compute the natural logarithm of the 'value' field.
+   * field("value").ln();
+   * ```
+   *
+   * @return A new {@code Expr} representing the natural logarithm of the numeric value.
+   */
+  ln(): FunctionExpr {
+    return new FunctionExpr('ln', [this]);
+  }
+
+  /**
+   * Creates an expression that computes the logarithm of this expression to a given base.
+   *
+   * ```typescript
+   * // Compute the logarithm of the 'value' field with base 10.
+   * field("value").log(10);
+   * ```
+   *
+   * @param base The base of the logarithm.
+   * @return A new {@code Expr} representing the logarithm of the numeric value.
+   */
+  log(base: number): FunctionExpr;
+
+  /**
+   * Creates an expression that computes the logarithm of this expression to a given base.
+   *
+   * ```typescript
+   * // Compute the logarithm of the 'value' field with the base in the 'base' field.
+   * field("value").log(field("base"));
+   * ```
+   *
+   * @param base The base of the logarithm.
+   * @return A new {@code Expr} representing the logarithm of the numeric value.
+   */
+  log(base: Expr): FunctionExpr;
+  log(base: number | Expr): FunctionExpr {
+    return new FunctionExpr('log', [this, valueToDefaultExpr(base)]);
+  }
+
+  /**
+   * Creates an expression that computes the square root of a numeric value.
+   *
+   * ```typescript
+   * // Compute the square root of the 'value' field.
+   * field("value").sqrt();
+   * ```
+   *
+   * @return A new {@code Expr} representing the square root of the numeric value.
+   */
+  sqrt(): FunctionExpr {
+    return new FunctionExpr('sqrt', [this]);
+  }
+
+  /**
+   * Creates an expression that reverses a string.
+   *
+   * ```typescript
+   * // Reverse the value of the 'myString' field.
+   * field("myString").strReverse();
+   * ```
+   *
+   * @return A new {@code Expr} representing the reversed string.
+   */
+  strReverse(): FunctionExpr {
+    return new FunctionExpr('str_reverse', [this]);
+  }
+
+  // TODO(new-expression): Add new expression method definitions above this line
+
+  /**
    * Creates an {@link Ordering} that sorts documents in ascending order based on this expression.
    *
    * ```typescript
@@ -1846,11 +1796,11 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * ```
    *
    * @param name The alias to assign to this expression.
-   * @return A new {@link ExprWithAlias} that wraps this
+   * @return A new {@link AliasedExpr} that wraps this
    *     expression and associates it with the provided alias.
    */
-  as(name: string): ExprWithAlias {
-    return new ExprWithAlias(this, name);
+  as(name: string): AliasedExpr {
+    return new AliasedExpr(this, name);
   }
 }
 
@@ -1894,11 +1844,11 @@ export class AggregateFunction implements AggregateFunction, HasUserData {
    * ```
    *
    * @param name The alias to assign to this AggregateFunction.
-   * @return A new {@link AggregateWithAlias} that wraps this
+   * @return A new {@link AliasedAggregate} that wraps this
    *     AggregateFunction and associates it with the provided alias.
    */
-  as(name: string): AggregateWithAlias {
-    return new AggregateWithAlias(this, name);
+  as(name: string): AliasedAggregate {
+    return new AliasedAggregate(this, name);
   }
 
   /**
@@ -1920,7 +1870,7 @@ export class AggregateFunction implements AggregateFunction, HasUserData {
 /**
  * An AggregateFunction with alias.
  */
-export class AggregateWithAlias implements AggregateWithAlias, HasUserData {
+export class AliasedAggregate implements AliasedAggregate, HasUserData {
   constructor(
     readonly aggregate: AggregateFunction,
     readonly alias: string
@@ -1946,10 +1896,10 @@ export class AggregateWithAlias implements AggregateWithAlias, HasUserData {
 /**
  * TODO
  */
-export class ExprWithAlias
+export class AliasedExpr
   implements firestore.Pipelines.Selectable, HasUserData
 {
-  exprType: firestore.Pipelines.ExprType = 'ExprWithAlias';
+  exprType: firestore.Pipelines.ExprType = 'AliasedExpr';
   selectable = true as const;
 
   /**
@@ -2259,27 +2209,6 @@ export function constant(value: unknown): Constant {
 }
 
 /**
- * Creates a `Constant` instance for a VectorValue value.
- *
- * ```typescript
- * // Create a Constant instance for a vector value
- * const vectorConstant = constantVector([1, 2, 3]);
- * ```
- *
- * @param value The VectorValue value.
- * @return A new `Constant` instance.
- */
-export function constantVector(
-  value: number[] | firestore.VectorValue
-): Constant {
-  if (Array.isArray(value)) {
-    return constant(new VectorValue(value as number[]));
-  } else {
-    return constant(value);
-  }
-}
-
-/**
  * Internal only
  * @internal
  * @private
@@ -2371,7 +2300,7 @@ class MapFunctionExpr extends FunctionExpr {
       if (Object.prototype.hasOwnProperty.call(this.map, key)) {
         if (this.map[key]) {
           args.push(constant(key)._toProto(serializer));
-          args.push(this.map[key]._toProto(serializer));
+          args.push(this.map[key]!._toProto(serializer));
         }
       }
     }
@@ -2420,7 +2349,7 @@ class ArrayFunctionExpr extends FunctionExpr {
         name: this.name,
         args: this.values
           .filter(v => !!v)
-          .map(value => value._toProto(serializer)),
+          .map(value => value!._toProto(serializer)),
       },
     };
   }
@@ -2439,10 +2368,16 @@ class ArrayFunctionExpr extends FunctionExpr {
 }
 
 /**
- * An interface that represents a filter condition.
+ * An expression that evaluates to a boolean value.
+ *
+ * This expression type is useful for filter conditions.
+ *
  */
-export class BooleanExpr extends FunctionExpr implements BooleanExpr {
-  filterable: true = true as const;
+export class BooleanExpr
+  extends FunctionExpr
+  implements firestore.Pipelines.BooleanExpr
+{
+  returnType: 'boolean' = 'boolean' as const;
 
   /**
    * Creates an aggregation that finds the count of input documents satisfying
@@ -2501,433 +2436,75 @@ export function rand(): FunctionExpr {
 }
 
 /**
- * Creates an expression that applies a bitwise AND operation between a field and a constant.
- *
- * ```typescript
- * // Calculate the bitwise AND of 'field1' and 0xFF.
- * bitAnd("field1", 0xFF);
- * ```
- *
- * @param field The left operand field name.
- * @param otherBits A constant representing bits.
- * @return A new {@code Expr} representing the bitwise AND operation.
- */
-export function bitAnd(
-  field: string,
-  otherBits: number | Buffer | Uint8Array
-): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise AND operation between a field and an expression.
- *
- * ```typescript
- * // Calculate the bitwise AND of 'field1' and 'field2'.
- * bitAnd("field1", field("field2"));
- * ```
- *
- * @param field The left operand field name.
- * @param bitsExpression An expression that returns bits when evaluated.
- * @return A new {@code Expr} representing the bitwise AND operation.
- */
-export function bitAnd(field: string, bitsExpression: Expr): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise AND operation between an expression and a constant.
- *
- * ```typescript
- * // Calculate the bitwise AND of 'field1' and 0xFF.
- * bitAnd(field("field1"), 0xFF);
- * ```
- *
- * @param bitsExpression An expression returning bits.
- * @param otherBits A constant representing bits.
- * @return A new {@code Expr} representing the bitwise AND operation.
- */
-export function bitAnd(
-  bitsExpression: Expr,
-  otherBits: number | Buffer | Uint8Array
-): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise AND operation between two expressions.
- *
- * ```typescript
- * // Calculate the bitwise AND of 'field1' and 'field2'.
- * bitAnd(field("field1"), field("field2"));
- * ```
- *
- * @param bitsExpression An expression that returns bits when evaluated.
- * @param otherBitsExpression An expression that returns bits when evaluated.
- * @return A new {@code Expr} representing the bitwise AND operation.
- */
-export function bitAnd(
-  bitsExpression: Expr,
-  otherBitsExpression: Expr
-): FunctionExpr;
-export function bitAnd(
-  bits: string | Expr,
-  bitsOrExpression: number | Expr | Buffer | Uint8Array
-): FunctionExpr {
-  return fieldOrExpression(bits).bitAnd(valueToDefaultExpr(bitsOrExpression));
-}
-
-/**
- * Creates an expression that applies a bitwise OR operation between a field and a constant.
- *
- * ```typescript
- * // Calculate the bitwise OR of 'field1' and 0xFF.
- * bitOr("field1", 0xFF);
- * ```
- *
- * @param field The left operand field name.
- * @param otherBits A constant representing bits.
- * @return A new {@code Expr} representing the bitwise OR operation.
- */
-export function bitOr(
-  field: string,
-  otherBits: number | Buffer | Uint8Array
-): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise OR operation between a field and an expression.
- *
- * ```typescript
- * // Calculate the bitwise OR of 'field1' and 'field2'.
- * bitOr("field1", field("field2"));
- * ```
- *
- * @param field The left operand field name.
- * @param bitsExpression An expression that returns bits when evaluated.
- * @return A new {@code Expr} representing the bitwise OR operation.
- */
-export function bitOr(field: string, bitsExpression: Expr): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise OR operation between an expression and a constant.
- *
- * ```typescript
- * // Calculate the bitwise OR of 'field1' and 0xFF.
- * bitOr(field("field1"), 0xFF);
- * ```
- *
- * @param bitsExpression An expression returning bits.
- * @param otherBits A constant representing bits.
- * @return A new {@code Expr} representing the bitwise OR operation.
- */
-export function bitOr(
-  bitsExpression: Expr,
-  otherBits: number | Buffer | Uint8Array
-): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise OR operation between two expressions.
- *
- * ```typescript
- * // Calculate the bitwise OR of 'field1' and 'field2'.
- * bitOr(field("field1"), field("field2"));
- * ```
- *
- * @param bitsExpression An expression that returns bits when evaluated.
- * @param otherBitsExpression An expression that returns bits when evaluated.
- * @return A new {@code Expr} representing the bitwise OR operation.
- */
-export function bitOr(
-  bitsExpression: Expr,
-  otherBitsExpression: Expr
-): FunctionExpr;
-export function bitOr(
-  bits: string | Expr,
-  bitsOrExpression: number | Expr | Buffer | Uint8Array
-): FunctionExpr {
-  return fieldOrExpression(bits).bitOr(valueToDefaultExpr(bitsOrExpression));
-}
-
-/**
- * Creates an expression that applies a bitwise XOR operation between a field and a constant.
- *
- * ```typescript
- * // Calculate the bitwise XOR of 'field1' and 0xFF.
- * bitXor("field1", 0xFF);
- * ```
- *
- * @param field The left operand field name.
- * @param otherBits A constant representing bits.
- * @return A new {@code Expr} representing the bitwise XOR operation.
- */
-export function bitXor(
-  field: string,
-  otherBits: number | Buffer | Uint8Array
-): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise XOR operation between a field and an expression.
- *
- * ```typescript
- * // Calculate the bitwise XOR of 'field1' and 'field2'.
- * bitXor("field1", field("field2"));
- * ```
- *
- * @param field The left operand field name.
- * @param bitsExpression An expression that returns bits when evaluated.
- * @return A new {@code Expr} representing the bitwise XOR operation.
- */
-export function bitXor(field: string, bitsExpression: Expr): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise XOR operation between an expression and a constant.
- *
- * ```typescript
- * // Calculate the bitwise XOR of 'field1' and 0xFF.
- * bitXor(field("field1"), 0xFF);
- * ```
- *
- * @param bitsExpression An expression returning bits.
- * @param otherBits A constant representing bits.
- * @return A new {@code Expr} representing the bitwise XOR operation.
- */
-export function bitXor(
-  bitsExpression: Expr,
-  otherBits: number | Buffer | Uint8Array
-): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise XOR operation between two expressions.
- *
- * ```typescript
- * // Calculate the bitwise XOR of 'field1' and 'field2'.
- * bitXor(field("field1"), field("field2"));
- * ```
- *
- * @param bitsExpression An expression that returns bits when evaluated.
- * @param otherBitsExpression An expression that returns bits when evaluated.
- * @return A new {@code Expr} representing the bitwise XOR operation.
- */
-export function bitXor(
-  bitsExpression: Expr,
-  otherBitsExpression: Expr
-): FunctionExpr;
-export function bitXor(
-  bits: string | Expr,
-  bitsOrExpression: number | Expr | Buffer | Uint8Array
-): FunctionExpr {
-  return fieldOrExpression(bits).bitXor(valueToDefaultExpr(bitsOrExpression));
-}
-
-/**
- * Creates an expression that applies a bitwise NOT operation to a field.
- *
- * ```typescript
- * // Calculate the bitwise NOT of 'field1'.
- * bitNot("field1");
- * ```
- *
- * @param field The operand field name.
- * @return A new {@code Expr} representing the bitwise NOT operation.
- */
-export function bitNot(field: string): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise NOT operation to an expression.
- *
- * ```typescript
- * // Calculate the bitwise NOT of 'field1'.
- * bitNot(field("field1"));
- * ```
- *
- * @param bitsValueExpression An expression that returns bits when evaluated.
- * @return A new {@code Expr} representing the bitwise NOT operation.
- */
-export function bitNot(bitsValueExpression: Expr): FunctionExpr;
-export function bitNot(bits: string | Expr): FunctionExpr {
-  return fieldOrExpression(bits).bitNot();
-}
-
-/**
- * Creates an expression that applies a bitwise left shift operation between a field and a constant.
- *
- * ```typescript
- * // Calculate the bitwise left shift of 'field1' by 2 bits.
- * bitLeftShift("field1", 2);
- * ```
- *
- * @param field The left operand field name.
- * @param y The right operand constant representing the number of bits to shift.
- * @return A new {@code Expr} representing the bitwise left shift operation.
- */
-export function bitLeftShift(field: string, y: number): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise left shift operation between a field and an expression.
- *
- * ```typescript
- * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
- * bitLeftShift("field1", field("field2"));
- * ```
- *
- * @param field The left operand field name.
- * @param numberExpr The right operand expression representing the number of bits to shift.
- * @return A new {@code Expr} representing the bitwise left shift operation.
- */
-export function bitLeftShift(field: string, numberExpr: Expr): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise left shift operation between an expression and a constant.
- *
- * ```typescript
- * // Calculate the bitwise left shift of 'field1' by 2 bits.
- * bitLeftShift(field("field1"), 2);
- * ```
- *
- * @param xValue An expression returning bits.
- * @param y The right operand constant representing the number of bits to shift.
- * @return A new {@code Expr} representing the bitwise left shift operation.
- */
-export function bitLeftShift(xValue: Expr, y: number): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise left shift operation between two expressions.
- *
- * ```typescript
- * // Calculate the bitwise left shift of 'field1' by 'field2' bits.
- * bitLeftShift(field("field1"), field("field2"));
- * ```
- *
- * @param xValue An expression returning bits.
- * @param numberExpr The right operand expression representing the number of bits to shift.
- * @return A new {@code Expr} representing the bitwise left shift operation.
- */
-export function bitLeftShift(xValue: Expr, numberExpr: Expr): FunctionExpr;
-export function bitLeftShift(
-  xValue: string | Expr,
-  numberExpr: number | Expr
-): FunctionExpr {
-  return fieldOrExpression(xValue).bitLeftShift(valueToDefaultExpr(numberExpr));
-}
-
-/**
- * Creates an expression that applies a bitwise right shift operation between a field and a constant.
- *
- * ```typescript
- * // Calculate the bitwise right shift of 'field1' by 2 bits.
- * bitRightShift("field1", 2);
- * ```
- *
- * @param field The left operand field name.
- * @param y The right operand constant representing the number of bits to shift.
- * @return A new {@code Expr} representing the bitwise right shift operation.
- */
-export function bitRightShift(field: string, y: number): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise right shift operation between a field and an expression.
- *
- * ```typescript
- * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
- * bitRightShift("field1", field("field2"));
- * ```
- *
- * @param field The left operand field name.
- * @param numberExpr The right operand expression representing the number of bits to shift.
- * @return A new {@code Expr} representing the bitwise right shift operation.
- */
-export function bitRightShift(field: string, numberExpr: Expr): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise right shift operation between an expression and a constant.
- *
- * ```typescript
- * // Calculate the bitwise right shift of 'field1' by 2 bits.
- * bitRightShift(field("field1"), 2);
- * ```
- *
- * @param xValue An expression returning bits.
- * @param y The right operand constant representing the number of bits to shift.
- * @return A new {@code Expr} representing the bitwise right shift operation.
- */
-export function bitRightShift(xValue: Expr, y: number): FunctionExpr;
-/**
- * Creates an expression that applies a bitwise right shift operation between two expressions.
- *
- * ```typescript
- * // Calculate the bitwise right shift of 'field1' by 'field2' bits.
- * bitRightShift(field("field1"), field("field2"));
- * ```
- *
- * @param xValue An expression returning bits.
- * @param numberExpr The right operand expression representing the number of bits to shift.
- * @return A new {@code Expr} representing the bitwise right shift operation.
- */
-export function bitRightShift(xValue: Expr, numberExpr: Expr): FunctionExpr;
-export function bitRightShift(
-  xValue: string | Expr,
-  numberExpr: number | Expr
-): FunctionExpr {
-  return fieldOrExpression(xValue).bitRightShift(
-    valueToDefaultExpr(numberExpr)
-  );
-}
-
-/**
  * Creates an expression that indexes into an array from the beginning or end
- * and return the element. If the offset exceeds the array length, an error is
- * returned. A negative offset, starts from the end.
+ * and return the element. If the index exceeds the array length, an error is
+ * returned. A negative index, starts from the end.
  *
  * ```typescript
  * // Return the value in the tags field array at index 1.
- * arrayOffset('tags', 1);
+ * arrayGet('tags', 1);
  * ```
  *
  * @param arrayField The name of the array field.
- * @param offset The index of the element to return.
- * @return A new Expr representing the 'arrayOffset' operation.
+ * @param index The index of the element to return.
+ * @return A new Expr representing the 'arrayGet' operation.
  */
-export function arrayOffset(arrayField: string, offset: number): FunctionExpr;
+export function arrayGet(arrayField: string, index: number): FunctionExpr;
 
 /**
  * Creates an expression that indexes into an array from the beginning or end
- * and return the element. If the offset exceeds the array length, an error is
- * returned. A negative offset, starts from the end.
+ * and return the element. If the index exceeds the array length, an error is
+ * returned. A negative index, starts from the end.
  *
  * ```typescript
  * // Return the value in the tags field array at index specified by field
  * // 'favoriteTag'.
- * arrayOffset('tags', field('favoriteTag'));
+ * arrayGet('tags', field('favoriteTag'));
  * ```
  *
  * @param arrayField The name of the array field.
- * @param offsetExpr An Expr evaluating to the index of the element to return.
- * @return A new Expr representing the 'arrayOffset' operation.
+ * @param indexExpr An Expr evaluating to the index of the element to return.
+ * @return A new Expr representing the 'arrayGet' operation.
  */
-export function arrayOffset(arrayField: string, offsetExpr: Expr): FunctionExpr;
+export function arrayGet(arrayField: string, indexExpr: Expr): FunctionExpr;
 
 /**
  * Creates an expression that indexes into an array from the beginning or end
- * and return the element. If the offset exceeds the array length, an error is
- * returned. A negative offset, starts from the end.
+ * and return the element. If the index exceeds the array length, an error is
+ * returned. A negative index, starts from the end.
  *
  * ```typescript
  * // Return the value in the tags field array at index 1.
- * arrayOffset(field('tags'), 1);
+ * arrayGet(field('tags'), 1);
  * ```
  *
  * @param arrayExpression An Expr evaluating to an array.
- * @param offset The index of the element to return.
- * @return A new Expr representing the 'arrayOffset' operation.
+ * @param index The index of the element to return.
+ * @return A new Expr representing the 'arrayGet' operation.
  */
-export function arrayOffset(
-  arrayExpression: Expr,
-  offset: number
-): FunctionExpr;
+export function arrayGet(arrayExpression: Expr, index: number): FunctionExpr;
 
 /**
  * Creates an expression that indexes into an array from the beginning or end
- * and return the element. If the offset exceeds the array length, an error is
- * returned. A negative offset, starts from the end.
+ * and return the element. If the index exceeds the array length, an error is
+ * returned. A negative index, starts from the end.
  *
  * ```typescript
  * // Return the value in the tags field array at index specified by field
  * // 'favoriteTag'.
- * arrayOffset(field('tags'), field('favoriteTag'));
+ * arrayGet(field('tags'), field('favoriteTag'));
  * ```
  *
  * @param arrayExpression An Expr evaluating to an array.
- * @param offsetExpr An Expr evaluating to the index of the element to return.
- * @return A new Expr representing the 'arrayOffset' operation.
+ * @param indexExpr An Expr evaluating to the index of the element to return.
+ * @return A new Expr representing the 'arrayGet' operation.
  */
-export function arrayOffset(
-  arrayExpression: Expr,
-  offsetExpr: Expr
-): FunctionExpr;
-export function arrayOffset(
+export function arrayGet(arrayExpression: Expr, indexExpr: Expr): FunctionExpr;
+export function arrayGet(
   array: Expr | string,
-  offset: Expr | number
+  index: Expr | number
 ): FunctionExpr {
-  return fieldOrExpression(array).arrayOffset(valueToDefaultExpr(offset));
+  return fieldOrExpression(array).arrayGet(valueToDefaultExpr(index));
 }
 
 /**
@@ -2953,7 +2530,7 @@ export function isError(value: Expr): BooleanExpr {
  * ```typescript
  * // Returns the first item in the title field arrays, or returns
  * // the entire title field if the array is empty or the field is another type.
- * ifError(field("title").arrayOffset(0), field("title"));
+ * ifError(field("title").arrayGet(0), field("title"));
  * ```
  *
  * @param tryExpr The try expression.
@@ -2970,7 +2547,7 @@ export function ifError(tryExpr: Expr, catchExpr: Expr): FunctionExpr;
  * ```typescript
  * // Returns the first item in the title field arrays, or returns
  * // "Default Title"
- * ifError(field("title").arrayOffset(0), "Default Title");
+ * ifError(field("title").arrayGet(0), "Default Title");
  * ```
  *
  * @param tryExpr The try expression.
@@ -3087,8 +2664,6 @@ export function isNotNull(value: Expr | string): BooleanExpr {
 export function isNotNan(value: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
  *
  * ```typescript
@@ -3105,8 +2680,6 @@ export function isNotNan(value: Expr | string): BooleanExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that removes a key from the map at the specified field name.
  *
  * ```
@@ -3119,8 +2692,6 @@ export function isNotNan(value: Expr | string): BooleanExpr {
  */
 export function mapRemove(mapField: string, key: string): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that removes a key from the map produced by evaluating an expression.
  *
  * ```
@@ -3133,8 +2704,6 @@ export function mapRemove(mapField: string, key: string): FunctionExpr;
  */
 export function mapRemove(mapExpr: Expr, key: string): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that removes a key from the map at the specified field name.
  *
  * ```
@@ -3147,8 +2716,6 @@ export function mapRemove(mapExpr: Expr, key: string): FunctionExpr;
  */
 export function mapRemove(mapField: string, keyExpr: Expr): FunctionExpr;
 /**
- * @beta
- *
  * Creates an expression that removes a key from the map produced by evaluating an expression.
  *
  * ```
@@ -3169,8 +2736,6 @@ export function mapRemove(
 }
 
 /**
- * @beta
- *
  * Creates an expression that merges multiple map values.
  *
  * ```
@@ -3192,8 +2757,6 @@ export function mapMerge(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that merges multiple map values.
  *
  * ```
@@ -3225,24 +2788,6 @@ export function mapMerge(
 }
 
 /**
- * @beta
- *
- * Creates an expression that returns the document ID from a path.
- *
- * ```typescript
- * // Get the document ID from a path.
- * documentId(myDocumentReference);
- * ```
- *
- * @return A new {@code Expr} representing the documentId operation.
- */
-export function documentId(
-  documentPath: string | firestore.DocumentReference
-): FunctionExpr;
-
-/**
- * @beta
- *
  * Creates an expression that returns the document ID from a path.
  *
  * ```typescript
@@ -3252,76 +2797,63 @@ export function documentId(
  *
  * @return A new {@code Expr} representing the documentId operation.
  */
-export function documentId(documentPathExpr: Expr): FunctionExpr;
-
-export function documentId(
-  documentPath: Expr | string | firestore.DocumentReference
-): FunctionExpr {
-  const documentPathExpr = valueToDefaultExpr(documentPath);
+export function documentId(documentPathExpr: Expr): FunctionExpr {
   return documentPathExpr.documentId();
 }
 
 /**
- * @beta
- *
  * Creates an expression that returns a substring of a string or byte array.
  *
  * @param field The name of a field containing a string or byte array to compute the substring from.
  * @param position Index of the first character of the substring.
  * @param length Length of the substring.
  */
-export function substr(
+export function substring(
   field: string,
   position: number,
   length?: number
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that returns a substring of a string or byte array.
  *
  * @param input An expression returning a string or byte array to compute the substring from.
  * @param position Index of the first character of the substring.
  * @param length Length of the substring.
  */
-export function substr(
+export function substring(
   input: Expr,
   position: number,
   length?: number
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that returns a substring of a string or byte array.
  *
  * @param field The name of a field containing a string or byte array to compute the substring from.
  * @param position An expression that returns the index of the first character of the substring.
  * @param length An expression that returns the length of the substring.
  */
-export function substr(
+export function substring(
   field: string,
   position: Expr,
   length?: Expr
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that returns a substring of a string or byte array.
  *
  * @param input An expression returning a string or byte array to compute the substring from.
  * @param position An expression that returns the index of the first character of the substring.
  * @param length An expression that returns the length of the substring.
  */
-export function substr(
+export function substring(
   input: Expr,
   position: Expr,
   length?: Expr
 ): FunctionExpr;
 
-export function substr(
+export function substring(
   field: Expr | string,
   position: Expr | number,
   length?: Expr | number
@@ -3330,12 +2862,10 @@ export function substr(
   const positionExpr = valueToDefaultExpr(position);
   const lengthExpr =
     length === undefined ? undefined : valueToDefaultExpr(length);
-  return fieldExpr.substr(positionExpr, lengthExpr);
+  return fieldExpr.substring(positionExpr, lengthExpr);
 }
 
 /**
- * @beta
- *
  * Creates an expression that adds the result of two expressions together.
  *
  * ```typescript
@@ -3350,8 +2880,6 @@ export function substr(
 export function add(first: Expr, second: Expr | unknown): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that adds a field's value to the result of an expression.
  *
  * ```typescript
@@ -3373,8 +2901,6 @@ export function add(
 }
 
 /**
- * @beta
- *
  * Creates an expression that subtracts two expressions.
  *
  * ```typescript
@@ -3382,15 +2908,13 @@ export function add(
  * subtract(field("price"), field("discount"));
  * ```
  *
- * @param left The expression to subtract from.
- * @param right The expression to subtract.
+ * @param minuend The expression to subtract from.
+ * @param subtrahend The expression to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(left: Expr, right: Expr): FunctionExpr;
+export function subtract(minuend: Expr, subtrahend: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that subtracts a constant value from an expression.
  *
  * ```typescript
@@ -3398,15 +2922,13 @@ export function subtract(left: Expr, right: Expr): FunctionExpr;
  * subtract(field("value"), 2);
  * ```
  *
- * @param expression The expression to subtract from.
- * @param value The constant value to subtract.
+ * @param minuend The expression to subtract from.
+ * @param subtrahend The constant value to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(expression: Expr, value: unknown): FunctionExpr;
+export function subtract(minuend: Expr, subtrahend: unknown): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that subtracts an expression from a field's value.
  *
  * ```typescript
@@ -3414,15 +2936,16 @@ export function subtract(expression: Expr, value: unknown): FunctionExpr;
  * subtract("price", field("discount"));
  * ```
  *
- * @param fieldName The field name to subtract from.
- * @param expression The expression to subtract.
+ * @param minuendFieldName The field name to subtract from.
+ * @param subtrahend The expression to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(fieldName: string, expression: Expr): FunctionExpr;
+export function subtract(
+  minuendFieldName: string,
+  subtrahend: Expr
+): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that subtracts a constant value from a field's value.
  *
  * ```typescript
@@ -3430,11 +2953,14 @@ export function subtract(fieldName: string, expression: Expr): FunctionExpr;
  * subtract("total", 20);
  * ```
  *
- * @param fieldName The field name to subtract from.
- * @param value The constant value to subtract.
+ * @param minuendFieldName The field name to subtract from.
+ * @param subtrahend The constant value to subtract.
  * @return A new {@code Expr} representing the subtraction operation.
  */
-export function subtract(fieldName: string, value: unknown): FunctionExpr;
+export function subtract(
+  minuendFieldName: string,
+  subtrahend: unknown
+): FunctionExpr;
 export function subtract(
   left: Expr | string,
   right: Expr | unknown
@@ -3445,8 +2971,6 @@ export function subtract(
 }
 
 /**
- * @beta
- *
  * Creates an expression that multiplies the result of two expressions together.
  *
  * ```typescript
@@ -3461,8 +2985,6 @@ export function subtract(
 export function multiply(first: Expr, second: Expr | unknown): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that multiplies a field's value by the result of an expression.
  *
  * ```typescript
@@ -3487,8 +3009,6 @@ export function multiply(
 }
 
 /**
- * @beta
- *
  * Creates an expression that divides two expressions.
  *
  * ```typescript
@@ -3496,15 +3016,13 @@ export function multiply(
  * divide(field("total"), field("count"));
  * ```
  *
- * @param left The expression to be divided.
- * @param right The expression to divide by.
+ * @param dividend The expression to be divided.
+ * @param divisort The expression to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(left: Expr, right: Expr): FunctionExpr;
+export function divide(dividend: Expr, divisort: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that divides an expression by a constant value.
  *
  * ```typescript
@@ -3512,15 +3030,13 @@ export function divide(left: Expr, right: Expr): FunctionExpr;
  * divide(field("value"), 10);
  * ```
  *
- * @param expression The expression to be divided.
- * @param value The constant value to divide by.
+ * @param dividend The expression to be divided.
+ * @param divisor The constant value to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(expression: Expr, value: unknown): FunctionExpr;
+export function divide(dividend: Expr, divisor: unknown): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that divides a field's value by an expression.
  *
  * ```typescript
@@ -3528,15 +3044,13 @@ export function divide(expression: Expr, value: unknown): FunctionExpr;
  * divide("total", field("count"));
  * ```
  *
- * @param fieldName The field name to be divided.
- * @param expressions The expression to divide by.
+ * @param dividend The field name to be divided.
+ * @param divisor The expression to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(fieldName: string, expressions: Expr): FunctionExpr;
+export function divide(dividend: string, divisor: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that divides a field's value by a constant value.
  *
  * ```typescript
@@ -3544,23 +3058,21 @@ export function divide(fieldName: string, expressions: Expr): FunctionExpr;
  * divide("value", 10);
  * ```
  *
- * @param fieldName The field name to be divided.
- * @param value The constant value to divide by.
+ * @param dividend The field name to be divided.
+ * @param divisor The constant value to divide by.
  * @return A new {@code Expr} representing the division operation.
  */
-export function divide(fieldName: string, value: unknown): FunctionExpr;
+export function divide(dividend: string, divisor: unknown): FunctionExpr;
 export function divide(
-  left: Expr | string,
-  right: Expr | unknown
+  dividend: Expr | string,
+  divisor: Expr | unknown
 ): FunctionExpr {
-  const normalizedLeft = fieldOrExpression(left);
-  const normalizedRight = valueToDefaultExpr(right);
+  const normalizedLeft = fieldOrExpression(dividend);
+  const normalizedRight = valueToDefaultExpr(divisor);
   return normalizedLeft.divide(normalizedRight);
 }
 
 /**
- * @beta
- *
  * Creates an expression that calculates the modulo (remainder) of dividing two expressions.
  *
  * ```typescript
@@ -3575,8 +3087,6 @@ export function divide(
 export function mod(left: Expr, right: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that calculates the modulo (remainder) of dividing an expression by a constant.
  *
  * ```typescript
@@ -3591,8 +3101,6 @@ export function mod(left: Expr, right: Expr): FunctionExpr;
 export function mod(expression: Expr, value: unknown): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that calculates the modulo (remainder) of dividing a field's value by an expression.
  *
  * ```typescript
@@ -3607,8 +3115,6 @@ export function mod(expression: Expr, value: unknown): FunctionExpr;
 export function mod(fieldName: string, expression: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that calculates the modulo (remainder) of dividing a field's value by a constant.
  *
  * ```typescript
@@ -3628,8 +3134,6 @@ export function mod(left: Expr | string, right: Expr | unknown): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that creates a Firestore map value from an input object.
  *
  * ```typescript
@@ -3677,8 +3181,6 @@ export function _mapValue(plainObject: Record<string, unknown>): MapValue {
 }
 
 /**
- * @beta
- *
  * Creates an expression that creates a Firestore array value from an input array.
  *
  * ```typescript
@@ -3698,8 +3200,6 @@ export function array(elements: unknown[]): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if two expressions are equal.
  *
  * ```typescript
@@ -3714,8 +3214,6 @@ export function array(elements: unknown[]): FunctionExpr {
 export function eq(left: Expr, right: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression is equal to a constant value.
  *
  * ```typescript
@@ -3730,8 +3228,6 @@ export function eq(left: Expr, right: Expr): BooleanExpr;
 export function eq(expression: Expr, value: unknown): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is equal to an expression.
  *
  * ```typescript
@@ -3746,8 +3242,6 @@ export function eq(expression: Expr, value: unknown): BooleanExpr;
 export function eq(fieldName: string, expression: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is equal to a constant value.
  *
  * ```typescript
@@ -3767,8 +3261,6 @@ export function eq(left: Expr | string, right: unknown): BooleanExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if two expressions are not equal.
  *
  * ```typescript
@@ -3783,8 +3275,6 @@ export function eq(left: Expr | string, right: unknown): BooleanExpr {
 export function neq(left: Expr, right: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression is not equal to a constant value.
  *
  * ```typescript
@@ -3799,8 +3289,6 @@ export function neq(left: Expr, right: Expr): BooleanExpr;
 export function neq(expression: Expr, value: unknown): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is not equal to an expression.
  *
  * ```typescript
@@ -3815,8 +3303,6 @@ export function neq(expression: Expr, value: unknown): BooleanExpr;
 export function neq(fieldName: string, expression: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is not equal to a constant value.
  *
  * ```typescript
@@ -3836,8 +3322,6 @@ export function neq(left: Expr | string, right: unknown): BooleanExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if the first expression is less than the second expression.
  *
  * ```typescript
@@ -3852,8 +3336,6 @@ export function neq(left: Expr | string, right: unknown): BooleanExpr {
 export function lt(left: Expr, right: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression is less than a constant value.
  *
  * ```typescript
@@ -3868,8 +3350,6 @@ export function lt(left: Expr, right: Expr): BooleanExpr;
 export function lt(expression: Expr, value: unknown): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is less than an expression.
  *
  * ```typescript
@@ -3884,8 +3364,6 @@ export function lt(expression: Expr, value: unknown): BooleanExpr;
 export function lt(fieldName: string, expression: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is less than a constant value.
  *
  * ```typescript
@@ -3905,8 +3383,6 @@ export function lt(left: Expr | string, right: unknown): BooleanExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if the first expression is less than or equal to the second
  * expression.
  *
@@ -3922,8 +3398,6 @@ export function lt(left: Expr | string, right: unknown): BooleanExpr {
 export function lte(left: Expr, right: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression is less than or equal to a constant value.
  *
  * ```typescript
@@ -3952,8 +3426,6 @@ export function lte(expression: Expr, value: unknown): BooleanExpr;
 export function lte(fieldName: string, expression: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is less than or equal to a constant value.
  *
  * ```typescript
@@ -3973,8 +3445,6 @@ export function lte(left: Expr | string, right: unknown): BooleanExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if the first expression is greater than the second
  * expression.
  *
@@ -3990,8 +3460,6 @@ export function lte(left: Expr | string, right: unknown): BooleanExpr {
 export function gt(left: Expr, right: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression is greater than a constant value.
  *
  * ```typescript
@@ -4006,8 +3474,6 @@ export function gt(left: Expr, right: Expr): BooleanExpr;
 export function gt(expression: Expr, value: unknown): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is greater than an expression.
  *
  * ```typescript
@@ -4022,8 +3488,6 @@ export function gt(expression: Expr, value: unknown): BooleanExpr;
 export function gt(fieldName: string, expression: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is greater than a constant value.
  *
  * ```typescript
@@ -4043,8 +3507,6 @@ export function gt(left: Expr | string, right: unknown): BooleanExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if the first expression is greater than or equal to the
  * second expression.
  *
@@ -4060,8 +3522,6 @@ export function gt(left: Expr | string, right: unknown): BooleanExpr {
 export function gte(left: Expr, right: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression is greater than or equal to a constant
  * value.
  *
@@ -4077,8 +3537,6 @@ export function gte(left: Expr, right: Expr): BooleanExpr;
 export function gte(expression: Expr, value: unknown): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is greater than or equal to an expression.
  *
  * ```typescript
@@ -4093,8 +3551,6 @@ export function gte(expression: Expr, value: unknown): BooleanExpr;
 export function gte(fieldName: string, value: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is greater than or equal to a constant
  * value.
  *
@@ -4115,62 +3571,6 @@ export function gte(left: Expr | string, right: unknown): BooleanExpr {
 }
 
 /**
- * @beta
- *
- * Creates an expression that concatenates an array expression with other arrays.
- *
- * ```typescript
- * // Combine the 'items' array with two new item arrays
- * arrayConcat(field("items"), [field("newItems"), field("otherItems")]);
- * ```
- *
- * @param firstArray The first array expression to concatenate to.
- * @param secondArray The second array expression or array literal to concatenate to.
- * @param otherArrays Optional additional array expressions or array literals to concatenate.
- * @return A new {@code Expr} representing the concatenated array.
- */
-export function arrayConcat(
-  firstArray: Expr,
-  secondArray: Expr | unknown[],
-  ...otherArrays: Array<Expr | unknown[]>
-): FunctionExpr;
-
-/**
- * @beta
- *
- * Creates an expression that concatenates a field's array value with other arrays.
- *
- * ```typescript
- * // Combine the 'items' array with two new item arrays
- * arrayConcat("items", [field("newItems"), field("otherItems")]);
- * ```
- *
- * @param firstArrayField The first array to concatenate to.
- * @param secondArray The second array expression or array literal to concatenate to.
- * @param otherArrays Optional additional array expressions or array literals to concatenate.
- * @return A new {@code Expr} representing the concatenated array.
- */
-export function arrayConcat(
-  firstArrayField: string,
-  secondArray: Expr | unknown[],
-  ...otherArrays: Array<Expr | unknown[]>
-): FunctionExpr;
-
-export function arrayConcat(
-  firstArray: Expr | string,
-  secondArray: Expr | unknown[],
-  ...otherArrays: Array<Expr | unknown[]>
-): FunctionExpr {
-  const exprValues = otherArrays.map(element => valueToDefaultExpr(element));
-  return fieldOrExpression(firstArray).arrayConcat(
-    fieldOrExpression(secondArray),
-    ...exprValues
-  );
-}
-
-/**
- * @beta
- *
  * Creates an expression that checks if an array expression contains a specific element.
  *
  * ```typescript
@@ -4185,8 +3585,6 @@ export function arrayConcat(
 export function arrayContains(array: Expr, element: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an array expression contains a specific element.
  *
  * ```typescript
@@ -4201,8 +3599,6 @@ export function arrayContains(array: Expr, element: Expr): FunctionExpr;
 export function arrayContains(array: Expr, element: unknown): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's array value contains a specific element.
  *
  * ```typescript
@@ -4217,8 +3613,6 @@ export function arrayContains(array: Expr, element: unknown): FunctionExpr;
 export function arrayContains(fieldName: string, element: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's array value contains a specific value.
  *
  * ```typescript
@@ -4241,8 +3635,6 @@ export function arrayContains(
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if an array expression contains any of the specified
  * elements.
  *
@@ -4261,8 +3653,6 @@ export function arrayContainsAny(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's array value contains any of the specified
  * elements.
  *
@@ -4282,8 +3672,6 @@ export function arrayContainsAny(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an array expression contains any of the specified
  * elements.
  *
@@ -4299,8 +3687,6 @@ export function arrayContainsAny(
 export function arrayContainsAny(array: Expr, values: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's array value contains any of the specified
  * elements.
  *
@@ -4327,8 +3713,6 @@ export function arrayContainsAny(
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if an array expression contains all the specified elements.
  *
  * ```typescript
@@ -4346,8 +3730,6 @@ export function arrayContainsAll(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's array value contains all the specified values or
  * expressions.
  *
@@ -4366,8 +3748,6 @@ export function arrayContainsAll(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an array expression contains all the specified elements.
  *
  * ```typescript
@@ -4385,8 +3765,6 @@ export function arrayContainsAll(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's array value contains all the specified values or
  * expressions.
  *
@@ -4415,8 +3793,6 @@ export function arrayContainsAll(
 }
 
 /**
- * @beta
- *
  * Creates an expression that calculates the length of an array in a specified field.
  *
  * ```typescript
@@ -4430,8 +3806,6 @@ export function arrayContainsAll(
 export function arrayLength(fieldName: string): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that calculates the length of an array expression.
  *
  * ```typescript
@@ -4448,8 +3822,6 @@ export function arrayLength(array: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression, when evaluated, is equal to any of the provided values or
  * expressions.
  *
@@ -4468,8 +3840,6 @@ export function eqAny(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression is equal to any of the provided values.
  *
  * ```typescript
@@ -4484,8 +3854,6 @@ export function eqAny(
 export function eqAny(expression: Expr, arrayExpression: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is equal to any of the provided values or
  * expressions.
  *
@@ -4504,8 +3872,6 @@ export function eqAny(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is equal to any of the provided values or
  * expressions.
  *
@@ -4531,8 +3897,6 @@ export function eqAny(
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression is not equal to any of the provided values
  * or expressions.
  *
@@ -4551,8 +3915,6 @@ export function notEqAny(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is not equal to any of the provided values
  * or expressions.
  *
@@ -4571,8 +3933,6 @@ export function notEqAny(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression is not equal to any of the provided values
  * or expressions.
  *
@@ -4588,8 +3948,6 @@ export function notEqAny(
 export function notEqAny(element: Expr, arrayExpression: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value is not equal to any of the values in the evaluated expression.
  *
  * ```typescript
@@ -4615,8 +3973,6 @@ export function notEqAny(
 }
 
 /**
- * @beta
- *
  * Creates an expression that performs a logical 'XOR' (exclusive OR) operation on multiple BooleanExprs.
  *
  * ```typescript
@@ -4642,8 +3998,6 @@ export function xor(
 }
 
 /**
- * @beta
- *
  * Creates a conditional expression that evaluates to a 'then' expression if a condition is true
  * and an 'else' expression if the condition is false.
  *
@@ -4671,8 +4025,6 @@ export function cond(
 }
 
 /**
- * @beta
- *
  * Creates an expression that negates a filter condition.
  *
  * ```typescript
@@ -4688,8 +4040,6 @@ export function not(booleanExpr: BooleanExpr): BooleanExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that returns the largest value between multiple input
  * expressions or literal values. Based on Firestore's value type ordering.
  *
@@ -4711,8 +4061,6 @@ export function logicalMaximum(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that returns the largest value between multiple input
  * expressions or literal values. Based on Firestore's value type ordering.
  *
@@ -4745,8 +4093,6 @@ export function logicalMaximum(
 }
 
 /**
- * @beta
- *
  * Creates an expression that returns the smallest value between multiple input
  * expressions and literal values. Based on Firestore's value type ordering.
  *
@@ -4768,8 +4114,6 @@ export function logicalMinimum(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that returns the smallest value between a field's value
  * and other input expressions or literal values.
  * Based on Firestore's value type ordering.
@@ -4803,8 +4147,6 @@ export function logicalMinimum(
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field exists.
  *
  * ```typescript
@@ -4818,8 +4160,6 @@ export function logicalMinimum(
 export function exists(value: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field exists.
  *
  * ```typescript
@@ -4836,8 +4176,6 @@ export function exists(valueOrField: Expr | string): BooleanExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if an expression evaluates to 'NaN' (Not a Number).
  *
  * ```typescript
@@ -4851,8 +4189,6 @@ export function exists(valueOrField: Expr | string): BooleanExpr {
 export function isNan(value: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value evaluates to 'NaN' (Not a Number).
  *
  * ```typescript
@@ -4869,8 +4205,6 @@ export function isNan(value: Expr | string): BooleanExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that reverses a string.
  *
  * ```typescript
@@ -4884,8 +4218,6 @@ export function isNan(value: Expr | string): BooleanExpr {
 export function reverse(stringExpression: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that reverses a string value in the specified field.
  *
  * ```typescript
@@ -4902,156 +4234,35 @@ export function reverse(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
- * Creates an expression that replaces the first occurrence of a substring within a string with another substring.
+ * Creates an expression that reverses an array.
  *
  * ```typescript
- * // Replace the first occurrence of "hello" with "hi" in the 'message' field.
- * replaceFirst(field("message"), "hello", "hi");
+ * // Reverse the value of the 'myArray' field.
+ * arrayReverse("myArray");
  * ```
  *
- * @param value The expression representing the string to perform the replacement on.
- * @param find The substring to search for.
- * @param replace The substring to replace the first occurrence of 'find' with.
- * @return A new {@code Expr} representing the string with the first occurrence replaced.
+ * @param fieldName The name of the field to reverse.
+ * @return A new {@code Expr} representing the reversed array.
  */
-export function replaceFirst(
-  value: Expr,
-  find: string,
-  replace: string
-): FunctionExpr;
+export function arrayReverse(fieldName: string): FunctionExpr;
 
 /**
- * @beta
- *
- * Creates an expression that replaces the first occurrence of a substring within a string with another substring,
- * where the substring to find and the replacement substring are specified by expressions.
+ * Creates an expression that reverses an array.
  *
  * ```typescript
- * // Replace the first occurrence of the value in 'findField' with the value in 'replaceField' in the 'message' field.
- * replaceFirst(field("message"), field("findField"), field("replaceField"));
+ * // Reverse the value of the 'myArray' field.
+ * arrayReverse(field("myArray"));
  * ```
  *
- * @param value The expression representing the string to perform the replacement on.
- * @param find The expression representing the substring to search for.
- * @param replace The expression representing the substring to replace the first occurrence of 'find' with.
- * @return A new {@code Expr} representing the string with the first occurrence replaced.
+ * @param arrayExpression An expression evaluating to an array value, which will be reversed.
+ * @return A new {@code Expr} representing the reversed array.
  */
-export function replaceFirst(
-  value: Expr,
-  find: Expr,
-  replace: Expr
-): FunctionExpr;
-
-/**
- * @beta
- *
- * Creates an expression that replaces the first occurrence of a substring within a string represented by a field with another substring.
- *
- * ```typescript
- * // Replace the first occurrence of "hello" with "hi" in the 'message' field.
- * replaceFirst("message", "hello", "hi");
- * ```
- *
- * @param fieldName The name of the field representing the string to perform the replacement on.
- * @param find The substring to search for.
- * @param replace The substring to replace the first occurrence of 'find' with.
- * @return A new {@code Expr} representing the string with the first occurrence replaced.
- */
-export function replaceFirst(
-  fieldName: string,
-  find: string,
-  replace: string
-): FunctionExpr;
-export function replaceFirst(
-  value: Expr | string,
-  find: Expr | string,
-  replace: Expr | string
-): FunctionExpr {
-  const normalizedValue = fieldOrExpression(value);
-  const normalizedFind = valueToDefaultExpr(find);
-  const normalizedReplace = valueToDefaultExpr(replace);
-  return normalizedValue.replaceFirst(normalizedFind, normalizedReplace);
+export function arrayReverse(arrayExpression: Expr): FunctionExpr;
+export function arrayReverse(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).arrayReverse();
 }
 
 /**
- * @beta
- *
- * Creates an expression that replaces all occurrences of a substring within a string with another substring.
- *
- * ```typescript
- * // Replace all occurrences of "hello" with "hi" in the 'message' field.
- * replaceAll(field("message"), "hello", "hi");
- * ```
- *
- * @param value The expression representing the string to perform the replacement on.
- * @param find The substring to search for.
- * @param replace The substring to replace all occurrences of 'find' with.
- * @return A new {@code Expr} representing the string with all occurrences replaced.
- */
-export function replaceAll(
-  value: Expr,
-  find: string,
-  replace: string
-): FunctionExpr;
-
-/**
- * @beta
- *
- * Creates an expression that replaces all occurrences of a substring within a string with another substring,
- * where the substring to find and the replacement substring are specified by expressions.
- *
- * ```typescript
- * // Replace all occurrences of the value in 'findField' with the value in 'replaceField' in the 'message' field.
- * replaceAll(field("message"), field("findField"), field("replaceField"));
- * ```
- *
- * @param value The expression representing the string to perform the replacement on.
- * @param find The expression representing the substring to search for.
- * @param replace The expression representing the substring to replace all occurrences of 'find' with.
- * @return A new {@code Expr} representing the string with all occurrences replaced.
- */
-export function replaceAll(
-  value: Expr,
-  find: Expr,
-  replace: Expr
-): FunctionExpr;
-
-/**
- * @beta
- *
- * Creates an expression that replaces all occurrences of a substring within a string represented by a field with another substring.
- *
- * ```typescript
- * // Replace all occurrences of "hello" with "hi" in the 'message' field.
- * replaceAll("message", "hello", "hi");
- * ```
- *
- * @param fieldName The name of the field representing the string to perform the replacement on.
- * @param find The substring to search for.
- * @param replace The substring to replace all occurrences of 'find' with.
- * @return A new {@code Expr} representing the string with all occurrences replaced.
- */
-export function replaceAll(
-  fieldName: string,
-  find: string,
-  replace: string
-): FunctionExpr;
-export function replaceAll(
-  value: Expr | string,
-  find: Expr | string,
-  replace: Expr | string
-): FunctionExpr {
-  const normalizedValue = fieldOrExpression(value);
-  const normalizedFind = valueToDefaultExpr(find);
-  const normalizedReplace = valueToDefaultExpr(replace);
-  return normalizedValue.replaceAll(normalizedFind, normalizedReplace);
-}
-
-/**
- * @beta
- *
  * Creates an expression that calculates the byte length of a string in UTF-8, or just the length of a Blob.
  *
  * ```typescript
@@ -5065,8 +4276,6 @@ export function replaceAll(
 export function byteLength(expr: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that calculates the length of a string represented by a field in UTF-8 bytes, or just the length of a Blob.
  *
  * ```typescript
@@ -5084,8 +4293,92 @@ export function byteLength(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
+ * Creates an expression that computes e to the power of the expression's result.
  *
+ * ```typescript
+ * // Compute e to the power of 2.
+ * exp(constant(2));
+ * ```
+ *
+ * @return A new {@code Expr} representing the exp of the numeric value.
+ */
+export function exp(expression: Expr): FunctionExpr;
+
+/**
+ * Creates an expression that computes e to the power of the expression's result.
+ *
+ * ```typescript
+ * // Compute e to the power of the 'value' field.
+ * exp('value');
+ * ```
+ *
+ * @return A new {@code Expr} representing the exp of the numeric value.
+ */
+export function exp(fieldName: string): FunctionExpr;
+
+export function exp(expressionOrFieldName: Expr | string): FunctionExpr {
+  return fieldOrExpression(expressionOrFieldName).exp();
+}
+
+/**
+ * Creates an expression that computes the ceiling of a numeric value.
+ *
+ * ```typescript
+ * // Compute the ceiling of the 'price' field.
+ * ceil("price");
+ * ```
+ *
+ * @param fieldName The name of the field to compute the ceiling of.
+ * @return A new {@code Expr} representing the ceiling of the numeric value.
+ */
+export function ceil(fieldName: string): FunctionExpr;
+
+/**
+ * Creates an expression that computes the ceiling of a numeric value.
+ *
+ * ```typescript
+ * // Compute the ceiling of the 'price' field.
+ * ceil(field("price"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the ceiling will be computed for.
+ * @return A new {@code Expr} representing the ceiling of the numeric value.
+ */
+export function ceil(expression: Expr): FunctionExpr;
+export function ceil(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).ceil();
+}
+
+/**
+ * Creates an expression that computes the floor of a numeric value.
+ *
+ * @param expr The expression to compute the floor of.
+ * @return A new {@code Expr} representing the floor of the numeric value.
+ */
+export function floor(expr: Expr): FunctionExpr;
+
+/**
+ * Creates an expression that computes the floor of a numeric value.
+ *
+ * @param fieldName The name of the field to compute the floor of.
+ * @return A new {@code Expr} representing the floor of the numeric value.
+ */
+export function floor(fieldName: string): FunctionExpr;
+export function floor(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).floor();
+}
+
+/**
+ * Creates an aggregation that counts the number of distinct values of a field.
+ *
+ * @param expr The expression or field to count distinct values of.
+ * @return A new `AggregateFunction` representing the 'count_distinct' aggregation.
+ */
+export function countDistinct(expr: Expr | string): AggregateFunction {
+  return fieldOrExpression(expr).countDistinct();
+}
+
+/**
  * Creates an expression that calculates the character length of a string field in UTF8.
  *
  * ```typescript
@@ -5099,8 +4392,6 @@ export function byteLength(expr: Expr | string): FunctionExpr {
 export function charLength(fieldName: string): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that calculates the character length of a string expression in UTF-8.
  *
  * ```typescript
@@ -5118,8 +4409,6 @@ export function charLength(value: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that performs a case-sensitive wildcard string comparison against a
  * field.
  *
@@ -5135,8 +4424,6 @@ export function charLength(value: Expr | string): FunctionExpr {
 export function like(fieldName: string, pattern: string): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that performs a case-sensitive wildcard string comparison against a
  * field.
  *
@@ -5152,8 +4439,6 @@ export function like(fieldName: string, pattern: string): BooleanExpr;
 export function like(fieldName: string, pattern: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that performs a case-sensitive wildcard string comparison.
  *
  * ```typescript
@@ -5168,8 +4453,6 @@ export function like(fieldName: string, pattern: Expr): BooleanExpr;
 export function like(stringExpression: Expr, pattern: string): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that performs a case-sensitive wildcard string comparison.
  *
  * ```typescript
@@ -5192,8 +4475,6 @@ export function like(
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string field contains a specified regular expression as
  * a substring.
  *
@@ -5209,8 +4490,6 @@ export function like(
 export function regexContains(fieldName: string, pattern: string): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string field contains a specified regular expression as
  * a substring.
  *
@@ -5226,8 +4505,6 @@ export function regexContains(fieldName: string, pattern: string): BooleanExpr;
 export function regexContains(fieldName: string, pattern: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string expression contains a specified regular
  * expression as a substring.
  *
@@ -5246,8 +4523,6 @@ export function regexContains(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string expression contains a specified regular
  * expression as a substring.
  *
@@ -5274,8 +4549,6 @@ export function regexContains(
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string field matches a specified regular expression.
  *
  * ```typescript
@@ -5290,8 +4563,6 @@ export function regexContains(
 export function regexMatch(fieldName: string, pattern: string): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string field matches a specified regular expression.
  *
  * ```typescript
@@ -5306,8 +4577,6 @@ export function regexMatch(fieldName: string, pattern: string): BooleanExpr;
 export function regexMatch(fieldName: string, pattern: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string expression matches a specified regular
  * expression.
  *
@@ -5326,8 +4595,6 @@ export function regexMatch(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string expression matches a specified regular
  * expression.
  *
@@ -5351,8 +4618,6 @@ export function regexMatch(
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string field contains a specified substring.
  *
  * ```typescript
@@ -5367,8 +4632,6 @@ export function regexMatch(
 export function strContains(fieldName: string, substring: string): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string field contains a substring specified by an expression.
  *
  * ```typescript
@@ -5383,8 +4646,6 @@ export function strContains(fieldName: string, substring: string): BooleanExpr;
 export function strContains(fieldName: string, substring: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string expression contains a specified substring.
  *
  * ```typescript
@@ -5402,8 +4663,6 @@ export function strContains(
 ): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string expression contains a substring specified by another expression.
  *
  * ```typescript
@@ -5429,8 +4688,6 @@ export function strContains(
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value starts with a given prefix.
  *
  * ```typescript
@@ -5445,8 +4702,6 @@ export function strContains(
 export function startsWith(fieldName: string, prefix: string): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value starts with a given prefix.
  *
  * ```typescript
@@ -5461,8 +4716,6 @@ export function startsWith(fieldName: string, prefix: string): BooleanExpr;
 export function startsWith(fieldName: string, prefix: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string expression starts with a given prefix.
  *
  * ```typescript
@@ -5477,8 +4730,6 @@ export function startsWith(fieldName: string, prefix: Expr): BooleanExpr;
 export function startsWith(stringExpression: Expr, prefix: string): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string expression starts with a given prefix.
  *
  * ```typescript
@@ -5499,8 +4750,6 @@ export function startsWith(
 }
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value ends with a given postfix.
  *
  * ```typescript
@@ -5515,8 +4764,6 @@ export function startsWith(
 export function endsWith(fieldName: string, suffix: string): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a field's value ends with a given postfix.
  *
  * ```typescript
@@ -5531,8 +4778,6 @@ export function endsWith(fieldName: string, suffix: string): BooleanExpr;
 export function endsWith(fieldName: string, suffix: Expr): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string expression ends with a given postfix.
  *
  * ```typescript
@@ -5547,8 +4792,6 @@ export function endsWith(fieldName: string, suffix: Expr): BooleanExpr;
 export function endsWith(stringExpression: Expr, suffix: string): BooleanExpr;
 
 /**
- * @beta
- *
  * Creates an expression that checks if a string expression ends with a given postfix.
  *
  * ```typescript
@@ -5569,8 +4812,6 @@ export function endsWith(
 }
 
 /**
- * @beta
- *
  * Creates an expression that converts a string field to lowercase.
  *
  * ```typescript
@@ -5584,8 +4825,6 @@ export function endsWith(
 export function toLower(fieldName: string): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that converts a string expression to lowercase.
  *
  * ```typescript
@@ -5602,8 +4841,6 @@ export function toLower(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that converts a string field to uppercase.
  *
  * ```typescript
@@ -5617,8 +4854,6 @@ export function toLower(expr: Expr | string): FunctionExpr {
 export function toUpper(fieldName: string): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that converts a string expression to uppercase.
  *
  * ```typescript
@@ -5635,8 +4870,6 @@ export function toUpper(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that removes leading and trailing whitespace from a string field.
  *
  * ```typescript
@@ -5650,8 +4883,6 @@ export function toUpper(expr: Expr | string): FunctionExpr {
 export function trim(fieldName: string): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that removes leading and trailing whitespace from a string expression.
  *
  * ```typescript
@@ -5668,8 +4899,6 @@ export function trim(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that concatenates string functions, fields or constants together.
  *
  * ```typescript
@@ -5689,7 +4918,6 @@ export function strConcat(
 ): FunctionExpr;
 
 /**
- * @beta
  * Creates an expression that concatenates string expressions together.
  *
  * ```typescript
@@ -5719,8 +4947,6 @@ export function strConcat(
 }
 
 /**
- * @beta
- *
  * Accesses a value from a map (object) field using the provided key.
  *
  * ```typescript
@@ -5735,8 +4961,6 @@ export function strConcat(
 export function mapGet(fieldName: string, subField: string): FunctionExpr;
 
 /**
- * @beta
- *
  * Accesses a value from a map (object) expression using the provided key.
  *
  * ```typescript
@@ -5757,8 +4981,6 @@ export function mapGet(
 }
 
 /**
- * @beta
- *
  * Creates an aggregation that counts the total number of stage inputs.
  *
  * ```typescript
@@ -5773,8 +4995,6 @@ export function countAll(): AggregateFunction {
 }
 
 /**
- * @beta
- *
  * Creates an aggregation that counts the number of stage inputs with valid evaluations of the
  * provided expression.
  *
@@ -5805,8 +5025,6 @@ export function count(value: Expr | string): AggregateFunction {
 }
 
 /**
- * @beta
- *
  * Creates an aggregation that calculates the sum of values from an expression across multiple
  * stage inputs.
  *
@@ -5821,8 +5039,6 @@ export function count(value: Expr | string): AggregateFunction {
 export function sum(expression: Expr): AggregateFunction;
 
 /**
- * @beta
- *
  * Creates an aggregation that calculates the sum of a field's values across multiple stage
  * inputs.
  *
@@ -5840,8 +5056,6 @@ export function sum(value: Expr | string): AggregateFunction {
 }
 
 /**
- * @beta
- *
  * Creates an aggregation that calculates the average (mean) of values from an expression across
  * multiple stage inputs.
  *
@@ -5856,8 +5070,6 @@ export function sum(value: Expr | string): AggregateFunction {
 export function avg(expression: Expr): AggregateFunction;
 
 /**
- * @beta
- *
  * Creates an aggregation that calculates the average (mean) of a field's values across multiple
  * stage inputs.
  *
@@ -5875,8 +5087,6 @@ export function avg(value: Expr | string): AggregateFunction {
 }
 
 /**
- * @beta
- *
  * Creates an aggregation that finds the minimum value of an expression across multiple stage
  * inputs.
  *
@@ -5891,8 +5101,6 @@ export function avg(value: Expr | string): AggregateFunction {
 export function minimum(expression: Expr): AggregateFunction;
 
 /**
- * @beta
- *
  * Creates an aggregation that finds the minimum value of a field across multiple stage inputs.
  *
  * ```typescript
@@ -5909,8 +5117,6 @@ export function minimum(value: Expr | string): AggregateFunction {
 }
 
 /**
- * @beta
- *
  * Creates an aggregation that finds the maximum value of an expression across multiple stage
  * inputs.
  *
@@ -5925,8 +5131,6 @@ export function minimum(value: Expr | string): AggregateFunction {
 export function maximum(expression: Expr): AggregateFunction;
 
 /**
- * @beta
- *
  * Creates an aggregation that finds the maximum value of a field across multiple stage inputs.
  *
  * ```typescript
@@ -5943,8 +5147,6 @@ export function maximum(value: Expr | string): AggregateFunction {
 }
 
 /**
- * @beta
- *
  * Calculates the Cosine distance between a field's vector value and a literal vector value.
  *
  * ```typescript
@@ -5962,8 +5164,6 @@ export function cosineDistance(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Calculates the Cosine distance between a field's vector value and a vector expression.
  *
  * ```typescript
@@ -5981,8 +5181,6 @@ export function cosineDistance(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Calculates the Cosine distance between a vector expression and a vector literal.
  *
  * ```typescript
@@ -5996,12 +5194,10 @@ export function cosineDistance(
  */
 export function cosineDistance(
   vectorExpression: Expr,
-  vector: number[] | Expr
+  vector: number[] | VectorValue
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Calculates the Cosine distance between two vector expressions.
  *
  * ```typescript
@@ -6019,7 +5215,7 @@ export function cosineDistance(
 ): FunctionExpr;
 export function cosineDistance(
   expr: Expr | string,
-  other: Expr | number[] | VectorValue
+  other: Expr | number[] | firestore.VectorValue
 ): FunctionExpr {
   const expr1 = fieldOrExpression(expr);
   const expr2 = vectorToExpr(other);
@@ -6027,8 +5223,6 @@ export function cosineDistance(
 }
 
 /**
- * @beta
- *
  * Calculates the dot product between a field's vector value and a double array.
  *
  * ```typescript
@@ -6046,8 +5240,6 @@ export function dotProduct(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Calculates the dot product between a field's vector value and a vector expression.
  *
  * ```typescript
@@ -6065,8 +5257,6 @@ export function dotProduct(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Calculates the dot product between a vector expression and a double array.
  *
  * ```typescript
@@ -6084,8 +5274,6 @@ export function dotProduct(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Calculates the dot product between two vector expressions.
  *
  * ```typescript
@@ -6111,8 +5299,6 @@ export function dotProduct(
 }
 
 /**
- * @beta
- *
  * Calculates the Euclidean distance between a field's vector value and a double array.
  *
  * ```typescript
@@ -6130,8 +5316,6 @@ export function euclideanDistance(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Calculates the Euclidean distance between a field's vector value and a vector expression.
  *
  * ```typescript
@@ -6149,8 +5333,6 @@ export function euclideanDistance(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Calculates the Euclidean distance between a vector expression and a double array.
  *
  * ```typescript
@@ -6169,8 +5351,6 @@ export function euclideanDistance(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Calculates the Euclidean distance between two vector expressions.
  *
  * ```typescript
@@ -6196,8 +5376,6 @@ export function euclideanDistance(
 }
 
 /**
- * @beta
- *
  * Creates an expression that calculates the length of a Firestore Vector.
  *
  * ```typescript
@@ -6211,8 +5389,6 @@ export function euclideanDistance(
 export function vectorLength(vectorExpression: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that calculates the length of a Firestore Vector represented by a field.
  *
  * ```typescript
@@ -6229,8 +5405,6 @@ export function vectorLength(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that interprets an expression as the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
  * and returns a timestamp.
  *
@@ -6245,8 +5419,6 @@ export function vectorLength(expr: Expr | string): FunctionExpr {
 export function unixMicrosToTimestamp(expr: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that interprets a field's value as the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
  * and returns a timestamp.
  *
@@ -6264,8 +5436,6 @@ export function unixMicrosToTimestamp(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that converts a timestamp expression to the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
  *
  * ```typescript
@@ -6279,8 +5449,6 @@ export function unixMicrosToTimestamp(expr: Expr | string): FunctionExpr {
 export function timestampToUnixMicros(expr: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that converts a timestamp field to the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
  *
  * ```typescript
@@ -6297,8 +5465,6 @@ export function timestampToUnixMicros(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that interprets an expression as the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
  * and returns a timestamp.
  *
@@ -6313,8 +5479,6 @@ export function timestampToUnixMicros(expr: Expr | string): FunctionExpr {
 export function unixMillisToTimestamp(expr: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that interprets a field's value as the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
  * and returns a timestamp.
  *
@@ -6333,8 +5497,6 @@ export function unixMillisToTimestamp(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that converts a timestamp expression to the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
  *
  * ```typescript
@@ -6348,8 +5510,6 @@ export function unixMillisToTimestamp(expr: Expr | string): FunctionExpr {
 export function timestampToUnixMillis(expr: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that converts a timestamp field to the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
  *
  * ```typescript
@@ -6367,8 +5527,6 @@ export function timestampToUnixMillis(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that interprets an expression as the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC)
  * and returns a timestamp.
  *
@@ -6383,8 +5541,6 @@ export function timestampToUnixMillis(expr: Expr | string): FunctionExpr {
 export function unixSecondsToTimestamp(expr: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that interprets a field's value as the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC)
  * and returns a timestamp.
  *
@@ -6403,8 +5559,6 @@ export function unixSecondsToTimestamp(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that converts a timestamp expression to the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
  *
  * ```typescript
@@ -6418,8 +5572,6 @@ export function unixSecondsToTimestamp(expr: Expr | string): FunctionExpr {
 export function timestampToUnixSeconds(expr: Expr): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that converts a timestamp field to the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
  *
  * ```typescript
@@ -6437,8 +5589,6 @@ export function timestampToUnixSeconds(expr: Expr | string): FunctionExpr {
 }
 
 /**
- * @beta
- *
  * Creates an expression that adds a specified amount of time to a timestamp.
  *
  * ```typescript
@@ -6458,8 +5608,6 @@ export function timestampAdd(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that adds a specified amount of time to a timestamp.
  *
  * ```typescript
@@ -6479,8 +5627,6 @@ export function timestampAdd(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that adds a specified amount of time to a timestamp represented by a field.
  *
  * ```typescript
@@ -6517,8 +5663,6 @@ export function timestampAdd(
 }
 
 /**
- * @beta
- *
  * Creates an expression that subtracts a specified amount of time from a timestamp.
  *
  * ```typescript
@@ -6538,8 +5682,6 @@ export function timestampSub(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that subtracts a specified amount of time from a timestamp.
  *
  * ```typescript
@@ -6559,8 +5701,6 @@ export function timestampSub(
 ): FunctionExpr;
 
 /**
- * @beta
- *
  * Creates an expression that subtracts a specified amount of time from a timestamp represented by a field.
  *
  * ```typescript
@@ -6597,8 +5737,6 @@ export function timestampSub(
 }
 
 /**
- * @beta
- *
  * Creates an expression that performs a logical 'AND' operation on multiple filter conditions.
  *
  * ```typescript
@@ -6621,8 +5759,6 @@ export function and(
 }
 
 /**
- * @beta
- *
  * Creates an expression that performs a logical 'OR' operation on multiple filter conditions.
  *
  * ```typescript
@@ -6645,9 +5781,306 @@ export function or(
 }
 
 /**
- * @beta
+ * Creates an expression that returns the value of the base expression raised to the power of the exponent expression.
  *
- * Creates an {@link Ordering} that sorts documents in ascending order based on an expression.
+ * ```typescript
+ * // Raise the value of the 'base' field to the power of the 'exponent' field.
+ * pow(field("base"), field("exponent"));
+ * ```
+ *
+ * @param base The expression to raise to the power of the exponent.
+ * @param exponent The expression to raise the base to the power of.
+ * @return A new `Expr` representing the power operation.
+ */
+export function pow(base: Expr, exponent: Expr): FunctionExpr;
+
+/**
+ * Creates an expression that returns the value of the base expression raised to the power of the exponent.
+ *
+ * ```typescript
+ * // Raise the value of the 'base' field to the power of 2.
+ * pow(field("base"), 2);
+ * ```
+ *
+ * @param base The expression to raise to the power of the exponent.
+ * @param exponent The constant value to raise the base to the power of.
+ * @return A new `Expr` representing the power operation.
+ */
+export function pow(base: Expr, exponent: number): FunctionExpr;
+
+/**
+ * Creates an expression that returns the value of the base field raised to the power of the exponent expression.
+ *
+ * ```typescript
+ * // Raise the value of the 'base' field to the power of the 'exponent' field.
+ * pow("base", field("exponent"));
+ * ```
+ *
+ * @param base The name of the field to raise to the power of the exponent.
+ * @param exponent The expression to raise the base to the power of.
+ * @return A new `Expr` representing the power operation.
+ */
+export function pow(base: string, exponent: Expr): FunctionExpr;
+
+/**
+ * Creates an expression that returns the value of the base field raised to the power of the exponent.
+ *
+ * ```typescript
+ * // Raise the value of the 'base' field to the power of 2.
+ * pow("base", 2);
+ * ```
+ *
+ * @param base The name of the field to raise to the power of the exponent.
+ * @param exponent The constant value to raise the base to the power of.
+ * @return A new `Expr` representing the power operation.
+ */
+export function pow(base: string, exponent: number): FunctionExpr;
+export function pow(
+  base: Expr | string,
+  exponent: Expr | number
+): FunctionExpr {
+  return fieldOrExpression(base).pow(exponent as number);
+}
+
+/**
+ * Creates an expression that rounds a numeric value to the nearest whole number.
+ *
+ * ```typescript
+ * // Round the value of the 'price' field.
+ * round("price");
+ * ```
+ *
+ * @param fieldName The name of the field to round.
+ * @return A new `Expr` representing the rounded value.
+ */
+export function round(fieldName: string): FunctionExpr;
+
+/**
+ * Creates an expression that rounds a numeric value to the nearest whole number.
+ *
+ * ```typescript
+ * // Round the value of the 'price' field.
+ * round(field("price"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which will be rounded.
+ * @return A new `Expr` representing the rounded value.
+ */
+export function round(expression: Expr): FunctionExpr;
+export function round(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).round();
+}
+
+/**
+ * Creates an expression that returns the collection ID from a path.
+ *
+ * ```typescript
+ * // Get the collection ID from a path.
+ * collectionId("__name__");
+ * ```
+ *
+ * @param fieldName The name of the field to get the collection ID from.
+ * @return A new {@code Expr} representing the collectionId operation.
+ */
+export function collectionId(fieldName: string): FunctionExpr;
+
+/**
+ * Creates an expression that returns the collection ID from a path.
+ *
+ * ```typescript
+ * // Get the collection ID from a path.
+ * collectionId(field("__name__"));
+ * ```
+ *
+ * @param expression An expression evaluating to a path, which the collection ID will be extracted from.
+ * @return A new {@code Expr} representing the collectionId operation.
+ */
+export function collectionId(expression: Expr): FunctionExpr;
+export function collectionId(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).collectionId();
+}
+
+/**
+ * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
+ *
+ * ```typescript
+ * // Get the length of the 'name' field.
+ * length("name");
+ *
+ * // Get the number of items in the 'cart' array.
+ * length("cart");
+ * ```
+ *
+ * @param fieldName The name of the field to calculate the length of.
+ * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+ */
+export function length(fieldName: string): FunctionExpr;
+
+/**
+ * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
+ *
+ * ```typescript
+ * // Get the length of the 'name' field.
+ * length(field("name"));
+ *
+ * // Get the number of items in the 'cart' array.
+ * length(field("cart"));
+ * ```
+ *
+ * @param expression An expression evaluating to a string, array, map, vector, or bytes, which the length will be calculated for.
+ * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+ */
+export function length(expression: Expr): FunctionExpr;
+export function length(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).length();
+}
+
+/**
+ * Creates an expression that computes the natural logarithm of a numeric value.
+ *
+ * ```typescript
+ * // Compute the natural logarithm of the 'value' field.
+ * ln("value");
+ * ```
+ *
+ * @param fieldName The name of the field to compute the natural logarithm of.
+ * @return A new `Expr` representing the natural logarithm of the numeric value.
+ */
+export function ln(fieldName: string): FunctionExpr;
+
+/**
+ * Creates an expression that computes the natural logarithm of a numeric value.
+ *
+ * ```typescript
+ * // Compute the natural logarithm of the 'value' field.
+ * ln(field("value"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the natural logarithm will be computed for.
+ * @return A new `Expr` representing the natural logarithm of the numeric value.
+ */
+export function ln(expression: Expr): FunctionExpr;
+export function ln(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).ln();
+}
+
+/**
+ * Creates an expression that computes the logarithm of an expression to a given base.
+ *
+ * ```typescript
+ * // Compute the logarithm of the 'value' field with base 10.
+ * log(field("value"), 10);
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the logarithm will be computed for.
+ * @param base The base of the logarithm.
+ * @return A new {@code Expr} representing the logarithm of the numeric value.
+ */
+export function log(expression: Expr, base: number): FunctionExpr;
+/**
+ * Creates an expression that computes the logarithm of an expression to a given base.
+ *
+ * ```typescript
+ * // Compute the logarithm of the 'value' field with the base in the 'base' field.
+ * log(field("value"), field("base"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the logarithm will be computed for.
+ * @param base The base of the logarithm.
+ * @return A new {@code Expr} representing the logarithm of the numeric value.
+ */
+export function log(expression: Expr, base: Expr): FunctionExpr;
+/**
+ * Creates an expression that computes the logarithm of a field to a given base.
+ *
+ * ```typescript
+ * // Compute the logarithm of the 'value' field with base 10.
+ * log("value", 10);
+ * ```
+ *
+ * @param fieldName The name of the field to compute the logarithm of.
+ * @param base The base of the logarithm.
+ * @return A new {@code Expr} representing the logarithm of the numeric value.
+ */
+export function log(fieldName: string, base: number): FunctionExpr;
+/**
+ * Creates an expression that computes the logarithm of a field to a given base.
+ *
+ * ```typescript
+ * // Compute the logarithm of the 'value' field with the base in the 'base' field.
+ * log("value", field("base"));
+ * ```
+ *
+ * @param fieldName The name of the field to compute the logarithm of.
+ * @param base The base of the logarithm.
+ * @return A new {@code Expr} representing the logarithm of the numeric value.
+ */
+export function log(fieldName: string, base: Expr): FunctionExpr;
+export function log(expr: Expr | string, base: number | Expr): FunctionExpr {
+  return fieldOrExpression(expr).log(valueToDefaultExpr(base));
+}
+
+/**
+ * Creates an expression that computes the square root of a numeric value.
+ *
+ * ```typescript
+ * // Compute the square root of the 'value' field.
+ * sqrt(field("value"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the square root will be computed for.
+ * @return A new {@code Expr} representing the square root of the numeric value.
+ */
+export function sqrt(expression: Expr): FunctionExpr;
+/**
+ * Creates an expression that computes the square root of a numeric value.
+ *
+ * ```typescript
+ * // Compute the square root of the 'value' field.
+ * sqrt("value");
+ * ```
+ *
+ * @param fieldName The name of the field to compute the square root of.
+ * @return A new {@code Expr} representing the square root of the numeric value.
+ */
+export function sqrt(fieldName: string): FunctionExpr;
+export function sqrt(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).sqrt();
+}
+
+/**
+ * Creates an expression that reverses a string.
+ *
+ * ```typescript
+ * // Reverse the value of the 'myString' field.
+ * strReverse(field("myString"));
+ * ```
+ *
+ * @param stringExpression An expression evaluating to a string value, which will be reversed.
+ * @return A new {@code Expr} representing the reversed string.
+ */
+export function strReverse(stringExpression: Expr): FunctionExpr;
+
+/**
+ * Creates an expression that reverses a string value in the specified field.
+ *
+ * ```typescript
+ * // Reverse the value of the 'myString' field.
+ * strReverse("myString");
+ * ```
+ *
+ * @param field The name of the field representing the string to reverse.
+ * @return A new {@code Expr} representing the reversed string.
+ */
+export function strReverse(field: string): FunctionExpr;
+export function strReverse(expr: Expr | string): FunctionExpr {
+  return fieldOrExpression(expr).strReverse();
+}
+
+// TODO(new-expression): Add new top-level expression function definitions above this line
+
+/**
+ * Creates a {@link Field} instance representing the field at the given path.
  *
  * ```typescript
  * // Sort documents by the 'name' field in lowercase in ascending order
@@ -6661,8 +6094,6 @@ export function or(
 export function ascending(expr: Expr): Ordering;
 
 /**
- * @beta
- *
  * Creates an {@link Ordering} that sorts documents in ascending order based on a field.
  *
  * ```typescript
@@ -6680,8 +6111,6 @@ export function ascending(field: Expr | string): Ordering {
 }
 
 /**
- * @beta
- *
  * Creates an {@link Ordering} that sorts documents in descending order based on an expression.
  *
  * ```typescript
@@ -6696,8 +6125,6 @@ export function ascending(field: Expr | string): Ordering {
 export function descending(expr: Expr): Ordering;
 
 /**
- * @beta
- *
  * Creates an {@link Ordering} that sorts documents in descending order based on a field.
  *
  * ```typescript
@@ -6715,8 +6142,6 @@ export function descending(field: Expr | string): Ordering {
 }
 
 /**
- * @beta
- *
  * Represents an ordering criterion for sorting documents in a Firestore pipeline.
  *
  * You create `Ordering` instances using the `ascending` and `descending` helper functions.

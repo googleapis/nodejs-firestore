@@ -68,14 +68,14 @@ export interface Serializable {
  */
 export class Serializer {
   private allowUndefined: boolean;
-  private createReference: (path: string) => DocumentReference;
+  private createDocumentReference: (path: string) => DocumentReference;
   private createInteger: (n: number | string) => number | BigInt;
 
-  constructor(firestore: Firestore) {
+  constructor(private firestore: Firestore) {
     // Instead of storing the `firestore` object, we store just a reference to
     // its `.doc()` method. This avoid a circular reference, which breaks
     // JSON.stringify().
-    this.createReference = path => firestore.doc(path);
+    this.createDocumentReference = path => firestore.doc(path);
     this.createInteger = n =>
       firestore._settings.useBigInt ? BigInt(n) : Number(n);
     this.allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
@@ -340,7 +340,13 @@ export class Serializer {
         const resourcePath = QualifiedResourcePath.fromSlashSeparatedString(
           proto.referenceValue!
         );
-        return this.createReference(resourcePath.relativeName);
+        if (resourcePath.isDocument) {
+          return this.createDocumentReference(resourcePath.relativeName);
+        } else {
+          throw new Error(
+            `The SDK does not currently support decoding referenceValues for collections or partitions. Actual path value: '${proto.referenceValue!}'`
+          );
+        }
       }
       case 'arrayValue': {
         const array: unknown[] = [];

@@ -22,6 +22,7 @@ import './expression';
 import Firestore, {
   CollectionReference,
   DocumentReference,
+  FieldValue,
   Timestamp,
   VectorValue,
 } from '../index';
@@ -58,7 +59,6 @@ import {
   map,
   array,
   Constant,
-  constantVector,
   field,
   Ordering,
   gt,
@@ -140,14 +140,23 @@ export class ExecutionUtil {
     return Date.now() - startTime >= totalTimeout;
   }
 
-  stream(pipeline: Pipeline): NodeJS.ReadableStream {
-    // TODO(pipeline) implement options for stream
-    const structuredPipeline = new StructuredPipeline(pipeline, {}, {});
-    const responseStream = this._stream(structuredPipeline);
+  stream(
+    structuredPipeline: StructuredPipeline,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+  ): NodeJS.ReadableStream {
+    const responseStream = this._stream(
+      structuredPipeline,
+      transactionOrReadTime
+    );
     const transform = new Transform({
       objectMode: true,
-      transform(chunk, encoding, callback) {
-        callback(undefined, chunk.result);
+      transform(chunk: Array<PipelineStreamElement>, encoding, callback) {
+        chunk.forEach(item => {
+          if (item.result) {
+            this.push(item.result);
+          }
+        });
+        callback();
       },
     });
 
@@ -183,9 +192,6 @@ export class ExecutionUtil {
           if (proto.executionTime) {
             output.executionTime = Timestamp.fromProto(proto.executionTime);
           }
-          if (proto.explainStats) {
-            console.log(proto.explainStats.data);
-          }
           callback(undefined, [output]);
         } else {
           let output: PipelineStreamElement[] = proto.results.map(result => {
@@ -203,10 +209,19 @@ export class ExecutionUtil {
                   QualifiedResourcePath.fromSlashSeparatedString(result.name)
                 )
               : undefined;
+
+            if (!result.fields) {
+              logger(
+                '_stream',
+                null,
+                'Unexpected state: `result.fields` was falsey. Using an empty map.'
+              );
+            }
+
             output.result = new PipelineResult(
               this._serializer,
+              result.fields || {},
               ref,
-              result.fields || undefined,
               Timestamp.fromProto(proto.executionTime!),
               result.createTime
                 ? Timestamp.fromProto(result.createTime!)
@@ -573,10 +588,10 @@ export function isOrdering(val: unknown): val is firestore.Pipelines.Ordering {
   );
 }
 
-export function isAggregateWithAlias(
+export function isAliasedAggregate(
   val: unknown
-): val is firestore.Pipelines.AggregateWithAlias {
-  const candidate = val as firestore.Pipelines.AggregateWithAlias;
+): val is firestore.Pipelines.AliasedAggregate {
+  const candidate = val as firestore.Pipelines.AliasedAggregate;
   return (
     isString(candidate.alias) &&
     candidate.aggregate instanceof AggregateFunction
@@ -648,8 +663,12 @@ export function vectorToExpr(
 ): Expr {
   if (value instanceof Expr) {
     return value;
-  } else if (value instanceof VectorValue || Array.isArray(value)) {
-    const result = constantVector(value);
+  } else if (value instanceof VectorValue) {
+    const result = constant(value);
+    result._createdFromLiteral = true;
+    return result;
+  } else if (Array.isArray(value)) {
+    const result = constant(FieldValue.vector(value));
     result._createdFromLiteral = true;
     return result;
   } else {
