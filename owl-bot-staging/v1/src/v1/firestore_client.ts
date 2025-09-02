@@ -1169,7 +1169,7 @@ export class FirestoreClient {
       'x-goog-request-params'
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
-      'collection_id': request.collectionId ?? '',
+      'collection_id': request.collectionId?.toString() ?? '',
     });
     this.initialize().catch(err => {throw err});
     this._log.info('createDocument request %j', request);
@@ -1561,7 +1561,7 @@ export class FirestoreClient {
       'x-goog-request-params'
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
-      'collection_id': request.collectionId ?? '',
+      'collection_id': request.collectionId?.toString() ?? '',
     });
     this.initialize().catch(err => {throw err});
     const wrappedCallback: PaginationCallback<
@@ -1669,7 +1669,7 @@ export class FirestoreClient {
       'x-goog-request-params'
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
-      'collection_id': request.collectionId ?? '',
+      'collection_id': request.collectionId?.toString() ?? '',
     });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
@@ -1768,7 +1768,7 @@ export class FirestoreClient {
       'x-goog-request-params'
     ] = this._gaxModule.routingHeader.fromParams({
       'parent': request.parent ?? '',
-      'collection_id': request.collectionId ?? '',
+      'collection_id': request.collectionId?.toString() ?? '',
     });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
