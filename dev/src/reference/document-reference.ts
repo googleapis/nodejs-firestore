@@ -267,10 +267,6 @@ export class DocumentReference<
         return this.firestore.initializeIfNeeded(tag).then(() => {
           const request: api.IListCollectionIdsRequest = {
             parent: this.formattedName,
-            // Setting `pageSize` to an arbitrarily large value lets the backend cap
-            // the page size (currently to 300). Note that the backend rejects
-            // MAX_INT32 (b/146883794).
-            pageSize: Math.pow(2, 16) - 1,
           };
           return this._firestore
             .request<

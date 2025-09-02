@@ -4,6 +4,37 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.11.3](https://github.com/googleapis/nodejs-firestore/compare/v7.11.2...v7.11.3) (2025-07-09)
+
+
+### Bug Fixes
+
+* Improve performance of the UTF-8 string comparison logic ([#2380](https://github.com/googleapis/nodejs-firestore/issues/2380)) ([bc6a03e](https://github.com/googleapis/nodejs-firestore/commit/bc6a03e2b44e740b32676d7d0bec07feaa509b5b))
+
+## [7.11.2](https://github.com/googleapis/nodejs-firestore/compare/v7.11.1...v7.11.2) (2025-06-19)
+
+
+### Bug Fixes
+
+* Firestore Client caching stub in bad state issue ([#2365](https://github.com/googleapis/nodejs-firestore/issues/2365)) ([04ad0a4](https://github.com/googleapis/nodejs-firestore/commit/04ad0a4c0fb370db8aeae87dc6ab8bd06eafedd4))
+
+## [7.11.1](https://github.com/googleapis/nodejs-firestore/compare/v7.11.0...v7.11.1) (2025-05-02)
+
+
+### Bug Fixes
+
+* Aggregate query readtime bug ([#2331](https://github.com/googleapis/nodejs-firestore/issues/2331)) ([9ac0394](https://github.com/googleapis/nodejs-firestore/commit/9ac0394df78619bf1d6b7907a364342796a4f0fb))
+* Bump default deadline on CreateDatabase and RestoreDatabase to 2 minutes ([#2274](https://github.com/googleapis/nodejs-firestore/issues/2274)) ([d559080](https://github.com/googleapis/nodejs-firestore/commit/d559080a0f436927108ec69c2910af4e8246a8b0))
+* Close default BulkWriter upon terminate. ([#2276](https://github.com/googleapis/nodejs-firestore/issues/2276)) ([1e714a8](https://github.com/googleapis/nodejs-firestore/commit/1e714a8b7952b65872e65533cfe74d303dfabe20))
+* Correctly escape field paths with multiple backslashes or backticks ([#2259](https://github.com/googleapis/nodejs-firestore/issues/2259)) ([#2261](https://github.com/googleapis/nodejs-firestore/issues/2261)) ([7056ba7](https://github.com/googleapis/nodejs-firestore/commit/7056ba76040b9369d86c57838ef938c9d9ef73d8))
+* Do not send page size with auto-paginate. Fixes warnings in listCollections and listDocuments. ([#2336](https://github.com/googleapis/nodejs-firestore/issues/2336)) ([844b4ca](https://github.com/googleapis/nodejs-firestore/commit/844b4ca9c209e649565d122940858409d808baa6))
+* Finalize fixing typings for headers in generator ([#2287](https://github.com/googleapis/nodejs-firestore/issues/2287)) ([c6c85b6](https://github.com/googleapis/nodejs-firestore/commit/c6c85b66a25b56bd23c19285302a740b0ca85d25))
+* Prevent crashes if an inactive stream receives an error. ([#2283](https://github.com/googleapis/nodejs-firestore/issues/2283)) ([f58fe79](https://github.com/googleapis/nodejs-firestore/commit/f58fe791c7afc59087e2555f7208cdb611470d80))
+* Remove unused "long" dependency from firestore proto ([#2324](https://github.com/googleapis/nodejs-firestore/issues/2324)) ([5937b93](https://github.com/googleapis/nodejs-firestore/commit/5937b93aa1aacd2f63bf1678ec569c504cf0b186))
+* Sort document reference by long type id  ([#2257](https://github.com/googleapis/nodejs-firestore/issues/2257)) ([3fd0de9](https://github.com/googleapis/nodejs-firestore/commit/3fd0de93076adfe17aaae9e0a9b732bcae52d594))
+* Sort strings in UTF-8 encoded byte order ([#2275](https://github.com/googleapis/nodejs-firestore/issues/2275)) ([a2950e0](https://github.com/googleapis/nodejs-firestore/commit/a2950e0b6464012f0e6c5703d0d28c2175cd35a2))
+* Use lazy encoding for utf-8 encoded string comparison ([#2299](https://github.com/googleapis/nodejs-firestore/issues/2299)) ([e8777e1](https://github.com/googleapis/nodejs-firestore/commit/e8777e12db41096c3945afd3be7905c1c029493c))
+
 ## [7.11.0](https://github.com/googleapis/nodejs-firestore/compare/v7.10.0...v7.11.0) (2024-12-05)
 
 

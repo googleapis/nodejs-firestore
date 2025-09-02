@@ -783,6 +783,25 @@ describe('CollectionReference class', () => {
     expect(missingDocs.map(doc => doc.id)).to.have.members(['b']);
   });
 
+  it('lists documents (more than the max page size)', async () => {
+    const batch = firestore.batch();
+    const expectedResults = [];
+    for (let i = 0; i < 400; i++) {
+      const docRef = randomCol.doc(`${i}`.padStart(3, '0'));
+      batch.set(docRef, {id: i});
+      expectedResults.push(docRef.id);
+    }
+    await batch.commit();
+
+    const documentRefs = await randomCol.listDocuments();
+
+    const actualDocIds = documentRefs
+      .map(dr => dr.id)
+      .sort((a, b) => a.localeCompare(b));
+
+    expect(actualDocIds).to.deep.equal(expectedResults);
+  });
+
   it('supports withConverter()', async () => {
     const ref = await firestore
       .collection('col')
@@ -1176,11 +1195,13 @@ describe('DocumentReference class', () => {
   });
 
   it('has listCollections() method', () => {
-    const collections = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+    const collections: string[] = [];
     const promises: Array<Promise<{}>> = [];
 
-    for (const collection of collections) {
-      promises.push(randomCol.doc(`doc/${collection}/doc`).create({}));
+    for (let i = 0; i < 400; i++) {
+      const collectionId = i.toString().padStart(3, '0');
+      promises.push(randomCol.doc(`doc/${collectionId}/doc`).create({}));
+      collections.push(collectionId);
     }
 
     return Promise.all(promises)
@@ -5009,6 +5030,26 @@ describe('Aggregation queries', () => {
     });
     return Promise.all(sets);
   }
+
+  it('can run count within a transaction with readtime', async () => {
+    const doc = col.doc();
+    const writeResult: WriteResult = await doc.create({some: 'data'});
+
+    const count = await firestore.runTransaction(t => t.get(col.count()), {
+      readOnly: true,
+      readTime: writeResult.writeTime,
+    });
+    expect(count.data().count).to.equal(1);
+
+    const countBefore = await firestore.runTransaction(
+      t => t.get(col.count()),
+      {
+        readOnly: true,
+        readTime: Timestamp.fromMillis(writeResult.writeTime.toMillis() - 1),
+      }
+    );
+    expect(countBefore.data().count).to.equal(0);
+  });
 
   it('can run count query using aggregate api', async () => {
     const testDocs = {
