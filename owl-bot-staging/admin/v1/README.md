@@ -2,22 +2,20 @@
 [//]: # "The comments you see below are used to generate those parts of the template in later states."
 <img src="https://avatars2.githubusercontent.com/u/2810941?v=3&s=96" alt="Google Cloud Platform logo" title="Google Cloud Platform" align="right" height="96" width="96"/>
 
-[homepage]: https://github.com/googleapis/google-cloud-node/blob/main/packages/google-firestore-admin
-
-# [Admin: Nodejs Client][homepage]
+# [Cloud Firestore API: Nodejs Client][homepage]
 
 [//]: # "releaseLevel"
 
 [![npm version](https://img.shields.io/npm/v/@google-cloud/firestore-admin.svg)](https://www.npmjs.org/package/@google-cloud/firestore-admin)
 
-Admin client for Node.js
+Cloud Firestore API client for Node.js
 
 [//]: # "partials.introduction"
 
 A comprehensive list of changes in each version may be found in
-[the CHANGELOG]([homepage]/CHANGELOG.md).
+[the CHANGELOG][homepage_changelog].
 
-* [Admin Nodejs Client API Reference](https://cloud.google.com/nodejs/docs/reference/admin/latest)
+* [Cloud Firestore API Nodejs Client API Reference](https://cloud.google.com/nodejs/docs/reference/admin/latest)
 
 
 Read more about the client libraries for Cloud APIs, including the older
@@ -40,7 +38,7 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 
 1.  [Select or create a Cloud Platform project][projects].
 1.  [Enable billing for your project][billing].
-1.  [Enable the Admin API][enable_api].
+1.  [Enable the Cloud Firestore API API][enable_api].
 1.  [Set up authentication][auth] so you can access the
     API from your local workstation.
 ### Installing the client library
@@ -53,7 +51,7 @@ npm install @google-cloud/firestore-admin
 
 ## Samples
 
-Samples are in the [`samples/`]([homepage]/samples) directory. Each sample's `README.md` has instructions for running its sample.
+Samples are in the [`samples/`][homepage_samples] directory. Each sample's `README.md` has instructions for running its sample.
 
 [//]: # "samples"
 
@@ -105,3 +103,6 @@ See [LICENSE](https://github.com/googleapis/google-cloud-node/blob/main/packages
 [billing]: https://support.google.com/cloud/answer/6293499#enable-billing
 [enable_api]: https://console.cloud.google.com/flows/enableapi?apiid=firestore.googleapis.com
 [auth]: https://cloud.google.com/docs/authentication/external/set-up-adc-local
+[homepage_samples]: https://github.com/googleapis/google-cloud-node/blob/main/packages/google-firestore-admin/samples
+[homepage_changelog]: https://github.com/googleapis/google-cloud-node/blob/main/packages/google-firestore-admin/CHANGELOG.md
+[homepage]: https://github.com/googleapis/google-cloud-node/blob/main/packages/google-firestore-admin
