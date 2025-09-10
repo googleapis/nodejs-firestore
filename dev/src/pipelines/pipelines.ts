@@ -245,14 +245,24 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
   }
 
   /**
+   * Convert the given VectorQuery into an equivalent Pipeline.
+   *
+   * @param query A VectorQuery to be converted into a Pipeline.
+   *
+   * @throws {@FirestoreError} Thrown if the provided VectorQuer targets a different project or database than the Pipeline.
+   */
+  createFrom(query: firestore.VectorQuery): Pipeline;
+
+  /**
    * Convert the given Query into an equivalent Pipeline.
    *
    * @param query A Query to be converted into a Pipeline.
    *
-   * @throws {@FirestoreError} Thrown if any of the provided DocumentReferences target a different project or database than the pipeline.
+   * @throws {@FirestoreError} Thrown if the provided VectorQuer targets a different project or database than the Pipeline.
    */
-  createFrom(query: firestore.Query): Pipeline {
-    return (query as unknown as Query)._pipeline();
+  createFrom(query: firestore.Query): Pipeline;
+  createFrom(query: firestore.Query | firestore.VectorQuery): Pipeline {
+    return (query as unknown as {_pipeline(): Pipeline})._pipeline();
   }
 
   _validateReference(

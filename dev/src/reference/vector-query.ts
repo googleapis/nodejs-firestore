@@ -140,7 +140,11 @@ export class VectorQuery<
     return result;
   }
 
-  toPipeline(): Pipeline {
+  /**
+   * @private
+   * @internal
+   */
+  _toPipeline(): Pipeline {
     const options: firestore.Pipelines.FindNearestStageOptions = {
       field: field(this._options.vectorField),
       vectorValue: this._options.queryVector,

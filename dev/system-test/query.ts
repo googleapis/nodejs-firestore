@@ -128,7 +128,7 @@ describe('Query class', () => {
     query: VectorQuery
   ): Promise<VectorQuerySnapshot> {
     const queryResults = await query.get();
-    const pipeline = query.toPipeline();
+    const pipeline = query.query.firestore.pipeline().createFrom(query);
     const pipelineResults = await pipeline.execute();
 
     expect(pipelineResults.results.map(r => r._fieldsProto)).to.deep.equal(

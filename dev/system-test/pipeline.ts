@@ -609,7 +609,7 @@ describe.only('Pipeline class', () => {
         .sort(ascending('__name__'));
       const snapshot = await ppl.execute({
         explainOptions: {
-          outputFormat: 'text',
+          mode: undefined,
         },
       });
       expect(snapshot.explainStats).to.be.undefined;
