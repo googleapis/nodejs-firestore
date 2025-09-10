@@ -24,6 +24,7 @@ import Firestore, {
 import {validateFieldPath} from '../path';
 import {
   ExecutionUtil,
+  aliasedAggregateToMap,
   fieldOrExpression,
   isAliasedAggregate,
   isBooleanExpr,
@@ -35,6 +36,7 @@ import {
   isPipeline,
   isSelectable,
   isString,
+  selectablesToMap,
   toField,
   vectorToExpr,
 } from './pipeline-util';
@@ -1621,43 +1623,6 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     }
     return val;
   }
-}
-
-function selectablesToMap(
-  selectables: (firestore.Pipelines.Selectable | string)[]
-): Map<string, Expression> {
-  const result = new Map<string, Expression>();
-  for (const selectable of selectables) {
-    if (typeof selectable === 'string') {
-      result.set(
-        selectable as string,
-        new Field(FieldPath.fromArgument(selectable))
-      );
-    } else if (selectable instanceof Field) {
-      result.set((selectable as Field).fieldName, selectable);
-    } else if (selectable instanceof AliasedExpression) {
-      const expr = selectable as AliasedExpression;
-      result.set(expr._alias, expr._expr as unknown as Expression);
-    } else {
-      throw new Error('unexpected selectable: ' + JSON.stringify(selectable));
-    }
-  }
-  return result;
-}
-
-function aliasedAggregateToMap(
-  aliasedAggregatees: firestore.Pipelines.AliasedAggregate[]
-): Map<string, AggregateFunction> {
-  return aliasedAggregatees.reduce(
-    (
-      map: Map<string, AggregateFunction>,
-      selectable: firestore.Pipelines.AliasedAggregate
-    ) => {
-      map.set(selectable._alias, selectable._aggregate as AggregateFunction);
-      return map;
-    },
-    new Map() as Map<string, AggregateFunction>
-  );
 }
 
 /**

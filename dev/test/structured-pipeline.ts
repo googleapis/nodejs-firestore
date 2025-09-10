@@ -109,8 +109,6 @@ describe('StructuredPipeline', () => {
 
     const proto = structuredPipeline._toProto(new Serializer(db!));
 
-    console.log(JSON.stringify(proto));
-
     expect(proto).to.deep.equal({
       pipeline: {},
       options: {
