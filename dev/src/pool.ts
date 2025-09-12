@@ -34,13 +34,13 @@ export const CLIENT_TERMINATED_ERROR_MSG =
  * @private
  * @internal
  */
-export class ClientPool<T extends {}> {
+export class ClientPool<T extends object> {
   private grpcEnabled = false;
 
   /**
    * Stores each active clients and how many operations it has outstanding.
    */
-  private activeClients = new Map<
+  private readonly activeClients = new Map<
     T,
     {activeRequestCount: number; grpcEnabled: boolean}
   >();
@@ -50,7 +50,7 @@ export class ClientPool<T extends {}> {
    * https://github.com/googleapis/nodejs-firestore/issues/1023) and should
    * no longer be used.
    */
-  private failedClients = new Set<T>();
+  private readonly failedClients = new Set<T>();
 
   /**
    * A mapping from "client" objects to their corresponding IDs. These IDs have
@@ -76,7 +76,7 @@ export class ClientPool<T extends {}> {
    * Deferred promise that is resolved when there are no active operations on
    * the client pool after terminate() has been called.
    */
-  private terminateDeferred = new Deferred<void>();
+  private readonly terminateDeferred = new Deferred<void>();
 
   /**
    * @param concurrentOperationLimit The number of operations that each client
@@ -95,12 +95,11 @@ export class ClientPool<T extends {}> {
     private readonly clientDestructor: (client: T) => Promise<void> = () =>
       Promise.resolve()
   ) {
-    const clientPool = this;
-    this.lazyLogStringForAllClientIds = {
-      toString(): string {
-        return clientPool.logStringForAllClientIds();
-      },
-    };
+    this.lazyLogStringForAllClientIds = new LazyLogStringForAllClientIds({
+      activeClients: this.activeClients,
+      failedClients: this.failedClients,
+      clientIdByClient: this.clientIdByClient,
+    });
   }
 
   /**
@@ -207,25 +206,6 @@ export class ClientPool<T extends {}> {
         this.lazyLogStringForAllClientIds
       );
     }
-  }
-
-  private logStringFromClientIds(clients: Iterable<T>): string {
-    const clientIds: string[] = [];
-    for (const client of clients) {
-      clientIds.push(this.clientIdByClient.get(client) ?? '<unknown>');
-    }
-    return clientIds.sort().join(', ');
-  }
-
-  private logStringForAllClientIds(): string {
-    return (
-      `${this.activeClients.size} active clients: {` +
-      this.logStringFromClientIds(this.activeClients.keys()) +
-      '}, ' +
-      `${this.failedClients.size} failed clients: {` +
-      this.logStringFromClientIds(this.failedClients) +
-      '}'
-    );
   }
 
   /**
@@ -365,5 +345,45 @@ export class ClientPool<T extends {}> {
       this.activeClients.delete(client);
       await this.clientDestructor(client);
     }
+  }
+}
+
+/**
+ * Helper class that, when logged as a direct argument of `logger()`, will
+ * lazily evaluate to a long string that contains all IDs of both active and
+ * failed clients.
+ */
+class LazyLogStringForAllClientIds<T extends object> {
+  private readonly activeClients: Map<T, unknown>;
+  private readonly failedClients: Set<T>;
+  private readonly clientIdByClient: WeakMap<T, string>;
+
+  constructor(config: {
+    activeClients: Map<T, unknown>;
+    failedClients: Set<T>;
+    clientIdByClient: WeakMap<T, string>;
+  }) {
+    this.activeClients = config.activeClients;
+    this.failedClients = config.failedClients;
+    this.clientIdByClient = config.clientIdByClient;
+  }
+
+  toString(): string {
+    return (
+      `${this.activeClients.size} active clients: {` +
+      this.logStringFromClientIds(this.activeClients.keys()) +
+      '}, ' +
+      `${this.failedClients.size} failed clients: {` +
+      this.logStringFromClientIds(this.failedClients) +
+      '}'
+    );
+  }
+
+  private logStringFromClientIds(clients: Iterable<T>): string {
+    const clientIds: string[] = [];
+    for (const client of clients) {
+      clientIds.push(this.clientIdByClient.get(client) ?? '<unknown>');
+    }
+    return clientIds.sort().join(', ');
   }
 }

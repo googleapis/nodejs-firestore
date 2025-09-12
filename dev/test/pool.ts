@@ -34,7 +34,7 @@ function deferredPromises(count: number): Array<Deferred<void>> {
   return deferred;
 }
 
-function assertOpCount<T extends {}>(
+function assertOpCount<T extends object>(
   pool: ClientPool<T>,
   grpcClientOpCount: number,
   restClientOpCount: number
