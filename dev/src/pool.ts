@@ -380,10 +380,9 @@ class LazyLogStringForAllClientIds<T extends object> {
   }
 
   private logStringFromClientIds(clients: Iterable<T>): string {
-    const clientIds: string[] = [];
-    for (const client of clients) {
-      clientIds.push(this.clientIdByClient.get(client) ?? '<unknown>');
-    }
-    return clientIds.sort().join(', ');
+    return Array.from(clients)
+      .map(client => this.clientIdByClient.get(client) ?? '<unknown>')
+      .sort()
+      .join(', ');
   }
 }
