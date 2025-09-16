@@ -62,9 +62,6 @@
     "prelint": "cd samples; npm link ../; npm install",
     "precompile": "gts clean"
   },
-  "overrides": {
-    "@opentelemetry/sdk-trace-base": "^2.0.0"
-  },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
     "fast-deep-equal": "^3.1.3",
@@ -74,7 +71,7 @@
   },
   "devDependencies": {
     "@google-cloud/cloud-rad": "^0.4.10",
-    "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.4.1",
+    "@google-cloud/opentelemetry-cloud-trace-exporter": "^3.0.0",
     "@google-cloud/promisify": "^5.0.0",
     "@google-cloud/trace-agent": "^8.0.0",
     "@googleapis/cloudtrace": "^3.0.1",
