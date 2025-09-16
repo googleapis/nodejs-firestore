@@ -34,7 +34,7 @@ function deferredPromises(count: number): Array<Deferred<void>> {
   return deferred;
 }
 
-function assertOpCount<T>(
+function assertOpCount<T extends object>(
   pool: ClientPool<T>,
   grpcClientOpCount: number,
   restClientOpCount: number,
@@ -372,8 +372,8 @@ describe('Client pool', () => {
 
   it('bin packs operations', async () => {
     let clientCount = 0;
-    const clientPool = new ClientPool<number>(2, 0, () => {
-      return ++clientCount;
+    const clientPool = new ClientPool<{count: number}>(2, 0, () => {
+      return {count: ++clientCount};
     });
 
     expect(clientPool.size).to.equal(0);
@@ -381,24 +381,24 @@ describe('Client pool', () => {
     // Create 5 operations, which should schedule 2 operations on the first
     // client, 2 on the second and 1 on the third.
     const operationPromises = deferredPromises(7);
-    void clientPool.run(REQUEST_TAG, USE_REST, client => {
-      expect(client).to.be.equal(1);
+    clientPool.run(REQUEST_TAG, USE_REST, client => {
+      expect(client.count).to.be.equal(1);
       return operationPromises[0].promise;
     });
-    void clientPool.run(REQUEST_TAG, USE_REST, client => {
-      expect(client).to.be.equal(1);
+    clientPool.run(REQUEST_TAG, USE_REST, client => {
+      expect(client.count).to.be.equal(1);
       return operationPromises[1].promise;
     });
     const thirdOperation = clientPool.run(REQUEST_TAG, USE_REST, client => {
-      expect(client).to.be.equal(2);
+      expect(client.count).to.be.equal(2);
       return operationPromises[2].promise;
     });
-    void clientPool.run(REQUEST_TAG, USE_REST, client => {
-      expect(client).to.be.equal(2);
+    clientPool.run(REQUEST_TAG, USE_REST, client => {
+      expect(client.count).to.be.equal(2);
       return operationPromises[3].promise;
     });
-    void clientPool.run(REQUEST_TAG, USE_REST, client => {
-      expect(client).to.be.equal(3);
+    clientPool.run(REQUEST_TAG, USE_REST, client => {
+      expect(client.count).to.be.equal(3);
       return operationPromises[4].promise;
     });
 
@@ -408,8 +408,8 @@ describe('Client pool', () => {
 
     // A newly scheduled operation should use the first client that has a free
     // slot.
-    void clientPool.run(REQUEST_TAG, USE_REST, async client => {
-      expect(client).to.be.equal(2);
+    clientPool.run(REQUEST_TAG, USE_REST, async client => {
+      expect(client.count).to.be.equal(2);
     });
   });
 

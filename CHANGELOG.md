@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.11.4](https://github.com/googleapis/nodejs-firestore/compare/v7.11.3...v7.11.4) (2025-09-16)
+
+
+### Bug Fixes
+
+* Improve debug logging for the internal client pool. Added client IDs to debug log statements for client management. ([99918f1](https://github.com/googleapis/nodejs-firestore/commit/99918f1794adee706c4f2685cd3f8aea6dff895e))
+
 ## [7.11.3](https://github.com/googleapis/nodejs-firestore/compare/v7.11.2...v7.11.3) (2025-07-09)
 
 

@@ -18,7 +18,7 @@ import {GoogleError} from 'google-gax';
 import * as assert from 'assert';
 
 import {logger} from './logger';
-import {Deferred} from './util';
+import {Deferred, requestTag as generateClientId} from './util';
 
 export const CLIENT_TERMINATED_ERROR_MSG =
   'The client has already been terminated';
@@ -34,13 +34,13 @@ export const CLIENT_TERMINATED_ERROR_MSG =
  * @private
  * @internal
  */
-export class ClientPool<T> {
+export class ClientPool<T extends object> {
   private grpcEnabled = false;
 
   /**
    * Stores each active clients and how many operations it has outstanding.
    */
-  private activeClients = new Map<
+  private readonly activeClients = new Map<
     T,
     {activeRequestCount: number; grpcEnabled: boolean}
   >();
@@ -50,7 +50,21 @@ export class ClientPool<T> {
    * https://github.com/googleapis/nodejs-firestore/issues/1023) and should
    * no longer be used.
    */
-  private failedClients = new Set<T>();
+  private readonly failedClients = new Set<T>();
+
+  /**
+   * A mapping from "client" objects to their corresponding IDs. These IDs have
+   * no semantic meaning but are used for logging to enable tracing the events
+   * of a particular client over time (such as creating, acquiring, and
+   * releasing).
+   */
+  private readonly clientIdByClient = new WeakMap<T, string>();
+
+  /**
+   * An object that can be specified to `logger()` to lazily calculate a long
+   * log message that includes all client IDs of active and pending clients.
+   */
+  private readonly lazyLogStringForAllClientIds: unknown;
 
   /**
    * Whether the Firestore instance has been terminated. Once terminated, the
@@ -62,7 +76,7 @@ export class ClientPool<T> {
    * Deferred promise that is resolved when there are no active operations on
    * the client pool after terminate() has been called.
    */
-  private terminateDeferred = new Deferred<void>();
+  private readonly terminateDeferred = new Deferred<void>();
 
   /**
    * @param concurrentOperationLimit The number of operations that each client
@@ -79,8 +93,14 @@ export class ClientPool<T> {
     private readonly maxIdleClients: number,
     private readonly clientFactory: (requiresGrpc: boolean) => T,
     private readonly clientDestructor: (client: T) => Promise<void> = () =>
-      Promise.resolve(),
-  ) {}
+      Promise.resolve()
+  ) {
+    this.lazyLogStringForAllClientIds = new LazyLogStringForAllClientIds({
+      activeClients: this.activeClients,
+      failedClients: this.failedClients,
+      clientIdByClient: this.clientIdByClient,
+    });
+  }
 
   /**
    * Returns an already existing client if it has less than the maximum number
@@ -115,20 +135,25 @@ export class ClientPool<T> {
     }
 
     if (selectedClient) {
+      const selectedClientId = this.clientIdByClient.get(selectedClient);
       logger(
         'ClientPool.acquire',
         requestTag,
-        'Re-using existing client with %s remaining operations',
-        this.concurrentOperationLimit - selectedClientRequestCount,
+        'Re-using existing client [%s] with %s remaining operations',
+        selectedClientId,
+        this.concurrentOperationLimit - selectedClientRequestCount
       );
     } else {
+      const newClientId = 'cli' + generateClientId();
       logger(
         'ClientPool.acquire',
         requestTag,
-        'Creating a new client (requiresGrpc: %s)',
-        requiresGrpc,
+        'Creating a new client [%s] (requiresGrpc: %s)',
+        newClientId,
+        requiresGrpc
       );
       selectedClient = this.clientFactory(requiresGrpc);
+      this.clientIdByClient.set(selectedClient, newClientId);
       selectedClientRequestCount = 0;
       assert(
         !this.activeClients.has(selectedClient),
@@ -162,10 +187,24 @@ export class ClientPool<T> {
     }
 
     if (this.shouldGarbageCollectClient(client)) {
+      const clientId = this.clientIdByClient.get(client);
+      logger(
+        'ClientPool.release',
+        requestTag,
+        'Garbage collecting client [%s] (%s)',
+        clientId,
+        this.lazyLogStringForAllClientIds
+      );
       this.activeClients.delete(client);
       this.failedClients.delete(client);
       await this.clientDestructor(client);
-      logger('ClientPool.release', requestTag, 'Garbage collected 1 client');
+      logger(
+        'ClientPool.release',
+        requestTag,
+        'Garbage collected client [%s] (%s)',
+        clientId,
+        this.lazyLogStringForAllClientIds
+      );
     }
   }
 
@@ -296,8 +335,9 @@ export class ClientPool<T> {
       logger(
         'ClientPool.terminate',
         /* requestTag= */ null,
-        'Waiting for %s pending operations to complete before terminating',
+        'Waiting for %s pending operations to complete before terminating (%s)',
         this.opCount,
+        this.lazyLogStringForAllClientIds
       );
       await this.terminateDeferred.promise;
     }
@@ -305,5 +345,44 @@ export class ClientPool<T> {
       this.activeClients.delete(client);
       await this.clientDestructor(client);
     }
+  }
+}
+
+/**
+ * Helper class that, when logged as a direct argument of `logger()`, will
+ * lazily evaluate to a long string that contains all IDs of both active and
+ * failed clients.
+ */
+class LazyLogStringForAllClientIds<T extends object> {
+  private readonly activeClients: Map<T, unknown>;
+  private readonly failedClients: Set<T>;
+  private readonly clientIdByClient: WeakMap<T, string>;
+
+  constructor(config: {
+    activeClients: Map<T, unknown>;
+    failedClients: Set<T>;
+    clientIdByClient: WeakMap<T, string>;
+  }) {
+    this.activeClients = config.activeClients;
+    this.failedClients = config.failedClients;
+    this.clientIdByClient = config.clientIdByClient;
+  }
+
+  toString(): string {
+    return (
+      `${this.activeClients.size} active clients: {` +
+      this.logStringFromClientIds(this.activeClients.keys()) +
+      '}, ' +
+      `${this.failedClients.size} failed clients: {` +
+      this.logStringFromClientIds(this.failedClients) +
+      '}'
+    );
+  }
+
+  private logStringFromClientIds(clients: Iterable<T>): string {
+    return Array.from(clients)
+      .map(client => this.clientIdByClient.get(client) ?? '<unknown>')
+      .sort()
+      .join(', ');
   }
 }
