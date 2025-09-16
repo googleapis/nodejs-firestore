@@ -381,11 +381,11 @@ describe('Client pool', () => {
     // Create 5 operations, which should schedule 2 operations on the first
     // client, 2 on the second and 1 on the third.
     const operationPromises = deferredPromises(7);
-    clientPool.run(REQUEST_TAG, USE_REST, client => {
+    void clientPool.run(REQUEST_TAG, USE_REST, client => {
       expect(client.count).to.be.equal(1);
       return operationPromises[0].promise;
     });
-    clientPool.run(REQUEST_TAG, USE_REST, client => {
+    void clientPool.run(REQUEST_TAG, USE_REST, client => {
       expect(client.count).to.be.equal(1);
       return operationPromises[1].promise;
     });
@@ -393,11 +393,11 @@ describe('Client pool', () => {
       expect(client.count).to.be.equal(2);
       return operationPromises[2].promise;
     });
-    clientPool.run(REQUEST_TAG, USE_REST, client => {
+    void clientPool.run(REQUEST_TAG, USE_REST, client => {
       expect(client.count).to.be.equal(2);
       return operationPromises[3].promise;
     });
-    clientPool.run(REQUEST_TAG, USE_REST, client => {
+    void clientPool.run(REQUEST_TAG, USE_REST, client => {
       expect(client.count).to.be.equal(3);
       return operationPromises[4].promise;
     });
@@ -408,7 +408,7 @@ describe('Client pool', () => {
 
     // A newly scheduled operation should use the first client that has a free
     // slot.
-    clientPool.run(REQUEST_TAG, USE_REST, async client => {
+    void clientPool.run(REQUEST_TAG, USE_REST, async client => {
       expect(client.count).to.be.equal(2);
     });
   });

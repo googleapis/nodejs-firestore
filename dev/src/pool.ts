@@ -93,7 +93,7 @@ export class ClientPool<T extends object> {
     private readonly maxIdleClients: number,
     private readonly clientFactory: (requiresGrpc: boolean) => T,
     private readonly clientDestructor: (client: T) => Promise<void> = () =>
-      Promise.resolve()
+      Promise.resolve(),
   ) {
     this.lazyLogStringForAllClientIds = new LazyLogStringForAllClientIds({
       activeClients: this.activeClients,
@@ -141,7 +141,7 @@ export class ClientPool<T extends object> {
         requestTag,
         'Re-using existing client [%s] with %s remaining operations',
         selectedClientId,
-        this.concurrentOperationLimit - selectedClientRequestCount
+        this.concurrentOperationLimit - selectedClientRequestCount,
       );
     } else {
       const newClientId = 'cli' + generateClientId();
@@ -150,7 +150,7 @@ export class ClientPool<T extends object> {
         requestTag,
         'Creating a new client [%s] (requiresGrpc: %s)',
         newClientId,
-        requiresGrpc
+        requiresGrpc,
       );
       selectedClient = this.clientFactory(requiresGrpc);
       this.clientIdByClient.set(selectedClient, newClientId);
@@ -193,7 +193,7 @@ export class ClientPool<T extends object> {
         requestTag,
         'Garbage collecting client [%s] (%s)',
         clientId,
-        this.lazyLogStringForAllClientIds
+        this.lazyLogStringForAllClientIds,
       );
       this.activeClients.delete(client);
       this.failedClients.delete(client);
@@ -203,7 +203,7 @@ export class ClientPool<T extends object> {
         requestTag,
         'Garbage collected client [%s] (%s)',
         clientId,
-        this.lazyLogStringForAllClientIds
+        this.lazyLogStringForAllClientIds,
       );
     }
   }
@@ -337,7 +337,7 @@ export class ClientPool<T extends object> {
         /* requestTag= */ null,
         'Waiting for %s pending operations to complete before terminating (%s)',
         this.opCount,
-        this.lazyLogStringForAllClientIds
+        this.lazyLogStringForAllClientIds,
       );
       await this.terminateDeferred.promise;
     }
