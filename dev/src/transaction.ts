@@ -915,6 +915,7 @@ function isRetryableTransactionError(error: GoogleError): boolean {
     // This list is based on https://github.com/firebase/firebase-js-sdk/blob/master/packages/firestore/src/core/transaction_runner.ts#L112
     switch (error.code as number) {
       case StatusCode.ABORTED:
+      case 409: // GAXIOS may now return HTTP 409 instead of Aborted
       case StatusCode.CANCELLED:
       case StatusCode.UNKNOWN:
       case StatusCode.DEADLINE_EXCEEDED:
@@ -946,7 +947,10 @@ async function maybeBackoff(
   backoff: ExponentialBackoff,
   error?: GoogleError,
 ): Promise<void> {
-  if ((error?.code as number | undefined) === StatusCode.RESOURCE_EXHAUSTED) {
+  if (
+    (error?.code as number | undefined) === StatusCode.RESOURCE_EXHAUSTED ||
+    (error?.code as number | undefined) === 409
+  ) {
     backoff.resetToMax();
   }
   await backoff.backoffAndWait();
