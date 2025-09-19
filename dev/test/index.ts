@@ -51,7 +51,7 @@ const DEFAULT_SETTINGS = {
 };
 
 // Change the argument to 'console.log' to enable debug output.
-Firestore.setLogFunction(null);
+Firestore.setLogFunction(console.log);
 
 const bytesData = Buffer.from('AQI=', 'base64');
 
