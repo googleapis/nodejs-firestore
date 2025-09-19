@@ -235,32 +235,29 @@ export class ClientPool<T extends object> {
 
     if (clientMetadata.activeRequestCount !== 0) {
       // Don't garbage collect clients that have active requests.
-      return {
-        name: 'ClientHasActiveRequests',
+      return new ClientHasActiveRequests({
         shouldGarbageCollectClient: false,
         clientActiveRequestCount: clientMetadata.activeRequestCount,
-      };
+      });
     }
 
     if (this.grpcEnabled !== clientMetadata.grpcEnabled) {
       // We are transitioning to GRPC. Garbage collect REST clients.
-      return {
-        name: 'PoolIsTransitioningToGrpc',
+      return new PoolIsTransitioningToGrpc({
         shouldGarbageCollectClient: true,
         clientActiveRequestCount: clientMetadata.activeRequestCount,
         poolGrpcEnabled: this.grpcEnabled,
         clientGrpcEnabled: clientMetadata.grpcEnabled,
-      };
+      });
     }
 
     // Idle clients that have received RST_STREAM errors are always garbage
     // collected.
     if (this.failedClients.has(client)) {
-      return {
-        name: 'ClientIsFailed',
+      return new ClientIsFailed({
         shouldGarbageCollectClient: true,
         clientActiveRequestCount: clientMetadata.activeRequestCount,
-      };
+      });
     }
 
     // Otherwise, only garbage collect if we have too much idle capacity (e.g.
@@ -273,15 +270,14 @@ export class ClientPool<T extends object> {
 
     const maxIdleCapacityCount =
       this.maxIdleClients * this.concurrentOperationLimit;
-    return {
-      name: 'IdleCapacity',
+    return new IdleCapacity({
       shouldGarbageCollectClient: idleCapacityCount > maxIdleCapacityCount,
       clientActiveRequestCount: clientMetadata.activeRequestCount,
       idleCapacityCount: idleCapacityCount,
       maxIdleCapacityCount: maxIdleCapacityCount,
       maxIdleClients: this.maxIdleClients,
       concurrentOperationLimit: this.concurrentOperationLimit,
-    };
+    });
   }
 
   /**
@@ -427,40 +423,103 @@ class LazyLogStringForAllClientIds<T extends object> {
 }
 
 /**
- * The declaration of return types from ClientPool.shouldGarbageCollectClient().
+ * Minimum data to be included in the objects returned from
+ * ClientPool.shouldGarbageCollectClient().
  */
-// Since this namespace is just internal for this file to group related
-// interfaces, the eslint warning can be ignored IMO.
-// eslint-disable-next-line @typescript-eslint/no-namespace
-declare namespace ShouldGarbageCollectClientResults {
-  interface ClientHasActiveRequests {
-    name: 'ClientHasActiveRequests';
+abstract class BaseShouldGarbageCollectClientResult {
+  abstract readonly name: string;
+  abstract readonly shouldGarbageCollectClient: boolean;
+  abstract readonly clientActiveRequestCount: number;
+
+  /**
+   * Return a terse, one-line string representation. This makes it easy to
+   * grep through log output to find the logged values.
+   */
+  toString(): string {
+    const propertyStrings: string[] = [];
+    for (const propertyName of Object.getOwnPropertyNames(this)) {
+      const propertyValue = this[propertyName as keyof typeof this];
+      propertyStrings.push(`${propertyName}=${propertyValue}`);
+    }
+    return '{' + propertyStrings.join(', ') + '}';
+  }
+}
+
+class ClientHasActiveRequests extends BaseShouldGarbageCollectClientResult {
+  override readonly name = 'ClientHasActiveRequests' as const;
+  override readonly shouldGarbageCollectClient: false;
+  override readonly clientActiveRequestCount: number;
+
+  constructor(args: {
     shouldGarbageCollectClient: false;
     clientActiveRequestCount: number;
+  }) {
+    super();
+    this.shouldGarbageCollectClient = args.shouldGarbageCollectClient;
+    this.clientActiveRequestCount = args.clientActiveRequestCount;
   }
+}
 
-  interface PoolIsTransitioningToGrpc {
-    name: 'PoolIsTransitioningToGrpc';
+class PoolIsTransitioningToGrpc extends BaseShouldGarbageCollectClientResult {
+  override readonly name = 'PoolIsTransitioningToGrpc' as const;
+  override readonly shouldGarbageCollectClient: true;
+  override readonly clientActiveRequestCount: 0;
+  readonly poolGrpcEnabled: boolean;
+  readonly clientGrpcEnabled: boolean;
+
+  constructor(args: {
     shouldGarbageCollectClient: true;
     clientActiveRequestCount: 0;
     poolGrpcEnabled: boolean;
     clientGrpcEnabled: boolean;
+  }) {
+    super();
+    this.shouldGarbageCollectClient = args.shouldGarbageCollectClient;
+    this.clientActiveRequestCount = args.clientActiveRequestCount;
+    this.poolGrpcEnabled = args.poolGrpcEnabled;
+    this.clientGrpcEnabled = args.clientGrpcEnabled;
   }
+}
 
-  interface ClientIsFailed {
-    name: 'ClientIsFailed';
+class ClientIsFailed extends BaseShouldGarbageCollectClientResult {
+  override readonly name = 'ClientIsFailed' as const;
+  override readonly shouldGarbageCollectClient: true;
+  override readonly clientActiveRequestCount: 0;
+
+  constructor(args: {
     shouldGarbageCollectClient: true;
     clientActiveRequestCount: 0;
+  }) {
+    super();
+    this.shouldGarbageCollectClient = args.shouldGarbageCollectClient;
+    this.clientActiveRequestCount = args.clientActiveRequestCount;
   }
+}
 
-  interface IdleCapacity {
-    name: 'IdleCapacity';
+class IdleCapacity extends BaseShouldGarbageCollectClientResult {
+  override readonly name = 'IdleCapacity' as const;
+  override readonly shouldGarbageCollectClient: boolean;
+  override readonly clientActiveRequestCount: 0;
+  readonly idleCapacityCount: number;
+  readonly maxIdleCapacityCount: number;
+  readonly maxIdleClients: number;
+  readonly concurrentOperationLimit: number;
+
+  constructor(args: {
     shouldGarbageCollectClient: boolean;
     clientActiveRequestCount: 0;
     idleCapacityCount: number;
     maxIdleCapacityCount: number;
     maxIdleClients: number;
     concurrentOperationLimit: number;
+  }) {
+    super();
+    this.shouldGarbageCollectClient = args.shouldGarbageCollectClient;
+    this.clientActiveRequestCount = args.clientActiveRequestCount;
+    this.idleCapacityCount = args.idleCapacityCount;
+    this.maxIdleCapacityCount = args.maxIdleCapacityCount;
+    this.maxIdleClients = args.maxIdleClients;
+    this.concurrentOperationLimit = args.concurrentOperationLimit;
   }
 }
 
@@ -468,7 +527,7 @@ declare namespace ShouldGarbageCollectClientResults {
  * The set of return types from ClientPool.shouldGarbageCollectClient().
  */
 type ShouldGarbageCollectClientResult =
-  | ShouldGarbageCollectClientResults.ClientHasActiveRequests
-  | ShouldGarbageCollectClientResults.PoolIsTransitioningToGrpc
-  | ShouldGarbageCollectClientResults.ClientIsFailed
-  | ShouldGarbageCollectClientResults.IdleCapacity;
+  | ClientHasActiveRequests
+  | PoolIsTransitioningToGrpc
+  | ClientIsFailed
+  | IdleCapacity;
