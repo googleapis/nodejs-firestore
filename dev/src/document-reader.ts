@@ -65,7 +65,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
     private readonly transactionOrReadTime?:
       | Uint8Array
       | api.ITransactionOptions
-      | Timestamp
+      | Timestamp,
   ) {
     for (const docRef of this.allDocuments) {
       this.outstandingDocuments.add(docRef.formattedName);
@@ -79,7 +79,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
    * @param requestTag A unique client-assigned identifier for this request.
    */
   async get(
-    requestTag: string
+    requestTag: string,
   ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
     const {result} = await this._get(requestTag);
     return result;
@@ -92,7 +92,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
    * @param requestTag A unique client-assigned identifier for this request.
    */
   async _get(
-    requestTag: string
+    requestTag: string,
   ): Promise<BatchGetResponse<AppModelType, DbModelType>> {
     await this.fetchDocuments(requestTag);
 
@@ -107,7 +107,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
         // Recreate the DocumentSnapshot with the DocumentReference
         // containing the original converter.
         const finalDoc = new DocumentSnapshotBuilder(
-          docRef as DocumentReference<AppModelType, DbModelType>
+          docRef as DocumentReference<AppModelType, DbModelType>,
         );
         finalDoc.fieldsProto = document._fieldsProto;
         finalDoc.readTime = document.readTime;
@@ -144,7 +144,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
 
     if (this.fieldMask) {
       const fieldPaths = this.fieldMask.map(
-        fieldPath => fieldPath.formattedName
+        fieldPath => fieldPath.formattedName,
       );
       request.mask = {fieldPaths};
     }
@@ -156,7 +156,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
         'batchGetDocuments',
         /* bidirectional= */ false,
         request,
-        requestTag
+        requestTag,
       );
       stream.resume();
 
@@ -172,22 +172,22 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
             'DocumentReader.fetchDocuments',
             requestTag,
             'Received document: %s',
-            response.found.name!
+            response.found.name!,
           );
           snapshot = this.firestore.snapshot_(
             response.found,
-            response.readTime!
+            response.readTime!,
           );
         } else if (response.missing) {
           logger(
             'DocumentReader.fetchDocuments',
             requestTag,
             'Document missing: %s',
-            response.missing
+            response.missing,
           );
           snapshot = this.firestore.snapshot_(
             response.missing,
-            response.readTime!
+            response.readTime!,
           );
         }
 
@@ -214,7 +214,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
         requestTag,
         'BatchGetDocuments failed with error: %s. Retrying: %s',
         error,
-        shouldRetry
+        shouldRetry,
       );
       if (shouldRetry) {
         return this.fetchDocuments(requestTag);
@@ -226,7 +226,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
         'DocumentReader.fetchDocuments',
         requestTag,
         'Received %d results',
-        resultCount
+        resultCount,
       );
     }
   }

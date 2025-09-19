@@ -81,7 +81,7 @@ describe('FirestoreTypeConverter', () => {
     const converter: FirestoreDataConverter<MyModelType, DocumentData> = {
       toFirestore(
         modelObject: PartialWithFieldValue<MyModelType>,
-        options?: SetOptions
+        options?: SetOptions,
       ): DocumentData {
         if (options === undefined) {
           return {

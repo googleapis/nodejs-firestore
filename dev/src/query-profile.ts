@@ -39,7 +39,7 @@ export class PlanSummary implements firestore.PlanSummary {
    */
   static _fromProto(
     plan: IPlanSummary | null | undefined,
-    serializer: Serializer
+    serializer: Serializer,
   ): PlanSummary {
     const indexes: Record<string, unknown>[] = [];
     if (plan && plan.indexesUsed) {
@@ -65,7 +65,7 @@ export class ExecutionStats implements firestore.ExecutionStats {
     readonly resultsReturned: number,
     readonly executionDuration: firestore.Duration,
     readonly readOperations: number,
-    readonly debugStats: Record<string, unknown>
+    readonly debugStats: Record<string, unknown>,
   ) {}
 
   /**
@@ -74,7 +74,7 @@ export class ExecutionStats implements firestore.ExecutionStats {
    */
   static _fromProto(
     stats: IExecutionStats | null | undefined,
-    serializer: Serializer
+    serializer: Serializer,
   ): ExecutionStats | null {
     if (stats) {
       return new ExecutionStats(
@@ -84,7 +84,7 @@ export class ExecutionStats implements firestore.ExecutionStats {
           nanoseconds: Number(stats.executionDuration?.nanos),
         },
         Number(stats.readOperations),
-        serializer.decodeGoogleProtobufStruct(stats.debugStats)
+        serializer.decodeGoogleProtobufStruct(stats.debugStats),
       );
     }
     return null;
@@ -103,7 +103,7 @@ export class ExplainMetrics implements firestore.ExplainMetrics {
    */
   constructor(
     readonly planSummary: PlanSummary,
-    readonly executionStats: ExecutionStats | null
+    readonly executionStats: ExecutionStats | null,
   ) {}
 
   /**
@@ -112,11 +112,11 @@ export class ExplainMetrics implements firestore.ExplainMetrics {
    */
   static _fromProto(
     metrics: IExplainMetrics,
-    serializer: Serializer
+    serializer: Serializer,
   ): ExplainMetrics {
     return new ExplainMetrics(
       PlanSummary._fromProto(metrics.planSummary, serializer),
-      ExecutionStats._fromProto(metrics.executionStats, serializer)
+      ExecutionStats._fromProto(metrics.executionStats, serializer),
     );
   }
 }
@@ -134,6 +134,6 @@ export class ExplainResults<T> implements firestore.ExplainResults<T> {
    */
   constructor(
     readonly metrics: ExplainMetrics,
-    readonly snapshot: T | null
+    readonly snapshot: T | null,
   ) {}
 }

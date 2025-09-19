@@ -79,7 +79,7 @@ export class IndexTestHelper {
         result[autoId()] = doc;
         return result;
       },
-      {}
+      {},
     );
     return this.setTestDocs(docsMap);
   }
@@ -106,7 +106,7 @@ export class IndexTestHelper {
       [this.TEST_ID_FIELD]: this.testId,
       [this.TTL_FIELD]: new Timestamp( // Expire test data after 24 hours
         Timestamp.now().seconds + 24 * 60 * 60,
-        Timestamp.now().nanoseconds
+        Timestamp.now().nanoseconds,
       ),
     };
   }
@@ -126,7 +126,7 @@ export class IndexTestHelper {
       // eslint-disable-next-line no-prototype-builtins
       if (docs.hasOwnProperty(key)) {
         result[this.toHashedId(key)] = this.addTestSpecificFieldsToDoc(
-          docs[key]
+          docs[key],
         );
       }
     }
@@ -139,14 +139,14 @@ export class IndexTestHelper {
       (query, filter) => {
         return query.where(filter);
       },
-      query_.where(this.TEST_ID_FIELD, '==', this.testId)
+      query_.where(this.TEST_ID_FIELD, '==', this.testId),
     );
   }
 
   // Get document reference from a document key.
   getDocRef<T>(
     coll: CollectionReference<T>,
-    docId: string
+    docId: string,
   ): DocumentReference<T> {
     if (!docId.includes('test-id-')) {
       docId = this.toHashedId(docId);
@@ -157,10 +157,10 @@ export class IndexTestHelper {
   // Adds a document to a Firestore collection with test-specific fields.
   addDoc<T>(
     reference: CollectionReference<T>,
-    data: object
+    data: object,
   ): Promise<DocumentReference<T>> {
     const processedData = this.addTestSpecificFieldsToDoc(
-      data
+      data,
     ) as WithFieldValue<T>;
     return reference.add(processedData);
   }
@@ -168,17 +168,17 @@ export class IndexTestHelper {
   // Sets a document in Firestore with test-specific fields.
   async setDoc<T>(
     reference: DocumentReference<T>,
-    data: object
+    data: object,
   ): Promise<void> {
     const processedData = this.addTestSpecificFieldsToDoc(
-      data
+      data,
     ) as WithFieldValue<T>;
     await reference.set(processedData);
   }
 
   async updateDoc<T, DbModelType extends DocumentData>(
     reference: DocumentReference<T, DbModelType>,
-    data: UpdateData<DbModelType>
+    data: UpdateData<DbModelType>,
   ): Promise<void> {
     await reference.update(data);
   }

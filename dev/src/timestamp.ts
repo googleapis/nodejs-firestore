@@ -216,7 +216,7 @@ export class Timestamp implements firestore.Timestamp {
    */
   toDate(): Date {
     return new Date(
-      this._seconds * 1000 + Math.round(this._nanoseconds / MS_TO_NANOS)
+      this._seconds * 1000 + Math.round(this._nanoseconds / MS_TO_NANOS),
     );
   }
 

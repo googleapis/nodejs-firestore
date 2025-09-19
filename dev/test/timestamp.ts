@@ -89,7 +89,7 @@ describe('timestamps', () => {
         .then(res => {
           const timestamp = res.get('moonLanding');
           expect(new Date(-14182920 * 1000 + 123).getTime()).to.equal(
-            timestamp.toDate().getTime()
+            timestamp.toDate().getTime(),
           );
         });
     });
@@ -140,41 +140,41 @@ describe('timestamps', () => {
 
   it('validates seconds', () => {
     expect(() => new Firestore.Timestamp(0.1, 0)).to.throw(
-      'Value for argument "seconds" is not a valid integer.'
+      'Value for argument "seconds" is not a valid integer.',
     );
 
     expect(() => new Firestore.Timestamp(-62135596801, 0)).to.throw(
-      'Value for argument "seconds" must be within [-62135596800, 253402300799] inclusive, but was: -62135596801'
+      'Value for argument "seconds" must be within [-62135596800, 253402300799] inclusive, but was: -62135596801',
     );
 
     expect(() => new Firestore.Timestamp(253402300800, 0)).to.throw(
-      'Value for argument "seconds" must be within [-62135596800, 253402300799] inclusive, but was: 253402300800'
+      'Value for argument "seconds" must be within [-62135596800, 253402300799] inclusive, but was: 253402300800',
     );
   });
 
   it('validates nanoseconds', () => {
     expect(() => new Firestore.Timestamp(0, 0.1)).to.throw(
-      'Value for argument "nanoseconds" is not a valid integer.'
+      'Value for argument "nanoseconds" is not a valid integer.',
     );
 
     expect(() => new Firestore.Timestamp(0, -1)).to.throw(
-      'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: -1'
+      'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: -1',
     );
 
     expect(() => new Firestore.Timestamp(0, 1000000000)).to.throw(
-      'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: 1000000000'
+      'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: 1000000000',
     );
   });
 
   it('valueOf', () => {
     expect(new Firestore.Timestamp(-62135596677, 456).valueOf()).to.equal(
-      '000000000123.000000456'
+      '000000000123.000000456',
     );
     expect(new Firestore.Timestamp(-62135596800, 0).valueOf()).to.equal(
-      '000000000000.000000000'
+      '000000000000.000000000',
     );
     expect(new Firestore.Timestamp(253402300799, 1e9 - 1).valueOf()).to.equal(
-      '315537897599.999999999'
+      '315537897599.999999999',
     );
   });
 

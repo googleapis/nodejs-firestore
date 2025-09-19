@@ -52,7 +52,7 @@ async function main() {
   // Create a new client
   const firestore = new Firestore();
   const docRef = firestore.doc(
-    'distributed_counter_samples/distributed_counter'
+    'distributed_counter_samples/distributed_counter',
   );
   // Clean up documents from potential prior test runs
   await deleteDocs(docRef);

@@ -72,11 +72,11 @@ export class DocumentSnapshotBuilder<
     | DocumentSnapshot<AppModelType, DbModelType> {
     assert(
       (this.fieldsProto !== undefined) === (this.createTime !== undefined),
-      'Create time should be set iff document exists.'
+      'Create time should be set iff document exists.',
     );
     assert(
       (this.fieldsProto !== undefined) === (this.updateTime !== undefined),
-      'Update time should be set iff document exists.'
+      'Update time should be set iff document exists.',
     );
     return this.fieldsProto
       ? new QueryDocumentSnapshot<AppModelType, DbModelType>(
@@ -84,12 +84,12 @@ export class DocumentSnapshotBuilder<
           this.fieldsProto!,
           this.readTime!,
           this.createTime!,
-          this.updateTime!
+          this.updateTime!,
         )
       : new DocumentSnapshot<AppModelType, DbModelType>(
           this.ref,
           undefined,
-          this.readTime!
+          this.readTime!,
         );
   }
 }
@@ -142,7 +142,7 @@ export class DocumentSnapshot<
     readonly _fieldsProto?: ApiMapValue,
     readTime?: Timestamp,
     createTime?: Timestamp,
-    updateTime?: Timestamp
+    updateTime?: Timestamp,
   ) {
     this._ref = ref;
     this._serializer = ref.firestore._serializer!;
@@ -162,7 +162,7 @@ export class DocumentSnapshot<
    */
   static fromObject<AppModelType, DbModelType extends firestore.DocumentData>(
     ref: DocumentReference<AppModelType, DbModelType>,
-    obj: firestore.DocumentData
+    obj: firestore.DocumentData,
   ): DocumentSnapshot<AppModelType, DbModelType> {
     const serializer = ref.firestore._serializer!;
     return new DocumentSnapshot(ref, serializer.encodeFields(obj));
@@ -184,7 +184,7 @@ export class DocumentSnapshot<
     DbModelType extends firestore.DocumentData,
   >(
     ref: firestore.DocumentReference<AppModelType, DbModelType>,
-    data: UpdateMap
+    data: UpdateMap,
   ): DocumentSnapshot<AppModelType, DbModelType> {
     const serializer = (ref as DocumentReference<AppModelType, DbModelType>)
       .firestore._serializer!;
@@ -197,7 +197,7 @@ export class DocumentSnapshot<
       target: ApiMapValue,
       value: unknown,
       path: string[],
-      pos: number
+      pos: number,
     ): ApiMapValue | null {
       const key = path[pos];
       const isLast = pos === path.length - 1;
@@ -227,7 +227,7 @@ export class DocumentSnapshot<
             childNode.mapValue.fields,
             value,
             path,
-            pos + 1
+            pos + 1,
           );
 
           if (nestedValue) {
@@ -244,7 +244,7 @@ export class DocumentSnapshot<
           target[key].mapValue!.fields!,
           value,
           path,
-          pos + 1
+          pos + 1,
         );
         return target;
       }
@@ -259,7 +259,7 @@ export class DocumentSnapshot<
 
     return new DocumentSnapshot(
       ref as DocumentReference<AppModelType, DbModelType>,
-      res
+      res,
     );
   }
 
@@ -431,7 +431,7 @@ export class DocumentSnapshot<
     if (this.ref._converter !== defaultConverter()) {
       const untypedReference = new DocumentReference(
         this.ref.firestore,
-        this.ref._path
+        this.ref._path,
       );
       return this.ref._converter.fromFirestore(
         new QueryDocumentSnapshot(
@@ -439,8 +439,8 @@ export class DocumentSnapshot<
           this._fieldsProto!,
           this.readTime,
           this.createTime!,
-          this.updateTime!
-        )
+          this.updateTime!,
+        ),
       );
     } else {
       const obj: firestore.DocumentData = {};
@@ -556,7 +556,7 @@ export class DocumentSnapshot<
    * value.
    */
   isEqual(
-    other: firestore.DocumentSnapshot<AppModelType, DbModelType>
+    other: firestore.DocumentSnapshot<AppModelType, DbModelType>,
   ): boolean {
     // Since the read time is different on every document read, we explicitly
     // ignore all document metadata in this comparison.
@@ -564,7 +564,7 @@ export class DocumentSnapshot<
       this === other ||
       (other instanceof DocumentSnapshot &&
         this._ref.isEqual(
-          (other as DocumentSnapshot<AppModelType, DbModelType>)._ref
+          (other as DocumentSnapshot<AppModelType, DbModelType>)._ref,
         ) &&
         deepEqual(this._fieldsProto, other._fieldsProto))
     );
@@ -657,7 +657,7 @@ export class QueryDocumentSnapshot<
     const data = super.data();
     if (!data) {
       throw new Error(
-        'The data in a QueryDocumentSnapshot should always exist.'
+        'The data in a QueryDocumentSnapshot should always exist.',
       );
     }
     return data;
@@ -714,7 +714,7 @@ export class DocumentMask {
    * @param fieldMask A list of field paths.
    */
   static fromFieldMask(
-    fieldMask: Array<string | firestore.FieldPath>
+    fieldMask: Array<string | firestore.FieldPath>,
   ): DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
@@ -738,7 +738,7 @@ export class DocumentMask {
 
     function extractFieldPaths(
       currentData: firestore.DocumentData,
-      currentPath?: FieldPath
+      currentPath?: FieldPath,
     ): void {
       let isEmpty = true;
 
@@ -799,7 +799,7 @@ export class DocumentMask {
    */
   private static removeFromSortedArray(
     input: FieldPath[],
-    values: FieldPath[]
+    values: FieldPath[],
   ): void {
     for (let i = 0; i < input.length; ) {
       let removed = false;
@@ -866,13 +866,13 @@ export class DocumentMask {
      * that were specified in the mask but are not present in 'data'.
      */
     const applyDocumentMask: (
-      data: firestore.DocumentData
+      data: firestore.DocumentData,
     ) => firestore.DocumentData = data => {
       const remainingPaths = this._sortedPaths.slice(0);
 
       const processObject: (
         currentData: firestore.DocumentData,
-        currentPath?: FieldPath
+        currentPath?: FieldPath,
       ) => firestore.DocumentData | null = (currentData, currentPath) => {
         let result: firestore.DocumentData | null = null;
 
@@ -887,7 +887,7 @@ export class DocumentMask {
           } else if (isObject(currentData[key])) {
             const childObject = processObject(
               currentData[key] as firestore.DocumentData,
-              childPath
+              childPath,
             );
             if (childObject) {
               result = result || {};
@@ -912,7 +912,7 @@ export class DocumentMask {
 
     if (result.remainingPaths.length !== 0) {
       throw new Error(
-        `Input data is missing for field "${result.remainingPaths[0]}".`
+        `Input data is missing for field "${result.remainingPaths[0]}".`,
       );
     }
 
@@ -966,7 +966,7 @@ export class DocumentTransform<
    */
   constructor(
     private readonly ref: DocumentReference<AppModelType, DbModelType>,
-    private readonly transforms: Map<FieldPath, FieldTransform>
+    private readonly transforms: Map<FieldPath, FieldTransform>,
   ) {}
 
   /**
@@ -980,7 +980,7 @@ export class DocumentTransform<
    */
   static fromObject<AppModelType, DbModelType extends firestore.DocumentData>(
     ref: firestore.DocumentReference<AppModelType, DbModelType>,
-    obj: firestore.DocumentData
+    obj: firestore.DocumentData,
   ): DocumentTransform<AppModelType, DbModelType> {
     const updateMap = new Map<FieldPath, unknown>();
 
@@ -990,7 +990,7 @@ export class DocumentTransform<
 
     return DocumentTransform.fromUpdateMap<AppModelType, DbModelType>(
       ref,
-      updateMap
+      updateMap,
     );
   }
 
@@ -1008,21 +1008,21 @@ export class DocumentTransform<
     DbModelType extends firestore.DocumentData,
   >(
     ref: firestore.DocumentReference<AppModelType, DbModelType>,
-    data: UpdateMap
+    data: UpdateMap,
   ): DocumentTransform<AppModelType, DbModelType> {
     const transforms = new Map<FieldPath, FieldTransform>();
 
     function encode_(
       val: unknown,
       path: FieldPath,
-      allowTransforms: boolean
+      allowTransforms: boolean,
     ): void {
       if (val instanceof FieldTransform && val.includeInDocumentTransform) {
         if (allowTransforms) {
           transforms.set(path, val);
         } else {
           throw new Error(
-            `${val.methodName}() is not supported inside of array values.`
+            `${val.methodName}() is not supported inside of array values.`,
           );
         }
       } else if (Array.isArray(val)) {
@@ -1043,7 +1043,7 @@ export class DocumentTransform<
 
     return new DocumentTransform(
       ref as DocumentReference<AppModelType, DbModelType>,
-      transforms
+      transforms,
     );
   }
 
@@ -1088,7 +1088,7 @@ export class DocumentTransform<
    */
   toProto(serializer: Serializer): api.DocumentTransform.IFieldTransform[] {
     return Array.from(this.transforms, ([path, transform]) =>
-      transform.toProto(serializer, path)
+      transform.toProto(serializer, path),
     );
   }
 }

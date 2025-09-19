@@ -166,7 +166,7 @@ describe('validateUserInput', () => {
         allowDeletes: 'none',
         allowTransforms: false,
         allowUndefined: false,
-      })
+      }),
     ).to.throw(/Input object is deeper than 20 levels/i);
   });
 
@@ -240,7 +240,7 @@ describe('validateUserInput', () => {
         allowDeletes: 'none',
         allowTransforms: false,
         allowUndefined: false,
-      })
+      }),
     ).to.throw(/Input object is deeper than 20 levels/i);
   });
 });

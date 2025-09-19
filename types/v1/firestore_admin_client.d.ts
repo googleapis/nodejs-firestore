@@ -124,7 +124,7 @@ export declare class FirestoreAdminClient {
    */
   constructor(
     opts?: ClientOptions,
-    gaxInstance?: typeof gax | typeof gax.fallback
+    gaxInstance?: typeof gax | typeof gax.fallback,
   );
   /**
    * Initialize the client.
@@ -190,7 +190,7 @@ export declare class FirestoreAdminClient {
    */
   getIndex(
     request?: protos.google.firestore.admin.v1.IGetIndexRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IIndex,
@@ -205,7 +205,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IIndex,
       protos.google.firestore.admin.v1.IGetIndexRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   getIndex(
     request: protos.google.firestore.admin.v1.IGetIndexRequest,
@@ -213,7 +213,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IIndex,
       protos.google.firestore.admin.v1.IGetIndexRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Deletes a composite index.
@@ -234,7 +234,7 @@ export declare class FirestoreAdminClient {
    */
   deleteIndex(
     request?: protos.google.firestore.admin.v1.IDeleteIndexRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.protobuf.IEmpty,
@@ -249,7 +249,7 @@ export declare class FirestoreAdminClient {
       protos.google.protobuf.IEmpty,
       protos.google.firestore.admin.v1.IDeleteIndexRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   deleteIndex(
     request: protos.google.firestore.admin.v1.IDeleteIndexRequest,
@@ -257,7 +257,7 @@ export declare class FirestoreAdminClient {
       protos.google.protobuf.IEmpty,
       protos.google.firestore.admin.v1.IDeleteIndexRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Gets the metadata and configuration for a Field.
@@ -278,7 +278,7 @@ export declare class FirestoreAdminClient {
    */
   getField(
     request?: protos.google.firestore.admin.v1.IGetFieldRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IField,
@@ -293,7 +293,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IField,
       protos.google.firestore.admin.v1.IGetFieldRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   getField(
     request: protos.google.firestore.admin.v1.IGetFieldRequest,
@@ -301,7 +301,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IField,
       protos.google.firestore.admin.v1.IGetFieldRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Gets information about a database.
@@ -322,7 +322,7 @@ export declare class FirestoreAdminClient {
    */
   getDatabase(
     request?: protos.google.firestore.admin.v1.IGetDatabaseRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IDatabase,
@@ -337,7 +337,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IDatabase,
       protos.google.firestore.admin.v1.IGetDatabaseRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   getDatabase(
     request: protos.google.firestore.admin.v1.IGetDatabaseRequest,
@@ -345,7 +345,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IDatabase,
       protos.google.firestore.admin.v1.IGetDatabaseRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * List all the databases in the project.
@@ -368,7 +368,7 @@ export declare class FirestoreAdminClient {
    */
   listDatabases(
     request?: protos.google.firestore.admin.v1.IListDatabasesRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IListDatabasesResponse,
@@ -383,7 +383,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IListDatabasesResponse,
       protos.google.firestore.admin.v1.IListDatabasesRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   listDatabases(
     request: protos.google.firestore.admin.v1.IListDatabasesRequest,
@@ -391,7 +391,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IListDatabasesResponse,
       protos.google.firestore.admin.v1.IListDatabasesRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Gets information about a backup.
@@ -413,7 +413,7 @@ export declare class FirestoreAdminClient {
    */
   getBackup(
     request?: protos.google.firestore.admin.v1.IGetBackupRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IBackup,
@@ -428,7 +428,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IBackup,
       protos.google.firestore.admin.v1.IGetBackupRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   getBackup(
     request: protos.google.firestore.admin.v1.IGetBackupRequest,
@@ -436,7 +436,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IBackup,
       protos.google.firestore.admin.v1.IGetBackupRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Lists all the backups.
@@ -474,7 +474,7 @@ export declare class FirestoreAdminClient {
    */
   listBackups(
     request?: protos.google.firestore.admin.v1.IListBackupsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IListBackupsResponse,
@@ -489,7 +489,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IListBackupsResponse,
       protos.google.firestore.admin.v1.IListBackupsRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   listBackups(
     request: protos.google.firestore.admin.v1.IListBackupsRequest,
@@ -497,7 +497,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IListBackupsResponse,
       protos.google.firestore.admin.v1.IListBackupsRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Deletes a backup.
@@ -519,7 +519,7 @@ export declare class FirestoreAdminClient {
    */
   deleteBackup(
     request?: protos.google.firestore.admin.v1.IDeleteBackupRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.protobuf.IEmpty,
@@ -534,7 +534,7 @@ export declare class FirestoreAdminClient {
       protos.google.protobuf.IEmpty,
       protos.google.firestore.admin.v1.IDeleteBackupRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   deleteBackup(
     request: protos.google.firestore.admin.v1.IDeleteBackupRequest,
@@ -542,7 +542,7 @@ export declare class FirestoreAdminClient {
       protos.google.protobuf.IEmpty,
       protos.google.firestore.admin.v1.IDeleteBackupRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Creates a backup schedule on a database.
@@ -568,7 +568,7 @@ export declare class FirestoreAdminClient {
    */
   createBackupSchedule(
     request?: protos.google.firestore.admin.v1.ICreateBackupScheduleRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IBackupSchedule,
@@ -585,7 +585,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   createBackupSchedule(
     request: protos.google.firestore.admin.v1.ICreateBackupScheduleRequest,
@@ -595,7 +595,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Gets information about a backup schedule.
@@ -618,7 +618,7 @@ export declare class FirestoreAdminClient {
    */
   getBackupSchedule(
     request?: protos.google.firestore.admin.v1.IGetBackupScheduleRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IBackupSchedule,
@@ -635,7 +635,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   getBackupSchedule(
     request: protos.google.firestore.admin.v1.IGetBackupScheduleRequest,
@@ -645,7 +645,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * List backup schedules.
@@ -667,7 +667,7 @@ export declare class FirestoreAdminClient {
    */
   listBackupSchedules(
     request?: protos.google.firestore.admin.v1.IListBackupSchedulesRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IListBackupSchedulesResponse,
@@ -684,7 +684,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   listBackupSchedules(
     request: protos.google.firestore.admin.v1.IListBackupSchedulesRequest,
@@ -694,7 +694,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Updates a backup schedule.
@@ -716,7 +716,7 @@ export declare class FirestoreAdminClient {
    */
   updateBackupSchedule(
     request?: protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IBackupSchedule,
@@ -733,7 +733,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   updateBackupSchedule(
     request: protos.google.firestore.admin.v1.IUpdateBackupScheduleRequest,
@@ -743,7 +743,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Deletes a backup schedule.
@@ -766,7 +766,7 @@ export declare class FirestoreAdminClient {
    */
   deleteBackupSchedule(
     request?: protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.protobuf.IEmpty,
@@ -783,7 +783,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   deleteBackupSchedule(
     request: protos.google.firestore.admin.v1.IDeleteBackupScheduleRequest,
@@ -793,7 +793,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Creates a composite index. This returns a
@@ -822,7 +822,7 @@ export declare class FirestoreAdminClient {
    */
   createIndex(
     request?: protos.google.firestore.admin.v1.ICreateIndexRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       LROperation<
@@ -843,7 +843,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   createIndex(
     request: protos.google.firestore.admin.v1.ICreateIndexRequest,
@@ -854,7 +854,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Check the status of the long running operation returned by `createIndex()`.
@@ -868,7 +868,7 @@ export declare class FirestoreAdminClient {
    * region_tag:firestore_v1_generated_FirestoreAdmin_CreateIndex_async
    */
   checkCreateIndexProgress(
-    name: string
+    name: string,
   ): Promise<
     LROperation<
       protos.google.firestore.admin.v1.Index,
@@ -913,7 +913,7 @@ export declare class FirestoreAdminClient {
    */
   updateField(
     request?: protos.google.firestore.admin.v1.IUpdateFieldRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       LROperation<
@@ -934,7 +934,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   updateField(
     request: protos.google.firestore.admin.v1.IUpdateFieldRequest,
@@ -945,7 +945,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Check the status of the long running operation returned by `updateField()`.
@@ -959,7 +959,7 @@ export declare class FirestoreAdminClient {
    * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateField_async
    */
   checkUpdateFieldProgress(
-    name: string
+    name: string,
   ): Promise<
     LROperation<
       protos.google.firestore.admin.v1.Field,
@@ -1024,7 +1024,7 @@ export declare class FirestoreAdminClient {
    */
   exportDocuments(
     request?: protos.google.firestore.admin.v1.IExportDocumentsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       LROperation<
@@ -1045,7 +1045,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   exportDocuments(
     request: protos.google.firestore.admin.v1.IExportDocumentsRequest,
@@ -1056,7 +1056,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Check the status of the long running operation returned by `exportDocuments()`.
@@ -1070,7 +1070,7 @@ export declare class FirestoreAdminClient {
    * region_tag:firestore_v1_generated_FirestoreAdmin_ExportDocuments_async
    */
   checkExportDocumentsProgress(
-    name: string
+    name: string,
   ): Promise<
     LROperation<
       protos.google.firestore.admin.v1.ExportDocumentsResponse,
@@ -1118,7 +1118,7 @@ export declare class FirestoreAdminClient {
    */
   importDocuments(
     request?: protos.google.firestore.admin.v1.IImportDocumentsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       LROperation<
@@ -1139,7 +1139,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   importDocuments(
     request: protos.google.firestore.admin.v1.IImportDocumentsRequest,
@@ -1150,7 +1150,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Check the status of the long running operation returned by `importDocuments()`.
@@ -1164,7 +1164,7 @@ export declare class FirestoreAdminClient {
    * region_tag:firestore_v1_generated_FirestoreAdmin_ImportDocuments_async
    */
   checkImportDocumentsProgress(
-    name: string
+    name: string,
   ): Promise<
     LROperation<
       protos.google.protobuf.Empty,
@@ -1215,7 +1215,7 @@ export declare class FirestoreAdminClient {
    */
   bulkDeleteDocuments(
     request?: protos.google.firestore.admin.v1.IBulkDeleteDocumentsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       LROperation<
@@ -1236,7 +1236,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   bulkDeleteDocuments(
     request: protos.google.firestore.admin.v1.IBulkDeleteDocumentsRequest,
@@ -1247,7 +1247,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Check the status of the long running operation returned by `bulkDeleteDocuments()`.
@@ -1261,7 +1261,7 @@ export declare class FirestoreAdminClient {
    * region_tag:firestore_v1_generated_FirestoreAdmin_BulkDeleteDocuments_async
    */
   checkBulkDeleteDocumentsProgress(
-    name: string
+    name: string,
   ): Promise<
     LROperation<
       protos.google.firestore.admin.v1.BulkDeleteDocumentsResponse,
@@ -1300,7 +1300,7 @@ export declare class FirestoreAdminClient {
    */
   createDatabase(
     request?: protos.google.firestore.admin.v1.ICreateDatabaseRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       LROperation<
@@ -1321,7 +1321,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   createDatabase(
     request: protos.google.firestore.admin.v1.ICreateDatabaseRequest,
@@ -1332,7 +1332,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Check the status of the long running operation returned by `createDatabase()`.
@@ -1346,7 +1346,7 @@ export declare class FirestoreAdminClient {
    * region_tag:firestore_v1_generated_FirestoreAdmin_CreateDatabase_async
    */
   checkCreateDatabaseProgress(
-    name: string
+    name: string,
   ): Promise<
     LROperation<
       protos.google.firestore.admin.v1.Database,
@@ -1375,7 +1375,7 @@ export declare class FirestoreAdminClient {
    */
   updateDatabase(
     request?: protos.google.firestore.admin.v1.IUpdateDatabaseRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       LROperation<
@@ -1396,7 +1396,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   updateDatabase(
     request: protos.google.firestore.admin.v1.IUpdateDatabaseRequest,
@@ -1407,7 +1407,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Check the status of the long running operation returned by `updateDatabase()`.
@@ -1421,7 +1421,7 @@ export declare class FirestoreAdminClient {
    * region_tag:firestore_v1_generated_FirestoreAdmin_UpdateDatabase_async
    */
   checkUpdateDatabaseProgress(
-    name: string
+    name: string,
   ): Promise<
     LROperation<
       protos.google.firestore.admin.v1.Database,
@@ -1453,7 +1453,7 @@ export declare class FirestoreAdminClient {
    */
   deleteDatabase(
     request?: protos.google.firestore.admin.v1.IDeleteDatabaseRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       LROperation<
@@ -1474,7 +1474,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   deleteDatabase(
     request: protos.google.firestore.admin.v1.IDeleteDatabaseRequest,
@@ -1485,7 +1485,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Check the status of the long running operation returned by `deleteDatabase()`.
@@ -1499,7 +1499,7 @@ export declare class FirestoreAdminClient {
    * region_tag:firestore_v1_generated_FirestoreAdmin_DeleteDatabase_async
    */
   checkDeleteDatabaseProgress(
-    name: string
+    name: string,
   ): Promise<
     LROperation<
       protos.google.firestore.admin.v1.Database,
@@ -1567,7 +1567,7 @@ export declare class FirestoreAdminClient {
    */
   restoreDatabase(
     request?: protos.google.firestore.admin.v1.IRestoreDatabaseRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       LROperation<
@@ -1588,7 +1588,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   restoreDatabase(
     request: protos.google.firestore.admin.v1.IRestoreDatabaseRequest,
@@ -1599,7 +1599,7 @@ export declare class FirestoreAdminClient {
       >,
       protos.google.longrunning.IOperation | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   /**
    * Check the status of the long running operation returned by `restoreDatabase()`.
@@ -1613,7 +1613,7 @@ export declare class FirestoreAdminClient {
    * region_tag:firestore_v1_generated_FirestoreAdmin_RestoreDatabase_async
    */
   checkRestoreDatabaseProgress(
-    name: string
+    name: string,
   ): Promise<
     LROperation<
       protos.google.firestore.admin.v1.Database,
@@ -1650,7 +1650,7 @@ export declare class FirestoreAdminClient {
    */
   listIndexes(
     request?: protos.google.firestore.admin.v1.IListIndexesRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IIndex[],
@@ -1665,7 +1665,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IListIndexesRequest,
       protos.google.firestore.admin.v1.IListIndexesResponse | null | undefined,
       protos.google.firestore.admin.v1.IIndex
-    >
+    >,
   ): void;
   listIndexes(
     request: protos.google.firestore.admin.v1.IListIndexesRequest,
@@ -1673,7 +1673,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IListIndexesRequest,
       protos.google.firestore.admin.v1.IListIndexesResponse | null | undefined,
       protos.google.firestore.admin.v1.IIndex
-    >
+    >,
   ): void;
   /**
    * Equivalent to `listIndexes`, but returns a NodeJS Stream object.
@@ -1703,7 +1703,7 @@ export declare class FirestoreAdminClient {
    */
   listIndexesStream(
     request?: protos.google.firestore.admin.v1.IListIndexesRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Transform;
   /**
    * Equivalent to `listIndexes`, but returns an iterable object.
@@ -1736,7 +1736,7 @@ export declare class FirestoreAdminClient {
    */
   listIndexesAsync(
     request?: protos.google.firestore.admin.v1.IListIndexesRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): AsyncIterable<protos.google.firestore.admin.v1.IIndex>;
   /**
    * Lists the field configuration and metadata for this database.
@@ -1782,7 +1782,7 @@ export declare class FirestoreAdminClient {
    */
   listFields(
     request?: protos.google.firestore.admin.v1.IListFieldsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.admin.v1.IField[],
@@ -1797,7 +1797,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IListFieldsRequest,
       protos.google.firestore.admin.v1.IListFieldsResponse | null | undefined,
       protos.google.firestore.admin.v1.IField
-    >
+    >,
   ): void;
   listFields(
     request: protos.google.firestore.admin.v1.IListFieldsRequest,
@@ -1805,7 +1805,7 @@ export declare class FirestoreAdminClient {
       protos.google.firestore.admin.v1.IListFieldsRequest,
       protos.google.firestore.admin.v1.IListFieldsResponse | null | undefined,
       protos.google.firestore.admin.v1.IField
-    >
+    >,
   ): void;
   /**
    * Equivalent to `listFields`, but returns a NodeJS Stream object.
@@ -1841,7 +1841,7 @@ export declare class FirestoreAdminClient {
    */
   listFieldsStream(
     request?: protos.google.firestore.admin.v1.IListFieldsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Transform;
   /**
    * Equivalent to `listFields`, but returns an iterable object.
@@ -1880,7 +1880,7 @@ export declare class FirestoreAdminClient {
    */
   listFieldsAsync(
     request?: protos.google.firestore.admin.v1.IListFieldsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): AsyncIterable<protos.google.firestore.admin.v1.IField>;
   /**
    * Gets information about a location.
@@ -1917,7 +1917,7 @@ export declare class FirestoreAdminClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): Promise<LocationProtos.google.cloud.location.ILocation>;
   /**
    * Lists information about the supported locations for this service. Returns an iterable object.
@@ -1952,7 +1952,7 @@ export declare class FirestoreAdminClient {
    */
   listLocationsAsync(
     request: LocationProtos.google.cloud.location.IListLocationsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): AsyncIterable<LocationProtos.google.cloud.location.ILocation>;
   /**
    * Gets the latest state of a long-running operation.  Clients can use this
@@ -1997,7 +1997,7 @@ export declare class FirestoreAdminClient {
       protos.google.longrunning.Operation,
       protos.google.longrunning.GetOperationRequest,
       {} | null | undefined
-    >
+    >,
   ): Promise<[protos.google.longrunning.Operation]>;
   /**
    * Lists operations that match the specified filter in the request. If the
@@ -2031,7 +2031,7 @@ export declare class FirestoreAdminClient {
    */
   listOperationsAsync(
     request: protos.google.longrunning.ListOperationsRequest,
-    options?: gax.CallOptions
+    options?: gax.CallOptions,
   ): AsyncIterable<protos.google.longrunning.ListOperationsResponse>;
   /**
    * Starts asynchronous cancellation on a long-running operation.  The server
@@ -2077,7 +2077,7 @@ export declare class FirestoreAdminClient {
       protos.google.longrunning.CancelOperationRequest,
       protos.google.protobuf.Empty,
       {} | undefined | null
-    >
+    >,
   ): Promise<protos.google.protobuf.Empty>;
   /**
    * Deletes a long-running operation. This method indicates that the client is
@@ -2117,7 +2117,7 @@ export declare class FirestoreAdminClient {
       protos.google.protobuf.Empty,
       protos.google.longrunning.DeleteOperationRequest,
       {} | null | undefined
-    >
+    >,
   ): Promise<protos.google.protobuf.Empty>;
   /**
    * Return a fully-qualified backup resource name string.
@@ -2163,7 +2163,7 @@ export declare class FirestoreAdminClient {
   backupSchedulePath(
     project: string,
     database: string,
-    backupSchedule: string
+    backupSchedule: string,
   ): string;
   /**
    * Parse the project from BackupSchedule resource.
@@ -2173,7 +2173,7 @@ export declare class FirestoreAdminClient {
    * @returns {string} A string representing the project.
    */
   matchProjectFromBackupScheduleName(
-    backupScheduleName: string
+    backupScheduleName: string,
   ): string | number;
   /**
    * Parse the database from BackupSchedule resource.
@@ -2183,7 +2183,7 @@ export declare class FirestoreAdminClient {
    * @returns {string} A string representing the database.
    */
   matchDatabaseFromBackupScheduleName(
-    backupScheduleName: string
+    backupScheduleName: string,
   ): string | number;
   /**
    * Parse the backup_schedule from BackupSchedule resource.
@@ -2193,7 +2193,7 @@ export declare class FirestoreAdminClient {
    * @returns {string} A string representing the backup_schedule.
    */
   matchBackupScheduleFromBackupScheduleName(
-    backupScheduleName: string
+    backupScheduleName: string,
   ): string | number;
   /**
    * Return a fully-qualified collectionGroup resource name string.
@@ -2206,7 +2206,7 @@ export declare class FirestoreAdminClient {
   collectionGroupPath(
     project: string,
     database: string,
-    collection: string
+    collection: string,
   ): string;
   /**
    * Parse the project from CollectionGroup resource.
@@ -2216,7 +2216,7 @@ export declare class FirestoreAdminClient {
    * @returns {string} A string representing the project.
    */
   matchProjectFromCollectionGroupName(
-    collectionGroupName: string
+    collectionGroupName: string,
   ): string | number;
   /**
    * Parse the database from CollectionGroup resource.
@@ -2226,7 +2226,7 @@ export declare class FirestoreAdminClient {
    * @returns {string} A string representing the database.
    */
   matchDatabaseFromCollectionGroupName(
-    collectionGroupName: string
+    collectionGroupName: string,
   ): string | number;
   /**
    * Parse the collection from CollectionGroup resource.
@@ -2236,7 +2236,7 @@ export declare class FirestoreAdminClient {
    * @returns {string} A string representing the collection.
    */
   matchCollectionFromCollectionGroupName(
-    collectionGroupName: string
+    collectionGroupName: string,
   ): string | number;
   /**
    * Return a fully-qualified database resource name string.
@@ -2275,7 +2275,7 @@ export declare class FirestoreAdminClient {
     project: string,
     database: string,
     collection: string,
-    field: string
+    field: string,
   ): string;
   /**
    * Parse the project from Field resource.
@@ -2322,7 +2322,7 @@ export declare class FirestoreAdminClient {
     project: string,
     database: string,
     collection: string,
-    index: string
+    index: string,
   ): string;
   /**
    * Parse the project from Index resource.

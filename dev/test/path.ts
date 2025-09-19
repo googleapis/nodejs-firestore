@@ -24,7 +24,7 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 describe('ResourcePath', () => {
   it('has id property', () => {
     expect(
-      new QualifiedResourcePath(PROJECT_ID, '(default)', 'foo').id
+      new QualifiedResourcePath(PROJECT_ID, '(default)', 'foo').id,
     ).to.equal('foo');
     expect(new QualifiedResourcePath(PROJECT_ID, '(default)').id).to.be.null;
   });
@@ -48,19 +48,19 @@ describe('ResourcePath', () => {
     let path = QualifiedResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
     path = QualifiedResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/foo`
+      `${DATABASE_ROOT}/documents/foo`,
     );
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
     expect(() => {
       path = QualifiedResourcePath.fromSlashSeparatedString(
-        'projects/project/databases'
+        'projects/project/databases',
       );
     }).to.throw("Resource name 'projects/project/databases' is not valid");
   });
 
   it('accepts newlines', () => {
     const path = QualifiedResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/foo\nbar`
+      `${DATABASE_ROOT}/documents/foo\nbar`,
     );
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo\nbar`);
   });

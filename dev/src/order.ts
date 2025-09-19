@@ -81,7 +81,7 @@ function typeOrder(val: api.IValue): TypeOrder {
  */
 export function primitiveComparator(
   left: string | boolean | number,
-  right: string | boolean | number
+  right: string | boolean | number,
 ): number {
   if (left < right) {
     return -1;
@@ -139,7 +139,7 @@ function compareNumberProtos(left: api.IValue, right: api.IValue): number {
  */
 function compareTimestamps(
   left: google.protobuf.ITimestamp,
-  right: google.protobuf.ITimestamp
+  right: google.protobuf.ITimestamp,
 ): number {
   const seconds = primitiveComparator(left.seconds || 0, right.seconds || 0);
   if (seconds !== 0) {
@@ -165,10 +165,10 @@ function compareBlobs(left: Uint8Array, right: Uint8Array): number {
  */
 function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
   const leftPath = QualifiedResourcePath.fromSlashSeparatedString(
-    left.referenceValue!
+    left.referenceValue!,
   );
   const rightPath = QualifiedResourcePath.fromSlashSeparatedString(
-    right.referenceValue!
+    right.referenceValue!,
   );
   return leftPath.compareTo(rightPath);
 }
@@ -179,7 +179,7 @@ function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
  */
 function compareGeoPoints(
   left: google.type.ILatLng,
-  right: google.type.ILatLng
+  right: google.type.ILatLng,
 ): number {
   return (
     primitiveComparator(left.latitude || 0, right.latitude || 0) ||
@@ -239,7 +239,7 @@ function compareVectors(left: ApiMapValue, right: ApiMapValue): number {
 
   const lengthCompare = primitiveComparator(
     leftArray.length,
-    rightArray.length
+    rightArray.length,
   );
   if (lengthCompare !== 0) {
     return lengthCompare;
@@ -350,17 +350,17 @@ export function compare(left: api.IValue, right: api.IValue): number {
     case TypeOrder.ARRAY:
       return compareArrays(
         left.arrayValue!.values || [],
-        right.arrayValue!.values || []
+        right.arrayValue!.values || [],
       );
     case TypeOrder.OBJECT:
       return compareObjects(
         left.mapValue!.fields || {},
-        right.mapValue!.fields || {}
+        right.mapValue!.fields || {},
       );
     case TypeOrder.VECTOR:
       return compareVectors(
         left.mapValue!.fields || {},
-        right.mapValue!.fields || {}
+        right.mapValue!.fields || {},
       );
     default:
       throw new Error(`Encountered unknown type order: ${leftType}`);

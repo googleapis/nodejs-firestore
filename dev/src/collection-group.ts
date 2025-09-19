@@ -50,11 +50,11 @@ export class CollectionGroup<
     collectionId: string,
     converter:
       | firestore.FirestoreDataConverter<AppModelType, DbModelType>
-      | undefined
+      | undefined,
   ) {
     super(
       firestore,
-      QueryOptions.forCollectionGroupQuery(collectionId, converter)
+      QueryOptions.forCollectionGroupQuery(collectionId, converter),
     );
   }
 
@@ -80,7 +80,7 @@ export class CollectionGroup<
    * `QueryPartition`s.
    */
   async *getPartitions(
-    desiredPartitionCount: number
+    desiredPartitionCount: number,
   ): AsyncIterable<QueryPartition<AppModelType, DbModelType>> {
     const partitions: Array<api.IValue>[] = [];
 
@@ -108,7 +108,7 @@ export class CollectionGroup<
             'partitionQueryStream',
             /* bidirectional= */ false,
             request,
-            tag
+            tag,
           );
           stream.resume();
 
@@ -121,12 +121,12 @@ export class CollectionGroup<
           'Firestore.getPartitions',
           tag,
           'Received %d partitions',
-          partitions.length
+          partitions.length,
         );
 
         // Sort the partitions as they may not be ordered if responses are paged.
         partitions.sort((l, r) => compareArrays(l, r));
-      }
+      },
     );
 
     for (let i = 0; i < partitions.length; ++i) {
@@ -135,7 +135,7 @@ export class CollectionGroup<
         this._queryOptions.collectionId,
         this._queryOptions.converter,
         i > 0 ? partitions[i - 1] : undefined,
-        partitions[i]
+        partitions[i],
       );
     }
 
@@ -145,7 +145,7 @@ export class CollectionGroup<
       this._queryOptions.collectionId,
       this._queryOptions.converter,
       partitions.pop(),
-      undefined
+      undefined,
     );
   }
 
@@ -206,7 +206,10 @@ export class CollectionGroup<
     NewAppModelType,
     NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
-    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+    converter: firestore.FirestoreDataConverter<
+      NewAppModelType,
+      NewDbModelType
+    >,
   ): CollectionGroup<NewAppModelType, NewDbModelType>;
   withConverter<
     NewAppModelType,
@@ -215,12 +218,12 @@ export class CollectionGroup<
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
       NewDbModelType
-    > | null
+    > | null,
   ): CollectionGroup<NewAppModelType, NewDbModelType> {
     return new CollectionGroup<NewAppModelType, NewDbModelType>(
       this.firestore,
       this._queryOptions.collectionId,
-      converter ?? defaultConverter()
+      converter ?? defaultConverter(),
     );
   }
 }

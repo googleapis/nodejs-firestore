@@ -49,7 +49,7 @@ export class AggregateQuerySnapshot<
       DbModelType
     >,
     private readonly _readTime: Timestamp,
-    private readonly _data: firestore.AggregateSpecData<AggregateSpecType>
+    private readonly _data: firestore.AggregateSpecData<AggregateSpecType>,
   ) {}
 
   /** The query that was executed to produce this result. */
@@ -93,7 +93,7 @@ export class AggregateQuerySnapshot<
       AggregateSpecType,
       AppModelType,
       DbModelType
-    >
+    >,
   ): boolean {
     if (this === other) {
       return true;

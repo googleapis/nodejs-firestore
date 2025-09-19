@@ -70,15 +70,15 @@ protobufRoot.resolvePath = (origin, target) => {
   return target;
 };
 const protoDefinition = protobufRoot.loadSync(
-  path.join(__dirname, 'test-definition.proto')
+  path.join(__dirname, 'test-definition.proto'),
 );
 
 const TEST_SUITE_TYPE = protoDefinition.lookupType('tests.TestFile');
 const STRUCTURED_QUERY_TYPE = protoDefinition.lookupType(
-  'google.firestore.v1.StructuredQuery'
+  'google.firestore.v1.StructuredQuery',
 );
 const COMMIT_REQUEST_TYPE = protoDefinition.lookupType(
-  'google.firestore.v1.CommitRequest'
+  'google.firestore.v1.CommitRequest',
 );
 
 // Firestore instance initialized by the test runner.
@@ -128,11 +128,11 @@ const convertInput = {
     function convertArray(arr: unknown[]): unknown[] | FieldValue {
       if (arr.length > 0 && arr[0] === 'ArrayUnion') {
         return FieldValue.arrayUnion(
-          ...(convertArray(arr.slice(1)) as unknown[])
+          ...(convertArray(arr.slice(1)) as unknown[]),
         );
       } else if (arr.length > 0 && arr[0] === 'ArrayRemove') {
         return FieldValue.arrayRemove(
-          ...(convertArray(arr.slice(1)) as unknown[])
+          ...(convertArray(arr.slice(1)) as unknown[]),
         );
       } else {
         for (let i = 0; i < arr.length; ++i) {
@@ -183,8 +183,8 @@ const convertInput = {
       args.push(
         DocumentSnapshot.fromObject(
           docRef(cursor.docSnapshot.path),
-          convertInput.argument(cursor.docSnapshot.jsonData) as DocumentData
-        )
+          convertInput.argument(cursor.docSnapshot.jsonData) as DocumentData,
+        ),
       );
     } else {
       for (const jsonValue of cursor.jsonValues) {
@@ -205,8 +205,8 @@ const convertInput = {
         firestore.snapshot_(
           deepCopy,
           readTime.toDate().toISOString(),
-          'json'
-        ) as QueryDocumentSnapshot
+          'json',
+        ) as QueryDocumentSnapshot,
       );
     }
 
@@ -216,13 +216,13 @@ const convertInput = {
       const doc = firestore.snapshot_(
         deepCopy,
         readTime.toDate().toISOString(),
-        'json'
+        'json',
       ) as QueryDocumentSnapshot;
       const type = ['unspecified', 'added', 'removed', 'modified'][
         change.kind
       ] as DocumentChangeType;
       changes.push(
-        new DocumentChange(type, doc, change.oldIndex, change.newIndex)
+        new DocumentChange(type, doc, change.oldIndex, change.newIndex),
       );
     }
 
@@ -231,7 +231,7 @@ const convertInput = {
       readTime,
       docs.length,
       () => docs,
-      () => changes
+      () => changes,
     );
   },
 };
@@ -243,12 +243,12 @@ const convertProto = {
     const deepCopy = JSON.parse(JSON.stringify(listenRequest));
     if (deepCopy.targetChange) {
       deepCopy.targetChange.targetChangeType = convertProto.targetChange(
-        deepCopy.targetChange.targetChangeType
+        deepCopy.targetChange.targetChangeType,
       );
     }
     if (deepCopy.documentChange) {
       deepCopy.documentChange.document.fields = fieldsFromJson(
-        deepCopy.documentChange.document.fields
+        deepCopy.documentChange.document.fields,
       );
     }
     return deepCopy;
@@ -257,7 +257,7 @@ const convertProto = {
 
 /** Request handler for _commit. */
 function commitHandler(
-  spec: ConformanceProto
+  spec: ConformanceProto,
 ): UnaryMethod<api.ICommitRequest, api.ICommitResponse> {
   return request => {
     const actualCommit = COMMIT_REQUEST_TYPE.fromObject(request);
@@ -280,7 +280,7 @@ function commitHandler(
 function queryHandler(spec: ConformanceProto) {
   return (request: api.IRunQueryRequest) => {
     const actualQuery = STRUCTURED_QUERY_TYPE.fromObject(
-      request.structuredQuery!
+      request.structuredQuery!,
     );
     const expectedQuery = STRUCTURED_QUERY_TYPE.fromObject(spec.query);
     expect(actualQuery).to.deep.equal(expectedQuery);
@@ -407,7 +407,7 @@ function runTest(spec: ConformanceProto) {
       }
       return docRef(setSpec.docRefPath).set(
         convertInput.argument(spec.jsonData) as DocumentData,
-        setOption
+        setOption,
       );
     });
   };
@@ -416,7 +416,7 @@ function runTest(spec: ConformanceProto) {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
       return docRef(spec.docRefPath).create(
-        convertInput.argument(spec.jsonData) as DocumentData
+        convertInput.argument(spec.jsonData) as DocumentData,
       );
     });
   };
@@ -445,7 +445,7 @@ function runTest(spec: ConformanceProto) {
                 !actualSnap.isEqual(convertInput.snapshot(expectedSnapshot))
               ) {
                 reject(
-                  new Error('Expected and actual snapshots do not match.')
+                  new Error('Expected and actual snapshots do not match.'),
                 );
               }
 
@@ -461,7 +461,7 @@ function runTest(spec: ConformanceProto) {
             expect(expectedSnapshots).to.have.length(0);
             unlisten();
             reject(err);
-          }
+          },
         );
 
         for (const response of spec.responses) {
@@ -515,7 +515,7 @@ function runTest(spec: ConformanceProto) {
       if (!testSpec.isError) {
         throw err;
       }
-    }
+    },
   );
 }
 

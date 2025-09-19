@@ -71,7 +71,7 @@ describe('aggregate query interface', () => {
       [
         queryA.orderBy('foo').endBefore('b'),
         queryB.orderBy('bar').endBefore('a'),
-      ]
+      ],
     );
   });
 

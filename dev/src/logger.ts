@@ -44,7 +44,7 @@ export function logger(
     const time = new Date().toISOString();
     logFunction(
       `Firestore (${libVersion}) ${time} ${requestTag} [${methodName}]: ` +
-        formattedMessage
+        formattedMessage,
     );
   }
 }

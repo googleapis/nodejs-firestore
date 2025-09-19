@@ -26,7 +26,7 @@ describe('limit to last query', () => {
 
   before(async () => {
     await Promise.all(
-      cities.map(city => firestore.doc(`cities/${city}`).set({name: city}))
+      cities.map(city => firestore.doc(`cities/${city}`).set({name: city})),
     );
   });
 
@@ -36,7 +36,7 @@ describe('limit to last query', () => {
       await cityCollectionRef.select(FieldPath.documentId()).get()
     ).docs;
     await Promise.all(
-      cityDocs.map(doc => cityCollectionRef.doc(doc.id).delete())
+      cityDocs.map(doc => cityCollectionRef.doc(doc.id).delete()),
     );
   });
 

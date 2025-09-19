@@ -59,14 +59,14 @@ export class QueryUtil<
     /** @private */
     readonly _queryOptions: QueryOptions<AppModelType, DbModelType>,
     /** @private */
-    readonly _serializer: Serializer
+    readonly _serializer: Serializer,
   ) {}
 
   _getResponse(
     query: Template,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     retryWithCursor = true,
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
   ): Promise<QueryResponse<ReturnType<Template['_createSnapshot']>>> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -81,7 +81,7 @@ export class QueryUtil<
         query,
         transactionOrReadTime,
         retryWithCursor,
-        explainOptions
+        explainOptions,
       )
         .on('error', err => {
           reject(wrapError(err, stack));
@@ -123,7 +123,7 @@ export class QueryUtil<
                     changes.push(new DocumentChange('added', docs[i], -1, i));
                   }
                   return changes;
-                }
+                },
               ) as ReturnType<Template['_createSnapshot']>)
             : undefined;
 
@@ -154,7 +154,7 @@ export class QueryUtil<
     if (this._queryOptions.limitType === LimitType.Last) {
       throw new Error(
         'Query results for queries that include limitToLast() ' +
-          'constraints cannot be streamed. Use Query.get() instead.'
+          'constraints cannot be streamed. Use Query.get() instead.',
       );
     }
 
@@ -175,7 +175,7 @@ export class QueryUtil<
     query: Template,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     retryWithCursor = true,
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
   ): NodeJS.ReadableStream {
     const tag = requestTag();
     const startTime = Date.now();
@@ -194,7 +194,7 @@ export class QueryUtil<
       transform: (
         proto: api.RunQueryResponse | typeof NOOP_MESSAGE,
         enc,
-        callback
+        callback,
       ) => {
         if (proto === NOOP_MESSAGE) {
           callback(undefined);
@@ -215,7 +215,7 @@ export class QueryUtil<
         if (proto.document) {
           const document = this._firestore.snapshot_(
             proto.document,
-            proto.readTime!
+            proto.readTime!,
           );
           const finalDoc = new DocumentSnapshotBuilder<
             AppModelType,
@@ -237,7 +237,7 @@ export class QueryUtil<
         if (proto.explainMetrics) {
           output.explainMetrics = ExplainMetrics._fromProto(
             proto.explainMetrics,
-            this._serializer
+            this._serializer,
           );
         }
 
@@ -249,7 +249,7 @@ export class QueryUtil<
           this._firestore._traceUtil
             .currentSpan()
             .addEvent(
-              `Firestore.${methodName}: Received RunQueryResponse.Done.`
+              `Firestore.${methodName}: Received RunQueryResponse.Done.`,
             );
           backendStream.unpipe(stream);
           backendStream.resume();
@@ -283,7 +283,7 @@ export class QueryUtil<
             methodName,
             /* bidirectional= */ false,
             request,
-            tag
+            tag,
           );
           backendStream.on('error', err => {
             backendStream.unpipe(stream);
@@ -301,7 +301,7 @@ export class QueryUtil<
                 'QueryUtil._stream',
                 tag,
                 'Query failed with retryable stream error:',
-                err
+                err,
               );
 
               this._firestore._traceUtil
@@ -319,14 +319,14 @@ export class QueryUtil<
                   logger(
                     'QueryUtil._stream',
                     tag,
-                    'Query failed with retryable stream error but the total retry timeout has exceeded.'
+                    'Query failed with retryable stream error but the total retry timeout has exceeded.',
                   );
                   stream.destroy(err);
                   streamActive.resolve(/* active= */ false);
                 } else if (lastReceivedDocument && retryWithCursor) {
                   if (query instanceof VectorQuery) {
                     throw new Error(
-                      'Unimplemented: Vector query does not support cursors yet.'
+                      'Unimplemented: Vector query does not support cursors yet.',
                     );
                   }
 
@@ -334,7 +334,7 @@ export class QueryUtil<
                     'Query._stream',
                     tag,
                     'Query failed with retryable stream error and progress was made receiving ' +
-                      'documents, so the stream is being retried.'
+                      'documents, so the stream is being retried.',
                   );
 
                   isRetryRequestWithCursor = true;
@@ -378,7 +378,7 @@ export class QueryUtil<
                     'QueryUtil._stream',
                     tag,
                     `Query failed with retryable stream error however either retryWithCursor="${retryWithCursor}", or ` +
-                      'no progress was made receiving documents, so the stream is being closed.'
+                      'no progress was made receiving documents, so the stream is being closed.',
                   );
                   stream.destroy(err);
                   streamActive.resolve(/* active= */ false);
@@ -389,7 +389,7 @@ export class QueryUtil<
                 'QueryUtil._stream',
                 tag,
                 'Query failed with stream error:',
-                err
+                err,
               );
 
               this._firestore._traceUtil

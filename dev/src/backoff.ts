@@ -72,7 +72,7 @@ export let delayExecution: (f: () => void, ms: number) => NodeJS.Timeout =
  * @param {function} handler A handler than matches the API of `setTimeout()`.
  */
 export function setTimeoutHandler(
-  handler: (f: () => void, ms: number) => void
+  handler: (f: () => void, ms: number) => void,
 ): void {
   delayExecution = (f: () => void, ms: number) => {
     handler(f, ms);
@@ -255,13 +255,13 @@ export class ExponentialBackoff {
   backoffAndWait(): Promise<void> {
     if (this.awaitingBackoffCompletion) {
       return Promise.reject(
-        new Error('A backoff operation is already in progress.')
+        new Error('A backoff operation is already in progress.'),
       );
     }
 
     if (this.retryCount > MAX_RETRY_ATTEMPTS) {
       return Promise.reject(
-        new Error('Exceeded maximum number of retries allowed.')
+        new Error('Exceeded maximum number of retries allowed.'),
       );
     }
     // First schedule using the current base (which may be 0 and should be
@@ -272,7 +272,7 @@ export class ExponentialBackoff {
         'ExponentialBackoff.backoffAndWait',
         null,
         `Backing off for ${delayWithJitterMs} ms ` +
-          `(base delay: ${this.currentBaseMs} ms)`
+          `(base delay: ${this.currentBaseMs} ms)`,
       );
     }
 

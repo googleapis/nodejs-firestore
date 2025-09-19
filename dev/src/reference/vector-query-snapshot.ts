@@ -64,7 +64,7 @@ export class VectorQuerySnapshot<
     private readonly _readTime: Timestamp,
     private readonly _size: number,
     docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
-    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>,
   ) {
     this._docs = docs;
     this._changes = changes;
@@ -232,9 +232,9 @@ export class VectorQuerySnapshot<
    */
   forEach(
     callback: (
-      result: firestore.QueryDocumentSnapshot<AppModelType, DbModelType>
+      result: firestore.QueryDocumentSnapshot<AppModelType, DbModelType>,
     ) => void,
-    thisArg?: unknown
+    thisArg?: unknown,
   ): void {
     validateFunction('callback', callback);
 
@@ -252,7 +252,7 @@ export class VectorQuerySnapshot<
    * value.
    */
   isEqual(
-    other: firestore.VectorQuerySnapshot<AppModelType, DbModelType>
+    other: firestore.VectorQuerySnapshot<AppModelType, DbModelType>,
   ): boolean {
     // Since the read time is different on every query read, we explicitly
     // ignore all metadata in this comparison.

@@ -62,7 +62,7 @@ export type ApiOverride = Partial<GapicClient>;
  */
 export function createInstance(
   apiOverrides?: ApiOverride,
-  firestoreSettings?: Settings
+  firestoreSettings?: Settings,
 ): Promise<Firestore> {
   const initializationOptions = {
     ...{projectId: PROJECT_ID, sslCreds: SSL_CREDENTIALS!},
@@ -79,7 +79,7 @@ export function createInstance(
       ({
         ...new v1.FirestoreClient(initializationOptions),
         ...apiOverrides,
-      }) as any // eslint-disable-line @typescript-eslint/no-explicit-any
+      }) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
   );
 
   return Promise.resolve(firestore);
@@ -103,8 +103,8 @@ export function verifyInstance(firestore: Firestore): Promise<void> {
         } else {
           reject(
             new Error(
-              `Firestore has ${opCount} unfinished operations executing.`
-            )
+              `Firestore has ${opCount} unfinished operations executing.`,
+            ),
           );
         }
       }, 10);
@@ -116,7 +116,7 @@ function write(
   document: api.IDocument,
   mask: api.IDocumentMask | null,
   transforms: api.DocumentTransform.IFieldTransform[] | null,
-  precondition: api.IPrecondition | null
+  precondition: api.IPrecondition | null,
 ): api.ICommitRequest {
   const writes: api.IWrite[] = [];
   const update = Object.assign({}, document);
@@ -152,7 +152,7 @@ export function set(opts: {
     opts.document,
     opts.mask || null,
     opts.transforms || null,
-    /* precondition= */ null
+    /* precondition= */ null,
   );
 }
 
@@ -193,7 +193,7 @@ export function retrieve(id: string): api.IBatchGetDocumentsRequest {
 
 export function remove(
   id: string,
-  precondition?: api.IPrecondition
+  precondition?: api.IPrecondition,
 ): api.ICommitRequest {
   const writes: api.IWrite[] = [
     {delete: `${DATABASE_ROOT}/documents/collectionId/${id}`},
@@ -207,7 +207,7 @@ export function remove(
 }
 
 export function found(
-  dataOrId: api.IDocument | string
+  dataOrId: api.IDocument | string,
 ): api.IBatchGetDocumentsResponse {
   return {
     found: typeof dataOrId === 'string' ? document(dataOrId) : dataOrId,
@@ -256,14 +256,14 @@ export function document(
 }
 
 export function serverTimestamp(
-  field: string
+  field: string,
 ): api.DocumentTransform.IFieldTransform {
   return {fieldPath: field, setToServerValue: 'REQUEST_TIME'};
 }
 
 export function incrementTransform(
   field: string,
-  n: number
+  n: number,
 ): api.DocumentTransform.IFieldTransform {
   return {
     fieldPath: field,
@@ -311,7 +311,7 @@ export function writeResult(count: number): api.IWriteResponse {
 
 export function requestEquals(
   actual: object | undefined,
-  expected: object
+  expected: object,
 ): void {
   expect(actual).to.not.be.undefined;
 
@@ -372,7 +372,7 @@ export function response<T>(result: T): Promise<[T, unknown, unknown]> {
 export class Post {
   constructor(
     readonly title: string,
-    readonly author: string
+    readonly author: string,
   ) {}
   toString(): string {
     return this.title + ', by ' + this.author;
@@ -393,7 +393,7 @@ export const postConverter = {
 export const postConverterMerge = {
   toFirestore(
     post: PartialWithFieldValue<Post>,
-    options?: SetOptions
+    options?: SetOptions,
   ): DocumentData {
     if (options) {
       expect(post).to.not.be.an.instanceOf(Post);
@@ -412,7 +412,7 @@ export const postConverterMerge = {
 };
 
 export async function bundleToElementArray(
-  bundle: Buffer
+  bundle: Buffer,
 ): Promise<Array<firestore.IBundleElement>> {
   const result: Array<firestore.IBundleElement> = [];
   const readable = new PassThrough();
@@ -441,7 +441,7 @@ export async function bundleToElementArray(
  * is rejected with the cause of the first failed iteration.
  */
 export async function collect<T, TReturn, TNext>(
-  iterator: AsyncIterator<T, TReturn, TNext>
+  iterator: AsyncIterator<T, TReturn, TNext>,
 ): Promise<Array<T>> {
   const values: Array<T> = [];
   // eslint-disable-next-line no-constant-condition

@@ -146,11 +146,11 @@ describe('Firestore Tracing Controls', () => {
     // Make sure the SDK uses the one that was given to it, not the global one.
     expect(
       (firestore._traceUtil as EnabledTraceUtil).tracerProvider ===
-        myTracerProvider
+        myTracerProvider,
     ).to.be.true;
     expect(
       (firestore._traceUtil as EnabledTraceUtil).tracerProvider !==
-        globalTracerProvider
+        globalTracerProvider,
     ).to.be.true;
   });
 
@@ -181,7 +181,7 @@ describe('Firestore Tracing Controls', () => {
     } catch (e) {
       expect(
         e.toString() ===
-          "The object provided for 'tracerProvider' does not conform to the TracerProvider interface."
+          "The object provided for 'tracerProvider' does not conform to the TracerProvider interface.",
       );
     }
   });

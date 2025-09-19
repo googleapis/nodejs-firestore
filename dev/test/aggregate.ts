@@ -29,8 +29,8 @@ describe('aggregate field equality checks', () => {
       .to.be.true;
     expect(
       AggregateField.average('bar.baz').isEqual(
-        AggregateField.average('bar.baz')
-      )
+        AggregateField.average('bar.baz'),
+      ),
     ).to.be.true;
   });
 

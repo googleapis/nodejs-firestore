@@ -57,7 +57,7 @@ export class RateLimiter {
     private readonly multiplier: number,
     private readonly multiplierMillis: number,
     readonly maximumCapacity: number,
-    private readonly startTimeMillis = Date.now()
+    private readonly startTimeMillis = Date.now(),
   ) {
     this.availableTokens = initialCapacity;
     this.lastRefillTimeMillis = startTimeMillis;
@@ -75,7 +75,7 @@ export class RateLimiter {
    */
   tryMakeRequest(
     numOperations: number,
-    requestTimeMillis = Date.now()
+    requestTimeMillis = Date.now(),
   ): boolean {
     this.refillTokens(requestTimeMillis);
     if (numOperations <= this.availableTokens) {
@@ -98,7 +98,7 @@ export class RateLimiter {
    */
   getNextRequestDelayMs(
     numOperations: number,
-    requestTimeMillis = Date.now()
+    requestTimeMillis = Date.now(),
   ): number {
     this.refillTokens(requestTimeMillis);
     if (numOperations < this.availableTokens) {
@@ -131,13 +131,13 @@ export class RateLimiter {
       if (tokensToAdd > 0) {
         this.availableTokens = Math.min(
           capacity,
-          this.availableTokens + tokensToAdd
+          this.availableTokens + tokensToAdd,
         );
         this.lastRefillTimeMillis = requestTimeMillis;
       }
     } else {
       throw new Error(
-        'Request time should not be before the last token refill time.'
+        'Request time should not be before the last token refill time.',
       );
     }
   }
@@ -152,24 +152,24 @@ export class RateLimiter {
   calculateCapacity(requestTimeMillis: number): number {
     assert(
       requestTimeMillis >= this.startTimeMillis,
-      'startTime cannot be after currentTime'
+      'startTime cannot be after currentTime',
     );
     const millisElapsed = requestTimeMillis - this.startTimeMillis;
     const operationsPerSecond = Math.min(
       Math.floor(
         Math.pow(
           this.multiplier,
-          Math.floor(millisElapsed / this.multiplierMillis)
-        ) * this.initialCapacity
+          Math.floor(millisElapsed / this.multiplierMillis),
+        ) * this.initialCapacity,
       ),
-      this.maximumCapacity
+      this.maximumCapacity,
     );
 
     if (operationsPerSecond !== this.previousCapacity) {
       logger(
         'RateLimiter.calculateCapacity',
         null,
-        `New request capacity: ${operationsPerSecond} operations per second.`
+        `New request capacity: ${operationsPerSecond} operations per second.`,
       );
     }
 

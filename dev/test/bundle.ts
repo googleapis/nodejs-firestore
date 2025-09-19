@@ -35,7 +35,7 @@ export function verifyMetadata(
   meta: IBundleMetadata,
   createTime: ITimestamp,
   totalDocuments: number,
-  expectEmptyContent = false
+  expectEmptyContent = false,
 ): void {
   if (!expectEmptyContent) {
     expect(parseInt(meta.totalBytes!.toString())).greaterThan(0);
@@ -82,7 +82,7 @@ describe('Bundle Builder', () => {
       },
       // This should be the bundle read time.
       '2020-01-01T00:00:05.000000006Z',
-      'json'
+      'json',
     );
     // Same document but older read time.
     const snap2 = firestore.snapshot_(
@@ -93,7 +93,7 @@ describe('Bundle Builder', () => {
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
       '1970-01-01T00:00:05.000000006Z',
-      'json'
+      'json',
     );
 
     bundle.add(snap1);
@@ -107,7 +107,7 @@ describe('Bundle Builder', () => {
       meta!,
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       snap1.readTime.toProto().timestampValue!,
-      1
+      1,
     );
 
     // Verify doc1Meta and doc1Snap
@@ -132,7 +132,7 @@ describe('Bundle Builder', () => {
       },
       // This should be the bundle read time.
       '2020-01-01T00:00:05.000000006Z',
-      'json'
+      'json',
     );
     const query = firestore
       .collection('collectionId')
@@ -142,7 +142,7 @@ describe('Bundle Builder', () => {
       snap.readTime,
       1,
       () => [snap],
-      () => []
+      () => [],
     );
 
     const newQuery = firestore.collection('collectionId');
@@ -151,7 +151,7 @@ describe('Bundle Builder', () => {
       snap.readTime,
       1,
       () => [snap],
-      () => []
+      () => [],
     );
 
     bundle.add('test-query', querySnapshot);
@@ -165,15 +165,15 @@ describe('Bundle Builder', () => {
       meta!,
       // `snap.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       snap.readTime.toProto().timestampValue!,
-      1
+      1,
     );
 
     // Verify named query
     const namedQuery = elements.find(
-      e => e.namedQuery?.name === 'test-query'
+      e => e.namedQuery?.name === 'test-query',
     )!.namedQuery;
     const newNamedQuery = elements.find(
-      e => e.namedQuery?.name === 'test-query-new'
+      e => e.namedQuery?.name === 'test-query-new',
     )!.namedQuery;
     expect(namedQuery).to.deep.equal({
       name: 'test-query',
@@ -184,7 +184,7 @@ describe('Bundle Builder', () => {
         {
           parent: query.toProto().parent,
           structuredQuery: query.toProto().structuredQuery,
-        }
+        },
       ),
     });
     expect(newNamedQuery).to.deep.equal({
@@ -196,7 +196,7 @@ describe('Bundle Builder', () => {
         {
           parent: newQuery.toProto().parent,
           structuredQuery: newQuery.toProto().structuredQuery,
-        }
+        },
       ),
     });
 
@@ -224,7 +224,7 @@ describe('Bundle Builder', () => {
       },
       // This should be the bundle read time.
       '2020-01-01T00:00:05.000000006Z',
-      'json'
+      'json',
     );
     bundle.add(snap1);
     // Bundle is expected to be [bundleMeta, doc1Meta, doc1Snap].
@@ -237,7 +237,7 @@ describe('Bundle Builder', () => {
       meta!,
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       snap1.readTime.toProto().timestampValue!,
-      1
+      1,
     );
 
     // Verify doc1Meta and doc1Snap
@@ -259,7 +259,7 @@ describe('Bundle Builder', () => {
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
       '1970-01-01T00:00:05.000000006Z',
-      'json'
+      'json',
     );
     bundle.add(snap2);
 
@@ -272,7 +272,7 @@ describe('Bundle Builder', () => {
       newMeta!,
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       snap1.readTime.toProto().timestampValue!,
-      2
+      2,
     );
     expect(newElements.slice(1, 3)).to.deep.equal(elements.slice(1));
 
@@ -299,7 +299,7 @@ describe('Bundle Builder', () => {
       meta!,
       new Timestamp(0, 0).toProto().timestampValue!,
       0,
-      true
+      true,
     );
   });
 
@@ -314,7 +314,7 @@ describe('Bundle Builder', () => {
       },
       // This should be the bundle read time.
       '2020-01-01T00:00:05.000000006Z',
-      'json'
+      'json',
     );
     // Same document id but different collection
     const snap2 = firestore.snapshot_(
@@ -325,7 +325,7 @@ describe('Bundle Builder', () => {
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
       '1970-01-01T00:00:05.000000006Z',
-      'json'
+      'json',
     );
 
     bundle.add(snap1);
@@ -339,7 +339,7 @@ describe('Bundle Builder', () => {
       meta!,
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       snap1.readTime.toProto().timestampValue!,
-      2
+      2,
     );
 
     // Verify doc1Meta and doc1Snap
@@ -371,7 +371,7 @@ describe('Bundle Builder using BigInt', () => {
     return createInstance(undefined, {useBigInt: true}).then(
       firestoreInstance => {
         firestore = firestoreInstance;
-      }
+      },
     );
   });
 
@@ -388,7 +388,7 @@ describe('Bundle Builder using BigInt', () => {
       },
       // This should be the bundle read time.
       '2020-01-01T00:00:05.000000006Z',
-      'json'
+      'json',
     );
     bundle.add(snap);
 

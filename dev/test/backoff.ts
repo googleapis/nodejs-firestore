@@ -166,9 +166,9 @@ describe('ExponentialBackoff', () => {
     // The timeout handler for this test simply idles forever.
     setTimeoutHandler(() => {});
 
-    backoff.backoffAndWait().then(nop);
+    void backoff.backoffAndWait().then(nop);
     await expect(backoff.backoffAndWait()).to.eventually.be.rejectedWith(
-      'A backoff operation is already in progress.'
+      'A backoff operation is already in progress.',
     );
   });
 });

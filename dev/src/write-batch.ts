@@ -197,17 +197,17 @@ export class WriteBatch implements firestore.WriteBatch {
    */
   create<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
-    data: firestore.WithFieldValue<AppModelType>
+    data: firestore.WithFieldValue<AppModelType>,
   ): WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
     const firestoreData = ref._converter.toFirestore(
-      data as firestore.WithFieldValue<AppModelType>
+      data as firestore.WithFieldValue<AppModelType>,
     );
     validateDocumentData(
       'data',
       firestoreData,
       /* allowDeletes= */ false,
-      this._allowUndefined
+      this._allowUndefined,
     );
 
     this.verifyNotCommitted();
@@ -262,7 +262,7 @@ export class WriteBatch implements firestore.WriteBatch {
   delete(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     documentRef: firestore.DocumentReference<any, any>,
-    precondition?: firestore.Precondition
+    precondition?: firestore.Precondition,
   ): WriteBatch {
     const ref = validateDocumentReference('documentRef', documentRef);
     validateDeletePrecondition('precondition', precondition, {optional: true});
@@ -287,11 +287,11 @@ export class WriteBatch implements firestore.WriteBatch {
   set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.PartialWithFieldValue<AppModelType>,
-    options: firestore.SetOptions
+    options: firestore.SetOptions,
   ): WriteBatch;
   set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
-    data: firestore.WithFieldValue<AppModelType>
+    data: firestore.WithFieldValue<AppModelType>,
   ): WriteBatch;
   /**
    * Write to the document referred to by the provided
@@ -330,7 +330,7 @@ export class WriteBatch implements firestore.WriteBatch {
   set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.PartialWithFieldValue<AppModelType>,
-    options?: firestore.SetOptions
+    options?: firestore.SetOptions,
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});
     const mergeLeaves = options && 'merge' in options && options.merge;
@@ -346,7 +346,7 @@ export class WriteBatch implements firestore.WriteBatch {
       'data',
       firestoreData,
       /* allowDeletes= */ !!(mergePaths || mergeLeaves),
-      this._allowUndefined
+      this._allowUndefined,
     );
 
     this.verifyNotCommitted();
@@ -355,7 +355,7 @@ export class WriteBatch implements firestore.WriteBatch {
 
     if (mergePaths) {
       documentMask = DocumentMask.fromFieldMask(
-        (options as {mergeFields: Array<string | FieldPath>}).mergeFields
+        (options as {mergeFields: Array<string | FieldPath>}).mergeFields,
       );
       firestoreData = documentMask.applyTo(firestoreData);
     }
@@ -482,7 +482,7 @@ export class WriteBatch implements firestore.WriteBatch {
               i + argumentOffset,
               fieldOrValues[i + 1],
               this._allowUndefined,
-              fieldPath
+              fieldPath,
             );
             updateMap.set(fieldPath, fieldOrValues[i + 1]);
           }
@@ -499,7 +499,7 @@ export class WriteBatch implements firestore.WriteBatch {
         // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
         Object.entries(
-          dataOrField as firestore.UpdateData<DbModelType>
+          dataOrField as firestore.UpdateData<DbModelType>,
         ).forEach(([key, value]) => {
           // Skip `undefined` values (can be hit if `ignoreUndefinedProperties`
           // is set)
@@ -512,12 +512,12 @@ export class WriteBatch implements firestore.WriteBatch {
         if (preconditionOrValues.length > 0) {
           validateUpdatePrecondition(
             'preconditionOrValues',
-            preconditionOrValues[0]
+            preconditionOrValues[0],
           );
           precondition = new Precondition(
             preconditionOrValues[0] as {
               lastUpdateTime?: Timestamp;
-            }
+            },
           );
         }
       } catch (err) {
@@ -525,7 +525,7 @@ export class WriteBatch implements firestore.WriteBatch {
           'WriteBatch.update',
           null,
           'Non-varargs validation failed:',
-          err
+          err,
         );
         // We catch the validation error here and prefix the error with a custom
         // message to describe the usage of update() better.
@@ -591,9 +591,9 @@ export class WriteBatch implements firestore.WriteBatch {
               writeResult =>
                 new WriteResult(
                   Timestamp.fromProto(
-                    writeResult.updateTime || response.commitTime!
-                  )
-                )
+                    writeResult.updateTime || response.commitTime!,
+                  ),
+                ),
             );
           })
           .catch(err => {
@@ -603,7 +603,7 @@ export class WriteBatch implements firestore.WriteBatch {
       {
         [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: false,
         [ATTRIBUTE_KEY_DOC_COUNT]: this._opCount,
-      }
+      },
     );
   }
 
@@ -645,14 +645,14 @@ export class WriteBatch implements firestore.WriteBatch {
       'WriteBatch.commit',
       tag,
       'Sending %d writes',
-      request.writes!.length
+      request.writes!.length,
     );
 
     return this._firestore.request<Req, Resp>(
       commitOptions?.methodName || 'commit',
       request as Req,
       tag,
-      commitOptions?.retryCodes
+      commitOptions?.retryCodes,
     );
   }
 
@@ -680,7 +680,7 @@ export class WriteBatch implements firestore.WriteBatch {
 function validatePrecondition(
   arg: string | number,
   value: unknown,
-  options?: {allowedExistsValues?: boolean[]}
+  options?: {allowedExistsValues?: boolean[]},
 ): void {
   if (typeof value !== 'object' || value === null) {
     throw new Error('Input is not an object.');
@@ -696,8 +696,8 @@ function validatePrecondition(
       throw new Error(
         `${invalidArgumentMessage(
           arg,
-          'precondition'
-        )} "exists" is not a boolean.'`
+          'precondition',
+        )} "exists" is not a boolean.'`,
       );
     }
     if (
@@ -707,7 +707,7 @@ function validatePrecondition(
       throw new Error(
         `${invalidArgumentMessage(arg, 'precondition')} ` +
           `"exists" is not allowed to have the value ${precondition.exists} ` +
-          `(allowed values: ${options.allowedExistsValues.join(', ')})`
+          `(allowed values: ${options.allowedExistsValues.join(', ')})`,
       );
     }
   }
@@ -718,8 +718,8 @@ function validatePrecondition(
       throw new Error(
         `${invalidArgumentMessage(
           arg,
-          'precondition'
-        )} "lastUpdateTime" is not a Firestore Timestamp.`
+          'precondition',
+        )} "lastUpdateTime" is not a Firestore Timestamp.`,
       );
     }
   }
@@ -728,8 +728,8 @@ function validatePrecondition(
     throw new Error(
       `${invalidArgumentMessage(
         arg,
-        'precondition'
-      )} Input specifies more than one precondition.`
+        'precondition',
+      )} Input specifies more than one precondition.`,
     );
   }
 }
@@ -747,7 +747,7 @@ function validatePrecondition(
 function validateUpdatePrecondition(
   arg: string | number,
   value: unknown,
-  options?: RequiredArgumentOptions
+  options?: RequiredArgumentOptions,
 ): asserts value is {lastUpdateTime?: Timestamp} {
   if (!validateOptional(value, options)) {
     validatePrecondition(arg, value, {allowedExistsValues: [true]});
@@ -767,7 +767,7 @@ function validateUpdatePrecondition(
 function validateDeletePrecondition(
   arg: string | number,
   value: unknown,
-  options?: RequiredArgumentOptions
+  options?: RequiredArgumentOptions,
 ): void {
   if (!validateOptional(value, options)) {
     validatePrecondition(arg, value);
@@ -789,15 +789,15 @@ function validateDeletePrecondition(
 export function validateSetOptions(
   arg: string | number,
   value: unknown,
-  options?: RequiredArgumentOptions
+  options?: RequiredArgumentOptions,
 ): void {
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
       throw new Error(
         `${invalidArgumentMessage(
           arg,
-          'set() options argument'
-        )} Input is not an object.`
+          'set() options argument',
+        )} Input is not an object.`,
       );
     }
 
@@ -811,8 +811,8 @@ export function validateSetOptions(
           throw new Error(
             `${invalidArgumentMessage(
               arg,
-              'set() options argument'
-            )} "mergeFields" is not valid: ${err.message}`
+              'set() options argument',
+            )} "mergeFields" is not valid: ${err.message}`,
           );
         }
       }
@@ -822,8 +822,8 @@ export function validateSetOptions(
       throw new Error(
         `${invalidArgumentMessage(
           arg,
-          'set() options argument'
-        )} You cannot specify both "merge" and "mergeFields".`
+          'set() options argument',
+        )} You cannot specify both "merge" and "mergeFields".`,
       );
     }
   }
@@ -844,7 +844,7 @@ export function validateDocumentData(
   arg: string | number,
   obj: unknown,
   allowDeletes: boolean,
-  allowUndefined: boolean
+  allowUndefined: boolean,
 ): void {
   if (!isPlainObject(obj)) {
     throw new Error(customObjectMessage(arg, obj));
@@ -871,14 +871,14 @@ export function validateFieldValue(
   arg: string | number,
   val: unknown,
   allowUndefined: boolean,
-  path?: FieldPath
+  path?: FieldPath,
 ): void {
   validateUserInput(
     arg,
     val,
     'Firestore value',
     {allowDeletes: 'root', allowTransforms: true, allowUndefined},
-    path
+    path,
   );
 }
 
@@ -893,7 +893,7 @@ export function validateFieldValue(
  */
 function validateNoConflictingFields(
   arg: string | number,
-  data: UpdateMap
+  data: UpdateMap,
 ): void {
   const fields: FieldPath[] = [];
   data.forEach((value, key) => {
@@ -907,7 +907,7 @@ function validateNoConflictingFields(
       throw new Error(
         `${invalidArgumentMessage(arg, 'update map')} Field "${
           fields[i - 1]
-        }" was specified multiple times.`
+        }" was specified multiple times.`,
       );
     }
   }
@@ -926,7 +926,7 @@ function validateNoConflictingFields(
 function validateUpdateMap(
   arg: string | number,
   obj: unknown,
-  allowUndefined: boolean
+  allowUndefined: boolean,
 ): void {
   if (!isPlainObject(obj)) {
     throw new Error(customObjectMessage(arg, obj));

@@ -165,7 +165,7 @@ abstract class Path<T> {
     for (let i = 0; i < len; i++) {
       const comparison = this.compareSegments(
         this.segments[i],
-        other.segments[i]
+        other.segments[i],
       );
       if (comparison !== 0) {
         return comparison;
@@ -188,7 +188,7 @@ abstract class Path<T> {
       // both numeric
       return this.compareNumbers(
         this.extractNumericId(lhs),
-        this.extractNumericId(rhs)
+        this.extractNumericId(rhs),
       );
     } else {
       // both non-numeric
@@ -355,7 +355,7 @@ export class ResourcePath extends Path<ResourcePath> {
    */
   toQualifiedResourcePath(
     projectId: string,
-    databaseId: string
+    databaseId: string,
   ): QualifiedResourcePath {
     return new QualifiedResourcePath(projectId, databaseId, ...this.segments);
   }
@@ -483,7 +483,7 @@ export class QualifiedResourcePath extends ResourcePath {
     return new QualifiedResourcePath(
       this.projectId,
       this.databaseId,
-      ...segments
+      ...segments,
     );
   }
 
@@ -550,14 +550,14 @@ export class QualifiedResourcePath extends ResourcePath {
  */
 export function validateResourcePath(
   arg: string | number,
-  resourcePath: string
+  resourcePath: string,
 ): void {
   if (typeof resourcePath !== 'string' || resourcePath === '') {
     throw new Error(
       `${invalidArgumentMessage(
         arg,
-        'resource path'
-      )} Path must be a non-empty string.`
+        'resource path',
+      )} Path must be a non-empty string.`,
     );
   }
 
@@ -565,8 +565,8 @@ export function validateResourcePath(
     throw new Error(
       `${invalidArgumentMessage(
         arg,
-        'resource path'
-      )} Paths must not contain //.`
+        'resource path',
+      )} Paths must not contain //.`,
     );
   }
 }
@@ -606,7 +606,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
     if (Array.isArray(segments[0])) {
       throw new Error(
         'The FieldPath constructor no longer supports an array as its first argument. ' +
-          'Please unpack your array and call FieldPath() with individual arguments.'
+          'Please unpack your array and call FieldPath() with individual arguments.',
       );
     }
 
@@ -729,7 +729,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
  */
 export function validateFieldPath(
   arg: string | number,
-  fieldPath: unknown
+  fieldPath: unknown,
 ): asserts fieldPath is string | FieldPath {
   if (fieldPath instanceof FieldPath) {
     return;
@@ -737,7 +737,8 @@ export function validateFieldPath(
 
   if (fieldPath === undefined) {
     throw new Error(
-      invalidArgumentMessage(arg, 'field path') + ' The path cannot be omitted.'
+      invalidArgumentMessage(arg, 'field path') +
+        ' The path cannot be omitted.',
     );
   }
 
@@ -749,8 +750,8 @@ export function validateFieldPath(
     throw new Error(
       `${invalidArgumentMessage(
         arg,
-        'field path'
-      )} Paths can only be specified as strings or via a FieldPath object.`
+        'field path',
+      )} Paths can only be specified as strings or via a FieldPath object.`,
     );
   }
 
@@ -758,8 +759,8 @@ export function validateFieldPath(
     throw new Error(
       `${invalidArgumentMessage(
         arg,
-        'field path'
-      )} Paths must not contain ".." in them.`
+        'field path',
+      )} Paths must not contain ".." in them.`,
     );
   }
 
@@ -767,15 +768,15 @@ export function validateFieldPath(
     throw new Error(
       `${invalidArgumentMessage(
         arg,
-        'field path'
-      )} Paths must not start or end with ".".`
+        'field path',
+      )} Paths must not start or end with ".".`,
     );
   }
 
   if (!FIELD_PATH_RE.test(fieldPath)) {
     throw new Error(`${invalidArgumentMessage(
       arg,
-      'field path'
+      'field path',
     )} Paths can't be empty and must not contain
     "*~/[]".`);
   }

@@ -45,7 +45,7 @@ const DOC2 = `${DATABASE_ROOT}/documents/coll/doc2`;
 
 export function partitionQueryEquals(
   actual: api.IPartitionQueryRequest | undefined,
-  partitionCount: number
+  partitionCount: number,
 ) {
   expect(actual).to.not.be.undefined;
 
@@ -94,11 +94,11 @@ describe('Partition Query', () => {
 
   async function getPartitions(
     collectionGroup: CollectionGroup<DocumentData>,
-    desiredPartitionsCount: number
+    desiredPartitionsCount: number,
   ): Promise<QueryPartition<DocumentData>[]> {
     const partitions: QueryPartition<DocumentData>[] = [];
     for await (const partition of collectionGroup.getPartitions(
-      desiredPartitionsCount
+      desiredPartitionsCount,
     )) {
       partitions.push(partition);
     }
@@ -108,11 +108,11 @@ describe('Partition Query', () => {
   function verifyPartition(
     partition: FirebaseFirestore.QueryPartition,
     startAt: string | null,
-    endBefore: string | null
+    endBefore: string | null,
   ) {
     if (startAt) {
       expect(
-        partition.startAt?.map(value => (value as DocumentReference).path)
+        partition.startAt?.map(value => (value as DocumentReference).path),
       ).to.have.members([startAt]);
     } else {
       expect(partition.startAt).to.be.undefined;
@@ -120,7 +120,7 @@ describe('Partition Query', () => {
 
     if (endBefore) {
       expect(
-        partition.endBefore?.map(value => (value as DocumentReference).path)
+        partition.endBefore?.map(value => (value as DocumentReference).path),
       ).to.have.members([endBefore]);
     } else {
       expect(partition.endBefore).to.be.undefined;
@@ -137,7 +137,7 @@ describe('Partition Query', () => {
       partitionQueryStream: request => {
         partitionQueryEquals(
           request,
-          /* partitionCount= */ desiredPartitionsCount - 1
+          /* partitionCount= */ desiredPartitionsCount - 1,
         );
 
         return stream(cursorValue);
@@ -171,7 +171,7 @@ describe('Partition Query', () => {
     return createInstance().then(firestore => {
       const query = firestore.collectionGroup('collectionId');
       return expect(getPartitions(query, 0)).to.eventually.be.rejectedWith(
-        'Value for argument "desiredPartitionCount" must be within [1, Infinity] inclusive, but was: 0'
+        'Value for argument "desiredPartitionCount" must be within [1, Infinity] inclusive, but was: 0',
       );
     });
   });
@@ -194,7 +194,7 @@ describe('Partition Query', () => {
       partitionQueryStream: request => {
         partitionQueryEquals(
           request,
-          /* partitionCount= */ desiredPartitionsCount - 1
+          /* partitionCount= */ desiredPartitionsCount - 1,
         );
 
         return stream<api.ICursor>(
@@ -203,7 +203,7 @@ describe('Partition Query', () => {
           },
           {
             values: [{referenceValue: DOC2}],
-          }
+          },
         );
       },
       runQuery: request => {
@@ -253,7 +253,7 @@ describe('Partition Query', () => {
       partitionQueryStream: request => {
         partitionQueryEquals(
           request,
-          /* partitionCount= */ desiredPartitionsCount - 1
+          /* partitionCount= */ desiredPartitionsCount - 1,
         );
 
         return stream<api.ICursor>({
@@ -262,7 +262,7 @@ describe('Partition Query', () => {
       },
       runQuery: request => {
         expect(
-          request!.structuredQuery!.endAt!.values![0].integerValue
+          request!.structuredQuery!.endAt!.values![0].integerValue,
         ).to.equal(bigIntValue.toString());
         return emptyQueryStream();
       },
@@ -292,7 +292,7 @@ describe('Partition Query', () => {
           },
           {
             values: [{referenceValue: DOC1}],
-          }
+          },
         );
       },
     };

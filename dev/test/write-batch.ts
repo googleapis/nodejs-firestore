@@ -58,15 +58,15 @@ describe('set() method', () => {
 
   it('requires document name', () => {
     expect(() => (writeBatch as InvalidApiUsage).set()).to.throw(
-      'Value for argument "documentRef" is not a valid DocumentReference.'
+      'Value for argument "documentRef" is not a valid DocumentReference.',
     );
   });
 
   it('requires object', () => {
     expect(() =>
-      (writeBatch as InvalidApiUsage).set(firestore.doc('sub/doc'))
+      (writeBatch as InvalidApiUsage).set(firestore.doc('sub/doc')),
     ).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 
@@ -92,9 +92,9 @@ describe('set() method', () => {
     };
     const ref = firestore.doc('sub/doc').withConverter(converter);
     expect(() =>
-      writeBatch.set(ref, {title: 'foo'} as Partial<Post>, {merge: true})
+      writeBatch.set(ref, {title: 'foo'} as Partial<Post>, {merge: true}),
     ).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "author").'
+      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "author").',
     );
   });
 });
@@ -114,7 +114,7 @@ describe('delete() method', () => {
 
   it('requires document name', () => {
     expect(() => (writeBatch as InvalidApiUsage).delete()).to.throw(
-      'Value for argument "documentRef" is not a valid DocumentReference.'
+      'Value for argument "documentRef" is not a valid DocumentReference.',
     );
   });
 
@@ -140,7 +140,7 @@ describe('update() method', () => {
 
   it('requires document name', () => {
     expect(() => writeBatch.update({} as InvalidApiUsage, {})).to.throw(
-      'Value for argument "documentRef" is not a valid DocumentReference.'
+      'Value for argument "documentRef" is not a valid DocumentReference.',
     );
   });
 
@@ -148,10 +148,10 @@ describe('update() method', () => {
     expect(() => {
       writeBatch.update(
         firestore.doc('sub/doc'),
-        firestore.doc('sub/doc') as InvalidApiUsage
+        firestore.doc('sub/doc') as InvalidApiUsage,
       );
     }).to.throw(
-      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore document. Detected an object of type "DocumentReference" that doesn\'t match the expected instance. Please ensure that the Firestore types you are using are from the same NPM package.'
+      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore document. Detected an object of type "DocumentReference" that doesn\'t match the expected instance. Please ensure that the Firestore types you are using are from the same NPM package.',
     );
   });
 
@@ -159,7 +159,7 @@ describe('update() method', () => {
     writeBatch.update(
       firestore.doc('sub/doc'),
       {foo: 'bar'},
-      {lastUpdateTime: new Timestamp(479978400, 123000000)}
+      {lastUpdateTime: new Timestamp(479978400, 123000000)},
     );
   });
 
@@ -185,7 +185,7 @@ describe('create() method', () => {
 
   it('requires document name', () => {
     expect(() => (writeBatch as InvalidApiUsage).create()).to.throw(
-      'Value for argument "documentRef" is not a valid DocumentReference.'
+      'Value for argument "documentRef" is not a valid DocumentReference.',
     );
   });
 
@@ -193,7 +193,7 @@ describe('create() method', () => {
     expect(() => {
       (writeBatch as InvalidApiUsage).create(firestore.doc('sub/doc'));
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 
