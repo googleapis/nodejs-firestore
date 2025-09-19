@@ -33,7 +33,7 @@ import {
 } from './util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
-setLogFunction(console.log);
+setLogFunction(null);
 
 describe('Collection interface', () => {
   let firestore: Firestore;
