@@ -60,7 +60,7 @@ const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
 );
 
 // Change the argument to 'console.log' to enable debug output.
-setLogFunction(null);
+setLogFunction(console.log);
 
 describe('DocumentReference interface', () => {
   let firestore: Firestore;
