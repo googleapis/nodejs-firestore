@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.11.5](https://github.com/googleapis/nodejs-firestore/compare/v7.11.4...v7.11.5) (2025-09-22)
+
+
+### Bug Fixes
+
+* Pool.ts: add more detailed logging for client garbage collection ([#2420](https://github.com/googleapis/nodejs-firestore/issues/2420)) ([1bbca46](https://github.com/googleapis/nodejs-firestore/commit/1bbca46ff2a6ea98b52a83ff7dae6092e69b044d))
+
 ## [7.11.4](https://github.com/googleapis/nodejs-firestore/compare/v7.11.3...v7.11.4) (2025-09-16)
 
 
