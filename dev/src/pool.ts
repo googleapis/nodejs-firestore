@@ -18,7 +18,7 @@ import {GoogleError} from 'google-gax';
 import * as assert from 'assert';
 
 import {logger} from './logger';
-import {Deferred, requestTag as generateClientId} from './util';
+import {Deferred, requestTag as generateTag} from './util';
 
 export const CLIENT_TERMINATED_ERROR_MSG =
   'The client has already been terminated';
@@ -79,6 +79,11 @@ export class ClientPool<T extends object> {
   private readonly terminateDeferred = new Deferred<void>();
 
   /**
+   * A unique identifier for this object, for inclusion in log messages.
+   */
+  private readonly instanceId = 'cpl' + generateTag();
+
+  /**
    * @param concurrentOperationLimit The number of operations that each client
    * can handle.
    * @param maxIdleClients The maximum number of idle clients to keep before
@@ -137,16 +142,16 @@ export class ClientPool<T extends object> {
     if (selectedClient) {
       const selectedClientId = this.clientIdByClient.get(selectedClient);
       logger(
-        'ClientPool.acquire',
+        `ClientPool[${this.instanceId}].acquire`,
         requestTag,
         'Re-using existing client [%s] with %s remaining operations',
         selectedClientId,
         this.concurrentOperationLimit - selectedClientRequestCount
       );
     } else {
-      const newClientId = 'cli' + generateClientId();
+      const newClientId = 'cli' + generateTag();
       logger(
-        'ClientPool.acquire',
+        `ClientPool[${this.instanceId}].acquire`,
         requestTag,
         'Creating a new client [%s] (requiresGrpc: %s)',
         newClientId,
@@ -190,7 +195,7 @@ export class ClientPool<T extends object> {
 
     const gcDetermination = this.shouldGarbageCollectClient(client);
     logger(
-      'ClientPool.release',
+      `ClientPool[${this.instanceId}].release`,
       requestTag,
       'Releasing client [%s] (gc=%s)',
       clientId,
@@ -202,22 +207,23 @@ export class ClientPool<T extends object> {
     }
 
     logger(
-      'ClientPool.release',
+      `ClientPool[${this.instanceId}].release`,
       requestTag,
       'Garbage collecting client [%s] (%s)',
       clientId,
       this.lazyLogStringForAllClientIds
     );
 
-    this.activeClients.delete(client);
+    const activeClientDeleted = this.activeClients.delete(client);
     this.failedClients.delete(client);
     await this.clientDestructor(client);
 
     logger(
-      'ClientPool.release',
+      `ClientPool[${this.instanceId}].release`,
       requestTag,
-      'Garbage collected client [%s] (%s)',
+      'Garbage collected client [%s] activeClientDeleted=%s (%s)',
       clientId,
+      activeClientDeleted,
       this.lazyLogStringForAllClientIds
     );
   }
@@ -368,7 +374,7 @@ export class ClientPool<T extends object> {
     // Wait for all pending operations to complete before terminating.
     if (this.opCount > 0) {
       logger(
-        'ClientPool.terminate',
+        `ClientPool[${this.instanceId}].terminate`,
         /* requestTag= */ null,
         'Waiting for %s pending operations to complete before terminating (%s)',
         this.opCount,
@@ -376,6 +382,12 @@ export class ClientPool<T extends object> {
       );
       await this.terminateDeferred.promise;
     }
+    logger(
+      `ClientPool[${this.instanceId}].terminate`,
+      /* requestTag= */ null,
+      'Closing all active clients (%s)',
+      this.lazyLogStringForAllClientIds
+    );
     for (const [client] of this.activeClients) {
       this.activeClients.delete(client);
       await this.clientDestructor(client);
@@ -389,12 +401,12 @@ export class ClientPool<T extends object> {
  * failed clients.
  */
 class LazyLogStringForAllClientIds<T extends object> {
-  private readonly activeClients: Map<T, unknown>;
+  private readonly activeClients: Map<T, {activeRequestCount: number}>;
   private readonly failedClients: Set<T>;
   private readonly clientIdByClient: WeakMap<T, string>;
 
   constructor(config: {
-    activeClients: Map<T, unknown>;
+    activeClients: Map<T, {activeRequestCount: number}>;
     failedClients: Set<T>;
     clientIdByClient: WeakMap<T, string>;
   }) {
@@ -404,21 +416,26 @@ class LazyLogStringForAllClientIds<T extends object> {
   }
 
   toString(): string {
-    return (
-      `${this.activeClients.size} active clients: {` +
-      this.logStringFromClientIds(this.activeClients.keys()) +
-      '}, ' +
-      `${this.failedClients.size} failed clients: {` +
-      this.logStringFromClientIds(this.failedClients) +
-      '}'
-    );
-  }
-
-  private logStringFromClientIds(clients: Iterable<T>): string {
-    return Array.from(clients)
-      .map(client => this.clientIdByClient.get(client) ?? '<unknown>')
+    const activeClientsDescription = Array.from(this.activeClients.entries())
+      .map(
+        ([client, metadata]) =>
+          `${this.clientIdByClient.get(client)}=${metadata.activeRequestCount}`
+      )
       .sort()
       .join(', ');
+    const failedClientsDescription = Array.from(this.failedClients)
+      .map(client => `${this.clientIdByClient.get(client)}`)
+      .sort()
+      .join(', ');
+
+    return (
+      `${this.activeClients.size} active clients: {` +
+      activeClientsDescription +
+      '}, ' +
+      `${this.failedClients.size} failed clients: {` +
+      failedClientsDescription +
+      '}'
+    );
   }
 }
 
