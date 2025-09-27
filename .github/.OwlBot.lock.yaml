@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,5 +13,5 @@
 # limitations under the License.
 docker:
   image: gcr.io/cloud-devrel-public-resources/owlbot-nodejs:latest
-  digest: sha256:0d39e59663287ae929c1d4ccf8ebf7cef9946826c9b86eda7e85d8d752dbb584
-# created: 2024-11-21T22:39:44.342569463Z
+  digest: sha256:d7121436478154661c563c87f931ca78030903b813239c577f91021cda86cec3
+# created: 2025-08-28T17:36:59.211564853Z
