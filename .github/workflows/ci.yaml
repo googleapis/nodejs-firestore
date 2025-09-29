@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [14, 16, 18, 20]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,6 +24,20 @@ jobs:
       - run: rm -rf node_modules
       - run: npm install --engine-strict
       - run: npm test
+        env:
+          MOCHA_THROW_DEPRECATION: false
+  test-script:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: node --version
+      - run: npm install --engine-strict
+        working-directory: .github/scripts
+      - run: npm test
+        working-directory: .github/scripts
         env:
           MOCHA_THROW_DEPRECATION: false
   windows:
