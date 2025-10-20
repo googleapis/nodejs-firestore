@@ -9459,7 +9459,6 @@ declare namespace FirebaseFirestore {
      * value.
      */
     export class PipelineResult {
-      readonly executionTime: Timestamp;
       readonly createTime: Timestamp | undefined;
       readonly updateTime: Timestamp | undefined;
       /**

@@ -1930,22 +1930,6 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
   }
 
   /**
-   * The time at which the pipeline producing this result is executed.
-   *
-   * @type {Timestamp}
-   * @readonly
-   *
-   */
-  get executionTime(): Timestamp {
-    if (this._executionTime === undefined) {
-      throw new Error(
-        "'executionTime' is expected to exist, but it is undefined"
-      );
-    }
-    return this._executionTime;
-  }
-
-  /**
    * Retrieves all fields in the result as an object.
    *
    * @returns {T} An object containing all fields in the document.
