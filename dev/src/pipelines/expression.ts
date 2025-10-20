@@ -1333,32 +1333,32 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * ```typescript
    * // Subtract some duration determined by field 'unit' and 'amount' from the 'timestamp' field.
-   * field("timestamp").timestampSub(field("unit"), field("amount"));
+   * field("timestamp").timestampSubtract(field("unit"), field("amount"));
    * ```
    *
    * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
    * @param amount The expression evaluates to amount of the unit.
    * @return A new {@code Expression} representing the resulting timestamp.
    */
-  timestampSub(unit: Expression, amount: Expression): FunctionExpression;
+  timestampSubtract(unit: Expression, amount: Expression): FunctionExpression;
 
   /**
    * Creates an expression that subtracts a specified amount of time from this timestamp expression.
    *
    * ```typescript
    * // Subtract 1 day from the 'timestamp' field.
-   * field("timestamp").timestampSub("day", 1);
+   * field("timestamp").timestampSubtract("day", 1);
    * ```
    *
    * @param unit The unit of time to subtract (e.g., "day", "hour").
    * @param amount The amount of time to subtract.
    * @return A new {@code Expression} representing the resulting timestamp.
    */
-  timestampSub(
+  timestampSubtract(
     unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
     amount: number
   ): FunctionExpression;
-  timestampSub(
+  timestampSubtract(
     unit:
       | Expression
       | 'microsecond'
@@ -5668,7 +5668,7 @@ export function timestampAdd(
  *
  * ```typescript
  * // Subtract some duration determined by field 'unit' and 'amount' from the 'timestamp' field.
- * timestampSub(field("timestamp"), field("unit"), field("amount"));
+ * timestampSubtract(field("timestamp"), field("unit"), field("amount"));
  * ```
  *
  * @param timestamp The expression representing the timestamp.
@@ -5676,7 +5676,7 @@ export function timestampAdd(
  * @param amount The expression evaluates to amount of the unit.
  * @return A new {@code Expression} representing the resulting timestamp.
  */
-export function timestampSub(
+export function timestampSubtract(
   timestamp: Expression,
   unit: Expression,
   amount: Expression
@@ -5687,7 +5687,7 @@ export function timestampSub(
  *
  * ```typescript
  * // Subtract 1 day from the 'timestamp' field.
- * timestampSub(field("timestamp"), "day", 1);
+ * timestampSubtract(field("timestamp"), "day", 1);
  * ```
  *
  * @param timestamp The expression representing the timestamp.
@@ -5695,7 +5695,7 @@ export function timestampSub(
  * @param amount The amount of time to subtract.
  * @return A new {@code Expression} representing the resulting timestamp.
  */
-export function timestampSub(
+export function timestampSubtract(
   timestamp: Expression,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
@@ -5706,7 +5706,7 @@ export function timestampSub(
  *
  * ```typescript
  * // Subtract 1 day from the 'timestamp' field.
- * timestampSub("timestamp", "day", 1);
+ * timestampSubtract("timestamp", "day", 1);
  * ```
  *
  * @param fieldName The name of the field representing the timestamp.
@@ -5714,12 +5714,12 @@ export function timestampSub(
  * @param amount The amount of time to subtract.
  * @return A new {@code Expression} representing the resulting timestamp.
  */
-export function timestampSub(
+export function timestampSubtract(
   fieldName: string,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
 ): FunctionExpression;
-export function timestampSub(
+export function timestampSubtract(
   timestamp: Expression | string,
   unit:
     | Expression
@@ -5734,7 +5734,7 @@ export function timestampSub(
   const normalizedTimestamp = fieldOrExpression(timestamp);
   const normalizedUnit = valueToDefaultExpr(unit);
   const normalizedAmount = valueToDefaultExpr(amount);
-  return normalizedTimestamp.timestampSub(normalizedUnit, normalizedAmount);
+  return normalizedTimestamp.timestampSubtract(normalizedUnit, normalizedAmount);
 }
 
 /**

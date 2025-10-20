@@ -6,6 +6,9 @@
     <working-directory>$PROJECT_DIR$</working-directory>
     <pass-parent-env>true</pass-parent-env>
     <envs>
+      <env name="FIRESTORE_NAMED_DATABASE" value="enterprise" />
+      <env name="FIRESTORE_TARGET_BACKEND" value="nightly" />
+      <env name="GOOGLE_CLOUD_PROJECT" value="firestore-sdk-nightly" />
       <env name="TS_NODE_FILES" value="true" />
     </envs>
     <ui>bdd</ui>

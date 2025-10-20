@@ -104,7 +104,7 @@ export {
   notEqualAny,
   countAll,
   timestampAdd,
-  timestampSub,
+  timestampSubtract,
   timestampToUnixMicros,
   timestampToUnixSeconds,
   unixMicrosToTimestamp,

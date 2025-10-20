@@ -34,7 +34,7 @@ import {
   timestampToUnixSeconds,
   unixMicrosToTimestamp,
   timestampToUnixMillis,
-  timestampSub,
+  timestampSubtract,
   timestampAdd,
   byteLength,
   multiply,
@@ -3174,12 +3174,12 @@ describe.only('Pipeline class', () => {
           timestampAdd('timestamp', 'second', 10).as('plus10seconds'),
           timestampAdd('timestamp', 'microsecond', 10).as('plus10micros'),
           timestampAdd('timestamp', 'millisecond', 10).as('plus10millis'),
-          timestampSub('timestamp', 'day', 10).as('minus10days'),
-          timestampSub('timestamp', 'hour', 10).as('minus10hours'),
-          timestampSub('timestamp', 'minute', 10).as('minus10minutes'),
-          timestampSub('timestamp', 'second', 10).as('minus10seconds'),
-          timestampSub('timestamp', 'microsecond', 10).as('minus10micros'),
-          timestampSub('timestamp', 'millisecond', 10).as('minus10millis')
+          timestampSubtract('timestamp', 'day', 10).as('minus10days'),
+          timestampSubtract('timestamp', 'hour', 10).as('minus10hours'),
+          timestampSubtract('timestamp', 'minute', 10).as('minus10minutes'),
+          timestampSubtract('timestamp', 'second', 10).as('minus10seconds'),
+          timestampSubtract('timestamp', 'microsecond', 10).as('minus10micros'),
+          timestampSubtract('timestamp', 'millisecond', 10).as('minus10millis')
         )
         .execute();
       expectResults(snapshot, {

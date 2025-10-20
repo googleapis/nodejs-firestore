@@ -35,7 +35,7 @@ while IFS=, read -r find_str replace_str; do
   # - `xargs` passes the file list to sed.
   # - `sed -i ''` performs in-place editing (the '' is for macOS compatibility).
     # - `sed -i ''` performs in-place editing (the '' is for macOS compatibility).
-  git grep -l --word-regexp "$find_str" -- ':(exclude)*/renames.csv' ':(exclude)*/bulk-rename.sh' | while read -r file; do
+  git grep -l --word-regexp "$find_str" -- ':(exclude)renames.csv' ':(exclude)bulk-rename.sh' | while read -r file; do
     sed -i '' -e "s/[[:<:]]$find_str[[:>:]]/$replace_str/g" "$file"
   done
 
