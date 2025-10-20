@@ -3293,25 +3293,25 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'status' field is not equal to "completed"
-       * field("status").neq("completed");
+       * field("status").notEqual("completed");
        * ```
        *
        * @param expression The expression to compare for inequality.
        * @return A new {@link BooleanExpression} representing the inequality comparison.
        */
-      neq(expression: Expression): BooleanExpression;
+      notEqual(expression: Expression): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is not equal to a constant value.
        *
        * ```typescript
        * // Check if the 'country' field is not equal to "USA"
-       * field("country").neq("USA");
+       * field("country").notEqual("USA");
        * ```
        *
        * @param value The constant value to compare for inequality.
        * @return A new `Expression` representing the inequality comparison.
        */
-      neq(value: unknown): BooleanExpression;
+      notEqual(value: unknown): BooleanExpression;
 
       /**
        * Creates an expression that checks if this expression is less than another expression.
@@ -5615,54 +5615,54 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'status' field is not equal to field 'finalState'
-     * neq(field("status"), field("finalState"));
+     * notEqual(field("status"), field("finalState"));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
      * @return A new `Expression` representing the inequality comparison.
      */
-    export function neq(left: Expression, right: Expression): BooleanExpression;
+    export function notEqual(left: Expression, right: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is not equal to a constant value.
      *
      * ```typescript
      * // Check if the 'status' field is not equal to "completed"
-     * neq(field("status"), "completed");
+     * notEqual(field("status"), "completed");
      * ```
      *
      * @param expression The expression to compare.
      * @param value The constant value to compare to.
      * @return A new `Expression` representing the inequality comparison.
      */
-    export function neq(expression: Expression, value: unknown): BooleanExpression;
+    export function notEqual(expression: Expression, value: unknown): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is not equal to an expression.
      *
      * ```typescript
      * // Check if the 'status' field is not equal to the value of 'expectedStatus'
-     * neq("status", field("expectedStatus"));
+     * notEqual("status", field("expectedStatus"));
      * ```
      *
      * @param fieldName The field name to compare.
      * @param expression The expression to compare to.
      * @return A new {@link BooleanExpression} representing the inequality comparison.
      */
-    export function neq(fieldName: string, expression: Expression): BooleanExpression;
+    export function notEqual(fieldName: string, expression: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is not equal to a constant value.
      *
      * ```typescript
      * // Check if the 'country' field is not equal to "USA"
-     * neq("country", "USA");
+     * notEqual("country", "USA");
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The constant value to compare to.
      * @return A new `Expression` representing the inequality comparison.
      */
-    export function neq(fieldName: string, value: unknown): BooleanExpression;
+    export function notEqual(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if the first expression is less than the second expression.
      *

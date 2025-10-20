@@ -6,7 +6,7 @@ greaterThan,greaterThan
 greaterThanOrEqual,greaterThanOrEqual
 lessThan,lessThan
 lessThanOrEqual,lessThanOrEqual
-neq,notEqual
+notEqual,notEqual
 notEqAny,notEqualAny
 strConcat,stringConcat
 strContains,stringContains

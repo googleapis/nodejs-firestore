@@ -523,7 +523,7 @@ export function toPipelineBooleanExpr(
         case 'EQUAL':
           return and(field.exists(), field.equal(value));
         case 'NOT_EQUAL':
-          return and(field.exists(), field.neq(value));
+          return and(field.exists(), field.notEqual(value));
         case 'ARRAY_CONTAINS':
           return and(field.exists(), field.arrayContains(value));
         case 'IN': {

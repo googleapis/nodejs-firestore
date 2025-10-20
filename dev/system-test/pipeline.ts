@@ -82,7 +82,7 @@ import {
   greaterThan,
   like,
   lessThan,
-  neq,
+  notEqual,
   ascending,
   not,
   or,
@@ -2642,7 +2642,7 @@ describe('Pipeline class', () => {
           and(
             greaterThan('rating', 4.2),
             lessThanOrEqual(field('rating'), 4.5),
-            neq('genre', 'Science Fiction')
+            notEqual('genre', 'Science Fiction')
           )
         )
         .select('rating', 'title')
@@ -4597,7 +4597,7 @@ describe('Query to Pipeline', () => {
     );
   });
 
-  it('supports neq nan', () => {
+  it('supports notEqual nan', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: NaN},
@@ -4626,7 +4626,7 @@ describe('Query to Pipeline', () => {
     );
   });
 
-  it('supports neq null', () => {
+  it('supports notEqual null', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: null},
@@ -4640,7 +4640,7 @@ describe('Query to Pipeline', () => {
     );
   });
 
-  it('supports neq', () => {
+  it('supports notEqual', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: 0},

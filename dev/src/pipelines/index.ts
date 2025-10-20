@@ -32,7 +32,7 @@ export {
   greaterThan,
   like,
   lessThan,
-  neq,
+  notEqual,
   ascending,
   not,
   or,
