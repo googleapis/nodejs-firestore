@@ -925,7 +925,7 @@ declare namespace FirebaseFirestore {
      * const futureResults = await transaction
      *   .execute(
      *     firestore.pipeline().collection("books")
-     *       .where(gt(Field.of("rating"), 4.5))
+     *       .where(greaterThan(Field.of("rating"), 4.5))
      *       .select("title", "author", "rating"));
      * ```
      *
@@ -3368,25 +3368,25 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'age' field is greater than the 'limit' field
-       * field("age").gt(field("limit"));
+       * field("age").greaterThan(field("limit"));
        * ```
        *
        * @param expression The expression to compare for greater than.
        * @return A new {@link BooleanExpression} representing the greater than comparison.
        */
-      gt(expression: Expression): BooleanExpression;
+      greaterThan(expression: Expression): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is greater than a constant value.
        *
        * ```typescript
        * // Check if the 'price' field is greater than 100
-       * field("price").gt(100);
+       * field("price").greaterThan(100);
        * ```
        *
        * @param value The constant value to compare for greater than.
        * @return A new `Expression` representing the greater than comparison.
        */
-      gt(value: unknown): BooleanExpression;
+      greaterThan(value: unknown): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is greater than or equal to another
        * expression.
@@ -4811,7 +4811,7 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Example of creating a FunctionExpr indirectly using helper functions:
-     * const priceGreaterThan10 = field("price").gt(10);
+     * const priceGreaterThan10 = field("price").greaterThan(10);
      * const combinedCondition = and(priceGreaterThan10, field("category").equal("books"));
      *
      * // 'priceGreaterThan10' and 'combinedCondition' are instances of FunctionExpr.
@@ -4852,7 +4852,7 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Find the count of documents with a score greater than 90
-       * field("score").gt(90).countIf().as("highestScore");
+       * field("score").greaterThan(90).countIf().as("highestScore");
        * ```
        *
        * @return A new `AggregateFunction` representing the 'countIf' aggregation.
@@ -5777,54 +5777,54 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'age' field is greater than 18
-     * gt(field("age"), Constant(9).add(9));
+     * greaterThan(field("age"), Constant(9).add(9));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
      * @return A new `Expression` representing the greater than comparison.
      */
-    export function gt(left: Expression, right: Expression): BooleanExpression;
+    export function greaterThan(left: Expression, right: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is greater than a constant value.
      *
      * ```typescript
      * // Check if the 'age' field is greater than 18
-     * gt(field("age"), 18);
+     * greaterThan(field("age"), 18);
      * ```
      *
      * @param expression The expression to compare.
      * @param value The constant value to compare to.
      * @return A new `Expression` representing the greater than comparison.
      */
-    export function gt(expression: Expression, value: unknown): BooleanExpression;
+    export function greaterThan(expression: Expression, value: unknown): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is greater than another expression.
      *
      * ```typescript
      * // Check if the value of field 'age' is greater than the value of field 'limit'
-     * gt("age", field("limit"));
+     * greaterThan("age", field("limit"));
      * ```
      *
      * @param fieldName The name of the field to compare.
      * @param expression The expression to compare against.
      * @return A new {@link BooleanExpression} representing the greater than comparison.
      */
-    export function gt(fieldName: string, expression: Expression): BooleanExpression;
+    export function greaterThan(fieldName: string, expression: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is greater than a constant value.
      *
      * ```typescript
      * // Check if the 'price' field is greater than 100
-     * gt("price", 100);
+     * greaterThan("price", 100);
      * ```
      *
      * @param fieldName The name of the field to compare.
      * @param value The constant value to compare to.
      * @return A new {@link BooleanExpression} representing the greater than comparison.
      */
-    export function gt(fieldName: string, value: unknown): BooleanExpression;
+    export function greaterThan(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if the first expression is greater than or equal to the
      * second expression.
@@ -6243,7 +6243,7 @@ declare namespace FirebaseFirestore {
      * // Check if exactly one of the conditions is true: 'age' greater than 18, 'city' is "London",
      * // or 'status' is "active".
      * const condition = xor(
-     *     gt("age", 18),
+     *     greaterThan("age", 18),
      *     equal("city", "London"),
      *     equal("status", "active")
      * );
@@ -6266,7 +6266,7 @@ declare namespace FirebaseFirestore {
      * ```typescript
      * // If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
      * cond(
-     *     gt("age", 18), constant("Adult"), constant("Minor"));
+     *     greaterThan("age", 18), constant("Adult"), constant("Minor"));
      * ```
      *
      * @param condition The condition to evaluate.
@@ -7115,7 +7115,7 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Count the number of items where the price is greater than 10
-     * count(field("price").gt(10)).as("expensiveItemCount");
+     * count(field("price").greaterThan(10)).as("expensiveItemCount");
      * ```
      *
      * @param expression The expression to count.
@@ -7755,7 +7755,7 @@ declare namespace FirebaseFirestore {
      * ```typescript
      * // Check if the 'age' field is greater than 18 AND the 'city' field is "London" AND
      * // the 'status' field is "active"
-     * const condition = and(gt("age", 18), equal("city", "London"), equal("status", "active"));
+     * const condition = and(greaterThan("age", 18), equal("city", "London"), equal("status", "active"));
      * ```
      *
      * @param first The first filter condition.
@@ -7774,7 +7774,7 @@ declare namespace FirebaseFirestore {
      * ```typescript
      * // Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
      * // the 'status' field is "active"
-     * const condition = or(gt("age", 18), equal("city", "London"), equal("status", "active"));
+     * const condition = or(greaterThan("age", 18), equal("city", "London"), equal("status", "active"));
      * ```
      *
      * @param first The first filter condition.
@@ -8225,13 +8225,13 @@ declare namespace FirebaseFirestore {
      * // Example 2: Filter documents where 'genre' is "Science Fiction" and 'published' is after 1950
      * const results2 = await db.pipeline()
      *     .collection("books")
-     *     .where(and(Field.of("genre").equal("Science Fiction"), Field.of("published").gt(1950)))
+     *     .where(and(Field.of("genre").equal("Science Fiction"), Field.of("published").greaterThan(1950)))
      *     .execute();
      *
      * // Example 3: Calculate the average rating of books published after 1980
      * const results3 = await db.pipeline()
      *     .collection("books")
-     *     .where(Field.of("published").gt(1980))
+     *     .where(Field.of("published").greaterThan(1980))
      *     .aggregate(avg(Field.of("rating")).as("averageRating"))
      *     .execute();
      * ```
@@ -8420,7 +8420,7 @@ declare namespace FirebaseFirestore {
        *
        * <ul>
        *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
-       *       Function#gt} (greater than), etc.</li>
+       *       Function#greaterThan} (greater than), etc.</li>
        *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
        *   <li>advanced functions: {@link Function#regexMatch}, {@link
        *       Function#arrayContains}, etc.</li>
@@ -8432,8 +8432,8 @@ declare namespace FirebaseFirestore {
        * firestore.pipeline().collection("books")
        *   .where(
        *     and(
-       *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-       *         field("genre").equal("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+       *         greaterThan(field("rating"), 4.0),   // Filter for ratings greater than 4.0
+       *         field("genre").equal("Science Fiction") // Equivalent to greaterThan("genre", "Science Fiction")
        *     )
        *   );
        * ```
@@ -8452,7 +8452,7 @@ declare namespace FirebaseFirestore {
        *
        * <ul>
        *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
-       *       Function#gt} (greater than), etc.</li>
+       *       Function#greaterThan} (greater than), etc.</li>
        *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
        *   <li>advanced functions: {@link Function#regexMatch}, {@link
        *       Function#arrayContains}, etc.</li>
@@ -8464,8 +8464,8 @@ declare namespace FirebaseFirestore {
        * firestore.pipeline().collection("books")
        *   .where({
        *     filter: and(
-       *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-       *         field("genre").equal("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+       *         greaterThan(field("rating"), 4.0),   // Filter for ratings greater than 4.0
+       *         field("genre").equal("Science Fiction") // Equivalent to greaterThan("genre", "Science Fiction")
        *     )
        *   });
        * ```
@@ -9070,7 +9070,7 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * const futureResults = await firestore.pipeline().collection("books")
-       *     .where(gt(Field.of("rating"), 4.5))
+       *     .where(greaterThan(Field.of("rating"), 4.5))
        *     .select("title", "author", "rating")
        *     .execute();
        * ```
@@ -9090,7 +9090,7 @@ declare namespace FirebaseFirestore {
        * @example
        * ```typescript
        * firestore.pipeline().collection("books")
-       *     .where(gt(Field.of("rating"), 4.5))
+       *     .where(greaterThan(Field.of("rating"), 4.5))
        *     .select("title", "author", "rating")
        *     .stream()
        *     .on('data', (pipelineResult) => {
@@ -9500,7 +9500,7 @@ declare namespace FirebaseFirestore {
      * const snapshot = await firestore
      *   .pipeline()
      *   .collection('myCollection')
-     *   .where(field('value').gt(10))
+     *   .where(field('value').greaterThan(10))
      *   .execute();
      *
      * snapshot.results.forEach(doc => {

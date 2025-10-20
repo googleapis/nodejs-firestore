@@ -79,7 +79,7 @@ import {
   countAll,
   endsWith,
   equal,
-  gt,
+  greaterThan,
   like,
   lt,
   neq,
@@ -1071,7 +1071,7 @@ describe('Pipeline class', () => {
             accumulators: [avg('rating').as('avgRating')],
             groups: ['genre'],
           })
-          .where(gt('avgRating', 4.3))
+          .where(greaterThan('avgRating', 4.3))
           .sort(field('avgRating').descending())
           .execute();
         expectResults(
@@ -1105,7 +1105,7 @@ describe('Pipeline class', () => {
         let snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .aggregate(countIf(field('rating').gt(4.3)).as('count'))
+          .aggregate(countIf(field('rating').greaterThan(4.3)).as('count'))
           .execute();
         const expectedResults = {
           count: 3,
@@ -1115,7 +1115,7 @@ describe('Pipeline class', () => {
         snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .aggregate(field('rating').gt(4.3).countIf().as('count'))
+          .aggregate(field('rating').greaterThan(4.3).countIf().as('count'))
           .execute();
         expectResults(snapshot, expectedResults);
       });
@@ -1502,7 +1502,7 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where(
             and(
-              gt('rating', 4.5),
+              greaterThan('rating', 4.5),
               equalAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
             )
           )
@@ -1516,7 +1516,7 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where(
             and(
-              gt('rating', 4.5),
+              greaterThan('rating', 4.5),
               equalAny('genre', ['Science Fiction', 'Romance', 'Fantasy']),
               lt('published', 1965)
             )
@@ -1576,7 +1576,7 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where({
             condition: and(
-              gt('rating', 4.5),
+              greaterThan('rating', 4.5),
               equalAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
             ),
           })
@@ -2551,7 +2551,7 @@ describe('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .select(charLength('title').as('titleLength'), field('title'))
-        .where(gt('titleLength', 20))
+        .where(greaterThan('titleLength', 20))
         .sort(field('title').ascending())
         .execute();
 
@@ -2640,7 +2640,7 @@ describe('Pipeline class', () => {
         .collection(randomCol.path)
         .where(
           and(
-            gt('rating', 4.2),
+            greaterThan('rating', 4.2),
             lte(field('rating'), 4.5),
             neq('genre', 'Science Fiction')
           )
@@ -2665,7 +2665,7 @@ describe('Pipeline class', () => {
         .collection(randomCol.path)
         .where(
           or(
-            and(gt('rating', 4.5), equal('genre', 'Science Fiction')),
+            and(greaterThan('rating', 4.5), equal('genre', 'Science Fiction')),
             lt('published', 1900)
           )
         )
@@ -2888,7 +2888,7 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where(
             new BooleanExpression('and', [
-              field('rating').gt(0),
+              field('rating').greaterThan(0),
               field('title').charLength().lt(5),
               field('tags').arrayContains('propaganda'),
             ])
@@ -3879,7 +3879,7 @@ describe('Pipeline class', () => {
           or(
             and(
               field('rating').equal(lastDoc.get('rating')),
-              field('__name__').gt(lastDoc.ref)
+              field('__name__').greaterThan(lastDoc.ref)
             ),
             field('rating').lt(lastDoc.get('rating'))
           )

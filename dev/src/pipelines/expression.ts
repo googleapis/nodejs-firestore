@@ -321,28 +321,28 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * ```typescript
    * // Check if the 'age' field is greater than the 'limit' field
-   * field("age").gt(field("limit"));
+   * field("age").greaterThan(field("limit"));
    * ```
    *
    * @param expression The expression to compare for greater than.
    * @return A new `Expression` representing the greater than comparison.
    */
-  gt(expression: Expression): BooleanExpression;
+  greaterThan(expression: Expression): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is greater than a constant value.
    *
    * ```typescript
    * // Check if the 'price' field is greater than 100
-   * field("price").gt(100);
+   * field("price").greaterThan(100);
    * ```
    *
    * @param value The constant value to compare for greater than.
    * @return A new `Expression` representing the greater than comparison.
    */
-  gt(value: unknown): BooleanExpression;
-  gt(other: unknown): BooleanExpression {
-    return new BooleanExpression('gt', [this, valueToDefaultExpr(other)]);
+  greaterThan(value: unknown): BooleanExpression;
+  greaterThan(other: unknown): BooleanExpression {
+    return new BooleanExpression('greaterThan', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -2385,7 +2385,7 @@ export class BooleanExpression
    *
    * ```typescript
    * // Find the count of documents with a score greater than 90
-   * field("score").gt(90).countIf().as("highestScore");
+   * field("score").greaterThan(90).countIf().as("highestScore");
    * ```
    *
    * @return A new `AggregateFunction` representing the 'countIf' aggregation.
@@ -3450,60 +3450,60 @@ export function lte(left: Expression | string, right: unknown): BooleanExpressio
  *
  * ```typescript
  * // Check if the 'age' field is greater than 18
- * gt(field("age"), Constant(9).add(9));
+ * greaterThan(field("age"), Constant(9).add(9));
  * ```
  *
  * @param left The first expression to compare.
  * @param right The second expression to compare.
  * @return A new `Expression` representing the greater than comparison.
  */
-export function gt(left: Expression, right: Expression): BooleanExpression;
+export function greaterThan(left: Expression, right: Expression): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is greater than a constant value.
  *
  * ```typescript
  * // Check if the 'age' field is greater than 18
- * gt(field("age"), 18);
+ * greaterThan(field("age"), 18);
  * ```
  *
  * @param expression The expression to compare.
  * @param value The constant value to compare to.
  * @return A new `Expression` representing the greater than comparison.
  */
-export function gt(expression: Expression, value: unknown): BooleanExpression;
+export function greaterThan(expression: Expression, value: unknown): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is greater than an expression.
  *
  * ```typescript
  * // Check if the value of field 'age' is greater than the value of field 'limit'
- * gt("age", field("limit"));
+ * greaterThan("age", field("limit"));
  * ```
  *
  * @param fieldName The field name to compare.
  * @param expression The expression to compare to.
  * @return A new `Expression` representing the greater than comparison.
  */
-export function gt(fieldName: string, expression: Expression): BooleanExpression;
+export function greaterThan(fieldName: string, expression: Expression): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is greater than a constant value.
  *
  * ```typescript
  * // Check if the 'price' field is greater than 100
- * gt("price", 100);
+ * greaterThan("price", 100);
  * ```
  *
  * @param fieldName The field name to compare.
  * @param value The constant value to compare to.
  * @return A new `Expression` representing the greater than comparison.
  */
-export function gt(fieldName: string, value: unknown): BooleanExpression;
-export function gt(left: Expression | string, right: unknown): BooleanExpression {
+export function greaterThan(fieldName: string, value: unknown): BooleanExpression;
+export function greaterThan(left: Expression | string, right: unknown): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
-  return leftExpr.gt(rightExpr);
+  return leftExpr.greaterThan(rightExpr);
 }
 
 /**
@@ -3979,7 +3979,7 @@ export function notEqAny(
  * // Check if only one of the conditions is true: 'age' greater than 18, 'city' is "London",
  * // or 'status' is "active".
  * const condition = xor(
- *     gt("age", 18),
+ *     greaterThan("age", 18),
  *     equal("city", "London"),
  *     equal("status", "active"));
  * ```
@@ -4004,7 +4004,7 @@ export function xor(
  * ```typescript
  * // If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
  * cond(
- *     gt("age", 18), constant("Adult"), constant("Minor"));
+ *     greaterThan("age", 18), constant("Adult"), constant("Minor"));
  * ```
  *
  * @param condition The condition to evaluate.
@@ -5000,7 +5000,7 @@ export function countAll(): AggregateFunction {
  *
  * ```typescript
  * // Count the number of items where the price is greater than 10
- * count(field("price").gt(10)).as("expensiveItemCount");
+ * count(field("price").greaterThan(10)).as("expensiveItemCount");
  * ```
  *
  * @param expression The expression to count.
@@ -5742,7 +5742,7 @@ export function timestampSub(
  * ```typescript
  * // Check if the 'age' field is greater than 18 AND the 'city' field is "London" AND
  * // the 'status' field is "active"
- * const condition = and(gt("age", 18), equal("city", "London"), equal("status", "active"));
+ * const condition = and(greaterThan("age", 18), equal("city", "London"), equal("status", "active"));
  * ```
  *
  * @param first The first filter condition.
@@ -5764,7 +5764,7 @@ export function and(
  * ```typescript
  * // Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
  * // the 'status' field is "active"
- * const condition = or(gt("age", 18), equal("city", "London"), equal("status", "active"));
+ * const condition = or(greaterThan("age", 18), equal("city", "London"), equal("status", "active"));
  * ```
  *
  * @param first The first filter condition.

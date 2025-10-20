@@ -2,7 +2,7 @@ BooleanExpression,BooleanExpression
 Expression,Expression
 equal,equal
 equalAny,equalAny
-gt,greaterThan
+greaterThan,greaterThan
 gte,greaterThanOrEqual
 lt,lessThan
 lte,lessThanOrEqual

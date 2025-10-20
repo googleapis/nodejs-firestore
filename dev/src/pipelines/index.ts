@@ -29,7 +29,7 @@ export {
   ceil,
   exp,
   floor,
-  gt,
+  greaterThan,
   like,
   lt,
   neq,

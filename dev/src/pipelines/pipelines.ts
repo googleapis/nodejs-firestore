@@ -313,13 +313,13 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
  * // Example 2: Filter documents where 'genre' is 'Science Fiction' and 'published' is after 1950
  * const results2 = await db.pipeline()
  *     .collection('books')
- *     .where(and(field('genre').equal('Science Fiction'), field('published').gt(1950)))
+ *     .where(and(field('genre').equal('Science Fiction'), field('published').greaterThan(1950)))
  *     .execute();
  *
  * // Example 3: Calculate the average rating of books published after 1980
  * const results3 = await db.pipeline()
  *     .collection('books')
- *     .where(field('published').gt(1980))
+ *     .where(field('published').greaterThan(1980))
  *     .aggregate(avg(field('rating')).as('averageRating'))
  *     .execute();
  * ```
@@ -592,7 +592,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * <ul>
    *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
-   *       Function#gt} (greater than), etc.</li>
+   *       Function#greaterThan} (greater than), etc.</li>
    *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
    *   <li>advanced functions: {@link Function#regexMatch}, {@link
    *       Function#arrayContains}, etc.</li>
@@ -604,8 +604,8 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * firestore.pipeline().collection("books")
    *   .where(
    *     and(
-   *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-   *         field("genre").equal("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+   *         greaterThan(field("rating"), 4.0),   // Filter for ratings greater than 4.0
+   *         field("genre").equal("Science Fiction") // Equivalent to greaterThan("genre", "Science Fiction")
    *     )
    *   );
    * ```
@@ -624,7 +624,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * <ul>
    *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
-   *       Function#gt} (greater than), etc.</li>
+   *       Function#greaterThan} (greater than), etc.</li>
    *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
    *   <li>advanced functions: {@link Function#regexMatch}, {@link
    *       Function#arrayContains}, etc.</li>
@@ -636,8 +636,8 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * firestore.pipeline().collection("books")
    *   .where(
    *     and(
-   *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-   *         field("genre").equal("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+   *         greaterThan(field("rating"), 4.0),   // Filter for ratings greater than 4.0
+   *         field("genre").equal("Science Fiction") // Equivalent to greaterThan("genre", "Science Fiction")
    *     )
    *   );
    * ```
@@ -1523,7 +1523,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * ```typescript
    * const futureResults = await firestore.pipeline().collection('books')
-   *     .where(gt(field('rating'), 4.5))
+   *     .where(greaterThan(field('rating'), 4.5))
    *     .select('title', 'author', 'rating')
    *     .execute();
    * ```
@@ -1577,7 +1577,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @example
    * ```typescript
    * firestore.pipeline().collection('books')
-   *     .where(gt(field('rating'), 4.5))
+   *     .where(greaterThan(field('rating'), 4.5))
    *     .select('title', 'author', 'rating')
    *     .stream()
    *     .on('data', (pipelineResult) => {})
