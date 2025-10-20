@@ -41,7 +41,7 @@ import {
   sum,
   maximum,
   descending,
-  FunctionExpr,
+  FunctionExpression,
   minimum,
   count,
   countIf,
@@ -2874,7 +2874,7 @@ describe('Pipeline class', () => {
           .sort(descending('rating'))
           .limit(1)
           .select(
-            new FunctionExpr('add', [field('rating'), constant(1)]).as('rating')
+            new FunctionExpression('add', [field('rating'), constant(1)]).as('rating')
           )
           .execute();
         expectResults(snapshot, {
@@ -2937,7 +2937,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .sort(
-            new FunctionExpr('char_length', [field('title')]).ascending(),
+            new FunctionExpression('char_length', [field('title')]).ascending(),
             descending('__name__')
           )
           .limit(3)

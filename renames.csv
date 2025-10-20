@@ -12,5 +12,5 @@ stringConcat,stringConcat
 stringContains,stringContains
 stringReverse,stringReverse
 AliasedExpression,AliasedExpression
-FunctionExpr,FunctionExpression
+FunctionExpression,FunctionExpression
 cond,conditional

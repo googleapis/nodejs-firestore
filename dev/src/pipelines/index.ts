@@ -58,7 +58,7 @@ export {
   add,
   BooleanExpression,
   Expression,
-  FunctionExpr,
+  FunctionExpression,
   minimum,
   count,
   countIf,

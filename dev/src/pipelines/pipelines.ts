@@ -347,7 +347,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * - {@link Field}: References an existing document field.
    * - {@link Expression}: Either a literal value (see {@link Constant}) or a computed value
-   *   (see {@FunctionExpr}) with an assigned alias using {@link Expression#as}.
+   *   (see {@FunctionExpression}) with an assigned alias using {@link Expression#as}.
    *
    * Example:
    *
@@ -378,7 +378,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * - {@link Field}: References an existing document field.
    * - {@link Expression}: Either a literal value (see {@link Constant}) or a computed value
-   *   (see {@FunctionExpr}) with an assigned alias using {@link Expression#as}.
+   *   (see {@FunctionExpression}) with an assigned alias using {@link Expression#as}.
    *
    * Example:
    *

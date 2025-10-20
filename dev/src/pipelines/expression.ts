@@ -81,9 +81,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   add(
     second: firestore.Pipelines.Expression | unknown,
     ...others: Array<firestore.Pipelines.Expression | unknown>
-  ): FunctionExpr {
+  ): FunctionExpression {
     const values = [second, ...others];
-    return new FunctionExpr('add', [
+    return new FunctionExpression('add', [
       this,
       ...values.map(value => valueToDefaultExpr(value)),
     ]);
@@ -100,7 +100,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param subtrahend The expression to subtract from this expression.
    * @return A new `Expression` representing the subtraction operation.
    */
-  subtract(subtrahend: firestore.Pipelines.Expression): FunctionExpr;
+  subtract(subtrahend: firestore.Pipelines.Expression): FunctionExpression;
 
   /**
    * Creates an expression that subtracts a constant value from this expression.
@@ -113,9 +113,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param subtrahend The constant value to subtract.
    * @return A new `Expression` representing the subtraction operation.
    */
-  subtract(subtrahend: number): FunctionExpr;
-  subtract(subtrahend: number | firestore.Pipelines.Expression): FunctionExpr {
-    return new FunctionExpr('subtract', [this, valueToDefaultExpr(subtrahend)]);
+  subtract(subtrahend: number): FunctionExpression;
+  subtract(subtrahend: number | firestore.Pipelines.Expression): FunctionExpression {
+    return new FunctionExpression('subtract', [this, valueToDefaultExpr(subtrahend)]);
   }
 
   /**
@@ -133,8 +133,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   multiply(
     second: Expression | number,
     ...others: Array<Expression | number>
-  ): FunctionExpr {
-    return new FunctionExpr('multiply', [
+  ): FunctionExpression {
+    return new FunctionExpression('multiply', [
       this,
       valueToDefaultExpr(second),
       ...others.map(value => valueToDefaultExpr(value)),
@@ -152,7 +152,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param divisor The expression to divide by.
    * @return A new `Expression` representing the division operation.
    */
-  divide(divisor: Expression): FunctionExpr;
+  divide(divisor: Expression): FunctionExpression;
 
   /**
    * Creates an expression that divides this expression by a constant value.
@@ -165,9 +165,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param divisor The constant value to divide by.
    * @return A new `Expression` representing the division operation.
    */
-  divide(divisor: number): FunctionExpr;
-  divide(divisor: number | Expression): FunctionExpr {
-    return new FunctionExpr('divide', [this, valueToDefaultExpr(divisor)]);
+  divide(divisor: number): FunctionExpression;
+  divide(divisor: number | Expression): FunctionExpression {
+    return new FunctionExpression('divide', [this, valueToDefaultExpr(divisor)]);
   }
 
   /**
@@ -181,7 +181,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param expression The expression to divide by.
    * @return A new `Expression` representing the modulo operation.
    */
-  mod(expression: Expression): FunctionExpr;
+  mod(expression: Expression): FunctionExpression;
 
   /**
    * Creates an expression that calculates the modulo (remainder) of dividing this expression by a constant value.
@@ -194,9 +194,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param value The constant value to divide by.
    * @return A new `Expression` representing the modulo operation.
    */
-  mod(value: number): FunctionExpr;
-  mod(other: number | Expression): FunctionExpr {
-    return new FunctionExpr('mod', [this, valueToDefaultExpr(other)]);
+  mod(value: number): FunctionExpression;
+  mod(other: number | Expression): FunctionExpression {
+    return new FunctionExpression('mod', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -483,8 +483,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the reversed array.
    */
-  arrayReverse(): FunctionExpr {
-    return new FunctionExpr('array_reverse', [this]);
+  arrayReverse(): FunctionExpression {
+    return new FunctionExpression('array_reverse', [this]);
   }
 
   /**
@@ -497,8 +497,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new `Expression` representing the length of the array.
    */
-  arrayLength(): FunctionExpr {
-    return new FunctionExpr('array_length', [this]);
+  arrayLength(): FunctionExpression {
+    return new FunctionExpression('array_length', [this]);
   }
 
   /**
@@ -620,8 +620,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new `Expression` representing the length of the string.
    */
-  charLength(): FunctionExpr {
-    return new FunctionExpr('char_length', [this]);
+  charLength(): FunctionExpression {
+    return new FunctionExpression('char_length', [this]);
   }
 
   /**
@@ -635,7 +635,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param pattern The pattern to search for. You can use "%" as a wildcard character.
    * @return A new `Expression` representing the 'like' comparison.
    */
-  like(pattern: string): FunctionExpr;
+  like(pattern: string): FunctionExpression;
 
   /**
    * Creates an expression that performs a case-sensitive string comparison.
@@ -648,8 +648,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param pattern The pattern to search for. You can use "%" as a wildcard character.
    * @return A new `Expression` representing the 'like' comparison.
    */
-  like(pattern: Expression): FunctionExpr;
-  like(stringOrExpr: string | Expression): FunctionExpr {
+  like(pattern: Expression): FunctionExpression;
+  like(stringOrExpr: string | Expression): FunctionExpression {
     return new BooleanExpression('like', [this, valueToDefaultExpr(stringOrExpr)]);
   }
 
@@ -827,8 +827,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new `Expression` representing the lowercase string.
    */
-  toLower(): FunctionExpr {
-    return new FunctionExpr('to_lower', [this]);
+  toLower(): FunctionExpression {
+    return new FunctionExpression('to_lower', [this]);
   }
 
   /**
@@ -841,8 +841,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new `Expression` representing the uppercase string.
    */
-  toUpper(): FunctionExpr {
-    return new FunctionExpr('to_upper', [this]);
+  toUpper(): FunctionExpression {
+    return new FunctionExpression('to_upper', [this]);
   }
 
   /**
@@ -855,8 +855,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new `Expression` representing the trimmed string.
    */
-  trim(): FunctionExpr {
-    return new FunctionExpr('trim', [this]);
+  trim(): FunctionExpression {
+    return new FunctionExpression('trim', [this]);
   }
 
   /**
@@ -874,10 +874,10 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   stringConcat(
     secondString: Expression | string,
     ...otherStrings: Array<Expression | string>
-  ): FunctionExpr {
+  ): FunctionExpression {
     const elements = [secondString, ...otherStrings];
     const exprs = elements.map(valueToDefaultExpr);
-    return new FunctionExpr('str_concat', [this, ...exprs]);
+    return new FunctionExpression('str_concat', [this, ...exprs]);
   }
 
   /**
@@ -890,8 +890,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the reversed string.
    */
-  reverse(): FunctionExpr {
-    return new FunctionExpr('reverse', [this]);
+  reverse(): FunctionExpression {
+    return new FunctionExpression('reverse', [this]);
   }
 
   /**
@@ -904,8 +904,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the length of the string in bytes.
    */
-  byteLength(): FunctionExpr {
-    return new FunctionExpr('byte_length', [this]);
+  byteLength(): FunctionExpression {
+    return new FunctionExpression('byte_length', [this]);
   }
 
   /**
@@ -918,8 +918,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the ceiling of the numeric value.
    */
-  ceil(): FunctionExpr {
-    return new FunctionExpr('ceil', [this]);
+  ceil(): FunctionExpression {
+    return new FunctionExpression('ceil', [this]);
   }
 
   /**
@@ -932,8 +932,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the floor of the numeric value.
    */
-  floor(): FunctionExpr {
-    return new FunctionExpr('floor', [this]);
+  floor(): FunctionExpression {
+    return new FunctionExpression('floor', [this]);
   }
 
   /**
@@ -946,8 +946,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the exp of the numeric value.
    */
-  exp(): FunctionExpr {
-    return new FunctionExpr('exp', [this]);
+  exp(): FunctionExpression {
+    return new FunctionExpression('exp', [this]);
   }
 
   /**
@@ -961,8 +961,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param subfield The key to access in the map.
    * @return A new `Expression` representing the value associated with the given key in the map.
    */
-  mapGet(subfield: string): FunctionExpr {
-    return new FunctionExpr('map_get', [this, constant(subfield)]);
+  mapGet(subfield: string): FunctionExpression {
+    return new FunctionExpression('map_get', [this, constant(subfield)]);
   }
 
   /**
@@ -1066,9 +1066,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   logicalMaximum(
     second: Expression | unknown,
     ...others: Array<Expression | unknown>
-  ): FunctionExpr {
+  ): FunctionExpression {
     const values = [second, ...others];
-    return new FunctionExpr('max', [this, ...values.map(valueToDefaultExpr)]);
+    return new FunctionExpression('max', [this, ...values.map(valueToDefaultExpr)]);
   }
 
   /**
@@ -1086,9 +1086,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   logicalMinimum(
     second: Expression | unknown,
     ...others: Array<Expression | unknown>
-  ): FunctionExpr {
+  ): FunctionExpression {
     const values = [second, ...others];
-    return new FunctionExpr('min', [this, ...values.map(valueToDefaultExpr)]);
+    return new FunctionExpression('min', [this, ...values.map(valueToDefaultExpr)]);
   }
 
   /**
@@ -1101,8 +1101,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the length of the vector.
    */
-  vectorLength(): FunctionExpr {
-    return new FunctionExpr('vector_length', [this]);
+  vectorLength(): FunctionExpression {
+    return new FunctionExpression('vector_length', [this]);
   }
 
   /**
@@ -1116,7 +1116,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param vectorExpression The other vector (represented as an Expression) to compare against.
    * @return A new `Expression` representing the cosine distance between the two vectors.
    */
-  cosineDistance(vectorExpression: Expression): FunctionExpr;
+  cosineDistance(vectorExpression: Expression): FunctionExpression;
   /**
    * Calculates the Cosine distance between two vectors.
    *
@@ -1128,9 +1128,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param vector The other vector (as a VectorValue) to compare against.
    * @return A new `Expression` representing the Cosine* distance between the two vectors.
    */
-  cosineDistance(vector: firestore.VectorValue | number[]): FunctionExpr;
-  cosineDistance(other: Expression | firestore.VectorValue | number[]): FunctionExpr {
-    return new FunctionExpr('cosine_distance', [this, vectorToExpr(other)]);
+  cosineDistance(vector: firestore.VectorValue | number[]): FunctionExpression;
+  cosineDistance(other: Expression | firestore.VectorValue | number[]): FunctionExpression {
+    return new FunctionExpression('cosine_distance', [this, vectorToExpr(other)]);
   }
 
   /**
@@ -1144,7 +1144,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param vectorExpression The other vector (as an array of numbers) to calculate with.
    * @return A new `Expression` representing the dot product between the two vectors.
    */
-  dotProduct(vectorExpression: Expression): FunctionExpr;
+  dotProduct(vectorExpression: Expression): FunctionExpression;
 
   /**
    * Calculates the dot product between two vectors.
@@ -1157,9 +1157,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param vector The other vector (as an array of numbers) to calculate with.
    * @return A new `Expression` representing the dot product between the two vectors.
    */
-  dotProduct(vector: firestore.VectorValue | number[]): FunctionExpr;
-  dotProduct(other: Expression | firestore.VectorValue | number[]): FunctionExpr {
-    return new FunctionExpr('dot_product', [this, vectorToExpr(other)]);
+  dotProduct(vector: firestore.VectorValue | number[]): FunctionExpression;
+  dotProduct(other: Expression | firestore.VectorValue | number[]): FunctionExpression {
+    return new FunctionExpression('dot_product', [this, vectorToExpr(other)]);
   }
 
   /**
@@ -1173,7 +1173,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param vectorExpression The other vector (as an array of numbers) to calculate with.
    * @return A new `Expression` representing the Euclidean distance between the two vectors.
    */
-  euclideanDistance(vectorExpression: Expression): FunctionExpr;
+  euclideanDistance(vectorExpression: Expression): FunctionExpression;
 
   /**
    * Calculates the Euclidean distance between two vectors.
@@ -1186,11 +1186,11 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param vector The other vector (as a VectorValue) to compare against.
    * @return A new `Expression` representing the Euclidean distance between the two vectors.
    */
-  euclideanDistance(vector: firestore.VectorValue | number[]): FunctionExpr;
+  euclideanDistance(vector: firestore.VectorValue | number[]): FunctionExpression;
   euclideanDistance(
     other: Expression | firestore.VectorValue | number[]
-  ): FunctionExpr {
-    return new FunctionExpr('euclidean_distance', [this, vectorToExpr(other)]);
+  ): FunctionExpression {
+    return new FunctionExpression('euclidean_distance', [this, vectorToExpr(other)]);
   }
 
   /**
@@ -1204,8 +1204,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the timestamp.
    */
-  unixMicrosToTimestamp(): FunctionExpr {
-    return new FunctionExpr('unix_micros_to_timestamp', [this]);
+  unixMicrosToTimestamp(): FunctionExpression {
+    return new FunctionExpression('unix_micros_to_timestamp', [this]);
   }
 
   /**
@@ -1218,8 +1218,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the number of microseconds since epoch.
    */
-  timestampToUnixMicros(): FunctionExpr {
-    return new FunctionExpr('timestamp_to_unix_micros', [this]);
+  timestampToUnixMicros(): FunctionExpression {
+    return new FunctionExpression('timestamp_to_unix_micros', [this]);
   }
 
   /**
@@ -1233,8 +1233,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the timestamp.
    */
-  unixMillisToTimestamp(): FunctionExpr {
-    return new FunctionExpr('unix_millis_to_timestamp', [this]);
+  unixMillisToTimestamp(): FunctionExpression {
+    return new FunctionExpression('unix_millis_to_timestamp', [this]);
   }
 
   /**
@@ -1247,8 +1247,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the number of milliseconds since epoch.
    */
-  timestampToUnixMillis(): FunctionExpr {
-    return new FunctionExpr('timestamp_to_unix_millis', [this]);
+  timestampToUnixMillis(): FunctionExpression {
+    return new FunctionExpression('timestamp_to_unix_millis', [this]);
   }
 
   /**
@@ -1262,8 +1262,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the timestamp.
    */
-  unixSecondsToTimestamp(): FunctionExpr {
-    return new FunctionExpr('unix_seconds_to_timestamp', [this]);
+  unixSecondsToTimestamp(): FunctionExpression {
+    return new FunctionExpression('unix_seconds_to_timestamp', [this]);
   }
 
   /**
@@ -1276,8 +1276,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the number of seconds since epoch.
    */
-  timestampToUnixSeconds(): FunctionExpr {
-    return new FunctionExpr('timestamp_to_unix_seconds', [this]);
+  timestampToUnixSeconds(): FunctionExpression {
+    return new FunctionExpression('timestamp_to_unix_seconds', [this]);
   }
 
   /**
@@ -1292,7 +1292,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param amount The expression evaluates to amount of the unit.
    * @return A new {@code Expression} representing the resulting timestamp.
    */
-  timestampAdd(unit: Expression, amount: Expression): FunctionExpr;
+  timestampAdd(unit: Expression, amount: Expression): FunctionExpression;
 
   /**
    * Creates an expression that adds a specified amount of time to this timestamp expression.
@@ -1309,7 +1309,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   timestampAdd(
     unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
     amount: number
-  ): FunctionExpr;
+  ): FunctionExpression;
   timestampAdd(
     unit:
       | Expression
@@ -1320,8 +1320,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
       | 'hour'
       | 'day',
     amount: Expression | number
-  ): FunctionExpr {
-    return new FunctionExpr('timestamp_add', [
+  ): FunctionExpression {
+    return new FunctionExpression('timestamp_add', [
       this,
       valueToDefaultExpr(unit),
       valueToDefaultExpr(amount),
@@ -1340,7 +1340,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param amount The expression evaluates to amount of the unit.
    * @return A new {@code Expression} representing the resulting timestamp.
    */
-  timestampSub(unit: Expression, amount: Expression): FunctionExpr;
+  timestampSub(unit: Expression, amount: Expression): FunctionExpression;
 
   /**
    * Creates an expression that subtracts a specified amount of time from this timestamp expression.
@@ -1357,7 +1357,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   timestampSub(
     unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
     amount: number
-  ): FunctionExpr;
+  ): FunctionExpression;
   timestampSub(
     unit:
       | Expression
@@ -1368,8 +1368,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
       | 'hour'
       | 'day',
     amount: Expression | number
-  ): FunctionExpr {
-    return new FunctionExpr('timestamp_sub', [
+  ): FunctionExpression {
+    return new FunctionExpression('timestamp_sub', [
       this,
       valueToDefaultExpr(unit),
       valueToDefaultExpr(amount),
@@ -1386,8 +1386,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the documentId operation.
    */
-  documentId(): FunctionExpr {
-    return new FunctionExpr('document_id', [this]);
+  documentId(): FunctionExpression {
+    return new FunctionExpression('document_id', [this]);
   }
 
   /**
@@ -1397,7 +1397,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param length Length of the substring. If not provided, the substring will
    * end at the end of the input.
    */
-  substring(position: number, length?: number): FunctionExpr;
+  substring(position: number, length?: number): FunctionExpression;
 
   /**
    * Creates an expression that returns a substring of the results of this expression.
@@ -1406,13 +1406,13 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param length An expression returning the length of the substring. If not provided the
    * substring will end at the end of the input.
    */
-  substring(position: Expression, length?: Expression): FunctionExpr;
-  substring(position: Expression | number, length?: Expression | number): FunctionExpr {
+  substring(position: Expression, length?: Expression): FunctionExpression;
+  substring(position: Expression | number, length?: Expression | number): FunctionExpression {
     const positionExpr = valueToDefaultExpr(position);
     if (length === undefined) {
-      return new FunctionExpr('substr', [this, positionExpr]);
+      return new FunctionExpression('substr', [this, positionExpr]);
     } else {
-      return new FunctionExpr('substr', [
+      return new FunctionExpression('substr', [
         this,
         positionExpr,
         valueToDefaultExpr(length),
@@ -1433,7 +1433,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param index The index of the element to return.
    * @return A new Expression representing the 'arrayGet' operation.
    */
-  arrayGet(index: number): FunctionExpr;
+  arrayGet(index: number): FunctionExpression;
 
   /**
    * Creates an expression that indexes into an array from the beginning or end
@@ -1449,9 +1449,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param indexExpr An Expression evaluating to the index of the element to return.
    * @return A new Expression representing the 'arrayGet' operation.
    */
-  arrayGet(indexExpr: Expression): FunctionExpr;
-  arrayGet(index: Expression | number): FunctionExpr {
-    return new FunctionExpr('array_get', [this, valueToDefaultExpr(index)]);
+  arrayGet(indexExpr: Expression): FunctionExpression;
+  arrayGet(index: Expression | number): FunctionExpression {
+    return new FunctionExpression('array_get', [this, valueToDefaultExpr(index)]);
   }
 
   /**
@@ -1482,7 +1482,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * returned if this expression produces an error.
    * @return A new {@code Expression} representing the 'ifError' operation.
    */
-  ifError(catchExpr: Expression): FunctionExpr;
+  ifError(catchExpr: Expression): FunctionExpression;
 
   /**
    * Creates an expression that returns the `catch` argument if there is an
@@ -1498,9 +1498,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * produces an error.
    * @return A new {@code Expression} representing the 'ifError' operation.
    */
-  ifError(catchValue: unknown): FunctionExpr;
-  ifError(catchValue: unknown): FunctionExpr {
-    return new FunctionExpr('if_error', [this, valueToDefaultExpr(catchValue)]);
+  ifError(catchValue: unknown): FunctionExpression;
+  ifError(catchValue: unknown): FunctionExpression {
+    return new FunctionExpression('if_error', [this, valueToDefaultExpr(catchValue)]);
   }
 
   /**
@@ -1557,7 +1557,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param key The name of the key to remove from the input map.
    * @returns A new {@code FirestoreFunction} representing the 'mapRemove' operation.
    */
-  mapRemove(key: string): FunctionExpr;
+  mapRemove(key: string): FunctionExpression;
   /**
    * Creates an expression that removes a key from the map produced by evaluating this expression.
    *
@@ -1569,9 +1569,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param keyExpr An expression that produces the name of the key to remove from the input map.
    * @returns A new {@code FirestoreFunction} representing the 'mapRemove' operation.
    */
-  mapRemove(keyExpr: Expression): FunctionExpr;
-  mapRemove(stringExpr: Expression | string): FunctionExpr {
-    return new FunctionExpr('map_remove', [
+  mapRemove(keyExpr: Expression): FunctionExpression;
+  mapRemove(stringExpr: Expression | string): FunctionExpression {
+    return new FunctionExpression('map_remove', [
       this,
       valueToDefaultExpr(stringExpr),
     ]);
@@ -1596,10 +1596,10 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   mapMerge(
     secondMap: Record<string, unknown> | Expression,
     ...otherMaps: Array<Record<string, unknown> | Expression>
-  ): FunctionExpr {
+  ): FunctionExpression {
     const secondMapExpr = valueToDefaultExpr(secondMap);
     const otherMapExprs = otherMaps.map(valueToDefaultExpr);
-    return new FunctionExpr('map_merge', [
+    return new FunctionExpression('map_merge', [
       this,
       secondMapExpr,
       ...otherMapExprs,
@@ -1617,7 +1617,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param exponent The expression to raise this expression to the power of.
    * @return A new `Expression` representing the power operation.
    */
-  pow(exponent: Expression): FunctionExpr;
+  pow(exponent: Expression): FunctionExpression;
 
   /**
    * Creates an expression that returns the value of this expression raised to the power of a constant value.
@@ -1630,9 +1630,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param exponent The constant value to raise this expression to the power of.
    * @return A new `Expression` representing the power operation.
    */
-  pow(exponent: number): FunctionExpr;
-  pow(exponent: number | Expression): FunctionExpr {
-    return new FunctionExpr('pow', [this, valueToDefaultExpr(exponent)]);
+  pow(exponent: number): FunctionExpression;
+  pow(exponent: number | Expression): FunctionExpression {
+    return new FunctionExpression('pow', [this, valueToDefaultExpr(exponent)]);
   }
 
   /**
@@ -1645,8 +1645,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new `Expression` representing the rounded value.
    */
-  round(): FunctionExpr {
-    return new FunctionExpr('round', [this]);
+  round(): FunctionExpression {
+    return new FunctionExpression('round', [this]);
   }
 
   /**
@@ -1659,8 +1659,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the collectionId operation.
    */
-  collectionId(): FunctionExpr {
-    return new FunctionExpr('collection_id', [this]);
+  collectionId(): FunctionExpression {
+    return new FunctionExpression('collection_id', [this]);
   }
 
   /**
@@ -1676,8 +1676,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new `Expression` representing the length of the string, array, map, vector, or bytes.
    */
-  length(): FunctionExpr {
-    return new FunctionExpr('length', [this]);
+  length(): FunctionExpression {
+    return new FunctionExpression('length', [this]);
   }
 
   /**
@@ -1690,8 +1690,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the natural logarithm of the numeric value.
    */
-  ln(): FunctionExpr {
-    return new FunctionExpr('ln', [this]);
+  ln(): FunctionExpression {
+    return new FunctionExpression('ln', [this]);
   }
 
   /**
@@ -1705,7 +1705,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param base The base of the logarithm.
    * @return A new {@code Expression} representing the logarithm of the numeric value.
    */
-  log(base: number): FunctionExpr;
+  log(base: number): FunctionExpression;
 
   /**
    * Creates an expression that computes the logarithm of this expression to a given base.
@@ -1718,9 +1718,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @param base The base of the logarithm.
    * @return A new {@code Expression} representing the logarithm of the numeric value.
    */
-  log(base: Expression): FunctionExpr;
-  log(base: number | Expression): FunctionExpr {
-    return new FunctionExpr('log', [this, valueToDefaultExpr(base)]);
+  log(base: Expression): FunctionExpression;
+  log(base: number | Expression): FunctionExpression {
+    return new FunctionExpression('log', [this, valueToDefaultExpr(base)]);
   }
 
   /**
@@ -1733,8 +1733,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the square root of the numeric value.
    */
-  sqrt(): FunctionExpr {
-    return new FunctionExpr('sqrt', [this]);
+  sqrt(): FunctionExpression {
+    return new FunctionExpression('sqrt', [this]);
   }
 
   /**
@@ -1747,8 +1747,8 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * @return A new {@code Expression} representing the reversed string.
    */
-  stringReverse(): FunctionExpr {
-    return new FunctionExpr('str_reverse', [this]);
+  stringReverse(): FunctionExpression {
+    return new FunctionExpression('str_reverse', [this]);
   }
 
   // TODO(new-expression): Add new expression method definitions above this line
@@ -2242,7 +2242,7 @@ export class MapValue extends Expression {
  * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link equal},
  * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lessThan}, etc.) to construct new Function instances.
  */
-export class FunctionExpr extends Expression {
+export class FunctionExpression extends Expression {
   readonly exprType: firestore.Pipelines.ExprType = 'Function';
 
   constructor(
@@ -2283,7 +2283,7 @@ export class FunctionExpr extends Expression {
  * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link equal},
  * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lessThan}, etc.) to construct new Function instances.
  */
-class MapFunctionExpr extends FunctionExpr {
+class MapFunctionExpr extends FunctionExpression {
   readonly exprType: firestore.Pipelines.ExprType = 'Function';
 
   constructor(private map: Record<string, Expression | undefined>) {
@@ -2332,7 +2332,7 @@ class MapFunctionExpr extends FunctionExpr {
  * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link equal},
  * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lessThan}, etc.) to construct new Function instances.
  */
-class ArrayFunctionExpr extends FunctionExpr {
+class ArrayFunctionExpr extends FunctionExpression {
   readonly exprType: firestore.Pipelines.ExprType = 'Function';
 
   constructor(private values: Array<Expression | undefined>) {
@@ -2374,7 +2374,7 @@ class ArrayFunctionExpr extends FunctionExpr {
  *
  */
 export class BooleanExpression
-  extends FunctionExpr
+  extends FunctionExpression
   implements firestore.Pipelines.BooleanExpression
 {
   returnType: 'boolean' = 'boolean' as const;
@@ -2431,8 +2431,8 @@ export function countIf(booleanExpr: BooleanExpression): AggregateFunction {
  *
  * @returns A new `Expression` representing the 'rand' function.
  */
-export function rand(): FunctionExpr {
-  return new FunctionExpr('rand', []);
+export function rand(): FunctionExpression {
+  return new FunctionExpression('rand', []);
 }
 
 /**
@@ -2449,7 +2449,7 @@ export function rand(): FunctionExpr {
  * @param index The index of the element to return.
  * @return A new Expression representing the 'arrayGet' operation.
  */
-export function arrayGet(arrayField: string, index: number): FunctionExpr;
+export function arrayGet(arrayField: string, index: number): FunctionExpression;
 
 /**
  * Creates an expression that indexes into an array from the beginning or end
@@ -2466,7 +2466,7 @@ export function arrayGet(arrayField: string, index: number): FunctionExpr;
  * @param indexExpr An Expression evaluating to the index of the element to return.
  * @return A new Expression representing the 'arrayGet' operation.
  */
-export function arrayGet(arrayField: string, indexExpr: Expression): FunctionExpr;
+export function arrayGet(arrayField: string, indexExpr: Expression): FunctionExpression;
 
 /**
  * Creates an expression that indexes into an array from the beginning or end
@@ -2482,7 +2482,7 @@ export function arrayGet(arrayField: string, indexExpr: Expression): FunctionExp
  * @param index The index of the element to return.
  * @return A new Expression representing the 'arrayGet' operation.
  */
-export function arrayGet(arrayExpression: Expression, index: number): FunctionExpr;
+export function arrayGet(arrayExpression: Expression, index: number): FunctionExpression;
 
 /**
  * Creates an expression that indexes into an array from the beginning or end
@@ -2499,11 +2499,11 @@ export function arrayGet(arrayExpression: Expression, index: number): FunctionEx
  * @param indexExpr An Expression evaluating to the index of the element to return.
  * @return A new Expression representing the 'arrayGet' operation.
  */
-export function arrayGet(arrayExpression: Expression, indexExpr: Expression): FunctionExpr;
+export function arrayGet(arrayExpression: Expression, indexExpr: Expression): FunctionExpression;
 export function arrayGet(
   array: Expression | string,
   index: Expression | number
-): FunctionExpr {
+): FunctionExpression {
   return fieldOrExpression(array).arrayGet(valueToDefaultExpr(index));
 }
 
@@ -2538,7 +2538,7 @@ export function isError(value: Expression): BooleanExpression {
  * returned if the tryExpr produces an error.
  * @return A new {@code Expression} representing the 'ifError' operation.
  */
-export function ifError(tryExpr: Expression, catchExpr: Expression): FunctionExpr;
+export function ifError(tryExpr: Expression, catchExpr: Expression): FunctionExpression;
 
 /**
  * Creates an expression that returns the `catch` argument if there is an
@@ -2555,8 +2555,8 @@ export function ifError(tryExpr: Expression, catchExpr: Expression): FunctionExp
  * error.
  * @return A new {@code Expression} representing the 'ifError' operation.
  */
-export function ifError(tryExpr: Expression, catchValue: unknown): FunctionExpr;
-export function ifError(tryExpr: Expression, catchValue: unknown): FunctionExpr {
+export function ifError(tryExpr: Expression, catchValue: unknown): FunctionExpression;
+export function ifError(tryExpr: Expression, catchValue: unknown): FunctionExpression {
   const expr: Expression = cast<Expression>(tryExpr);
   return expr.ifError(valueToDefaultExpr(catchValue));
 }
@@ -2690,7 +2690,7 @@ export function isNotNan(value: Expression | string): BooleanExpression {
  * @param mapField The name of a field containing a map value.
  * @param key The name of the key to remove from the input map.
  */
-export function mapRemove(mapField: string, key: string): FunctionExpr;
+export function mapRemove(mapField: string, key: string): FunctionExpression;
 /**
  * Creates an expression that removes a key from the map produced by evaluating an expression.
  *
@@ -2702,7 +2702,7 @@ export function mapRemove(mapField: string, key: string): FunctionExpr;
  * @param mapExpr An expression return a map value.
  * @param key The name of the key to remove from the input map.
  */
-export function mapRemove(mapExpr: Expression, key: string): FunctionExpr;
+export function mapRemove(mapExpr: Expression, key: string): FunctionExpression;
 /**
  * Creates an expression that removes a key from the map at the specified field name.
  *
@@ -2714,7 +2714,7 @@ export function mapRemove(mapExpr: Expression, key: string): FunctionExpr;
  * @param mapField The name of a field containing a map value.
  * @param keyExpr An expression that produces the name of the key to remove from the input map.
  */
-export function mapRemove(mapField: string, keyExpr: Expression): FunctionExpr;
+export function mapRemove(mapField: string, keyExpr: Expression): FunctionExpression;
 /**
  * Creates an expression that removes a key from the map produced by evaluating an expression.
  *
@@ -2726,12 +2726,12 @@ export function mapRemove(mapField: string, keyExpr: Expression): FunctionExpr;
  * @param mapExpr An expression return a map value.
  * @param keyExpr An expression that produces the name of the key to remove from the input map.
  */
-export function mapRemove(mapExpr: Expression, keyExpr: Expression): FunctionExpr;
+export function mapRemove(mapExpr: Expression, keyExpr: Expression): FunctionExpression;
 
 export function mapRemove(
   mapExpr: Expression | string,
   stringExpr: Expression | string
-): FunctionExpr {
+): FunctionExpression {
   return fieldOrExpression(mapExpr).mapRemove(valueToDefaultExpr(stringExpr));
 }
 
@@ -2754,7 +2754,7 @@ export function mapMerge(
   mapField: string,
   secondMap: Record<string, unknown> | Expression,
   ...otherMaps: Array<Record<string, unknown> | Expression>
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that merges multiple map values.
@@ -2775,13 +2775,13 @@ export function mapMerge(
   firstMap: Record<string, unknown> | Expression,
   secondMap: Record<string, unknown> | Expression,
   ...otherMaps: Array<Record<string, unknown> | Expression>
-): FunctionExpr;
+): FunctionExpression;
 
 export function mapMerge(
   firstMap: string | Record<string, unknown> | Expression,
   secondMap: Record<string, unknown> | Expression,
   ...otherMaps: Array<Record<string, unknown> | Expression>
-): FunctionExpr {
+): FunctionExpression {
   const secondMapExpr = valueToDefaultExpr(secondMap);
   const otherMapExprs = otherMaps.map(valueToDefaultExpr);
   return fieldOrExpression(firstMap).mapMerge(secondMapExpr, ...otherMapExprs);
@@ -2797,7 +2797,7 @@ export function mapMerge(
  *
  * @return A new {@code Expression} representing the documentId operation.
  */
-export function documentId(documentPathExpr: Expression): FunctionExpr {
+export function documentId(documentPathExpr: Expression): FunctionExpression {
   return documentPathExpr.documentId();
 }
 
@@ -2812,7 +2812,7 @@ export function substring(
   field: string,
   position: number,
   length?: number
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that returns a substring of a string or byte array.
@@ -2825,7 +2825,7 @@ export function substring(
   input: Expression,
   position: number,
   length?: number
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that returns a substring of a string or byte array.
@@ -2838,7 +2838,7 @@ export function substring(
   field: string,
   position: Expression,
   length?: Expression
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that returns a substring of a string or byte array.
@@ -2851,13 +2851,13 @@ export function substring(
   input: Expression,
   position: Expression,
   length?: Expression
-): FunctionExpr;
+): FunctionExpression;
 
 export function substring(
   field: Expression | string,
   position: Expression | number,
   length?: Expression | number
-): FunctionExpr {
+): FunctionExpression {
   const fieldExpr = fieldOrExpression(field);
   const positionExpr = valueToDefaultExpr(position);
   const lengthExpr =
@@ -2877,7 +2877,7 @@ export function substring(
  * @param second The second expression or literal to add.
  * @return A new {@code Expression} representing the addition operation.
  */
-export function add(first: Expression, second: Expression | unknown): FunctionExpr;
+export function add(first: Expression, second: Expression | unknown): FunctionExpression;
 
 /**
  * Creates an expression that adds a field's value to the result of an expression.
@@ -2891,12 +2891,12 @@ export function add(first: Expression, second: Expression | unknown): FunctionEx
  * @param second The second expression or literal to add.
  * @return A new {@code Expression} representing the addition operation.
  */
-export function add(fieldName: string, second: Expression | unknown): FunctionExpr;
+export function add(fieldName: string, second: Expression | unknown): FunctionExpression;
 
 export function add(
   first: Expression | string,
   second: Expression | unknown
-): FunctionExpr {
+): FunctionExpression {
   return fieldOrExpression(first).add(valueToDefaultExpr(second));
 }
 
@@ -2912,7 +2912,7 @@ export function add(
  * @param subtrahend The expression to subtract.
  * @return A new {@code Expression} representing the subtraction operation.
  */
-export function subtract(minuend: Expression, subtrahend: Expression): FunctionExpr;
+export function subtract(minuend: Expression, subtrahend: Expression): FunctionExpression;
 
 /**
  * Creates an expression that subtracts a constant value from an expression.
@@ -2926,7 +2926,7 @@ export function subtract(minuend: Expression, subtrahend: Expression): FunctionE
  * @param subtrahend The constant value to subtract.
  * @return A new {@code Expression} representing the subtraction operation.
  */
-export function subtract(minuend: Expression, subtrahend: unknown): FunctionExpr;
+export function subtract(minuend: Expression, subtrahend: unknown): FunctionExpression;
 
 /**
  * Creates an expression that subtracts an expression from a field's value.
@@ -2943,7 +2943,7 @@ export function subtract(minuend: Expression, subtrahend: unknown): FunctionExpr
 export function subtract(
   minuendFieldName: string,
   subtrahend: Expression
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that subtracts a constant value from a field's value.
@@ -2960,11 +2960,11 @@ export function subtract(
 export function subtract(
   minuendFieldName: string,
   subtrahend: unknown
-): FunctionExpr;
+): FunctionExpression;
 export function subtract(
   left: Expression | string,
   right: Expression | unknown
-): FunctionExpr {
+): FunctionExpression {
   const normalizedLeft = fieldOrExpression(left);
   const normalizedRight = valueToDefaultExpr(right);
   return normalizedLeft.subtract(normalizedRight);
@@ -2982,7 +2982,7 @@ export function subtract(
  * @param second The second expression or literal to multiply.
  * @return A new {@code Expression} representing the multiplication operation.
  */
-export function multiply(first: Expression, second: Expression | unknown): FunctionExpr;
+export function multiply(first: Expression, second: Expression | unknown): FunctionExpression;
 
 /**
  * Creates an expression that multiplies a field's value by the result of an expression.
@@ -2999,12 +2999,12 @@ export function multiply(first: Expression, second: Expression | unknown): Funct
 export function multiply(
   fieldName: string,
   second: Expression | unknown
-): FunctionExpr;
+): FunctionExpression;
 
 export function multiply(
   first: Expression | string,
   second: Expression | unknown
-): FunctionExpr {
+): FunctionExpression {
   return fieldOrExpression(first).multiply(valueToDefaultExpr(second));
 }
 
@@ -3020,7 +3020,7 @@ export function multiply(
  * @param divisort The expression to divide by.
  * @return A new {@code Expression} representing the division operation.
  */
-export function divide(dividend: Expression, divisort: Expression): FunctionExpr;
+export function divide(dividend: Expression, divisort: Expression): FunctionExpression;
 
 /**
  * Creates an expression that divides an expression by a constant value.
@@ -3034,7 +3034,7 @@ export function divide(dividend: Expression, divisort: Expression): FunctionExpr
  * @param divisor The constant value to divide by.
  * @return A new {@code Expression} representing the division operation.
  */
-export function divide(dividend: Expression, divisor: unknown): FunctionExpr;
+export function divide(dividend: Expression, divisor: unknown): FunctionExpression;
 
 /**
  * Creates an expression that divides a field's value by an expression.
@@ -3048,7 +3048,7 @@ export function divide(dividend: Expression, divisor: unknown): FunctionExpr;
  * @param divisor The expression to divide by.
  * @return A new {@code Expression} representing the division operation.
  */
-export function divide(dividend: string, divisor: Expression): FunctionExpr;
+export function divide(dividend: string, divisor: Expression): FunctionExpression;
 
 /**
  * Creates an expression that divides a field's value by a constant value.
@@ -3062,11 +3062,11 @@ export function divide(dividend: string, divisor: Expression): FunctionExpr;
  * @param divisor The constant value to divide by.
  * @return A new {@code Expression} representing the division operation.
  */
-export function divide(dividend: string, divisor: unknown): FunctionExpr;
+export function divide(dividend: string, divisor: unknown): FunctionExpression;
 export function divide(
   dividend: Expression | string,
   divisor: Expression | unknown
-): FunctionExpr {
+): FunctionExpression {
   const normalizedLeft = fieldOrExpression(dividend);
   const normalizedRight = valueToDefaultExpr(divisor);
   return normalizedLeft.divide(normalizedRight);
@@ -3084,7 +3084,7 @@ export function divide(
  * @param right The divisor expression.
  * @return A new {@code Expression} representing the modulo operation.
  */
-export function mod(left: Expression, right: Expression): FunctionExpr;
+export function mod(left: Expression, right: Expression): FunctionExpression;
 
 /**
  * Creates an expression that calculates the modulo (remainder) of dividing an expression by a constant.
@@ -3098,7 +3098,7 @@ export function mod(left: Expression, right: Expression): FunctionExpr;
  * @param value The divisor constant.
  * @return A new {@code Expression} representing the modulo operation.
  */
-export function mod(expression: Expression, value: unknown): FunctionExpr;
+export function mod(expression: Expression, value: unknown): FunctionExpression;
 
 /**
  * Creates an expression that calculates the modulo (remainder) of dividing a field's value by an expression.
@@ -3112,7 +3112,7 @@ export function mod(expression: Expression, value: unknown): FunctionExpr;
  * @param expression The divisor expression.
  * @return A new {@code Expression} representing the modulo operation.
  */
-export function mod(fieldName: string, expression: Expression): FunctionExpr;
+export function mod(fieldName: string, expression: Expression): FunctionExpression;
 
 /**
  * Creates an expression that calculates the modulo (remainder) of dividing a field's value by a constant.
@@ -3126,8 +3126,8 @@ export function mod(fieldName: string, expression: Expression): FunctionExpr;
  * @param value The divisor constant.
  * @return A new {@code Expression} representing the modulo operation.
  */
-export function mod(fieldName: string, value: unknown): FunctionExpr;
-export function mod(left: Expression | string, right: Expression | unknown): FunctionExpr {
+export function mod(fieldName: string, value: unknown): FunctionExpression;
+export function mod(left: Expression | string, right: Expression | unknown): FunctionExpression {
   const normalizedLeft = fieldOrExpression(left);
   const normalizedRight = valueToDefaultExpr(right);
   return normalizedLeft.mod(normalizedRight);
@@ -3144,7 +3144,7 @@ export function mod(left: Expression | string, right: Expression | unknown): Fun
  * @param elements The input map to evaluate in the expression.
  * @return A new {@code Expression} representing the map function.
  */
-export function map(elements: Record<string, unknown>): FunctionExpr {
+export function map(elements: Record<string, unknown>): FunctionExpression {
   const result: Record<string, Expression | undefined> = {};
 
   for (const key in elements) {
@@ -3191,7 +3191,7 @@ export function _mapValue(plainObject: Record<string, unknown>): MapValue {
  * @param elements The input array to evaluate in the expression.
  * @return A new {@code Expression} representing the array function.
  */
-export function array(elements: unknown[]): FunctionExpr {
+export function array(elements: unknown[]): FunctionExpression {
   return new ArrayFunctionExpr(
     elements.map(element => {
       return element !== undefined ? valueToDefaultExpr(element) : undefined;
@@ -3582,7 +3582,7 @@ export function greaterThanOrEqual(left: Expression | string, right: unknown): B
  * @param element The element to search for in the array.
  * @return A new {@code Expression} representing the 'array_contains' comparison.
  */
-export function arrayContains(array: Expression, element: Expression): FunctionExpr;
+export function arrayContains(array: Expression, element: Expression): FunctionExpression;
 
 /**
  * Creates an expression that checks if an array expression contains a specific element.
@@ -3596,7 +3596,7 @@ export function arrayContains(array: Expression, element: Expression): FunctionE
  * @param element The element to search for in the array.
  * @return A new {@code Expression} representing the 'array_contains' comparison.
  */
-export function arrayContains(array: Expression, element: unknown): FunctionExpr;
+export function arrayContains(array: Expression, element: unknown): FunctionExpression;
 
 /**
  * Creates an expression that checks if a field's array value contains a specific element.
@@ -3610,7 +3610,7 @@ export function arrayContains(array: Expression, element: unknown): FunctionExpr
  * @param element The element to search for in the array.
  * @return A new {@code Expression} representing the 'array_contains' comparison.
  */
-export function arrayContains(fieldName: string, element: Expression): FunctionExpr;
+export function arrayContains(fieldName: string, element: Expression): FunctionExpression;
 
 /**
  * Creates an expression that checks if a field's array value contains a specific value.
@@ -3803,7 +3803,7 @@ export function arrayContainsAll(
  * @param fieldName The name of the field containing an array to calculate the length of.
  * @return A new {@code Expression} representing the length of the array.
  */
-export function arrayLength(fieldName: string): FunctionExpr;
+export function arrayLength(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that calculates the length of an array expression.
@@ -3816,8 +3816,8 @@ export function arrayLength(fieldName: string): FunctionExpr;
  * @param array The array expression to calculate the length of.
  * @return A new {@code Expression} representing the length of the array.
  */
-export function arrayLength(array: Expression): FunctionExpr;
-export function arrayLength(array: Expression | string): FunctionExpr {
+export function arrayLength(array: Expression): FunctionExpression;
+export function arrayLength(array: Expression | string): FunctionExpression {
   return fieldOrExpression(array).arrayLength();
 }
 
@@ -4016,8 +4016,8 @@ export function cond(
   condition: BooleanExpression,
   thenExpr: Expression,
   elseExpr: Expression
-): FunctionExpr {
-  return new FunctionExpr('cond', [
+): FunctionExpression {
+  return new FunctionExpression('cond', [
     condition,
     cast<Expression>(thenExpr),
     cast<Expression>(elseExpr),
@@ -4058,7 +4058,7 @@ export function logicalMaximum(
   first: Expression,
   second: Expression | unknown,
   ...others: Array<Expression | unknown>
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that returns the largest value between multiple input
@@ -4079,13 +4079,13 @@ export function logicalMaximum(
   fieldName: string,
   second: Expression | unknown,
   ...others: Array<Expression | unknown>
-): FunctionExpr;
+): FunctionExpression;
 
 export function logicalMaximum(
   first: Expression | string,
   second: Expression | unknown,
   ...others: Array<Expression | unknown>
-): FunctionExpr {
+): FunctionExpression {
   return fieldOrExpression(first).logicalMaximum(
     valueToDefaultExpr(second),
     ...others.map(value => valueToDefaultExpr(value))
@@ -4111,7 +4111,7 @@ export function logicalMinimum(
   first: Expression,
   second: Expression | unknown,
   ...others: Array<Expression | unknown>
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that returns the smallest value between a field's value
@@ -4133,13 +4133,13 @@ export function logicalMinimum(
   fieldName: string,
   second: Expression | unknown,
   ...others: Array<Expression | unknown>
-): FunctionExpr;
+): FunctionExpression;
 
 export function logicalMinimum(
   first: Expression | string,
   second: Expression | unknown,
   ...others: Array<Expression | unknown>
-): FunctionExpr {
+): FunctionExpression {
   return fieldOrExpression(first).logicalMinimum(
     valueToDefaultExpr(second),
     ...others.map(value => valueToDefaultExpr(value))
@@ -4215,7 +4215,7 @@ export function isNan(value: Expression | string): BooleanExpression {
  * @param stringExpression An expression evaluating to a string value, which will be reversed.
  * @return A new {@code Expression} representing the reversed string.
  */
-export function reverse(stringExpression: Expression): FunctionExpr;
+export function reverse(stringExpression: Expression): FunctionExpression;
 
 /**
  * Creates an expression that reverses a string value in the specified field.
@@ -4228,8 +4228,8 @@ export function reverse(stringExpression: Expression): FunctionExpr;
  * @param field The name of the field representing the string to reverse.
  * @return A new {@code Expression} representing the reversed string.
  */
-export function reverse(field: string): FunctionExpr;
-export function reverse(expr: Expression | string): FunctionExpr {
+export function reverse(field: string): FunctionExpression;
+export function reverse(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).reverse();
 }
 
@@ -4244,7 +4244,7 @@ export function reverse(expr: Expression | string): FunctionExpr {
  * @param fieldName The name of the field to reverse.
  * @return A new {@code Expression} representing the reversed array.
  */
-export function arrayReverse(fieldName: string): FunctionExpr;
+export function arrayReverse(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that reverses an array.
@@ -4257,8 +4257,8 @@ export function arrayReverse(fieldName: string): FunctionExpr;
  * @param arrayExpression An expression evaluating to an array value, which will be reversed.
  * @return A new {@code Expression} representing the reversed array.
  */
-export function arrayReverse(arrayExpression: Expression): FunctionExpr;
-export function arrayReverse(expr: Expression | string): FunctionExpr {
+export function arrayReverse(arrayExpression: Expression): FunctionExpression;
+export function arrayReverse(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).arrayReverse();
 }
 
@@ -4273,7 +4273,7 @@ export function arrayReverse(expr: Expression | string): FunctionExpr {
  * @param expr The expression representing the string.
  * @return A new {@code Expression} representing the length of the string in bytes.
  */
-export function byteLength(expr: Expression): FunctionExpr;
+export function byteLength(expr: Expression): FunctionExpression;
 
 /**
  * Creates an expression that calculates the length of a string represented by a field in UTF-8 bytes, or just the length of a Blob.
@@ -4286,8 +4286,8 @@ export function byteLength(expr: Expression): FunctionExpr;
  * @param fieldName The name of the field containing the string.
  * @return A new {@code Expression} representing the length of the string in bytes.
  */
-export function byteLength(fieldName: string): FunctionExpr;
-export function byteLength(expr: Expression | string): FunctionExpr {
+export function byteLength(fieldName: string): FunctionExpression;
+export function byteLength(expr: Expression | string): FunctionExpression {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.byteLength();
 }
@@ -4302,7 +4302,7 @@ export function byteLength(expr: Expression | string): FunctionExpr {
  *
  * @return A new {@code Expression} representing the exp of the numeric value.
  */
-export function exp(expression: Expression): FunctionExpr;
+export function exp(expression: Expression): FunctionExpression;
 
 /**
  * Creates an expression that computes e to the power of the expression's result.
@@ -4314,9 +4314,9 @@ export function exp(expression: Expression): FunctionExpr;
  *
  * @return A new {@code Expression} representing the exp of the numeric value.
  */
-export function exp(fieldName: string): FunctionExpr;
+export function exp(fieldName: string): FunctionExpression;
 
-export function exp(expressionOrFieldName: Expression | string): FunctionExpr {
+export function exp(expressionOrFieldName: Expression | string): FunctionExpression {
   return fieldOrExpression(expressionOrFieldName).exp();
 }
 
@@ -4331,7 +4331,7 @@ export function exp(expressionOrFieldName: Expression | string): FunctionExpr {
  * @param fieldName The name of the field to compute the ceiling of.
  * @return A new {@code Expression} representing the ceiling of the numeric value.
  */
-export function ceil(fieldName: string): FunctionExpr;
+export function ceil(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that computes the ceiling of a numeric value.
@@ -4344,8 +4344,8 @@ export function ceil(fieldName: string): FunctionExpr;
  * @param expression An expression evaluating to a numeric value, which the ceiling will be computed for.
  * @return A new {@code Expression} representing the ceiling of the numeric value.
  */
-export function ceil(expression: Expression): FunctionExpr;
-export function ceil(expr: Expression | string): FunctionExpr {
+export function ceil(expression: Expression): FunctionExpression;
+export function ceil(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).ceil();
 }
 
@@ -4355,7 +4355,7 @@ export function ceil(expr: Expression | string): FunctionExpr {
  * @param expr The expression to compute the floor of.
  * @return A new {@code Expression} representing the floor of the numeric value.
  */
-export function floor(expr: Expression): FunctionExpr;
+export function floor(expr: Expression): FunctionExpression;
 
 /**
  * Creates an expression that computes the floor of a numeric value.
@@ -4363,8 +4363,8 @@ export function floor(expr: Expression): FunctionExpr;
  * @param fieldName The name of the field to compute the floor of.
  * @return A new {@code Expression} representing the floor of the numeric value.
  */
-export function floor(fieldName: string): FunctionExpr;
-export function floor(expr: Expression | string): FunctionExpr {
+export function floor(fieldName: string): FunctionExpression;
+export function floor(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).floor();
 }
 
@@ -4389,7 +4389,7 @@ export function countDistinct(expr: Expression | string): AggregateFunction {
  * @param fieldName The name of the field containing the string.
  * @return A new {@code Expression} representing the length of the string.
  */
-export function charLength(fieldName: string): FunctionExpr;
+export function charLength(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that calculates the character length of a string expression in UTF-8.
@@ -4402,8 +4402,8 @@ export function charLength(fieldName: string): FunctionExpr;
  * @param stringExpression The expression representing the string to calculate the length of.
  * @return A new {@code Expression} representing the length of the string.
  */
-export function charLength(stringExpression: Expression): FunctionExpr;
-export function charLength(value: Expression | string): FunctionExpr {
+export function charLength(stringExpression: Expression): FunctionExpression;
+export function charLength(value: Expression | string): FunctionExpression {
   const valueExpr = fieldOrExpression(value);
   return valueExpr.charLength();
 }
@@ -4468,7 +4468,7 @@ export function like(stringExpression: Expression, pattern: Expression): Boolean
 export function like(
   left: Expression | string,
   pattern: Expression | string
-): FunctionExpr {
+): FunctionExpression {
   const leftExpr = fieldOrExpression(left);
   const patternExpr = valueToDefaultExpr(pattern);
   return leftExpr.like(patternExpr);
@@ -4822,7 +4822,7 @@ export function endsWith(
  * @param fieldName The name of the field containing the string.
  * @return A new {@code Expression} representing the lowercase string.
  */
-export function toLower(fieldName: string): FunctionExpr;
+export function toLower(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that converts a string expression to lowercase.
@@ -4835,8 +4835,8 @@ export function toLower(fieldName: string): FunctionExpr;
  * @param stringExpression The expression representing the string to convert to lowercase.
  * @return A new {@code Expression} representing the lowercase string.
  */
-export function toLower(stringExpression: Expression): FunctionExpr;
-export function toLower(expr: Expression | string): FunctionExpr {
+export function toLower(stringExpression: Expression): FunctionExpression;
+export function toLower(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).toLower();
 }
 
@@ -4851,7 +4851,7 @@ export function toLower(expr: Expression | string): FunctionExpr {
  * @param fieldName The name of the field containing the string.
  * @return A new {@code Expression} representing the uppercase string.
  */
-export function toUpper(fieldName: string): FunctionExpr;
+export function toUpper(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that converts a string expression to uppercase.
@@ -4864,8 +4864,8 @@ export function toUpper(fieldName: string): FunctionExpr;
  * @param stringExpression The expression representing the string to convert to uppercase.
  * @return A new {@code Expression} representing the uppercase string.
  */
-export function toUpper(stringExpression: Expression): FunctionExpr;
-export function toUpper(expr: Expression | string): FunctionExpr {
+export function toUpper(stringExpression: Expression): FunctionExpression;
+export function toUpper(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).toUpper();
 }
 
@@ -4880,7 +4880,7 @@ export function toUpper(expr: Expression | string): FunctionExpr {
  * @param fieldName The name of the field containing the string.
  * @return A new {@code Expression} representing the trimmed string.
  */
-export function trim(fieldName: string): FunctionExpr;
+export function trim(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that removes leading and trailing whitespace from a string expression.
@@ -4893,8 +4893,8 @@ export function trim(fieldName: string): FunctionExpr;
  * @param stringExpression The expression representing the string to trim.
  * @return A new {@code Expression} representing the trimmed string.
  */
-export function trim(stringExpression: Expression): FunctionExpr;
-export function trim(expr: Expression | string): FunctionExpr {
+export function trim(stringExpression: Expression): FunctionExpression;
+export function trim(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).trim();
 }
 
@@ -4915,7 +4915,7 @@ export function stringConcat(
   fieldName: string,
   secondString: Expression | string,
   ...otherStrings: Array<Expression | string>
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that concatenates string expressions together.
@@ -4934,12 +4934,12 @@ export function stringConcat(
   firstString: Expression,
   secondString: Expression | string,
   ...otherStrings: Array<Expression | string>
-): FunctionExpr;
+): FunctionExpression;
 export function stringConcat(
   first: string | Expression,
   second: string | Expression,
   ...elements: Array<string | Expression>
-): FunctionExpr {
+): FunctionExpression {
   return fieldOrExpression(first).stringConcat(
     valueToDefaultExpr(second),
     ...elements.map(valueToDefaultExpr)
@@ -4958,7 +4958,7 @@ export function stringConcat(
  * @param subField The key to access in the map.
  * @return A new {@code Expression} representing the value associated with the given key in the map.
  */
-export function mapGet(fieldName: string, subField: string): FunctionExpr;
+export function mapGet(fieldName: string, subField: string): FunctionExpression;
 
 /**
  * Accesses a value from a map (object) expression using the provided key.
@@ -4972,11 +4972,11 @@ export function mapGet(fieldName: string, subField: string): FunctionExpr;
  * @param subField The key to access in the map.
  * @return A new {@code Expression} representing the value associated with the given key in the map.
  */
-export function mapGet(mapExpression: Expression, subField: string): FunctionExpr;
+export function mapGet(mapExpression: Expression, subField: string): FunctionExpression;
 export function mapGet(
   fieldOrExpr: string | Expression,
   subField: string
-): FunctionExpr {
+): FunctionExpression {
   return fieldOrExpression(fieldOrExpr).mapGet(subField);
 }
 
@@ -5161,7 +5161,7 @@ export function maximum(value: Expression | string): AggregateFunction {
 export function cosineDistance(
   fieldName: string,
   vector: number[] | VectorValue
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Calculates the Cosine distance between a field's vector value and a vector expression.
@@ -5178,7 +5178,7 @@ export function cosineDistance(
 export function cosineDistance(
   fieldName: string,
   vectorExpression: Expression
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Calculates the Cosine distance between a vector expression and a vector literal.
@@ -5195,7 +5195,7 @@ export function cosineDistance(
 export function cosineDistance(
   vectorExpression: Expression,
   vector: number[] | VectorValue
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Calculates the Cosine distance between two vector expressions.
@@ -5212,11 +5212,11 @@ export function cosineDistance(
 export function cosineDistance(
   vectorExpression: Expression,
   otherVectorExpression: Expression
-): FunctionExpr;
+): FunctionExpression;
 export function cosineDistance(
   expr: Expression | string,
   other: Expression | number[] | firestore.VectorValue
-): FunctionExpr {
+): FunctionExpression {
   const expr1 = fieldOrExpression(expr);
   const expr2 = vectorToExpr(other);
   return expr1.cosineDistance(expr2);
@@ -5237,7 +5237,7 @@ export function cosineDistance(
 export function dotProduct(
   fieldName: string,
   vector: number[] | VectorValue
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Calculates the dot product between a field's vector value and a vector expression.
@@ -5254,7 +5254,7 @@ export function dotProduct(
 export function dotProduct(
   fieldName: string,
   vectorExpression: Expression
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Calculates the dot product between a vector expression and a double array.
@@ -5271,7 +5271,7 @@ export function dotProduct(
 export function dotProduct(
   vectorExpression: Expression,
   vector: number[] | VectorValue
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Calculates the dot product between two vector expressions.
@@ -5288,11 +5288,11 @@ export function dotProduct(
 export function dotProduct(
   vectorExpression: Expression,
   otherVectorExpression: Expression
-): FunctionExpr;
+): FunctionExpression;
 export function dotProduct(
   expr: Expression | string,
   other: Expression | number[] | VectorValue
-): FunctionExpr {
+): FunctionExpression {
   const expr1 = fieldOrExpression(expr);
   const expr2 = vectorToExpr(other);
   return expr1.dotProduct(expr2);
@@ -5313,7 +5313,7 @@ export function dotProduct(
 export function euclideanDistance(
   fieldName: string,
   vector: number[] | VectorValue
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Calculates the Euclidean distance between a field's vector value and a vector expression.
@@ -5330,7 +5330,7 @@ export function euclideanDistance(
 export function euclideanDistance(
   fieldName: string,
   vectorExpression: Expression
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Calculates the Euclidean distance between a vector expression and a double array.
@@ -5348,7 +5348,7 @@ export function euclideanDistance(
 export function euclideanDistance(
   vectorExpression: Expression,
   vector: number[] | VectorValue
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Calculates the Euclidean distance between two vector expressions.
@@ -5365,11 +5365,11 @@ export function euclideanDistance(
 export function euclideanDistance(
   vectorExpression: Expression,
   otherVectorExpression: Expression
-): FunctionExpr;
+): FunctionExpression;
 export function euclideanDistance(
   expr: Expression | string,
   other: Expression | number[] | VectorValue
-): FunctionExpr {
+): FunctionExpression {
   const expr1 = fieldOrExpression(expr);
   const expr2 = vectorToExpr(other);
   return expr1.euclideanDistance(expr2);
@@ -5386,7 +5386,7 @@ export function euclideanDistance(
  * @param vectorExpression The expression representing the Firestore Vector.
  * @return A new {@code Expression} representing the length of the array.
  */
-export function vectorLength(vectorExpression: Expression): FunctionExpr;
+export function vectorLength(vectorExpression: Expression): FunctionExpression;
 
 /**
  * Creates an expression that calculates the length of a Firestore Vector represented by a field.
@@ -5399,8 +5399,8 @@ export function vectorLength(vectorExpression: Expression): FunctionExpr;
  * @param fieldName The name of the field representing the Firestore Vector.
  * @return A new {@code Expression} representing the length of the array.
  */
-export function vectorLength(fieldName: string): FunctionExpr;
-export function vectorLength(expr: Expression | string): FunctionExpr {
+export function vectorLength(fieldName: string): FunctionExpression;
+export function vectorLength(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).vectorLength();
 }
 
@@ -5416,7 +5416,7 @@ export function vectorLength(expr: Expression | string): FunctionExpr {
  * @param expr The expression representing the number of microseconds since epoch.
  * @return A new {@code Expression} representing the timestamp.
  */
-export function unixMicrosToTimestamp(expr: Expression): FunctionExpr;
+export function unixMicrosToTimestamp(expr: Expression): FunctionExpression;
 
 /**
  * Creates an expression that interprets a field's value as the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -5430,8 +5430,8 @@ export function unixMicrosToTimestamp(expr: Expression): FunctionExpr;
  * @param fieldName The name of the field representing the number of microseconds since epoch.
  * @return A new {@code Expression} representing the timestamp.
  */
-export function unixMicrosToTimestamp(fieldName: string): FunctionExpr;
-export function unixMicrosToTimestamp(expr: Expression | string): FunctionExpr {
+export function unixMicrosToTimestamp(fieldName: string): FunctionExpression;
+export function unixMicrosToTimestamp(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).unixMicrosToTimestamp();
 }
 
@@ -5446,7 +5446,7 @@ export function unixMicrosToTimestamp(expr: Expression | string): FunctionExpr {
  * @param expr The expression representing the timestamp.
  * @return A new {@code Expression} representing the number of microseconds since epoch.
  */
-export function timestampToUnixMicros(expr: Expression): FunctionExpr;
+export function timestampToUnixMicros(expr: Expression): FunctionExpression;
 
 /**
  * Creates an expression that converts a timestamp field to the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -5459,8 +5459,8 @@ export function timestampToUnixMicros(expr: Expression): FunctionExpr;
  * @param fieldName The name of the field representing the timestamp.
  * @return A new {@code Expression} representing the number of microseconds since epoch.
  */
-export function timestampToUnixMicros(fieldName: string): FunctionExpr;
-export function timestampToUnixMicros(expr: Expression | string): FunctionExpr {
+export function timestampToUnixMicros(fieldName: string): FunctionExpression;
+export function timestampToUnixMicros(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).timestampToUnixMicros();
 }
 
@@ -5476,7 +5476,7 @@ export function timestampToUnixMicros(expr: Expression | string): FunctionExpr {
  * @param expr The expression representing the number of milliseconds since epoch.
  * @return A new {@code Expression} representing the timestamp.
  */
-export function unixMillisToTimestamp(expr: Expression): FunctionExpr;
+export function unixMillisToTimestamp(expr: Expression): FunctionExpression;
 
 /**
  * Creates an expression that interprets a field's value as the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -5490,8 +5490,8 @@ export function unixMillisToTimestamp(expr: Expression): FunctionExpr;
  * @param fieldName The name of the field representing the number of milliseconds since epoch.
  * @return A new {@code Expression} representing the timestamp.
  */
-export function unixMillisToTimestamp(fieldName: string): FunctionExpr;
-export function unixMillisToTimestamp(expr: Expression | string): FunctionExpr {
+export function unixMillisToTimestamp(fieldName: string): FunctionExpression;
+export function unixMillisToTimestamp(expr: Expression | string): FunctionExpression {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.unixMillisToTimestamp();
 }
@@ -5507,7 +5507,7 @@ export function unixMillisToTimestamp(expr: Expression | string): FunctionExpr {
  * @param expr The expression representing the timestamp.
  * @return A new {@code Expression} representing the number of milliseconds since epoch.
  */
-export function timestampToUnixMillis(expr: Expression): FunctionExpr;
+export function timestampToUnixMillis(expr: Expression): FunctionExpression;
 
 /**
  * Creates an expression that converts a timestamp field to the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -5520,8 +5520,8 @@ export function timestampToUnixMillis(expr: Expression): FunctionExpr;
  * @param fieldName The name of the field representing the timestamp.
  * @return A new {@code Expression} representing the number of milliseconds since epoch.
  */
-export function timestampToUnixMillis(fieldName: string): FunctionExpr;
-export function timestampToUnixMillis(expr: Expression | string): FunctionExpr {
+export function timestampToUnixMillis(fieldName: string): FunctionExpression;
+export function timestampToUnixMillis(expr: Expression | string): FunctionExpression {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.timestampToUnixMillis();
 }
@@ -5538,7 +5538,7 @@ export function timestampToUnixMillis(expr: Expression | string): FunctionExpr {
  * @param expr The expression representing the number of seconds since epoch.
  * @return A new {@code Expression} representing the timestamp.
  */
-export function unixSecondsToTimestamp(expr: Expression): FunctionExpr;
+export function unixSecondsToTimestamp(expr: Expression): FunctionExpression;
 
 /**
  * Creates an expression that interprets a field's value as the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -5552,8 +5552,8 @@ export function unixSecondsToTimestamp(expr: Expression): FunctionExpr;
  * @param fieldName The name of the field representing the number of seconds since epoch.
  * @return A new {@code Expression} representing the timestamp.
  */
-export function unixSecondsToTimestamp(fieldName: string): FunctionExpr;
-export function unixSecondsToTimestamp(expr: Expression | string): FunctionExpr {
+export function unixSecondsToTimestamp(fieldName: string): FunctionExpression;
+export function unixSecondsToTimestamp(expr: Expression | string): FunctionExpression {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.unixSecondsToTimestamp();
 }
@@ -5569,7 +5569,7 @@ export function unixSecondsToTimestamp(expr: Expression | string): FunctionExpr 
  * @param expr The expression representing the timestamp.
  * @return A new {@code Expression} representing the number of seconds since epoch.
  */
-export function timestampToUnixSeconds(expr: Expression): FunctionExpr;
+export function timestampToUnixSeconds(expr: Expression): FunctionExpression;
 
 /**
  * Creates an expression that converts a timestamp field to the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -5582,8 +5582,8 @@ export function timestampToUnixSeconds(expr: Expression): FunctionExpr;
  * @param fieldName The name of the field representing the timestamp.
  * @return A new {@code Expression} representing the number of seconds since epoch.
  */
-export function timestampToUnixSeconds(fieldName: string): FunctionExpr;
-export function timestampToUnixSeconds(expr: Expression | string): FunctionExpr {
+export function timestampToUnixSeconds(fieldName: string): FunctionExpression;
+export function timestampToUnixSeconds(expr: Expression | string): FunctionExpression {
   const normalizedExpr = fieldOrExpression(expr);
   return normalizedExpr.timestampToUnixSeconds();
 }
@@ -5605,7 +5605,7 @@ export function timestampAdd(
   timestamp: Expression,
   unit: Expression,
   amount: Expression
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that adds a specified amount of time to a timestamp.
@@ -5624,7 +5624,7 @@ export function timestampAdd(
   timestamp: Expression,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that adds a specified amount of time to a timestamp represented by a field.
@@ -5643,7 +5643,7 @@ export function timestampAdd(
   fieldName: string,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
-): FunctionExpr;
+): FunctionExpression;
 export function timestampAdd(
   timestamp: Expression | string,
   unit:
@@ -5655,7 +5655,7 @@ export function timestampAdd(
     | 'hour'
     | 'day',
   amount: Expression | number
-): FunctionExpr {
+): FunctionExpression {
   const normalizedTimestamp = fieldOrExpression(timestamp);
   const normalizedUnit = valueToDefaultExpr(unit);
   const normalizedAmount = valueToDefaultExpr(amount);
@@ -5679,7 +5679,7 @@ export function timestampSub(
   timestamp: Expression,
   unit: Expression,
   amount: Expression
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that subtracts a specified amount of time from a timestamp.
@@ -5698,7 +5698,7 @@ export function timestampSub(
   timestamp: Expression,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
-): FunctionExpr;
+): FunctionExpression;
 
 /**
  * Creates an expression that subtracts a specified amount of time from a timestamp represented by a field.
@@ -5717,7 +5717,7 @@ export function timestampSub(
   fieldName: string,
   unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day',
   amount: number
-): FunctionExpr;
+): FunctionExpression;
 export function timestampSub(
   timestamp: Expression | string,
   unit:
@@ -5729,7 +5729,7 @@ export function timestampSub(
     | 'hour'
     | 'day',
   amount: Expression | number
-): FunctionExpr {
+): FunctionExpression {
   const normalizedTimestamp = fieldOrExpression(timestamp);
   const normalizedUnit = valueToDefaultExpr(unit);
   const normalizedAmount = valueToDefaultExpr(amount);
@@ -5792,7 +5792,7 @@ export function or(
  * @param exponent The expression to raise the base to the power of.
  * @return A new `Expression` representing the power operation.
  */
-export function pow(base: Expression, exponent: Expression): FunctionExpr;
+export function pow(base: Expression, exponent: Expression): FunctionExpression;
 
 /**
  * Creates an expression that returns the value of the base expression raised to the power of the exponent.
@@ -5806,7 +5806,7 @@ export function pow(base: Expression, exponent: Expression): FunctionExpr;
  * @param exponent The constant value to raise the base to the power of.
  * @return A new `Expression` representing the power operation.
  */
-export function pow(base: Expression, exponent: number): FunctionExpr;
+export function pow(base: Expression, exponent: number): FunctionExpression;
 
 /**
  * Creates an expression that returns the value of the base field raised to the power of the exponent expression.
@@ -5820,7 +5820,7 @@ export function pow(base: Expression, exponent: number): FunctionExpr;
  * @param exponent The expression to raise the base to the power of.
  * @return A new `Expression` representing the power operation.
  */
-export function pow(base: string, exponent: Expression): FunctionExpr;
+export function pow(base: string, exponent: Expression): FunctionExpression;
 
 /**
  * Creates an expression that returns the value of the base field raised to the power of the exponent.
@@ -5834,11 +5834,11 @@ export function pow(base: string, exponent: Expression): FunctionExpr;
  * @param exponent The constant value to raise the base to the power of.
  * @return A new `Expression` representing the power operation.
  */
-export function pow(base: string, exponent: number): FunctionExpr;
+export function pow(base: string, exponent: number): FunctionExpression;
 export function pow(
   base: Expression | string,
   exponent: Expression | number
-): FunctionExpr {
+): FunctionExpression {
   return fieldOrExpression(base).pow(exponent as number);
 }
 
@@ -5853,7 +5853,7 @@ export function pow(
  * @param fieldName The name of the field to round.
  * @return A new `Expression` representing the rounded value.
  */
-export function round(fieldName: string): FunctionExpr;
+export function round(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that rounds a numeric value to the nearest whole number.
@@ -5866,8 +5866,8 @@ export function round(fieldName: string): FunctionExpr;
  * @param expression An expression evaluating to a numeric value, which will be rounded.
  * @return A new `Expression` representing the rounded value.
  */
-export function round(expression: Expression): FunctionExpr;
-export function round(expr: Expression | string): FunctionExpr {
+export function round(expression: Expression): FunctionExpression;
+export function round(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).round();
 }
 
@@ -5882,7 +5882,7 @@ export function round(expr: Expression | string): FunctionExpr {
  * @param fieldName The name of the field to get the collection ID from.
  * @return A new {@code Expression} representing the collectionId operation.
  */
-export function collectionId(fieldName: string): FunctionExpr;
+export function collectionId(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that returns the collection ID from a path.
@@ -5895,8 +5895,8 @@ export function collectionId(fieldName: string): FunctionExpr;
  * @param expression An expression evaluating to a path, which the collection ID will be extracted from.
  * @return A new {@code Expression} representing the collectionId operation.
  */
-export function collectionId(expression: Expression): FunctionExpr;
-export function collectionId(expr: Expression | string): FunctionExpr {
+export function collectionId(expression: Expression): FunctionExpression;
+export function collectionId(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).collectionId();
 }
 
@@ -5914,7 +5914,7 @@ export function collectionId(expr: Expression | string): FunctionExpr {
  * @param fieldName The name of the field to calculate the length of.
  * @return A new `Expression` representing the length of the string, array, map, vector, or bytes.
  */
-export function length(fieldName: string): FunctionExpr;
+export function length(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
@@ -5930,8 +5930,8 @@ export function length(fieldName: string): FunctionExpr;
  * @param expression An expression evaluating to a string, array, map, vector, or bytes, which the length will be calculated for.
  * @return A new `Expression` representing the length of the string, array, map, vector, or bytes.
  */
-export function length(expression: Expression): FunctionExpr;
-export function length(expr: Expression | string): FunctionExpr {
+export function length(expression: Expression): FunctionExpression;
+export function length(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).length();
 }
 
@@ -5946,7 +5946,7 @@ export function length(expr: Expression | string): FunctionExpr {
  * @param fieldName The name of the field to compute the natural logarithm of.
  * @return A new `Expression` representing the natural logarithm of the numeric value.
  */
-export function ln(fieldName: string): FunctionExpr;
+export function ln(fieldName: string): FunctionExpression;
 
 /**
  * Creates an expression that computes the natural logarithm of a numeric value.
@@ -5959,8 +5959,8 @@ export function ln(fieldName: string): FunctionExpr;
  * @param expression An expression evaluating to a numeric value, which the natural logarithm will be computed for.
  * @return A new `Expression` representing the natural logarithm of the numeric value.
  */
-export function ln(expression: Expression): FunctionExpr;
-export function ln(expr: Expression | string): FunctionExpr {
+export function ln(expression: Expression): FunctionExpression;
+export function ln(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).ln();
 }
 
@@ -5976,7 +5976,7 @@ export function ln(expr: Expression | string): FunctionExpr {
  * @param base The base of the logarithm.
  * @return A new {@code Expression} representing the logarithm of the numeric value.
  */
-export function log(expression: Expression, base: number): FunctionExpr;
+export function log(expression: Expression, base: number): FunctionExpression;
 /**
  * Creates an expression that computes the logarithm of an expression to a given base.
  *
@@ -5989,7 +5989,7 @@ export function log(expression: Expression, base: number): FunctionExpr;
  * @param base The base of the logarithm.
  * @return A new {@code Expression} representing the logarithm of the numeric value.
  */
-export function log(expression: Expression, base: Expression): FunctionExpr;
+export function log(expression: Expression, base: Expression): FunctionExpression;
 /**
  * Creates an expression that computes the logarithm of a field to a given base.
  *
@@ -6002,7 +6002,7 @@ export function log(expression: Expression, base: Expression): FunctionExpr;
  * @param base The base of the logarithm.
  * @return A new {@code Expression} representing the logarithm of the numeric value.
  */
-export function log(fieldName: string, base: number): FunctionExpr;
+export function log(fieldName: string, base: number): FunctionExpression;
 /**
  * Creates an expression that computes the logarithm of a field to a given base.
  *
@@ -6015,8 +6015,8 @@ export function log(fieldName: string, base: number): FunctionExpr;
  * @param base The base of the logarithm.
  * @return A new {@code Expression} representing the logarithm of the numeric value.
  */
-export function log(fieldName: string, base: Expression): FunctionExpr;
-export function log(expr: Expression | string, base: number | Expression): FunctionExpr {
+export function log(fieldName: string, base: Expression): FunctionExpression;
+export function log(expr: Expression | string, base: number | Expression): FunctionExpression {
   return fieldOrExpression(expr).log(valueToDefaultExpr(base));
 }
 
@@ -6031,7 +6031,7 @@ export function log(expr: Expression | string, base: number | Expression): Funct
  * @param expression An expression evaluating to a numeric value, which the square root will be computed for.
  * @return A new {@code Expression} representing the square root of the numeric value.
  */
-export function sqrt(expression: Expression): FunctionExpr;
+export function sqrt(expression: Expression): FunctionExpression;
 /**
  * Creates an expression that computes the square root of a numeric value.
  *
@@ -6043,8 +6043,8 @@ export function sqrt(expression: Expression): FunctionExpr;
  * @param fieldName The name of the field to compute the square root of.
  * @return A new {@code Expression} representing the square root of the numeric value.
  */
-export function sqrt(fieldName: string): FunctionExpr;
-export function sqrt(expr: Expression | string): FunctionExpr {
+export function sqrt(fieldName: string): FunctionExpression;
+export function sqrt(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).sqrt();
 }
 
@@ -6059,7 +6059,7 @@ export function sqrt(expr: Expression | string): FunctionExpr {
  * @param stringExpression An expression evaluating to a string value, which will be reversed.
  * @return A new {@code Expression} representing the reversed string.
  */
-export function stringReverse(stringExpression: Expression): FunctionExpr;
+export function stringReverse(stringExpression: Expression): FunctionExpression;
 
 /**
  * Creates an expression that reverses a string value in the specified field.
@@ -6072,8 +6072,8 @@ export function stringReverse(stringExpression: Expression): FunctionExpr;
  * @param field The name of the field representing the string to reverse.
  * @return A new {@code Expression} representing the reversed string.
  */
-export function stringReverse(field: string): FunctionExpr;
-export function stringReverse(expr: Expression | string): FunctionExpr {
+export function stringReverse(field: string): FunctionExpression;
+export function stringReverse(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).stringReverse();
 }
 
