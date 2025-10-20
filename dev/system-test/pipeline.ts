@@ -95,7 +95,7 @@ import {
   dotProduct,
   euclideanDistance,
   mapGet,
-  lte,
+  lessThanOrEqual,
   equalAny,
   notEqAny,
   logicalMinimum,
@@ -2641,7 +2641,7 @@ describe('Pipeline class', () => {
         .where(
           and(
             greaterThan('rating', 4.2),
-            lte(field('rating'), 4.5),
+            lessThanOrEqual(field('rating'), 4.5),
             neq('genre', 'Science Fiction')
           )
         )

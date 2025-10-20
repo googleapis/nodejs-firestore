@@ -46,7 +46,7 @@ export {
   dotProduct,
   euclideanDistance,
   mapGet,
-  lte,
+  lessThanOrEqual,
   equalAny,
   map,
   array,

@@ -5,7 +5,7 @@ equalAny,equalAny
 greaterThan,greaterThan
 greaterThanOrEqual,greaterThanOrEqual
 lessThan,lessThan
-lte,lessThanOrEqual
+lessThanOrEqual,lessThanOrEqual
 neq,notEqual
 notEqAny,notEqualAny
 strConcat,stringConcat

@@ -3343,25 +3343,25 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'quantity' field is less than or equal to 20
-       * field("quantity").lte(constant(20));
+       * field("quantity").lessThanOrEqual(constant(20));
        * ```
        *
        * @param expression The expression to compare against.
        * @return A new `BooleanExpression` representing the less than or equal to comparison.
        */
-      lte(expression: Expression): BooleanExpression;
+      lessThanOrEqual(expression: Expression): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is less than or equal to a constant value.
        *
        * ```typescript
        * // Check if the 'score' field is less than or equal to 70
-       * field("score").lte(70);
+       * field("score").lessThanOrEqual(70);
        * ```
        *
        * @param value The constant value to compare for less than or equal to.
        * @return A new `Expression` representing the less than or equal to comparison.
        */
-      lte(value: unknown): BooleanExpression;
+      lessThanOrEqual(value: unknown): BooleanExpression;
 
       /**
        * Creates an expression that checks if this expression is greater than another expression.
@@ -5722,55 +5722,55 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'quantity' field is less than or equal to 20
-     * lte(field("quantity"), field("limit"));
+     * lessThanOrEqual(field("quantity"), field("limit"));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
      * @return A new `Expression` representing the less than or equal to comparison.
      */
-    export function lte(left: Expression, right: Expression): BooleanExpression;
+    export function lessThanOrEqual(left: Expression, right: Expression): BooleanExpression;
 
     /**
      * Creates an expression that checks if a given expression's value is less than or equal to a constant value.
      *
      * ```typescript
      * // Check if the 'quantity' field is less than or equal to 20
-     * lte(field("quantity"), 20);
+     * lessThanOrEqual(field("quantity"), 20);
      * ```
      *
      * @param expression The {@link Expression} to compare.
      * @param value The constant value to compare against.
      * @return A new {@link BooleanExpression} representing the less than or equal to comparison.
      */
-    export function lte(expression: Expression, value: unknown): BooleanExpression;
+    export function lessThanOrEqual(expression: Expression, value: unknown): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is less than or equal to another expression.
      *
      * ```typescript
      * // Check if the 'quantity' field is less than or equal to the 'limit' field
-     * lte("quantity", field("limit"));
+     * lessThanOrEqual("quantity", field("limit"));
      * ```
      *
      * @param fieldName The name of the field whose value will be compared.
      * @param expression The expression to compare against the field's value.
      * @return A new {@link BooleanExpression} representing the less than or equal to comparison.
      */
-    export function lte(fieldName: string, expression: Expression): BooleanExpression;
+    export function lessThanOrEqual(fieldName: string, expression: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is less than or equal to a constant value.
      *
      * ```typescript
      * // Check if the 'score' field is less than or equal to 70
-     * lte("score", 70);
+     * lessThanOrEqual("score", 70);
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The constant value to compare to.
      * @return A new `Expression` representing the less than or equal to comparison.
      */
-    export function lte(fieldName: string, value: unknown): BooleanExpression;
+    export function lessThanOrEqual(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if the first expression is greater than the second
      * expression.

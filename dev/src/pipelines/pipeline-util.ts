@@ -515,7 +515,7 @@ export function toPipelineBooleanExpr(
         case 'LESS_THAN':
           return and(field.exists(), field.lessThan(value));
         case 'LESS_THAN_OR_EQUAL':
-          return and(field.exists(), field.lte(value));
+          return and(field.exists(), field.lessThanOrEqual(value));
         case 'GREATER_THAN':
           return and(field.exists(), field.greaterThan(value));
         case 'GREATER_THAN_OR_EQUAL':
