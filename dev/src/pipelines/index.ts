@@ -39,7 +39,7 @@ export {
   regexContains,
   regexMatch,
   startsWith,
-  strConcat,
+  stringConcat,
   subtract,
   cosineDistance,
   countDistinct,

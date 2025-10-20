@@ -8,7 +8,7 @@ lessThan,lessThan
 lessThanOrEqual,lessThanOrEqual
 notEqual,notEqual
 notEqualAny,notEqualAny
-strConcat,stringConcat
+stringConcat,stringConcat
 strContains,stringContains
 strReverse,stringReverse
 AliasedExpr,AliasedExpression

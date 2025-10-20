@@ -89,7 +89,7 @@ import {
   regexContains,
   regexMatch,
   startsWith,
-  strConcat,
+  stringConcat,
   subtract,
   cosineDistance,
   dotProduct,
@@ -1726,7 +1726,7 @@ describe('Pipeline class', () => {
           .select('title', 'author')
           .rawStage('add_fields', [
             {
-              display: strConcat('title', ' - ', field('author')),
+              display: stringConcat('title', ' - ', field('author')),
             },
           ])
           .execute();
@@ -2491,7 +2491,7 @@ describe('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .sort(ascending('author'))
-        .select(field('author').strConcat(' - ', field('title')).as('bookInfo'))
+        .select(field('author').stringConcat(' - ', field('title')).as('bookInfo'))
         .limit(1)
         .execute();
       expectResults(snapshot, {

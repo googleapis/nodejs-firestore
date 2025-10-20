@@ -3788,14 +3788,14 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Combine the 'firstName', " ", and 'lastName' fields into a single string
-       * field("firstName").strConcat(constant(" "), field("lastName"));
+       * field("firstName").stringConcat(constant(" "), field("lastName"));
        * ```
        *
        * @param secondString The additional expression or string literal to concatenate.
        * @param otherStrings Optional additional expressions or string literals to concatenate.
        * @return A new `Expression` representing the concatenated string.
        */
-      strConcat(
+      stringConcat(
         secondString: Expression | string,
         ...otherStrings: Array<Expression | string>
       ): FunctionExpr;
@@ -7041,7 +7041,7 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Combine the 'firstName' field, a space, and the 'lastName' field into a single string.
-     * strConcat("firstName", " ", field("lastName"));
+     * stringConcat("firstName", " ", field("lastName"));
      * ```
      *
      * @param fieldName The name of the field to use as the initial string value for concatenation.
@@ -7049,7 +7049,7 @@ declare namespace FirebaseFirestore {
      * @param otherStrings Optional additional expressions or literals (typically strings) to concatenate.
      * @return A new {@code FunctionExpr} representing the concatenated string.
      */
-    export function strConcat(
+    export function stringConcat(
       fieldName: string,
       secondString: Expression | string,
       ...otherStrings: Array<Expression | string>
@@ -7059,7 +7059,7 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Combine the 'firstName', " ", and 'lastName' fields into a single string
-     * strConcat(field("firstName"), " ", field("lastName"));
+     * stringConcat(field("firstName"), " ", field("lastName"));
      * ```
      *
      * @param firstString The initial string expression to concatenate to.
@@ -7067,7 +7067,7 @@ declare namespace FirebaseFirestore {
      * @param otherStrings Optional additional expressions or literals (typically strings) to concatenate.
      * @return A new {@code Expression} representing the concatenated string.
      */
-    export function strConcat(
+    export function stringConcat(
       firstString: Expression,
       secondString: Expression | string,
       ...otherStrings: Array<Expression | string>

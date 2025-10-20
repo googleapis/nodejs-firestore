@@ -864,14 +864,14 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * ```typescript
    * // Combine the 'firstName', " ", and 'lastName' fields into a single string
-   * field("firstName").strConcat(constant(" "), field("lastName"));
+   * field("firstName").stringConcat(constant(" "), field("lastName"));
    * ```
    *
    * @param secondString The additional expression or string literal to concatenate.
    * @param otherStrings Optional additional expressions or string literals to concatenate.
    * @return A new `Expression` representing the concatenated string.
    */
-  strConcat(
+  stringConcat(
     secondString: Expression | string,
     ...otherStrings: Array<Expression | string>
   ): FunctionExpr {
@@ -4903,7 +4903,7 @@ export function trim(expr: Expression | string): FunctionExpr {
  *
  * ```typescript
  * // Combine the 'firstName', " ", and 'lastName' fields into a single string
- * strConcat("firstName", " ", field("lastName"));
+ * stringConcat("firstName", " ", field("lastName"));
  * ```
  *
  * @param fieldName The field name containing the initial string value.
@@ -4911,7 +4911,7 @@ export function trim(expr: Expression | string): FunctionExpr {
  * @param otherStrings Optional additional expressions or literals (typically strings) to concatenate.
  * @return A new {@code Expression} representing the concatenated string.
  */
-export function strConcat(
+export function stringConcat(
   fieldName: string,
   secondString: Expression | string,
   ...otherStrings: Array<Expression | string>
@@ -4922,7 +4922,7 @@ export function strConcat(
  *
  * ```typescript
  * // Combine the 'firstName', " ", and 'lastName' fields into a single string
- * strConcat(field("firstName"), " ", field("lastName"));
+ * stringConcat(field("firstName"), " ", field("lastName"));
  * ```
  *
  * @param firstString The initial string expression to concatenate to.
@@ -4930,17 +4930,17 @@ export function strConcat(
  * @param otherStrings Optional additional expressions or literals (typically strings) to concatenate.
  * @return A new {@code Expression} representing the concatenated string.
  */
-export function strConcat(
+export function stringConcat(
   firstString: Expression,
   secondString: Expression | string,
   ...otherStrings: Array<Expression | string>
 ): FunctionExpr;
-export function strConcat(
+export function stringConcat(
   first: string | Expression,
   second: string | Expression,
   ...elements: Array<string | Expression>
 ): FunctionExpr {
-  return fieldOrExpression(first).strConcat(
+  return fieldOrExpression(first).stringConcat(
     valueToDefaultExpr(second),
     ...elements.map(valueToDefaultExpr)
   );
