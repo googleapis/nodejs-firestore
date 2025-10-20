@@ -143,7 +143,7 @@ use(chaiAsPromised);
 
 const timestampDeltaMS = 3000;
 
-describe('Pipeline class', () => {
+describe.only('Pipeline class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   let beginDocCreation = 0;
@@ -2084,7 +2084,8 @@ describe('Pipeline class', () => {
             'tags',
             'tag',
             'awards',
-            'nestedField'
+            'nestedField',
+              'tagsIndex'
           )
           .execute();
         expectResults(
@@ -2226,7 +2227,8 @@ describe('Pipeline class', () => {
             'tags',
             'tag',
             'awards',
-            'nestedField'
+            'nestedField',
+              'tagsIndex'
           )
           .execute();
         expectResults(

@@ -4750,7 +4750,7 @@ declare namespace FirebaseFirestore {
      * @param value The boolean value.
      * @return A new `Expression` instance.
      */
-    export function constant(value: boolean): Expression;
+    export function constant(value: boolean): BooleanExpression;
     /**
      * Creates an `Expression` instance for a null value.
      *

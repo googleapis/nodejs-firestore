@@ -254,7 +254,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    */
   notEqual(value: unknown): BooleanExpression;
   notEqual(other: unknown): BooleanExpression {
-    return new BooleanExpression('notEqual', [this, valueToDefaultExpr(other)]);
+    return new BooleanExpression('not_equal', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -283,7 +283,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    */
   lessThan(value: unknown): BooleanExpression;
   lessThan(other: unknown): BooleanExpression {
-    return new BooleanExpression('lessThan', [this, valueToDefaultExpr(other)]);
+    return new BooleanExpression('less_than', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -313,7 +313,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    */
   lessThanOrEqual(value: unknown): BooleanExpression;
   lessThanOrEqual(other: unknown): BooleanExpression {
-    return new BooleanExpression('lessThanOrEqual', [this, valueToDefaultExpr(other)]);
+    return new BooleanExpression('less_than_or_equal', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -342,7 +342,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    */
   greaterThan(value: unknown): BooleanExpression;
   greaterThan(other: unknown): BooleanExpression {
-    return new BooleanExpression('greaterThan', [this, valueToDefaultExpr(other)]);
+    return new BooleanExpression('greater_than', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -373,7 +373,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    */
   greaterThanOrEqual(value: unknown): BooleanExpression;
   greaterThanOrEqual(other: unknown): BooleanExpression {
-    return new BooleanExpression('greaterThanOrEqual', [this, valueToDefaultExpr(other)]);
+    return new BooleanExpression('greater_than_or_equal', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -532,7 +532,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
       : cast<Expression>(others);
-    return new BooleanExpression('eq_any', [this, exprOthers]);
+    return new BooleanExpression('equal_any', [this, exprOthers]);
   }
 
   /**
@@ -565,7 +565,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
       : cast<Expression>(others);
-    return new BooleanExpression('not_eq_any', [this, exprOthers]);
+    return new BooleanExpression('not_equal_any', [this, exprOthers]);
   }
 
   /**
@@ -745,7 +745,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    */
   stringContains(expr: Expression): BooleanExpression;
   stringContains(stringOrExpr: string | Expression): BooleanExpression {
-    return new BooleanExpression('str_contains', [
+    return new BooleanExpression('string_contains', [
       this,
       valueToDefaultExpr(stringOrExpr),
     ]);
@@ -877,7 +877,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   ): FunctionExpression {
     const elements = [secondString, ...otherStrings];
     const exprs = elements.map(valueToDefaultExpr);
-    return new FunctionExpression('str_concat', [this, ...exprs]);
+    return new FunctionExpression('string_concat', [this, ...exprs]);
   }
 
   /**
@@ -1020,7 +1020,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @return A new `AggregateFunction` representing the 'min' aggregation.
    */
   minimum(): AggregateFunction {
-    return new AggregateFunction('min', [this]);
+    return new AggregateFunction('minimum', [this]);
   }
 
   /**
@@ -1034,7 +1034,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @return A new `AggregateFunction` representing the 'max' aggregation.
    */
   maximum(): AggregateFunction {
-    return new AggregateFunction('max', [this]);
+    return new AggregateFunction('maximum', [this]);
   }
 
   /**
@@ -1068,7 +1068,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
     ...others: Array<Expression | unknown>
   ): FunctionExpression {
     const values = [second, ...others];
-    return new FunctionExpression('max', [this, ...values.map(valueToDefaultExpr)]);
+    return new FunctionExpression('maximum', [this, ...values.map(valueToDefaultExpr)]);
   }
 
   /**
@@ -1088,7 +1088,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
     ...others: Array<Expression | unknown>
   ): FunctionExpression {
     const values = [second, ...others];
-    return new FunctionExpression('min', [this, ...values.map(valueToDefaultExpr)]);
+    return new FunctionExpression('minimum', [this, ...values.map(valueToDefaultExpr)]);
   }
 
   /**
@@ -1369,7 +1369,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
       | 'day',
     amount: Expression | number
   ): FunctionExpression {
-    return new FunctionExpression('timestamp_sub', [
+    return new FunctionExpression('timestamp_subtract', [
       this,
       valueToDefaultExpr(unit),
       valueToDefaultExpr(amount),
@@ -1410,9 +1410,9 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   substring(position: Expression | number, length?: Expression | number): FunctionExpression {
     const positionExpr = valueToDefaultExpr(position);
     if (length === undefined) {
-      return new FunctionExpression('substr', [this, positionExpr]);
+      return new FunctionExpression('substring', [this, positionExpr]);
     } else {
-      return new FunctionExpression('substr', [
+      return new FunctionExpression('substring', [
         this,
         positionExpr,
         valueToDefaultExpr(length),
@@ -1748,7 +1748,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * @return A new {@code Expression} representing the reversed string.
    */
   stringReverse(): FunctionExpression {
-    return new FunctionExpression('str_reverse', [this]);
+    return new FunctionExpression('string_reverse', [this]);
   }
 
   // TODO(new-expression): Add new expression method definitions above this line
@@ -2130,7 +2130,7 @@ export function constant(value: string): Expression;
  * @param value The boolean value.
  * @return A new `Expression` instance.
  */
-export function constant(value: boolean): Expression;
+export function constant(value: boolean): BooleanExpression;
 
 /**
  * Creates an 'Expression' instance for a null value.
