@@ -1,4 +1,16 @@
-BooleanExpr,BooleanExpression
+BooleanExpression,BooleanExpression
 Expression,Expression
 equal,equal
 equalAny,equalAny
+gt,greaterThan
+gte,greaterThanOrEqual
+lt,lessThan
+lte,lessThanOrEqual
+neq,notEqual
+notEqAny,notEqualAny
+strConcat,stringConcat
+strContains,stringContains
+strReverse,stringReverse
+AliasedExpr,AliasedExpression
+FunctionExpr,FunctionExpression
+cond,conditional
