@@ -2922,7 +2922,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .aggregate(
-            new AggregateFunction('count_if', [field('rating').gte(4.5)]).as(
+            new AggregateFunction('count_if', [field('rating').greaterThanOrEqual(4.5)]).as(
               'countOfBest'
             )
           )
@@ -2968,7 +2968,7 @@ describe('Pipeline class', () => {
       expect(snapshot.results.length).to.equal(10);
       snapshot.results.forEach((d: PipelineResult) => {
         expect(d.get('result')).to.be.lt(1);
-        expect(d.get('result')).to.be.gte(0);
+        expect(d.get('result')).to.be.greaterThanOrEqual(0);
       });
     });
 

@@ -3,7 +3,7 @@ Expression,Expression
 equal,equal
 equalAny,equalAny
 greaterThan,greaterThan
-gte,greaterThanOrEqual
+greaterThanOrEqual,greaterThanOrEqual
 lt,lessThan
 lte,lessThanOrEqual
 neq,notEqual

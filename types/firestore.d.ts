@@ -3393,26 +3393,26 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'quantity' field is greater than or equal to field 'requirement' plus 1
-       * field("quantity").gte(field('requirement').add(1));
+       * field("quantity").greaterThanOrEqual(field('requirement').add(1));
        * ```
        *
        * @param expression The expression to compare for greater than or equal to.
        * @return A new `Expression` representing the greater than or equal to comparison.
        */
-      gte(expression: Expression): BooleanExpression;
+      greaterThanOrEqual(expression: Expression): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is greater than or equal to a constant
        * value.
        *
        * ```typescript
        * // Check if the 'score' field is greater than or equal to 80
-       * field("score").gte(80);
+       * field("score").greaterThanOrEqual(80);
        * ```
        *
        * @param value The constant value to compare for greater than or equal to.
        * @return A new `Expression` representing the greater than or equal to comparison.
        */
-      gte(value: unknown): BooleanExpression;
+      greaterThanOrEqual(value: unknown): BooleanExpression;
       /**
        * Creates an expression that checks if an array contains a specific element.
        *
@@ -5831,55 +5831,55 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'quantity' field is greater than or equal to the field "threshold"
-     * gte(field("quantity"), field("threshold"));
+     * greaterThanOrEqual(field("quantity"), field("threshold"));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
      * @return A new `Expression` representing the greater than or equal to comparison.
      */
-    export function gte(left: Expression, right: Expression): BooleanExpression;
+    export function greaterThanOrEqual(left: Expression, right: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is greater than or equal to a constant
      * value.
      *
      * ```typescript
      * // Check if the 'quantity' field is greater than or equal to 10
-     * gte(field("quantity"), 10);
+     * greaterThanOrEqual(field("quantity"), 10);
      * ```
      *
      * @param expression The expression to compare.
      * @param value The constant value to compare to.
      * @return A new `Expression` representing the greater than or equal to comparison.
      */
-    export function gte(expression: Expression, value: unknown): BooleanExpression;
+    export function greaterThanOrEqual(expression: Expression, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is greater than or equal to an expression.
      *
      * ```typescript
      * // Check if the value of field 'age' is greater than or equal to the value of field 'limit'
-     * gte("age", field("limit"));
+     * greaterThanOrEqual("age", field("limit"));
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The expression to compare to.
      * @return A new `Expression` representing the greater than or equal to comparison.
      */
-    export function gte(fieldName: string, value: Expression): BooleanExpression;
+    export function greaterThanOrEqual(fieldName: string, value: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is greater than or equal to a constant
      * value.
      *
      * ```typescript
      * // Check if the 'score' field is greater than or equal to 80
-     * gte("score", 80);
+     * greaterThanOrEqual("score", 80);
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The constant value to compare to.
      * @return A new `Expression` representing the greater than or equal to comparison.
      */
-    export function gte(fieldName: string, value: unknown): BooleanExpression;
+    export function greaterThanOrEqual(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if an array expression contains a specific element.
      *

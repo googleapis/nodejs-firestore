@@ -89,7 +89,7 @@ export {
   sum,
   maximum,
   descending,
-  gte,
+  greaterThanOrEqual,
   multiply,
   cond,
   Ordering,
