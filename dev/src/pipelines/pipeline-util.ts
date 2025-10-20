@@ -575,7 +575,7 @@ export function isSelectable(
 ): val is firestore.Pipelines.Selectable {
   const candidate = val as firestore.Pipelines.Selectable;
   return (
-    candidate.selectable && isString(candidate.alias) && isExpr(candidate.expr)
+    candidate.selectable && isString(candidate._alias) && isExpr(candidate._expr)
   );
 }
 

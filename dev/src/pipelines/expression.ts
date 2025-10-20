@@ -1882,8 +1882,8 @@ export class AliasedExpression
   _createdFromLiteral = false;
 
   constructor(
-    readonly expr: Expression,
-    readonly alias: string
+    readonly _expr: Expression,
+    readonly _alias: string
   ) {}
 
   /**
@@ -1891,7 +1891,7 @@ export class AliasedExpression
    * @internal
    */
   _validateUserData(ignoreUndefinedProperties: boolean): void {
-    this.expr._validateUserData(ignoreUndefinedProperties);
+    this._expr._validateUserData(ignoreUndefinedProperties);
   }
 }
 
@@ -1962,11 +1962,11 @@ export class Field extends Expression implements firestore.Pipelines.Selectable 
     return this.fieldPath.formattedName;
   }
 
-  get alias(): string {
+  get _alias(): string {
     return this.fieldName();
   }
 
-  get expr(): Expression {
+  get _expr(): Expression {
     return this;
   }
 

@@ -1352,8 +1352,8 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     )
       ? selectableOrOptions
       : selectableOrOptions.selectable;
-    const alias = selectable.alias;
-    const expr = selectable.expr as Expression;
+    const alias = selectable._alias;
+    const expr = selectable._expr as Expression;
 
     const indexFieldName = isSelectable(selectableOrOptions)
       ? indexField
@@ -1637,7 +1637,7 @@ function selectablesToMap(
       result.set((selectable as Field).fieldName(), selectable);
     } else if (selectable instanceof AliasedExpression) {
       const expr = selectable as AliasedExpression;
-      result.set(expr.alias, expr.expr as unknown as Expression);
+      result.set(expr._alias, expr._expr as unknown as Expression);
     } else {
       throw new Error('unexpected selectable: ' + JSON.stringify(selectable));
     }
