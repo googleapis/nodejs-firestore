@@ -110,7 +110,6 @@ import {
   collectionId,
   length,
   ln,
-  log,
   sqrt,
   stringReverse,
   // TODO(new-expression): add new expression imports above this line
@@ -3546,32 +3545,6 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         lnRating: 1.4350845252893227,
-      });
-    });
-
-    it('can compute the logarithm of a numeric value', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
-        .limit(1)
-        .select(field('rating').log(10).as('logRating'))
-        .execute();
-      expectResults(snapshot, {
-        logRating: 0.6232492903979004,
-      });
-    });
-
-    it('can compute the logarithm of a numeric value with the top-level function', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
-        .limit(1)
-        .select(log('rating', 10).as('logRating'))
-        .execute();
-      expectResults(snapshot, {
-        logRating: 0.6232492903979004,
       });
     });
 

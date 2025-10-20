@@ -1695,35 +1695,6 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
   }
 
   /**
-   * Creates an expression that computes the logarithm of this expression to a given base.
-   *
-   * ```typescript
-   * // Compute the logarithm of the 'value' field with base 10.
-   * field("value").log(10);
-   * ```
-   *
-   * @param base The base of the logarithm.
-   * @return A new {@code Expression} representing the logarithm of the numeric value.
-   */
-  log(base: number): FunctionExpression;
-
-  /**
-   * Creates an expression that computes the logarithm of this expression to a given base.
-   *
-   * ```typescript
-   * // Compute the logarithm of the 'value' field with the base in the 'base' field.
-   * field("value").log(field("base"));
-   * ```
-   *
-   * @param base The base of the logarithm.
-   * @return A new {@code Expression} representing the logarithm of the numeric value.
-   */
-  log(base: Expression): FunctionExpression;
-  log(base: number | Expression): FunctionExpression {
-    return new FunctionExpression('log', [this, valueToDefaultExpr(base)]);
-  }
-
-  /**
    * Creates an expression that computes the square root of a numeric value.
    *
    * ```typescript
@@ -5953,62 +5924,6 @@ export function ln(fieldName: string): FunctionExpression;
 export function ln(expression: Expression): FunctionExpression;
 export function ln(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).ln();
-}
-
-/**
- * Creates an expression that computes the logarithm of an expression to a given base.
- *
- * ```typescript
- * // Compute the logarithm of the 'value' field with base 10.
- * log(field("value"), 10);
- * ```
- *
- * @param expression An expression evaluating to a numeric value, which the logarithm will be computed for.
- * @param base The base of the logarithm.
- * @return A new {@code Expression} representing the logarithm of the numeric value.
- */
-export function log(expression: Expression, base: number): FunctionExpression;
-/**
- * Creates an expression that computes the logarithm of an expression to a given base.
- *
- * ```typescript
- * // Compute the logarithm of the 'value' field with the base in the 'base' field.
- * log(field("value"), field("base"));
- * ```
- *
- * @param expression An expression evaluating to a numeric value, which the logarithm will be computed for.
- * @param base The base of the logarithm.
- * @return A new {@code Expression} representing the logarithm of the numeric value.
- */
-export function log(expression: Expression, base: Expression): FunctionExpression;
-/**
- * Creates an expression that computes the logarithm of a field to a given base.
- *
- * ```typescript
- * // Compute the logarithm of the 'value' field with base 10.
- * log("value", 10);
- * ```
- *
- * @param fieldName The name of the field to compute the logarithm of.
- * @param base The base of the logarithm.
- * @return A new {@code Expression} representing the logarithm of the numeric value.
- */
-export function log(fieldName: string, base: number): FunctionExpression;
-/**
- * Creates an expression that computes the logarithm of a field to a given base.
- *
- * ```typescript
- * // Compute the logarithm of the 'value' field with the base in the 'base' field.
- * log("value", field("base"));
- * ```
- *
- * @param fieldName The name of the field to compute the logarithm of.
- * @param base The base of the logarithm.
- * @return A new {@code Expression} representing the logarithm of the numeric value.
- */
-export function log(fieldName: string, base: Expression): FunctionExpression;
-export function log(expr: Expression | string, base: number | Expression): FunctionExpression {
-  return fieldOrExpression(expr).log(valueToDefaultExpr(base));
 }
 
 /**

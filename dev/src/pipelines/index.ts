@@ -114,7 +114,6 @@ export {
   collectionId,
   length,
   ln,
-  log,
   round,
   sqrt,
   stringReverse,
