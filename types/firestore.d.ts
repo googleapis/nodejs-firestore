@@ -3132,7 +3132,7 @@ declare namespace FirebaseFirestore {
      *
      * @internal
      */
-    export type ExprType =
+    export type ExpressionType =
       | 'Field'
       | 'Constant'
       | 'Function'
@@ -3154,7 +3154,7 @@ declare namespace FirebaseFirestore {
      * method calls to create complex expressions.
      */
     export abstract class Expression {
-      abstract readonly expressionType: ExprType;
+      abstract readonly expressionType: ExpressionType;
       /**
        * Creates an expression that adds this expression to another expression.
        *
@@ -4568,7 +4568,7 @@ declare namespace FirebaseFirestore {
       /**
        * @property expressionType The type of the aggregate expression, indicating the specific aggregate function (e.g., COUNT, SUM, AVG).
        */
-      expressionType: ExprType;
+      expressionType: ExpressionType;
 
       /**
        * @private
@@ -4623,7 +4623,7 @@ declare namespace FirebaseFirestore {
       /**
        * @internal Specifies that the instance is an AliasedExpression.
        */
-      expressionType: ExprType;
+      expressionType: ExpressionType;
 
       /**
        * Specifies that this class is selectable, meaning it contains an {@link Expression} and an alias,
@@ -4656,7 +4656,7 @@ declare namespace FirebaseFirestore {
       /**
        * @internal Specifies that the instance is a Field.
        */
-      readonly expressionType: ExprType;
+      readonly expressionType: ExpressionType;
       /**
        * Specifies that this class is selectable, meaning it contains an {@link Expression} and an alias,
        * and can be provided to the Select stage of a pipeline.
@@ -4728,7 +4728,7 @@ declare namespace FirebaseFirestore {
      * ```
      */
     export class Constant extends Expression {
-      readonly expressionType: ExprType;
+      readonly expressionType: ExpressionType;
     }
     /**
      * Creates an `Expression` instance for a number value.
@@ -4825,7 +4825,7 @@ declare namespace FirebaseFirestore {
        * @internal
        * Indicates that this expression is a `FunctionExpression`.
        */
-      readonly expressionType: ExprType;
+      readonly expressionType: ExpressionType;
       /**
        * @private
        * @internal
