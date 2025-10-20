@@ -593,8 +593,8 @@ export function isAliasedAggregate(
 ): val is firestore.Pipelines.AliasedAggregate {
   const candidate = val as firestore.Pipelines.AliasedAggregate;
   return (
-    isString(candidate.alias) &&
-    candidate.aggregate instanceof AggregateFunction
+    isString(candidate._alias) &&
+    candidate._aggregate instanceof AggregateFunction
   );
 }
 

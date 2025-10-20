@@ -1653,7 +1653,7 @@ function aliasedAggregateToMap(
       map: Map<string, AggregateFunction>,
       selectable: firestore.Pipelines.AliasedAggregate
     ) => {
-      map.set(selectable.alias, selectable.aggregate as AggregateFunction);
+      map.set(selectable._alias, selectable._aggregate as AggregateFunction);
       return map;
     },
     new Map() as Map<string, AggregateFunction>

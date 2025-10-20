@@ -1872,8 +1872,8 @@ export class AggregateFunction implements AggregateFunction, HasUserData {
  */
 export class AliasedAggregate implements AliasedAggregate, HasUserData {
   constructor(
-    readonly aggregate: AggregateFunction,
-    readonly alias: string
+    readonly _aggregate: AggregateFunction,
+    readonly _alias: string
   ) {}
 
   /**
@@ -1889,7 +1889,7 @@ export class AliasedAggregate implements AliasedAggregate, HasUserData {
    * @internal
    */
   _validateUserData(ignoreUndefinedProperties: boolean): void {
-    this.aggregate._validateUserData(ignoreUndefinedProperties);
+    this._aggregate._validateUserData(ignoreUndefinedProperties);
   }
 }
 

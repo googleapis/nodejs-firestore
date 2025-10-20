@@ -4601,13 +4601,15 @@ declare namespace FirebaseFirestore {
     export class AliasedAggregate {
       /**
        * The underlying {@link AggregateFunction} that this aliased aggregate wraps.
+       * @internal
        */
-      readonly aggregate: AggregateFunction;
+      readonly _aggregate: AggregateFunction;
 
       /**
        * Specifies the name of the property that will contain the aggregate result in the output document.
+       * @internal
        */
-      readonly alias: string;
+      readonly _alias: string;
     }
 
     /**
