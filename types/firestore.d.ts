@@ -4501,12 +4501,12 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Reverse the value of the 'myString' field.
-       * field("myString").strReverse();
+       * field("myString").stringReverse();
        * ```
        *
        * @return A new {@code Expression} representing the reversed string.
        */
-      strReverse(): FunctionExpr;
+      stringReverse(): FunctionExpr;
       // TODO(new-expression): Add new expression method declarations above this line
       /**
        * Creates an {@link Ordering} that sorts documents in ascending order based on this expression.
@@ -7898,25 +7898,25 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Reverse the value of the 'myString' field.
-     * strReverse(field("myString"));
+     * stringReverse(field("myString"));
      * ```
      *
      * @param stringExpression An expression evaluating to a string value, which will be reversed.
      * @return A new {@code Expression} representing the reversed string.
      */
-    export function strReverse(stringExpression: Expression): FunctionExpr;
+    export function stringReverse(stringExpression: Expression): FunctionExpr;
     /**
      * Creates an expression that reverses a string value in the specified field.
      *
      * ```typescript
      * // Reverse the value of the 'myString' field.
-     * strReverse("myString");
+     * stringReverse("myString");
      * ```
      *
      * @param field The name of the field representing the string to reverse.
      * @return A new {@code Expression} representing the reversed string.
      */
-    export function strReverse(field: string): FunctionExpr;
+    export function stringReverse(field: string): FunctionExpr;
     // TODO(new-expression): Add new top-level expression function declarations above this line
     /**
      * Creates an expression that computes the natural logarithm of a numeric value.

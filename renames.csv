@@ -10,7 +10,7 @@ notEqual,notEqual
 notEqualAny,notEqualAny
 stringConcat,stringConcat
 stringContains,stringContains
-strReverse,stringReverse
+stringReverse,stringReverse
 AliasedExpr,AliasedExpression
 FunctionExpr,FunctionExpression
 cond,conditional

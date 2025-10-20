@@ -113,7 +113,7 @@ import {
   ln,
   log,
   sqrt,
-  strReverse,
+  stringReverse,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -3646,7 +3646,7 @@ describe('Pipeline class', () => {
         .collection(randomCol.path)
         .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
-        .select(field('title').strReverse().as('reversedTitle'))
+        .select(field('title').stringReverse().as('reversedTitle'))
         .execute();
       expectResults(snapshot, {
         reversedTitle: "yxalaG eht ot ediuG s'rekihhctiH ehT",
@@ -3659,7 +3659,7 @@ describe('Pipeline class', () => {
         .collection(randomCol.path)
         .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
-        .select(strReverse('title').as('reversedTitle'))
+        .select(stringReverse('title').as('reversedTitle'))
         .execute();
       expectResults(snapshot, {
         reversedTitle: "yxalaG eht ot ediuG s'rekihhctiH ehT",

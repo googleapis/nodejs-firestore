@@ -118,6 +118,6 @@ export {
   log,
   round,
   sqrt,
-  strReverse,
+  stringReverse,
   // TODO(new-expression): Add new expression exports above this line
 } from './expression';
