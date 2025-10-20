@@ -3318,25 +3318,25 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'age' field is less than 'limit'
-       * field("age").lt(field('limit'));
+       * field("age").lessThan(field('limit'));
        * ```
        *
        * @param expression The expression to compare against.
        * @return A new `BooleanExpression` representing the less than comparison.
        */
-      lt(expression: Expression): BooleanExpression;
+      lessThan(expression: Expression): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is less than a constant value.
        *
        * ```typescript
        * // Check if the 'price' field is less than 50
-       * field("price").lt(50);
+       * field("price").lessThan(50);
        * ```
        *
        * @param value The constant value to compare for less than.
        * @return A new `Expression` representing the less than comparison.
        */
-      lt(value: unknown): BooleanExpression;
+      lessThan(value: unknown): BooleanExpression;
 
       /**
        * Creates an expression that checks if the current expression's value is less than or equal to the value of another expression.
@@ -4806,7 +4806,7 @@ declare namespace FirebaseFirestore {
      *
      * You typically do not instantiate `FunctionExpr` directly. Instead, use the provided
      * top-level functions (like {@link and}, {@link equal}, {@link ceil}) or methods available
-     * on {@link Expression} instances (e.g., {@link Expression#equal}, {@link Expression#lt}) to construct
+     * on {@link Expression} instances (e.g., {@link Expression#equal}, {@link Expression#lessThan}) to construct
      * `FunctionExpr` instances.
      *
      * ```typescript
@@ -5668,54 +5668,54 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'age' field is less than 30
-     * lt(field("age"), field("limit"));
+     * lessThan(field("age"), field("limit"));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
      * @return A new `Expression` representing the less than comparison.
      */
-    export function lt(left: Expression, right: Expression): BooleanExpression;
+    export function lessThan(left: Expression, right: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is less than a constant value.
      *
      * ```typescript
      * // Check if the 'age' field is less than 30
-     * lt(field("age"), 30);
+     * lessThan(field("age"), 30);
      * ```
      *
      * @param expression The expression to compare.
      * @param value The constant value to compare to.
      * @return A new `Expression` representing the less than comparison.
      */
-    export function lt(expression: Expression, value: unknown): BooleanExpression;
+    export function lessThan(expression: Expression, value: unknown): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is less than an expression.
      *
      * ```typescript
      * // Check if the 'age' field is less than the 'limit' field
-     * lt("age", field("limit"));
+     * lessThan("age", field("limit"));
      * ```
      *
      * @param fieldName The field name to compare.
      * @param expression The expression to compare to.
      * @return A new `BooleanExpression` representing the less than comparison.
      */
-    export function lt(fieldName: string, expression: Expression): BooleanExpression;
+    export function lessThan(fieldName: string, expression: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is less than a constant value.
      *
      * ```typescript
      * // Check if the 'price' field is less than 50
-     * lt("price", 50);
+     * lessThan("price", 50);
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The constant value to compare to.
      * @return A new `Expression` representing the less than comparison.
      */
-    export function lt(fieldName: string, value: unknown): BooleanExpression;
+    export function lessThan(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if the first expression is less than or equal to the second
      * expression.
@@ -8419,7 +8419,7 @@ declare namespace FirebaseFirestore {
        * BooleanExpression}, typically including but not limited to:
        *
        * <ul>
-       *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
+       *   <li>field comparators: {@link Function#equal}, {@link Function#lessThan} (less than), {@link
        *       Function#greaterThan} (greater than), etc.</li>
        *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
        *   <li>advanced functions: {@link Function#regexMatch}, {@link
@@ -8451,7 +8451,7 @@ declare namespace FirebaseFirestore {
        * BooleanExpression}, typically including but not limited to:
        *
        * <ul>
-       *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
+       *   <li>field comparators: {@link Function#equal}, {@link Function#lessThan} (less than), {@link
        *       Function#greaterThan} (greater than), etc.</li>
        *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
        *   <li>advanced functions: {@link Function#regexMatch}, {@link
@@ -9037,7 +9037,7 @@ declare namespace FirebaseFirestore {
        * ```typescript
        * // Assume we don't have a built-in "where" stage
        * firestore.pipeline().collection("books")
-       *     .rawStage("where", [Field.of("published").lt(1900)]) // Custom "where" stage
+       *     .rawStage("where", [Field.of("published").lessThan(1900)]) // Custom "where" stage
        *     .select("title", "author");
        * ```
        *

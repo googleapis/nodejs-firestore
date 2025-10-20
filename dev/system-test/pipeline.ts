@@ -81,7 +81,7 @@ import {
   equal,
   greaterThan,
   like,
-  lt,
+  lessThan,
   neq,
   ascending,
   not,
@@ -1053,7 +1053,7 @@ describe('Pipeline class', () => {
           firestore
             .pipeline()
             .collection(randomCol.path)
-            .where(lt('published', 1900))
+            .where(lessThan('published', 1900))
             .aggregate({
               accumulators: [],
               groups: ['genre'],
@@ -1066,7 +1066,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(lt(field('published'), 1984))
+          .where(lessThan(field('published'), 1984))
           .aggregate({
             accumulators: [avg('rating').as('avgRating')],
             groups: ['genre'],
@@ -1518,7 +1518,7 @@ describe('Pipeline class', () => {
             and(
               greaterThan('rating', 4.5),
               equalAny('genre', ['Science Fiction', 'Romance', 'Fantasy']),
-              lt('published', 1965)
+              lessThan('published', 1965)
             )
           )
           .execute();
@@ -2393,7 +2393,7 @@ describe('Pipeline class', () => {
         .select(
           'title',
           cond(
-            lt(field('published'), 1960),
+            lessThan(field('published'), 1960),
             constant(1960),
             field('published')
           ).as('published-safe')
@@ -2666,7 +2666,7 @@ describe('Pipeline class', () => {
         .where(
           or(
             and(greaterThan('rating', 4.5), equal('genre', 'Science Fiction')),
-            lt('published', 1900)
+            lessThan('published', 1900)
           )
         )
         .select('title')
@@ -2889,7 +2889,7 @@ describe('Pipeline class', () => {
           .where(
             new BooleanExpression('and', [
               field('rating').greaterThan(0),
-              field('title').charLength().lt(5),
+              field('title').charLength().lessThan(5),
               field('tags').arrayContains('propaganda'),
             ])
           )
@@ -2967,7 +2967,7 @@ describe('Pipeline class', () => {
         .execute();
       expect(snapshot.results.length).to.equal(10);
       snapshot.results.forEach((d: PipelineResult) => {
-        expect(d.get('result')).to.be.lt(1);
+        expect(d.get('result')).to.be.lessThan(1);
         expect(d.get('result')).to.be.greaterThanOrEqual(0);
       });
     });
@@ -3881,7 +3881,7 @@ describe('Pipeline class', () => {
               field('rating').equal(lastDoc.get('rating')),
               field('__name__').greaterThan(lastDoc.ref)
             ),
-            field('rating').lt(lastDoc.get('rating'))
+            field('rating').lessThan(lastDoc.get('rating'))
           )
         )
         .limit(pageSize)

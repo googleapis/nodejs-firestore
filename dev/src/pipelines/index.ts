@@ -31,7 +31,7 @@ export {
   floor,
   greaterThan,
   like,
-  lt,
+  lessThan,
   neq,
   ascending,
   not,

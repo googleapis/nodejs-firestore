@@ -62,7 +62,7 @@ import {
   field,
   Ordering,
   greaterThan,
-  lt,
+  lessThan,
   Field,
   AggregateFunction,
 } from './expression';
@@ -442,7 +442,7 @@ export function whereConditionsFromCursor(
   position: 'before' | 'after'
 ): BooleanExpression {
   // The filterFunc is either greater than or less than
-  const filterFunc = position === 'before' ? lt : greaterThan;
+  const filterFunc = position === 'before' ? lessThan : greaterThan;
   const cursors = cursor.values.map(value => Constant._fromProto(value));
   const size = cursors.length;
 
@@ -467,8 +467,8 @@ export function whereConditionsFromCursor(
     value = cursors[i];
 
     // For each field in the orderings, the condition is either
-    // a) lt|greaterThan the cursor value,
-    // b) or equal the cursor value and lt|greaterThan the cursor values for other fields
+    // a) lessThan|greaterThan the cursor value,
+    // b) or equal the cursor value and lessThan|greaterThan the cursor values for other fields
     condition = or(
       filterFunc(field, value),
       and(field.equal(value) as unknown as BooleanExpression, condition)
@@ -513,7 +513,7 @@ export function toPipelineBooleanExpr(
         : serializer.encodeValue(f.value);
       switch (f.op) {
         case 'LESS_THAN':
-          return and(field.exists(), field.lt(value));
+          return and(field.exists(), field.lessThan(value));
         case 'LESS_THAN_OR_EQUAL':
           return and(field.exists(), field.lte(value));
         case 'GREATER_THAN':

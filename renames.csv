@@ -4,7 +4,7 @@ equal,equal
 equalAny,equalAny
 greaterThan,greaterThan
 greaterThanOrEqual,greaterThanOrEqual
-lt,lessThan
+lessThan,lessThan
 lte,lessThanOrEqual
 neq,notEqual
 notEqAny,notEqualAny

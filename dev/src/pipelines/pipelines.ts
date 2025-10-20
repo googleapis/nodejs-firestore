@@ -591,7 +591,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * BooleanExpression}, typically including but not limited to:
    *
    * <ul>
-   *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
+   *   <li>field comparators: {@link Function#equal}, {@link Function#lessThan} (less than), {@link
    *       Function#greaterThan} (greater than), etc.</li>
    *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
    *   <li>advanced functions: {@link Function#regexMatch}, {@link
@@ -623,7 +623,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * BooleanExpression}, typically including but not limited to:
    *
    * <ul>
-   *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
+   *   <li>field comparators: {@link Function#equal}, {@link Function#lessThan} (less than), {@link
    *       Function#greaterThan} (greater than), etc.</li>
    *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
    *   <li>advanced functions: {@link Function#regexMatch}, {@link
@@ -1461,7 +1461,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * ```typescript
    * // Assume we don't have a built-in 'where' stage
    * firestore.pipeline().collection('books')
-   *     .rawStage('where', [field('published').lt(1900)]) // Custom 'where' stage
+   *     .rawStage('where', [field('published').lessThan(1900)]) // Custom 'where' stage
    *     .select('title', 'author');
    * ```
    *

@@ -262,28 +262,28 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * ```typescript
    * // Check if the 'age' field is less than 'limit'
-   * field("age").lt(field('limit'));
+   * field("age").lessThan(field('limit'));
    * ```
    *
    * @param experession The expression to compare for less than.
    * @return A new `Expression` representing the less than comparison.
    */
-  lt(experession: Expression): BooleanExpression;
+  lessThan(experession: Expression): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is less than a constant value.
    *
    * ```typescript
    * // Check if the 'price' field is less than 50
-   * field("price").lt(50);
+   * field("price").lessThan(50);
    * ```
    *
    * @param value The constant value to compare for less than.
    * @return A new `Expression` representing the less than comparison.
    */
-  lt(value: unknown): BooleanExpression;
-  lt(other: unknown): BooleanExpression {
-    return new BooleanExpression('lt', [this, valueToDefaultExpr(other)]);
+  lessThan(value: unknown): BooleanExpression;
+  lessThan(other: unknown): BooleanExpression {
+    return new BooleanExpression('lessThan', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -2240,7 +2240,7 @@ export class MapValue extends Expression {
  * execution.
  *
  * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link equal},
- * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lt}, etc.) to construct new Function instances.
+ * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lessThan}, etc.) to construct new Function instances.
  */
 export class FunctionExpr extends Expression {
   readonly exprType: firestore.Pipelines.ExprType = 'Function';
@@ -2281,7 +2281,7 @@ export class FunctionExpr extends Expression {
  * execution.
  *
  * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link equal},
- * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lt}, etc.) to construct new Function instances.
+ * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lessThan}, etc.) to construct new Function instances.
  */
 class MapFunctionExpr extends FunctionExpr {
   readonly exprType: firestore.Pipelines.ExprType = 'Function';
@@ -2330,7 +2330,7 @@ class MapFunctionExpr extends FunctionExpr {
  * execution.
  *
  * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link equal},
- * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lt}, etc.) to construct new Function instances.
+ * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lessThan}, etc.) to construct new Function instances.
  */
 class ArrayFunctionExpr extends FunctionExpr {
   readonly exprType: firestore.Pipelines.ExprType = 'Function';
@@ -3326,60 +3326,60 @@ export function neq(left: Expression | string, right: unknown): BooleanExpressio
  *
  * ```typescript
  * // Check if the 'age' field is less than 30
- * lt(field("age"), field("limit"));
+ * lessThan(field("age"), field("limit"));
  * ```
  *
  * @param left The first expression to compare.
  * @param right The second expression to compare.
  * @return A new `Expression` representing the less than comparison.
  */
-export function lt(left: Expression, right: Expression): BooleanExpression;
+export function lessThan(left: Expression, right: Expression): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is less than a constant value.
  *
  * ```typescript
  * // Check if the 'age' field is less than 30
- * lt(field("age"), 30);
+ * lessThan(field("age"), 30);
  * ```
  *
  * @param expression The expression to compare.
  * @param value The constant value to compare to.
  * @return A new `Expression` representing the less than comparison.
  */
-export function lt(expression: Expression, value: unknown): BooleanExpression;
+export function lessThan(expression: Expression, value: unknown): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is less than an expression.
  *
  * ```typescript
  * // Check if the 'age' field is less than the 'limit' field
- * lt("age", field("limit"));
+ * lessThan("age", field("limit"));
  * ```
  *
  * @param fieldName The field name to compare.
  * @param expression The expression to compare to.
  * @return A new `Expression` representing the less than comparison.
  */
-export function lt(fieldName: string, expression: Expression): BooleanExpression;
+export function lessThan(fieldName: string, expression: Expression): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is less than a constant value.
  *
  * ```typescript
  * // Check if the 'price' field is less than 50
- * lt("price", 50);
+ * lessThan("price", 50);
  * ```
  *
  * @param fieldName The field name to compare.
  * @param value The constant value to compare to.
  * @return A new `Expression` representing the less than comparison.
  */
-export function lt(fieldName: string, value: unknown): BooleanExpression;
-export function lt(left: Expression | string, right: unknown): BooleanExpression {
+export function lessThan(fieldName: string, value: unknown): BooleanExpression;
+export function lessThan(left: Expression | string, right: unknown): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
-  return leftExpr.lt(rightExpr);
+  return leftExpr.lessThan(rightExpr);
 }
 
 /**
