@@ -152,7 +152,7 @@ describe('Collection interface', () => {
   it('has list() method', () => {
     const overrides: ApiOverride = {
       listDocuments: request => {
-        expect(request).to.deep.eq({
+        expect(request).to.deep.equal({
           parent: `${DATABASE_ROOT}/documents/a/b`,
           collectionId: 'c',
           showMissing: true,

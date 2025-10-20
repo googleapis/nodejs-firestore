@@ -320,7 +320,7 @@ export function requestEquals(
   // the expected and the actual request.
   actual = extend(true, {}, actual);
   const proto = Object.assign({database: DATABASE_ROOT}, expected);
-  expect(actual).to.deep.eq(proto);
+  expect(actual).to.deep.equal(proto);
 }
 
 export function stream<T>(...elements: Array<T | Error>): Duplex {

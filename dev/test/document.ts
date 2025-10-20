@@ -529,7 +529,7 @@ describe('deserialize document', () => {
         .doc('collectionId/documentId')
         .get()
         .then(res => {
-          expect(res.data()).to.deep.eq({foo: Buffer.from('AG=', 'base64')});
+          expect(res.data()).to.deep.equal({foo: Buffer.from('AG=', 'base64')});
         });
     });
   });
@@ -787,8 +787,8 @@ describe('get document', () => {
         .doc('collectionId/documentId')
         .get()
         .then(result => {
-          expect(result.data()).to.deep.eq({foo: {bar: 'foobar'}});
-          expect(result.get('foo')).to.deep.eq({bar: 'foobar'});
+          expect(result.data()).to.deep.equal({foo: {bar: 'foobar'}});
+          expect(result.get('foo')).to.deep.equal({bar: 'foobar'});
           expect(result.get('foo.bar')).to.equal('foobar');
           expect(result.get(new FieldPath('foo', 'bar'))).to.equal('foobar');
           expect(result.ref.id).to.equal('documentId');
@@ -2221,7 +2221,7 @@ describe('listCollections() method', () => {
   it('sorts results', () => {
     const overrides: ApiOverride = {
       listCollectionIds: request => {
-        expect(request).to.deep.eq({
+        expect(request).to.deep.equal({
           parent: `projects/${PROJECT_ID}/databases/(default)/documents/coll/doc`,
         });
 

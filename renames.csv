@@ -1,4 +1,4 @@
 BooleanExpr,BooleanExpression
 Expression,Expression
-eq,equal
+equal,equal
 eqAny,equalAny

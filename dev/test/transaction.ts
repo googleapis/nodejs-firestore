@@ -377,7 +377,7 @@ function runTransaction<T>(
 
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('commit');
-      expect(actual).to.deep.eq(request.request);
+      expect(actual).to.deep.equal(request.request);
       if (request.error) {
         return Promise.reject(request.error);
       } else {
@@ -387,7 +387,7 @@ function runTransaction<T>(
     rollback: actual => {
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('rollback');
-      expect(actual).to.deep.eq(request.request);
+      expect(actual).to.deep.equal(request.request);
       if (request.error) {
         return Promise.reject(request.error);
       } else {
@@ -397,14 +397,14 @@ function runTransaction<T>(
     batchGetDocuments: actual => {
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('getDocument');
-      expect(actual).to.deep.eq(request.request);
+      expect(actual).to.deep.equal(request.request);
       return request.stream!;
     },
     runQuery: actual => {
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('query');
       actual = extend(true, {}, actual); // Remove undefined properties
-      expect(actual).to.deep.eq(request.request);
+      expect(actual).to.deep.equal(request.request);
       return request.stream!;
     },
   };

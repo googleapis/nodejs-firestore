@@ -3265,28 +3265,28 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'age' field is equal to the value of another field named 'otherAge'.
-       * field("age").eq(field("otherAge"));
+       * field("age").equal(field("otherAge"));
        *
        * // Check if the 'status' field is equal to a string literal.
-       * field("status").eq("active");
+       * field("status").equal("active");
        * ```
        *
        * @param expression The expression to compare for equality.
        * @return A new `BooleanExpression` representing the equality comparison.
        */
-      eq(expression: Expression): BooleanExpression;
+      equal(expression: Expression): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is equal to a constant value.
        *
        * ```typescript
        * // Check if the 'city' field is equal to "London"
-       * field("city").eq("London");
+       * field("city").equal("London");
        * ```
        *
        * @param value The constant value to compare for equality.
        * @return A new `Expression` representing the equality comparison.
        */
-      eq(value: unknown): BooleanExpression;
+      equal(value: unknown): BooleanExpression;
 
       /**
        * Creates an expression that checks if this expression is not equal to another expression.
@@ -4802,17 +4802,17 @@ declare namespace FirebaseFirestore {
      * Represents an expression that encapsulates a function call within the Firestore Pipelines.
      *
      * `FunctionExpr` extends {@link Expression} and is used to build complex queries and transformations
-     * by applying various functions (e.g., `and`, `eq`, `ceil`) to fields or other expressions.
+     * by applying various functions (e.g., `and`, `equal`, `ceil`) to fields or other expressions.
      *
      * You typically do not instantiate `FunctionExpr` directly. Instead, use the provided
-     * top-level functions (like {@link and}, {@link eq}, {@link ceil}) or methods available
-     * on {@link Expression} instances (e.g., {@link Expression#eq}, {@link Expression#lt}) to construct
+     * top-level functions (like {@link and}, {@link equal}, {@link ceil}) or methods available
+     * on {@link Expression} instances (e.g., {@link Expression#equal}, {@link Expression#lt}) to construct
      * `FunctionExpr` instances.
      *
      * ```typescript
      * // Example of creating a FunctionExpr indirectly using helper functions:
      * const priceGreaterThan10 = field("price").gt(10);
-     * const combinedCondition = and(priceGreaterThan10, field("category").eq("books"));
+     * const combinedCondition = and(priceGreaterThan10, field("category").equal("books"));
      *
      * // 'priceGreaterThan10' and 'combinedCondition' are instances of FunctionExpr.
      * ```
@@ -4876,7 +4876,7 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Count the number of documents where 'is_active' field equals true
-     * countIf(field("is_active").eq(true)).as("numActiveDocuments");
+     * countIf(field("is_active").equal(true)).as("numActiveDocuments");
      * ```
      *
      * @param booleanExpr - The boolean expression to evaluate on each input.
@@ -5562,54 +5562,54 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'age' field is equal to an expression
-     * eq(field("age"), field("minAge").add(10));
+     * equal(field("age"), field("minAge").add(10));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
      * @return A new `BooleanExpression` representing the equality comparison.
      */
-    export function eq(left: Expression, right: Expression): BooleanExpression;
+    export function equal(left: Expression, right: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is equal to a constant value.
      *
      * ```typescript
      * // Check if the 'age' field is equal to 21
-     * eq(field("age"), 21);
+     * equal(field("age"), 21);
      * ```
      *
      * @param expression The expression to compare.
      * @param value The constant value to compare to.
      * @return A new `Expression` representing the equality comparison.
      */
-    export function eq(expression: Expression, value: unknown): BooleanExpression;
+    export function equal(expression: Expression, value: unknown): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is equal to another expression.
      *
      * ```typescript
      * // Check if the 'age' field is equal to the 'limit' field
-     * eq("age", field("limit"));
+     * equal("age", field("limit"));
      * ```
      *
      * @param fieldName The name of the field to compare.
      * @param expression The expression to compare the field's value against.
      * @return A new `BooleanExpression` representing the equality comparison.
      */
-    export function eq(fieldName: string, expression: Expression): BooleanExpression;
+    export function equal(fieldName: string, expression: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is equal to a constant value.
      *
      * ```typescript
      * // Check if the 'city' field is equal to string constant "London"
-     * eq("city", "London");
+     * equal("city", "London");
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The constant value to compare to.
      * @return A new `Expression` representing the equality comparison.
      */
-    export function eq(fieldName: string, value: unknown): BooleanExpression;
+    export function equal(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if two expressions are not equal.
      *
@@ -6244,8 +6244,8 @@ declare namespace FirebaseFirestore {
      * // or 'status' is "active".
      * const condition = xor(
      *     gt("age", 18),
-     *     eq("city", "London"),
-     *     eq("status", "active")
+     *     equal("city", "London"),
+     *     equal("status", "active")
      * );
      * ```
      *
@@ -6284,7 +6284,7 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Find documents where the 'completed' field is NOT true
-     * not(eq("completed", true));
+     * not(equal("completed", true));
      * ```
      *
      * @param booleanExpr The filter condition to negate.
@@ -7755,7 +7755,7 @@ declare namespace FirebaseFirestore {
      * ```typescript
      * // Check if the 'age' field is greater than 18 AND the 'city' field is "London" AND
      * // the 'status' field is "active"
-     * const condition = and(gt("age", 18), eq("city", "London"), eq("status", "active"));
+     * const condition = and(gt("age", 18), equal("city", "London"), equal("status", "active"));
      * ```
      *
      * @param first The first filter condition.
@@ -7774,7 +7774,7 @@ declare namespace FirebaseFirestore {
      * ```typescript
      * // Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
      * // the 'status' field is "active"
-     * const condition = or(gt("age", 18), eq("city", "London"), eq("status", "active"));
+     * const condition = or(gt("age", 18), equal("city", "London"), equal("status", "active"));
      * ```
      *
      * @param first The first filter condition.
@@ -8225,7 +8225,7 @@ declare namespace FirebaseFirestore {
      * // Example 2: Filter documents where 'genre' is "Science Fiction" and 'published' is after 1950
      * const results2 = await db.pipeline()
      *     .collection("books")
-     *     .where(and(Field.of("genre").eq("Science Fiction"), Field.of("published").gt(1950)))
+     *     .where(and(Field.of("genre").equal("Science Fiction"), Field.of("published").gt(1950)))
      *     .execute();
      *
      * // Example 3: Calculate the average rating of books published after 1980
@@ -8419,7 +8419,7 @@ declare namespace FirebaseFirestore {
        * BooleanExpression}, typically including but not limited to:
        *
        * <ul>
-       *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
+       *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
        *       Function#gt} (greater than), etc.</li>
        *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
        *   <li>advanced functions: {@link Function#regexMatch}, {@link
@@ -8433,7 +8433,7 @@ declare namespace FirebaseFirestore {
        *   .where(
        *     and(
        *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-       *         field("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+       *         field("genre").equal("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
        *     )
        *   );
        * ```
@@ -8451,7 +8451,7 @@ declare namespace FirebaseFirestore {
        * BooleanExpression}, typically including but not limited to:
        *
        * <ul>
-       *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
+       *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
        *       Function#gt} (greater than), etc.</li>
        *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
        *   <li>advanced functions: {@link Function#regexMatch}, {@link
@@ -8465,7 +8465,7 @@ declare namespace FirebaseFirestore {
        *   .where({
        *     filter: and(
        *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-       *         field("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+       *         field("genre").equal("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
        *     )
        *   });
        * ```

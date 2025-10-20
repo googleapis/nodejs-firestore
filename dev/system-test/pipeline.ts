@@ -78,7 +78,7 @@ import {
   avg,
   countAll,
   endsWith,
-  eq,
+  equal,
   gt,
   like,
   lt,
@@ -708,7 +708,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .database()
-        .where(eq('randomId', randomId))
+        .where(equal('randomId', randomId))
         .sort(ascending('order'))
         .execute();
       expectResults(snapshot, doc1.id, doc2.id);
@@ -936,7 +936,7 @@ describe('Pipeline class', () => {
         )
         .where(
           and(
-            eq('metadataArray', [
+            equal('metadataArray', [
               1,
               2,
               field('genre'),
@@ -946,7 +946,7 @@ describe('Pipeline class', () => {
                 published: field('published'),
               },
             ]),
-            eq('metadata', {
+            equal('metadata', {
               genre: field('genre'),
               rating: multiply('rating', 10),
               nestedArray: [field('title')],
@@ -1003,7 +1003,7 @@ describe('Pipeline class', () => {
         snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('genre', 'Science Fiction'))
+          .where(equal('genre', 'Science Fiction'))
           .aggregate(
             countAll().as('count'),
             avg('rating').as('avgRating'),
@@ -1032,7 +1032,7 @@ describe('Pipeline class', () => {
         snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('genre', 'Science Fiction'))
+          .where(equal('genre', 'Science Fiction'))
           .aggregate(
             countAll().as('count'),
             avg('rating').as('avgRating'),
@@ -1531,9 +1531,9 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where(
             or(
-              eq('genre', 'Romance'),
-              eq('genre', 'Dystopian'),
-              eq('genre', 'Fantasy')
+              equal('genre', 'Romance'),
+              equal('genre', 'Dystopian'),
+              equal('genre', 'Fantasy')
             )
           )
           .sort(ascending('title'))
@@ -1554,10 +1554,10 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where(
             xor(
-              eq('genre', 'Romance'),
-              eq('genre', 'Dystopian'),
-              eq('genre', 'Fantasy'),
-              eq('published', 1949)
+              equal('genre', 'Romance'),
+              equal('genre', 'Dystopian'),
+              equal('genre', 'Fantasy'),
+              equal('published', 1949)
             )
           )
           .select('title')
@@ -1742,7 +1742,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author')
-          .rawStage('where', [field('author').eq('Douglas Adams')])
+          .rawStage('where', [field('author').equal('Douglas Adams')])
           .execute();
         expectResults(snapshot, {
           title: "The Hitchhiker's Guide to the Galaxy",
@@ -1853,7 +1853,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .replaceWith('awards')
           .execute();
         expectResults(snapshot, {
@@ -1867,7 +1867,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .replaceWith(
             map({
               foo: 'bar',
@@ -1887,7 +1887,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .replaceWith({map: 'awards'})
           .execute();
         expectResults(snapshot, {
@@ -2005,7 +2005,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .unnest(field('tags').as('tag'))
           .select(
             'title',
@@ -2073,7 +2073,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .unnest(field('tags').as('tag'), 'tagsIndex')
           .select(
             'title',
@@ -2144,7 +2144,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .unnest(array([1, 2, 3]).as('copy'))
           .select(
             'title',
@@ -2212,7 +2212,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .unnest({
             selectable: field('tags').as('tag'),
             indexField: 'tagsIndex',
@@ -2481,7 +2481,7 @@ describe('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .select(arrayLength('tags').as('tagsCount'))
-        .where(eq('tagsCount', 3))
+        .where(equal('tagsCount', 3))
         .execute();
       expect(snapshot.results.length).to.equal(10);
     });
@@ -2611,7 +2611,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(eq('title', 'To Kill a Mockingbird'))
+        .where(equal('title', 'To Kill a Mockingbird'))
         .select(
           add(field('rating'), 1).as('ratingPlusOne'),
           subtract(field('published'), 1900).as('yearsSince1900'),
@@ -2665,7 +2665,7 @@ describe('Pipeline class', () => {
         .collection(randomCol.path)
         .where(
           or(
-            and(gt('rating', 4.5), eq('genre', 'Science Fiction')),
+            and(gt('rating', 4.5), equal('genre', 'Science Fiction')),
             lt('published', 1900)
           )
         )
@@ -2746,7 +2746,7 @@ describe('Pipeline class', () => {
           field('awards').mapGet('others').as('others'),
           field('title')
         )
-        .where(eq('hugoAward', true))
+        .where(equal('hugoAward', true))
         .execute();
       expectResults(
         snapshot,
@@ -2829,7 +2829,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(eq('awards.hugo', true))
+        .where(equal('awards.hugo', true))
         .sort(descending('title'))
         .select('title', 'awards.hugo')
         .execute();
@@ -2847,7 +2847,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(eq('awards.hugo', true))
+        .where(equal('awards.hugo', true))
         .select(
           'title',
           field('nestedField.level.1'),
@@ -3216,7 +3216,7 @@ describe('Pipeline class', () => {
         .collection(randomCol)
         .limit(1)
         .select(constant(true).as('trueField'))
-        .select('trueField', not(eq('trueField', true)).as('falseField'))
+        .select('trueField', not(equal('trueField', true)).as('falseField'))
         .execute();
 
       expectResults(snapshot, {
@@ -3229,7 +3229,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('tags').arrayReverse().as('reversedTags'))
         .execute();
@@ -3242,7 +3242,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(arrayReverse('tags').as('reversedTags'))
         .execute();
@@ -3255,7 +3255,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').ceil().as('ceilingRating'))
         .execute();
@@ -3268,7 +3268,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(ceil('rating').as('ceilingRating'))
         .execute();
@@ -3281,7 +3281,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').floor().as('floorRating'))
         .execute();
@@ -3294,7 +3294,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(floor('rating').as('floorRating'))
         .execute();
@@ -3307,7 +3307,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq('The Lord of the Rings'))
+        .where(field('title').equal('The Lord of the Rings'))
         .limit(1)
         .select(field('rating').exp().as('expRating'))
         .execute();
@@ -3320,7 +3320,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq('The Lord of the Rings'))
+        .where(field('title').equal('The Lord of the Rings'))
         .limit(1)
         .select(exp('rating').as('expRating'))
         .execute();
@@ -3334,7 +3334,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').pow(2).as('powerRating'))
         .execute();
@@ -3348,7 +3348,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(pow('rating', 2).as('powerRating'))
         .execute();
@@ -3362,7 +3362,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').round().as('roundedRating'))
         .execute();
@@ -3375,7 +3375,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(round('rating').as('roundedRating'))
         .execute();
@@ -3388,7 +3388,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .addFields(constant(1.5).as('positiveHalf'))
         .select(field('positiveHalf').round().as('roundedRating'))
@@ -3402,7 +3402,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .addFields(constant(-1.5).as('negativeHalf'))
         .select(field('negativeHalf').round().as('roundedRating'))
@@ -3440,7 +3440,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('title').length().as('titleLength'))
         .execute();
@@ -3453,7 +3453,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(length('title').as('titleLength'))
         .execute();
@@ -3466,7 +3466,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('tags').length().as('tagsLength'))
         .execute();
@@ -3479,7 +3479,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(length('tags').as('tagsLength'))
         .execute();
@@ -3492,7 +3492,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('awards').length().as('awardsLength'))
         .execute();
@@ -3505,7 +3505,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('embedding').length().as('embeddingLength'))
         .execute();
@@ -3531,7 +3531,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').ln().as('lnRating'))
         .execute();
@@ -3542,7 +3542,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(ln('rating').as('lnRating'))
         .execute();
@@ -3553,7 +3553,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(ln('rating').as('lnRating'))
         .execute();
@@ -3566,7 +3566,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').log(10).as('logRating'))
         .execute();
@@ -3579,7 +3579,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(log('rating', 10).as('logRating'))
         .execute();
@@ -3592,7 +3592,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').round().as('roundedRating'))
         .execute();
@@ -3605,7 +3605,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(round('rating').as('roundedRating'))
         .execute();
@@ -3618,7 +3618,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').sqrt().as('sqrtRating'))
         .execute();
@@ -3631,7 +3631,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(sqrt('rating').as('sqrtRating'))
         .execute();
@@ -3644,7 +3644,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('title').strReverse().as('reversedTitle'))
         .execute();
@@ -3657,7 +3657,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(strReverse('title').as('reversedTitle'))
         .execute();
@@ -3783,7 +3783,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(eq('title', '1984'))
+        .where(equal('title', '1984'))
         .limit(1)
         .select(reverse('title').as('reverseTitle'))
         .execute();
@@ -3878,7 +3878,7 @@ describe('Pipeline class', () => {
         .where(
           or(
             and(
-              field('rating').eq(lastDoc.get('rating')),
+              field('rating').equal(lastDoc.get('rating')),
               field('__name__').gt(lastDoc.ref)
             ),
             field('rating').lt(lastDoc.get('rating'))
@@ -4582,7 +4582,7 @@ describe('Query to Pipeline', () => {
     });
   });
 
-  it('supports eq nan', () => {
+  it('supports equal nan', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: NaN},
@@ -4612,7 +4612,7 @@ describe('Query to Pipeline', () => {
     );
   });
 
-  it('supports eq null', () => {
+  it('supports equal null', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: null},

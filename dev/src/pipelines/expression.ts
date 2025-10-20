@@ -204,28 +204,28 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * ```typescript
    * // Check if the 'age' field is equal to 21
-   * field("age").eq(21);
+   * field("age").equal(21);
    * ```
    *
    * @param expression The expression to compare for equality.
    * @return A new `Expression` representing the equality comparison.
    */
-  eq(expression: Expression): BooleanExpression;
+  equal(expression: Expression): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is equal to a constant value.
    *
    * ```typescript
    * // Check if the 'city' field is equal to "London"
-   * field("city").eq("London");
+   * field("city").equal("London");
    * ```
    *
    * @param value The constant value to compare for equality.
    * @return A new `Expression` representing the equality comparison.
    */
-  eq(value: unknown): BooleanExpression;
-  eq(other: unknown): BooleanExpression {
-    return new BooleanExpression('eq', [this, valueToDefaultExpr(other)]);
+  equal(value: unknown): BooleanExpression;
+  equal(other: unknown): BooleanExpression {
+    return new BooleanExpression('equal', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -2239,8 +2239,8 @@ export class MapValue extends Expression {
  * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
  * execution.
  *
- * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link eq},
- * or the methods on {@link Expression} ({@link Expression#eq}, {@link Expression#lt}, etc.) to construct new Function instances.
+ * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link equal},
+ * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lt}, etc.) to construct new Function instances.
  */
 export class FunctionExpr extends Expression {
   readonly exprType: firestore.Pipelines.ExprType = 'Function';
@@ -2280,8 +2280,8 @@ export class FunctionExpr extends Expression {
  * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
  * execution.
  *
- * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link eq},
- * or the methods on {@link Expression} ({@link Expression#eq}, {@link Expression#lt}, etc.) to construct new Function instances.
+ * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link equal},
+ * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lt}, etc.) to construct new Function instances.
  */
 class MapFunctionExpr extends FunctionExpr {
   readonly exprType: firestore.Pipelines.ExprType = 'Function';
@@ -2329,8 +2329,8 @@ class MapFunctionExpr extends FunctionExpr {
  * This class defines the base class for Firestore {@link Pipeline} functions, which can be evaluated within pipeline
  * execution.
  *
- * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link eq},
- * or the methods on {@link Expression} ({@link Expression#eq}, {@link Expression#lt}, etc.) to construct new Function instances.
+ * Typically, you would not use this class or its children directly. Use either the functions like {@link and}, {@link equal},
+ * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lt}, etc.) to construct new Function instances.
  */
 class ArrayFunctionExpr extends FunctionExpr {
   readonly exprType: firestore.Pipelines.ExprType = 'Function';
@@ -2415,7 +2415,7 @@ export class BooleanExpression
  *
  * ```typescript
  * // Count the number of documents where 'is_active' field equals true
- * countIf(field("is_active").eq(true)).as("numActiveDocuments");
+ * countIf(field("is_active").equal(true)).as("numActiveDocuments");
  * ```
  *
  * @param booleanExpr - The boolean expression to evaluate on each input.
@@ -3204,60 +3204,60 @@ export function array(elements: unknown[]): FunctionExpr {
  *
  * ```typescript
  * // Check if the 'age' field is equal to an expression
- * eq(field("age"), field("minAge").add(10));
+ * equal(field("age"), field("minAge").add(10));
  * ```
  *
  * @param left The first expression to compare.
  * @param right The second expression to compare.
  * @return A new `Expression` representing the equality comparison.
  */
-export function eq(left: Expression, right: Expression): BooleanExpression;
+export function equal(left: Expression, right: Expression): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is equal to a constant value.
  *
  * ```typescript
  * // Check if the 'age' field is equal to 21
- * eq(field("age"), 21);
+ * equal(field("age"), 21);
  * ```
  *
  * @param expression The expression to compare.
  * @param value The constant value to compare to.
  * @return A new `Expression` representing the equality comparison.
  */
-export function eq(expression: Expression, value: unknown): BooleanExpression;
+export function equal(expression: Expression, value: unknown): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is equal to an expression.
  *
  * ```typescript
  * // Check if the 'age' field is equal to the 'limit' field
- * eq("age", field("limit"));
+ * equal("age", field("limit"));
  * ```
  *
  * @param fieldName The field name to compare.
  * @param expression The expression to compare to.
  * @return A new `Expression` representing the equality comparison.
  */
-export function eq(fieldName: string, expression: Expression): BooleanExpression;
+export function equal(fieldName: string, expression: Expression): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is equal to a constant value.
  *
  * ```typescript
  * // Check if the 'city' field is equal to string constant "London"
- * eq("city", "London");
+ * equal("city", "London");
  * ```
  *
  * @param fieldName The field name to compare.
  * @param value The constant value to compare to.
  * @return A new `Expression` representing the equality comparison.
  */
-export function eq(fieldName: string, value: unknown): BooleanExpression;
-export function eq(left: Expression | string, right: unknown): BooleanExpression {
+export function equal(fieldName: string, value: unknown): BooleanExpression;
+export function equal(left: Expression | string, right: unknown): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
-  return leftExpr.eq(rightExpr);
+  return leftExpr.equal(rightExpr);
 }
 
 /**
@@ -3980,8 +3980,8 @@ export function notEqAny(
  * // or 'status' is "active".
  * const condition = xor(
  *     gt("age", 18),
- *     eq("city", "London"),
- *     eq("status", "active"));
+ *     equal("city", "London"),
+ *     equal("status", "active"));
  * ```
  *
  * @param first The first condition.
@@ -4029,7 +4029,7 @@ export function cond(
  *
  * ```typescript
  * // Find documents where the 'completed' field is NOT true
- * not(eq("completed", true));
+ * not(equal("completed", true));
  * ```
  *
  * @param booleanExpr The filter condition to negate.
@@ -5742,7 +5742,7 @@ export function timestampSub(
  * ```typescript
  * // Check if the 'age' field is greater than 18 AND the 'city' field is "London" AND
  * // the 'status' field is "active"
- * const condition = and(gt("age", 18), eq("city", "London"), eq("status", "active"));
+ * const condition = and(gt("age", 18), equal("city", "London"), equal("status", "active"));
  * ```
  *
  * @param first The first filter condition.
@@ -5764,7 +5764,7 @@ export function and(
  * ```typescript
  * // Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
  * // the 'status' field is "active"
- * const condition = or(gt("age", 18), eq("city", "London"), eq("status", "active"));
+ * const condition = or(gt("age", 18), equal("city", "London"), equal("status", "active"));
  * ```
  *
  * @param first The first filter condition.

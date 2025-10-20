@@ -74,7 +74,7 @@ export function partitionQueryEquals(
   // ignores these fields, but we need to manually strip them before we compare
   // the expected and the actual request.
   actual = extend(true, {}, actual);
-  expect(actual).to.deep.eq(query);
+  expect(actual).to.deep.equal(query);
 }
 
 describe('Partition Query', () => {

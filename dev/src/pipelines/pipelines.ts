@@ -313,7 +313,7 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
  * // Example 2: Filter documents where 'genre' is 'Science Fiction' and 'published' is after 1950
  * const results2 = await db.pipeline()
  *     .collection('books')
- *     .where(and(field('genre').eq('Science Fiction'), field('published').gt(1950)))
+ *     .where(and(field('genre').equal('Science Fiction'), field('published').gt(1950)))
  *     .execute();
  *
  * // Example 3: Calculate the average rating of books published after 1980
@@ -591,7 +591,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * BooleanExpression}, typically including but not limited to:
    *
    * <ul>
-   *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
+   *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
    *       Function#gt} (greater than), etc.</li>
    *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
    *   <li>advanced functions: {@link Function#regexMatch}, {@link
@@ -605,7 +605,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *   .where(
    *     and(
    *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-   *         field("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+   *         field("genre").equal("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
    *     )
    *   );
    * ```
@@ -623,7 +623,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * BooleanExpression}, typically including but not limited to:
    *
    * <ul>
-   *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
+   *   <li>field comparators: {@link Function#equal}, {@link Function#lt} (less than), {@link
    *       Function#gt} (greater than), etc.</li>
    *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
    *   <li>advanced functions: {@link Function#regexMatch}, {@link
@@ -637,7 +637,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *   .where(
    *     and(
    *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-   *         field("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+   *         field("genre").equal("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
    *     )
    *   );
    * ```

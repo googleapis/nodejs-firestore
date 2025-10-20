@@ -457,7 +457,7 @@ export function whereConditionsFromCursor(
   ) {
     // When the cursor bound is inclusive, then the last bound
     // can be equal to the value, otherwise it's not equal
-    condition = or(condition, field.eq(value) as unknown as BooleanExpression);
+    condition = or(condition, field.equal(value) as unknown as BooleanExpression);
   }
 
   // Iterate backwards over the remaining bounds, adding
@@ -471,7 +471,7 @@ export function whereConditionsFromCursor(
     // b) or equal the cursor value and lt|gt the cursor values for other fields
     condition = or(
       filterFunc(field, value),
-      and(field.eq(value) as unknown as BooleanExpression, condition)
+      and(field.equal(value) as unknown as BooleanExpression, condition)
     );
   }
 
@@ -521,7 +521,7 @@ export function toPipelineBooleanExpr(
         case 'GREATER_THAN_OR_EQUAL':
           return and(field.exists(), field.gte(value));
         case 'EQUAL':
-          return and(field.exists(), field.eq(value));
+          return and(field.exists(), field.equal(value));
         case 'NOT_EQUAL':
           return and(field.exists(), field.neq(value));
         case 'ARRAY_CONTAINS':
