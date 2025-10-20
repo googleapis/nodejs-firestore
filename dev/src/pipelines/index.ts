@@ -91,7 +91,7 @@ export {
   descending,
   greaterThanOrEqual,
   multiply,
-  cond,
+  conditional,
   Ordering,
   AliasedAggregate,
   endsWith,

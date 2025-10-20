@@ -100,7 +100,7 @@ import {
   notEqualAny,
   logicalMinimum,
   logicalMaximum,
-  cond,
+  conditional,
   constant,
   PipelineResult,
   PipelineSnapshot,
@@ -2386,13 +2386,13 @@ describe('Pipeline class', () => {
       );
     });
 
-    it('cond works', async () => {
+    it('conditional works', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .select(
           'title',
-          cond(
+          conditional(
             lessThan(field('published'), 1960),
             constant(1960),
             field('published')

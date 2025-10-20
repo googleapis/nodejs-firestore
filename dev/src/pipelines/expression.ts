@@ -1583,7 +1583,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * ```
    * // Merges the map in the settings field with, a map literal, and a map in
    * // that is conditionally returned by another expression
-   * field('settings').mapMerge({ enabled: true }, cond(field('isAdmin'), { admin: true}, {})
+   * field('settings').mapMerge({ enabled: true }, conditional(field('isAdmin'), { admin: true}, {})
    * ```
    *
    * @param secondMap A required second map to merge. Represented as a literal or
@@ -2741,7 +2741,7 @@ export function mapRemove(
  * ```
  * // Merges the map in the settings field with, a map literal, and a map in
  * // that is conditionally returned by another expression
- * mapMerge('settings', { enabled: true }, cond(field('isAdmin'), { admin: true}, {})
+ * mapMerge('settings', { enabled: true }, conditional(field('isAdmin'), { admin: true}, {})
  * ```
  *
  * @param mapField Name of a field containing a map value that will be merged.
@@ -2762,7 +2762,7 @@ export function mapMerge(
  * ```
  * // Merges the map in the settings field with, a map literal, and a map in
  * // that is conditionally returned by another expression
- * mapMerge(field('settings'), { enabled: true }, cond(field('isAdmin'), { admin: true}, {})
+ * mapMerge(field('settings'), { enabled: true }, conditional(field('isAdmin'), { admin: true}, {})
  * ```
  *
  * @param firstMap An expression or literal map value that will be merged.
@@ -4003,7 +4003,7 @@ export function xor(
  *
  * ```typescript
  * // If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
- * cond(
+ * conditional(
  *     greaterThan("age", 18), constant("Adult"), constant("Minor"));
  * ```
  *
@@ -4012,12 +4012,12 @@ export function xor(
  * @param elseExpr The expression to evaluate if the condition is false.
  * @return A new {@code Expression} representing the conditional expression.
  */
-export function cond(
+export function conditional(
   condition: BooleanExpression,
   thenExpr: Expression,
   elseExpr: Expression
 ): FunctionExpression {
-  return new FunctionExpression('cond', [
+  return new FunctionExpression('conditional', [
     condition,
     cast<Expression>(thenExpr),
     cast<Expression>(elseExpr),

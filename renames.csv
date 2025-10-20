@@ -13,4 +13,4 @@ stringContains,stringContains
 stringReverse,stringReverse
 AliasedExpression,AliasedExpression
 FunctionExpression,FunctionExpression
-cond,conditional
+conditional,conditional
