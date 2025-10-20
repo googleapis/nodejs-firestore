@@ -101,7 +101,7 @@ export {
   byteLength,
   logicalMaximum,
   logicalMinimum,
-  notEqAny,
+  notEqualAny,
   countAll,
   timestampAdd,
   timestampSub,

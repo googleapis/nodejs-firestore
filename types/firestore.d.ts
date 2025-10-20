@@ -3530,26 +3530,26 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-       * field("status").notEqAny(["pending", field("rejectedStatus")]);
+       * field("status").notEqualAny(["pending", field("rejectedStatus")]);
        * ```
        *
        * @param values The values or expressions to check against.
        * @return A new `Expression` representing the 'NotEqAny' comparison.
        */
-      notEqAny(values: Array<Expression | unknown>): BooleanExpression;
+      notEqualAny(values: Array<Expression | unknown>): BooleanExpression;
 
       /**
        * Creates an expression that checks if the current expression's value is not equal to any of the values within the array produced by the `arrayExpression`.
        *
        * ```typescript
        * // Check if the 'status' field is not equal to any value in the array returned by the 'rejectedStatuses' field.
-       * field("status").notEqAny(field('rejectedStatuses'));
+       * field("status").notEqualAny(field('rejectedStatuses'));
        * ```
        *
        * @param arrayExpression An `Expression` that evaluates to an array of values to compare against.
        * @return A new `BooleanExpression` representing the result of the 'not equal to any' comparison.
        */
-      notEqAny(arrayExpression: Expression): BooleanExpression;
+      notEqualAny(arrayExpression: Expression): BooleanExpression;
       /**
        * Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
        *
@@ -6175,14 +6175,14 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-     * notEqAny(field("status"), ["pending", field("rejectedStatus")]);
+     * notEqualAny(field("status"), ["pending", field("rejectedStatus")]);
      * ```
      *
      * @param element The expression to compare.
      * @param values The values to check against.
      * @return A new {@code Expression} representing the 'NOT IN' comparison.
      */
-    export function notEqAny(
+    export function notEqualAny(
       element: Expression,
       values: Array<Expression | unknown>
     ): BooleanExpression;
@@ -6192,14 +6192,14 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-     * notEqAny("status", [constant("pending"), field("rejectedStatus")]);
+     * notEqualAny("status", [constant("pending"), field("rejectedStatus")]);
      * ```
      *
      * @param fieldName The field name to compare.
      * @param values The values to check against.
      * @return A new {@code Expression} representing the 'NOT IN' comparison.
      */
-    export function notEqAny(
+    export function notEqualAny(
       fieldName: string,
       values: Array<Expression | unknown>
     ): BooleanExpression;
@@ -6210,27 +6210,27 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'status' field is not present in the array stored in the 'invalidStatuses' field.
-     * notEqAny(field("status"), field("invalidStatuses"));
+     * notEqualAny(field("status"), field("invalidStatuses"));
      * ```
      *
      * @param element The expression representing the value to check.
      * @param arrayExpression An expression that evaluates to an array of values to check against.
      * @return A new {@code BooleanExpression} representing the 'NOT IN' comparison.
      */
-    export function notEqAny(element: Expression, arrayExpression: Expression): BooleanExpression;
+    export function notEqualAny(element: Expression, arrayExpression: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is not equal to any of the values in the evaluated expression.
      *
      * ```typescript
      * // Check if the 'status' field is not equal to any value in the field 'rejectedStatuses'
-     * notEqAny("status", field("rejectedStatuses"));
+     * notEqualAny("status", field("rejectedStatuses"));
      * ```
      *
      * @param fieldName The field name to compare.
      * @param arrayExpression The values to check against.
      * @return A new {@code Expression} representing the 'NOT IN' comparison.
      */
-    export function notEqAny(
+    export function notEqualAny(
       fieldName: string,
       arrayExpression: Expression
     ): BooleanExpression;

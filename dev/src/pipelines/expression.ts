@@ -541,27 +541,27 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * ```typescript
    * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-   * field("status").notEqAny(["pending", field("rejectedStatus")]);
+   * field("status").notEqualAny(["pending", field("rejectedStatus")]);
    * ```
    *
    * @param values The values or expressions to check against.
    * @return A new `Expression` representing the 'NotEqAny' comparison.
    */
-  notEqAny(values: Array<Expression | unknown>): BooleanExpression;
+  notEqualAny(values: Array<Expression | unknown>): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is not equal to any of the values in the evaluated expression.
    *
    * ```typescript
    * // Check if the 'status' field is not equal to any value in the field 'rejectedStatuses'
-   * field("status").notEqAny(field('rejectedStatuses'));
+   * field("status").notEqualAny(field('rejectedStatuses'));
    * ```
    *
    * @param arrayExpression The values or expressions to check against.
    * @return A new `Expression` representing the 'NotEqAny' comparison.
    */
-  notEqAny(arrayExpression: Expression): BooleanExpression;
-  notEqAny(others: unknown[] | Expression): BooleanExpression {
+  notEqualAny(arrayExpression: Expression): BooleanExpression;
+  notEqualAny(others: unknown[] | Expression): BooleanExpression {
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
       : cast<Expression>(others);
@@ -3902,14 +3902,14 @@ export function equalAny(
  *
  * ```typescript
  * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
- * notEqAny(field("status"), ["pending", field("rejectedStatus")]);
+ * notEqualAny(field("status"), ["pending", field("rejectedStatus")]);
  * ```
  *
  * @param element The expression to compare.
  * @param values The values to check against.
  * @return A new {@code Expression} representing the 'NOT IN' comparison.
  */
-export function notEqAny(
+export function notEqualAny(
   element: Expression,
   values: Array<Expression | unknown>
 ): BooleanExpression;
@@ -3920,14 +3920,14 @@ export function notEqAny(
  *
  * ```typescript
  * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
- * notEqAny("status", [constant("pending"), field("rejectedStatus")]);
+ * notEqualAny("status", [constant("pending"), field("rejectedStatus")]);
  * ```
  *
  * @param fieldName The field name to compare.
  * @param values The values to check against.
  * @return A new {@code Expression} representing the 'NOT IN' comparison.
  */
-export function notEqAny(
+export function notEqualAny(
   fieldName: string,
   values: Array<Expression | unknown>
 ): BooleanExpression;
@@ -3938,37 +3938,37 @@ export function notEqAny(
  *
  * ```typescript
  * // Check if the 'status' field is neither "pending" nor the value of the field 'rejectedStatus'
- * notEqAny(field("status"), ["pending", field("rejectedStatus")]);
+ * notEqualAny(field("status"), ["pending", field("rejectedStatus")]);
  * ```
  *
  * @param element The expression to compare.
  * @param arrayExpression The values to check against.
  * @return A new {@code Expression} representing the 'NOT IN' comparison.
  */
-export function notEqAny(element: Expression, arrayExpression: Expression): BooleanExpression;
+export function notEqualAny(element: Expression, arrayExpression: Expression): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is not equal to any of the values in the evaluated expression.
  *
  * ```typescript
  * // Check if the 'status' field is not equal to any value in the field 'rejectedStatuses'
- * notEqAny("status", field("rejectedStatuses"));
+ * notEqualAny("status", field("rejectedStatuses"));
  * ```
  *
  * @param fieldName The field name to compare.
  * @param arrayExpression The values to check against.
  * @return A new {@code Expression} representing the 'NOT IN' comparison.
  */
-export function notEqAny(fieldName: string, arrayExpression: Expression): BooleanExpression;
+export function notEqualAny(fieldName: string, arrayExpression: Expression): BooleanExpression;
 
-export function notEqAny(
+export function notEqualAny(
   element: Expression | string,
   values: unknown[] | Expression
 ): BooleanExpression {
   if (Array.isArray(values)) {
-    return fieldOrExpression(element).notEqAny(values);
+    return fieldOrExpression(element).notEqualAny(values);
   } else {
-    return fieldOrExpression(element).notEqAny(values);
+    return fieldOrExpression(element).notEqualAny(values);
   }
 }
 

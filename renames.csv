@@ -7,7 +7,7 @@ greaterThanOrEqual,greaterThanOrEqual
 lessThan,lessThan
 lessThanOrEqual,lessThanOrEqual
 notEqual,notEqual
-notEqAny,notEqualAny
+notEqualAny,notEqualAny
 strConcat,stringConcat
 strContains,stringContains
 strReverse,stringReverse

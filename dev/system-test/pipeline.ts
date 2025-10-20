@@ -97,7 +97,7 @@ import {
   mapGet,
   lessThanOrEqual,
   equalAny,
-  notEqAny,
+  notEqualAny,
   logicalMinimum,
   logicalMaximum,
   cond,
@@ -2424,12 +2424,12 @@ describe('Pipeline class', () => {
       );
     });
 
-    it('notEqAny works', async () => {
+    it('notEqualAny works', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .where(
-          notEqAny(
+          notEqualAny(
             'published',
             [1965, 1925, 1949, 1960, 1866, 1985, 1954, 1967, 1979]
           )

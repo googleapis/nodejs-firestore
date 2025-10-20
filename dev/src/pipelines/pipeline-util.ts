@@ -536,7 +536,7 @@ export function toPipelineBooleanExpr(
         }
         case 'NOT_IN': {
           const values = value?.arrayValue?.values?.map(val => constant(val));
-          return and(field.exists(), field.notEqAny(values!));
+          return and(field.exists(), field.notEqualAny(values!));
         }
       }
     }
