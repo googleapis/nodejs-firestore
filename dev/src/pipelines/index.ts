@@ -53,7 +53,6 @@ export {
   field,
   xor,
   AggregateFunction,
-  rand,
   arrayGet,
   add,
   BooleanExpression,

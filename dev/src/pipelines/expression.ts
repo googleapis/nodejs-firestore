@@ -2427,16 +2427,6 @@ export function countIf(booleanExpr: BooleanExpression): AggregateFunction {
 }
 
 /**
- * Creates an expression that return a pseudo-random value of type double in the
- * range of [0, 1), inclusive of 0 and exclusive of 1.
- *
- * @returns A new `Expression` representing the 'rand' function.
- */
-export function rand(): FunctionExpression {
-  return new FunctionExpression('rand', []);
-}
-
-/**
  * Creates an expression that indexes into an array from the beginning or end
  * and return the element. If the index exceeds the array length, an error is
  * returned. A negative index, starts from the end.

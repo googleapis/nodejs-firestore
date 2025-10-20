@@ -28,7 +28,6 @@ import {
   exp,
   xor,
   AggregateFunction,
-  rand,
   arrayGet,
   timestampToUnixMicros,
   timestampToUnixSeconds,
@@ -2957,20 +2956,6 @@ describe.only('Pipeline class', () => {
             title: 'The Great Gatsby',
           }
         );
-      });
-    });
-
-    it('supports Rand', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(10)
-        .select(rand().as('result'))
-        .execute();
-      expect(snapshot.results.length).to.equal(10);
-      snapshot.results.forEach((d: PipelineResult) => {
-        expect(d.get('result')).to.be.lessThan(1);
-        expect(d.get('result')).to.be.greaterThanOrEqual(0);
       });
     });
 
