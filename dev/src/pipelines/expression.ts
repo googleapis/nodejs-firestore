@@ -2045,6 +2045,7 @@ export function field(field: string | firestore.FieldPath): Field {
 }
 
 /**
+ * @internal
  * Represents a constant value that can be used in a Firestore pipeline expression.
  *
  * You can create a `Constant` instance using the static {@link #of} method:
@@ -2108,103 +2109,103 @@ export class Constant extends Expression {
 }
 
 /**
- * Creates a `Constant` instance for a number value.
+ * Creates an 'Expression' instance for a number value.
  *
  * @param value The number value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: number): Constant;
+export function constant(value: number): Expression;
 
 /**
- * Creates a `Constant` instance for a string value.
+ * Creates an 'Expression' instance for a string value.
  *
  * @param value The string value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: string): Constant;
+export function constant(value: string): Expression;
 
 /**
- * Creates a `Constant` instance for a boolean value.
+ * Creates an 'Expression' instance for a boolean value.
  *
  * @param value The boolean value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: boolean): Constant;
+export function constant(value: boolean): Expression;
 
 /**
- * Creates a `Constant` instance for a null value.
+ * Creates an 'Expression' instance for a null value.
  *
  * @param value The null value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: null): Constant;
+export function constant(value: null): Expression;
 
 /**
- * Creates a `Constant` instance for a GeoPoint value.
+ * Creates an 'Expression' instance for a GeoPoint value.
  *
  * @param value The GeoPoint value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: firestore.GeoPoint): Constant;
+export function constant(value: firestore.GeoPoint): Expression;
 
 /**
- * Creates a `Constant` instance for a Timestamp value.
+ * Creates an 'Expression' instance for a Timestamp value.
  *
  * @param value The Timestamp value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: firestore.Timestamp): Constant;
+export function constant(value: firestore.Timestamp): Expression;
 
 /**
- * Creates a `Constant` instance for a Date value.
+ * Creates an 'Expression' instance for a Date value.
  *
  * @param value The Date value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: Date): Constant;
+export function constant(value: Date): Expression;
 
 /**
- * Creates a `Constant` instance for a Buffer | Uint8Array value.
+ * Creates an 'Expression' instance for a Buffer | Uint8Array value.
  *
  * @param value The Buffer | Uint8Array value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: Buffer | Uint8Array): Constant;
+export function constant(value: Buffer | Uint8Array): Expression;
 
 /**
- * Creates a `Constant` instance for a DocumentReference value.
+ * Creates an 'Expression' instance for a DocumentReference value.
  *
  * @param value The DocumentReference value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: firestore.DocumentReference): Constant;
+export function constant(value: firestore.DocumentReference): Expression;
 
 /**
- * Creates a `Constant` instance for a Firestore proto value.
+ * Creates an 'Expression' instance for a Firestore proto value.
  * For internal use only.
  * @private
  * @internal
  * @param value The Firestore proto value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: api.IValue): Constant;
+export function constant(value: api.IValue): Expression;
 
 /**
- * Creates a `Constant` instance for a VectorValue value.
+ * Creates an 'Expression' instance for a VectorValue value.
  *
  * @param value The VectorValue value.
- * @return A new `Constant` instance.
+ * @return A new `Expression` instance.
  */
-export function constant(value: firestore.VectorValue): Constant;
+export function constant(value: firestore.VectorValue): Expression;
 
 /**
  * @internal
  * @private
  * @param value
  */
-export function constant(value: unknown): Constant;
+export function constant(value: unknown): Expression;
 
-export function constant(value: unknown): Constant {
+export function constant(value: unknown): Expression {
   return new Constant(value);
 }
 

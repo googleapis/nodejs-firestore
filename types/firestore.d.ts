@@ -4714,6 +4714,7 @@ declare namespace FirebaseFirestore {
     export function field(path: FieldPath): Field;
 
     /**
+     * @internal
      * Represents a constant value that can be used as part of a Firestore pipeline expression.
      *
      * Instances of `Constant` are typically created via the top-level `constant()` function.
@@ -4730,75 +4731,75 @@ declare namespace FirebaseFirestore {
       readonly exprType: ExprType;
     }
     /**
-     * Creates a `Constant` instance for a number value.
+     * Creates an `Expression` instance for a number value.
      *
      * @param value The number value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: number): Constant;
+    export function constant(value: number): Expression;
     /**
-     * Creates a `Constant` instance for a string value.
+     * Creates an `Expression` instance for a string value.
      *
      * @param value The string value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: string): Constant;
+    export function constant(value: string): Expression;
     /**
-     * Creates a `Constant` instance for a boolean value.
+     * Creates an `Expression` instance for a boolean value.
      *
      * @param value The boolean value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: boolean): Constant;
+    export function constant(value: boolean): Expression;
     /**
-     * Creates a `Constant` instance for a null value.
+     * Creates an `Expression` instance for a null value.
      *
      * @param value The null value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: null): Constant;
+    export function constant(value: null): Expression;
     /**
-     * Creates a `Constant` instance for a GeoPoint value.
+     * Creates an `Expression` instance for a GeoPoint value.
      *
      * @param value The GeoPoint value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: GeoPoint): Constant;
+    export function constant(value: GeoPoint): Expression;
     /**
-     * Creates a `Constant` instance for a Timestamp value.
+     * Creates an `Expression` instance for a Timestamp value.
      *
      * @param value The Timestamp value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: Timestamp): Constant;
+    export function constant(value: Timestamp): Expression;
     /**
-     * Creates a `Constant` instance for a Date value.
+     * Creates an `Expression` instance for a Date value.
      *
      * @param value The Date value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: Date): Constant;
+    export function constant(value: Date): Expression;
     /**
-     * Creates a `Constant` instance for a Buffer | Uint8Array value.
+     * Creates an `Expression` instance for a Buffer | Uint8Array value.
      *
      * @param value The Buffer | Uint8Array value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: Buffer | Uint8Array): Constant;
+    export function constant(value: Buffer | Uint8Array): Expression;
     /**
-     * Creates a `Constant` instance for a DocumentReference value.
+     * Creates an `Expression` instance for a DocumentReference value.
      *
      * @param value The DocumentReference value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: DocumentReference): Constant;
+    export function constant(value: DocumentReference): Expression;
     /**
-     * Creates a `Constant` instance for a VectorValue value.
+     * Creates an `Expression` instance for a VectorValue value.
      *
      * @param value The VectorValue value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: VectorValue): Constant;
+    export function constant(value: VectorValue): Expression;
 
     /**
      * Represents an expression that encapsulates a function call within the Firestore Pipelines.
@@ -5779,7 +5780,7 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'age' field is greater than 18
-     * greaterThan(field("age"), Constant(9).add(9));
+     * greaterThan(field("age"), constant(9).add(9));
      * ```
      *
      * @param left The first expression to compare.
