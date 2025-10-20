@@ -210,7 +210,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param expression The expression to compare for equality.
    * @return A new `Expr` representing the equality comparison.
    */
-  eq(expression: Expr): BooleanExpr;
+  eq(expression: Expr): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is equal to a constant value.
@@ -223,9 +223,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param value The constant value to compare for equality.
    * @return A new `Expr` representing the equality comparison.
    */
-  eq(value: unknown): BooleanExpr;
-  eq(other: unknown): BooleanExpr {
-    return new BooleanExpr('eq', [this, valueToDefaultExpr(other)]);
+  eq(value: unknown): BooleanExpression;
+  eq(other: unknown): BooleanExpression {
+    return new BooleanExpression('eq', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -239,7 +239,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param expression The expression to compare for inequality.
    * @return A new `Expr` representing the inequality comparison.
    */
-  neq(expression: Expr): BooleanExpr;
+  neq(expression: Expr): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is not equal to a constant value.
@@ -252,9 +252,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param value The constant value to compare for inequality.
    * @return A new `Expr` representing the inequality comparison.
    */
-  neq(value: unknown): BooleanExpr;
-  neq(other: unknown): BooleanExpr {
-    return new BooleanExpr('neq', [this, valueToDefaultExpr(other)]);
+  neq(value: unknown): BooleanExpression;
+  neq(other: unknown): BooleanExpression {
+    return new BooleanExpression('neq', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -268,7 +268,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param experession The expression to compare for less than.
    * @return A new `Expr` representing the less than comparison.
    */
-  lt(experession: Expr): BooleanExpr;
+  lt(experession: Expr): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is less than a constant value.
@@ -281,9 +281,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param value The constant value to compare for less than.
    * @return A new `Expr` representing the less than comparison.
    */
-  lt(value: unknown): BooleanExpr;
-  lt(other: unknown): BooleanExpr {
-    return new BooleanExpr('lt', [this, valueToDefaultExpr(other)]);
+  lt(value: unknown): BooleanExpression;
+  lt(other: unknown): BooleanExpression {
+    return new BooleanExpression('lt', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -298,7 +298,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param expression The expression to compare for less than or equal to.
    * @return A new `Expr` representing the less than or equal to comparison.
    */
-  lte(expression: Expr): BooleanExpr;
+  lte(expression: Expr): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is less than or equal to a constant value.
@@ -311,9 +311,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param value The constant value to compare for less than or equal to.
    * @return A new `Expr` representing the less than or equal to comparison.
    */
-  lte(value: unknown): BooleanExpr;
-  lte(other: unknown): BooleanExpr {
-    return new BooleanExpr('lte', [this, valueToDefaultExpr(other)]);
+  lte(value: unknown): BooleanExpression;
+  lte(other: unknown): BooleanExpression {
+    return new BooleanExpression('lte', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -327,7 +327,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param expression The expression to compare for greater than.
    * @return A new `Expr` representing the greater than comparison.
    */
-  gt(expression: Expr): BooleanExpr;
+  gt(expression: Expr): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is greater than a constant value.
@@ -340,9 +340,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param value The constant value to compare for greater than.
    * @return A new `Expr` representing the greater than comparison.
    */
-  gt(value: unknown): BooleanExpr;
-  gt(other: unknown): BooleanExpr {
-    return new BooleanExpr('gt', [this, valueToDefaultExpr(other)]);
+  gt(value: unknown): BooleanExpression;
+  gt(other: unknown): BooleanExpression {
+    return new BooleanExpression('gt', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -357,7 +357,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param expression The expression to compare for greater than or equal to.
    * @return A new `Expr` representing the greater than or equal to comparison.
    */
-  gte(expression: Expr): BooleanExpr;
+  gte(expression: Expr): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is greater than or equal to a constant
@@ -371,9 +371,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param value The constant value to compare for greater than or equal to.
    * @return A new `Expr` representing the greater than or equal to comparison.
    */
-  gte(value: unknown): BooleanExpr;
-  gte(other: unknown): BooleanExpr {
-    return new BooleanExpr('gte', [this, valueToDefaultExpr(other)]);
+  gte(value: unknown): BooleanExpression;
+  gte(other: unknown): BooleanExpression {
+    return new BooleanExpression('gte', [this, valueToDefaultExpr(other)]);
   }
 
   /**
@@ -387,7 +387,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param expression The element to search for in the array.
    * @return A new `Expr` representing the 'array_contains' comparison.
    */
-  arrayContains(expression: Expr): BooleanExpr;
+  arrayContains(expression: Expr): BooleanExpression;
 
   /**
    * Creates an expression that checks if an array contains a specific value.
@@ -400,9 +400,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param value The element to search for in the array.
    * @return A new `Expr` representing the 'array_contains' comparison.
    */
-  arrayContains(value: unknown): BooleanExpr;
-  arrayContains(element: unknown): BooleanExpr {
-    return new BooleanExpr('array_contains', [
+  arrayContains(value: unknown): BooleanExpression;
+  arrayContains(element: unknown): BooleanExpression {
+    return new BooleanExpression('array_contains', [
       this,
       valueToDefaultExpr(element),
     ]);
@@ -419,7 +419,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param values The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_all' comparison.
    */
-  arrayContainsAll(values: Array<Expr | unknown>): BooleanExpr;
+  arrayContainsAll(values: Array<Expr | unknown>): BooleanExpression;
 
   /**
    * Creates an expression that checks if an array contains all the specified elements.
@@ -432,12 +432,12 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param arrayExpression The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_all' comparison.
    */
-  arrayContainsAll(arrayExpression: Expr): BooleanExpr;
-  arrayContainsAll(values: unknown[] | Expr): BooleanExpr {
+  arrayContainsAll(arrayExpression: Expr): BooleanExpression;
+  arrayContainsAll(values: unknown[] | Expr): BooleanExpression {
     const normalizedExpr = Array.isArray(values)
       ? new ListOfExprs(values.map(valueToDefaultExpr))
       : cast<Expr>(values);
-    return new BooleanExpr('array_contains_all', [this, normalizedExpr]);
+    return new BooleanExpression('array_contains_all', [this, normalizedExpr]);
   }
 
   /**
@@ -451,7 +451,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param values The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_any' comparison.
    */
-  arrayContainsAny(values: Array<Expr | unknown>): BooleanExpr;
+  arrayContainsAny(values: Array<Expr | unknown>): BooleanExpression;
 
   /**
    * Creates an expression that checks if an array contains any of the specified elements.
@@ -465,12 +465,12 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param arrayExpression The elements to check for in the array.
    * @return A new `Expr` representing the 'array_contains_any' comparison.
    */
-  arrayContainsAny(arrayExpression: Expr): BooleanExpr;
-  arrayContainsAny(values: Array<unknown | Expr> | Expr): BooleanExpr {
+  arrayContainsAny(arrayExpression: Expr): BooleanExpression;
+  arrayContainsAny(values: Array<unknown | Expr> | Expr): BooleanExpression {
     const normalizedExpr = Array.isArray(values)
       ? new ListOfExprs(values.map(valueToDefaultExpr))
       : cast<Expr>(values);
-    return new BooleanExpr('array_contains_any', [this, normalizedExpr]);
+    return new BooleanExpression('array_contains_any', [this, normalizedExpr]);
   }
 
   /**
@@ -513,7 +513,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param values The values or expressions to check against.
    * @return A new `Expr` representing the 'IN' comparison.
    */
-  eqAny(values: Array<Expr | unknown>): BooleanExpr;
+  eqAny(values: Array<Expr | unknown>): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is equal to any of the provided values or
@@ -527,12 +527,12 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param arrayExpression An expression that evaluates to an array of values to check against.
    * @return A new `Expr` representing the 'IN' comparison.
    */
-  eqAny(arrayExpression: Expr): BooleanExpr;
-  eqAny(others: unknown[] | Expr): BooleanExpr {
+  eqAny(arrayExpression: Expr): BooleanExpression;
+  eqAny(others: unknown[] | Expr): BooleanExpression {
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
       : cast<Expr>(others);
-    return new BooleanExpr('eq_any', [this, exprOthers]);
+    return new BooleanExpression('eq_any', [this, exprOthers]);
   }
 
   /**
@@ -547,7 +547,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param values The values or expressions to check against.
    * @return A new `Expr` representing the 'NotEqAny' comparison.
    */
-  notEqAny(values: Array<Expr | unknown>): BooleanExpr;
+  notEqAny(values: Array<Expr | unknown>): BooleanExpression;
 
   /**
    * Creates an expression that checks if this expression is not equal to any of the values in the evaluated expression.
@@ -560,12 +560,12 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param arrayExpression The values or expressions to check against.
    * @return A new `Expr` representing the 'NotEqAny' comparison.
    */
-  notEqAny(arrayExpression: Expr): BooleanExpr;
-  notEqAny(others: unknown[] | Expr): BooleanExpr {
+  notEqAny(arrayExpression: Expr): BooleanExpression;
+  notEqAny(others: unknown[] | Expr): BooleanExpression {
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
       : cast<Expr>(others);
-    return new BooleanExpr('not_eq_any', [this, exprOthers]);
+    return new BooleanExpression('not_eq_any', [this, exprOthers]);
   }
 
   /**
@@ -578,8 +578,8 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    *
    * @return A new `Expr` representing the 'isNan' check.
    */
-  isNan(): BooleanExpr {
-    return new BooleanExpr('is_nan', [this]);
+  isNan(): BooleanExpression {
+    return new BooleanExpression('is_nan', [this]);
   }
 
   /**
@@ -592,8 +592,8 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    *
    * @return A new `Expr` representing the 'isNull' check.
    */
-  isNull(): BooleanExpr {
-    return new BooleanExpr('is_null', [this]);
+  isNull(): BooleanExpression {
+    return new BooleanExpression('is_null', [this]);
   }
 
   /**
@@ -606,8 +606,8 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    *
    * @return A new `Expr` representing the 'exists' check.
    */
-  exists(): BooleanExpr {
-    return new BooleanExpr('exists', [this]);
+  exists(): BooleanExpression {
+    return new BooleanExpression('exists', [this]);
   }
 
   /**
@@ -650,7 +650,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    */
   like(pattern: Expr): FunctionExpr;
   like(stringOrExpr: string | Expr): FunctionExpr {
-    return new BooleanExpr('like', [this, valueToDefaultExpr(stringOrExpr)]);
+    return new BooleanExpression('like', [this, valueToDefaultExpr(stringOrExpr)]);
   }
 
   /**
@@ -665,7 +665,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param pattern The regular expression to use for the search.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  regexContains(pattern: string): BooleanExpr;
+  regexContains(pattern: string): BooleanExpression;
 
   /**
    * Creates an expression that checks if a string contains a specified regular expression as a
@@ -679,9 +679,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param pattern The regular expression to use for the search.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  regexContains(pattern: Expr): BooleanExpr;
-  regexContains(stringOrExpr: string | Expr): BooleanExpr {
-    return new BooleanExpr('regex_contains', [
+  regexContains(pattern: Expr): BooleanExpression;
+  regexContains(stringOrExpr: string | Expr): BooleanExpression {
+    return new BooleanExpression('regex_contains', [
       this,
       valueToDefaultExpr(stringOrExpr),
     ]);
@@ -698,7 +698,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param pattern The regular expression to use for the match.
    * @return A new `Expr` representing the regular expression match.
    */
-  regexMatch(pattern: string): BooleanExpr;
+  regexMatch(pattern: string): BooleanExpression;
 
   /**
    * Creates an expression that checks if a string matches a specified regular expression.
@@ -711,9 +711,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param pattern The regular expression to use for the match.
    * @return A new `Expr` representing the regular expression match.
    */
-  regexMatch(pattern: Expr): BooleanExpr;
-  regexMatch(stringOrExpr: string | Expr): BooleanExpr {
-    return new BooleanExpr('regex_match', [
+  regexMatch(pattern: Expr): BooleanExpression;
+  regexMatch(stringOrExpr: string | Expr): BooleanExpression {
+    return new BooleanExpression('regex_match', [
       this,
       valueToDefaultExpr(stringOrExpr),
     ]);
@@ -730,7 +730,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param substring The substring to search for.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  strContains(substring: string): BooleanExpr;
+  strContains(substring: string): BooleanExpression;
 
   /**
    * Creates an expression that checks if a string contains the string represented by another expression.
@@ -743,9 +743,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param expr The expression representing the substring to search for.
    * @return A new `Expr` representing the 'contains' comparison.
    */
-  strContains(expr: Expr): BooleanExpr;
-  strContains(stringOrExpr: string | Expr): BooleanExpr {
-    return new BooleanExpr('str_contains', [
+  strContains(expr: Expr): BooleanExpression;
+  strContains(stringOrExpr: string | Expr): BooleanExpression {
+    return new BooleanExpression('str_contains', [
       this,
       valueToDefaultExpr(stringOrExpr),
     ]);
@@ -762,7 +762,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param prefix The prefix to check for.
    * @return A new `Expr` representing the 'starts with' comparison.
    */
-  startsWith(prefix: string): BooleanExpr;
+  startsWith(prefix: string): BooleanExpression;
 
   /**
    * Creates an expression that checks if a string starts with a given prefix (represented as an
@@ -776,9 +776,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param prefix The prefix expression to check for.
    * @return A new `Expr` representing the 'starts with' comparison.
    */
-  startsWith(prefix: Expr): BooleanExpr;
-  startsWith(stringOrExpr: string | Expr): BooleanExpr {
-    return new BooleanExpr('starts_with', [
+  startsWith(prefix: Expr): BooleanExpression;
+  startsWith(stringOrExpr: string | Expr): BooleanExpression {
+    return new BooleanExpression('starts_with', [
       this,
       valueToDefaultExpr(stringOrExpr),
     ]);
@@ -795,7 +795,7 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param suffix The postfix to check for.
    * @return A new `Expr` representing the 'ends with' comparison.
    */
-  endsWith(suffix: string): BooleanExpr;
+  endsWith(suffix: string): BooleanExpression;
 
   /**
    * Creates an expression that checks if a string ends with a given postfix (represented as an
@@ -809,9 +809,9 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * @param suffix The postfix expression to check for.
    * @return A new `Expr` representing the 'ends with' comparison.
    */
-  endsWith(suffix: Expr): BooleanExpr;
-  endsWith(stringOrExpr: string | Expr): BooleanExpr {
-    return new BooleanExpr('ends_with', [
+  endsWith(suffix: Expr): BooleanExpression;
+  endsWith(stringOrExpr: string | Expr): BooleanExpression {
+    return new BooleanExpression('ends_with', [
       this,
       valueToDefaultExpr(stringOrExpr),
     ]);
@@ -1462,10 +1462,10 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("title").arrayContains(1).isError();
    * ```
    *
-   * @return A new {@code BooleanExpr} representing the 'isError' check.
+   * @return A new {@code BooleanExpression} representing the 'isError' check.
    */
-  isError(): BooleanExpr {
-    return new BooleanExpr('is_error', [this]);
+  isError(): BooleanExpression {
+    return new BooleanExpression('is_error', [this]);
   }
 
   /**
@@ -1512,10 +1512,10 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("value").isAbsent();
    * ```
    *
-   * @return A new {@code BooleanExpr} representing the 'isAbsent' check.
+   * @return A new {@code BooleanExpression} representing the 'isAbsent' check.
    */
-  isAbsent(): BooleanExpr {
-    return new BooleanExpr('is_absent', [this]);
+  isAbsent(): BooleanExpression {
+    return new BooleanExpression('is_absent', [this]);
   }
 
   /**
@@ -1526,10 +1526,10 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    * field("name").isNotNull();
    * ```
    *
-   * @return A new {@code BooleanExpr} representing the 'isNotNull' check.
+   * @return A new {@code BooleanExpression} representing the 'isNotNull' check.
    */
-  isNotNull(): BooleanExpr {
-    return new BooleanExpr('is_not_null', [this]);
+  isNotNull(): BooleanExpression {
+    return new BooleanExpression('is_not_null', [this]);
   }
 
   /**
@@ -1542,8 +1542,8 @@ export abstract class Expr implements firestore.Pipelines.Expr, HasUserData {
    *
    * @return A new {@code Expr} representing the 'isNan' check.
    */
-  isNotNan(): BooleanExpr {
-    return new BooleanExpr('is_not_nan', [this]);
+  isNotNan(): BooleanExpression {
+    return new BooleanExpression('is_not_nan', [this]);
   }
 
   /**
@@ -2373,9 +2373,9 @@ class ArrayFunctionExpr extends FunctionExpr {
  * This expression type is useful for filter conditions.
  *
  */
-export class BooleanExpr
+export class BooleanExpression
   extends FunctionExpr
-  implements firestore.Pipelines.BooleanExpr
+  implements firestore.Pipelines.BooleanExpression
 {
   returnType: 'boolean' = 'boolean' as const;
 
@@ -2404,8 +2404,8 @@ export class BooleanExpr
    *
    * @return A new {@code Expr} representing the negated filter condition.
    */
-  not(): BooleanExpr {
-    return new BooleanExpr('not', [this]);
+  not(): BooleanExpression {
+    return new BooleanExpression('not', [this]);
   }
 }
 
@@ -2421,7 +2421,7 @@ export class BooleanExpr
  * @param booleanExpr - The boolean expression to evaluate on each input.
  * @returns A new `AggregateFunction` representing the 'countIf' aggregation.
  */
-export function countIf(booleanExpr: BooleanExpr): AggregateFunction {
+export function countIf(booleanExpr: BooleanExpression): AggregateFunction {
   return new AggregateFunction('count_if', [cast<Expr>(booleanExpr)]);
 }
 
@@ -2518,7 +2518,7 @@ export function arrayGet(
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isError' check.
  */
-export function isError(value: Expr): BooleanExpr {
+export function isError(value: Expr): BooleanExpression {
   const expr: Expr = cast<Expr>(value);
   return expr.isError();
 }
@@ -2573,7 +2573,7 @@ export function ifError(tryExpr: Expr, catchValue: unknown): FunctionExpr {
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isAbsent' check.
  */
-export function isAbsent(value: Expr): BooleanExpr;
+export function isAbsent(value: Expr): BooleanExpression;
 
 /**
  * Creates an expression that returns `true` if a field is absent. Otherwise,
@@ -2587,8 +2587,8 @@ export function isAbsent(value: Expr): BooleanExpr;
  * @param field The field to check.
  * @return A new {@code Expr} representing the 'isAbsent' check.
  */
-export function isAbsent(field: string): BooleanExpr;
-export function isAbsent(value: Expr | string): BooleanExpr {
+export function isAbsent(field: string): BooleanExpression;
+export function isAbsent(value: Expr | string): BooleanExpression {
   return fieldOrExpression(value).isAbsent();
 }
 
@@ -2603,7 +2603,7 @@ export function isAbsent(value: Expr | string): BooleanExpr {
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isNull' check.
  */
-export function isNull(value: Expr): BooleanExpr;
+export function isNull(value: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value evaluates to 'NaN' (Not a Number).
@@ -2616,8 +2616,8 @@ export function isNull(value: Expr): BooleanExpr;
  * @param value The name of the field to check.
  * @return A new {@code Expr} representing the 'isNull' check.
  */
-export function isNull(value: string): BooleanExpr;
-export function isNull(value: Expr | string): BooleanExpr {
+export function isNull(value: string): BooleanExpression;
+export function isNull(value: Expr | string): BooleanExpression {
   return fieldOrExpression(value).isNull();
 }
 
@@ -2632,7 +2632,7 @@ export function isNull(value: Expr | string): BooleanExpr {
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isNotNull' check.
  */
-export function isNotNull(value: Expr): BooleanExpr;
+export function isNotNull(value: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if tbe value of a field is not null.
@@ -2645,8 +2645,8 @@ export function isNotNull(value: Expr): BooleanExpr;
  * @param value The name of the field to check.
  * @return A new {@code Expr} representing the 'isNotNull' check.
  */
-export function isNotNull(value: string): BooleanExpr;
-export function isNotNull(value: Expr | string): BooleanExpr {
+export function isNotNull(value: string): BooleanExpression;
+export function isNotNull(value: Expr | string): BooleanExpression {
   return fieldOrExpression(value).isNotNull();
 }
 
@@ -2661,7 +2661,7 @@ export function isNotNull(value: Expr | string): BooleanExpr {
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isNotNaN' check.
  */
-export function isNotNan(value: Expr): BooleanExpr;
+export function isNotNan(value: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
@@ -2674,8 +2674,8 @@ export function isNotNan(value: Expr): BooleanExpr;
  * @param value The name of the field to check.
  * @return A new {@code Expr} representing the 'isNotNaN' check.
  */
-export function isNotNan(value: string): BooleanExpr;
-export function isNotNan(value: Expr | string): BooleanExpr {
+export function isNotNan(value: string): BooleanExpression;
+export function isNotNan(value: Expr | string): BooleanExpression {
   return fieldOrExpression(value).isNotNan();
 }
 
@@ -3211,7 +3211,7 @@ export function array(elements: unknown[]): FunctionExpr {
  * @param right The second expression to compare.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(left: Expr, right: Expr): BooleanExpr;
+export function eq(left: Expr, right: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is equal to a constant value.
@@ -3225,7 +3225,7 @@ export function eq(left: Expr, right: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(expression: Expr, value: unknown): BooleanExpr;
+export function eq(expression: Expr, value: unknown): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is equal to an expression.
@@ -3239,7 +3239,7 @@ export function eq(expression: Expr, value: unknown): BooleanExpr;
  * @param expression The expression to compare to.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(fieldName: string, expression: Expr): BooleanExpr;
+export function eq(fieldName: string, expression: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is equal to a constant value.
@@ -3253,8 +3253,8 @@ export function eq(fieldName: string, expression: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the equality comparison.
  */
-export function eq(fieldName: string, value: unknown): BooleanExpr;
-export function eq(left: Expr | string, right: unknown): BooleanExpr {
+export function eq(fieldName: string, value: unknown): BooleanExpression;
+export function eq(left: Expr | string, right: unknown): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.eq(rightExpr);
@@ -3272,7 +3272,7 @@ export function eq(left: Expr | string, right: unknown): BooleanExpr {
  * @param right The second expression to compare.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(left: Expr, right: Expr): BooleanExpr;
+export function neq(left: Expr, right: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is not equal to a constant value.
@@ -3286,7 +3286,7 @@ export function neq(left: Expr, right: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(expression: Expr, value: unknown): BooleanExpr;
+export function neq(expression: Expr, value: unknown): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is not equal to an expression.
@@ -3300,7 +3300,7 @@ export function neq(expression: Expr, value: unknown): BooleanExpr;
  * @param expression The expression to compare to.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(fieldName: string, expression: Expr): BooleanExpr;
+export function neq(fieldName: string, expression: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is not equal to a constant value.
@@ -3314,8 +3314,8 @@ export function neq(fieldName: string, expression: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the inequality comparison.
  */
-export function neq(fieldName: string, value: unknown): BooleanExpr;
-export function neq(left: Expr | string, right: unknown): BooleanExpr {
+export function neq(fieldName: string, value: unknown): BooleanExpression;
+export function neq(left: Expr | string, right: unknown): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.neq(rightExpr);
@@ -3333,7 +3333,7 @@ export function neq(left: Expr | string, right: unknown): BooleanExpr {
  * @param right The second expression to compare.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(left: Expr, right: Expr): BooleanExpr;
+export function lt(left: Expr, right: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is less than a constant value.
@@ -3347,7 +3347,7 @@ export function lt(left: Expr, right: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(expression: Expr, value: unknown): BooleanExpr;
+export function lt(expression: Expr, value: unknown): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is less than an expression.
@@ -3361,7 +3361,7 @@ export function lt(expression: Expr, value: unknown): BooleanExpr;
  * @param expression The expression to compare to.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(fieldName: string, expression: Expr): BooleanExpr;
+export function lt(fieldName: string, expression: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is less than a constant value.
@@ -3375,8 +3375,8 @@ export function lt(fieldName: string, expression: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the less than comparison.
  */
-export function lt(fieldName: string, value: unknown): BooleanExpr;
-export function lt(left: Expr | string, right: unknown): BooleanExpr {
+export function lt(fieldName: string, value: unknown): BooleanExpression;
+export function lt(left: Expr | string, right: unknown): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.lt(rightExpr);
@@ -3395,7 +3395,7 @@ export function lt(left: Expr | string, right: unknown): BooleanExpr {
  * @param right The second expression to compare.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(left: Expr, right: Expr): BooleanExpr;
+export function lte(left: Expr, right: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is less than or equal to a constant value.
@@ -3409,7 +3409,7 @@ export function lte(left: Expr, right: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(expression: Expr, value: unknown): BooleanExpr;
+export function lte(expression: Expr, value: unknown): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is less than or equal to an expression.
@@ -3423,7 +3423,7 @@ export function lte(expression: Expr, value: unknown): BooleanExpr;
  * @param expression The expression to compare to.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(fieldName: string, expression: Expr): BooleanExpr;
+export function lte(fieldName: string, expression: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is less than or equal to a constant value.
@@ -3437,8 +3437,8 @@ export function lte(fieldName: string, expression: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the less than or equal to comparison.
  */
-export function lte(fieldName: string, value: unknown): BooleanExpr;
-export function lte(left: Expr | string, right: unknown): BooleanExpr {
+export function lte(fieldName: string, value: unknown): BooleanExpression;
+export function lte(left: Expr | string, right: unknown): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.lte(rightExpr);
@@ -3457,7 +3457,7 @@ export function lte(left: Expr | string, right: unknown): BooleanExpr {
  * @param right The second expression to compare.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(left: Expr, right: Expr): BooleanExpr;
+export function gt(left: Expr, right: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is greater than a constant value.
@@ -3471,7 +3471,7 @@ export function gt(left: Expr, right: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(expression: Expr, value: unknown): BooleanExpr;
+export function gt(expression: Expr, value: unknown): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is greater than an expression.
@@ -3485,7 +3485,7 @@ export function gt(expression: Expr, value: unknown): BooleanExpr;
  * @param expression The expression to compare to.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(fieldName: string, expression: Expr): BooleanExpr;
+export function gt(fieldName: string, expression: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is greater than a constant value.
@@ -3499,8 +3499,8 @@ export function gt(fieldName: string, expression: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the greater than comparison.
  */
-export function gt(fieldName: string, value: unknown): BooleanExpr;
-export function gt(left: Expr | string, right: unknown): BooleanExpr {
+export function gt(fieldName: string, value: unknown): BooleanExpression;
+export function gt(left: Expr | string, right: unknown): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.gt(rightExpr);
@@ -3519,7 +3519,7 @@ export function gt(left: Expr | string, right: unknown): BooleanExpr {
  * @param right The second expression to compare.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(left: Expr, right: Expr): BooleanExpr;
+export function gte(left: Expr, right: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is greater than or equal to a constant
@@ -3534,7 +3534,7 @@ export function gte(left: Expr, right: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(expression: Expr, value: unknown): BooleanExpr;
+export function gte(expression: Expr, value: unknown): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is greater than or equal to an expression.
@@ -3548,7 +3548,7 @@ export function gte(expression: Expr, value: unknown): BooleanExpr;
  * @param value The expression to compare to.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(fieldName: string, value: Expr): BooleanExpr;
+export function gte(fieldName: string, value: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is greater than or equal to a constant
@@ -3563,8 +3563,8 @@ export function gte(fieldName: string, value: Expr): BooleanExpr;
  * @param value The constant value to compare to.
  * @return A new `Expr` representing the greater than or equal to comparison.
  */
-export function gte(fieldName: string, value: unknown): BooleanExpr;
-export function gte(left: Expr | string, right: unknown): BooleanExpr {
+export function gte(fieldName: string, value: unknown): BooleanExpression;
+export function gte(left: Expr | string, right: unknown): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.gte(rightExpr);
@@ -3624,11 +3624,11 @@ export function arrayContains(fieldName: string, element: Expr): FunctionExpr;
  * @param element The element to search for in the array.
  * @return A new {@code Expr} representing the 'array_contains' comparison.
  */
-export function arrayContains(fieldName: string, element: unknown): BooleanExpr;
+export function arrayContains(fieldName: string, element: unknown): BooleanExpression;
 export function arrayContains(
   array: Expr | string,
   element: unknown
-): BooleanExpr {
+): BooleanExpression {
   const arrayExpr = fieldOrExpression(array);
   const elementExpr = valueToDefaultExpr(element);
   return arrayExpr.arrayContains(elementExpr);
@@ -3650,7 +3650,7 @@ export function arrayContains(
 export function arrayContainsAny(
   array: Expr,
   values: Array<Expr | unknown>
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's array value contains any of the specified
@@ -3669,7 +3669,7 @@ export function arrayContainsAny(
 export function arrayContainsAny(
   fieldName: string,
   values: Array<Expr | unknown>
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if an array expression contains any of the specified
@@ -3684,7 +3684,7 @@ export function arrayContainsAny(
  * @param values An expression that evaluates to an array, whose elements to check for in the array.
  * @return A new {@code Expr} representing the 'array_contains_any' comparison.
  */
-export function arrayContainsAny(array: Expr, values: Expr): BooleanExpr;
+export function arrayContainsAny(array: Expr, values: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's array value contains any of the specified
@@ -3700,11 +3700,11 @@ export function arrayContainsAny(array: Expr, values: Expr): BooleanExpr;
  * @param values An expression that evaluates to an array, whose elements to check for in the array field.
  * @return A new {@code Expr} representing the 'array_contains_any' comparison.
  */
-export function arrayContainsAny(fieldName: string, values: Expr): BooleanExpr;
+export function arrayContainsAny(fieldName: string, values: Expr): BooleanExpression;
 export function arrayContainsAny(
   array: Expr | string,
   values: unknown[] | Expr
-): BooleanExpr {
+): BooleanExpression {
   if (Array.isArray(values)) {
     return fieldOrExpression(array).arrayContainsAny(values);
   } else {
@@ -3727,7 +3727,7 @@ export function arrayContainsAny(
 export function arrayContainsAll(
   array: Expr,
   values: Array<Expr | unknown>
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's array value contains all the specified values or
@@ -3745,7 +3745,7 @@ export function arrayContainsAll(
 export function arrayContainsAll(
   fieldName: string,
   values: Array<Expr | unknown>
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if an array expression contains all the specified elements.
@@ -3762,7 +3762,7 @@ export function arrayContainsAll(
 export function arrayContainsAll(
   array: Expr,
   arrayExpression: Expr
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's array value contains all the specified values or
@@ -3780,11 +3780,11 @@ export function arrayContainsAll(
 export function arrayContainsAll(
   fieldName: string,
   arrayExpression: Expr
-): BooleanExpr;
+): BooleanExpression;
 export function arrayContainsAll(
   array: Expr | string,
   values: unknown[] | Expr
-): BooleanExpr {
+): BooleanExpression {
   if (Array.isArray(values)) {
     return fieldOrExpression(array).arrayContainsAll(values);
   } else {
@@ -3837,7 +3837,7 @@ export function arrayLength(array: Expr | string): FunctionExpr {
 export function eqAny(
   expression: Expr,
   values: Array<Expr | unknown>
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is equal to any of the provided values.
@@ -3851,7 +3851,7 @@ export function eqAny(
  * @param arrayExpression An expression that evaluates to an array, whose elements to check for equality to the input.
  * @return A new {@code Expr} representing the 'IN' comparison.
  */
-export function eqAny(expression: Expr, arrayExpression: Expr): BooleanExpr;
+export function eqAny(expression: Expr, arrayExpression: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is equal to any of the provided values or
@@ -3869,7 +3869,7 @@ export function eqAny(expression: Expr, arrayExpression: Expr): BooleanExpr;
 export function eqAny(
   fieldName: string,
   values: Array<Expr | unknown>
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is equal to any of the provided values or
@@ -3884,11 +3884,11 @@ export function eqAny(
  * @param arrayExpression An expression that evaluates to an array, whose elements to check for equality to the input field.
  * @return A new {@code Expr} representing the 'IN' comparison.
  */
-export function eqAny(fieldName: string, arrayExpression: Expr): BooleanExpr;
+export function eqAny(fieldName: string, arrayExpression: Expr): BooleanExpression;
 export function eqAny(
   element: Expr | string,
   values: unknown[] | Expr
-): BooleanExpr {
+): BooleanExpression {
   if (Array.isArray(values)) {
     return fieldOrExpression(element).eqAny(values);
   } else {
@@ -3912,7 +3912,7 @@ export function eqAny(
 export function notEqAny(
   element: Expr,
   values: Array<Expr | unknown>
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is not equal to any of the provided values
@@ -3930,7 +3930,7 @@ export function notEqAny(
 export function notEqAny(
   fieldName: string,
   values: Array<Expr | unknown>
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if an expression is not equal to any of the provided values
@@ -3945,7 +3945,7 @@ export function notEqAny(
  * @param arrayExpression The values to check against.
  * @return A new {@code Expr} representing the 'NOT IN' comparison.
  */
-export function notEqAny(element: Expr, arrayExpression: Expr): BooleanExpr;
+export function notEqAny(element: Expr, arrayExpression: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value is not equal to any of the values in the evaluated expression.
@@ -3959,12 +3959,12 @@ export function notEqAny(element: Expr, arrayExpression: Expr): BooleanExpr;
  * @param arrayExpression The values to check against.
  * @return A new {@code Expr} representing the 'NOT IN' comparison.
  */
-export function notEqAny(fieldName: string, arrayExpression: Expr): BooleanExpr;
+export function notEqAny(fieldName: string, arrayExpression: Expr): BooleanExpression;
 
 export function notEqAny(
   element: Expr | string,
   values: unknown[] | Expr
-): BooleanExpr {
+): BooleanExpression {
   if (Array.isArray(values)) {
     return fieldOrExpression(element).notEqAny(values);
   } else {
@@ -3990,11 +3990,11 @@ export function notEqAny(
  * @return A new {@code Expr} representing the logical 'XOR' operation.
  */
 export function xor(
-  first: BooleanExpr,
-  second: BooleanExpr,
-  ...additionalConditions: BooleanExpr[]
-): BooleanExpr {
-  return new BooleanExpr('xor', [first, second, ...additionalConditions]);
+  first: BooleanExpression,
+  second: BooleanExpression,
+  ...additionalConditions: BooleanExpression[]
+): BooleanExpression {
+  return new BooleanExpression('xor', [first, second, ...additionalConditions]);
 }
 
 /**
@@ -4013,7 +4013,7 @@ export function xor(
  * @return A new {@code Expr} representing the conditional expression.
  */
 export function cond(
-  condition: BooleanExpr,
+  condition: BooleanExpression,
   thenExpr: Expr,
   elseExpr: Expr
 ): FunctionExpr {
@@ -4035,7 +4035,7 @@ export function cond(
  * @param booleanExpr The filter condition to negate.
  * @return A new {@code Expr} representing the negated filter condition.
  */
-export function not(booleanExpr: BooleanExpr): BooleanExpr {
+export function not(booleanExpr: BooleanExpression): BooleanExpression {
   return booleanExpr.not();
 }
 
@@ -4157,7 +4157,7 @@ export function logicalMinimum(
  * @param value An expression evaluates to the name of the field to check.
  * @return A new {@code Expr} representing the 'exists' check.
  */
-export function exists(value: Expr): BooleanExpr;
+export function exists(value: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field exists.
@@ -4170,8 +4170,8 @@ export function exists(value: Expr): BooleanExpr;
  * @param fieldName The field name to check.
  * @return A new {@code Expr} representing the 'exists' check.
  */
-export function exists(fieldName: string): BooleanExpr;
-export function exists(valueOrField: Expr | string): BooleanExpr {
+export function exists(fieldName: string): BooleanExpression;
+export function exists(valueOrField: Expr | string): BooleanExpression {
   return fieldOrExpression(valueOrField).exists();
 }
 
@@ -4186,7 +4186,7 @@ export function exists(valueOrField: Expr | string): BooleanExpr {
  * @param value The expression to check.
  * @return A new {@code Expr} representing the 'isNan' check.
  */
-export function isNan(value: Expr): BooleanExpr;
+export function isNan(value: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value evaluates to 'NaN' (Not a Number).
@@ -4199,8 +4199,8 @@ export function isNan(value: Expr): BooleanExpr;
  * @param fieldName The name of the field to check.
  * @return A new {@code Expr} representing the 'isNan' check.
  */
-export function isNan(fieldName: string): BooleanExpr;
-export function isNan(value: Expr | string): BooleanExpr {
+export function isNan(fieldName: string): BooleanExpression;
+export function isNan(value: Expr | string): BooleanExpression {
   return fieldOrExpression(value).isNan();
 }
 
@@ -4421,7 +4421,7 @@ export function charLength(value: Expr | string): FunctionExpr {
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
-export function like(fieldName: string, pattern: string): BooleanExpr;
+export function like(fieldName: string, pattern: string): BooleanExpression;
 
 /**
  * Creates an expression that performs a case-sensitive wildcard string comparison against a
@@ -4436,7 +4436,7 @@ export function like(fieldName: string, pattern: string): BooleanExpr;
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
-export function like(fieldName: string, pattern: Expr): BooleanExpr;
+export function like(fieldName: string, pattern: Expr): BooleanExpression;
 
 /**
  * Creates an expression that performs a case-sensitive wildcard string comparison.
@@ -4450,7 +4450,7 @@ export function like(fieldName: string, pattern: Expr): BooleanExpr;
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
-export function like(stringExpression: Expr, pattern: string): BooleanExpr;
+export function like(stringExpression: Expr, pattern: string): BooleanExpression;
 
 /**
  * Creates an expression that performs a case-sensitive wildcard string comparison.
@@ -4464,7 +4464,7 @@ export function like(stringExpression: Expr, pattern: string): BooleanExpr;
  * @param pattern The pattern to search for. You can use "%" as a wildcard character.
  * @return A new {@code Expr} representing the 'like' comparison.
  */
-export function like(stringExpression: Expr, pattern: Expr): BooleanExpr;
+export function like(stringExpression: Expr, pattern: Expr): BooleanExpression;
 export function like(
   left: Expr | string,
   pattern: Expr | string
@@ -4487,7 +4487,7 @@ export function like(
  * @param pattern The regular expression to use for the search.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function regexContains(fieldName: string, pattern: string): BooleanExpr;
+export function regexContains(fieldName: string, pattern: string): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string field contains a specified regular expression as
@@ -4502,7 +4502,7 @@ export function regexContains(fieldName: string, pattern: string): BooleanExpr;
  * @param pattern The regular expression to use for the search.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function regexContains(fieldName: string, pattern: Expr): BooleanExpr;
+export function regexContains(fieldName: string, pattern: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression contains a specified regular
@@ -4520,7 +4520,7 @@ export function regexContains(fieldName: string, pattern: Expr): BooleanExpr;
 export function regexContains(
   stringExpression: Expr,
   pattern: string
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression contains a specified regular
@@ -4538,11 +4538,11 @@ export function regexContains(
 export function regexContains(
   stringExpression: Expr,
   pattern: Expr
-): BooleanExpr;
+): BooleanExpression;
 export function regexContains(
   left: Expr | string,
   pattern: Expr | string
-): BooleanExpr {
+): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const patternExpr = valueToDefaultExpr(pattern);
   return leftExpr.regexContains(patternExpr);
@@ -4560,7 +4560,7 @@ export function regexContains(
  * @param pattern The regular expression to use for the match.
  * @return A new {@code Expr} representing the regular expression match.
  */
-export function regexMatch(fieldName: string, pattern: string): BooleanExpr;
+export function regexMatch(fieldName: string, pattern: string): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string field matches a specified regular expression.
@@ -4574,7 +4574,7 @@ export function regexMatch(fieldName: string, pattern: string): BooleanExpr;
  * @param pattern The regular expression to use for the match.
  * @return A new {@code Expr} representing the regular expression match.
  */
-export function regexMatch(fieldName: string, pattern: Expr): BooleanExpr;
+export function regexMatch(fieldName: string, pattern: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression matches a specified regular
@@ -4592,7 +4592,7 @@ export function regexMatch(fieldName: string, pattern: Expr): BooleanExpr;
 export function regexMatch(
   stringExpression: Expr,
   pattern: string
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression matches a specified regular
@@ -4607,11 +4607,11 @@ export function regexMatch(
  * @param pattern The regular expression to use for the match.
  * @return A new {@code Expr} representing the regular expression match.
  */
-export function regexMatch(stringExpression: Expr, pattern: Expr): BooleanExpr;
+export function regexMatch(stringExpression: Expr, pattern: Expr): BooleanExpression;
 export function regexMatch(
   left: Expr | string,
   pattern: Expr | string
-): BooleanExpr {
+): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const patternExpr = valueToDefaultExpr(pattern);
   return leftExpr.regexMatch(patternExpr);
@@ -4629,7 +4629,7 @@ export function regexMatch(
  * @param substring The substring to search for.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function strContains(fieldName: string, substring: string): BooleanExpr;
+export function strContains(fieldName: string, substring: string): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string field contains a substring specified by an expression.
@@ -4643,7 +4643,7 @@ export function strContains(fieldName: string, substring: string): BooleanExpr;
  * @param substring The expression representing the substring to search for.
  * @return A new {@code Expr} representing the 'contains' comparison.
  */
-export function strContains(fieldName: string, substring: Expr): BooleanExpr;
+export function strContains(fieldName: string, substring: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression contains a specified substring.
@@ -4660,7 +4660,7 @@ export function strContains(fieldName: string, substring: Expr): BooleanExpr;
 export function strContains(
   stringExpression: Expr,
   substring: string
-): BooleanExpr;
+): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression contains a substring specified by another expression.
@@ -4677,11 +4677,11 @@ export function strContains(
 export function strContains(
   stringExpression: Expr,
   substring: Expr
-): BooleanExpr;
+): BooleanExpression;
 export function strContains(
   left: Expr | string,
   substring: Expr | string
-): BooleanExpr {
+): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const substringExpr = valueToDefaultExpr(substring);
   return leftExpr.strContains(substringExpr);
@@ -4699,7 +4699,7 @@ export function strContains(
  * @param prefix The prefix to check for.
  * @return A new {@code Expr} representing the 'starts with' comparison.
  */
-export function startsWith(fieldName: string, prefix: string): BooleanExpr;
+export function startsWith(fieldName: string, prefix: string): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value starts with a given prefix.
@@ -4713,7 +4713,7 @@ export function startsWith(fieldName: string, prefix: string): BooleanExpr;
  * @param prefix The expression representing the prefix.
  * @return A new {@code Expr} representing the 'starts with' comparison.
  */
-export function startsWith(fieldName: string, prefix: Expr): BooleanExpr;
+export function startsWith(fieldName: string, prefix: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression starts with a given prefix.
@@ -4727,7 +4727,7 @@ export function startsWith(fieldName: string, prefix: Expr): BooleanExpr;
  * @param prefix The prefix to check for.
  * @return A new {@code Expr} representing the 'starts with' comparison.
  */
-export function startsWith(stringExpression: Expr, prefix: string): BooleanExpr;
+export function startsWith(stringExpression: Expr, prefix: string): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression starts with a given prefix.
@@ -4741,11 +4741,11 @@ export function startsWith(stringExpression: Expr, prefix: string): BooleanExpr;
  * @param prefix The prefix to check for.
  * @return A new {@code Expr} representing the 'starts with' comparison.
  */
-export function startsWith(stringExpression: Expr, prefix: Expr): BooleanExpr;
+export function startsWith(stringExpression: Expr, prefix: Expr): BooleanExpression;
 export function startsWith(
   expr: Expr | string,
   prefix: Expr | string
-): BooleanExpr {
+): BooleanExpression {
   return fieldOrExpression(expr).startsWith(valueToDefaultExpr(prefix));
 }
 
@@ -4761,7 +4761,7 @@ export function startsWith(
  * @param suffix The postfix to check for.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
-export function endsWith(fieldName: string, suffix: string): BooleanExpr;
+export function endsWith(fieldName: string, suffix: string): BooleanExpression;
 
 /**
  * Creates an expression that checks if a field's value ends with a given postfix.
@@ -4775,7 +4775,7 @@ export function endsWith(fieldName: string, suffix: string): BooleanExpr;
  * @param suffix The expression representing the postfix.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
-export function endsWith(fieldName: string, suffix: Expr): BooleanExpr;
+export function endsWith(fieldName: string, suffix: Expr): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression ends with a given postfix.
@@ -4789,7 +4789,7 @@ export function endsWith(fieldName: string, suffix: Expr): BooleanExpr;
  * @param suffix The postfix to check for.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
-export function endsWith(stringExpression: Expr, suffix: string): BooleanExpr;
+export function endsWith(stringExpression: Expr, suffix: string): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression ends with a given postfix.
@@ -4803,11 +4803,11 @@ export function endsWith(stringExpression: Expr, suffix: string): BooleanExpr;
  * @param suffix The postfix to check for.
  * @return A new {@code Expr} representing the 'ends with' comparison.
  */
-export function endsWith(stringExpression: Expr, suffix: Expr): BooleanExpr;
+export function endsWith(stringExpression: Expr, suffix: Expr): BooleanExpression;
 export function endsWith(
   expr: Expr | string,
   suffix: Expr | string
-): BooleanExpr {
+): BooleanExpression {
   return fieldOrExpression(expr).endsWith(valueToDefaultExpr(suffix));
 }
 
@@ -5751,11 +5751,11 @@ export function timestampSub(
  * @return A new {@code Expr} representing the logical 'AND' operation.
  */
 export function and(
-  first: BooleanExpr,
-  second: BooleanExpr,
-  ...more: BooleanExpr[]
-): BooleanExpr {
-  return new BooleanExpr('and', [first, second, ...more]);
+  first: BooleanExpression,
+  second: BooleanExpression,
+  ...more: BooleanExpression[]
+): BooleanExpression {
+  return new BooleanExpression('and', [first, second, ...more]);
 }
 
 /**
@@ -5773,11 +5773,11 @@ export function and(
  * @return A new {@code Expr} representing the logical 'OR' operation.
  */
 export function or(
-  first: BooleanExpr,
-  second: BooleanExpr,
-  ...more: BooleanExpr[]
-): BooleanExpr {
-  return new BooleanExpr('or', [first, second, ...more]);
+  first: BooleanExpression,
+  second: BooleanExpression,
+  ...more: BooleanExpression[]
+): BooleanExpression {
+  return new BooleanExpression('or', [first, second, ...more]);
 }
 
 /**

@@ -21,7 +21,7 @@ import {ProtoSerializable, Serializer} from '../serializer';
 
 import {
   AggregateFunction,
-  BooleanExpr,
+  BooleanExpression,
   Expr,
   Field,
   field,
@@ -256,7 +256,7 @@ export type InternalWhereStageOptions = Omit<
   firestore.Pipelines.WhereStageOptions,
   'condition'
 > & {
-  condition: BooleanExpr;
+  condition: BooleanExpression;
 };
 
 /**

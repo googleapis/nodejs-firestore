@@ -19,7 +19,7 @@ import {
 } from '@google-cloud/firestore';
 
 import {
-  BooleanExpr,
+  BooleanExpression,
   map,
   array,
   field,
@@ -2887,7 +2887,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .where(
-            new BooleanExpr('and', [
+            new BooleanExpression('and', [
               field('rating').gt(0),
               field('title').charLength().lt(5),
               field('tags').arrayContains('propaganda'),
@@ -2905,7 +2905,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .where(
-            new BooleanExpr('array_contains_any', [
+            new BooleanExpression('array_contains_any', [
               field('tags'),
               array(['politics']),
             ])

@@ -53,7 +53,7 @@ import {
   Expr,
   AliasedExpr,
   Field,
-  BooleanExpr,
+  BooleanExpression,
   Ordering,
   constant,
   _mapValue,
@@ -584,11 +584,11 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
 
   /**
    * Filters the documents from previous stages to only include those matching the specified {@link
-   * BooleanExpr}.
+   * BooleanExpression}.
    *
    * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
    * You can filter documents based on their field values, using implementations of {@link
-   * BooleanExpr}, typically including but not limited to:
+   * BooleanExpression}, typically including but not limited to:
    *
    * <ul>
    *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
@@ -610,17 +610,17 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *   );
    * ```
    *
-   * @param condition The {@link BooleanExpr} to apply.
+   * @param condition The {@link BooleanExpression} to apply.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  where(condition: firestore.Pipelines.BooleanExpr): Pipeline;
+  where(condition: firestore.Pipelines.BooleanExpression): Pipeline;
   /**
    * Filters the documents from previous stages to only include those matching the specified {@link
-   * BooleanExpr}.
+   * BooleanExpression}.
    *
    * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
    * You can filter documents based on their field values, using implementations of {@link
-   * BooleanExpr}, typically including but not limited to:
+   * BooleanExpression}, typically including but not limited to:
    *
    * <ul>
    *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
@@ -648,17 +648,17 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   where(options: firestore.Pipelines.WhereStageOptions): Pipeline;
   where(
     conditionOrOptions:
-      | firestore.Pipelines.BooleanExpr
+      | firestore.Pipelines.BooleanExpression
       | firestore.Pipelines.WhereStageOptions
   ): Pipeline {
     const options = isBooleanExpr(conditionOrOptions) ? {} : conditionOrOptions;
 
-    const condition: firestore.Pipelines.BooleanExpr = isBooleanExpr(
+    const condition: firestore.Pipelines.BooleanExpression = isBooleanExpr(
       conditionOrOptions
     )
       ? conditionOrOptions
       : conditionOrOptions.condition;
-    const convertedCondition: BooleanExpr = condition as BooleanExpr;
+    const convertedCondition: BooleanExpression = condition as BooleanExpression;
     this._validateUserData('where', convertedCondition);
 
     const internalOptions: InternalWhereStageOptions = {

@@ -56,7 +56,7 @@ export {
   rand,
   arrayGet,
   add,
-  BooleanExpr,
+  BooleanExpression,
   Expr,
   FunctionExpr,
   minimum,

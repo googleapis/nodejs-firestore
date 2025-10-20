@@ -3272,9 +3272,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param expression The expression to compare for equality.
-       * @return A new `BooleanExpr` representing the equality comparison.
+       * @return A new `BooleanExpression` representing the equality comparison.
        */
-      eq(expression: Expr): BooleanExpr;
+      eq(expression: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is equal to a constant value.
        *
@@ -3286,7 +3286,7 @@ declare namespace FirebaseFirestore {
        * @param value The constant value to compare for equality.
        * @return A new `Expr` representing the equality comparison.
        */
-      eq(value: unknown): BooleanExpr;
+      eq(value: unknown): BooleanExpression;
 
       /**
        * Creates an expression that checks if this expression is not equal to another expression.
@@ -3297,9 +3297,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param expression The expression to compare for inequality.
-       * @return A new {@link BooleanExpr} representing the inequality comparison.
+       * @return A new {@link BooleanExpression} representing the inequality comparison.
        */
-      neq(expression: Expr): BooleanExpr;
+      neq(expression: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is not equal to a constant value.
        *
@@ -3311,7 +3311,7 @@ declare namespace FirebaseFirestore {
        * @param value The constant value to compare for inequality.
        * @return A new `Expr` representing the inequality comparison.
        */
-      neq(value: unknown): BooleanExpr;
+      neq(value: unknown): BooleanExpression;
 
       /**
        * Creates an expression that checks if this expression is less than another expression.
@@ -3322,9 +3322,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param expression The expression to compare against.
-       * @return A new `BooleanExpr` representing the less than comparison.
+       * @return A new `BooleanExpression` representing the less than comparison.
        */
-      lt(expression: Expr): BooleanExpr;
+      lt(expression: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is less than a constant value.
        *
@@ -3336,7 +3336,7 @@ declare namespace FirebaseFirestore {
        * @param value The constant value to compare for less than.
        * @return A new `Expr` representing the less than comparison.
        */
-      lt(value: unknown): BooleanExpr;
+      lt(value: unknown): BooleanExpression;
 
       /**
        * Creates an expression that checks if the current expression's value is less than or equal to the value of another expression.
@@ -3347,9 +3347,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param expression The expression to compare against.
-       * @return A new `BooleanExpr` representing the less than or equal to comparison.
+       * @return A new `BooleanExpression` representing the less than or equal to comparison.
        */
-      lte(expression: Expr): BooleanExpr;
+      lte(expression: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is less than or equal to a constant value.
        *
@@ -3361,7 +3361,7 @@ declare namespace FirebaseFirestore {
        * @param value The constant value to compare for less than or equal to.
        * @return A new `Expr` representing the less than or equal to comparison.
        */
-      lte(value: unknown): BooleanExpr;
+      lte(value: unknown): BooleanExpression;
 
       /**
        * Creates an expression that checks if this expression is greater than another expression.
@@ -3372,9 +3372,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param expression The expression to compare for greater than.
-       * @return A new {@link BooleanExpr} representing the greater than comparison.
+       * @return A new {@link BooleanExpression} representing the greater than comparison.
        */
-      gt(expression: Expr): BooleanExpr;
+      gt(expression: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is greater than a constant value.
        *
@@ -3386,7 +3386,7 @@ declare namespace FirebaseFirestore {
        * @param value The constant value to compare for greater than.
        * @return A new `Expr` representing the greater than comparison.
        */
-      gt(value: unknown): BooleanExpr;
+      gt(value: unknown): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is greater than or equal to another
        * expression.
@@ -3399,7 +3399,7 @@ declare namespace FirebaseFirestore {
        * @param expression The expression to compare for greater than or equal to.
        * @return A new `Expr` representing the greater than or equal to comparison.
        */
-      gte(expression: Expr): BooleanExpr;
+      gte(expression: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is greater than or equal to a constant
        * value.
@@ -3412,7 +3412,7 @@ declare namespace FirebaseFirestore {
        * @param value The constant value to compare for greater than or equal to.
        * @return A new `Expr` representing the greater than or equal to comparison.
        */
-      gte(value: unknown): BooleanExpr;
+      gte(value: unknown): BooleanExpression;
       /**
        * Creates an expression that checks if an array contains a specific element.
        *
@@ -3424,7 +3424,7 @@ declare namespace FirebaseFirestore {
        * @param expression The element to search for in the array.
        * @return A new `Expr` representing the 'array_contains' comparison.
        */
-      arrayContains(expression: Expr): BooleanExpr;
+      arrayContains(expression: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if an array contains a specific value.
        *
@@ -3436,7 +3436,7 @@ declare namespace FirebaseFirestore {
        * @param value The element to search for in the array.
        * @return A new `Expr` representing the 'array_contains' comparison.
        */
-      arrayContains(value: unknown): BooleanExpr;
+      arrayContains(value: unknown): BooleanExpression;
       /**
        * Creates an expression that checks if an array contains all the specified elements.
        *
@@ -3448,7 +3448,7 @@ declare namespace FirebaseFirestore {
        * @param values The elements to check for in the array.
        * @return A new `Expr` representing the 'array_contains_all' comparison.
        */
-      arrayContainsAll(values: Array<Expr | unknown>): BooleanExpr;
+      arrayContainsAll(values: Array<Expr | unknown>): BooleanExpression;
       /**
        * Creates an expression that checks if an array contains all the specified elements.
        *
@@ -3460,7 +3460,7 @@ declare namespace FirebaseFirestore {
        * @param arrayExpression The elements to check for in the array.
        * @return A new `Expr` representing the 'array_contains_all' comparison.
        */
-      arrayContainsAll(arrayExpression: Expr): BooleanExpr;
+      arrayContainsAll(arrayExpression: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if an array contains any of the specified elements.
        *
@@ -3472,7 +3472,7 @@ declare namespace FirebaseFirestore {
        * @param values The elements to check for in the array.
        * @return A new `Expr` representing the 'array_contains_any' comparison.
        */
-      arrayContainsAny(values: Array<Expr | unknown>): BooleanExpr;
+      arrayContainsAny(values: Array<Expr | unknown>): BooleanExpression;
       /**
        * Creates an expression that checks if an array contains any of the specified elements.
        *
@@ -3485,7 +3485,7 @@ declare namespace FirebaseFirestore {
        * @param arrayExpression The elements to check for in the array.
        * @return A new `Expr` representing the 'array_contains_any' comparison.
        */
-      arrayContainsAny(arrayExpression: Expr): BooleanExpr;
+      arrayContainsAny(arrayExpression: Expr): BooleanExpression;
       /**
        * Creates an expression that calculates the length of an array.
        *
@@ -3508,9 +3508,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param values An array of values or expressions to check against.
-       * @return A new `BooleanExpr` representing the 'IN' comparison.
+       * @return A new `BooleanExpression` representing the 'IN' comparison.
        */
-      eqAny(values: Array<Expr | unknown>): BooleanExpr;
+      eqAny(values: Array<Expr | unknown>): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is equal to any of the provided values or
        * expressions.
@@ -3523,7 +3523,7 @@ declare namespace FirebaseFirestore {
        * @param arrayExpression An expression that evaluates to an array of values to check against.
        * @return A new `Expr` representing the 'IN' comparison.
        */
-      eqAny(arrayExpression: Expr): BooleanExpr;
+      eqAny(arrayExpression: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is not equal to any of the provided values or
        * expressions.
@@ -3536,7 +3536,7 @@ declare namespace FirebaseFirestore {
        * @param values The values or expressions to check against.
        * @return A new `Expr` representing the 'NotEqAny' comparison.
        */
-      notEqAny(values: Array<Expr | unknown>): BooleanExpr;
+      notEqAny(values: Array<Expr | unknown>): BooleanExpression;
 
       /**
        * Creates an expression that checks if the current expression's value is not equal to any of the values within the array produced by the `arrayExpression`.
@@ -3547,9 +3547,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param arrayExpression An `Expr` that evaluates to an array of values to compare against.
-       * @return A new `BooleanExpr` representing the result of the 'not equal to any' comparison.
+       * @return A new `BooleanExpression` representing the result of the 'not equal to any' comparison.
        */
-      notEqAny(arrayExpression: Expr): BooleanExpr;
+      notEqAny(arrayExpression: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
        *
@@ -3560,7 +3560,7 @@ declare namespace FirebaseFirestore {
        *
        * @return A new `Expr` representing the 'isNaN' check.
        */
-      isNan(): BooleanExpr;
+      isNan(): BooleanExpression;
 
       /**
        * Creates an expression that checks if this expression evaluates to `null`.
@@ -3570,9 +3570,9 @@ declare namespace FirebaseFirestore {
        * field("status").isNull();
        * ```
        *
-       * @return A new `BooleanExpr` representing the `isNull` check.
+       * @return A new `BooleanExpression` representing the `isNull` check.
        */
-      isNull(): BooleanExpr;
+      isNull(): BooleanExpression;
 
       /**
        * Creates an expression that checks if a field exists in the document.
@@ -3582,9 +3582,9 @@ declare namespace FirebaseFirestore {
        * field("phoneNumber").exists();
        * ```
        *
-       * @returns A new {@link BooleanExpr} representing the 'exists' check.
+       * @returns A new {@link BooleanExpression} representing the 'exists' check.
        */
-      exists(): BooleanExpr;
+      exists(): BooleanExpression;
       /**
        * Creates an expression that calculates the character length of a string in UTF-8.
        *
@@ -3634,7 +3634,7 @@ declare namespace FirebaseFirestore {
        * @param pattern The regular expression to use for the search.
        * @return A new `Expr` representing the 'contains' comparison.
        */
-      regexContains(pattern: string): BooleanExpr;
+      regexContains(pattern: string): BooleanExpression;
 
       /**
        * Creates an expression that checks if a string contains a specified regular expression as a
@@ -3646,9 +3646,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param pattern The regular expression to use for the search.
-       * @return A new {@link BooleanExpr} representing the 'contains' comparison.
+       * @return A new {@link BooleanExpression} representing the 'contains' comparison.
        */
-      regexContains(pattern: Expr): BooleanExpr;
+      regexContains(pattern: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if a string matches a specified regular expression.
        *
@@ -3660,7 +3660,7 @@ declare namespace FirebaseFirestore {
        * @param pattern The regular expression to use for the match.
        * @return A new `Expr` representing the regular expression match.
        */
-      regexMatch(pattern: string): BooleanExpr;
+      regexMatch(pattern: string): BooleanExpression;
 
       /**
        * Creates an expression that checks if a string matches a specified regular expression.
@@ -3671,9 +3671,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param pattern An expression that evaluates to the regular expression string to use for the match.
-       * @return A new `BooleanExpr` representing the result of the regular expression match.
+       * @return A new `BooleanExpression` representing the result of the regular expression match.
        */
-      regexMatch(pattern: Expr): BooleanExpr;
+      regexMatch(pattern: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if a string contains a specified substring.
        *
@@ -3685,7 +3685,7 @@ declare namespace FirebaseFirestore {
        * @param substring The substring to search for.
        * @return A new `Expr` representing the 'contains' comparison.
        */
-      strContains(substring: string): BooleanExpr;
+      strContains(substring: string): BooleanExpression;
 
       /**
        * Creates an expression that checks if a string contains the string represented by another expression.
@@ -3696,9 +3696,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param expr The expression representing the substring to search for.
-       * @return A new {@link BooleanExpr} representing the 'contains' comparison.
+       * @return A new {@link BooleanExpression} representing the 'contains' comparison.
        */
-      strContains(expr: Expr): BooleanExpr;
+      strContains(expr: Expr): BooleanExpression;
       /**
        * Creates an expression that checks if a string starts with a given prefix.
        *
@@ -3710,7 +3710,7 @@ declare namespace FirebaseFirestore {
        * @param prefix The prefix to check for.
        * @return A new `Expr` representing the 'starts with' comparison.
        */
-      startsWith(prefix: string): BooleanExpr;
+      startsWith(prefix: string): BooleanExpression;
 
       /**
        * Creates an expression that checks if the string value of the current expression starts with the string value of the given prefix expression.
@@ -3721,9 +3721,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param prefix An expression whose string value will be used as the prefix to check against.
-       * @returns A new `BooleanExpr` representing the 'starts with' comparison result.
+       * @returns A new `BooleanExpression` representing the 'starts with' comparison result.
        */
-      startsWith(prefix: Expr): BooleanExpr;
+      startsWith(prefix: Expr): BooleanExpression;
 
       /**
        * Creates an expression that checks if a string ends with a given postfix.
@@ -3734,9 +3734,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param suffix The postfix to check for.
-       * @return A new {@link BooleanExpr} representing the 'ends with' comparison.
+       * @return A new {@link BooleanExpression} representing the 'ends with' comparison.
        */
-      endsWith(suffix: string): BooleanExpr;
+      endsWith(suffix: string): BooleanExpression;
       /**
        * Creates an expression that checks if a string ends with a given postfix (represented as an
        * expression).
@@ -3749,7 +3749,7 @@ declare namespace FirebaseFirestore {
        * @param suffix The postfix expression to check for.
        * @return A new `Expr` representing the 'ends with' comparison.
        */
-      endsWith(suffix: Expr): BooleanExpr;
+      endsWith(suffix: Expr): BooleanExpression;
       /**
        * Creates an expression that converts a string to lowercase.
        *
@@ -4269,9 +4269,9 @@ declare namespace FirebaseFirestore {
        * field("title").arrayContains(1).isError();
        * ```
        *
-       * @return A new {@code BooleanExpr} representing the 'isError' check.
+       * @return A new {@code BooleanExpression} representing the 'isError' check.
        */
-      isError(): BooleanExpr;
+      isError(): BooleanExpression;
       /**
 
        * Creates an expression that returns the result of the `catchExpr` argument
@@ -4314,9 +4314,9 @@ declare namespace FirebaseFirestore {
        * field("value").isAbsent();
        * ```
        *
-       * @return A new {@code BooleanExpr} representing the 'isAbsent' check.
+       * @return A new {@code BooleanExpression} representing the 'isAbsent' check.
        */
-      isAbsent(): BooleanExpr;
+      isAbsent(): BooleanExpression;
 
       /**
        * Creates an expression that checks if the result of an expression is not null.
@@ -4326,9 +4326,9 @@ declare namespace FirebaseFirestore {
        * field("name").isNotNull();
        * ```
        *
-       * @return A new {@code BooleanExpr} representing the 'isNotNull' check.
+       * @return A new {@code BooleanExpression} representing the 'isNotNull' check.
        */
-      isNotNull(): BooleanExpr;
+      isNotNull(): BooleanExpression;
       /**
 
        * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
@@ -4340,7 +4340,7 @@ declare namespace FirebaseFirestore {
        *
        * @return A new {@code Expr} representing the 'isNaN' check.
        */
-      isNotNan(): BooleanExpr;
+      isNotNan(): BooleanExpression;
 
       /**
        * Creates an expression that removes a key from the map produced by evaluating this expression.
@@ -4840,7 +4840,7 @@ declare namespace FirebaseFirestore {
      * This expression type is useful for filter conditions.
      *
      */
-    export class BooleanExpr extends FunctionExpr {
+    export class BooleanExpression extends FunctionExpr {
       /**
        * @internal
        * @private
@@ -4868,7 +4868,7 @@ declare namespace FirebaseFirestore {
        *
        * @return A new {@code Expr} representing the negated filter condition.
        */
-      not(): BooleanExpr;
+      not(): BooleanExpression;
     }
     /**
      * Creates an aggregation that counts the number of stage inputs where the provided
@@ -4882,7 +4882,7 @@ declare namespace FirebaseFirestore {
      * @param booleanExpr - The boolean expression to evaluate on each input.
      * @returns A new `AggregateFunction` representing the 'countIf' aggregation.
      */
-    export function countIf(booleanExpr: BooleanExpr): AggregateFunction;
+    export function countIf(booleanExpr: BooleanExpression): AggregateFunction;
     /**
      * Creates an expression that return a pseudo-random value of type double in the
      * range of [0, 1), inclusive of 0 and exclusive of 1.
@@ -4969,7 +4969,7 @@ declare namespace FirebaseFirestore {
      * @param value The expression to check.
      * @return A new {@code Expr} representing the 'isError' check.
      */
-    export function isError(value: Expr): BooleanExpr;
+    export function isError(value: Expr): BooleanExpression;
     /**
      * Creates an expression that returns the `catch` argument if there is an
      * error, else return the result of the `try` argument evaluation.
@@ -5014,7 +5014,7 @@ declare namespace FirebaseFirestore {
      * @param value The expression to check.
      * @return A new {@code Expr} representing the 'isAbsent' check.
      */
-    export function isAbsent(value: Expr): BooleanExpr;
+    export function isAbsent(value: Expr): BooleanExpression;
     /**
      * Creates an expression that returns `true` if a field is absent. Otherwise,
      * returns `false` even if the field value is `null`.
@@ -5027,7 +5027,7 @@ declare namespace FirebaseFirestore {
      * @param field The field to check.
      * @return A new {@code Expr} representing the 'isAbsent' check.
      */
-    export function isAbsent(field: string): BooleanExpr;
+    export function isAbsent(field: string): BooleanExpression;
 
     /**
      * Creates an expression that checks if an expression evaluates to 'null'.
@@ -5038,9 +5038,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value The expression to check for null.
-     * @return A new {@code BooleanExpr} representing the 'isNull' check.
+     * @return A new {@code BooleanExpression} representing the 'isNull' check.
      */
-    export function isNull(value: Expr): BooleanExpr;
+    export function isNull(value: Expr): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value evaluates to 'null'.
@@ -5051,9 +5051,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value The name of the field to check.
-     * @return A new {@code BooleanExpr} representing the 'isNull' check.
+     * @return A new {@code BooleanExpression} representing the 'isNull' check.
      */
-    export function isNull(value: string): BooleanExpr;
+    export function isNull(value: string): BooleanExpression;
 
     /**
      * Creates an expression that checks if the result of an expression is not null.
@@ -5064,9 +5064,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value The expression to check.
-     * @return A new {@code BooleanExpr} representing the 'not null' check.
+     * @return A new {@code BooleanExpression} representing the 'not null' check.
      */
-    export function isNotNull(value: Expr): BooleanExpr;
+    export function isNotNull(value: Expr): BooleanExpression;
 
     /**
      * Creates an expression that checks if the value of a field is not null.
@@ -5077,9 +5077,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value The name of the field to check.
-     * @return A new {@code BooleanExpr} representing the 'not null' check.
+     * @return A new {@code BooleanExpression} representing the 'not null' check.
      */
-    export function isNotNull(value: string): BooleanExpr;
+    export function isNotNull(value: string): BooleanExpression;
 
     /**
      * Creates an expression that evaluates to `true` if the given expression's result is not `NaN` (Not a Number), and `false` otherwise.
@@ -5090,9 +5090,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value The expression to check for `NaN`.
-     * @return A new {@code BooleanExpr} representing the result of the `isNotNaN` check.
+     * @return A new {@code BooleanExpression} representing the result of the `isNotNaN` check.
      */
-    export function isNotNan(value: Expr): BooleanExpr;
+    export function isNotNan(value: Expr): BooleanExpression;
 
     /**
      * Creates an expression that checks if a numeric value is not NaN (Not a Number).
@@ -5103,9 +5103,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value The name of the field to check.
-     * @return A new {@code BooleanExpr} representing the 'isNotNan' check.
+     * @return A new {@code BooleanExpression} representing the 'isNotNan' check.
      */
-    export function isNotNan(value: string): BooleanExpr;
+    export function isNotNan(value: string): BooleanExpression;
     /**
      * Creates an expression that removes a key from the map at the specified field name.
      *
@@ -5567,9 +5567,9 @@ declare namespace FirebaseFirestore {
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
-     * @return A new `BooleanExpr` representing the equality comparison.
+     * @return A new `BooleanExpression` representing the equality comparison.
      */
-    export function eq(left: Expr, right: Expr): BooleanExpr;
+    export function eq(left: Expr, right: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is equal to a constant value.
      *
@@ -5582,7 +5582,7 @@ declare namespace FirebaseFirestore {
      * @param value The constant value to compare to.
      * @return A new `Expr` representing the equality comparison.
      */
-    export function eq(expression: Expr, value: unknown): BooleanExpr;
+    export function eq(expression: Expr, value: unknown): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is equal to another expression.
@@ -5594,9 +5594,9 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field to compare.
      * @param expression The expression to compare the field's value against.
-     * @return A new `BooleanExpr` representing the equality comparison.
+     * @return A new `BooleanExpression` representing the equality comparison.
      */
-    export function eq(fieldName: string, expression: Expr): BooleanExpr;
+    export function eq(fieldName: string, expression: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is equal to a constant value.
      *
@@ -5609,7 +5609,7 @@ declare namespace FirebaseFirestore {
      * @param value The constant value to compare to.
      * @return A new `Expr` representing the equality comparison.
      */
-    export function eq(fieldName: string, value: unknown): BooleanExpr;
+    export function eq(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if two expressions are not equal.
      *
@@ -5622,7 +5622,7 @@ declare namespace FirebaseFirestore {
      * @param right The second expression to compare.
      * @return A new `Expr` representing the inequality comparison.
      */
-    export function neq(left: Expr, right: Expr): BooleanExpr;
+    export function neq(left: Expr, right: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is not equal to a constant value.
      *
@@ -5635,7 +5635,7 @@ declare namespace FirebaseFirestore {
      * @param value The constant value to compare to.
      * @return A new `Expr` representing the inequality comparison.
      */
-    export function neq(expression: Expr, value: unknown): BooleanExpr;
+    export function neq(expression: Expr, value: unknown): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is not equal to an expression.
@@ -5647,9 +5647,9 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to compare.
      * @param expression The expression to compare to.
-     * @return A new {@link BooleanExpr} representing the inequality comparison.
+     * @return A new {@link BooleanExpression} representing the inequality comparison.
      */
-    export function neq(fieldName: string, expression: Expr): BooleanExpr;
+    export function neq(fieldName: string, expression: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is not equal to a constant value.
      *
@@ -5662,7 +5662,7 @@ declare namespace FirebaseFirestore {
      * @param value The constant value to compare to.
      * @return A new `Expr` representing the inequality comparison.
      */
-    export function neq(fieldName: string, value: unknown): BooleanExpr;
+    export function neq(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if the first expression is less than the second expression.
      *
@@ -5675,7 +5675,7 @@ declare namespace FirebaseFirestore {
      * @param right The second expression to compare.
      * @return A new `Expr` representing the less than comparison.
      */
-    export function lt(left: Expr, right: Expr): BooleanExpr;
+    export function lt(left: Expr, right: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is less than a constant value.
      *
@@ -5688,7 +5688,7 @@ declare namespace FirebaseFirestore {
      * @param value The constant value to compare to.
      * @return A new `Expr` representing the less than comparison.
      */
-    export function lt(expression: Expr, value: unknown): BooleanExpr;
+    export function lt(expression: Expr, value: unknown): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is less than an expression.
@@ -5700,9 +5700,9 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to compare.
      * @param expression The expression to compare to.
-     * @return A new `BooleanExpr` representing the less than comparison.
+     * @return A new `BooleanExpression` representing the less than comparison.
      */
-    export function lt(fieldName: string, expression: Expr): BooleanExpr;
+    export function lt(fieldName: string, expression: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is less than a constant value.
      *
@@ -5715,7 +5715,7 @@ declare namespace FirebaseFirestore {
      * @param value The constant value to compare to.
      * @return A new `Expr` representing the less than comparison.
      */
-    export function lt(fieldName: string, value: unknown): BooleanExpr;
+    export function lt(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if the first expression is less than or equal to the second
      * expression.
@@ -5729,7 +5729,7 @@ declare namespace FirebaseFirestore {
      * @param right The second expression to compare.
      * @return A new `Expr` representing the less than or equal to comparison.
      */
-    export function lte(left: Expr, right: Expr): BooleanExpr;
+    export function lte(left: Expr, right: Expr): BooleanExpression;
 
     /**
      * Creates an expression that checks if a given expression's value is less than or equal to a constant value.
@@ -5741,9 +5741,9 @@ declare namespace FirebaseFirestore {
      *
      * @param expression The {@link Expr} to compare.
      * @param value The constant value to compare against.
-     * @return A new {@link BooleanExpr} representing the less than or equal to comparison.
+     * @return A new {@link BooleanExpression} representing the less than or equal to comparison.
      */
-    export function lte(expression: Expr, value: unknown): BooleanExpr;
+    export function lte(expression: Expr, value: unknown): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is less than or equal to another expression.
@@ -5755,9 +5755,9 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field whose value will be compared.
      * @param expression The expression to compare against the field's value.
-     * @return A new {@link BooleanExpr} representing the less than or equal to comparison.
+     * @return A new {@link BooleanExpression} representing the less than or equal to comparison.
      */
-    export function lte(fieldName: string, expression: Expr): BooleanExpr;
+    export function lte(fieldName: string, expression: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is less than or equal to a constant value.
      *
@@ -5770,7 +5770,7 @@ declare namespace FirebaseFirestore {
      * @param value The constant value to compare to.
      * @return A new `Expr` representing the less than or equal to comparison.
      */
-    export function lte(fieldName: string, value: unknown): BooleanExpr;
+    export function lte(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if the first expression is greater than the second
      * expression.
@@ -5784,7 +5784,7 @@ declare namespace FirebaseFirestore {
      * @param right The second expression to compare.
      * @return A new `Expr` representing the greater than comparison.
      */
-    export function gt(left: Expr, right: Expr): BooleanExpr;
+    export function gt(left: Expr, right: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is greater than a constant value.
      *
@@ -5797,7 +5797,7 @@ declare namespace FirebaseFirestore {
      * @param value The constant value to compare to.
      * @return A new `Expr` representing the greater than comparison.
      */
-    export function gt(expression: Expr, value: unknown): BooleanExpr;
+    export function gt(expression: Expr, value: unknown): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is greater than another expression.
@@ -5809,9 +5809,9 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field to compare.
      * @param expression The expression to compare against.
-     * @return A new {@link BooleanExpr} representing the greater than comparison.
+     * @return A new {@link BooleanExpression} representing the greater than comparison.
      */
-    export function gt(fieldName: string, expression: Expr): BooleanExpr;
+    export function gt(fieldName: string, expression: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is greater than a constant value.
      *
@@ -5822,9 +5822,9 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field to compare.
      * @param value The constant value to compare to.
-     * @return A new {@link BooleanExpr} representing the greater than comparison.
+     * @return A new {@link BooleanExpression} representing the greater than comparison.
      */
-    export function gt(fieldName: string, value: unknown): BooleanExpr;
+    export function gt(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if the first expression is greater than or equal to the
      * second expression.
@@ -5838,7 +5838,7 @@ declare namespace FirebaseFirestore {
      * @param right The second expression to compare.
      * @return A new `Expr` representing the greater than or equal to comparison.
      */
-    export function gte(left: Expr, right: Expr): BooleanExpr;
+    export function gte(left: Expr, right: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is greater than or equal to a constant
      * value.
@@ -5852,7 +5852,7 @@ declare namespace FirebaseFirestore {
      * @param value The constant value to compare to.
      * @return A new `Expr` representing the greater than or equal to comparison.
      */
-    export function gte(expression: Expr, value: unknown): BooleanExpr;
+    export function gte(expression: Expr, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is greater than or equal to an expression.
      *
@@ -5865,7 +5865,7 @@ declare namespace FirebaseFirestore {
      * @param value The expression to compare to.
      * @return A new `Expr` representing the greater than or equal to comparison.
      */
-    export function gte(fieldName: string, value: Expr): BooleanExpr;
+    export function gte(fieldName: string, value: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is greater than or equal to a constant
      * value.
@@ -5879,7 +5879,7 @@ declare namespace FirebaseFirestore {
      * @param value The constant value to compare to.
      * @return A new `Expr` representing the greater than or equal to comparison.
      */
-    export function gte(fieldName: string, value: unknown): BooleanExpr;
+    export function gte(fieldName: string, value: unknown): BooleanExpression;
     /**
      * Creates an expression that checks if an array expression contains a specific element.
      *
@@ -5937,7 +5937,7 @@ declare namespace FirebaseFirestore {
     export function arrayContains(
       fieldName: string,
       element: unknown
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if an array expression contains any of the specified
      * elements.
@@ -5954,7 +5954,7 @@ declare namespace FirebaseFirestore {
     export function arrayContainsAny(
       array: Expr,
       values: Array<Expr | unknown>
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a field's array value contains any of the specified
      * elements.
@@ -5972,7 +5972,7 @@ declare namespace FirebaseFirestore {
     export function arrayContainsAny(
       fieldName: string,
       values: Array<Expr | unknown>
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if an array expression contains any of the specified
      * elements.
@@ -5986,7 +5986,7 @@ declare namespace FirebaseFirestore {
      * @param values An expression that evaluates to an array, whose elements to check for in the array.
      * @return A new {@code Expr} representing the 'array_contains_any' comparison.
      */
-    export function arrayContainsAny(array: Expr, values: Expr): BooleanExpr;
+    export function arrayContainsAny(array: Expr, values: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a field's array value contains any of the specified
      * elements.
@@ -6004,7 +6004,7 @@ declare namespace FirebaseFirestore {
     export function arrayContainsAny(
       fieldName: string,
       values: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if an array expression contains all the specified elements.
      *
@@ -6020,7 +6020,7 @@ declare namespace FirebaseFirestore {
     export function arrayContainsAll(
       array: Expr,
       values: Array<Expr | unknown>
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a field's array value contains all the specified values or
      * expressions.
@@ -6037,7 +6037,7 @@ declare namespace FirebaseFirestore {
     export function arrayContainsAll(
       fieldName: string,
       values: Array<Expr | unknown>
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if an array expression contains all the specified elements.
      *
@@ -6055,12 +6055,12 @@ declare namespace FirebaseFirestore {
      *
      * @param array An expression evaluating to the array to check.
      * @param arrayExpression An expression evaluating to an array of elements to check for.
-     * @return A new {@code BooleanExpr} representing the 'array_contains_all' comparison.
+     * @return A new {@code BooleanExpression} representing the 'array_contains_all' comparison.
      */
     export function arrayContainsAll(
       array: Expr,
       arrayExpression: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's array value contains all the elements specified by another expression.
@@ -6072,12 +6072,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the array field to check.
      * @param arrayExpression An expression that evaluates to an array of values to check for.
-     * @return A new {@code BooleanExpr} representing the 'array_contains_all' comparison.
+     * @return A new {@code BooleanExpression} representing the 'array_contains_all' comparison.
      */
     export function arrayContainsAll(
       fieldName: string,
       arrayExpression: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that calculates the length of an array in a specified field.
      *
@@ -6118,7 +6118,7 @@ declare namespace FirebaseFirestore {
     export function eqAny(
       expression: Expr,
       values: Array<Expr | unknown>
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is equal to any of the provided values.
      *
@@ -6131,7 +6131,7 @@ declare namespace FirebaseFirestore {
      * @param arrayExpression An expression that evaluates to an array, whose elements to check for equality to the input.
      * @return A new {@code Expr} representing the 'IN' comparison.
      */
-    export function eqAny(expression: Expr, arrayExpression: Expr): BooleanExpr;
+    export function eqAny(expression: Expr, arrayExpression: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is equal to any of the provided values or
      * expressions.
@@ -6148,7 +6148,7 @@ declare namespace FirebaseFirestore {
     export function eqAny(
       fieldName: string,
       values: Array<Expr | unknown>
-    ): BooleanExpr;
+    ): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value is equal to any of the elements
@@ -6163,12 +6163,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field to compare.
      * @param arrayExpression An expression that evaluates to an array. The function checks if the value of `fieldName` is equal to any element within this array.
-     * @return A new {@code BooleanExpr} representing the 'IN' comparison.
+     * @return A new {@code BooleanExpression} representing the 'IN' comparison.
      */
     export function eqAny(
       fieldName: string,
       arrayExpression: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if an expression is not equal to any of the provided values
      * or expressions.
@@ -6185,7 +6185,7 @@ declare namespace FirebaseFirestore {
     export function notEqAny(
       element: Expr,
       values: Array<Expr | unknown>
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is not equal to any of the provided values
      * or expressions.
@@ -6202,7 +6202,7 @@ declare namespace FirebaseFirestore {
     export function notEqAny(
       fieldName: string,
       values: Array<Expr | unknown>
-    ): BooleanExpr;
+    ): BooleanExpression;
 
     /**
      * Creates an expression that checks if a given element expression is not equal to any of the values
@@ -6215,9 +6215,9 @@ declare namespace FirebaseFirestore {
      *
      * @param element The expression representing the value to check.
      * @param arrayExpression An expression that evaluates to an array of values to check against.
-     * @return A new {@code BooleanExpr} representing the 'NOT IN' comparison.
+     * @return A new {@code BooleanExpression} representing the 'NOT IN' comparison.
      */
-    export function notEqAny(element: Expr, arrayExpression: Expr): BooleanExpr;
+    export function notEqAny(element: Expr, arrayExpression: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is not equal to any of the values in the evaluated expression.
      *
@@ -6233,7 +6233,7 @@ declare namespace FirebaseFirestore {
     export function notEqAny(
       fieldName: string,
       arrayExpression: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
 
     /**
      * Creates an expression that performs a logical 'XOR' (exclusive OR) operation on two or more Boolean expressions.
@@ -6252,13 +6252,13 @@ declare namespace FirebaseFirestore {
      * @param first The first Boolean expression.
      * @param second The second Boolean expression.
      * @param additionalConditions Optional: Additional Boolean expressions to include in the XOR operation.
-     * @returns A new {@link BooleanExpr} representing the logical 'XOR' operation.
+     * @returns A new {@link BooleanExpression} representing the logical 'XOR' operation.
      */
     export function xor(
-      first: BooleanExpr,
-      second: BooleanExpr,
-      ...additionalConditions: BooleanExpr[]
-    ): BooleanExpr;
+      first: BooleanExpression,
+      second: BooleanExpression,
+      ...additionalConditions: BooleanExpression[]
+    ): BooleanExpression;
     /**
      * Creates a conditional expression that evaluates to a 'then' expression if a condition is true
      * and an 'else' expression if the condition is false.
@@ -6275,7 +6275,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expr} representing the conditional expression.
      */
     export function cond(
-      condition: BooleanExpr,
+      condition: BooleanExpression,
       thenExpr: Expr,
       elseExpr: Expr
     ): FunctionExpr;
@@ -6290,7 +6290,7 @@ declare namespace FirebaseFirestore {
      * @param booleanExpr The filter condition to negate.
      * @return A new {@code Expr} representing the negated filter condition.
      */
-    export function not(booleanExpr: BooleanExpr): BooleanExpr;
+    export function not(booleanExpr: BooleanExpression): BooleanExpression;
     /**
      * Creates an expression that returns the largest value between multiple input
      * expressions or literal values. Based on Firestore's value type ordering.
@@ -6382,9 +6382,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value An expression representing the field to check for existence.
-     * @return A new {@code BooleanExpr} representing the 'exists' check.
+     * @return A new {@code BooleanExpression} representing the 'exists' check.
      */
-    export function exists(value: Expr): BooleanExpr;
+    export function exists(value: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a field exists.
      *
@@ -6396,7 +6396,7 @@ declare namespace FirebaseFirestore {
      * @param fieldName The field name to check.
      * @return A new {@code Expr} representing the 'exists' check.
      */
-    export function exists(fieldName: string): BooleanExpr;
+    export function exists(fieldName: string): BooleanExpression;
 
     /**
      * Creates an expression that checks if an expression evaluates to 'NaN' (Not a Number).
@@ -6409,7 +6409,7 @@ declare namespace FirebaseFirestore {
      * @param value The expression to check.
      * @return A new {@code Expr} representing the 'isNaN' check.
      */
-    export function isNan(value: Expr): BooleanExpr;
+    export function isNan(value: Expr): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value evaluates to 'NaN' (Not a Number).
@@ -6420,9 +6420,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field to check.
-     * @return A new {@code BooleanExpr} representing the 'isNan' check.
+     * @return A new {@code BooleanExpression} representing the 'isNan' check.
      */
-    export function isNan(fieldName: string): BooleanExpr;
+    export function isNan(fieldName: string): BooleanExpression;
     /**
      * Creates an expression that reverses a string.
      *
@@ -6600,7 +6600,7 @@ declare namespace FirebaseFirestore {
      * @param pattern The pattern to search for. You can use "%" as a wildcard character.
      * @return A new {@code Expr} representing the 'like' comparison.
      */
-    export function like(fieldName: string, pattern: string): BooleanExpr;
+    export function like(fieldName: string, pattern: string): BooleanExpression;
     /**
      * Creates an expression that performs a case-sensitive wildcard string comparison against a
      * field.
@@ -6614,7 +6614,7 @@ declare namespace FirebaseFirestore {
      * @param pattern The pattern to search for. You can use "%" as a wildcard character.
      * @return A new {@code Expr} representing the 'like' comparison.
      */
-    export function like(fieldName: string, pattern: Expr): BooleanExpr;
+    export function like(fieldName: string, pattern: Expr): BooleanExpression;
 
     /**
      * Creates an expression that performs a case-sensitive wildcard string comparison.
@@ -6626,9 +6626,9 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The expression representing the string to perform the comparison on.
      * @param pattern The pattern to search for. You can use "%" as a wildcard character.
-     * @return A new {@code BooleanExpr} representing the 'like' comparison.
+     * @return A new {@code BooleanExpression} representing the 'like' comparison.
      */
-    export function like(stringExpression: Expr, pattern: string): BooleanExpr;
+    export function like(stringExpression: Expr, pattern: string): BooleanExpression;
     /**
      * Creates an expression that performs a case-sensitive wildcard string comparison.
      *
@@ -6641,7 +6641,7 @@ declare namespace FirebaseFirestore {
      * @param pattern The pattern to search for. You can use "%" as a wildcard character.
      * @return A new {@code Expr} representing the 'like' comparison.
      */
-    export function like(stringExpression: Expr, pattern: Expr): BooleanExpr;
+    export function like(stringExpression: Expr, pattern: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a string field contains a specified regular expression as
      * a substring.
@@ -6658,7 +6658,7 @@ declare namespace FirebaseFirestore {
     export function regexContains(
       fieldName: string,
       pattern: string
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a string field contains a specified regular expression as
      * a substring.
@@ -6675,7 +6675,7 @@ declare namespace FirebaseFirestore {
     export function regexContains(
       fieldName: string,
       pattern: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
 
     /**
      * Creates an expression that checks if a string expression contains a specified regular
@@ -6688,12 +6688,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The expression representing the string to perform the regex comparison on.
      * @param pattern The regular expression string to search for within the `stringExpression`.
-     * @return A new {@code BooleanExpr} representing the result of the regex contains comparison.
+     * @return A new {@code BooleanExpression} representing the result of the regex contains comparison.
      */
     export function regexContains(
       stringExpression: Expr,
       pattern: string
-    ): BooleanExpr;
+    ): BooleanExpression;
 
     /**
      * Creates an expression that checks if a string expression contains a specified regular
@@ -6709,12 +6709,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The expression representing the string to perform the comparison on.
      * @param pattern The regular expression to use for the search.
-     * @return A new {@code BooleanExpr} representing the 'contains' comparison.
+     * @return A new {@code BooleanExpression} representing the 'contains' comparison.
      */
     export function regexContains(
       stringExpression: Expr,
       pattern: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a string field matches a specified regular expression.
      *
@@ -6727,7 +6727,7 @@ declare namespace FirebaseFirestore {
      * @param pattern The regular expression to use for the match.
      * @return A new {@code Expr} representing the regular expression match.
      */
-    export function regexMatch(fieldName: string, pattern: string): BooleanExpr;
+    export function regexMatch(fieldName: string, pattern: string): BooleanExpression;
 
     /**
      * Creates an expression that checks if a string field matches a specified regular expression.
@@ -6742,9 +6742,9 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field containing the string value to be matched.
      * @param pattern An {@link Expr} that evaluates to the regular expression string to use for the match.
-     * @return A new {@link BooleanExpr} representing the result of the regular expression match.
+     * @return A new {@link BooleanExpression} representing the result of the regular expression match.
      */
-    export function regexMatch(fieldName: string, pattern: Expr): BooleanExpr;
+    export function regexMatch(fieldName: string, pattern: Expr): BooleanExpression;
 
     /**
      * Creates an expression that checks if a string expression matches a specified regular
@@ -6757,12 +6757,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression An expression that evaluates to the string to match against.
      * @param pattern The regular expression to use for the match.
-     * @return A new {@link BooleanExpr} representing the result of the regular expression match.
+     * @return A new {@link BooleanExpression} representing the result of the regular expression match.
      */
     export function regexMatch(
       stringExpression: Expr,
       pattern: string
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a string expression matches a specified regular
      * expression.
@@ -6779,7 +6779,7 @@ declare namespace FirebaseFirestore {
     export function regexMatch(
       stringExpression: Expr,
       pattern: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a string field contains a specified substring.
      *
@@ -6795,7 +6795,7 @@ declare namespace FirebaseFirestore {
     export function strContains(
       fieldName: string,
       substring: string
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a string field contains a substring specified by an expression.
      *
@@ -6811,7 +6811,7 @@ declare namespace FirebaseFirestore {
     export function strContains(
       fieldName: string,
       substring: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a string expression contains a specified substring.
      *
@@ -6827,7 +6827,7 @@ declare namespace FirebaseFirestore {
     export function strContains(
       stringExpression: Expr,
       substring: string
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a string expression contains a substring specified by another expression.
      *
@@ -6843,7 +6843,7 @@ declare namespace FirebaseFirestore {
     export function strContains(
       stringExpression: Expr,
       substring: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value starts with a given prefix.
      *
@@ -6856,7 +6856,7 @@ declare namespace FirebaseFirestore {
      * @param prefix The prefix to check for.
      * @return A new {@code Expr} representing the 'starts with' comparison.
      */
-    export function startsWith(fieldName: string, prefix: string): BooleanExpr;
+    export function startsWith(fieldName: string, prefix: string): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value starts with a given prefix.
      *
@@ -6869,7 +6869,7 @@ declare namespace FirebaseFirestore {
      * @param prefix The expression representing the prefix.
      * @return A new {@code Expr} representing the 'starts with' comparison.
      */
-    export function startsWith(fieldName: string, prefix: Expr): BooleanExpr;
+    export function startsWith(fieldName: string, prefix: Expr): BooleanExpression;
 
     /**
      * Creates an expression that checks if a string value, represented by an expression, starts with a given prefix.
@@ -6881,12 +6881,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression An expression that evaluates to a string, which will be checked for the prefix.
      * @param prefix The string prefix to check for.
-     * @return A new {@code BooleanExpr} representing the 'starts with' comparison.
+     * @return A new {@code BooleanExpression} representing the 'starts with' comparison.
      */
     export function startsWith(
       stringExpression: Expr,
       prefix: string
-    ): BooleanExpr;
+    ): BooleanExpression;
 
     /**
      * Creates an expression that checks if a string expression starts with a given prefix expression.
@@ -6898,12 +6898,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The string expression to check.
      * @param prefix The prefix expression to check for.
-     * @return A new {@code BooleanExpr} representing the 'starts with' comparison.
+     * @return A new {@code BooleanExpression} representing the 'starts with' comparison.
      */
     export function startsWith(
       stringExpression: Expr,
       prefix: Expr
-    ): BooleanExpr;
+    ): BooleanExpression;
 
     /**
      * Creates an expression that checks if a field's value ends with a given suffix.
@@ -6915,9 +6915,9 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to check.
      * @param suffix The suffix to check for.
-     * @return A new {@link BooleanExpr} representing the 'ends with' comparison.
+     * @return A new {@link BooleanExpression} representing the 'ends with' comparison.
      */
-    export function endsWith(fieldName: string, suffix: string): BooleanExpr;
+    export function endsWith(fieldName: string, suffix: string): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value ends with a given postfix.
      *
@@ -6930,7 +6930,7 @@ declare namespace FirebaseFirestore {
      * @param suffix The expression representing the postfix.
      * @return A new {@code Expr} representing the 'ends with' comparison.
      */
-    export function endsWith(fieldName: string, suffix: Expr): BooleanExpr;
+    export function endsWith(fieldName: string, suffix: Expr): BooleanExpression;
     /**
      * Creates an expression that checks if a string expression ends with a given postfix.
      *
@@ -6946,7 +6946,7 @@ declare namespace FirebaseFirestore {
     export function endsWith(
       stringExpression: Expr,
       suffix: string
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * Creates an expression that checks if a string expression ends with a given postfix.
      *
@@ -6959,7 +6959,7 @@ declare namespace FirebaseFirestore {
      * @param suffix The postfix to check for.
      * @return A new {@code Expr} representing the 'ends with' comparison.
      */
-    export function endsWith(stringExpression: Expr, suffix: Expr): BooleanExpr;
+    export function endsWith(stringExpression: Expr, suffix: Expr): BooleanExpression;
 
     /**
      * Creates an expression that converts a string field to lowercase.
@@ -7764,10 +7764,10 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expr} representing the logical 'AND' operation.
      */
     export function and(
-      first: BooleanExpr,
-      second: BooleanExpr,
-      ...more: BooleanExpr[]
-    ): BooleanExpr;
+      first: BooleanExpression,
+      second: BooleanExpression,
+      ...more: BooleanExpression[]
+    ): BooleanExpression;
     /**
      * Creates an expression that performs a logical 'OR' operation on multiple filter conditions.
      *
@@ -7783,10 +7783,10 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expr} representing the logical 'OR' operation.
      */
     export function or(
-      first: BooleanExpr,
-      second: BooleanExpr,
-      ...more: BooleanExpr[]
-    ): BooleanExpr;
+      first: BooleanExpression,
+      second: BooleanExpression,
+      ...more: BooleanExpression[]
+    ): BooleanExpression;
     /**
      * Creates an expression that returns the value of the base expression raised to the power of the exponent expression.
      *
@@ -8412,11 +8412,11 @@ declare namespace FirebaseFirestore {
       select(options: SelectStageOptions): Pipeline;
       /**
        * Filters the documents from previous stages to only include those matching the specified {@link
-       * BooleanExpr}.
+       * BooleanExpression}.
        *
        * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
        * You can filter documents based on their field values, using implementations of {@link
-       * BooleanExpr}, typically including but not limited to:
+       * BooleanExpression}, typically including but not limited to:
        *
        * <ul>
        *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
@@ -8438,17 +8438,17 @@ declare namespace FirebaseFirestore {
        *   );
        * ```
        *
-       * @param condition The {@link BooleanExpr} to apply.
+       * @param condition The {@link BooleanExpression} to apply.
        * @return A new Pipeline object with this stage appended to the stage list.
        */
-      where(condition: BooleanExpr): Pipeline;
+      where(condition: BooleanExpression): Pipeline;
       /**
        * Filters the documents from previous stages to only include those matching the specified {@link
-       * BooleanExpr}.
+       * BooleanExpression}.
        *
        * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
        * You can filter documents based on their field values, using implementations of {@link
-       * BooleanExpr}, typically including but not limited to:
+       * BooleanExpression}, typically including but not limited to:
        *
        * <ul>
        *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
@@ -8470,7 +8470,7 @@ declare namespace FirebaseFirestore {
        *   });
        * ```
        *
-       * @param options An object that specifies the filtering criteria. It is expected to contain a `filter` property of type {@link BooleanExpr}.
+       * @param options An object that specifies the filtering criteria. It is expected to contain a `filter` property of type {@link BooleanExpression}.
        * @return A new Pipeline object with this stage appended to the stage list.
        */
       where(options: WhereStageOptions): Pipeline;
@@ -9287,9 +9287,9 @@ declare namespace FirebaseFirestore {
      */
     export type WhereStageOptions = StageOptions & {
       /**
-       * The {@link BooleanExpr} to apply as a filter for each input document to this stage.
+       * The {@link BooleanExpression} to apply as a filter for each input document to this stage.
        */
-      condition: BooleanExpr;
+      condition: BooleanExpression;
     };
     /**
      * Options defining how an OffsetStage is evaluated. See {@link Pipeline.offset}.

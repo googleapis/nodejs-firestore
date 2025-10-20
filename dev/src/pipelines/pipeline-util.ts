@@ -51,7 +51,7 @@ import api = protos.google.firestore.v1;
 
 import {
   Expr,
-  BooleanExpr,
+  BooleanExpression,
   and,
   or,
   field as createField,
@@ -440,7 +440,7 @@ export function whereConditionsFromCursor(
   cursor: QueryCursor,
   orderings: Ordering[],
   position: 'before' | 'after'
-): BooleanExpr {
+): BooleanExpression {
   // The filterFunc is either greater than or less than
   const filterFunc = position === 'before' ? lt : gt;
   const cursors = cursor.values.map(value => Constant._fromProto(value));
@@ -450,14 +450,14 @@ export function whereConditionsFromCursor(
   let value = cursors[size - 1];
 
   // Add condition for last bound
-  let condition: BooleanExpr = filterFunc(field, value);
+  let condition: BooleanExpression = filterFunc(field, value);
   if (
     (position === 'after' && cursor.before) ||
     (position === 'before' && !cursor.before)
   ) {
     // When the cursor bound is inclusive, then the last bound
     // can be equal to the value, otherwise it's not equal
-    condition = or(condition, field.eq(value) as unknown as BooleanExpr);
+    condition = or(condition, field.eq(value) as unknown as BooleanExpression);
   }
 
   // Iterate backwards over the remaining bounds, adding
@@ -471,7 +471,7 @@ export function whereConditionsFromCursor(
     // b) or equal the cursor value and lt|gt the cursor values for other fields
     condition = or(
       filterFunc(field, value),
-      and(field.eq(value) as unknown as BooleanExpr, condition)
+      and(field.eq(value) as unknown as BooleanExpression, condition)
     );
   }
 
@@ -491,7 +491,7 @@ export function reverseOrderings(orderings: Ordering[]): Ordering[] {
 export function toPipelineBooleanExpr(
   f: FilterInternal,
   serializer: Serializer
-): BooleanExpr {
+): BooleanExpression {
   if (f instanceof FieldFilterInternal) {
     const field = createField(f.field);
     if (f.isNanChecking()) {
@@ -604,8 +604,8 @@ export function isExpr(val: unknown): val is firestore.Pipelines.Expr {
 
 export function isBooleanExpr(
   val: unknown
-): val is firestore.Pipelines.BooleanExpr {
-  return val instanceof BooleanExpr;
+): val is firestore.Pipelines.BooleanExpression {
+  return val instanceof BooleanExpression;
 }
 
 export function isField(val: unknown): val is firestore.Pipelines.Field {
