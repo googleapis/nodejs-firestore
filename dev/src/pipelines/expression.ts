@@ -724,27 +724,27 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * ```typescript
    * // Check if the 'description' field contains "example".
-   * field("description").strContains("example");
+   * field("description").stringContains("example");
    * ```
    *
    * @param substring The substring to search for.
    * @return A new `Expression` representing the 'contains' comparison.
    */
-  strContains(substring: string): BooleanExpression;
+  stringContains(substring: string): BooleanExpression;
 
   /**
    * Creates an expression that checks if a string contains the string represented by another expression.
    *
    * ```typescript
    * // Check if the 'description' field contains the value of the 'keyword' field.
-   * field("description").strContains(field("keyword"));
+   * field("description").stringContains(field("keyword"));
    * ```
    *
    * @param expr The expression representing the substring to search for.
    * @return A new `Expression` representing the 'contains' comparison.
    */
-  strContains(expr: Expression): BooleanExpression;
-  strContains(stringOrExpr: string | Expression): BooleanExpression {
+  stringContains(expr: Expression): BooleanExpression;
+  stringContains(stringOrExpr: string | Expression): BooleanExpression {
     return new BooleanExpression('str_contains', [
       this,
       valueToDefaultExpr(stringOrExpr),
@@ -4622,42 +4622,42 @@ export function regexMatch(
  *
  * ```typescript
  * // Check if the 'description' field contains "example".
- * strContains("description", "example");
+ * stringContains("description", "example");
  * ```
  *
  * @param fieldName The name of the field containing the string.
  * @param substring The substring to search for.
  * @return A new {@code Expression} representing the 'contains' comparison.
  */
-export function strContains(fieldName: string, substring: string): BooleanExpression;
+export function stringContains(fieldName: string, substring: string): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string field contains a substring specified by an expression.
  *
  * ```typescript
  * // Check if the 'description' field contains the value of the 'keyword' field.
- * strContains("description", field("keyword"));
+ * stringContains("description", field("keyword"));
  * ```
  *
  * @param fieldName The name of the field containing the string.
  * @param substring The expression representing the substring to search for.
  * @return A new {@code Expression} representing the 'contains' comparison.
  */
-export function strContains(fieldName: string, substring: Expression): BooleanExpression;
+export function stringContains(fieldName: string, substring: Expression): BooleanExpression;
 
 /**
  * Creates an expression that checks if a string expression contains a specified substring.
  *
  * ```typescript
  * // Check if the 'description' field contains "example".
- * strContains(field("description"), "example");
+ * stringContains(field("description"), "example");
  * ```
  *
  * @param stringExpression The expression representing the string to perform the comparison on.
  * @param substring The substring to search for.
  * @return A new {@code Expression} representing the 'contains' comparison.
  */
-export function strContains(
+export function stringContains(
   stringExpression: Expression,
   substring: string
 ): BooleanExpression;
@@ -4667,24 +4667,24 @@ export function strContains(
  *
  * ```typescript
  * // Check if the 'description' field contains the value of the 'keyword' field.
- * strContains(field("description"), field("keyword"));
+ * stringContains(field("description"), field("keyword"));
  * ```
  *
  * @param stringExpression The expression representing the string to perform the comparison on.
  * @param substring The expression representing the substring to search for.
  * @return A new {@code Expression} representing the 'contains' comparison.
  */
-export function strContains(
+export function stringContains(
   stringExpression: Expression,
   substring: Expression
 ): BooleanExpression;
-export function strContains(
+export function stringContains(
   left: Expression | string,
   substring: Expression | string
 ): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const substringExpr = valueToDefaultExpr(substring);
-  return leftExpr.strContains(substringExpr);
+  return leftExpr.stringContains(substringExpr);
 }
 
 /**

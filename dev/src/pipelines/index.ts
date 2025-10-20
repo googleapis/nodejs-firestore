@@ -63,7 +63,7 @@ export {
   count,
   countIf,
   arrayLength,
-  strContains,
+  stringContains,
   charLength,
   divide,
   mod,

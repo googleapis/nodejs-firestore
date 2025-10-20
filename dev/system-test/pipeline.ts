@@ -46,7 +46,7 @@ import {
   count,
   countIf,
   arrayLength,
-  strContains,
+  stringContains,
   charLength,
   divide,
   mod,
@@ -2535,7 +2535,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(strContains('title', "'s"))
+        .where(stringContains('title', "'s"))
         .select('title')
         .sort(field('title').ascending())
         .execute();

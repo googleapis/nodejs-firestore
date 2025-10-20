@@ -9,7 +9,7 @@ lessThanOrEqual,lessThanOrEqual
 notEqual,notEqual
 notEqualAny,notEqualAny
 stringConcat,stringConcat
-strContains,stringContains
+stringContains,stringContains
 strReverse,stringReverse
 AliasedExpr,AliasedExpression
 FunctionExpr,FunctionExpression
