@@ -4531,8 +4531,14 @@ declare namespace FirebaseFirestore {
      */
     export interface Selectable {
       selectable: true;
-      readonly alias: string;
-      readonly expr: Expression;
+      /**
+       * @internal
+       */
+      readonly _alias: string;
+      /**
+       * @internal
+       */
+      readonly _expr: Expression;
     }
 
     /**
@@ -4597,7 +4603,8 @@ declare namespace FirebaseFirestore {
      */
     export class AliasedExpression implements Selectable {
       /**
-       * @internal Specifies that the instance is an AliasedExpression.
+       * @internal
+       * Specifies that the instance is an AliasedExpression.
        */
       expressionType: ExpressionType;
 
@@ -4608,14 +4615,16 @@ declare namespace FirebaseFirestore {
       selectable: true;
 
       /**
+       * @internal
        * The underlying expression that is being aliased.
        */
-      readonly expr: Expression;
+      readonly _expr: Expression;
 
       /**
+       * @internal
        * Specifies the name of the property that will contain the aggregate result in the output document.
        */
-      readonly alias: string;
+      readonly _alias: string;
     }
 
     /**
@@ -4643,25 +4652,27 @@ declare namespace FirebaseFirestore {
        *
        * @example
        * ```typescript
-       * const name = field("price").fieldName();
+       * const name = field("price").fieldName;
        * console.log(name); // "price"
        * ```
        *
        * @returns The name of the field.
        */
-      fieldName(): string;
+      get fieldName(): string;
       /**
+       * @internal
        * Returns the alias of the field, which is the field-name itself.
        *
        * @returns The field name itself.
        */
-      get alias(): string;
+      get _alias(): string;
       /**
+       * @internal
        * Self-referential getter that returns this.
        *
        * @returns This {@link Field} object.
        */
-      get expr(): Expression;
+      get _expr(): Expression;
     }
     /**
      * Creates a {@code Field} instance representing the field at the given path.

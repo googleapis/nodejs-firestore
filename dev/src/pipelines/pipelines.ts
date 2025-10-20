@@ -1634,7 +1634,7 @@ function selectablesToMap(
         new Field(FieldPath.fromArgument(selectable))
       );
     } else if (selectable instanceof Field) {
-      result.set((selectable as Field).fieldName(), selectable);
+      result.set((selectable as Field).fieldName, selectable);
     } else if (selectable instanceof AliasedExpression) {
       const expr = selectable as AliasedExpression;
       result.set(expr._alias, expr._expr as unknown as Expression);

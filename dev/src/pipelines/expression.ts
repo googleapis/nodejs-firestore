@@ -1958,12 +1958,12 @@ export class Field extends Expression implements firestore.Pipelines.Selectable 
     super();
   }
 
-  fieldName(): string {
+  get fieldName(): string {
     return this.fieldPath.formattedName;
   }
 
   get _alias(): string {
-    return this.fieldName();
+    return this.fieldName;
   }
 
   get _expr(): Expression {
