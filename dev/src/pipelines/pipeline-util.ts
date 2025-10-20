@@ -528,7 +528,7 @@ export function toPipelineBooleanExpr(
           return and(field.exists(), field.arrayContains(value));
         case 'IN': {
           const values = value?.arrayValue?.values?.map(val => constant(val));
-          return and(field.exists(), field.eqAny(values!));
+          return and(field.exists(), field.equalAny(values!));
         }
         case 'ARRAY_CONTAINS_ANY': {
           const values = value?.arrayValue?.values?.map(val => constant(val));

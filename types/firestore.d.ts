@@ -3504,26 +3504,26 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'category' field is either "Electronics" or the value of field 'primaryType'
-       * field("category").eqAny(["Electronics", field("primaryType")]);
+       * field("category").equalAny(["Electronics", field("primaryType")]);
        * ```
        *
        * @param values An array of values or expressions to check against.
        * @return A new `BooleanExpression` representing the 'IN' comparison.
        */
-      eqAny(values: Array<Expression | unknown>): BooleanExpression;
+      equalAny(values: Array<Expression | unknown>): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is equal to any of the provided values or
        * expressions.
        *
        * ```typescript
        * // Check if the 'category' field is either "Electronics" or the value of field 'primaryType'
-       * field("category").eqAny(array(["Electronics", field("primaryType")]));
+       * field("category").equalAny(array(["Electronics", field("primaryType")]));
        * ```
        *
        * @param arrayExpression An expression that evaluates to an array of values to check against.
        * @return A new `Expression` representing the 'IN' comparison.
        */
-      eqAny(arrayExpression: Expression): BooleanExpression;
+      equalAny(arrayExpression: Expression): BooleanExpression;
       /**
        * Creates an expression that checks if this expression is not equal to any of the provided values or
        * expressions.
@@ -6108,14 +6108,14 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-     * eqAny(field("category"), [constant("Electronics"), field("primaryType")]);
+     * equalAny(field("category"), [constant("Electronics"), field("primaryType")]);
      * ```
      *
      * @param expression The expression whose results to compare.
      * @param values The values to check against.
      * @return A new {@code Expression} representing the 'IN' comparison.
      */
-    export function eqAny(
+    export function equalAny(
       expression: Expression,
       values: Array<Expression | unknown>
     ): BooleanExpression;
@@ -6124,28 +6124,28 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'category' field is set to a value in the disabledCategories field
-     * eqAny(field("category"), field('disabledCategories'));
+     * equalAny(field("category"), field('disabledCategories'));
      * ```
      *
      * @param expression The expression whose results to compare.
      * @param arrayExpression An expression that evaluates to an array, whose elements to check for equality to the input.
      * @return A new {@code Expression} representing the 'IN' comparison.
      */
-    export function eqAny(expression: Expression, arrayExpression: Expression): BooleanExpression;
+    export function equalAny(expression: Expression, arrayExpression: Expression): BooleanExpression;
     /**
      * Creates an expression that checks if a field's value is equal to any of the provided values or
      * expressions.
      *
      * ```typescript
      * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-     * eqAny("category", [constant("Electronics"), field("primaryType")]);
+     * equalAny("category", [constant("Electronics"), field("primaryType")]);
      * ```
      *
      * @param fieldName The field to compare.
      * @param values The values to check against.
      * @return A new {@code Expression} representing the 'IN' comparison.
      */
-    export function eqAny(
+    export function equalAny(
       fieldName: string,
       values: Array<Expression | unknown>
     ): BooleanExpression;
@@ -6158,14 +6158,14 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'category' field's value is present in the 'allowedCategories' array field.
-     * eqAny("category", field("allowedCategories"));
+     * equalAny("category", field("allowedCategories"));
      * ```
      *
      * @param fieldName The name of the field to compare.
      * @param arrayExpression An expression that evaluates to an array. The function checks if the value of `fieldName` is equal to any element within this array.
      * @return A new {@code BooleanExpression} representing the 'IN' comparison.
      */
-    export function eqAny(
+    export function equalAny(
       fieldName: string,
       arrayExpression: Expression
     ): BooleanExpression;

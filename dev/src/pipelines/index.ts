@@ -47,7 +47,7 @@ export {
   euclideanDistance,
   mapGet,
   lte,
-  eqAny,
+  equalAny,
   map,
   array,
   field,

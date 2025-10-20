@@ -96,7 +96,7 @@ import {
   euclideanDistance,
   mapGet,
   lte,
-  eqAny,
+  equalAny,
   notEqAny,
   logicalMinimum,
   logicalMaximum,
@@ -1503,7 +1503,7 @@ describe('Pipeline class', () => {
           .where(
             and(
               gt('rating', 4.5),
-              eqAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
+              equalAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
             )
           )
           .execute();
@@ -1517,7 +1517,7 @@ describe('Pipeline class', () => {
           .where(
             and(
               gt('rating', 4.5),
-              eqAny('genre', ['Science Fiction', 'Romance', 'Fantasy']),
+              equalAny('genre', ['Science Fiction', 'Romance', 'Fantasy']),
               lt('published', 1965)
             )
           )
@@ -1577,7 +1577,7 @@ describe('Pipeline class', () => {
           .where({
             condition: and(
               gt('rating', 4.5),
-              eqAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
+              equalAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
             ),
           })
           .execute();
@@ -2409,11 +2409,11 @@ describe('Pipeline class', () => {
       );
     });
 
-    it('eqAny works', async () => {
+    it('equalAny works', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(eqAny('published', [1979, 1999, 1967]))
+        .where(equalAny('published', [1979, 1999, 1967]))
         .sort(descending('title'))
         .select('title')
         .execute();
