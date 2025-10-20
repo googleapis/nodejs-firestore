@@ -95,7 +95,7 @@ export {
   Ordering,
   AliasedAggregate,
   endsWith,
-  AliasedExpr,
+  AliasedExpression,
   mapMerge,
   mapRemove,
   byteLength,

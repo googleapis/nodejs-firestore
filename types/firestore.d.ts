@@ -3138,7 +3138,7 @@ declare namespace FirebaseFirestore {
       | 'Function'
       | 'AggregateFunction'
       | 'ListOfExprs'
-      | 'AliasedExpr';
+      | 'AliasedExpression';
     /**
      * Represents an expression that can be evaluated to a value within the execution of a {@link
      * Pipeline}.
@@ -4545,10 +4545,10 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param name The alias to assign to this expression.
-       * @return A new {@link AliasedExpr} that wraps this
+       * @return A new {@link AliasedExpression} that wraps this
        *     expression and associates it with the provided alias.
        */
-      as(name: string): AliasedExpr;
+      as(name: string): AliasedExpression;
     }
     /**
      * An interface that represents a selectable expression.
@@ -4617,9 +4617,9 @@ declare namespace FirebaseFirestore {
      * allowing the expression's result to be referred to by name in the output
      * of a Firestore pipeline query.
      */
-    export class AliasedExpr implements Selectable {
+    export class AliasedExpression implements Selectable {
       /**
-       * @internal Specifies that the instance is an AliasedExpr.
+       * @internal Specifies that the instance is an AliasedExpression.
        */
       exprType: ExprType;
 
@@ -8580,7 +8580,7 @@ declare namespace FirebaseFirestore {
        *
        * - {@code string}: Name of an existing field
        * - {@link Field}: References an existing document field.
-       * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
+       * - {@link AliasedExpression}: Represents the result of a function with an assigned alias name
        *   using {@link Expression#as}.
        *
        * Example:
@@ -8612,7 +8612,7 @@ declare namespace FirebaseFirestore {
        *
        * - {@code string}: Name of an existing field
        * - {@link Field}: References an existing document field.
-       * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
+       * - {@link AliasedExpression}: Represents the result of a function with an assigned alias name
        *   using {@link Expression#as}.
        *
        * Example:

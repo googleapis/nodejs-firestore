@@ -11,6 +11,6 @@ notEqualAny,notEqualAny
 stringConcat,stringConcat
 stringContains,stringContains
 stringReverse,stringReverse
-AliasedExpr,AliasedExpression
+AliasedExpression,AliasedExpression
 FunctionExpr,FunctionExpression
 cond,conditional

@@ -1796,11 +1796,11 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    * ```
    *
    * @param name The alias to assign to this expression.
-   * @return A new {@link AliasedExpr} that wraps this
+   * @return A new {@link AliasedExpression} that wraps this
    *     expression and associates it with the provided alias.
    */
-  as(name: string): AliasedExpr {
-    return new AliasedExpr(this, name);
+  as(name: string): AliasedExpression {
+    return new AliasedExpression(this, name);
   }
 }
 
@@ -1896,10 +1896,10 @@ export class AliasedAggregate implements AliasedAggregate, HasUserData {
 /**
  * TODO
  */
-export class AliasedExpr
+export class AliasedExpression
   implements firestore.Pipelines.Selectable, HasUserData
 {
-  exprType: firestore.Pipelines.ExprType = 'AliasedExpr';
+  exprType: firestore.Pipelines.ExprType = 'AliasedExpression';
   selectable = true as const;
 
   /**

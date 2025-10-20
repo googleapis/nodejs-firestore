@@ -51,7 +51,7 @@ import {
   AggregateFunction,
   AliasedAggregate,
   Expression,
-  AliasedExpr,
+  AliasedExpression,
   Field,
   BooleanExpression,
   Ordering,
@@ -805,7 +805,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * - {@code string}: Name of an existing field
    * - {@link Field}: References an existing document field.
-   * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
+   * - {@link AliasedExpression}: Represents the result of a function with an assigned alias name
    *   using {@link Expression#as}.
    *
    * Example:
@@ -837,7 +837,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * - {@code string}: Name of an existing field
    * - {@link Field}: References an existing document field.
-   * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
+   * - {@link AliasedExpression}: Represents the result of a function with an assigned alias name
    *   using {@link Expression#as}.
    *
    * Example:
@@ -1635,8 +1635,8 @@ function selectablesToMap(
       );
     } else if (selectable instanceof Field) {
       result.set((selectable as Field).fieldName(), selectable);
-    } else if (selectable instanceof AliasedExpr) {
-      const expr = selectable as AliasedExpr;
+    } else if (selectable instanceof AliasedExpression) {
+      const expr = selectable as AliasedExpression;
       result.set(expr.alias, expr.expr as unknown as Expression);
     } else {
       throw new Error('unexpected selectable: ' + JSON.stringify(selectable));
