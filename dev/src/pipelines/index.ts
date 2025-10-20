@@ -24,7 +24,7 @@ export {
   arrayContains,
   arrayContainsAny,
   arrayReverse,
-  avg,
+  average,
   equal,
   ceil,
   exp,

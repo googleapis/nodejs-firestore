@@ -75,7 +75,7 @@ import {
   arrayContains,
   arrayContainsAny,
   arrayReverse,
-  avg,
+  average,
   countAll,
   endsWith,
   equal,
@@ -421,7 +421,7 @@ describe('Pipeline class', () => {
       const pipeline = firestore
         .pipeline()
         .collection(randomCol.path)
-        .aggregate(avg('rating').as('avgRating'));
+        .aggregate(average('rating').as('avgRating'));
 
       const snapshot = await pipeline.execute();
       const end = new Date().valueOf();
@@ -439,7 +439,7 @@ describe('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .aggregate({
-          accumulators: [avg('rating').as('avgRating')],
+          accumulators: [average('rating').as('avgRating')],
           groups: ['genre'],
         });
 
@@ -1006,7 +1006,7 @@ describe('Pipeline class', () => {
           .where(equal('genre', 'Science Fiction'))
           .aggregate(
             countAll().as('count'),
-            avg('rating').as('avgRating'),
+            average('rating').as('avgRating'),
             maximum('rating').as('maxRating'),
             sum('rating').as('sumRating')
           )
@@ -1035,7 +1035,7 @@ describe('Pipeline class', () => {
           .where(equal('genre', 'Science Fiction'))
           .aggregate(
             countAll().as('count'),
-            avg('rating').as('avgRating'),
+            average('rating').as('avgRating'),
             maximum('rating').as('maxRating'),
             sum('rating').as('sumRating')
           )
@@ -1068,7 +1068,7 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where(lessThan(field('published'), 1984))
           .aggregate({
-            accumulators: [avg('rating').as('avgRating')],
+            accumulators: [average('rating').as('avgRating')],
             groups: ['genre'],
           })
           .where(greaterThan('avgRating', 4.3))
@@ -1775,7 +1775,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author', 'rating')
-          .rawStage('aggregate', [{averageRating: field('rating').avg()}, {}])
+          .rawStage('aggregate', [{averageRating: field('rating').average()}, {}])
           .execute();
         expectResults(snapshot, {
           averageRating: 4.3100000000000005,

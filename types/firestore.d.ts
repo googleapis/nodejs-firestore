@@ -3902,12 +3902,12 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Calculate the average age of users
-       * field("age").avg().as("averageAge");
+       * field("age").average().as("averageAge");
        * ```
        *
-       * @return A new `AggregateFunction` representing the 'avg' aggregation.
+       * @return A new `AggregateFunction` representing the 'average' aggregation.
        */
-      avg(): AggregateFunction;
+      average(): AggregateFunction;
       /**
        * Creates an aggregation that finds the minimum value of a field across multiple stage inputs.
        *
@@ -4584,7 +4584,7 @@ declare namespace FirebaseFirestore {
        * ```typescript
        * // Calculate the average price of all items and assign it the alias "averagePrice".
        * pipeline().collection("items")
-       *   .aggregate(field("price").avg().as("averagePrice"));
+       *   .aggregate(field("price").average().as("averagePrice"));
        * ```
        *
        * @param name The alias to assign to this AggregateFunction.
@@ -7166,26 +7166,26 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Calculate the average age of users
-     * avg(field("age")).as("averageAge");
+     * average(field("age")).as("averageAge");
      * ```
      *
      * @param expression The expression representing the values to average.
-     * @return A new {@code AggregateFunction} representing the 'avg' aggregation.
+     * @return A new {@code AggregateFunction} representing the 'average' aggregation.
      */
-    export function avg(expression: Expression): AggregateFunction;
+    export function average(expression: Expression): AggregateFunction;
     /**
      * Creates an aggregation that calculates the average (mean) of a field's values across multiple
      * stage inputs.
      *
      * ```typescript
      * // Calculate the average age of users
-     * avg("age").as("averageAge");
+     * average("age").as("averageAge");
      * ```
      *
      * @param fieldName The name of the field containing numeric values to average.
-     * @return A new {@code AggregateFunction} representing the 'avg' aggregation.
+     * @return A new {@code AggregateFunction} representing the 'average' aggregation.
      */
-    export function avg(fieldName: string): AggregateFunction;
+    export function average(fieldName: string): AggregateFunction;
     /**
      * Creates an aggregation that finds the minimum value of an expression across multiple stage
      * inputs.
@@ -8232,7 +8232,7 @@ declare namespace FirebaseFirestore {
      * const results3 = await db.pipeline()
      *     .collection("books")
      *     .where(Field.of("published").greaterThan(1980))
-     *     .aggregate(avg(Field.of("rating")).as("averageRating"))
+     *     .aggregate(average(Field.of("rating")).as("averageRating"))
      *     .execute();
      * ```
      */
@@ -8641,7 +8641,7 @@ declare namespace FirebaseFirestore {
        * // Calculate the average rating and the total number of books
        * firestore.pipeline().collection("books")
        *     .aggregate(
-       *         field("rating").avg().as("averageRating"),
+       *         field("rating").average().as("averageRating"),
        *         countAll().as("totalBooks")
        *     );
        * ```
@@ -8679,7 +8679,7 @@ declare namespace FirebaseFirestore {
        * // Calculate the average rating for each genre.
        * firestore.pipeline().collection("books")
        *   .aggregate({
-       *       accumulators: [avg(field("rating")).as("avg_rating")]
+       *       accumulators: [average(field("rating")).as("avg_rating")]
        *       groups: ["genre"]
        *       });
        * ```

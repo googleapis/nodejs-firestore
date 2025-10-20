@@ -320,7 +320,7 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
  * const results3 = await db.pipeline()
  *     .collection('books')
  *     .where(field('published').greaterThan(1980))
- *     .aggregate(avg(field('rating')).as('averageRating'))
+ *     .aggregate(average(field('rating')).as('averageRating'))
  *     .execute();
  * ```
  */
@@ -893,7 +893,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * // Calculate the average rating and the total number of books
    * firestore.pipeline().collection("books")
    *     .aggregate(
-   *         field("rating").avg().as("averageRating"),
+   *         field("rating").average().as("averageRating"),
    *         countAll().as("totalBooks")
    *     );
    * ```
@@ -931,7 +931,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * // Calculate the average rating for each genre.
    * firestore.pipeline().collection("books")
    *   .aggregate({
-   *       accumulators: [avg(field("rating")).as("avg_rating")]
+   *       accumulators: [average(field("rating")).as("avg_rating")]
    *       groups: ["genre"]
    *       });
    * ```

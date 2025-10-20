@@ -1000,13 +1000,13 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
    *
    * ```typescript
    * // Calculate the average age of users
-   * field("age").avg().as("averageAge");
+   * field("age").average().as("averageAge");
    * ```
    *
-   * @return A new `AggregateFunction` representing the 'avg' aggregation.
+   * @return A new `AggregateFunction` representing the 'average' aggregation.
    */
-  avg(): AggregateFunction {
-    return new AggregateFunction('avg', [this]);
+  average(): AggregateFunction {
+    return new AggregateFunction('average', [this]);
   }
 
   /**
@@ -1840,7 +1840,7 @@ export class AggregateFunction implements AggregateFunction, HasUserData {
    * ```typescript
    * // Calculate the average price of all items and assign it the alias "averagePrice".
    * firestore.pipeline().collection("items")
-   *   .aggregate(field("price").avg().as("averagePrice"));
+   *   .aggregate(field("price").average().as("averagePrice"));
    * ```
    *
    * @param name The alias to assign to this AggregateFunction.
@@ -5061,13 +5061,13 @@ export function sum(value: Expression | string): AggregateFunction {
  *
  * ```typescript
  * // Calculate the average age of users
- * avg(field("age")).as("averageAge");
+ * average(field("age")).as("averageAge");
  * ```
  *
  * @param expression The expression representing the values to average.
- * @return A new {@code AggregateFunction} representing the 'avg' aggregation.
+ * @return A new {@code AggregateFunction} representing the 'average' aggregation.
  */
-export function avg(expression: Expression): AggregateFunction;
+export function average(expression: Expression): AggregateFunction;
 
 /**
  * Creates an aggregation that calculates the average (mean) of a field's values across multiple
@@ -5075,15 +5075,15 @@ export function avg(expression: Expression): AggregateFunction;
  *
  * ```typescript
  * // Calculate the average age of users
- * avg("age").as("averageAge");
+ * average("age").as("averageAge");
  * ```
  *
  * @param fieldName The name of the field containing numeric values to average.
- * @return A new {@code AggregateFunction} representing the 'avg' aggregation.
+ * @return A new {@code AggregateFunction} representing the 'average' aggregation.
  */
-export function avg(fieldName: string): AggregateFunction;
-export function avg(value: Expression | string): AggregateFunction {
-  return fieldOrExpression(value).avg();
+export function average(fieldName: string): AggregateFunction;
+export function average(value: Expression | string): AggregateFunction {
+  return fieldOrExpression(value).average();
 }
 
 /**
