@@ -43,7 +43,7 @@ import {cast} from '../util';
  * method calls to create complex expressions.
  */
 export abstract class Expression implements firestore.Pipelines.Expression, HasUserData {
-  abstract exprType: firestore.Pipelines.ExprType;
+  abstract expressionType: firestore.Pipelines.ExprType;
 
   /**
    * @internal
@@ -1808,7 +1808,7 @@ export abstract class Expression implements firestore.Pipelines.Expression, HasU
  * A class that represents an aggregate function.
  */
 export class AggregateFunction implements AggregateFunction, HasUserData {
-  exprType: firestore.Pipelines.ExprType = 'AggregateFunction';
+  expressionType: firestore.Pipelines.ExprType = 'AggregateFunction';
 
   /**
    * @internal
@@ -1899,7 +1899,7 @@ export class AliasedAggregate implements AliasedAggregate, HasUserData {
 export class AliasedExpression
   implements firestore.Pipelines.Selectable, HasUserData
 {
-  exprType: firestore.Pipelines.ExprType = 'AliasedExpression';
+  expressionType: firestore.Pipelines.ExprType = 'AliasedExpression';
   selectable = true as const;
 
   /**
@@ -1928,7 +1928,7 @@ export class AliasedExpression
  * @internal
  */
 class ListOfExprs extends Expression {
-  exprType: firestore.Pipelines.ExprType = 'ListOfExprs';
+  expressionType: firestore.Pipelines.ExprType = 'ListOfExprs';
 
   constructor(private exprs: Expression[]) {
     super();
@@ -1974,7 +1974,7 @@ class ListOfExprs extends Expression {
  * ```
  */
 export class Field extends Expression implements firestore.Pipelines.Selectable {
-  readonly exprType: firestore.Pipelines.ExprType = 'Field';
+  readonly expressionType: firestore.Pipelines.ExprType = 'Field';
   selectable = true as const;
 
   /**
@@ -2059,7 +2059,7 @@ export function field(field: string | firestore.FieldPath): Field {
  * ```
  */
 export class Constant extends Expression {
-  readonly exprType: firestore.Pipelines.ExprType = 'Constant';
+  readonly expressionType: firestore.Pipelines.ExprType = 'Constant';
 
   private protoValue?: api.IValue;
 
@@ -2219,7 +2219,7 @@ export class MapValue extends Expression {
     super();
   }
 
-  exprType: firestore.Pipelines.ExprType = 'Constant';
+  expressionType: firestore.Pipelines.ExprType = 'Constant';
 
   _toProto(serializer: Serializer): api.IValue {
     return serializer.encodeValue(this.plainObject);
@@ -2244,7 +2244,7 @@ export class MapValue extends Expression {
  * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lessThan}, etc.) to construct new Function instances.
  */
 export class FunctionExpression extends Expression {
-  readonly exprType: firestore.Pipelines.ExprType = 'Function';
+  readonly expressionType: firestore.Pipelines.ExprType = 'Function';
 
   constructor(
     protected name: string,
@@ -2285,7 +2285,7 @@ export class FunctionExpression extends Expression {
  * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lessThan}, etc.) to construct new Function instances.
  */
 class MapFunctionExpr extends FunctionExpression {
-  readonly exprType: firestore.Pipelines.ExprType = 'Function';
+  readonly expressionType: firestore.Pipelines.ExprType = 'Function';
 
   constructor(private map: Record<string, Expression | undefined>) {
     super('map', []);
@@ -2334,7 +2334,7 @@ class MapFunctionExpr extends FunctionExpression {
  * or the methods on {@link Expression} ({@link Expression#equal}, {@link Expression#lessThan}, etc.) to construct new Function instances.
  */
 class ArrayFunctionExpr extends FunctionExpression {
-  readonly exprType: firestore.Pipelines.ExprType = 'Function';
+  readonly expressionType: firestore.Pipelines.ExprType = 'Function';
 
   constructor(private values: Array<Expression | undefined>) {
     super('array', []);

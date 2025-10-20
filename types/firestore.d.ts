@@ -3154,7 +3154,7 @@ declare namespace FirebaseFirestore {
      * method calls to create complex expressions.
      */
     export abstract class Expression {
-      abstract readonly exprType: ExprType;
+      abstract readonly expressionType: ExprType;
       /**
        * Creates an expression that adds this expression to another expression.
        *
@@ -4566,9 +4566,9 @@ declare namespace FirebaseFirestore {
      */
     export class AggregateFunction {
       /**
-       * @property exprType The type of the aggregate expression, indicating the specific aggregate function (e.g., COUNT, SUM, AVG).
+       * @property expressionType The type of the aggregate expression, indicating the specific aggregate function (e.g., COUNT, SUM, AVG).
        */
-      exprType: ExprType;
+      expressionType: ExprType;
 
       /**
        * @private
@@ -4623,7 +4623,7 @@ declare namespace FirebaseFirestore {
       /**
        * @internal Specifies that the instance is an AliasedExpression.
        */
-      exprType: ExprType;
+      expressionType: ExprType;
 
       /**
        * Specifies that this class is selectable, meaning it contains an {@link Expression} and an alias,
@@ -4656,7 +4656,7 @@ declare namespace FirebaseFirestore {
       /**
        * @internal Specifies that the instance is a Field.
        */
-      readonly exprType: ExprType;
+      readonly expressionType: ExprType;
       /**
        * Specifies that this class is selectable, meaning it contains an {@link Expression} and an alias,
        * and can be provided to the Select stage of a pipeline.
@@ -4728,7 +4728,7 @@ declare namespace FirebaseFirestore {
      * ```
      */
     export class Constant extends Expression {
-      readonly exprType: ExprType;
+      readonly expressionType: ExprType;
     }
     /**
      * Creates an `Expression` instance for a number value.
@@ -4825,7 +4825,7 @@ declare namespace FirebaseFirestore {
        * @internal
        * Indicates that this expression is a `FunctionExpression`.
        */
-      readonly exprType: ExprType;
+      readonly expressionType: ExprType;
       /**
        * @private
        * @internal
