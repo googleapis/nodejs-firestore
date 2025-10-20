@@ -50,7 +50,7 @@ import {
 import api = protos.google.firestore.v1;
 
 import {
-  Expr,
+  Expression,
   BooleanExpression,
   and,
   or,
@@ -598,8 +598,8 @@ export function isAliasedAggregate(
   );
 }
 
-export function isExpr(val: unknown): val is firestore.Pipelines.Expr {
-  return val instanceof Expr;
+export function isExpr(val: unknown): val is firestore.Pipelines.Expression {
+  return val instanceof Expression;
 }
 
 export function isBooleanExpr(
@@ -623,19 +623,19 @@ export function isCollectionReference(
 }
 
 /**
- * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * Converts a value to an Expression, Returning either a Constant, MapFunction,
  * ArrayFunction, or the input itself (if it's already an expression).
  *
  * @private
  * @internal
  * @param value
  */
-export function valueToDefaultExpr(value: unknown): Expr {
-  let result: Expr | undefined;
+export function valueToDefaultExpr(value: unknown): Expression {
+  let result: Expression | undefined;
   if (isFirestoreValue(value)) {
     return constant(value);
   }
-  if (value instanceof Expr) {
+  if (value instanceof Expression) {
     return value;
   } else if (isPlainObject(value)) {
     result = map(value as Record<string, unknown>);
@@ -651,7 +651,7 @@ export function valueToDefaultExpr(value: unknown): Expr {
 }
 
 /**
- * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * Converts a value to an Expression, Returning either a Constant, MapFunction,
  * ArrayFunction, or the input itself (if it's already an expression).
  *
  * @private
@@ -659,9 +659,9 @@ export function valueToDefaultExpr(value: unknown): Expr {
  * @param value
  */
 export function vectorToExpr(
-  value: firestore.VectorValue | number[] | Expr
-): Expr {
-  if (value instanceof Expr) {
+  value: firestore.VectorValue | number[] | Expression
+): Expression {
+  if (value instanceof Expression) {
     return value;
   } else if (value instanceof VectorValue) {
     const result = constant(value);
@@ -677,7 +677,7 @@ export function vectorToExpr(
 }
 
 /**
- * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * Converts a value to an Expression, Returning either a Constant, MapFunction,
  * ArrayFunction, or the input itself (if it's already an expression).
  * If the input is a string, it is assumed to be a field name, and a
  * field(value) is returned.
@@ -686,7 +686,7 @@ export function vectorToExpr(
  * @internal
  * @param value
  */
-export function fieldOrExpression(value: unknown): Expr {
+export function fieldOrExpression(value: unknown): Expression {
   if (isString(value)) {
     const result = field(value);
     result._createdFromLiteral = true;

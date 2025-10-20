@@ -57,7 +57,7 @@ export {
   arrayGet,
   add,
   BooleanExpression,
-  Expr,
+  Expression,
   FunctionExpr,
   minimum,
   count,

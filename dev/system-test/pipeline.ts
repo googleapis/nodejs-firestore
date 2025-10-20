@@ -1863,7 +1863,7 @@ describe('Pipeline class', () => {
         });
       });
 
-      it('run pipeline with replaceWith Expr result', async () => {
+      it('run pipeline with replaceWith Expression result', async () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)

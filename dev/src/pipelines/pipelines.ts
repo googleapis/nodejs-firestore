@@ -50,7 +50,7 @@ import {isOptionalEqual, isPlainObject} from '../util';
 import {
   AggregateFunction,
   AliasedAggregate,
-  Expr,
+  Expression,
   AliasedExpr,
   Field,
   BooleanExpression,
@@ -346,8 +346,8 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * The added fields are defined using {@link Selectable}s, which can be:
    *
    * - {@link Field}: References an existing document field.
-   * - {@link Expr}: Either a literal value (see {@link Constant}) or a computed value
-   *   (see {@FunctionExpr}) with an assigned alias using {@link Expr#as}.
+   * - {@link Expression}: Either a literal value (see {@link Constant}) or a computed value
+   *   (see {@FunctionExpr}) with an assigned alias using {@link Expression#as}.
    *
    * Example:
    *
@@ -377,8 +377,8 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * The added fields are defined using {@link Selectable}s, which can be:
    *
    * - {@link Field}: References an existing document field.
-   * - {@link Expr}: Either a literal value (see {@link Constant}) or a computed value
-   *   (see {@FunctionExpr}) with an assigned alias using {@link Expr#as}.
+   * - {@link Expression}: Either a literal value (see {@link Constant}) or a computed value
+   *   (see {@FunctionExpr}) with an assigned alias using {@link Expression#as}.
    *
    * Example:
    *
@@ -406,7 +406,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     )
       ? [fieldOrOptions, ...additionalFields]
       : fieldOrOptions.fields;
-    const normalizedFields: Map<string, Expr> = selectablesToMap(fields);
+    const normalizedFields: Map<string, Expression> = selectablesToMap(fields);
 
     this._validateUserData('select', normalizedFields);
 
@@ -495,7 +495,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *   <li>{@code string}: Name of an existing field</li>
    *   <li>{@link Field}: References an existing field.</li>
    *   <li>{@link Function}: Represents the result of a function with an assigned alias name using
-   *       {@link Expr#as}</li>
+   *       {@link Expression#as}</li>
    * </ul>
    *
    * <p>If no selections are provided, the output of this stage is empty. Use {@link
@@ -532,7 +532,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *   <li>{@code string}: Name of an existing field</li>
    *   <li>{@link Field}: References an existing field.</li>
    *   <li>{@link Function}: Represents the result of a function with an assigned alias name using
-   *       {@link Expr#as}</li>
+   *       {@link Expression#as}</li>
    * </ul>
    *
    * <p>If no selections are provided, the output of this stage is empty. Use {@link
@@ -570,7 +570,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
       isSelectable(selectionOrOptions) || isString(selectionOrOptions)
         ? [selectionOrOptions, ...additionalSelections]
         : selectionOrOptions.selections;
-    const normalizedSelections: Map<string, Expr> =
+    const normalizedSelections: Map<string, Expression> =
       selectablesToMap(selections);
 
     this._validateUserData('select', normalizedSelections);
@@ -799,14 +799,14 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * Returns a set of distinct values from the inputs to this stage.
    *
    * This stage runs through the results from previous stages to include only results with
-   * unique combinations of {@link Expr} values ({@link Field}, {@link Function}, etc).
+   * unique combinations of {@link Expression} values ({@link Field}, {@link Function}, etc).
    *
    * The parameters to this stage are defined using {@link Selectable} expressions or strings:
    *
    * - {@code string}: Name of an existing field
    * - {@link Field}: References an existing document field.
    * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
-   *   using {@link Expr#as}.
+   *   using {@link Expression#as}.
    *
    * Example:
    *
@@ -831,14 +831,14 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * Returns a set of distinct values from the inputs to this stage.
    *
    * This stage runs through the results from previous stages to include only results with
-   * unique combinations of {@link Expr} values ({@link Field}, {@link Function}, etc).
+   * unique combinations of {@link Expression} values ({@link Field}, {@link Function}, etc).
    *
    * The parameters to this stage are defined using {@link Selectable} expressions or strings:
    *
    * - {@code string}: Name of an existing field
    * - {@link Field}: References an existing document field.
    * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
-   *   using {@link Expr#as}.
+   *   using {@link Expression#as}.
    *
    * Example:
    *
@@ -869,7 +869,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
       isString(groupOrOptions) || isSelectable(groupOrOptions)
         ? [groupOrOptions, ...additionalGroups]
         : groupOrOptions.groups;
-    const convertedGroups: Map<string, Expr> = selectablesToMap(groups);
+    const convertedGroups: Map<string, Expression> = selectablesToMap(groups);
     this._validateUserData('distinct', convertedGroups);
 
     const internalOptions: InternalDistinctStageOptions = {
@@ -885,7 +885,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * <p>This stage allows you to calculate aggregate values over a set of documents. You define the
    * aggregations to perform using {@link AliasedAggregate} expressions which are typically results of
-   * calling {@link Expr#as} on {@link AggregateFunction} instances.
+   * calling {@link Expression#as} on {@link AggregateFunction} instances.
    *
    * <p>Example:
    *
@@ -921,7 +921,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *       specifying groups is the same as putting the entire inputs into one group.</li>
    *   <li>**Accumulators:** One or more accumulation operations to perform within each group. These
    *       are defined using {@link AliasedAggregate} expressions, which are typically created by
-   *       calling {@link Expr#as} on {@link AggregateFunction} instances. Each aggregation
+   *       calling {@link Expression#as} on {@link AggregateFunction} instances. Each aggregation
    *       calculates a value (e.g., sum, average, count) based on the documents within its group.</li>
    * </ul>
    *
@@ -957,7 +957,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
       aliasedAggregateToMap(accumulators);
     const groups: Array<firestore.Pipelines.Selectable | string> =
       isAliasedAggregate(targetOrOptions) ? [] : targetOrOptions.groups ?? [];
-    const convertedGroups: Map<string, Expr> = selectablesToMap(groups);
+    const convertedGroups: Map<string, Expression> = selectablesToMap(groups);
     this._validateUserData('aggregate', convertedGroups);
 
     const internalOptions: InternalAggregateStageOptions = {
@@ -1080,10 +1080,10 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * // }
    * ```
    *
-   * @param expr An {@link Expr} that when returned evaluates to a map.
+   * @param expr An {@link Expression} that when returned evaluates to a map.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  replaceWith(expr: firestore.Pipelines.Expr): Pipeline;
+  replaceWith(expr: firestore.Pipelines.Expression): Pipeline;
   /**
    * Fully overwrites all fields in a document with those coming from a map.
    *
@@ -1123,14 +1123,14 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   replaceWith(options: firestore.Pipelines.ReplaceWithStageOptions): Pipeline;
   replaceWith(
     valueOrOptions:
-      | firestore.Pipelines.Expr
+      | firestore.Pipelines.Expression
       | string
       | firestore.Pipelines.ReplaceWithStageOptions
   ): Pipeline {
     const options =
       isString(valueOrOptions) || isExpr(valueOrOptions) ? {} : valueOrOptions;
 
-    const fieldNameOrExpr: string | firestore.Pipelines.Expr =
+    const fieldNameOrExpr: string | firestore.Pipelines.Expression =
       isString(valueOrOptions) || isExpr(valueOrOptions)
         ? valueOrOptions
         : valueOrOptions.map;
@@ -1353,7 +1353,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
       ? selectableOrOptions
       : selectableOrOptions.selectable;
     const alias = selectable.alias;
-    const expr = selectable.expr as Expr;
+    const expr = selectable.expr as Expression;
 
     const indexFieldName = isSelectable(selectableOrOptions)
       ? indexField
@@ -1473,14 +1473,14 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   rawStage(
     name: string,
     params: unknown[],
-    options?: {[key: string]: Expr | unknown}
+    options?: {[key: string]: Expression | unknown}
   ): Pipeline {
     // Convert input values to Expressions.
     // We treat objects as mapValues and arrays as arrayValues,
     // this is unlike the default conversion for objects and arrays
     // passed to an expression.
     const expressionParams = params.map((value: unknown) => {
-      if (value instanceof Expr) {
+      if (value instanceof Expression) {
         return value;
       } else if (value instanceof AggregateFunction) {
         return value;
@@ -1625,8 +1625,8 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
 
 function selectablesToMap(
   selectables: (firestore.Pipelines.Selectable | string)[]
-): Map<string, Expr> {
-  const result = new Map<string, Expr>();
+): Map<string, Expression> {
+  const result = new Map<string, Expression>();
   for (const selectable of selectables) {
     if (typeof selectable === 'string') {
       result.set(
@@ -1637,7 +1637,7 @@ function selectablesToMap(
       result.set((selectable as Field).fieldName(), selectable);
     } else if (selectable instanceof AliasedExpr) {
       const expr = selectable as AliasedExpr;
-      result.set(expr.alias, expr.expr as unknown as Expr);
+      result.set(expr.alias, expr.expr as unknown as Expression);
     } else {
       throw new Error('unexpected selectable: ' + JSON.stringify(selectable));
     }

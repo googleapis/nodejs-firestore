@@ -22,7 +22,7 @@ import {ProtoSerializable, Serializer} from '../serializer';
 import {
   AggregateFunction,
   BooleanExpression,
-  Expr,
+  Expression,
   Field,
   field,
   Ordering,
@@ -72,7 +72,7 @@ export type InternalAggregateStageOptions = Omit<
   firestore.Pipelines.AggregateStageOptions,
   'groups' | 'accumulators'
 > & {
-  groups: Map<string, Expr>;
+  groups: Map<string, Expression>;
   accumulators: Map<string, AggregateFunction>;
 };
 
@@ -104,7 +104,7 @@ export type InternalDistinctStageOptions = Omit<
   firestore.Pipelines.DistinctStageOptions,
   'groups'
 > & {
-  groups: Map<string, Expr>;
+  groups: Map<string, Expression>;
 };
 
 /**
@@ -284,7 +284,7 @@ export type InternalFindNearestStageOptions = Omit<
   firestore.Pipelines.FindNearestStageOptions,
   'vectorValue' | 'field' | 'distanceField'
 > & {
-  vectorValue: Expr;
+  vectorValue: Expression;
   field: Field;
   distanceField?: Field;
 };
@@ -381,7 +381,7 @@ export type InternalUnnestStageOptions = Omit<
   'selectable' | 'indexField'
 > & {
   alias: string;
-  expr: Expr;
+  expr: Expression;
   indexField?: Field;
 };
 
@@ -463,7 +463,7 @@ export type InternalReplaceWithStageOptions = Omit<
   firestore.Pipelines.ReplaceWithStageOptions,
   'map'
 > & {
-  map: Expr;
+  map: Expression;
 };
 
 /**
@@ -494,7 +494,7 @@ export type InternalSelectStageOptions = Omit<
   firestore.Pipelines.SelectStageOptions,
   'selections'
 > & {
-  selections: Map<string, Expr>;
+  selections: Map<string, Expression>;
 };
 
 /**
@@ -522,7 +522,7 @@ export type InternalAddFieldsStageOptions = Omit<
   firestore.Pipelines.AddFieldsStageOptions,
   'fields'
 > & {
-  fields: Map<string, Expr>;
+  fields: Map<string, Expression>;
 };
 
 /**
@@ -586,7 +586,7 @@ export class RawStage implements Stage {
    */
   constructor(
     public name: string,
-    private params: Array<AggregateFunction | Expr>,
+    private params: Array<AggregateFunction | Expression>,
     private rawOptions: Record<string, unknown>
   ) {}
 
