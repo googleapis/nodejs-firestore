@@ -330,7 +330,8 @@ export class Transaction implements firestore.Transaction {
         this.executePipelineFn
       ).then(results => {
         const executionTime = results.reduce((maxTime, result) => {
-          return (result._executionTime && result._executionTime?.valueOf() > maxTime.valueOf())
+          return result._executionTime &&
+            result._executionTime?.valueOf() > maxTime.valueOf()
             ? result._executionTime
             : maxTime;
         }, Timestamp.fromMillis(0));

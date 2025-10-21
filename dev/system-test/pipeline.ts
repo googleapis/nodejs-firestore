@@ -1773,7 +1773,10 @@ describe.only('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author', 'rating')
-          .rawStage('aggregate', [{averageRating: field('rating').average()}, {}])
+          .rawStage('aggregate', [
+            {averageRating: field('rating').average()},
+            {},
+          ])
           .execute();
         expectResults(snapshot, {
           averageRating: 4.3100000000000005,
@@ -2083,7 +2086,7 @@ describe.only('Pipeline class', () => {
             'tag',
             'awards',
             'nestedField',
-              'tagsIndex'
+            'tagsIndex'
           )
           .execute();
         expectResults(
@@ -2226,7 +2229,7 @@ describe.only('Pipeline class', () => {
             'tag',
             'awards',
             'nestedField',
-              'tagsIndex'
+            'tagsIndex'
           )
           .execute();
         expectResults(
@@ -2491,7 +2494,9 @@ describe.only('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .sort(ascending('author'))
-        .select(field('author').stringConcat(' - ', field('title')).as('bookInfo'))
+        .select(
+          field('author').stringConcat(' - ', field('title')).as('bookInfo')
+        )
         .limit(1)
         .execute();
       expectResults(snapshot, {
@@ -2874,7 +2879,9 @@ describe.only('Pipeline class', () => {
           .sort(descending('rating'))
           .limit(1)
           .select(
-            new FunctionExpression('add', [field('rating'), constant(1)]).as('rating')
+            new FunctionExpression('add', [field('rating'), constant(1)]).as(
+              'rating'
+            )
           )
           .execute();
         expectResults(snapshot, {
@@ -2922,9 +2929,9 @@ describe.only('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .aggregate(
-            new AggregateFunction('count_if', [field('rating').greaterThanOrEqual(4.5)]).as(
-              'countOfBest'
-            )
+            new AggregateFunction('count_if', [
+              field('rating').greaterThanOrEqual(4.5),
+            ]).as('countOfBest')
           )
           .execute();
         expectResults(snapshot, {

@@ -117,7 +117,7 @@ describe('execute(Pipeline|PipelineExecuteOptions)', () => {
               fields: {
                 mode: {
                   stringValue: 'analyze',
-                }
+                },
               },
             },
           },

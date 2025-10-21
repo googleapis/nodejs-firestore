@@ -458,7 +458,10 @@ export function whereConditionsFromCursor(
   ) {
     // When the cursor bound is inclusive, then the last bound
     // can be equal to the value, otherwise it's not equal
-    condition = or(condition, field.equal(value) as unknown as BooleanExpression);
+    condition = or(
+      condition,
+      field.equal(value) as unknown as BooleanExpression
+    );
   }
 
   // Iterate backwards over the remaining bounds, adding
@@ -576,7 +579,9 @@ export function isSelectable(
 ): val is firestore.Pipelines.Selectable {
   const candidate = val as firestore.Pipelines.Selectable;
   return (
-    candidate.selectable && isString(candidate._alias) && isExpr(candidate._expr)
+    candidate.selectable &&
+    isString(candidate._alias) &&
+    isExpr(candidate._expr)
   );
 }
 
