@@ -104,7 +104,6 @@ import {
   Type as MessageType,
   ReflectionObject,
 } from 'protobufjs';
-import {logger} from '../logger';
 
 /**
  * Represents the source of a Firestore {@link Pipeline}.

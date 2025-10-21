@@ -43,7 +43,6 @@ export const DEFAULT_DATABASE_ID = '(default)';
  * @type {RegExp}
  */
 const RESOURCE_PATH_RE =
-  // Note: [\s\S] matches all characters including newlines.
   /^projects\/([^/]+)\/databases\/([^/]+)(?:\/documents(?:\/([^/]+(?:\/[^/]+)*))?)?$/;
 
 /*!
