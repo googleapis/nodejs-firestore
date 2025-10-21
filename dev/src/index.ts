@@ -949,7 +949,13 @@ export class Firestore implements firestore.Firestore {
   }
 
   /**
-   * TODO
+   * @beta
+   * Creates and returns a new PipelineSource, which allows specifying the source stage of a {@link Pipeline}.
+   *
+   * @example
+   * ```
+   * let myPipeline: Pipeline = firestore.pipeline().collection('books');
+   * ```
    */
   pipeline(): PipelineSource {
     return new PipelineSource(this);

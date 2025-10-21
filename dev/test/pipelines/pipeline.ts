@@ -31,7 +31,7 @@ import IValue = google.firestore.v1.IValue;
 const FIRST_CALL = 0;
 const EXECUTE_PIPELINE_REQUEST = 0;
 
-describe('execute(Pipeline|PipelineOptions)', () => {
+describe('execute(Pipeline|PipelineExecuteOptions)', () => {
   it('returns execution time with empty results', async () => {
     const executeTime = Timestamp.now();
     const results: IExecutePipelineResponse[] = [
@@ -102,7 +102,6 @@ describe('execute(Pipeline|PipelineOptions)', () => {
         indexMode: 'recommended',
         explainOptions: {
           mode: 'analyze',
-          outputFormat: 'json',
         },
       });
 
@@ -118,9 +117,6 @@ describe('execute(Pipeline|PipelineOptions)', () => {
               fields: {
                 mode: {
                   stringValue: 'analyze',
-                },
-                output_format: {
-                  stringValue: 'json',
                 },
               },
             },
@@ -146,7 +142,7 @@ describe('execute(Pipeline|PipelineOptions)', () => {
     );
   });
 
-  it('serializes the pipeline generic options', async () => {
+  it('serializes the pipeline raw options', async () => {
     const spy = sinon.fake.returns(stream());
     const firestore = await createInstance({
       executePipeline: spy,
@@ -156,7 +152,7 @@ describe('execute(Pipeline|PipelineOptions)', () => {
       .pipeline()
       .collection('foo')
       .execute({
-        customOptions: {
+        rawOptions: {
           foo: 'bar',
         },
       });
@@ -191,8 +187,8 @@ describe('execute(Pipeline|PipelineOptions)', () => {
 });
 
 describe('stage option serialization', () => {
-  // Default custom options
-  const customOptions: Record<string, unknown> = {
+  // Default rawOptions
+  const rawOptions: Record<string, unknown> = {
     foo: 'bar1',
   };
   // Default expected serialized options
@@ -213,7 +209,7 @@ describe('stage option serialization', () => {
       pipeline: firestore =>
         firestore.pipeline().collection({
           collection: 'foo',
-          customOptions,
+          rawOptions,
           forceIndex: 'foo-index',
         }),
       expectedOptions: {
@@ -228,7 +224,7 @@ describe('stage option serialization', () => {
       pipeline: firestore =>
         firestore.pipeline().collectionGroup({
           collectionId: 'foo',
-          customOptions,
+          rawOptions,
           forceIndex: 'bar-index',
         }),
       expectedOptions: {
@@ -243,14 +239,14 @@ describe('stage option serialization', () => {
       pipeline: firestore =>
         firestore.pipeline().documents({
           docs: ['foo/bar'],
-          customOptions,
+          rawOptions,
         }),
     },
     {
       name: 'database stage',
       pipeline: firestore =>
         firestore.pipeline().database({
-          customOptions,
+          rawOptions,
         }),
     },
     {
@@ -261,7 +257,7 @@ describe('stage option serialization', () => {
           .database()
           .distinct({
             groups: ['foo'],
-            customOptions,
+            rawOptions,
           }),
       stageIndex: 1,
     },
@@ -275,7 +271,7 @@ describe('stage option serialization', () => {
             field: 'foo',
             vectorValue: [0],
             distanceMeasure: 'euclidean',
-            customOptions,
+            rawOptions,
           }),
       stageIndex: 1,
     },
@@ -287,7 +283,7 @@ describe('stage option serialization', () => {
           .database()
           .select({
             selections: ['foo'],
-            customOptions,
+            rawOptions,
           }),
       stageIndex: 1,
     },
@@ -299,7 +295,7 @@ describe('stage option serialization', () => {
           .database()
           .unnest({
             selectable: field('foo'),
-            customOptions,
+            rawOptions,
           }),
       stageIndex: 1,
     },
@@ -311,7 +307,7 @@ describe('stage option serialization', () => {
           .database()
           .addFields({
             fields: [field('foo')],
-            customOptions,
+            rawOptions,
           }),
       stageIndex: 1,
     },
@@ -323,7 +319,7 @@ describe('stage option serialization', () => {
           .database()
           .aggregate({
             accumulators: [sum('foo').as('fooSum')],
-            customOptions,
+            rawOptions,
           }),
       stageIndex: 1,
     },
@@ -332,7 +328,7 @@ describe('stage option serialization', () => {
       pipeline: firestore =>
         firestore.pipeline().database().limit({
           limit: 1,
-          customOptions,
+          rawOptions,
         }),
       stageIndex: 1,
     },
@@ -341,7 +337,7 @@ describe('stage option serialization', () => {
       pipeline: firestore =>
         firestore.pipeline().database().offset({
           offset: 1,
-          customOptions,
+          rawOptions,
         }),
       stageIndex: 1,
     },
@@ -353,7 +349,7 @@ describe('stage option serialization', () => {
           .database()
           .removeFields({
             fields: ['foo'],
-            customOptions,
+            rawOptions,
           }),
       stageIndex: 1,
     },
@@ -362,7 +358,7 @@ describe('stage option serialization', () => {
       pipeline: firestore =>
         firestore.pipeline().database().replaceWith({
           map: 'foo',
-          customOptions,
+          rawOptions,
         }),
       stageIndex: 1,
     },
@@ -371,7 +367,7 @@ describe('stage option serialization', () => {
       pipeline: firestore =>
         firestore.pipeline().database().sample({
           documents: 100,
-          customOptions,
+          rawOptions,
         }),
       stageIndex: 1,
     },
@@ -383,7 +379,7 @@ describe('stage option serialization', () => {
           .database()
           .sort({
             orderings: [descending('foo')],
-            customOptions,
+            rawOptions,
           }),
       stageIndex: 1,
     },
@@ -392,7 +388,7 @@ describe('stage option serialization', () => {
       pipeline: firestore =>
         firestore.pipeline().database().union({
           other: firestore.pipeline().database(),
-          customOptions,
+          rawOptions,
         }),
       stageIndex: 1,
     },
@@ -404,7 +400,7 @@ describe('stage option serialization', () => {
           .database()
           .where({
             condition: field('foo').eq(1),
-            customOptions,
+            rawOptions,
           }),
       stageIndex: 1,
     },

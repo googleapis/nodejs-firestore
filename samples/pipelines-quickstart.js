@@ -14,6 +14,8 @@
 
 'use strict';
 
+/* eslint-disable n/no-missing-require */
+
 // [START firestore_pipelines_quickstart]
 const {Firestore} = require('@google-cloud/firestore');
 const {field} = require('@google-cloud/firestore/pipelines');
