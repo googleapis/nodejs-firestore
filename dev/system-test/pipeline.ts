@@ -494,40 +494,39 @@ describe('Pipeline class', () => {
 
     it('mode: unspecified', async () => {
       const ppl = firestore
-          .pipeline()
-          .collection(randomCol.path)
-          .sort(ascending('__name__'));
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
       const snapshot = await ppl.execute({
-        explainOptions: {
-        },
+        explainOptions: {},
       });
       expect(snapshot.explainStats).to.be.undefined;
 
       expect(snapshot.results.length).to.equal(10);
       expect(snapshot.pipeline).to.equal(ppl);
       expectResults(
-          snapshot,
-          'book1',
-          'book10',
-          'book2',
-          'book3',
-          'book4',
-          'book5',
-          'book6',
-          'book7',
-          'book8',
-          'book9'
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
       );
     });
 
     it('mode: undefined', async () => {
       const ppl = firestore
-          .pipeline()
-          .collection(randomCol.path)
-          .sort(ascending('__name__'));
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
       const snapshot = await ppl.execute({
         explainOptions: {
-          mode: undefined
+          mode: undefined,
         },
       });
       expect(snapshot.explainStats).to.be.undefined;
@@ -535,17 +534,17 @@ describe('Pipeline class', () => {
       expect(snapshot.results.length).to.equal(10);
       expect(snapshot.pipeline).to.equal(ppl);
       expectResults(
-          snapshot,
-          'book1',
-          'book10',
-          'book2',
-          'book3',
-          'book4',
-          'book5',
-          'book6',
-          'book7',
-          'book8',
-          'book9'
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
       );
     });
   });
