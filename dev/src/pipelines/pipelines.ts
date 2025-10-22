@@ -53,7 +53,6 @@ import {
   AggregateFunction,
   AliasedAggregate,
   Expression,
-  AliasedExpression,
   Field,
   BooleanExpression,
   Ordering,

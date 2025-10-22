@@ -967,6 +967,27 @@ export abstract class Expression
   }
 
   /**
+   * Creates an expression that concatenates expression results together.
+   *
+   * ```typescript
+   * // Combine the 'firstName', ' ', and 'lastName' fields into a single value.
+   * field("firstName").concat(constant(" "), field("lastName"));
+   * ```
+   *
+   * @param second The additional expression or literal to concatenate.
+   * @param others Optional additional expressions or literals to concatenate.
+   * @return A new `Expr` representing the concatenated value.
+   */
+  concat(
+    second: Expression | unknown,
+    ...others: Array<Expression | unknown>
+  ): FunctionExpression {
+    const elements = [second, ...others];
+    const exprs = elements.map(valueToDefaultExpr);
+    return new FunctionExpression('concat', [this, ...exprs]);
+  }
+
+  /**
    * @beta
    * Creates an expression that reverses this string expression.
    *
@@ -1024,6 +1045,20 @@ export abstract class Expression
    */
   floor(): FunctionExpression {
     return new FunctionExpression('floor', [this]);
+  }
+
+  /**
+   * Creates an expression that computes the absolute value of a numeric value.
+   *
+   * ```typescript
+   * // Compute the absolute value of the 'price' field.
+   * field("price").abs();
+   * ```
+   *
+   * @return A new {@code Expr} representing the absolute value of the numeric value.
+   */
+  abs(): FunctionExpression {
+    return new FunctionExpression('abs', [this]);
   }
 
   /**
@@ -1888,6 +1923,104 @@ export abstract class Expression
     return new FunctionExpression('string_reverse', [this]);
   }
 
+  /**
+   * Creates an expression that returns the `elseValue` argument if this expression results in an absent value, else
+   * return the result of the this expression evaluation.
+   *
+   * ```typescript
+   * // Returns the value of the optional field 'optional_field', or returns 'default_value'
+   * // if the field is absent.
+   * field("optional_field").ifAbsent("default_value")
+   * ```
+   *
+   * @param elseValue The value that will be returned if this Expression evaluates to an absent value.
+   * @return A new [Expression] representing the ifAbsent operation.
+   */
+  ifAbsent(elseValue: unknown): Expression;
+
+  /**
+   * Creates an expression that returns the `elseValue` argument if this expression results in an absent value, else
+   * return the result of this expression evaluation.
+   *
+   * ```typescript
+   * // Returns the value of the optional field 'optional_field', or if that is
+   * // absent, then returns the value of the field `
+   * field("optional_field").ifAbsent(field('default_field'))
+   * ```
+   *
+   * @param elseExpression The Expression that will be evaluated if this Expression evaluates to an absent value.
+   * @return A new [Expression] representing the ifAbsent operation.
+   */
+  ifAbsent(elseExpression: unknown): Expression;
+
+  ifAbsent(elseValueOrExpression: Expression | unknown): Expression {
+    return new FunctionExpression('if_absent', [
+      this,
+      valueToDefaultExpr(elseValueOrExpression),
+    ]);
+  }
+
+  /**
+   * Creates an expression that joins the elements of an array into a string.
+   *
+   * ```typescript
+   * // Join the elements of the 'tags' field with the delimiter from the 'separator' field.
+   * field("tags").join(field("separator"))
+   * ```
+   *
+   * @param delimiterExpression The expression that evaluates to the delimiter string.
+   * @return A new Expression representing the join operation.
+   */
+  join(delimiterExpression: Expression): Expression;
+
+  /**
+   * Creates an expression that joins the elements of an array field into a string.
+   *
+   * ```typescript
+   * // Join the elements of the 'tags' field with a comma and space.
+   * field("tags").join(", ")
+   * ```
+   *
+   * @param delimiter The string to use as a delimiter.
+   * @return A new Expression representing the join operation.
+   */
+  join(delimiter: string): Expression;
+
+  join(delimeterValueOrExpression: string | Expression): Expression {
+    return new FunctionExpression('join', [
+      this,
+      valueToDefaultExpr(delimeterValueOrExpression),
+    ]);
+  }
+
+  /**
+   * Creates an expression that computes the base-10 logarithm of a numeric value.
+   *
+   * ```typescript
+   * // Compute the base-10 logarithm of the 'value' field.
+   * field("value").log10();
+   * ```
+   *
+   * @return A new {@code Expr} representing the base-10 logarithm of the numeric value.
+   */
+  log10(): FunctionExpression {
+    return new FunctionExpression('log10', [this]);
+  }
+
+  /**
+   * Creates an expression that computes the sum of the elements in an array.
+   *
+   * ```typescript
+   * // Compute the sum of the elements in the 'scores' field.
+   * field("scores").arraySum();
+   * ```
+   *
+   * @return A new {@code Expr} representing the sum of the elements in the array.
+   */
+  arraySum(): FunctionExpression {
+    return new FunctionExpression('sum', [this]);
+  }
+
   // TODO(new-expression): Add new expression method definitions above this line
 
   /**
@@ -2600,6 +2733,44 @@ export class BooleanExpression
    */
   not(): BooleanExpression {
     return new BooleanExpression('not', [this]);
+  }
+
+  /**
+   * Creates a conditional expression that evaluates to the 'then' expression
+   * if `this` expression evaluates to `true`,
+   * or evaluates to the 'else' expression if `this` expressions evaluates `false`.
+   *
+   * ```typescript
+   * // If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
+   * field("age").greaterThanOrEqual(18).conditional(constant("Adult"), constant("Minor"));
+   * ```
+   *
+   * @param thenExpr The expression to evaluate if the condition is true.
+   * @param elseExpr The expression to evaluate if the condition is false.
+   * @return A new {@code Expr} representing the conditional expression.
+   */
+  conditional(thenExpr: Expression, elseExpr: Expression): FunctionExpression {
+    return new FunctionExpression('conditional', [this, thenExpr, elseExpr]);
+  }
+
+  /**
+   * @beta
+   *
+   * Creates an expression that returns the `catch` argument if there is an
+   * error, else return the result of this expression.
+   *
+   * ```typescript
+   * // Create an expression that protects against a divide by zero error
+   * // but always returns a boolean expression.
+   * constant(50).divide('length').gt(1).ifError(constant(false));
+   * ```
+   *
+   * @param catchValue The value that will be returned if this expression
+   * produces an error.
+   * @return A new {@code Expr} representing the 'ifError' operation.
+   */
+  ifError(catchValue: BooleanExpression): BooleanExpression {
+    return new BooleanExpression('if_error', [this, catchValue]);
   }
 }
 
@@ -6347,6 +6518,37 @@ export function timestampSubtract(
 
 /**
  * @beta
+ *
+ * Creates an expression that evaluates to the current server timestamp.
+ *
+ * ```typescript
+ * // Get the current server timestamp
+ * currentTimestamp()
+ * ```
+ *
+ * @return A new Expression representing the current server timestamp.
+ */
+export function currentTimestamp(): FunctionExpression {
+  return new FunctionExpression('current_timestamp', []);
+}
+
+/**
+ * Creates an expression that raises an error with the given message. This could be useful for
+ * debugging purposes.
+ *
+ * ```typescript
+ * // Raise an error with the message "simulating an evaluation error".
+ * error("simulating an evaluation error")
+ * ```
+ *
+ * @return A new Expression representing the error() operation.
+ */
+export function error(message: string): Expression {
+  return new FunctionExpression('error', [constant(message)]);
+}
+
+/**
+ * @beta
  * Creates an expression that performs a logical 'AND' operation on multiple filter conditions.
  *
  * ```typescript
@@ -6646,6 +6848,281 @@ export function stringReverse(stringExpression: Expression): FunctionExpression;
 export function stringReverse(field: string): FunctionExpression;
 export function stringReverse(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).stringReverse();
+}
+
+/**
+ * Creates an expression that concatenates strings, arrays, or blobs. Types cannot be mixed.
+ *
+ * ```typescript
+ * // Concatenate the 'firstName' and 'lastName' fields with a space in between.
+ * concat(field("firstName"), " ", field("lastName"))
+ * ```
+ *
+ * @param first The first expressions to concatenate.
+ * @param second The second literal or expression to concatenate.
+ * @param others Additional literals or expressions to concatenate.
+ * @return A new `Expression` representing the concatenation.
+ */
+export function concat(
+  first: Expression,
+  second: Expression | unknown,
+  ...others: Array<Expression | unknown>
+): FunctionExpression;
+
+/**
+ * Creates an expression that concatenates strings, arrays, or blobs. Types cannot be mixed.
+ *
+ * ```typescript
+ * // Concatenate a field with a literal string.
+ * concat(field("firstName"), "Doe")
+ * ```
+ *
+ * @param fieldName The name of a field to concatenate.
+ * @param second The second literal or expression to concatenate.
+ * @param others Additional literal or expressions to concatenate.
+ * @return A new `Expression` representing the concatenation.
+ */
+export function concat(
+  fieldName: string,
+  second: Expression | unknown,
+  ...others: Array<Expression | unknown>
+): FunctionExpression;
+
+export function concat(
+  fieldNameOrExpression: string | Expression,
+  second: Expression | unknown,
+  ...others: Array<Expression | unknown>
+): FunctionExpression {
+  return fieldOrExpression(fieldNameOrExpression).concat(
+    valueToDefaultExpr(second),
+    ...others.map(valueToDefaultExpr)
+  );
+}
+
+/**
+ * Creates an expression that computes the absolute value of a numeric value.
+ *
+ * @param expr The expression to compute the absolute value of.
+ * @return A new {@code Expr} representing the absolute value of the numeric value.
+ */
+export function abs(expr: Expression): FunctionExpression;
+
+/**
+ * Creates an expression that computes the absolute value of a numeric value.
+ *
+ * @param fieldName The field to compute the absolute value of.
+ * @return A new {@code Expr} representing the absolute value of the numeric value.
+ */
+export function abs(fieldName: string): FunctionExpression;
+export function abs(expr: Expression | string): FunctionExpression {
+  return fieldOrExpression(expr).abs();
+}
+
+/**
+ * Creates an expression that returns the `elseExpr` argument if `ifExpr` is absent, else return
+ * the result of the `ifExpr` argument evaluation.
+ *
+ * ```typescript
+ * // Returns the value of the optional field 'optional_field', or returns 'default_value'
+ * // if the field is absent.
+ * ifAbsent(field("optional_field"), constant("default_value"))
+ * ```
+ *
+ * @param ifExpr The expression to check for absence.
+ * @param elseExpr The expression that will be evaluated and returned if [ifExpr] is absent.
+ * @return A new Expression representing the ifAbsent operation.
+ */
+export function ifAbsent(ifExpr: Expression, elseExpr: Expression): Expression;
+
+/**
+ * Creates an expression that returns the `elseValue` argument if `ifExpr` is absent, else
+ * return the result of the `ifExpr` argument evaluation.
+ *
+ * ```typescript
+ * // Returns the value of the optional field 'optional_field', or returns 'default_value'
+ * // if the field is absent.
+ * ifAbsent(field("optional_field"), "default_value")
+ * ```
+ *
+ * @param ifExpr The expression to check for absence.
+ * @param elseValue The value that will be returned if `ifExpr` evaluates to an absent value.
+ * @return A new [Expression] representing the ifAbsent operation.
+ */
+export function ifAbsent(ifExpr: Expression, elseValue: unknown): Expression;
+
+/**
+ * Creates an expression that returns the `elseExpr` argument if `ifFieldName` is absent, else
+ * return the value of the field.
+ *
+ * ```typescript
+ * // Returns the value of the optional field 'optional_field', or returns the value of
+ * // 'default_field' if 'optional_field' is absent.
+ * ifAbsent("optional_field", field("default_field"))
+ * ```
+ *
+ * @param ifFieldName The field to check for absence.
+ * @param elseExpr The expression that will be evaluated and returned if `ifFieldName` is
+ * absent.
+ * @return A new Expression representing the ifAbsent operation.
+ */
+export function ifAbsent(ifFieldName: string, elseExpr: Expression): Expression;
+
+/**
+ * Creates an expression that returns the `elseValue` argument if `ifFieldName` is absent, else
+ * return the value of the field.
+ *
+ * ```typescript
+ * // Returns the value of the optional field 'optional_field', or returns 'default_value'
+ * // if the field is absent.
+ * ifAbsent("optional_field", "default_value")
+ * ```
+ *
+ * @param ifFieldName The field to check for absence.
+ * @param elseValue The value that will be returned if [ifFieldName] is absent.
+ * @return A new Expression representing the ifAbsent operation.
+ */
+export function ifAbsent(
+  ifFieldName: string | Expression,
+  elseValue: Expression | unknown
+): Expression;
+export function ifAbsent(
+  fieldNameOrExpression: string | Expression,
+  elseValue: Expression | unknown
+): Expression {
+  return fieldOrExpression(fieldNameOrExpression).ifAbsent(
+    valueToDefaultExpr(elseValue)
+  );
+}
+
+/**
+ * Creates an expression that joins the elements of an array into a string.
+ *
+ * ```typescript
+ * // Join the elements of the 'tags' field with a comma and space.
+ * join("tags", ", ")
+ * ```
+ *
+ * @param arrayFieldName The name of the field containing the array.
+ * @param delimiter The string to use as a delimiter.
+ * @return A new Expression representing the join operation.
+ */
+export function join(arrayFieldName: string, delimiter: string): Expression;
+
+/**
+ * Creates an expression that joins the elements of an array into a string.
+ *
+ * ```typescript
+ * // Join an array of string using the delimiter from the 'separator' field.
+ * join(array(['foo', 'bar']), field("separator"))
+ * ```
+ *
+ * @param arrayExpression An expression that evaluates to an array.
+ * @param delimiterExpression The expression that evaluates to the delimiter string.
+ * @return A new Expression representing the join operation.
+ */
+export function join(
+  arrayExpression: Expression,
+  delimiterExpression: Expression
+): Expression;
+
+/**
+ * Creates an expression that joins the elements of an array into a string.
+ *
+ * ```typescript
+ * // Join the elements of the 'tags' field with a comma and space.
+ * join(field("tags"), ", ")
+ * ```
+ *
+ * @param arrayExpression An expression that evaluates to an array.
+ * @param delimiter The string to use as a delimiter.
+ * @return A new Expression representing the join operation.
+ */
+export function join(
+  arrayExpression: Expression,
+  delimiter: string
+): Expression;
+
+/**
+ * Creates an expression that joins the elements of an array into a string.
+ *
+ * ```typescript
+ * // Join the elements of the 'tags' field with the delimiter from the 'separator' field.
+ * join('tags', field("separator"))
+ * ```
+ *
+ * @param arrayFieldName The name of the field containing the array.
+ * @param delimiterExpression The expression that evaluates to the delimiter string.
+ * @return A new Expression representing the join operation.
+ */
+export function join(
+  arrayFieldName: string,
+  delimiterExpression: Expression
+): Expression;
+export function join(
+  fieldNameOrExpression: string | Expression,
+  delimiterValueOrExpression: Expression | string
+): Expression {
+  return fieldOrExpression(fieldNameOrExpression).join(
+    valueToDefaultExpr(delimiterValueOrExpression)
+  );
+}
+
+/**
+ * Creates an expression that computes the base-10 logarithm of a numeric value.
+ *
+ * ```typescript
+ * // Compute the base-10 logarithm of the 'value' field.
+ * log10("value");
+ * ```
+ *
+ * @param fieldName The name of the field to compute the base-10 logarithm of.
+ * @return A new `Expr` representing the base-10 logarithm of the numeric value.
+ */
+export function log10(fieldName: string): FunctionExpression;
+
+/**
+ * Creates an expression that computes the base-10 logarithm of a numeric value.
+ *
+ * ```typescript
+ * // Compute the base-10 logarithm of the 'value' field.
+ * log10(field("value"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which the base-10 logarithm will be computed for.
+ * @return A new `Expr` representing the base-10 logarithm of the numeric value.
+ */
+export function log10(expression: Expression): FunctionExpression;
+export function log10(expr: Expression | string): FunctionExpression {
+  return fieldOrExpression(expr).log10();
+}
+
+/**
+ * Creates an expression that computes the sum of the elements in an array.
+ *
+ * ```typescript
+ * // Compute the sum of the elements in the 'scores' field.
+ * arraySum("scores");
+ * ```
+ *
+ * @param fieldName The name of the field to compute the sum of.
+ * @return A new `Expr` representing the sum of the elements in the array.
+ */
+export function arraySum(fieldName: string): FunctionExpression;
+
+/**
+ * Creates an expression that computes the sum of the elements in an array.
+ *
+ * ```typescript
+ * // Compute the sum of the elements in the 'scores' field.
+ * arraySum(field("scores"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric array, which the sum will be computed for.
+ * @return A new `Expr` representing the sum of the elements in the array.
+ */
+export function arraySum(expression: Expression): FunctionExpression;
+export function arraySum(expr: Expression | string): FunctionExpression {
+  return fieldOrExpression(expr).arraySum();
 }
 
 // TODO(new-expression): Add new top-level expression function definitions above this line

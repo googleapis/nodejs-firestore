@@ -112,6 +112,14 @@ import {
   ln,
   sqrt,
   stringReverse,
+  abs,
+  log10,
+  concat,
+  ifAbsent,
+  join,
+  arraySum,
+  currentTimestamp,
+  error,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -2399,16 +2407,20 @@ describe.only('Pipeline class', () => {
             lessThan(field('published'), 1960),
             constant(1960),
             field('published')
-          ).as('published-safe')
+          ).as('published-safe'),
+          field('rating')
+            .greaterThanOrEqual(4.5)
+            .conditional(constant('great'), constant('good'))
+            .as('rating')
         )
         .sort(field('title').ascending())
         .limit(3)
         .execute();
       expectResults(
         snapshot,
-        {title: '1984', 'published-safe': 1960},
-        {title: 'Crime and Punishment', 'published-safe': 1960},
-        {title: 'Dune', 'published-safe': 1965}
+        {title: '1984', 'published-safe': 1960, rating: 'good'},
+        {title: 'Crime and Punishment', 'published-safe': 1960, rating: 'good'},
+        {title: 'Dune', 'published-safe': 1965, rating: 'great'}
       );
     });
 
@@ -2725,6 +2737,7 @@ describe.only('Pipeline class', () => {
           field('rating').isNan().as('ratingIsNaN'),
           arrayGet('title', 0).isError().as('isError'),
           arrayGet('title', 0).ifError(constant('was error')).as('ifError'),
+          constant(true).ifError(constant(false)).as('ifErrorBoolean'),
           field('foo').isAbsent().as('isAbsent'),
           field('title').isNotNull().as('titleIsNotNull'),
           field('cost').isNotNan().as('costIsNotNan')
@@ -2735,6 +2748,7 @@ describe.only('Pipeline class', () => {
         ratingIsNaN: false,
         isError: true,
         ifError: 'was error',
+        ifErrorBoolean: false,
         isAbsent: true,
         titleIsNotNull: true,
         costIsNotNan: false,
@@ -3755,6 +3769,176 @@ describe.only('Pipeline class', () => {
         .select(reverse('title').as('reverseTitle'))
         .execute();
       expectResults(snapshot, {reverseTitle: '4891'});
+    });
+
+    it('testAbs', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(
+          constant(-10).as('neg10'),
+          constant(-22.22).as('neg22'),
+          constant(1).as('pos1')
+        )
+        .select(
+          abs('neg10').as('10'),
+          abs(field('neg22')).as('22'),
+          field('pos1').as('1')
+        )
+        .execute();
+      expectResults(snapshot, {
+        '10': 10,
+        '22': 22.22,
+        '1': 1,
+      });
+    });
+
+    it('can compute the base-10 logarithm of a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal('The Lord of the Rings'))
+        .limit(1)
+        .select(field('rating').log10().as('log10Rating'))
+        .execute();
+      expect(snapshot.results[0]!.data().log10Rating).to.be.closeTo(
+        0.672,
+        0.001
+      );
+    });
+
+    it('can compute the base-10 logarithm of a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal('The Lord of the Rings'))
+        .limit(1)
+        .select(log10('rating').as('log10Rating'))
+        .execute();
+      expect(snapshot.results[0]!.data().log10Rating).to.be.closeTo(
+        0.672,
+        0.001
+      );
+    });
+
+    it('can concat fields', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .addFields(
+          concat('author', ' ', field('title')).as('display'),
+          field('author').concat(': ', field('title')).as('display2')
+        )
+        .where(equal('author', 'Douglas Adams'))
+        .select('display', 'display2')
+        .execute();
+      expectResults(snapshot, {
+        display: "Douglas Adams The Hitchhiker's Guide to the Galaxy",
+        display2: "Douglas Adams: The Hitchhiker's Guide to the Galaxy",
+      });
+    });
+
+    it('supports currentTimestamp', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .addFields(currentTimestamp().as('now'))
+        .select('now')
+        .execute();
+      const now = snapshot.results[0].get('now') as Timestamp;
+      expect(now).instanceof(Timestamp);
+      expect(
+        now.toDate().getUTCSeconds() - new Date().getUTCSeconds()
+      ).lessThan(5000);
+    });
+
+    // Not implemented in backend
+    // eslint-disable-next-line no-restricted-properties
+    it.skip('supports error', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(isError(error('test error')).as('error'))
+        .execute();
+
+      expectResults(snapshot, {
+        error: true,
+      });
+    });
+
+    it('supports ifAbsent', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            title: 'foo',
+          })
+        )
+        .select(
+          ifAbsent('title', 'default title').as('title'),
+          field('name').ifAbsent('default name').as('name'),
+          field('name').ifAbsent(field('title')).as('nameOrTitle')
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        title: 'foo',
+        name: 'default name',
+        nameOrTitle: 'foo',
+      });
+    });
+
+    it('supports join', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            tags: ['foo', 'bar', 'baz'],
+            delimeter: '|',
+          })
+        )
+        .select(join('tags', ',').as('csv'), field('tags').join('|').as('or'))
+        .execute();
+
+      expectResults(snapshot, {
+        csv: 'foo,bar,baz',
+        or: 'foo|bar|baz',
+      });
+    });
+
+    it('can compute the sum of the elements in an array', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal('The Lord of the Rings'))
+        .limit(1)
+        .addFields(array([150, 200]).as('sales'))
+        .select(field('sales').arraySum().as('totalSales'))
+        .execute();
+      expectResults(snapshot, {
+        totalSales: 350,
+      });
+    });
+
+    it('can compute the sum of the elements in an array with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal('The Lord of the Rings'))
+        .limit(1)
+        .addFields(array([150, 200]).as('sales'))
+        .select(arraySum('sales').as('totalSales'))
+        .execute();
+      expectResults(snapshot, {
+        totalSales: 350,
+      });
     });
 
     // TODO(new-expression): Add new expression tests above this line

@@ -3902,6 +3902,18 @@ declare namespace FirebaseFirestore {
       floor(): FunctionExpression;
 
       /**
+       * Creates an expression that computes the absolute value of a numeric value.
+       *
+       * ```typescript
+       * // Compute the absolute value of the 'price' field.
+       * field("price").abs();
+       * ```
+       *
+       * @return A new {@code Expr} representing the absolute value of the numeric value.
+       */
+      abs(): FunctionExpression;
+
+      /**
        * @beta
        * Creates an expression that computes `e` (Euler's number) raised to the power of this expression's numeric value.
        *
@@ -4287,8 +4299,7 @@ declare namespace FirebaseFirestore {
         amount: number
       ): FunctionExpression;
       /**
- * @beta
-
+       * @beta
        * Creates an expression that returns the document ID from a DocumentReference.
        *
        * ```typescript
@@ -4300,8 +4311,7 @@ declare namespace FirebaseFirestore {
        */
       documentId(): FunctionExpression;
       /**
- * @beta
-
+       * @beta
        * Creates an expression that returns a substring of the results of this expression.
        *
        * @param position Index of the first character of the substring.
@@ -4310,8 +4320,7 @@ declare namespace FirebaseFirestore {
        */
       substring(position: number, length?: number): FunctionExpression;
       /**
- * @beta
-
+       * @beta
        * Creates an expression that returns a substring of the results of this expression.
        *
        * @param position An expression returning the index of the first character of the substring.
@@ -4320,8 +4329,7 @@ declare namespace FirebaseFirestore {
        */
       substring(position: Expression, length?: Expression): FunctionExpression;
       /**
- * @beta
-
+       * @beta
        * Creates an expression that indexes into an array from the beginning or end
        * and returns the element. If the index exceeds the array length, an error is
        * returned. A negative index, starts from the end.
@@ -4336,8 +4344,7 @@ declare namespace FirebaseFirestore {
        */
       arrayGet(index: number): FunctionExpression;
       /**
- * @beta
-
+       * @beta
        * Creates an expression that indexes into an array from the beginning or end
        * and returns the element. If the index exceeds the array length, an error is
        * returned. A negative index, starts from the end.
@@ -4353,8 +4360,7 @@ declare namespace FirebaseFirestore {
        */
       arrayGet(indexExpr: Expression): FunctionExpression;
       /**
- * @beta
-
+       * @beta
        * Creates an expression that checks if a given expression produces an error.
        *
        * ```typescript
@@ -4366,8 +4372,7 @@ declare namespace FirebaseFirestore {
        */
       isError(): BooleanExpression;
       /**
- * @beta
-
+       * @beta
        * Creates an expression that returns the result of the `catchExpr` argument
        * if there is an error, else return the result of this expression.
        *
@@ -4383,8 +4388,7 @@ declare namespace FirebaseFirestore {
        */
       ifError(catchExpr: Expression): FunctionExpression;
       /**
- * @beta
-
+       * @beta
        * Creates an expression that returns the `catch` argument if there is an
        * error, else return the result of this expression.
        *
@@ -4400,8 +4404,7 @@ declare namespace FirebaseFirestore {
        */
       ifError(catchValue: unknown): FunctionExpression;
       /**
- * @beta
-
+       * @beta
        * Creates an expression that returns `true` if the result of this expression
        * is absent. Otherwise, returns `false` even if the value is `null`.
        *
@@ -4427,8 +4430,7 @@ declare namespace FirebaseFirestore {
        */
       isNotNull(): BooleanExpression;
       /**
- * @beta
-
+       * @beta
        * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
        *
        * ```typescript
@@ -4592,6 +4594,90 @@ declare namespace FirebaseFirestore {
        * @return A new {@code Expression} representing the reversed string.
        */
       stringReverse(): FunctionExpression;
+
+      /**
+       * Creates an expression that returns the `elseValue` argument if this expression results in an absent value, else
+       * return the result of the this expression evaluation.
+       *
+       * ```typescript
+       * // Returns the value of the optional field 'optional_field', or returns 'default_value'
+       * // if the field is absent.
+       * field("optional_field").ifAbsent("default_value")
+       * ```
+       *
+       * @param elseValue The value that will be returned if this Expression evaluates to an absent value.
+       * @return A new [Expression] representing the ifAbsent operation.
+       */
+      ifAbsent(elseValue: unknown): Expression;
+
+      /**
+       * Creates an expression that returns the `elseValue` argument if this expression results in an absent value, else
+       * return the result of this expression evaluation.
+       *
+       * ```typescript
+       * // Returns the value of the optional field 'optional_field', or if that is
+       * // absent, then returns the value of the field `
+       * field("optional_field").ifAbsent(field('default_field'))
+       * ```
+       *
+       * @param elseExpression The Expression that will be evaluated if this Expression evaluates to an absent value.
+       * @return A new [Expression] representing the ifAbsent operation.
+       */
+      ifAbsent(elseExpression: unknown): Expression;
+
+      ifAbsent(elseValueOrExpression: Expression | unknown): Expression;
+
+      /**
+       * Creates an expression that joins the elements of an array into a string.
+       *
+       * ```typescript
+       * // Join the elements of the 'tags' field with the delimiter from the 'separator' field.
+       * field("tags").join(field("separator"))
+       * ```
+       *
+       * @param delimiterExpression The expression that evaluates to the delimiter string.
+       * @return A new Expression representing the join operation.
+       */
+      join(delimiterExpression: Expression): Expression;
+
+      /**
+       * Creates an expression that joins the elements of an array field into a string.
+       *
+       * ```typescript
+       * // Join the elements of the 'tags' field with a comma and space.
+       * field("tags").join(", ")
+       * ```
+       *
+       * @param delimiter The string to use as a delimiter.
+       * @return A new Expression representing the join operation.
+       */
+      join(delimiter: string): Expression;
+
+      join(delimeterValueOrExpression: string | Expression): Expression;
+
+      /**
+       * Creates an expression that computes the base-10 logarithm of a numeric value.
+       *
+       * ```typescript
+       * // Compute the base-10 logarithm of the 'value' field.
+       * field("value").log10();
+       * ```
+       *
+       * @return A new {@code Expr} representing the base-10 logarithm of the numeric value.
+       */
+      log10(): FunctionExpression;
+
+      /**
+       * Creates an expression that computes the sum of the elements in an array.
+       *
+       * ```typescript
+       * // Compute the sum of the elements in the 'scores' field.
+       * field("scores").arraySum();
+       * ```
+       *
+       * @return A new {@code Expr} representing the sum of the elements in the array.
+       */
+      arraySum(): FunctionExpression;
       // TODO(new-expression): Add new expression method declarations above this line
       /**
        * @beta
@@ -8273,6 +8359,34 @@ declare namespace FirebaseFirestore {
         | 'day',
       amount: number
     ): FunctionExpression;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that evaluates to the current server timestamp.
+     *
+     * ```typescript
+     * // Get the current server timestamp
+     * currentTimestamp()
+     * ```
+     *
+     * @return A new Expression representing the current server timestamp.
+     */
+    export function currentTimestamp(): FunctionExpression;
+
+    /**
+     * Creates an expression that raises an error with the given message. This could be useful for
+     * debugging purposes.
+     *
+     * ```typescript
+     * // Raise an error with the message "simulating an evaluation error".
+     * error("simulating an evaluation error")
+     * ```
+     *
+     * @return A new Expression representing the error() operation.
+     */
+    export function error(message: string): Expression;
+
     /**
      * @beta
      * Creates an expression that performs a logical 'AND' operation on multiple filter conditions.
@@ -8458,7 +8572,191 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the reversed string.
      */
     export function stringReverse(field: string): FunctionExpression;
-    // TODO(new-expression): Add new top-level expression function declarations above this line
+
+    /**
+     * Creates an expression that concatenates strings, arrays, or blobs. Types cannot be mixed.
+     *
+     * ```typescript
+     * // Concatenate the 'firstName' and 'lastName' fields with a space in between.
+     * concat(field("firstName"), " ", field("lastName"))
+     * ```
+     *
+     * @param first The first expressions to concatenate.
+     * @param second The second literal or expression to concatenate.
+     * @param others Additional literals or expressions to concatenate.
+     * @return A new `Expression` representing the concatenation.
+     */
+    export function concat(
+      first: Expression,
+      second: Expression | unknown,
+      ...others: Array<Expression | unknown>
+    ): FunctionExpression;
+
+    /**
+     * Creates an expression that computes the absolute value of a numeric value.
+     *
+     * @param expr The expression to compute the absolute value of.
+     * @return A new {@code Expr} representing the absolute value of the numeric value.
+     */
+    export function abs(expr: Expression): FunctionExpression;
+
+    /**
+     * Creates an expression that returns the `elseExpr` argument if `ifExpr` is absent, else return
+     * the result of the `ifExpr` argument evaluation.
+     *
+     * ```typescript
+     * // Returns the value of the optional field 'optional_field', or returns 'default_value'
+     * // if the field is absent.
+     * ifAbsent(field("optional_field"), constant("default_value"))
+     * ```
+     *
+     * @param ifExpr The expression to check for absence.
+     * @param elseExpr The expression that will be evaluated and returned if [ifExpr] is absent.
+     * @return A new Expression representing the ifAbsent operation.
+     */
+    export function ifAbsent(
+      ifExpr: Expression,
+      elseExpr: Expression
+    ): Expression;
+
+    /**
+     * Creates an expression that returns the `elseValue` argument if `ifExpr` is absent, else
+     * return the result of the `ifExpr` argument evaluation.
+     *
+     * ```typescript
+     * // Returns the value of the optional field 'optional_field', or returns 'default_value'
+     * // if the field is absent.
+     * ifAbsent(field("optional_field"), "default_value")
+     * ```
+     *
+     * @param ifExpr The expression to check for absence.
+     * @param elseValue The value that will be returned if `ifExpr` evaluates to an absent value.
+     * @return A new [Expression] representing the ifAbsent operation.
+     */
+    export function ifAbsent(
+      ifExpr: Expression,
+      elseValue: unknown
+    ): Expression;
+
+    /**
+     * Creates an expression that returns the `elseExpr` argument if `ifFieldName` is absent, else
+     * return the value of the field.
+     *
+     * ```typescript
+     * // Returns the value of the optional field 'optional_field', or returns the value of
+     * // 'default_field' if 'optional_field' is absent.
+     * ifAbsent("optional_field", field("default_field"))
+     * ```
+     *
+     * @param ifFieldName The field to check for absence.
+     * @param elseExpr The expression that will be evaluated and returned if `ifFieldName` is
+     * absent.
+     * @return A new Expression representing the ifAbsent operation.
+     */
+    export function ifAbsent(
+      ifFieldName: string,
+      elseExpr: Expression
+    ): Expression;
+
+    /**
+     * Creates an expression that joins the elements of an array into a string.
+     *
+     * ```typescript
+     * // Join the elements of the 'tags' field with a comma and space.
+     * join("tags", ", ")
+     * ```
+     *
+     * @param arrayFieldName The name of the field containing the array.
+     * @param delimiter The string to use as a delimiter.
+     * @return A new Expression representing the join operation.
+     */
+    export function join(arrayFieldName: string, delimiter: string): Expression;
+
+    /**
+     * Creates an expression that joins the elements of an array into a string.
+     *
+     * ```typescript
+     * // Join an array of string using the delimiter from the 'separator' field.
+     * join(array(['foo', 'bar']), field("separator"))
+     * ```
+     *
+     * @param arrayExpression An expression that evaluates to an array.
+     * @param delimiterExpression The expression that evaluates to the delimiter string.
+     * @return A new Expression representing the join operation.
+     */
+    export function join(
+      arrayExpression: Expression,
+      delimiterExpression: Expression
+    ): Expression;
+
+    /**
+     * Creates an expression that joins the elements of an array into a string.
+     *
+     * ```typescript
+     * // Join the elements of the 'tags' field with a comma and space.
+     * join(field("tags"), ", ")
+     * ```
+     *
+     * @param arrayExpression An expression that evaluates to an array.
+     * @param delimiter The string to use as a delimiter.
+     * @return A new Expression representing the join operation.
+     */
+    export function join(
+      arrayExpression: Expression,
+      delimiter: string
+    ): Expression;
+
+    /**
+     * Creates an expression that computes the base-10 logarithm of a numeric value.
+     *
+     * ```typescript
+     * // Compute the base-10 logarithm of the 'value' field.
+     * log10("value");
+     * ```
+     *
+     * @param fieldName The name of the field to compute the base-10 logarithm of.
+     * @return A new `Expr` representing the base-10 logarithm of the numeric value.
+     */
+    export function log10(fieldName: string): FunctionExpression;
+
+    /**
+     * Creates an expression that computes the base-10 logarithm of a numeric value.
+     *
+     * ```typescript
+     * // Compute the base-10 logarithm of the 'value' field.
+     * log10(field("value"));
+     * ```
+     *
+     * @param expression An expression evaluating to a numeric value, which the base-10 logarithm will be computed for.
+     * @return A new `Expr` representing the base-10 logarithm of the numeric value.
+     */
+    export function log10(expression: Expression): FunctionExpression;
+
+    /**
+     * Creates an expression that computes the sum of the elements in an array.
+     *
+     * ```typescript
+     * // Compute the sum of the elements in the 'scores' field.
+     * arraySum("scores");
+     * ```
+     *
+     * @param fieldName The name of the field to compute the sum of.
+     * @return A new `Expr` representing the sum of the elements in the array.
+     */
+    export function arraySum(fieldName: string): FunctionExpression;
+
+    /**
+     * Creates an expression that computes the sum of the elements in an array.
+     *
+     * ```typescript
+     * // Compute the sum of the elements in the 'scores' field.
+     * arraySum(field("scores"));
+     * ```
+     *
+     * @param expression An expression evaluating to a numeric array, which the sum will be computed for.
+     * @return A new `Expr` representing the sum of the elements in the array.
+     */
+    export function arraySum(expression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that computes the natural logarithm of a numeric value.
@@ -8537,6 +8835,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the square root of the numeric value.
      */
     export function sqrt(fieldName: string): FunctionExpression;
+    // TODO(new-expression): Add new top-level expression function declarations above this line
     /**
      * @beta
      * Creates an {@link Ordering} that sorts documents in ascending order based on an expression.

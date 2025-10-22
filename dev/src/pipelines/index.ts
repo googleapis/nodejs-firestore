@@ -117,5 +117,13 @@ export {
   round,
   sqrt,
   stringReverse,
+  abs,
+  arraySum,
+  ifAbsent,
+  log10,
+  concat,
+  join,
+  currentTimestamp,
+  error,
   // TODO(new-expression): Add new expression exports above this line
 } from './expression';
