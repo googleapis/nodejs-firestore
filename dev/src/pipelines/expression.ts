@@ -967,6 +967,7 @@ export abstract class Expression
   }
 
   /**
+   * @beta
    * Creates an expression that concatenates expression results together.
    *
    * ```typescript
@@ -1048,6 +1049,7 @@ export abstract class Expression
   }
 
   /**
+   * @beta
    * Creates an expression that computes the absolute value of a numeric value.
    *
    * ```typescript
@@ -1924,6 +1926,7 @@ export abstract class Expression
   }
 
   /**
+   * @beta
    * Creates an expression that returns the `elseValue` argument if this expression results in an absent value, else
    * return the result of the this expression evaluation.
    *
@@ -1939,6 +1942,7 @@ export abstract class Expression
   ifAbsent(elseValue: unknown): Expression;
 
   /**
+   * @beta
    * Creates an expression that returns the `elseValue` argument if this expression results in an absent value, else
    * return the result of this expression evaluation.
    *
@@ -1961,6 +1965,7 @@ export abstract class Expression
   }
 
   /**
+   * @beta
    * Creates an expression that joins the elements of an array into a string.
    *
    * ```typescript
@@ -1974,6 +1979,7 @@ export abstract class Expression
   join(delimiterExpression: Expression): Expression;
 
   /**
+   * @beta
    * Creates an expression that joins the elements of an array field into a string.
    *
    * ```typescript
@@ -1994,6 +2000,7 @@ export abstract class Expression
   }
 
   /**
+   * @beta
    * Creates an expression that computes the base-10 logarithm of a numeric value.
    *
    * ```typescript
@@ -2008,6 +2015,7 @@ export abstract class Expression
   }
 
   /**
+   * @beta
    * Creates an expression that computes the sum of the elements in an array.
    *
    * ```typescript
@@ -2736,6 +2744,7 @@ export class BooleanExpression
   }
 
   /**
+   * @beta
    * Creates a conditional expression that evaluates to the 'then' expression
    * if `this` expression evaluates to `true`,
    * or evaluates to the 'else' expression if `this` expressions evaluates `false`.
@@ -6533,6 +6542,7 @@ export function currentTimestamp(): FunctionExpression {
 }
 
 /**
+ * @beta
  * Creates an expression that raises an error with the given message. This could be useful for
  * debugging purposes.
  *
@@ -6851,6 +6861,7 @@ export function stringReverse(expr: Expression | string): FunctionExpression {
 }
 
 /**
+ * @beta
  * Creates an expression that concatenates strings, arrays, or blobs. Types cannot be mixed.
  *
  * ```typescript
@@ -6870,6 +6881,7 @@ export function concat(
 ): FunctionExpression;
 
 /**
+ * @beta
  * Creates an expression that concatenates strings, arrays, or blobs. Types cannot be mixed.
  *
  * ```typescript
@@ -6900,6 +6912,7 @@ export function concat(
 }
 
 /**
+ * @beta
  * Creates an expression that computes the absolute value of a numeric value.
  *
  * @param expr The expression to compute the absolute value of.
@@ -6908,6 +6921,7 @@ export function concat(
 export function abs(expr: Expression): FunctionExpression;
 
 /**
+ * @beta
  * Creates an expression that computes the absolute value of a numeric value.
  *
  * @param fieldName The field to compute the absolute value of.
@@ -6919,6 +6933,7 @@ export function abs(expr: Expression | string): FunctionExpression {
 }
 
 /**
+ * @beta
  * Creates an expression that returns the `elseExpr` argument if `ifExpr` is absent, else return
  * the result of the `ifExpr` argument evaluation.
  *
@@ -6935,6 +6950,7 @@ export function abs(expr: Expression | string): FunctionExpression {
 export function ifAbsent(ifExpr: Expression, elseExpr: Expression): Expression;
 
 /**
+ * @beta
  * Creates an expression that returns the `elseValue` argument if `ifExpr` is absent, else
  * return the result of the `ifExpr` argument evaluation.
  *
@@ -6951,6 +6967,7 @@ export function ifAbsent(ifExpr: Expression, elseExpr: Expression): Expression;
 export function ifAbsent(ifExpr: Expression, elseValue: unknown): Expression;
 
 /**
+ * @beta
  * Creates an expression that returns the `elseExpr` argument if `ifFieldName` is absent, else
  * return the value of the field.
  *
@@ -6968,6 +6985,7 @@ export function ifAbsent(ifExpr: Expression, elseValue: unknown): Expression;
 export function ifAbsent(ifFieldName: string, elseExpr: Expression): Expression;
 
 /**
+ * @beta
  * Creates an expression that returns the `elseValue` argument if `ifFieldName` is absent, else
  * return the value of the field.
  *
@@ -6995,6 +7013,7 @@ export function ifAbsent(
 }
 
 /**
+ * @beta
  * Creates an expression that joins the elements of an array into a string.
  *
  * ```typescript
@@ -7009,6 +7028,7 @@ export function ifAbsent(
 export function join(arrayFieldName: string, delimiter: string): Expression;
 
 /**
+ * @beta
  * Creates an expression that joins the elements of an array into a string.
  *
  * ```typescript
@@ -7026,6 +7046,7 @@ export function join(
 ): Expression;
 
 /**
+ * @beta
  * Creates an expression that joins the elements of an array into a string.
  *
  * ```typescript
@@ -7043,6 +7064,7 @@ export function join(
 ): Expression;
 
 /**
+ * @beta
  * Creates an expression that joins the elements of an array into a string.
  *
  * ```typescript
@@ -7068,6 +7090,7 @@ export function join(
 }
 
 /**
+ * @beta
  * Creates an expression that computes the base-10 logarithm of a numeric value.
  *
  * ```typescript
@@ -7081,6 +7104,7 @@ export function join(
 export function log10(fieldName: string): FunctionExpression;
 
 /**
+ * @beta
  * Creates an expression that computes the base-10 logarithm of a numeric value.
  *
  * ```typescript
@@ -7097,6 +7121,7 @@ export function log10(expr: Expression | string): FunctionExpression {
 }
 
 /**
+ * @beta
  * Creates an expression that computes the sum of the elements in an array.
  *
  * ```typescript
@@ -7110,6 +7135,7 @@ export function log10(expr: Expression | string): FunctionExpression {
 export function arraySum(fieldName: string): FunctionExpression;
 
 /**
+ * @beta
  * Creates an expression that computes the sum of the elements in an array.
  *
  * ```typescript

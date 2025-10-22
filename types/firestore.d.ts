@@ -3902,6 +3902,7 @@ declare namespace FirebaseFirestore {
       floor(): FunctionExpression;
 
       /**
+       * @beta
        * Creates an expression that computes the absolute value of a numeric value.
        *
        * ```typescript
@@ -4596,6 +4597,7 @@ declare namespace FirebaseFirestore {
       stringReverse(): FunctionExpression;
 
       /**
+       * @beta
        * Creates an expression that returns the `elseValue` argument if this expression results in an absent value, else
        * return the result of the this expression evaluation.
        *
@@ -4611,6 +4613,7 @@ declare namespace FirebaseFirestore {
       ifAbsent(elseValue: unknown): Expression;
 
       /**
+       * @beta
        * Creates an expression that returns the `elseValue` argument if this expression results in an absent value, else
        * return the result of this expression evaluation.
        *
@@ -4628,6 +4631,7 @@ declare namespace FirebaseFirestore {
       ifAbsent(elseValueOrExpression: Expression | unknown): Expression;
 
       /**
+       * @beta
        * Creates an expression that joins the elements of an array into a string.
        *
        * ```typescript
@@ -4641,6 +4645,7 @@ declare namespace FirebaseFirestore {
       join(delimiterExpression: Expression): Expression;
 
       /**
+       * @beta
        * Creates an expression that joins the elements of an array field into a string.
        *
        * ```typescript
@@ -4656,6 +4661,7 @@ declare namespace FirebaseFirestore {
       join(delimeterValueOrExpression: string | Expression): Expression;
 
       /**
+       * @beta
        * Creates an expression that computes the base-10 logarithm of a numeric value.
        *
        * ```typescript
@@ -4668,6 +4674,7 @@ declare namespace FirebaseFirestore {
       log10(): FunctionExpression;
 
       /**
+       * @beta
        * Creates an expression that computes the sum of the elements in an array.
        *
        * ```typescript
@@ -8375,6 +8382,7 @@ declare namespace FirebaseFirestore {
     export function currentTimestamp(): FunctionExpression;
 
     /**
+     * @beta
      * Creates an expression that raises an error with the given message. This could be useful for
      * debugging purposes.
      *
@@ -8574,6 +8582,7 @@ declare namespace FirebaseFirestore {
     export function stringReverse(field: string): FunctionExpression;
 
     /**
+     * @beta
      * Creates an expression that concatenates strings, arrays, or blobs. Types cannot be mixed.
      *
      * ```typescript
@@ -8593,6 +8602,7 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
 
     /**
+     * @beta
      * Creates an expression that computes the absolute value of a numeric value.
      *
      * @param expr The expression to compute the absolute value of.
@@ -8601,6 +8611,7 @@ declare namespace FirebaseFirestore {
     export function abs(expr: Expression): FunctionExpression;
 
     /**
+     * @beta
      * Creates an expression that returns the `elseExpr` argument if `ifExpr` is absent, else return
      * the result of the `ifExpr` argument evaluation.
      *
@@ -8620,6 +8631,7 @@ declare namespace FirebaseFirestore {
     ): Expression;
 
     /**
+     * @beta
      * Creates an expression that returns the `elseValue` argument if `ifExpr` is absent, else
      * return the result of the `ifExpr` argument evaluation.
      *
@@ -8639,6 +8651,7 @@ declare namespace FirebaseFirestore {
     ): Expression;
 
     /**
+     * @beta
      * Creates an expression that returns the `elseExpr` argument if `ifFieldName` is absent, else
      * return the value of the field.
      *
@@ -8659,6 +8672,7 @@ declare namespace FirebaseFirestore {
     ): Expression;
 
     /**
+     * @beta
      * Creates an expression that joins the elements of an array into a string.
      *
      * ```typescript
@@ -8673,6 +8687,7 @@ declare namespace FirebaseFirestore {
     export function join(arrayFieldName: string, delimiter: string): Expression;
 
     /**
+     * @beta
      * Creates an expression that joins the elements of an array into a string.
      *
      * ```typescript
@@ -8690,6 +8705,7 @@ declare namespace FirebaseFirestore {
     ): Expression;
 
     /**
+     * @beta
      * Creates an expression that joins the elements of an array into a string.
      *
      * ```typescript
@@ -8707,6 +8723,7 @@ declare namespace FirebaseFirestore {
     ): Expression;
 
     /**
+     * @beta
      * Creates an expression that computes the base-10 logarithm of a numeric value.
      *
      * ```typescript
@@ -8720,6 +8737,7 @@ declare namespace FirebaseFirestore {
     export function log10(fieldName: string): FunctionExpression;
 
     /**
+     * @beta
      * Creates an expression that computes the base-10 logarithm of a numeric value.
      *
      * ```typescript
@@ -8733,6 +8751,7 @@ declare namespace FirebaseFirestore {
     export function log10(expression: Expression): FunctionExpression;
 
     /**
+     * @beta
      * Creates an expression that computes the sum of the elements in an array.
      *
      * ```typescript
@@ -8746,6 +8765,7 @@ declare namespace FirebaseFirestore {
     export function arraySum(fieldName: string): FunctionExpression;
 
     /**
+     * @beta
      * Creates an expression that computes the sum of the elements in an array.
      *
      * ```typescript
