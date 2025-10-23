@@ -120,6 +120,7 @@ import {
   arraySum,
   currentTimestamp,
   error,
+  arrayConcat,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -3717,6 +3718,33 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         of: 'of the Rings',
+      });
+    });
+
+    it('arrayConcat works', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
+        .select(
+          arrayConcat('tags', ['newTag1', 'newTag2'], field('tags'), [null]).as(
+            'modifiedTags'
+          )
+        )
+        .limit(1)
+        .execute();
+      expectResults(snapshot, {
+        modifiedTags: [
+          'comedy',
+          'space',
+          'adventure',
+          'newTag1',
+          'newTag2',
+          'comedy',
+          'space',
+          'adventure',
+          null,
+        ],
       });
     });
 

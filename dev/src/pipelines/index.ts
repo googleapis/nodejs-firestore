@@ -125,5 +125,6 @@ export {
   join,
   currentTimestamp,
   error,
+  arrayConcat,
   // TODO(new-expression): Add new expression exports above this line
 } from './expression';

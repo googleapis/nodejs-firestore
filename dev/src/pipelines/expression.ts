@@ -426,6 +426,26 @@ export abstract class Expression
   }
 
   /**
+   * Creates an expression that concatenates an array expression with one or more other arrays.
+   *
+   * ```typescript
+   * // Combine the 'items' array with another array field.
+   * field("items").arrayConcat(field("otherItems"));
+   * ```
+   * @param secondArray Second array expression or array literal to concatenate.
+   * @param otherArrays Optional additional array expressions or array literals to concatenate.
+   * @return A new `Expr` representing the concatenated array.
+   */
+  arrayConcat(
+    secondArray: Expression | unknown[],
+    ...otherArrays: Array<Expression | unknown[]>
+  ): FunctionExpression {
+    const elements = [secondArray, ...otherArrays];
+    const exprValues = elements.map(value => valueToDefaultExpr(value));
+    return new FunctionExpression('array_concat', [this, ...exprValues]);
+  }
+
+  /**
    * @beta
    * Creates an expression that checks if an array contains a specific element.
    *
@@ -4134,6 +4154,60 @@ export function greaterThanOrEqual(
   const leftExpr = fieldOrExpression(left);
   const rightExpr = valueToDefaultExpr(right);
   return leftExpr.greaterThanOrEqual(rightExpr);
+}
+
+/**
+ * @beta
+ *
+ * Creates an expression that concatenates an array expression with other arrays.
+ *
+ * ```typescript
+ * // Combine the 'items' array with two new item arrays
+ * arrayConcat(field("items"), [field("newItems"), field("otherItems")]);
+ * ```
+ *
+ * @param firstArray The first array expression to concatenate to.
+ * @param secondArray The second array expression or array literal to concatenate to.
+ * @param otherArrays Optional additional array expressions or array literals to concatenate.
+ * @return A new {@code Expr} representing the concatenated array.
+ */
+export function arrayConcat(
+  firstArray: Expression,
+  secondArray: Expression | unknown[],
+  ...otherArrays: Array<Expression | unknown[]>
+): FunctionExpression;
+
+/**
+ * @beta
+ *
+ * Creates an expression that concatenates a field's array value with other arrays.
+ *
+ * ```typescript
+ * // Combine the 'items' array with two new item arrays
+ * arrayConcat("items", [field("newItems"), field("otherItems")]);
+ * ```
+ *
+ * @param firstArrayField The first array to concatenate to.
+ * @param secondArray The second array expression or array literal to concatenate to.
+ * @param otherArrays Optional additional array expressions or array literals to concatenate.
+ * @return A new {@code Expr} representing the concatenated array.
+ */
+export function arrayConcat(
+  firstArrayField: string,
+  secondArray: Expression | unknown[],
+  ...otherArrays: Array<Expression | unknown[]>
+): FunctionExpression;
+
+export function arrayConcat(
+  firstArray: Expression | string,
+  secondArray: Expression | unknown[],
+  ...otherArrays: Array<Expression | unknown[]>
+): FunctionExpression {
+  const exprValues = otherArrays.map(element => valueToDefaultExpr(element));
+  return fieldOrExpression(firstArray).arrayConcat(
+    fieldOrExpression(secondArray),
+    ...exprValues
+  );
 }
 
 /**
