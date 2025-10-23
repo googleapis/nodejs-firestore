@@ -3312,7 +3312,6 @@ export function documentId(documentPathExpr: Expression): FunctionExpression;
 export function documentId(
   documentPath: Expression | string | firestore.DocumentReference
 ): FunctionExpression {
-  // @ts-ignore
   const documentPathExpr = valueToDefaultExpr(documentPath);
   return documentPathExpr.documentId();
 }

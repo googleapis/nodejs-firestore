@@ -25,7 +25,7 @@ export type StructuredPipelineOptions = {
   indexMode?: 'recommended';
   explainOptions?: {
     mode?: 'execute' | 'explain' | 'analyze';
-    outputFormat?: 'text' | 'json';
+    outputFormat?: 'text' | 'mongo';
   };
 };
 

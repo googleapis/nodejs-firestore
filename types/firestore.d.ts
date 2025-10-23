@@ -10176,7 +10176,7 @@ declare namespace FirebaseFirestore {
          * @beta
          * Specifies the output format of the query planner information.
          */
-        outputFormat?: 'text' | 'json';
+        outputFormat?: 'text' | 'mongo';
       };
       /**
        * @beta

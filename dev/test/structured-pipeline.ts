@@ -63,7 +63,7 @@ describe('StructuredPipeline', () => {
         indexMode: 'recommended',
         explainOptions: {
           mode: 'explain',
-          outputFormat: 'json',
+          outputFormat: 'mongo',
         },
       },
       {}
@@ -84,7 +84,7 @@ describe('StructuredPipeline', () => {
                 stringValue: 'explain',
               },
               output_format: {
-                stringValue: 'json',
+                stringValue: 'mongo',
               },
             },
           },

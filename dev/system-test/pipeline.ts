@@ -539,7 +539,7 @@ describe.only('Pipeline class', () => {
       );
     });
 
-    it('mode: analyze, format: json', async () => {
+    it('mode: analyze, format: mongo', async () => {
       const ppl = firestore
         .pipeline()
         .collection(randomCol.path)
@@ -547,7 +547,7 @@ describe.only('Pipeline class', () => {
       const snapshot = await ppl.execute({
         explainOptions: {
           mode: 'analyze',
-          outputFormat: 'json',
+          outputFormat: 'mongo',
         },
       });
       expect(snapshot.explainStats).not.to.be.undefined;
@@ -1350,7 +1350,6 @@ describe.only('Pipeline class', () => {
           .select('title', 'author')
           .sort(field('author').ascending())
           .removeFields(field('author'))
-          .sort(field('author').ascending())
           .execute();
         expectResults(
           snapshot,
@@ -1390,7 +1389,6 @@ describe.only('Pipeline class', () => {
           .removeFields({
             fields: [field('author'), 'genre'],
           })
-          .sort(field('author').ascending())
           .execute();
         expectResults(
           snapshot,
@@ -1430,7 +1428,6 @@ describe.only('Pipeline class', () => {
           .select('title', 'author')
           .sort(field('author').ascending())
           .removeFields(field('author'))
-          .sort(field('author').ascending())
           .execute();
         expectResults(
           snapshot,
@@ -1470,7 +1467,6 @@ describe.only('Pipeline class', () => {
           .removeFields({
             fields: [field('author'), 'genre'],
           })
-          .sort(field('author').ascending())
           .execute();
         expectResults(
           snapshot,
@@ -2790,7 +2786,7 @@ describe.only('Pipeline class', () => {
           title: "The Hitchhiker's Guide to the Galaxy",
           others: {unknown: {year: 1980}},
         },
-        {hugoAward: true, title: 'Dune', others: null}
+        {hugoAward: true, title: 'Dune'}
       );
     });
 
@@ -2882,23 +2878,32 @@ describe.only('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(equal('awards.hugo', true))
+        .limit(1)
+        .replaceWith(
+          map({
+            title: 'foo',
+            nested: {
+              level: {
+                '1': 'bar',
+              },
+              'level.1': {
+                'level.2': 'baz',
+              },
+            },
+          })
+        )
         .select(
           'title',
-          field('nestedField.level.1'),
-          mapGet('nestedField', 'level.1').mapGet('level.2').as('nested')
+          field('nested.level.1'),
+          mapGet('nested', 'level.1').mapGet('level.2').as('nested')
         )
-        .sort(descending('title'))
         .execute();
-      expectResults(
-        snapshot,
-        {
-          title: "The Hitchhiker's Guide to the Galaxy",
-          'nestedField.level.`1`': null,
-          nested: true,
-        },
-        {title: 'Dune', 'nestedField.level.`1`': null, nested: null}
-      );
+
+      expectResults(snapshot, {
+        title: 'foo',
+        'nested.level.`1`': 'bar',
+        nested: 'baz',
+      });
     });
 
     describe('genericFunction', () => {
