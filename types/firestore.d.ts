@@ -10560,11 +10560,11 @@ declare namespace FirebaseFirestore {
     export class ExplainStats {
       /**
        * @beta
-       * When explain stats were requested with `outputFormat = 'json'`, this returns
+       * When explain stats were requested with `outputFormat = 'mongo'`, this returns
        * the explain stats object parsed from the JSON string returned from the Firestore
        * backend.
        *
-       * If explain stats were not requested with `outputFormat = 'json'`, the behavior
+       * If explain stats were not requested with `outputFormat = 'mongo'`, the behavior
        * of this method is not guaranteed and is expected to throw.
        */
       get json(): {
