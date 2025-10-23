@@ -1863,8 +1863,42 @@ export abstract class Expression
    *
    * @return A new `Expression` representing the rounded value.
    */
-  round(): FunctionExpression {
-    return new FunctionExpression('round', [this]);
+  round(): FunctionExpression;
+  /**
+   * Creates an expression that rounds a numeric value to the specified number of decimal places.
+   *
+   * ```typescript
+   * // Round the value of the 'price' field to two decimal places.
+   * field("price").round(2);
+   * ```
+   *
+   * @param decimalPlaces A constant specifying the rounding precision in decimal places.
+   *
+   * @return A new `Expr` representing the rounded value.
+   */
+  round(decimalPlaces: number): FunctionExpression;
+  /**
+   * Creates an expression that rounds a numeric value to the specified number of decimal places.
+   *
+   * ```typescript
+   * // Round the value of the 'price' field to two decimal places.
+   * field("price").round(constant(2));
+   * ```
+   *
+   * @param decimalPlaces An expression specifying the rounding precision in decimal places.
+   *
+   * @return A new `Expr` representing the rounded value.
+   */
+  round(decimalPlaces: Expression): FunctionExpression;
+  round(decimalPlaces?: number | Expression): FunctionExpression {
+    if (decimalPlaces === undefined) {
+      return new FunctionExpression('round', [this]);
+    } else {
+      return new FunctionExpression('round', [
+        this,
+        valueToDefaultExpr(decimalPlaces),
+      ]);
+    }
   }
 
   /**
@@ -2924,6 +2958,30 @@ export function isError(value: Expression): BooleanExpression {
 
 /**
  * @beta
+ *
+ * Creates an expression that returns the `catch` argument if there is an
+ * error, else return the result of the `try` argument evaluation.
+ *
+ * This overload is useful when a BooleanExpression is required.
+ *
+ * ```typescript
+ * // Create an expression that protects against a divide by zero error
+ * // but always returns a boolean expression.
+ * ifError(constant(50).divide('length').gt(1), constant(false));
+ * ```
+ *
+ * @param tryExpr The try expression.
+ * @param catchExpr The catch expression that will be evaluated and
+ * returned if the tryExpr produces an error.
+ * @return A new {@code Expr} representing the 'ifError' operation.
+ */
+export function ifError(
+  tryExpr: BooleanExpression,
+  catchExpr: BooleanExpression
+): BooleanExpression;
+
+/**
+ * @beta
  * Creates an expression that returns the `catch` argument if there is an
  * error, else return the result of the `try` argument evaluation.
  *
@@ -2967,8 +3025,14 @@ export function ifError(
   tryExpr: Expression,
   catchValue: unknown
 ): FunctionExpression {
-  const expr: Expression = cast<Expression>(tryExpr);
-  return expr.ifError(valueToDefaultExpr(catchValue));
+  if (
+    tryExpr instanceof BooleanExpression &&
+    catchValue instanceof BooleanExpression
+  ) {
+    return tryExpr.ifError(catchValue);
+  } else {
+    return tryExpr.ifError(valueToDefaultExpr(catchValue));
+  }
 }
 
 /**
@@ -6770,8 +6834,48 @@ export function round(fieldName: string): FunctionExpression;
  * @return A new `Expression` representing the rounded value.
  */
 export function round(expression: Expression): FunctionExpression;
-export function round(expr: Expression | string): FunctionExpression {
-  return fieldOrExpression(expr).round();
+/**
+ * Creates an expression that rounds a numeric value to the specified number of decimal places.
+ *
+ * ```typescript
+ * // Round the value of the 'price' field to two decimal places.
+ * round("price", 2);
+ * ```
+ *
+ * @param fieldName The name of the field to round.
+ * @param decimalPlaces A constant or expression specifying the rounding precision in decimal places.
+ * @return A new `Expr` representing the rounded value.
+ */
+export function round(
+  fieldName: string,
+  decimalPlaces: number | Expression
+): FunctionExpression;
+
+/**
+ * Creates an expression that rounds a numeric value to the specified number of decimal places.
+ *
+ * ```typescript
+ * // Round the value of the 'price' field to two decimal places.
+ * round(field("price"), constant(2));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which will be rounded.
+ * @param decimalPlaces A constant or expression specifying the rounding precision in decimal places.
+ * @return A new `Expr` representing the rounded value.
+ */
+export function round(
+  expression: Expression,
+  decimalPlaces: number | Expression
+): FunctionExpression;
+export function round(
+  expr: Expression | string,
+  decimalPlaces?: number | Expression
+): FunctionExpression {
+  if (decimalPlaces === undefined) {
+    return fieldOrExpression(expr).round();
+  } else {
+    return fieldOrExpression(expr).round(valueToDefaultExpr(decimalPlaces));
+  }
 }
 
 /**

@@ -2707,8 +2707,16 @@ describe.only('Pipeline class', () => {
         .select(
           isNull('rating').as('ratingIsNull'),
           isNan('rating').as('ratingIsNaN'),
-          isError(arrayGet('title', 0)).as('isError'),
-          ifError(arrayGet('title', 0), constant('was error')).as('ifError'),
+          isError(divide(constant(1), constant(0))).as('isError'),
+          ifError(divide(constant(1), constant(0)), constant('was error')).as(
+            'ifError'
+          ),
+          ifError(
+            divide(constant(1), constant(0)).greaterThan(1),
+            constant(true)
+          )
+            .not()
+            .as('ifErrorBooleanExpression'),
           isAbsent('foo').as('isAbsent'),
           isNotNull('title').as('titleIsNotNull'),
           isNotNan('cost').as('costIsNotNan'),
@@ -2721,6 +2729,7 @@ describe.only('Pipeline class', () => {
         ratingIsNaN: false,
         isError: true,
         ifError: 'was error',
+        ifErrorBooleanExpression: false,
         isAbsent: true,
         titleIsNotNull: true,
         costIsNotNan: false,
@@ -2736,9 +2745,15 @@ describe.only('Pipeline class', () => {
         .select(
           field('rating').isNull().as('ratingIsNull'),
           field('rating').isNan().as('ratingIsNaN'),
-          arrayGet('title', 0).isError().as('isError'),
-          arrayGet('title', 0).ifError(constant('was error')).as('ifError'),
-          constant(true).ifError(constant(false)).as('ifErrorBoolean'),
+          divide(constant(1), constant(0)).isError().as('isError'),
+          divide(constant(1), constant(0))
+            .ifError(constant('was error'))
+            .as('ifError'),
+          divide(constant(1), constant(0))
+            .greaterThan(1)
+            .ifError(constant(true))
+            .not()
+            .as('ifErrorBooleanExpression'),
           field('foo').isAbsent().as('isAbsent'),
           field('title').isNotNull().as('titleIsNotNull'),
           field('cost').isNotNan().as('costIsNotNan')
@@ -2749,7 +2764,7 @@ describe.only('Pipeline class', () => {
         ratingIsNaN: false,
         isError: true,
         ifError: 'was error',
-        ifErrorBoolean: false,
+        ifErrorBooleanExpression: false,
         isAbsent: true,
         titleIsNotNull: true,
         costIsNotNan: false,
@@ -3417,6 +3432,31 @@ describe.only('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         roundedRating: -2,
+      });
+    });
+
+    it('can round a numeric value to specified precision', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            foo: 4.123456,
+          })
+        )
+        .select(
+          field('foo').round(0).as('0'),
+          round('foo', 1).as('1'),
+          round('foo', constant(2)).as('2'),
+          round(field('foo'), 4).as('4')
+        )
+        .execute();
+      expectResults(snapshot, {
+        '0': 4,
+        '1': 4.1,
+        '2': 4.12,
+        '4': 4.1235,
       });
     });
 
