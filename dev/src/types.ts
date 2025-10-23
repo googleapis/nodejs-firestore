@@ -21,7 +21,7 @@ import {
   WithFieldValue,
 } from '@google-cloud/firestore';
 
-import {CallOptions} from 'google-gax';
+import {CallOptions, CancellablePromise} from 'google-gax';
 import {Duplex} from 'stream';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -106,7 +106,7 @@ export type FirestoreStreamingMethod =
 export type UnaryMethod<Req, Resp> = (
   request: Req,
   callOptions: CallOptions
-) => Promise<[Resp, unknown, unknown]>;
+) => CancellablePromise<[Resp, unknown, unknown]>;
 
 // We don't have type information for the npm package
 // `functional-red-black-tree`.

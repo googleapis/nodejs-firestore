@@ -205,11 +205,14 @@ export class DocumentReference<
    * });
    * ```
    */
-  get(): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
+  get(options?: firestore.ReadOptions): Promise<DocumentSnapshot<AppModelType, DbModelType>> {
     return this._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_DOC_REF_GET,
       () => {
-        return this._firestore.getAll(this).then(([result]) => result);
+        if (options)
+          return this._firestore.getAll(this, options).then(([result]) => result);
+        else
+          return this._firestore.getAll(this).then(([result]) => result);
       }
     );
   }
@@ -259,7 +262,7 @@ export class DocumentReference<
    * });
    * ```
    */
-  listCollections(): Promise<Array<CollectionReference>> {
+  listCollections(options?: firestore.FirestoreRequestOptions): Promise<Array<CollectionReference>> {
     return this._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
       () => {
@@ -272,7 +275,7 @@ export class DocumentReference<
             .request<
               api.IListCollectionIdsRequest,
               string[]
-            >('listCollectionIds', request, tag)
+            >('listCollectionIds', request, tag, options)
             .then(collectionIds => {
               const collections: Array<CollectionReference> = [];
 

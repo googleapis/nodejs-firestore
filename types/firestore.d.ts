@@ -487,6 +487,10 @@ declare namespace FirebaseFirestore {
     tracerProvider?: any;
   }
 
+  export interface FirestoreRequestOptions {
+    abortSignal?: AbortSignal;
+  }
+
   /** Options to configure a read-only transaction. */
   export interface ReadOnlyTransactionOptions {
     /** Set to true to indicate a read-only transaction. */
@@ -1360,7 +1364,7 @@ declare namespace FirebaseFirestore {
    * calls. By providing a `fieldMask`, these calls can be configured to only
    * return a subset of fields.
    */
-  export interface ReadOptions {
+  export interface ReadOptions extends FirestoreRequestOptions {
     /**
      * Specifies the set of fields to return and reduces the amount of data
      * transmitted by the backend.

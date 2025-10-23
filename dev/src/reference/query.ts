@@ -1134,11 +1134,11 @@ export class Query<
    * });
    * ```
    */
-  async get(): Promise<QuerySnapshot<AppModelType, DbModelType>> {
+  async get(options?: firestore.FirestoreRequestOptions): Promise<QuerySnapshot<AppModelType, DbModelType>> {
     return this._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_QUERY_GET,
       async () => {
-        const {result} = await this._get();
+        const {result} = await this._get(options);
         return result;
       }
     );
@@ -1153,12 +1153,14 @@ export class Query<
    *  from the query execution (if any), and the query results (if any).
    */
   async explain(
-    options?: firestore.ExplainOptions
+    options?: firestore.ExplainOptions,
+    requestOptions?: firestore.FirestoreRequestOptions
   ): Promise<ExplainResults<QuerySnapshot<AppModelType, DbModelType>>> {
     if (options === undefined) {
       options = {};
     }
     const {result, explainMetrics} = await this._getResponse(
+      requestOptions,
       undefined,
       options
     );
@@ -1178,9 +1180,10 @@ export class Query<
    *  transaction, or timestamp to use as read time.
    */
   async _get(
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+    options: firestore.FirestoreRequestOptions | undefined,
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
   ): Promise<QuerySnapshotResponse<QuerySnapshot<AppModelType, DbModelType>>> {
-    const result = await this._getResponse(transactionOrReadTime);
+    const result = await this._getResponse(options, transactionOrReadTime, undefined);
     if (!result.result) {
       throw new Error('No QuerySnapshot result');
     }
@@ -1190,11 +1193,13 @@ export class Query<
   }
 
   _getResponse(
+    options: firestore.FirestoreRequestOptions | undefined,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
   ): Promise<QueryResponse<QuerySnapshot<AppModelType, DbModelType>>> {
     return this._queryUtil._getResponse(
       this,
+      options,
       transactionOrReadTime,
       true,
       explainOptions
@@ -1222,8 +1227,8 @@ export class Query<
    * });
    * ```
    */
-  stream(): NodeJS.ReadableStream {
-    return this._queryUtil.stream(this);
+  stream(options?: firestore.FirestoreRequestOptions): NodeJS.ReadableStream {
+    return this._queryUtil.stream(this, options);
   }
 
   /**
@@ -1255,7 +1260,8 @@ export class Query<
    * ```
    */
   explainStream(
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
+    requestOptions?: firestore.FirestoreRequestOptions
   ): NodeJS.ReadableStream {
     if (explainOptions === undefined) {
       explainOptions = {};
@@ -1267,7 +1273,7 @@ export class Query<
       );
     }
 
-    const responseStream = this._stream(undefined, explainOptions);
+    const responseStream = this._stream(requestOptions, undefined, explainOptions);
     const transform = new Transform({
       objectMode: true,
       transform(
@@ -1481,11 +1487,13 @@ export class Query<
    * @returns A stream of document results, optionally preceded by a transaction response.
    */
   _stream(
+    options: firestore.FirestoreRequestOptions | undefined,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): NodeJS.ReadableStream {
     return this._queryUtil._stream(
       this,
+      options,
       transactionOrReadTime,
       true,
       explainOptions
@@ -1517,7 +1525,7 @@ export class Query<
    * unsubscribe();
    * ```
    */
-  onSnapshot(
+  onSnapshot(   
     onNext: (snapshot: QuerySnapshot<AppModelType, DbModelType>) => void,
     onError?: (error: Error) => void
   ): () => void {

@@ -74,6 +74,7 @@ import {
   validateTimestamp,
 } from './validate';
 import {WriteBatch} from './write-batch';
+import {AbortUtil, Cancellable} from './abort-util';
 
 import {interfaces} from './v1/firestore_client_config.json';
 const serviceConfig = interfaces['google.firestore.v1.Firestore'];
@@ -1288,9 +1289,9 @@ export class Firestore implements firestore.Firestore {
    * });
    * ```
    */
-  listCollections(): Promise<CollectionReference[]> {
+  listCollections(options?: firestore.FirestoreRequestOptions): Promise<CollectionReference[]> {
     const rootDocument = new DocumentReference(this, ResourcePath.EMPTY);
-    return rootDocument.listCollections();
+    return rootDocument.listCollections(options);
   }
 
   /**
@@ -1331,9 +1332,10 @@ export class Firestore implements firestore.Firestore {
           1
         );
 
-        const {documents, fieldMask} = parseGetAllArguments(
+        const { parsedGetAllArguments, readOptions } = parseGetAllArguments(
           documentRefsOrReadOptions
         );
+        const { documents, fieldMask } = parsedGetAllArguments;
 
         this._traceUtil.currentSpan().setAttributes({
           [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: false,
@@ -1348,7 +1350,7 @@ export class Firestore implements firestore.Firestore {
         return this.initializeIfNeeded(tag)
           .then(() => {
             const reader = new DocumentReader(this, documents, fieldMask);
-            return reader.get(tag);
+            return reader.get(tag, readOptions);
           })
           .catch(err => {
             throw wrapError(err, stack);
@@ -1793,11 +1795,17 @@ export class Firestore implements firestore.Firestore {
     methodName: FirestoreUnaryMethod,
     request: Req,
     requestTag: string,
+    options: firestore.FirestoreRequestOptions | undefined,
     retryCodes?: number[]
   ): Promise<Resp> {
+    const abortSignal = options?.abortSignal || null;
+    
+    // Check if already aborted before starting
+    AbortUtil.throwIfAborted(abortSignal);
+    
     const callOptions = this.createCallOptions(methodName, retryCodes);
 
-    return this._clientPool.run(
+    const requestPromise = this._clientPool.run(
       requestTag,
       /* requiresGrpc= */ false,
       async gapicClient => {
@@ -1808,9 +1816,21 @@ export class Firestore implements firestore.Firestore {
             'Sending request: %j',
             request
           );
-          const [result] = await (
-            gapicClient[methodName] as UnaryMethod<Req, Resp>
-          )(request, callOptions);
+          
+          // Make the GAX call - this returns a CancellablePromise
+          const gaxCall = (gapicClient[methodName] as UnaryMethod<Req, Resp>)(request, callOptions);
+          
+          // Create cancellable wrapper for the GAX call
+          const cancellable: Cancellable = {
+            cancel: () => {
+              logger('Firestore.request', requestTag, 'Cancelling request due to abort signal');
+              gaxCall.cancel();
+            }
+          };
+          
+          // Make the call cancellable with AbortSignal
+          const [result] = await AbortUtil.makeCancellable(gaxCall, cancellable, abortSignal);
+          
           logger(
             'Firestore.request',
             requestTag,
@@ -1824,6 +1844,8 @@ export class Firestore implements firestore.Firestore {
         }
       }
     );
+
+    return requestPromise;
   }
 
   /**
@@ -1847,8 +1869,14 @@ export class Firestore implements firestore.Firestore {
     methodName: FirestoreStreamingMethod,
     bidrectional: boolean,
     request: {},
-    requestTag: string
+    requestTag: string,
+    options: firestore.FirestoreRequestOptions | undefined
   ): Promise<Duplex> {
+    const abortSignal = options?.abortSignal || null;
+    
+    // Check if already aborted before starting
+    AbortUtil.throwIfAborted(abortSignal);
+    
     const callOptions = this.createCallOptions(methodName);
 
     const bidirectional = methodName === 'listen';
@@ -1874,6 +1902,15 @@ export class Firestore implements firestore.Firestore {
           const stream = bidirectional
             ? gapicClient[methodName](callOptions)
             : gapicClient[methodName](request, callOptions);
+          
+          // Create a cancellable object for the stream
+          const cancellable: Cancellable = {
+            cancel: () => {
+              logger('Firestore.requestStream', requestTag, 'Cancelling stream due to abort signal');
+              (stream as any).cancel();
+            }
+          };
+          
           const logStream = new Transform({
             objectMode: true,
             transform: (chunk, encoding, callback) => {
@@ -1901,12 +1938,20 @@ export class Firestore implements firestore.Firestore {
           stream.pipe(logStream);
 
           const lifetime = new Deferred<void>();
-          const resultStream = await this._initializeStream(
+          const streamPromise = this._initializeStream(
             stream,
             lifetime,
             requestTag,
             bidirectional ? request : undefined
           );
+          
+          // Make the stream initialization cancellable
+          const resultStream = await AbortUtil.makeCancellable(
+            streamPromise,
+            cancellable,
+            abortSignal
+          );
+          
           resultStream.on('end', () => {
             stream.end();
             this._traceUtil

@@ -113,12 +113,13 @@ export class VectorQuery<
    *  from the query execution (if any), and the query results (if any).
    */
   async explain(
-    options?: firestore.ExplainOptions
+    options?: firestore.ExplainOptions,
+    requestOptions?: firestore.FirestoreRequestOptions
   ): Promise<ExplainResults<VectorQuerySnapshot<AppModelType, DbModelType>>> {
     if (options === undefined) {
       options = {};
     }
-    const {result, explainMetrics} = await this._getResponse(options);
+    const {result, explainMetrics} = await this._getResponse(requestOptions, options);
     if (!explainMetrics) {
       throw new Error('No explain results');
     }
@@ -130,8 +131,8 @@ export class VectorQuery<
    *
    * @returns A promise that will be resolved with the results of the query.
    */
-  async get(): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
-    const {result} = await this._getResponse();
+  async get(options?: firestore.FirestoreRequestOptions): Promise<VectorQuerySnapshot<AppModelType, DbModelType>> {
+    const {result} = await this._getResponse(options);
     if (!result) {
       throw new Error('No VectorQuerySnapshot result');
     }
@@ -139,10 +140,12 @@ export class VectorQuery<
   }
 
   _getResponse(
-    explainOptions?: firestore.ExplainOptions
+    options: firestore.FirestoreRequestOptions | undefined,
+    explainOptions?: firestore.ExplainOptions,
   ): Promise<QueryResponse<VectorQuerySnapshot<AppModelType, DbModelType>>> {
     return this._queryUtil._getResponse(
       this,
+      options,
       /*transactionOrReadTime*/ undefined,
       // VectorQuery cannot be retried with cursors as they do not support cursors yet.
       /*retryWithCursor*/ false,
@@ -158,9 +161,10 @@ export class VectorQuery<
    * @internal
    * @returns A stream of document results.
    */
-  _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
+  _stream(options: firestore.FirestoreRequestOptions | undefined, transactionId?: Uint8Array): NodeJS.ReadableStream {
     return this._queryUtil._stream(
       this,
+      options,
       transactionId,
       /*retryWithCursor*/ false
     );
