@@ -80,7 +80,8 @@ export class CollectionGroup<
    * `QueryPartition`s.
    */
   async *getPartitions(
-    desiredPartitionCount: number
+    desiredPartitionCount: number,
+    options?: firestore.FirestoreRequestOptions
   ): AsyncIterable<QueryPartition<AppModelType, DbModelType>> {
     const partitions: Array<api.IValue>[] = [];
 
@@ -108,7 +109,8 @@ export class CollectionGroup<
             'partitionQueryStream',
             /* bidirectional= */ false,
             request,
-            tag
+            tag,
+            options
           );
           stream.resume();
 

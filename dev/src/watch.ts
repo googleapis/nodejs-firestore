@@ -296,7 +296,7 @@ abstract class Watch<
     this.onError = onError;
     this.docTree = rbtree(this.getComparator());
 
-    this.initStream();
+    this.initStream(undefined);
 
     const unsubscribe: () => void = () => {
       logger('Watch.onSnapshot', this.requestTag, 'Unsubscribe called');
@@ -394,7 +394,7 @@ abstract class Watch<
    * @private
    * @internal
    */
-  private maybeReopenStream(err: GoogleError): void {
+  private maybeReopenStream(options: firestore.FirestoreRequestOptions | undefined, err: GoogleError): void {
     if (this.isActive && !this.isPermanentWatchError(err)) {
       logger(
         'Watch.maybeReopenStream',
@@ -408,7 +408,7 @@ abstract class Watch<
         this.backoff.resetToMax();
       }
 
-      this.initStream();
+      this.initStream(options);
     } else {
       this.closeStream(err);
     }
@@ -420,7 +420,7 @@ abstract class Watch<
    * @private
    * @internal
    */
-  private resetIdleTimeout(): void {
+  private resetIdleTimeout(options: firestore.FirestoreRequestOptions | undefined): void {
     if (this.idleTimeoutHandle) {
       clearTimeout(this.idleTimeoutHandle);
     }
@@ -436,7 +436,7 @@ abstract class Watch<
 
       const error = new GoogleError('Watch stream idle timeout');
       error.code = Status.UNKNOWN;
-      this.maybeReopenStream(error);
+      this.maybeReopenStream(options, error);
     }, WATCH_IDLE_TIMEOUT_MS);
   }
 
@@ -445,13 +445,13 @@ abstract class Watch<
    * @private
    * @internal
    */
-  private resetStream(): void {
+  private resetStream(options: firestore.FirestoreRequestOptions | undefined): void {
     logger('Watch.resetStream', this.requestTag, 'Restarting stream');
     if (this.currentStream) {
       this.currentStream.end();
       this.currentStream = null;
     }
-    this.initStream();
+    this.initStream(options);
   }
 
   /**
@@ -459,7 +459,7 @@ abstract class Watch<
    * @private
    * @internal
    */
-  private initStream(): void {
+  private initStream(options: firestore.FirestoreRequestOptions | undefined): void {
     this.backoff
       .backoffAndWait()
       .then(async () => {
@@ -485,7 +485,8 @@ abstract class Watch<
             'listen',
             /* bidirectional= */ true,
             request,
-            this.requestTag
+            this.requestTag,
+            options
           )
           .then(backendStream => {
             if (!this.isActive) {
@@ -505,16 +506,16 @@ abstract class Watch<
             }
             logger('Watch.initStream', this.requestTag, 'Opened new stream');
             this.currentStream = backendStream;
-            this.resetIdleTimeout();
+            this.resetIdleTimeout(options);
 
             this.currentStream!.on('data', (proto: api.IListenResponse) => {
-              this.resetIdleTimeout();
-              this.onData(proto);
+              this.resetIdleTimeout(options);
+              this.onData(options, proto);
             })
               .on('error', err => {
                 if (this.currentStream === backendStream) {
                   this.currentStream = null;
-                  this.maybeReopenStream(err);
+                  this.maybeReopenStream(options, err);
                 }
               })
               .on('end', () => {
@@ -523,7 +524,7 @@ abstract class Watch<
 
                   const err = new GoogleError('Stream ended unexpectedly');
                   err.code = Status.UNKNOWN;
-                  this.maybeReopenStream(err);
+                  this.maybeReopenStream(options, err);
                 }
               });
             this.currentStream!.resume();
@@ -540,7 +541,7 @@ abstract class Watch<
    * @private
    * @internal
    */
-  private onData(proto: api.IListenResponse): void {
+  private onData(options: firestore.FirestoreRequestOptions | undefined, proto: api.IListenResponse): void {
     if (proto.targetChange) {
       logger('Watch.onData', this.requestTag, 'Processing target change');
       const change = proto.targetChange;
@@ -641,7 +642,7 @@ abstract class Watch<
         // We need to remove all the current results.
         this.resetDocs();
         // The filter didn't match, so re-issue the query.
-        this.resetStream();
+        this.resetStream(options);
       }
     } else {
       this.closeStream(

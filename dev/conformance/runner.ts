@@ -272,7 +272,10 @@ function commitHandler(
         updateTime: {},
       });
     }
-    return response(res);
+    const promise = response(res) as any;
+    // Add cancel method to make it a CancellablePromise
+    promise.cancel = () => {};
+    return promise;
   };
 }
 
@@ -284,7 +287,9 @@ function queryHandler(spec: ConformanceProto) {
     );
     const expectedQuery = STRUCTURED_QUERY_TYPE.fromObject(spec.query);
     expect(actualQuery).to.deep.equal(expectedQuery);
-    const stream = through2.obj();
+    const stream = through2.obj() as any;
+    // Add cancel method to make it a CancellableStream
+    stream.cancel = () => {};
     setImmediate(() => {
       // Empty query always emits a readTime
       stream.push({readTime: {seconds: 0, nanos: 0}});
@@ -299,7 +304,9 @@ function getHandler(spec: ConformanceProto) {
   return (request: api.IBatchGetDocumentsRequest) => {
     const getDocument = spec.request;
     expect(request.documents![0]).to.equal(getDocument.name);
-    const stream = through2.obj();
+    const stream = through2.obj() as any;
+    // Add cancel method to make it a CancellableStream
+    stream.cancel = () => {};
     setImmediate(() => {
       stream.push({
         missing: getDocument.name,
@@ -432,7 +439,12 @@ function runTest(spec: ConformanceProto) {
     const expectedSnapshots = spec.snapshots;
     const writeStream = through2.obj();
     const overrides: ApiOverride = {
-      listen: () => duplexify.obj(through2.obj(), writeStream),
+      listen: () => {
+        const stream = duplexify.obj(through2.obj(), writeStream) as any;
+        // Add cancel method to make it a CancellableStream
+        stream.cancel = () => {};
+        return stream;
+      },
     };
 
     return createInstance(overrides).then(() => {

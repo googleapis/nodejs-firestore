@@ -135,7 +135,8 @@ export class Transaction implements firestore.Transaction {
    * @return {Promise<QuerySnapshot>} A QuerySnapshot for the retrieved data.
    */
   get<AppModelType, DbModelType extends firestore.DocumentData>(
-    query: firestore.Query<AppModelType, DbModelType>
+    query: firestore.Query<AppModelType, DbModelType>,
+    options?: firestore.FirestoreRequestOptions
   ): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
   /**
@@ -146,7 +147,8 @@ export class Transaction implements firestore.Transaction {
    * @return {Promise<DocumentSnapshot>}  A DocumentSnapshot for the read data.
    */
   get<AppModelType, DbModelType extends firestore.DocumentData>(
-    documentRef: firestore.DocumentReference<AppModelType, DbModelType>
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
+    options?: firestore.FirestoreRequestOptions
   ): Promise<DocumentSnapshot<AppModelType, DbModelType>>;
 
   /**
@@ -165,7 +167,8 @@ export class Transaction implements firestore.Transaction {
       AggregateSpecType,
       AppModelType,
       DbModelType
-    >
+    >,
+    options?: firestore.FirestoreRequestOptions
   ): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   >;
@@ -201,7 +204,8 @@ export class Transaction implements firestore.Transaction {
     refOrQuery:
       | firestore.DocumentReference<AppModelType, DbModelType>
       | firestore.Query<AppModelType, DbModelType>
-      | firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
+      | firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>,
+    options?: firestore.FirestoreRequestOptions
   ): Promise<
     | DocumentSnapshot<AppModelType, DbModelType>
     | QuerySnapshot<AppModelType, DbModelType>
@@ -215,7 +219,7 @@ export class Transaction implements firestore.Transaction {
       return this._firestore._traceUtil.startActiveSpan(
         SPAN_NAME_TRANSACTION_GET_DOCUMENT,
         () => {
-          return this.withLazyStartedTransaction(refOrQuery, this.getSingleFn);
+          return this.withLazyStartedTransaction(refOrQuery, this.getSingleFn, options);
         }
       );
     }
@@ -226,7 +230,7 @@ export class Transaction implements firestore.Transaction {
           ? SPAN_NAME_TRANSACTION_GET_QUERY
           : SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY,
         () => {
-          return this.withLazyStartedTransaction(refOrQuery, this.getQueryFn);
+          return this.withLazyStartedTransaction(refOrQuery, this.getQueryFn, options);
         }
       );
     }
@@ -280,9 +284,12 @@ export class Transaction implements firestore.Transaction {
       1
     );
 
+    const parsed = parseGetAllArguments(documentRefsOrReadOptions);
+
     return this.withLazyStartedTransaction(
-      parseGetAllArguments(documentRefsOrReadOptions),
-      this.getBatchFn
+      parsed.parsedGetAllArguments,
+      this.getBatchFn,
+      parsed.readOptions
     );
   }
 
@@ -485,7 +492,7 @@ export class Transaction implements firestore.Transaction {
    * @private
    * @internal
    */
-  async commit(): Promise<void> {
+  async commit(options?: firestore.FirestoreRequestOptions): Promise<void> {
     return this._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_TRANSACTION_COMMIT,
       async () => {
@@ -504,10 +511,10 @@ export class Transaction implements firestore.Transaction {
           return;
         }
 
-        await this._writeBatch._commit({
+        await this._writeBatch._commit(options, {
           transactionId,
           requestTag: this._requestTag,
-        });
+        }); //TODO: add public options
         this._transactionIdPromise = undefined;
         this._prevTransactionId = transactionId;
       },
@@ -526,7 +533,7 @@ export class Transaction implements firestore.Transaction {
    * @private
    * @internal
    */
-  async rollback(): Promise<void> {
+  async rollback(options?: firestore.FirestoreRequestOptions | undefined): Promise<void> {
     return this._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_TRANSACTION_ROLLBACK,
       async () => {
@@ -558,7 +565,7 @@ export class Transaction implements firestore.Transaction {
         // Rollback can be done concurrently thereby reducing latency caused by
         // otherwise blocking.
         this._firestore
-          .request('rollback', request, this._requestTag)
+          .request('rollback', request, this._requestTag, options)
           .catch(err => {
             logger(
               'Firestore.runTransaction',
@@ -648,7 +655,8 @@ export class Transaction implements firestore.Transaction {
    * context.
    */
   async runTransactionOnce<T>(
-    updateFunction: (transaction: Transaction) => Promise<T>
+    updateFunction: (transaction: Transaction) => Promise<T>,
+    options?: firestore.FirestoreRequestOptions
   ): Promise<T> {
     try {
       const promise = updateFunction(this);
@@ -659,7 +667,7 @@ export class Transaction implements firestore.Transaction {
       }
       const result = await promise;
       if (this._writeBatch) {
-        await this.commit();
+        await this.commit(options);
       }
       return result;
     } catch (err) {
@@ -684,22 +692,24 @@ export class Transaction implements firestore.Transaction {
     resultFn: (
       this: typeof this,
       param: TParam,
-      opts: Uint8Array | api.ITransactionOptions | Timestamp
-    ) => Promise<{transaction?: Uint8Array; result: TResult}>
+      opts: Uint8Array | api.ITransactionOptions | Timestamp,
+      requestOptions: firestore.FirestoreRequestOptions | undefined
+    ) => Promise<{transaction?: Uint8Array; result: TResult}>,
+    options: firestore.FirestoreRequestOptions | undefined
   ): Promise<TResult> {
     if (this._transactionIdPromise) {
       // Simply queue this subsequent read operation after the first read
       // operation has resolved and we don't expect a transaction ID in the
       // response because we are not starting a new transaction
       return this._transactionIdPromise
-        .then(opts => resultFn.call(this, param, opts))
+        .then(opts => resultFn.call(this, param, opts, options))
         .then(r => r.result);
     } else {
       if (this._readOnlyReadTime) {
         // We do not start a transaction for read-only transactions
         // do not set _prevTransactionId
         return resultFn
-          .call(this, param, this._readOnlyReadTime)
+          .call(this, param, this._readOnlyReadTime, options)
           .then(r => r.result);
       } else {
         // This is the first read of the transaction so we create the appropriate
@@ -713,7 +723,7 @@ export class Transaction implements firestore.Transaction {
           opts.readOnly = {};
         }
 
-        const resultPromise = resultFn.call(this, param, opts);
+        const resultPromise = resultFn.call(this, param, opts, options);
 
         // Ensure the _transactionIdPromise is set synchronously so that
         // subsequent operations will not race to start another transaction
@@ -737,7 +747,8 @@ export class Transaction implements firestore.Transaction {
     DbModelType extends firestore.DocumentData,
   >(
     document: DocumentReference<AppModelType, DbModelType>,
-    opts: Uint8Array | api.ITransactionOptions | Timestamp
+    opts: Uint8Array | api.ITransactionOptions | Timestamp,
+    requestOptions: firestore.FirestoreRequestOptions | undefined
   ): Promise<{
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>;
@@ -751,7 +762,7 @@ export class Transaction implements firestore.Transaction {
     const {
       transaction,
       result: [result],
-    } = await documentReader._get(this._requestTag);
+    } = await documentReader._get(this._requestTag, requestOptions);
     return {transaction, result};
   }
 
@@ -766,7 +777,8 @@ export class Transaction implements firestore.Transaction {
       documents: Array<DocumentReference<AppModelType, DbModelType>>;
       fieldMask?: FieldPath[];
     },
-    opts: Uint8Array | api.ITransactionOptions | Timestamp
+    opts: Uint8Array | api.ITransactionOptions | Timestamp,
+    requestOptions: firestore.FirestoreRequestOptions | undefined
   ): Promise<{
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>[];
@@ -780,7 +792,7 @@ export class Transaction implements firestore.Transaction {
           fieldMask,
           opts
         );
-        return documentReader._get(this._requestTag);
+        return documentReader._get(this._requestTag, requestOptions);
       }
     );
   }
@@ -790,12 +802,13 @@ export class Transaction implements firestore.Transaction {
     TQuery extends Query<any, any> | AggregateQuery<any, any>,
   >(
     query: TQuery,
-    opts: Uint8Array | api.ITransactionOptions | Timestamp
+    opts: Uint8Array | api.ITransactionOptions | Timestamp,
+    requestOptions: firestore.FirestoreRequestOptions | undefined
   ): Promise<{
     transaction?: Uint8Array;
     result: Awaited<ReturnType<TQuery['_get']>>['result'];
   }> {
-    return query._get(opts);
+    return query._get(requestOptions, opts);
   }
 }
 
@@ -817,8 +830,11 @@ export function parseGetAllArguments<
     | firestore.ReadOptions
   >
 ): {
-  documents: Array<DocumentReference<AppModelType, DbModelType>>;
-  fieldMask: FieldPath[] | undefined;
+  parsedGetAllArguments: {
+    documents: Array<DocumentReference<AppModelType, DbModelType>>;
+    fieldMask: FieldPath[] | undefined;
+  }
+  readOptions: firestore.ReadOptions | undefined;
 } {
   let documents: Array<DocumentReference<AppModelType, DbModelType>>;
   let readOptions: firestore.ReadOptions | undefined = undefined;
@@ -857,7 +873,13 @@ export function parseGetAllArguments<
           FieldPath.fromArgument(fieldPath)
         )
       : undefined;
-  return {fieldMask, documents};
+  return {
+    parsedGetAllArguments: {
+      fieldMask, 
+      documents
+    }, 
+    readOptions
+  };
 }
 
 /**

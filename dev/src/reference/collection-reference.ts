@@ -165,7 +165,7 @@ export class CollectionReference<
    * });
    * ```
    */
-  listDocuments(): Promise<
+  listDocuments(options?: firestore.FirestoreRequestOptions): Promise<
     Array<DocumentReference<AppModelType, DbModelType>>
   > {
     return this._firestore._traceUtil.startActiveSpan(
@@ -190,7 +190,7 @@ export class CollectionReference<
             .request<
               api.IListDocumentsRequest,
               api.IDocument[]
-            >('listDocuments', request, tag)
+            >('listDocuments', request, tag, options)
             .then(documents => {
               // Note that the backend already orders these documents by name,
               // so we do not need to manually sort them.

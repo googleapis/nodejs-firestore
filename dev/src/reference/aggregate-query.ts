@@ -34,6 +34,7 @@ import {
   SPAN_NAME_AGGREGATION_QUERY_GET,
   SPAN_NAME_RUN_AGGREGATION_QUERY,
 } from '../telemetry/trace-util';
+import { request } from 'http';
 
 /**
  * A query that calculates aggregations over an underlying query.
@@ -82,13 +83,13 @@ export class AggregateQuery<
    *
    * @return A promise that will be resolved with the results of the query.
    */
-  async get(): Promise<
+  async get(options?: firestore.FirestoreRequestOptions): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   > {
     return this._query._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_AGGREGATION_QUERY_GET,
       async () => {
-        const {result} = await this._get();
+        const {result} = await this._get(options);
         return result;
       }
     );
@@ -104,13 +105,14 @@ export class AggregateQuery<
    *  transaction, or timestamp to use as read time.
    */
   async _get(
+    options: firestore.FirestoreRequestOptions | undefined,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
   ): Promise<
     QuerySnapshotResponse<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
     >
   > {
-    const response = await this._getResponse(transactionOrReadTime);
+    const response = await this._getResponse(options, transactionOrReadTime);
     if (!response.result) {
       throw new Error('No AggregateQuery results');
     }
@@ -129,6 +131,7 @@ export class AggregateQuery<
    *  transaction, or timestamp to use as read time.
    */
   _getResponse(
+    options: firestore.FirestoreRequestOptions | undefined,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): Promise<
@@ -144,7 +147,7 @@ export class AggregateQuery<
         AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
       > = {};
 
-      const stream = this._stream(transactionOrReadTime, explainOptions);
+      const stream = this._stream(options, transactionOrReadTime, explainOptions);
       stream.on('error', err => {
         reject(wrapError(err, stack));
       });
@@ -187,6 +190,7 @@ export class AggregateQuery<
    * @returns A stream of document results optionally preceded by a transaction response.
    */
   _stream(
+    options: firestore.FirestoreRequestOptions | undefined,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     explainOptions?: firestore.ExplainOptions
   ): Readable {
@@ -234,7 +238,8 @@ export class AggregateQuery<
           'runAggregationQuery',
           /* bidirectional= */ false,
           request,
-          tag
+          tag,
+          options
         );
         stream.on('close', () => {
           backendStream.resume();
@@ -387,13 +392,15 @@ export class AggregateQuery<
    * statistics from the query execution (if any), and the query results (if any).
    */
   async explain(
-    options?: firestore.ExplainOptions
+    options?: firestore.ExplainOptions,
+    requestOptions?: firestore.FirestoreRequestOptions
   ): Promise<
     ExplainResults<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
     >
   > {
     const {result, explainMetrics} = await this._getResponse(
+      requestOptions,
       undefined,
       options || {}
     );

@@ -64,6 +64,7 @@ export class QueryUtil<
 
   _getResponse(
     query: Template,
+    options: firestore.FirestoreRequestOptions | undefined,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     retryWithCursor = true,
     explainOptions?: firestore.ExplainOptions
@@ -79,9 +80,10 @@ export class QueryUtil<
 
       this._stream(
         query,
+        options,
         transactionOrReadTime,
         retryWithCursor,
-        explainOptions
+        explainOptions,        
       )
         .on('error', err => {
           reject(wrapError(err, stack));
@@ -150,7 +152,7 @@ export class QueryUtil<
     return Date.now() - startTime >= totalTimeout;
   }
 
-  stream(query: Template): NodeJS.ReadableStream {
+  stream(query: Template, options?: firestore.FirestoreRequestOptions): NodeJS.ReadableStream {
     if (this._queryOptions.limitType === LimitType.Last) {
       throw new Error(
         'Query results for queries that include limitToLast() ' +
@@ -158,7 +160,7 @@ export class QueryUtil<
       );
     }
 
-    const responseStream = this._stream(query);
+    const responseStream = this._stream(query, options);
     const transform = new Transform({
       objectMode: true,
       transform(chunk, encoding, callback) {
@@ -173,6 +175,7 @@ export class QueryUtil<
 
   _stream(
     query: Template,
+    requestOptions: firestore.FirestoreRequestOptions | undefined,
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
     retryWithCursor = true,
     explainOptions?: firestore.ExplainOptions
@@ -283,7 +286,8 @@ export class QueryUtil<
             methodName,
             /* bidirectional= */ false,
             request,
-            tag
+            tag,
+            requestOptions
           );
           backendStream.on('error', err => {
             backendStream.unpipe(stream);

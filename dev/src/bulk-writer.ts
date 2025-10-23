@@ -246,7 +246,7 @@ class BulkCommitBatch extends WriteBatch {
     return this.docPaths.has(documentRef.path);
   }
 
-  async bulkCommit(options: {requestTag?: string} = {}): Promise<void> {
+  async bulkCommit(options: {requestTag?: string, abortSignal?: AbortSignal} = {}): Promise<void> {
     return this._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_BULK_WRITER_COMMIT,
       async () => {
@@ -266,7 +266,7 @@ class BulkCommitBatch extends WriteBatch {
           response = await this._commit<
             api.BatchWriteRequest,
             api.BatchWriteResponse
-          >({retryCodes, methodName: 'batchWrite', requestTag: tag});
+          >(options, {retryCodes, methodName: 'batchWrite', requestTag: tag}); //TODO: add public options
         } catch (err) {
           // Map the failure to each individual write's result.
           const ops = Array.from({length: this.pendingOps.length});

@@ -22,7 +22,7 @@ import {google} from '../protos/firestore_v1_proto_api';
 import {logger} from './logger';
 import {Firestore} from './index';
 import {Timestamp} from './timestamp';
-import {DocumentData} from '@google-cloud/firestore';
+import {DocumentData, FirestoreRequestOptions} from '@google-cloud/firestore';
 import api = google.firestore.v1;
 
 interface BatchGetResponse<AppModelType, DbModelType extends DocumentData> {
@@ -79,9 +79,10 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
    * @param requestTag A unique client-assigned identifier for this request.
    */
   async get(
-    requestTag: string
+    requestTag: string,
+    options?: FirestoreRequestOptions
   ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
-    const {result} = await this._get(requestTag);
+    const {result} = await this._get(requestTag, options); //TODO: add public options
     return result;
   }
 
@@ -92,9 +93,10 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
    * @param requestTag A unique client-assigned identifier for this request.
    */
   async _get(
-    requestTag: string
+    requestTag: string,
+    options: FirestoreRequestOptions | undefined
   ): Promise<BatchGetResponse<AppModelType, DbModelType>> {
-    await this.fetchDocuments(requestTag);
+    await this.fetchDocuments(requestTag, options);
 
     // BatchGetDocuments doesn't preserve document order. We use the request
     // order to sort the resulting documents.
@@ -125,7 +127,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
     };
   }
 
-  private async fetchDocuments(requestTag: string): Promise<void> {
+  private async fetchDocuments(requestTag: string, options: FirestoreRequestOptions | undefined): Promise<void> {
     if (!this.outstandingDocuments.size) {
       return;
     }
@@ -156,7 +158,8 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
         'batchGetDocuments',
         /* bidirectional= */ false,
         request,
-        requestTag
+        requestTag,
+        options
       );
       stream.resume();
 
@@ -217,7 +220,7 @@ export class DocumentReader<AppModelType, DbModelType extends DocumentData> {
         shouldRetry
       );
       if (shouldRetry) {
-        return this.fetchDocuments(requestTag);
+        return this.fetchDocuments(requestTag, options);
       } else {
         throw error;
       }

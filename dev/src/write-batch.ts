@@ -575,7 +575,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * });
    * ```
    */
-  commit(): Promise<WriteResult[]> {
+  commit(options?: firestore.FirestoreRequestOptions): Promise<WriteResult[]> {
     return this._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_BATCH_COMMIT,
       async () => {
@@ -585,7 +585,7 @@ export class WriteBatch implements firestore.WriteBatch {
         // Commits should also be retried when they fail with status code ABORTED.
         const retryCodes = [StatusCode.ABORTED, ...getRetryCodes('commit')];
 
-        return this._commit<api.CommitRequest, api.CommitResponse>({retryCodes})
+        return this._commit<api.CommitRequest, api.CommitResponse>(options, {retryCodes}) //TODO: add public options
           .then(response => {
             return (response.writeResults || []).map(
               writeResult =>
@@ -618,12 +618,15 @@ export class WriteBatch implements firestore.WriteBatch {
    * this request.
    * @returns  A Promise that resolves when this batch completes.
    */
-  async _commit<Req extends api.ICommitRequest, Resp>(commitOptions?: {
-    transactionId?: Uint8Array;
-    requestTag?: string;
-    retryCodes?: number[];
-    methodName?: FirestoreUnaryMethod;
-  }): Promise<Resp> {
+  async _commit<Req extends api.ICommitRequest, Resp>(
+    requestOptions: firestore.FirestoreRequestOptions | undefined,
+    commitOptions?: {
+      transactionId?: Uint8Array;
+      requestTag?: string;
+      retryCodes?: number[];
+      methodName?: FirestoreUnaryMethod;
+    }
+  ): Promise<Resp> {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
     this._committed = true;
 
@@ -652,6 +655,7 @@ export class WriteBatch implements firestore.WriteBatch {
       commitOptions?.methodName || 'commit',
       request as Req,
       tag,
+      requestOptions,
       commitOptions?.retryCodes
     );
   }
