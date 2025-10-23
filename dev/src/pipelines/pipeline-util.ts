@@ -500,17 +500,15 @@ export function toPipelineBooleanExpr(
     const field = createField(f.field);
     if (f.isNanChecking()) {
       if (f.nanOp() === 'IS_NAN') {
-        // ifError detects non numeric value in the field, which is rejected by the IS_NAN filter in the classic query
-        return and(field.exists(), field.isNan()).ifError(constant(false));
+        return and(field.exists(), field.equal(constant(NaN)));
       } else {
-        // ifError detect non-numeric value in the field, which is rejected by the IS_NOT_NAN filter in the classic query
-        return and(field.exists(), field.isNotNan().ifError(constant(false)));
+        return and(field.exists(), field.notEqual(constant(NaN)));
       }
     } else if (f.isNullChecking()) {
       if (f.nullOp() === 'IS_NULL') {
-        return and(field.exists(), field.isNull());
+        return and(field.exists(), field.equal(constant(null)));
       } else {
-        return and(field.exists(), field.isNotNull());
+        return and(field.exists(), field.notEqual(constant(null)));
       }
     } else {
       // Comparison filters

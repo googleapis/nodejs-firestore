@@ -4817,8 +4817,11 @@ describe('Query to Pipeline', () => {
       },
       async (collRef, db) => {
         const query1 = collRef.where('bar', '==', NaN);
+        const classicSnapshot = await query1.get();
+        const classicData = classicSnapshot.docs.map(d => d.data());
+
         const snapshot = await execute(db.pipeline().createFrom(query1));
-        verifyResults(snapshot, {foo: 1, bar: NaN});
+        verifyResults(snapshot, ...classicData);
       }
     );
   });
@@ -4832,8 +4835,12 @@ describe('Query to Pipeline', () => {
       },
       async (collRef, db) => {
         const query1 = collRef.where('bar', '!=', NaN);
+
+        const classicSnapshot = await query1.get();
+        const classicData = classicSnapshot.docs.map(d => d.data());
+
         const snapshot = await execute(db.pipeline().createFrom(query1));
-        verifyResults(snapshot, {foo: 2, bar: 1});
+        verifyResults(snapshot, ...classicData);
       }
     );
   });
@@ -4846,8 +4853,11 @@ describe('Query to Pipeline', () => {
       },
       async (collRef, db) => {
         const query1 = collRef.where('bar', '==', null);
+        const classicSnapshot = await query1.get();
+        const classicData = classicSnapshot.docs.map(d => d.data());
+
         const snapshot = await execute(db.pipeline().createFrom(query1));
-        verifyResults(snapshot, {foo: 1, bar: null});
+        verifyResults(snapshot, ...classicData);
       }
     );
   });
@@ -4860,8 +4870,10 @@ describe('Query to Pipeline', () => {
       },
       async (collRef, db) => {
         const query1 = collRef.where('bar', '!=', null);
+        const classicSnapshot = await query1.get();
+        const classicData = classicSnapshot.docs.map(d => d.data());
         const snapshot = await execute(db.pipeline().createFrom(query1));
-        verifyResults(snapshot, {foo: 2, bar: 1});
+        verifyResults(snapshot, ...classicData);
       }
     );
   });
