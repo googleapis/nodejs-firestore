@@ -3696,12 +3696,14 @@ describe.only('Pipeline class', () => {
         .limit(1)
         .select(
           documentId(field('__name__')).as('docId'),
-          documentId(field('__path__')).as('noDocId')
+          documentId(field('__path__')).as('noDocId'),
+          documentId(randomCol.doc('foo')).as('fromDocRef')
         )
         .execute();
       expectResults(snapshot, {
         docId: 'book4',
         noDocId: null,
+        fromDocRef: 'foo',
       });
       snapshot = await firestore
         .pipeline()

@@ -3283,6 +3283,22 @@ export function mapMerge(
 
 /**
  * @beta
+ *
+ * Creates an expression that returns the document ID from a path.
+ *
+ * ```typescript
+ * // Get the document ID from a path.
+ * documentId(myDocumentReference);
+ * ```
+ *
+ * @return A new {@code Expr} representing the documentId operation.
+ */
+export function documentId(
+  documentPath: string | firestore.DocumentReference
+): FunctionExpression;
+
+/**
+ * @beta
  * Creates an expression that returns the document ID from a path.
  *
  * ```typescript
@@ -3292,7 +3308,12 @@ export function mapMerge(
  *
  * @return A new {@code Expression} representing the documentId operation.
  */
-export function documentId(documentPathExpr: Expression): FunctionExpression {
+export function documentId(documentPathExpr: Expression): FunctionExpression;
+export function documentId(
+  documentPath: Expression | string | firestore.DocumentReference
+): FunctionExpression {
+  // @ts-ignore
+  const documentPathExpr = valueToDefaultExpr(documentPath);
   return documentPathExpr.documentId();
 }
 

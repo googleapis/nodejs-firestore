@@ -5573,6 +5573,37 @@ declare namespace FirebaseFirestore {
     export function documentId(
       documentPathExpr: Expression
     ): FunctionExpression;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the document ID from a path.
+     *
+     * ```typescript
+     * // Get the document ID from a path.
+     * documentId(myDocumentReference);
+     * ```
+     *
+     * @return A new {@code Expr} representing the documentId operation.
+     */
+    export function documentId(
+      documentPath: string | DocumentReference
+    ): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the document ID from a path.
+     *
+     * ```typescript
+     * // Get the document ID from a path.
+     * documentId(field("__path__"));
+     * ```
+     *
+     * @return A new {@code Expression} representing the documentId operation.
+     */
+    export function documentId(
+      documentPathExpr: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns a substring of a string or byte array.
