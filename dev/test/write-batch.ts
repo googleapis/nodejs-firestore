@@ -215,7 +215,7 @@ describe('batch support', () => {
       commit: (request, options) => {
         expect(options!.retry!.retryCodes).contains(Status.ABORTED);
 
-        expect(request).to.deep.equal({
+        expect(request).to.deep.eq({
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: [
             {
