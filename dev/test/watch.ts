@@ -64,7 +64,7 @@ function docsEqual(
   expect(actual.length).to.equal(expected.length);
   for (let i = 0; i < actual.length; i++) {
     expect(actual[i].ref.id).to.equal(expected[i].ref.id);
-    expect(actual[i].data()).to.deep.equal(expected[i].data());
+    expect(actual[i].data()).to.deep.eq(expected[i].data());
     expect(expected[i].createTime).to.be.an.instanceOf(Timestamp);
     expect(expected[i].updateTime).to.be.an.instanceOf(Timestamp);
   }
@@ -106,7 +106,7 @@ function snapshotsEqual(
     expect(actualDocChanges[i].doc.ref.id).to.equal(
       expected.docChanges[i].doc.ref.id
     );
-    expect(actualDocChanges[i].doc.data()).to.deep.equal(
+    expect(actualDocChanges[i].doc.data()).to.deep.eq(
       expected.docChanges[i].doc.data()
     );
     const readVersion =

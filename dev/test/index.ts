@@ -790,7 +790,7 @@ describe('serializer', () => {
   it('supports all types', () => {
     const overrides: ApiOverride = {
       commit: request => {
-        expect(allSupportedTypesProtobufJs.fields).to.deep.equal(
+        expect(allSupportedTypesProtobufJs.fields).to.deep.eq(
           request.writes![0].update!.fields
         );
         return response({
@@ -823,7 +823,7 @@ describe('snapshot_() method', () => {
     const data = actualObject.data()!;
     delete data.pathValue;
     delete expected.pathValue;
-    expect(data).to.deep.equal(expected);
+    expect(data).to.deep.eq(expected);
 
     // We specifically test the GeoPoint properties to ensure 100% test
     // coverage.
@@ -854,7 +854,7 @@ describe('snapshot_() method', () => {
     );
 
     expect(doc.exists).to.be.true;
-    expect({foo: bytesData}).to.deep.equal(doc.data());
+    expect({foo: bytesData}).to.deep.eq(doc.data());
     expect(doc.createTime!.isEqual(new Firestore.Timestamp(1, 2))).to.be.true;
     expect(doc.updateTime!.isEqual(new Firestore.Timestamp(3, 4))).to.be.true;
     expect(doc.readTime.isEqual(new Firestore.Timestamp(5, 6))).to.be.true;
@@ -882,7 +882,7 @@ describe('snapshot_() method', () => {
     );
 
     expect(doc.exists).to.be.true;
-    expect(doc.data()).to.deep.equal({
+    expect(doc.data()).to.deep.eq({
       a: bytesData,
       b: Firestore.Timestamp.fromDate(new Date('1985-03-18T07:20:00.000Z')),
       c: bytesData,
@@ -1062,7 +1062,7 @@ describe('listCollections() method', () => {
   it('returns collections', () => {
     const overrides: ApiOverride = {
       listCollectionIds: request => {
-        expect(request).to.deep.equal({
+        expect(request).to.deep.eq({
           parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
         });
 
@@ -1292,7 +1292,7 @@ describe('getAll() method', () => {
           });
       }
 
-      expect(actualErrorAttempts).to.deep.equal(expectedErrorAttempts);
+      expect(actualErrorAttempts).to.deep.eq(expectedErrorAttempts);
     });
   }).timeout(5000);
 

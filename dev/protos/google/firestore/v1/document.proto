@@ -212,7 +212,7 @@ message Pipeline {
   // name: "filter"
   // args {
   //   function_value {
-  //     name: "equal"
+  //     name: "eq"
   //     args { field_reference_value: "state" }
   //     args { string_value: "MD" }
   //   }
