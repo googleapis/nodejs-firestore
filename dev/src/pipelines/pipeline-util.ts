@@ -498,50 +498,37 @@ export function toPipelineBooleanExpr(
 ): BooleanExpression {
   if (f instanceof FieldFilterInternal) {
     const field = createField(f.field);
-    if (f.isNanChecking()) {
-      if (f.nanOp() === 'IS_NAN') {
-        return and(field.exists(), field.equal(constant(NaN)));
-      } else {
-        return and(field.exists(), field.notEqual(constant(NaN)));
+
+    // Comparison filters
+    const value = isFirestoreValue(f.value)
+      ? f.value
+      : serializer.encodeValue(f.value);
+    switch (f.op) {
+      case 'LESS_THAN':
+        return and(field.exists(), field.lessThan(value));
+      case 'LESS_THAN_OR_EQUAL':
+        return and(field.exists(), field.lessThanOrEqual(value));
+      case 'GREATER_THAN':
+        return and(field.exists(), field.greaterThan(value));
+      case 'GREATER_THAN_OR_EQUAL':
+        return and(field.exists(), field.greaterThanOrEqual(value));
+      case 'EQUAL':
+        return and(field.exists(), field.equal(value));
+      case 'NOT_EQUAL':
+        return and(field.exists(), field.notEqual(value));
+      case 'ARRAY_CONTAINS':
+        return and(field.exists(), field.arrayContains(value));
+      case 'IN': {
+        const values = value?.arrayValue?.values?.map(val => constant(val));
+        return and(field.exists(), field.equalAny(values!));
       }
-    } else if (f.isNullChecking()) {
-      if (f.nullOp() === 'IS_NULL') {
-        return and(field.exists(), field.equal(constant(null)));
-      } else {
-        return and(field.exists(), field.notEqual(constant(null)));
+      case 'ARRAY_CONTAINS_ANY': {
+        const values = value?.arrayValue?.values?.map(val => constant(val));
+        return and(field.exists(), field.arrayContainsAny(values!));
       }
-    } else {
-      // Comparison filters
-      const value = isFirestoreValue(f.value)
-        ? f.value
-        : serializer.encodeValue(f.value);
-      switch (f.op) {
-        case 'LESS_THAN':
-          return and(field.exists(), field.lessThan(value));
-        case 'LESS_THAN_OR_EQUAL':
-          return and(field.exists(), field.lessThanOrEqual(value));
-        case 'GREATER_THAN':
-          return and(field.exists(), field.greaterThan(value));
-        case 'GREATER_THAN_OR_EQUAL':
-          return and(field.exists(), field.greaterThanOrEqual(value));
-        case 'EQUAL':
-          return and(field.exists(), field.equal(value));
-        case 'NOT_EQUAL':
-          return and(field.exists(), field.notEqual(value));
-        case 'ARRAY_CONTAINS':
-          return and(field.exists(), field.arrayContains(value));
-        case 'IN': {
-          const values = value?.arrayValue?.values?.map(val => constant(val));
-          return and(field.exists(), field.equalAny(values!));
-        }
-        case 'ARRAY_CONTAINS_ANY': {
-          const values = value?.arrayValue?.values?.map(val => constant(val));
-          return and(field.exists(), field.arrayContainsAny(values!));
-        }
-        case 'NOT_IN': {
-          const values = value?.arrayValue?.values?.map(val => constant(val));
-          return and(field.exists(), field.notEqualAny(values!));
-        }
+      case 'NOT_IN': {
+        const values = value?.arrayValue?.values?.map(val => constant(val));
+        return and(field.exists(), field.notEqualAny(values!));
       }
     }
   } else if (f instanceof CompositeFilterInternal) {
