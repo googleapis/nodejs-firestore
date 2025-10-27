@@ -3600,31 +3600,6 @@ declare namespace FirebaseFirestore {
        * @return A new `BooleanExpression` representing the result of the 'not equal to any' comparison.
        */
       notEqualAny(arrayExpression: Expression): BooleanExpression;
-      /**
-       * @beta
-       * Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
-       *
-       * ```typescript
-       * // Check if the result of a calculation is NaN
-       * field("value").divide(0).isNaN();
-       * ```
-       *
-       * @return A new `Expression` representing the 'isNaN' check.
-       */
-      isNan(): BooleanExpression;
-
-      /**
-       * @beta
-       * Creates an expression that checks if this expression evaluates to `null`.
-       *
-       * ```typescript
-       * // Check if the 'status' field is null.
-       * field("status").isNull();
-       * ```
-       *
-       * @return A new `BooleanExpression` representing the `isNull` check.
-       */
-      isNull(): BooleanExpression;
 
       /**
        * @beta
@@ -4434,31 +4409,6 @@ declare namespace FirebaseFirestore {
        * @return A new {@code BooleanExpression} representing the 'isAbsent' check.
        */
       isAbsent(): BooleanExpression;
-
-      /**
-       * @beta
-       * Creates an expression that checks if the result of an expression is not null.
-       *
-       * ```typescript
-       * // Check if the value of the 'name' field is not null
-       * field("name").isNotNull();
-       * ```
-       *
-       * @return A new {@code BooleanExpression} representing the 'isNotNull' check.
-       */
-      isNotNull(): BooleanExpression;
-      /**
-       * @beta
-       * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
-       *
-       * ```typescript
-       * // Check if the result of a calculation is NOT NaN
-       * field("value").divide(0).isNotNan();
-       * ```
-       *
-       * @return A new {@code Expression} representing the 'isNaN' check.
-       */
-      isNotNan(): BooleanExpression;
 
       /**
        * @beta
@@ -5358,89 +5308,6 @@ declare namespace FirebaseFirestore {
      */
     export function isAbsent(field: string): BooleanExpression;
 
-    /**
-     * @beta
-     * Creates an expression that checks if an expression evaluates to 'null'.
-     *
-     * ```typescript
-     * // Check if the 'lastLogin' field is null
-     * isNull(field("lastLogin"));
-     * ```
-     *
-     * @param value The expression to check for null.
-     * @return A new {@code BooleanExpression} representing the 'isNull' check.
-     */
-    export function isNull(value: Expression): BooleanExpression;
-
-    /**
-     * @beta
-     * Creates an expression that checks if a field's value evaluates to 'null'.
-     *
-     * ```typescript
-     * // Check if the 'endDate' field is null.
-     * isNull("endDate");
-     * ```
-     *
-     * @param value The name of the field to check.
-     * @return A new {@code BooleanExpression} representing the 'isNull' check.
-     */
-    export function isNull(value: string): BooleanExpression;
-
-    /**
-     * @beta
-     * Creates an expression that checks if the result of an expression is not null.
-     *
-     * ```typescript
-     * // Check if the value of the 'name' field is not null
-     * isNotNull(field("name"));
-     * ```
-     *
-     * @param value The expression to check.
-     * @return A new {@code BooleanExpression} representing the 'not null' check.
-     */
-    export function isNotNull(value: Expression): BooleanExpression;
-
-    /**
-     * @beta
-     * Creates an expression that checks if the value of a field is not null.
-     *
-     * ```typescript
-     * // Check if the value of the 'name' field is not null
-     * isNotNull("name");
-     * ```
-     *
-     * @param value The name of the field to check.
-     * @return A new {@code BooleanExpression} representing the 'not null' check.
-     */
-    export function isNotNull(value: string): BooleanExpression;
-
-    /**
-     * @beta
-     * Creates an expression that evaluates to `true` if the given expression's result is not `NaN` (Not a Number), and `false` otherwise.
-     *
-     * ```typescript
-     * // Check if the result of a calculation is NOT NaN
-     * isNotNan(field("value").divide(0));
-     * ```
-     *
-     * @param value The expression to check for `NaN`.
-     * @return A new {@code BooleanExpression} representing the result of the `isNotNaN` check.
-     */
-    export function isNotNan(value: Expression): BooleanExpression;
-
-    /**
-     * @beta
-     * Creates an expression that checks if a numeric value is not NaN (Not a Number).
-     *
-     * ```typescript
-     * // Check if the value of a field is not NaN
-     * isNotNan("value");
-     * ```
-     *
-     * @param value The name of the field to check.
-     * @return A new {@code BooleanExpression} representing the 'isNotNan' check.
-     */
-    export function isNotNan(value: string): BooleanExpression;
     /**
      * @beta
      * Creates an expression that removes a key from the map at the specified field name.
@@ -7018,33 +6885,6 @@ declare namespace FirebaseFirestore {
 
     /**
      * @beta
-     * Creates an expression that checks if an expression evaluates to 'NaN' (Not a Number).
-     *
-     * ```typescript
-     * // Check if the result of a calculation is NaN
-     * isNan(field("value").divide(0));
-     * ```
-     *
-     * @param value The expression to check.
-     * @return A new {@code Expression} representing the 'isNaN' check.
-     */
-    export function isNan(value: Expression): BooleanExpression;
-
-    /**
-     * @beta
-     * Creates an expression that checks if a field's value evaluates to 'NaN' (Not a Number).
-     *
-     * ```typescript
-     * // Check if the result of a calculation is NaN
-     * isNan("value");
-     * ```
-     *
-     * @param fieldName The name of the field to check.
-     * @return A new {@code BooleanExpression} representing the 'isNan' check.
-     */
-    export function isNan(fieldName: string): BooleanExpression;
-    /**
-     * @beta
      * Creates an expression that reverses a string.
      *
      * ```typescript
@@ -8532,20 +8372,6 @@ declare namespace FirebaseFirestore {
      * @return A new Expression representing the current server timestamp.
      */
     export function currentTimestamp(): FunctionExpression;
-
-    /**
-     * @beta
-     * Creates an expression that raises an error with the given message. This could be useful for
-     * debugging purposes.
-     *
-     * ```typescript
-     * // Raise an error with the message "simulating an evaluation error".
-     * error("simulating an evaluation error")
-     * ```
-     *
-     * @return A new Expression representing the error() operation.
-     */
-    export function error(message: string): Expression;
 
     /**
      * @beta
