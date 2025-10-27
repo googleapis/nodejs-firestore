@@ -1021,6 +1021,27 @@ describe.only('Pipeline class', () => {
         });
       });
 
+      it('throws on duplicate aliases', async () => {
+        expect(() =>
+          firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .aggregate(countAll().as('count'), count('foo').as('count'))
+        ).to.throw("Duplicate alias or field 'count'");
+      });
+
+      it('throws on duplicate group aliases', async () => {
+        expect(() =>
+          firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .aggregate({
+              accumulators: [countAll().as('count')],
+              groups: ['bax', field('bar').as('bax')],
+            })
+        ).to.throw("Duplicate alias or field 'bax'");
+      });
+
       it('supports aggregate options', async () => {
         let snapshot = await firestore
           .pipeline()
@@ -1212,6 +1233,16 @@ describe.only('Pipeline class', () => {
         );
       });
 
+      it('throws on duplicate aliases', async () => {
+        expect(() => {
+          firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .limit(1)
+            .select(constant(1).as('foo'), constant(2).as('foo'));
+        }).to.throw("Duplicate alias or field 'foo'");
+      });
+
       it('supports options', async () => {
         const snapshot = await firestore
           .pipeline()
@@ -1281,6 +1312,17 @@ describe.only('Pipeline class', () => {
             foo: 'bar',
           }
         );
+      });
+
+      it('throws on duplicate aliases', async () => {
+        expect(() =>
+          firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .select('title', 'author')
+            .addFields(constant('bar').as('foo'), constant('baz').as('foo'))
+            .sort(field('author').ascending())
+        ).to.throw("Duplicate alias or field 'foo'");
       });
 
       it('supports options', async () => {

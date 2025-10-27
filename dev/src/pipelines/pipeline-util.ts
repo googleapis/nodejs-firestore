@@ -65,7 +65,6 @@ import {
   lessThan,
   Field,
   AggregateFunction,
-  AliasedExpression,
 } from './expression';
 import {Pipeline, PipelineResult, ExplainStats} from './pipelines';
 import {StructuredPipeline} from './structured-pipeline';
@@ -724,19 +723,21 @@ export function selectablesToMap(
 ): Map<string, Expression> {
   const result = new Map<string, Expression>();
   for (const selectable of selectables) {
+    let alias: string;
+    let expression: Expression;
     if (typeof selectable === 'string') {
-      result.set(
-        selectable as string,
-        new Field(FieldPath.fromArgument(selectable))
-      );
-    } else if (selectable instanceof Field) {
-      result.set((selectable as Field).fieldName, selectable);
-    } else if (selectable instanceof AliasedExpression) {
-      const expr = selectable as AliasedExpression;
-      result.set(expr._alias, expr._expr as unknown as Expression);
+      alias = selectable as string;
+      expression = new Field(FieldPath.fromArgument(selectable));
     } else {
-      throw new Error('unexpected selectable: ' + JSON.stringify(selectable));
+      alias = selectable._alias;
+      expression = selectable._expr as unknown as Expression;
     }
+
+    if (result.get(alias) !== undefined) {
+      throw new Error(`Duplicate alias or field '${alias}'`);
+    }
+
+    result.set(alias, expression);
   }
   return result;
 }
@@ -749,6 +750,10 @@ export function aliasedAggregateToMap(
       map: Map<string, AggregateFunction>,
       selectable: firestore.Pipelines.AliasedAggregate
     ) => {
+      if (map.get(selectable._alias) !== undefined) {
+        throw new Error(`Duplicate alias or field '${selectable._alias}'`);
+      }
+
       map.set(selectable._alias, selectable._aggregate as AggregateFunction);
       return map;
     },
